@@ -134,8 +134,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\CVersion.hpp" />
     <ClInclude Include="include\MathDefines.hpp" />
     <ClInclude Include="include\NumTypes.hpp" />
+    <ClInclude Include="include\Template.hpp" />
+    <ClInclude Include="include\Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

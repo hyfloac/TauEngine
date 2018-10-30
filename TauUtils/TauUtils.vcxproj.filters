@@ -21,5 +21,14 @@
     <ClInclude Include="include\NumTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\CVersion.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Template.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
