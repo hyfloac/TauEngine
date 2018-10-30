@@ -21,12 +21,21 @@
     <ClCompile Include="src\Maths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Win32Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Maths.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\DLL.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Window.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\_SysWindowContainer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
