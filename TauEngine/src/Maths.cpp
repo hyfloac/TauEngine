@@ -4,8 +4,8 @@
 /**
  * A unit circle with 2**16 elements.
  */
-static float SIN_TABLE_F[65536];
-static float SIN_TABLE_D[65536];
+static float  SIN_TABLE_F[65536];
+static double SIN_TABLE_D[65536];
 
 /**
  * Initializes the sin table.
