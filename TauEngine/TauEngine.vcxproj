@@ -26,6 +26,14 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\DLLMain.cpp" />
+    <ClCompile Include="src\Maths.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\DLL.hpp" />
+    <ClInclude Include="include\Maths.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{F6A7C1B6-572B-446F-84CB-3771C747534D}</ProjectGuid>
@@ -88,26 +96,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -115,6 +129,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>TAU_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -126,6 +141,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>TAU_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -139,6 +155,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>TAU_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -154,6 +171,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>TAU_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -165,11 +183,17 @@
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>TAU_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>TAU_DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

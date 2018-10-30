@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DLL.hpp"
+
 #define RADIANS_TO_DEGREES_CONVERTER_VAL 57.29577951308232087679815481410517
 #define DEGREES_TO_RADIANS_CONVERTER_VAL 0.017453292519943295769236907684886
 
@@ -31,3 +33,28 @@ long double logN(long double x) noexcept
 {
     return log(x) * log(_Base);
 }
+
+/**
+ * Initializes a very fast Sin/Cos table.
+ */
+TAU_DLL void initSinTable() noexcept;
+
+/**
+ * Computes the sin value from a lookup table.
+ */
+TAU_DLL float fastSin(float value) noexcept;
+
+/**
+ * Computes the sin value from a lookup table.
+ */
+TAU_DLL float fastCos(float value) noexcept;
+
+/**
+ * Computes the sin value from a lookup table.
+ */
+TAU_DLL float fastSin(double value) noexcept;
+
+/**
+ * Computes the sin value from a lookup table.
+ */
+TAU_DLL float fastCos(double value) noexcept;

@@ -88,30 +88,42 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\TauEngine\bin\Debug-x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\TauEngine\bin\OptimizedDebug-x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\TauEngine\bin\Release-x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\TauEngine\bin\Debug-x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\TauEngine\bin\OptimizedDebug-x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\TauEngine\TauEngine\include;C:\TauEngine\TauUtils\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\TauEngine\bin\Release-x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -144,6 +156,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
+      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\TauEngine\TauUtils\include;C:\TauEngine\TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <PerUserRedirection>true</PerUserRedirection>
@@ -154,13 +169,17 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X86Image</CreateHotPatchableImage>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>C:\TauEngine\bin\Debug-x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -193,6 +212,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
+      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\TauEngine\TauUtils\include;C:\TauEngine\TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <PerUserRedirection>true</PerUserRedirection>
@@ -203,13 +225,17 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>C:\TauEngine\bin\Debug-x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -242,6 +268,9 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\TauEngine\TauUtils\include;C:\TauEngine\TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -253,11 +282,15 @@
       <LargeAddressAware>true</LargeAddressAware>
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
-      <LinkTimeCodeGeneration>PGOptimization</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>C:\TauEngine\bin\Release-x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -290,6 +323,9 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\TauEngine\TauUtils\include;C:\TauEngine\TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -301,11 +337,15 @@
       <LargeAddressAware>true</LargeAddressAware>
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
-      <LinkTimeCodeGeneration>PGOptimization</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>C:\TauEngine\bin\Release-x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|Win32'">
     <ClCompile>
@@ -340,6 +380,9 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
       <MinimalRebuild>true</MinimalRebuild>
+      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\TauEngine\TauUtils\include;C:\TauEngine\TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <PerUserRedirection>true</PerUserRedirection>
@@ -350,14 +393,18 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X86Image</CreateHotPatchableImage>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>C:\TauEngine\bin\OptimizedDebug-x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <ClCompile>
@@ -392,6 +439,9 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
       <MinimalRebuild>true</MinimalRebuild>
+      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\TauEngine\TauUtils\include;C:\TauEngine\TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <PerUserRedirection>true</PerUserRedirection>
@@ -402,14 +452,18 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>C:\TauEngine\bin\OptimizedDebug-x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />

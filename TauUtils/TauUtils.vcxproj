@@ -135,7 +135,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\MathDefines.hpp" />
-    <ClInclude Include="include\Maths.hpp" />
     <ClInclude Include="include\NumTypes.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,9 +18,6 @@
     <ClInclude Include="include\MathDefines.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Maths.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\NumTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
