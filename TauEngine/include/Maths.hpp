@@ -45,16 +45,16 @@ TAU_DLL void initSinTable() noexcept;
 TAU_DLL float fastSin(float value) noexcept;
 
 /**
- * Computes the sin value from a lookup table.
+ * Computes the cos value from a lookup table.
  */
 TAU_DLL float fastCos(float value) noexcept;
 
 /**
  * Computes the sin value from a lookup table.
  */
-TAU_DLL float fastSin(double value) noexcept;
+TAU_DLL double fastSin(double value) noexcept;
 
 /**
- * Computes the sin value from a lookup table.
+ * Computes the cos value from a lookup table.
  */
-TAU_DLL float fastCos(double value) noexcept;
+TAU_DLL double fastCos(double value) noexcept;
