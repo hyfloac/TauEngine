@@ -102,7 +102,7 @@
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)TauEngine\include;$(SolutionDir)TauUtils\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)TauEngine\include;$(SolutionDir)TauUtils\include;$(SolutionDir)TauEditor\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\Release-x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -156,7 +156,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
-      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4577;4514;4710;4668;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -212,7 +212,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
-      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4577;4514;4710;4668;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -268,9 +268,9 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
-      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4577;4514;4710;4668;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;$(SolutionDir)TauEditor\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -323,7 +323,7 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
-      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4577;4514;4710;4668;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -380,7 +380,7 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
       <MinimalRebuild>true</MinimalRebuild>
-      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4577;4514;4710;4668;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -439,7 +439,7 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
       <MinimalRebuild>true</MinimalRebuild>
-      <DisableSpecificWarnings>4577;4514;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4577;4514;4710;4668;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)TauUtils\include;$(SolutionDir)TauEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -467,6 +467,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\WinMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
