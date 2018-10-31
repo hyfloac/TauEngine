@@ -67,7 +67,7 @@ float fastSin(float value) noexcept
  * value * ------- & 0xFFFF
  *           Tau
  */
-float fastSin(double value) noexcept
+double fastSin(double value) noexcept
 {
     return SIN_TABLE_D[(u32) (value * 10430.378) & 65535];
 }
@@ -96,7 +96,7 @@ float fastCos(float value) noexcept
  * ( value * ------- + ------- ) & 0xFFFF
  *             Tau        4
  */
-float fastCos(double value) noexcept
+double fastCos(double value) noexcept
 {
     return SIN_TABLE_D[(u32) (value * 10430.3783504704527249495663163811 + 16384.0) & 65535];
 }
