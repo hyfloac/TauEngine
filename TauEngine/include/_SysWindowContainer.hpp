@@ -6,6 +6,8 @@
 struct _SysWindowContainer
 {
     WNDCLASS windowClass;
-    HWND windowHandle;
+    HWND     windowHandle;
+    HDC      hdc;
+    HGLRC    renderingContext;
 };
 #endif
