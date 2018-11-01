@@ -3,6 +3,7 @@
 #include <NumTypes.hpp>
 #include <_SysWindowContainer.hpp>
 #include <DLL.hpp>
+#include <Utils.hpp>
 
 class Window;
 
@@ -27,13 +28,16 @@ private:
     u32 _height;
     const char* _title;
     _SysWindowContainer _windowContainer;
+    const Window* _parent;
 
     WindowState _windowState;
     bool _isResizing;
 
     onWindowResized_t _windowResizeHandler;
 public:
-    Window(u32 width, u32 height, const char* title) noexcept;
+    static void unloadCurrentContext() noexcept;
+public:
+    Window(u32 width, u32 height, const char* title, const Window* parent = null) noexcept;
     ~Window() noexcept;
 
     inline u32 width()  const noexcept { return _width;  }
@@ -49,7 +53,13 @@ public:
     bool createWindow() noexcept;
     void closeWindow() noexcept;
     void showWindow() const noexcept;
+    void hideWindow() const noexcept;
 
+    bool createContext() noexcept;
+
+    void makeContextCurrent() const noexcept;
+
+    void swapBuffers() const noexcept;
 public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);

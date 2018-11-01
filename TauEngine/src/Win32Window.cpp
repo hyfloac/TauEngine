@@ -1,7 +1,11 @@
+#include <TauEngine.hpp>
 #ifdef _WIN32
 #include <Window.hpp>
 #include <Utils.hpp>
 #include <cstdio>
+#include <GL/glew.h>
+#include <GL/wglew.h>
+#include <GL/GL.h>
 
 #ifndef MAX_WINDOW_COUNT
  #define MAX_WINDOW_COUNT 16
@@ -10,6 +14,11 @@
 static const char*    CLASS_NAME   =  "TauEngineWindowClass";
 static const wchar_t* CLASS_NAME_W = L"TauEngineWindowClass";
 
+/**
+ *   When we get a message for a window we only receive the
+ * handle. Thus we need to store the reference to the actual
+ * window somewhere. That somewhere is in this array.
+ */
 static Window* windowHandles[MAX_WINDOW_COUNT];
 static u32 currentWindowHandleIndex = 0;
 
@@ -30,6 +39,12 @@ static void removeWindow(Window* systemWindowContainer)
         if(systemWindowContainer->_windowContainer.windowHandle == windowHandles[i]->_windowContainer.windowHandle)
         {
             memcpy(windowHandles + i, windowHandles + i + 1, --currentWindowHandleIndex - i);
+#if _DEBUG
+            //   If in debug mode zero out the location, this is useful
+            // for debugging. In practice, this is actually useless for 
+            // the system and requires a memory write.
+            windowHandles[currentWindowHandleIndex] = null;
+#endif
             return;
         }
     }
@@ -97,25 +112,32 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             }
             break;
         case WM_CLOSE:
-        case WM_QUIT:
             if(window)
             {
                 window->closeWindow();
             }
             break;
         case WM_DESTROY:
-            PostQuitMessage(0);
+            if(window)
+            {
+                window->closeWindow();
+            }
+            if(currentWindowHandleIndex == 0)
+            {
+                tauExit(0);
+            }
             break;
         default: return DefWindowProc(windowHandle, uMsg, wParam, lParam);
     }
     return 0;
 }
 
-Window::Window(u32 width, u32 height, const char* title) noexcept
+Window::Window(u32 width, u32 height, const char* title, const Window* parent) noexcept
     : _width(width), 
       _height(height), 
-      _title(title), 
-      _windowContainer({ { }, null }),
+      _title(title),
+      _windowContainer({ { }, null, null, null }),
+      _parent(parent),
       _windowState(NEITHER),
       _isResizing(false),
       _windowResizeHandler(null)
@@ -151,25 +173,34 @@ bool Window::createWindow() noexcept
 
     RegisterClass(windowClass);
 
+    HWND parent = null;
+
+    if(this->_parent)
+    {
+        parent = this->_parent->_windowContainer.windowHandle;
+    }
+
     this->_windowContainer.windowHandle = CreateWindowExA(0,
                                                           windowClass->lpszClassName,
                                                           this->_title,
                                                           WS_OVERLAPPEDWINDOW,
                                                           CW_USEDEFAULT, CW_USEDEFAULT, 
-                                                          CW_USEDEFAULT, CW_USEDEFAULT,
-                                                          null,
+                                                          this->_width, this->_height,
+                                                          parent,
                                                           null,
                                                           windowClass->hInstance,
                                                           null);
+
+    this->_windowContainer.hdc = GetDC(this->_windowContainer.windowHandle);
 
     return this->_windowContainer.windowHandle;
 }
 
 void Window::closeWindow() noexcept
 {
+    removeWindow(this);
     if(this->_windowContainer.windowHandle)
     {
-        removeWindow(this);
         DestroyWindow(_windowContainer.windowHandle);
     }
 }
@@ -179,4 +210,91 @@ void Window::showWindow() const noexcept
     ShowWindow(this->_windowContainer.windowHandle, SW_SHOWNA);
     UpdateWindow(this->_windowContainer.windowHandle);
 }
+
+void Window::hideWindow() const noexcept
+{
+    ShowWindow(this->_windowContainer.windowHandle, SW_HIDE);
+}
+
+bool Window::createContext() noexcept
+{
+    PIXELFORMATDESCRIPTOR pfd;
+    memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
+    pfd.cDepthBits = 32;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+
+    const int pixelFormat = ChoosePixelFormat(this->_windowContainer.hdc, &pfd);
+
+    if(pixelFormat == 0)
+    {
+        return false;
+    }
+
+    const BOOL res = SetPixelFormat(this->_windowContainer.hdc, pixelFormat, &pfd);
+
+    if(!res) 
+    {
+        return false;
+    }
+
+    const HGLRC tempContext = wglCreateContext(this->_windowContainer.hdc);  // NOLINT(misc-misplaced-const)
+    wglMakeCurrent(this->_windowContainer.hdc, tempContext);
+
+    const GLenum glewSuccess = glewInit();
+    if(glewSuccess != GLEW_OK)
+    {
+        return false;
+    }
+
+    static const int attribs[] =
+    {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 1,
+        WGL_CONTEXT_FLAGS_ARB, 0,
+        0
+    };
+
+    if(wglewIsSupported("WGL_ARB_create_context") == 1)
+    {
+        this->_windowContainer.renderingContext = wglCreateContextAttribsARB(this->_windowContainer.hdc, null, attribs);
+        wglMakeCurrent(null, null);
+        wglDeleteContext(tempContext);
+        wglMakeCurrent(this->_windowContainer.hdc, this->_windowContainer.renderingContext);
+    }
+    else
+    {
+        this->_windowContainer.renderingContext = tempContext;
+    }
+
+    return this->_windowContainer.renderingContext;
+}
+
+void Window::makeContextCurrent() const noexcept
+{
+    if(!this->_windowContainer.hdc || !this->_windowContainer.renderingContext)
+    {
+        return;
+    }
+    wglMakeCurrent(this->_windowContainer.hdc, this->_windowContainer.renderingContext);
+}
+
+void Window::unloadCurrentContext() noexcept
+{
+    wglMakeCurrent(null, null);
+}
+
+void Window::swapBuffers() const noexcept
+{
+    if(this->_windowContainer.hdc)
+    {
+        SwapBuffers(this->_windowContainer.hdc);
+    }
+}
+
+
 #endif
