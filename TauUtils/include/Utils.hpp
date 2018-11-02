@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CVersion.hpp"
+#include <CVersion.hpp>
 
 #ifdef __CPP_14
   #define DEPRECATED [[deprecated]]

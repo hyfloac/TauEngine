@@ -1,5 +1,5 @@
-#include "Maths.hpp"
-#include "MathDefines.hpp"
+#include <Maths.hpp>
+#include <MathDefines.hpp>
 
 /**
  * A unit circle with 2**16 elements.
