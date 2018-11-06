@@ -27,9 +27,6 @@
     <ClCompile Include="src\TauEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GLUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\glew\glew.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,9 +50,6 @@
     <ClInclude Include="include\TauEngine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\GLUtils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\GL\eglew.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -69,6 +63,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Timings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Mouse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SingleThreadedMemoryManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

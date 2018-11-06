@@ -1,6 +1,8 @@
 #pragma once
 
-#include "DLL.hpp"
+#include <DLL.hpp>
+#include <cmath>
+#include <NumTypes.hpp>
 
 #define RADIANS_TO_DEGREES_CONVERTER_VAL 57.29577951308232087679815481410517
 #define DEGREES_TO_RADIANS_CONVERTER_VAL 0.017453292519943295769236907684886
@@ -13,8 +15,6 @@
 #define RAD_2_DEG(__F) RAD_2_DEG_F(__F)
 #define DEG_2_RAD(__F) DEG_2_RAD_F(__F)
 
-#include <cmath>
-#include "NumTypes.hpp"
 
 template<u32 _Base>
 float logN(float x) noexcept

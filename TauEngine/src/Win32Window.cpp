@@ -1,11 +1,12 @@
-#include <TauEngine.hpp>
 #ifdef _WIN32
 #include <Window.hpp>
-#include <Utils.hpp>
-#include <cstdio>
+#include <Windowsx.h>
+#include <TauEngine.hpp>
+
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #include <GL/GL.h>
+#include <EnumBitFields.hpp>
 
 #ifndef MAX_WINDOW_COUNT
  #define MAX_WINDOW_COUNT 16
@@ -63,9 +64,77 @@ static Window* getWindowFromHandle(HWND handle)
     return null;
 }
 
+static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
+{
+#if TRUST_RAW_MOUSE_PARAM
+    return static_cast<MouseFlags>(wParam);
+#else
+    auto out = static_cast<MouseFlags>(0);
+
+    if(wParam & MK_LBUTTON)
+    {
+        out |= MouseFlags::MF_LEFT_BUTTON_DOWN;
+    }
+    else if(wParam & MK_RBUTTON)
+    {
+        out |= MouseFlags::MF_RIGHT_BUTTON_DOWN;
+    }
+    else if(wParam & MK_SHIFT)
+    {
+        out |= MouseFlags::MF_SHIFT_KEY_DOWN;
+    }
+    else if(wParam & MK_CONTROL)
+    {
+        out |= MouseFlags::MF_CTRL_KEY_DOWN;
+    }
+    else if(wParam & MK_MBUTTON)
+    {
+        out |= MouseFlags::MF_MIDDLE_BUTTON_DOWN;
+    }
+
+    const UINT xButton = GET_XBUTTON_WPARAM(wParam);
+    if(xButton == XBUTTON1)
+    {
+        out |= MouseFlags::MF_X_BUTTON_1_DOWN;
+    }
+    else if(xButton == XBUTTON2)
+    {
+        out |= MouseFlags::MF_X_BUTTON_2_DOWN;
+    }
+
+    return out;
+#endif
+}
+
+static MouseEvent mouseEventFromMsg(UINT uMsg, WPARAM wParam)
+{
+    const UINT xButton = GET_XBUTTON_WPARAM(wParam);
+    switch(uMsg)
+    {
+        case WM_LBUTTONDOWN: return ME_LEFT_BUTTON_DOWN;
+        case WM_LBUTTONUP:   return ME_LEFT_BUTTON_UP;
+        case WM_MBUTTONDOWN: return ME_MIDDLE_BUTTON_DOWN;
+        case WM_MBUTTONUP:   return ME_MIDDLE_BUTTON_UP;
+        case WM_RBUTTONDOWN: return ME_RIGHT_BUTTON_DOWN;
+        case WM_RBUTTONUP:   return ME_RIGHT_BUTTON_UP;
+        case WM_XBUTTONDOWN:
+            if(xButton == XBUTTON1) { return ME_X_BUTTON_1_DOWN; }
+            if(xButton == XBUTTON2) { return ME_X_BUTTON_2_DOWN; }
+            break;
+        case WM_XBUTTONUP:
+            if(xButton == XBUTTON1) { return ME_X_BUTTON_1_UP; }
+            if(xButton == XBUTTON2) { return ME_X_BUTTON_2_UP; }
+            break;
+        default: break;
+    }
+    return static_cast<MouseEvent>(0xFF);
+}
+
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     Window* window = getWindowFromHandle(windowHandle);
+    const u32 xPos = static_cast<u32>(GET_X_LPARAM(lParam));
+    const u32 yPos = static_cast<u32>(GET_Y_LPARAM(lParam));
 
     switch(uMsg)
     {
@@ -127,20 +196,35 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 tauExit(0);
             }
             break;
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+        case WM_XBUTTONDOWN:
+        case WM_XBUTTONUP:
+            if(window)
+            {
+                window->_mouseEventHandler(mouseEventFromMsg(uMsg, wParam), mouseFlagsFromWParam(wParam), xPos, yPos, window);
+                return 1;
+            }
         default: return DefWindowProc(windowHandle, uMsg, wParam, lParam);
     }
     return 0;
 }
 
-Window::Window(u32 width, u32 height, const char* title, const Window* parent) noexcept
+Window::Window(u32 width, u32 height, const char* title, const void* userContainer, const Window* parent) noexcept
     : _width(width), 
       _height(height), 
       _title(title),
       _windowContainer({ { }, null, null, null }),
+      _userContainer(userContainer),
       _parent(parent),
       _windowState(NEITHER),
       _isResizing(false),
-      _windowResizeHandler(null)
+      _windowResizeHandler(null),
+      _mouseEventHandler(null)
 { }
 
 Window::~Window() noexcept
@@ -152,7 +236,7 @@ void Window::resize(const u32 width, const u32 height) noexcept
 {
     this->_width = width;
     this->_height = height;
-    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, width, height, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
 void Window::setTitle(const char* title) noexcept
@@ -170,6 +254,7 @@ bool Window::createWindow() noexcept
     windowClass->lpfnWndProc = WindowProc;
     windowClass->hInstance = GetModuleHandleA(null);
     windowClass->lpszClassName = CLASS_NAME;
+    windowClass->style = CS_DBLCLKS;
 
     RegisterClass(windowClass);
 
@@ -189,7 +274,7 @@ bool Window::createWindow() noexcept
                                                           parent,
                                                           null,
                                                           windowClass->hInstance,
-                                                          null);
+                                                          (LPVOID) null);
 
     this->_windowContainer.hdc = GetDC(this->_windowContainer.windowHandle);
 
@@ -295,6 +380,4 @@ void Window::swapBuffers() const noexcept
         SwapBuffers(this->_windowContainer.hdc);
     }
 }
-
-
 #endif
