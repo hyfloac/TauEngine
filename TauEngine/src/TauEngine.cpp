@@ -1,6 +1,7 @@
 #include <TauEngine.hpp>
 #include <Utils.hpp>
 #include <GL/glew.h>
+#include <NumTypes.hpp>
 
 bool tauInit() noexcept
 {
@@ -19,15 +20,22 @@ bool tauInit() noexcept
     return true;
 }
 
+#ifndef NUM_MESSAGES_TO_READ
+  #define NUM_MESSAGES_TO_READ 8
+#endif
+
 #ifdef _WIN32
 #include <Windows.h>
 
 void tauRunMessageLoop() noexcept
 {
     MSG msg;
-    if(!PeekMessageA(&msg, null, 0, 0, PM_REMOVE)) { return; }
-    TranslateMessage(&msg);
-    DispatchMessageA(&msg);
+    u32 cnt = 0;
+    while(cnt++ < NUM_MESSAGES_TO_READ && PeekMessageA(&msg, null, 0, 0, PM_REMOVE))
+    {
+        TranslateMessage(&msg);
+        DispatchMessageA(&msg);
+    }
 }
 
 volatile static bool shouldExit = false;

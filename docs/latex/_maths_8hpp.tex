@@ -1,0 +1,190 @@
+\hypertarget{_maths_8hpp}{}\section{Tau\+Engine/include/\+Maths.hpp File Reference}
+\label{_maths_8hpp}\index{Tau\+Engine/include/\+Maths.\+hpp@{Tau\+Engine/include/\+Maths.\+hpp}}
+{\ttfamily \#include $<$D\+L\+L.\+hpp$>$}\newline
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$Num\+Types.\+hpp$>$}\newline
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}~57.\+29577951308232087679815481410517
+\item 
+\#define \mbox{\hyperlink{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}~0.\+017453292519943295769236907684886
+\item 
+\#define \mbox{\hyperlink{_maths_8hpp_a5debc63493c1e5d95a23d8eaa014dad2}{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F}}(\+\_\+\+\_\+F)~(float) (\+\_\+\+\_\+F $\ast$ \mbox{\hyperlink{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}\#\#f)
+\item 
+\#define \mbox{\hyperlink{_maths_8hpp_acefaff7e4883e86252344d4ca67a8ca5}{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F}}(\+\_\+\+\_\+F)~(float) (\+\_\+\+\_\+F $\ast$ \mbox{\hyperlink{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}\#\#f)
+\item 
+\#define \mbox{\hyperlink{_maths_8hpp_a59b67f2111db6a9402bce675a39596be}{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D}}(\+\_\+\+\_\+D)~(double) (\+\_\+\+\_\+D $\ast$ \mbox{\hyperlink{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}})
+\item 
+\#define \mbox{\hyperlink{_maths_8hpp_af17d64a08dc04b7c4ea345c137face52}{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D}}(\+\_\+\+\_\+D)~(double) (\+\_\+\+\_\+D $\ast$ \mbox{\hyperlink{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}})
+\item 
+\mbox{\Hypertarget{_maths_8hpp_a07e13a494a917f17c73a7061f21b834c}\label{_maths_8hpp_a07e13a494a917f17c73a7061f21b834c}} 
+\#define {\bfseries R\+A\+D\+\_\+2\+\_\+\+D\+EG}(\+\_\+\+\_\+F)~\mbox{\hyperlink{_maths_8hpp_a5debc63493c1e5d95a23d8eaa014dad2}{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F}}(\+\_\+\+\_\+F)
+\item 
+\mbox{\Hypertarget{_maths_8hpp_a5764f7aa716335d1e6462e25ec9c40bb}\label{_maths_8hpp_a5764f7aa716335d1e6462e25ec9c40bb}} 
+\#define {\bfseries D\+E\+G\+\_\+2\+\_\+\+R\+AD}(\+\_\+\+\_\+F)~\mbox{\hyperlink{_maths_8hpp_acefaff7e4883e86252344d4ca67a8ca5}{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F}}(\+\_\+\+\_\+F)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$u32 \+\_\+\+Base$>$ }\\float \mbox{\hyperlink{_maths_8hpp_ae2afbd72b2782692727a6f01eb90920b}{logN}} (float x) noexcept
+\item 
+{\footnotesize template$<$u32 \+\_\+\+Base$>$ }\\double \mbox{\hyperlink{_maths_8hpp_a11e983be7424f994da8c4699d168b981}{logN}} (double x) noexcept
+\item 
+{\footnotesize template$<$u32 \+\_\+\+Base$>$ }\\long double \mbox{\hyperlink{_maths_8hpp_a8dc89beb22b73b7ccfabb4ac4876b0aa}{logN}} (long double x) noexcept
+\item 
+T\+A\+U\+\_\+\+D\+LL void \mbox{\hyperlink{_maths_8hpp_aeab2bfe7ad959ecef222e449b485a703}{init\+Sin\+Table}} () noexcept
+\item 
+T\+A\+U\+\_\+\+D\+LL float \mbox{\hyperlink{_maths_8hpp_ae0f179e2253da7cc5a3cb6ea39b58821}{fast\+Sin}} (float value) noexcept
+\item 
+T\+A\+U\+\_\+\+D\+LL double \mbox{\hyperlink{_maths_8hpp_ae35a962207d7b5d33c51e11d2406898b}{fast\+Sin}} (double value) noexcept
+\item 
+T\+A\+U\+\_\+\+D\+LL float \mbox{\hyperlink{_maths_8hpp_a07eaf83e106bcfcba5947fedee9935d6}{fast\+Cos}} (float value) noexcept
+\item 
+T\+A\+U\+\_\+\+D\+LL double \mbox{\hyperlink{_maths_8hpp_a025905769e5f2a52efa1001a6d0ec296}{fast\+Cos}} (double value) noexcept
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Some useful math functions. 
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{_maths_8hpp_af17d64a08dc04b7c4ea345c137face52}\label{_maths_8hpp_af17d64a08dc04b7c4ea345c137face52}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D@{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D}}
+\index{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D@{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D}{DEG\_2\_RAD\_D}}
+{\footnotesize\ttfamily \#define D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+D(\begin{DoxyParamCaption}\item[{}]{\+\_\+\+\_\+D }\end{DoxyParamCaption})~(double) (\+\_\+\+\_\+D $\ast$ \mbox{\hyperlink{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}})}
+
+Converts degrees to radians (double precision). \mbox{\Hypertarget{_maths_8hpp_acefaff7e4883e86252344d4ca67a8ca5}\label{_maths_8hpp_acefaff7e4883e86252344d4ca67a8ca5}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F@{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F}}
+\index{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F@{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F}{DEG\_2\_RAD\_F}}
+{\footnotesize\ttfamily \#define D\+E\+G\+\_\+2\+\_\+\+R\+A\+D\+\_\+F(\begin{DoxyParamCaption}\item[{}]{\+\_\+\+\_\+F }\end{DoxyParamCaption})~(float) (\+\_\+\+\_\+F $\ast$ \mbox{\hyperlink{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}\#\#f)}
+
+Converts degrees to radians (single precision). \mbox{\Hypertarget{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}\label{_maths_8hpp_a7486eddb6e653b268b5d880945d93b54}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL@{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}
+\index{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL@{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}{DEGREES\_TO\_RADIANS\_CONVERTER\_VAL}}
+{\footnotesize\ttfamily \#define D\+E\+G\+R\+E\+E\+S\+\_\+\+T\+O\+\_\+\+R\+A\+D\+I\+A\+N\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL~0.\+017453292519943295769236907684886}
+
+Equal to 180/pi \mbox{\Hypertarget{_maths_8hpp_a59b67f2111db6a9402bce675a39596be}\label{_maths_8hpp_a59b67f2111db6a9402bce675a39596be}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D@{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D}}
+\index{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D@{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D}{RAD\_2\_DEG\_D}}
+{\footnotesize\ttfamily \#define R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+D(\begin{DoxyParamCaption}\item[{}]{\+\_\+\+\_\+D }\end{DoxyParamCaption})~(double) (\+\_\+\+\_\+D $\ast$ \mbox{\hyperlink{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}})}
+
+Converts radians to degrees (double precision). \mbox{\Hypertarget{_maths_8hpp_a5debc63493c1e5d95a23d8eaa014dad2}\label{_maths_8hpp_a5debc63493c1e5d95a23d8eaa014dad2}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F@{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F}}
+\index{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F@{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F}{RAD\_2\_DEG\_F}}
+{\footnotesize\ttfamily \#define R\+A\+D\+\_\+2\+\_\+\+D\+E\+G\+\_\+F(\begin{DoxyParamCaption}\item[{}]{\+\_\+\+\_\+F }\end{DoxyParamCaption})~(float) (\+\_\+\+\_\+F $\ast$ \mbox{\hyperlink{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}\#\#f)}
+
+Converts radians to degrees (single precision). \mbox{\Hypertarget{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}\label{_maths_8hpp_a8c38c8ceed883104b76aed6f9c55774a}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL@{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}}
+\index{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL@{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL}{RADIANS\_TO\_DEGREES\_CONVERTER\_VAL}}
+{\footnotesize\ttfamily \#define R\+A\+D\+I\+A\+N\+S\+\_\+\+T\+O\+\_\+\+D\+E\+G\+R\+E\+E\+S\+\_\+\+C\+O\+N\+V\+E\+R\+T\+E\+R\+\_\+\+V\+AL~57.\+29577951308232087679815481410517}
+
+Equal to pi/180. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{_maths_8hpp_a07eaf83e106bcfcba5947fedee9935d6}\label{_maths_8hpp_a07eaf83e106bcfcba5947fedee9935d6}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!fast\+Cos@{fast\+Cos}}
+\index{fast\+Cos@{fast\+Cos}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{fast\+Cos()}{fastCos()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL float fast\+Cos (\begin{DoxyParamCaption}\item[{float}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Cos looked up in the sin table with the appropriate offset
+
+Access index by multiplying the input by blip count divided by Tau (2pi), add pi/2 (the shift to convert sin to cosine), binary A\+ND it against the blip count minus 1
+
+$\huge[ \LARGE x * \frac{65536}{\tau} \Large + \LARGE \frac{65536}{4} \huge] \large \& \Large 65535$
+
+$\huge[ \LARGE x * \frac{32768}{\pi} \Large + \large 16384 \huge] \large \& \Large 65535$ \mbox{\Hypertarget{_maths_8hpp_a025905769e5f2a52efa1001a6d0ec296}\label{_maths_8hpp_a025905769e5f2a52efa1001a6d0ec296}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!fast\+Cos@{fast\+Cos}}
+\index{fast\+Cos@{fast\+Cos}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{fast\+Cos()}{fastCos()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL double fast\+Cos (\begin{DoxyParamCaption}\item[{double}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Cos looked up in the sin table with the appropriate offset
+
+Access index by multiplying the input by blip count divided by Tau (2pi), add pi/2 (the shift to convert sin to cosine), binary A\+ND it against the blip count minus 1
+
+$\huge[ \LARGE x * \frac{65536}{\tau} \Large + \LARGE \frac{65536}{4} \huge] \large \& \Large 65535$
+
+$\huge[ \LARGE x * \frac{32768}{\pi} \Large + \large 16384 \huge] \large \& \Large 65535$ \mbox{\Hypertarget{_maths_8hpp_ae0f179e2253da7cc5a3cb6ea39b58821}\label{_maths_8hpp_ae0f179e2253da7cc5a3cb6ea39b58821}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!fast\+Sin@{fast\+Sin}}
+\index{fast\+Sin@{fast\+Sin}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{fast\+Sin()}{fastSin()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL float fast\+Sin (\begin{DoxyParamCaption}\item[{float}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Sin looked up in a table
+
+Access index by multiplying the input by blip count divided by Tau (2pi), binary A\+ND it against the blip count minus 1
+
+$\LARGE x * \frac{65536}{\tau} \normalsize \& \large 65535$
+
+$\LARGE x * \frac{32768}{\pi} \normalsize \& \large 65535$ \mbox{\Hypertarget{_maths_8hpp_ae35a962207d7b5d33c51e11d2406898b}\label{_maths_8hpp_ae35a962207d7b5d33c51e11d2406898b}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!fast\+Sin@{fast\+Sin}}
+\index{fast\+Sin@{fast\+Sin}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{fast\+Sin()}{fastSin()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL double fast\+Sin (\begin{DoxyParamCaption}\item[{double}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Sin looked up in a table
+
+Access index by multiplying the input by blip count divided by Tau (2pi), binary A\+ND it against the blip count minus 1
+
+$\LARGE x * \frac{65536}{\tau} \normalsize \& \large 65535$
+
+$\LARGE x * \frac{32768}{\pi} \normalsize \& \large 65535$ \mbox{\Hypertarget{_maths_8hpp_aeab2bfe7ad959ecef222e449b485a703}\label{_maths_8hpp_aeab2bfe7ad959ecef222e449b485a703}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!init\+Sin\+Table@{init\+Sin\+Table}}
+\index{init\+Sin\+Table@{init\+Sin\+Table}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{init\+Sin\+Table()}{initSinTable()}}
+{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL void init\+Sin\+Table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Initializes the sin table.
+
+Each element is computed by taking the index, multiplying it by Tau (2pi), divide by the element count.
+
+$\LARGE \frac{i * 2 * \pi}{65536}$ -\/$>$ $\LARGE \frac{i*\pi}{32768}$ \mbox{\Hypertarget{_maths_8hpp_ae2afbd72b2782692727a6f01eb90920b}\label{_maths_8hpp_ae2afbd72b2782692727a6f01eb90920b}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!logN@{logN}}
+\index{logN@{logN}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{log\+N()}{logN()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$u32 \+\_\+\+Base$>$ \\
+float logN (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Computes the log base n of a value (single precision).
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em x} & The value to find the logarithm of. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{_maths_8hpp_a11e983be7424f994da8c4699d168b981}\label{_maths_8hpp_a11e983be7424f994da8c4699d168b981}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!logN@{logN}}
+\index{logN@{logN}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{log\+N()}{logN()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily template$<$u32 \+\_\+\+Base$>$ \\
+double logN (\begin{DoxyParamCaption}\item[{double}]{x }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Computes the log base n of a value (double precision).
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em x} & The value to find the logarithm of. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{_maths_8hpp_a8dc89beb22b73b7ccfabb4ac4876b0aa}\label{_maths_8hpp_a8dc89beb22b73b7ccfabb4ac4876b0aa}} 
+\index{Maths.\+hpp@{Maths.\+hpp}!logN@{logN}}
+\index{logN@{logN}!Maths.\+hpp@{Maths.\+hpp}}
+\subsubsection{\texorpdfstring{log\+N()}{logN()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily template$<$u32 \+\_\+\+Base$>$ \\
+long double logN (\begin{DoxyParamCaption}\item[{long double}]{x }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Computes the log base n of a value (double precision on windows, 2.\+5x precision (80 bit) in G\+CC).
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em x} & The value to find the logarithm of. \\
+\hline
+\end{DoxyParams}

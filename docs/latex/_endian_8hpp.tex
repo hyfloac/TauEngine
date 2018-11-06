@@ -1,0 +1,47 @@
+\hypertarget{_endian_8hpp}{}\section{Tau\+Utils/include/\+Endian.hpp File Reference}
+\label{_endian_8hpp}\index{Tau\+Utils/include/\+Endian.\+hpp@{Tau\+Utils/include/\+Endian.\+hpp}}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{_endian_8hpp_a30f87dfd7349d5165f116b550c35c6ed}\label{_endian_8hpp_a30f87dfd7349d5165f116b550c35c6ed}} 
+\#define {\bfseries I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN}~1
+\item 
+\mbox{\Hypertarget{_endian_8hpp_a0fdc6fe49d3e76c9ed558321df1decef}\label{_endian_8hpp_a0fdc6fe49d3e76c9ed558321df1decef}} 
+\#define {\bfseries I\+S\+\_\+\+B\+I\+G\+\_\+\+E\+N\+D\+I\+AN}~0
+\item 
+\mbox{\Hypertarget{_endian_8hpp_a8782a401fbf55261460863fc2f8df1ce}\label{_endian_8hpp_a8782a401fbf55261460863fc2f8df1ce}} 
+\#define {\bfseries L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN}
+\item 
+\#define \mbox{\hyperlink{_endian_8hpp_a5621d040f1613d8106b52a091380262f}{N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN}}~(((union \{ unsigned short x; unsigned char c; \})\{ 1 \}).c)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static bool \mbox{\hyperlink{_endian_8hpp_a35e4d6610c6cafa218ce75d42ca67061}{is\+Little\+Endian}} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A series of things to determine the endian of system.
+
+This does not work with a middle endian ({\ttfamily 3 4 1 2}). 
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{_endian_8hpp_a5621d040f1613d8106b52a091380262f}\label{_endian_8hpp_a5621d040f1613d8106b52a091380262f}} 
+\index{Endian.\+hpp@{Endian.\+hpp}!N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN@{N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN}}
+\index{N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN@{N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN}!Endian.\+hpp@{Endian.\+hpp}}
+\subsubsection{\texorpdfstring{N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN}{NON\_PP\_IS\_LITTLE\_ENDIAN}}
+{\footnotesize\ttfamily \#define N\+O\+N\+\_\+\+P\+P\+\_\+\+I\+S\+\_\+\+L\+I\+T\+T\+L\+E\+\_\+\+E\+N\+D\+I\+AN~(((union \{ unsigned short x; unsigned char c; \})\{ 1 \}).c)}
+
+A simple little union that determines what endian the system is.
+
+I\textquotesingle{}m not entirely sure if this is runtime or compile time. I would guess compile time if optimizations are on. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{_endian_8hpp_a35e4d6610c6cafa218ce75d42ca67061}\label{_endian_8hpp_a35e4d6610c6cafa218ce75d42ca67061}} 
+\index{Endian.\+hpp@{Endian.\+hpp}!is\+Little\+Endian@{is\+Little\+Endian}}
+\index{is\+Little\+Endian@{is\+Little\+Endian}!Endian.\+hpp@{Endian.\+hpp}}
+\subsubsection{\texorpdfstring{is\+Little\+Endian()}{isLittleEndian()}}
+{\footnotesize\ttfamily static bool is\+Little\+Endian (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+A runtime function used to determine what endian the system is. 

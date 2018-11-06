@@ -1,3 +1,4 @@
+/** @file */
 #include <Timings.hpp>
 
 #ifdef _WIN32
@@ -52,6 +53,9 @@ u64 currentTimeMillis() noexcept
 #endif
 }
 
+/**
+ * The current clock speed information.
+ */
 static ClockCyclesTimeFrame clockCycles;
 
 void computeClockCyclesPerTime(const u64 timeoutMS) noexcept
@@ -64,6 +68,58 @@ void computeClockCyclesPerTime(const u64 timeoutMS) noexcept
 
     const u64 time = timeEnd - timeBegin;
     const u64 clock = clockEnd - clockBegin;
+
+    clockCycles = {};
+
+    clockCycles.clockCyclesPerMillisecondF = (f64) clock / (f64) time;
+    clockCycles.clockCyclesPerMillisecond = (u64) clockCycles.clockCyclesPerMillisecondF;
+
+    clockCycles.clockCyclesPerSecondF = clockCycles.clockCyclesPerMillisecondF / 1000.0;
+    clockCycles.clockCyclesPerSecond = (u64) clockCycles.clockCyclesPerSecondF;
+
+    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / (f64) time;
+    clockCycles.clockCyclesPerMicrosecond = (u64) clockCycles.clockCyclesPerMicrosecondF;
+
+    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / (f64) time;
+    clockCycles.clockCyclesPerNanosecond = (u64) clockCycles.clockCyclesPerNanosecondF;
+}
+
+/**
+ *   The unix epoch for which the program started. This is 
+ * initialized in {@link initProgramStartTimes(void)} which is 
+ * called from {@link DLLMain(HMODULE,DWORD,LPVOID)}, so it
+ * is really initialized at the time the DLL is first loaded.
+ */
+static u64 programStartTime = 0;
+
+/**
+ *   The number of clock cycles that have occured when the 
+ * program started. This is initialized in 
+ * {@link initProgramStartTimes(void)} which is called from 
+ * {@link DLLMain(HMODULE,DWORD,LPVOID)}, so it is really 
+ * initialized at the time the DLL is first loaded.
+ */
+static u64 programStartClockCycles = 0;
+
+/**
+ *   This is a mostly hidden function used to initialize the 
+ * variables {@link programStartTime} and 
+ * {@link programStartClockCycles}. It is called from 
+ * {@link DLLMain(HMODULE,DWORD,LPVOID)}.
+ */
+void initProgramStartTimes() noexcept
+{
+    if(!programStartTime || !programStartClockCycles)
+    {
+        programStartTime = currentTimeMillis();
+        programStartClockCycles = rdtsc();
+    }
+}
+
+void computeClockCyclesFromRuntime() noexcept
+{
+    const u64 time = currentTimeMillis() - programStartTime;
+    const u64 clock = rdtsc() - programStartClockCycles;
 
     clockCycles = {};
 

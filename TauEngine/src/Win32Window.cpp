@@ -1,3 +1,8 @@
+/**
+ * @file
+ * 
+ * The windows implementation of {@link Window}.
+ */
 #ifdef _WIN32
 #include <Window.hpp>
 #include <Windowsx.h>
@@ -9,20 +14,50 @@
 #include <EnumBitFields.hpp>
 
 #ifndef MAX_WINDOW_COUNT
+/**
+ * The maximum number of windows that are being stored.
+ * 
+ *   This is used with {@link windowHandles} to be able to 
+ * retrieve a {@link Window} from an {@link HWND}.
+ * 
+ *   This can be overriden by defining `MAX_WINDOW_COUNT`
+ * in the pre processor before building the DLL.
+ */
  #define MAX_WINDOW_COUNT 16
 #endif
 
+/**
+ *   This is the name of a Windows class. This is used for 
+ * interfacing with the OS.
+ */
 static const char*    CLASS_NAME   =  "TauEngineWindowClass";
+/**
+ * This is a wide string version of {@link CLASS_NAME}.
+ */
 static const wchar_t* CLASS_NAME_W = L"TauEngineWindowClass";
 
 /**
  *   When we get a message for a window we only receive the
- * handle. Thus we need to store the reference to the actual
+ * handle, thus we need to store the reference to the actual
  * window somewhere. That somewhere is in this array.
  */
 static Window* windowHandles[MAX_WINDOW_COUNT];
+
+/**
+ * This is the current index for the {@link windowHandles} array.
+ * It serves to let us easily insert the next window.
+ */
 static u32 currentWindowHandleIndex = 0;
 
+/**
+ * Adds a window to {@link windowHandles}.
+ * 
+ * @param[in] systemWindowContainer
+ *    The {@link Window} to put into {@link windowHandles}.
+ * @return 
+ *      Returns true if the `systemWindowContainer` was 
+ *    successfully added to {@link windowHandles}.
+ */
 static bool addWindow(Window* systemWindowContainer)
 {
     if(currentWindowHandleIndex < MAX_WINDOW_COUNT)
@@ -33,6 +68,14 @@ static bool addWindow(Window* systemWindowContainer)
     return false;
 }
 
+/**
+ *   Removes a window from {@link windowHandles}. After the 
+ * window is removed, all other pointers are shifted down if
+ * necessary.
+ * 
+ * @param[in] systemWindowContainer
+ *    The {@link Window} to remove from {@link windowHandles}.
+ */
 static void removeWindow(Window* systemWindowContainer)
 {
     for(u32 i = 0; i < currentWindowHandleIndex; ++i)
@@ -51,6 +94,16 @@ static void removeWindow(Window* systemWindowContainer)
     }
 }
 
+/**
+ * Retrieves a {@link Window} from {@link windowHandles}.
+ * 
+ * @param[in] handle
+ *    The handle of the {@link Window} to retrieve.
+ * @return 
+ *      A pointer to the {@link Window} containing the 
+ *    {@link HWND} `handle`. returns null if no window is 
+ *    currently holding the referenced handle.
+ */
 static Window* getWindowFromHandle(HWND handle)
 {
     for(u32 i = 0; i < currentWindowHandleIndex; ++i)
@@ -64,6 +117,21 @@ static Window* getWindowFromHandle(HWND handle)
     return null;
 }
 
+/**
+ *   Returns a {@link MouseFlags} bit field represented by the 
+ * {@link WPARAM}.
+ * 
+ *   If `TRUST_RAW_MOUSE_PARAM` is defined as `true` then this 
+ * is just a simple cast, otherwise we manually go through 
+ * each flag and binary OR in the equivalent 
+ * {@link MouseFlags}.
+ * 
+ * @param[in] wParam
+ *      The {@link WPARAM} representing a bit mask of flags 
+ *    for use with mouse events.
+ * @return
+ *    An equivalent {@link MouseFlags} enum bit mask.
+ */
 static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
 {
 #if TRUST_RAW_MOUSE_PARAM
@@ -75,19 +143,19 @@ static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
     {
         out |= MouseFlags::MF_LEFT_BUTTON_DOWN;
     }
-    else if(wParam & MK_RBUTTON)
+    if(wParam & MK_RBUTTON)
     {
         out |= MouseFlags::MF_RIGHT_BUTTON_DOWN;
     }
-    else if(wParam & MK_SHIFT)
+    if(wParam & MK_SHIFT)
     {
         out |= MouseFlags::MF_SHIFT_KEY_DOWN;
     }
-    else if(wParam & MK_CONTROL)
+    if(wParam & MK_CONTROL)
     {
         out |= MouseFlags::MF_CTRL_KEY_DOWN;
     }
-    else if(wParam & MK_MBUTTON)
+    if(wParam & MK_MBUTTON)
     {
         out |= MouseFlags::MF_MIDDLE_BUTTON_DOWN;
     }
@@ -97,7 +165,7 @@ static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
     {
         out |= MouseFlags::MF_X_BUTTON_1_DOWN;
     }
-    else if(xButton == XBUTTON2)
+    if(xButton == XBUTTON2)
     {
         out |= MouseFlags::MF_X_BUTTON_2_DOWN;
     }
@@ -106,6 +174,19 @@ static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
 #endif
 }
 
+/**
+ *   Returns a {@link MouseEvent} based on the message type. 
+ * `wParam` is also needed for identifying which X button was
+ * pressed.
+ * 
+ * @param[in] uMsg
+ *      The message type, this is the primary component in 
+ *    creating the {@link MouseEvent}.
+ * @param[in] wParam
+ *    Used to determine which X button may have been pressed.
+ * @return
+ *    A {@link MouseEvent} representing which event was fired.
+ */
 static MouseEvent mouseEventFromMsg(UINT uMsg, WPARAM wParam)
 {
     const UINT xButton = GET_XBUTTON_WPARAM(wParam);
@@ -204,11 +285,17 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
         case WM_RBUTTONUP:
         case WM_XBUTTONDOWN:
         case WM_XBUTTONUP:
-            if(window)
+            if(window && window->_mouseEventHandler)
             {
                 window->_mouseEventHandler(mouseEventFromMsg(uMsg, wParam), mouseFlagsFromWParam(wParam), xPos, yPos, window);
-                return 1;
             }
+            break;
+        case WM_MOUSEMOVE:
+            if(window && window->_mouseMoveHandler)
+            {
+                window->_mouseMoveHandler(mouseFlagsFromWParam(wParam), xPos, yPos, window);
+            }
+            break;
         default: return DefWindowProc(windowHandle, uMsg, wParam, lParam);
     }
     return 0;
@@ -224,7 +311,8 @@ Window::Window(u32 width, u32 height, const char* title, const void* userContain
       _windowState(NEITHER),
       _isResizing(false),
       _windowResizeHandler(null),
-      _mouseEventHandler(null)
+      _mouseEventHandler(null),
+      _mouseMoveHandler(null)
 { }
 
 Window::~Window() noexcept

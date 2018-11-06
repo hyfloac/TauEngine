@@ -1,0 +1,70 @@
+\hypertarget{class_tri_tree}{}\section{Tri\+Tree$<$ \+\_\+\+Key, \+\_\+\+Value $>$ Class Template Reference}
+\label{class_tri_tree}\index{Tri\+Tree$<$ \+\_\+\+Key, \+\_\+\+Value $>$@{Tri\+Tree$<$ \+\_\+\+Key, \+\_\+\+Value $>$}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a70f1ea56b8f3843080efeee51448efda}\label{class_tri_tree_a70f1ea56b8f3843080efeee51448efda}} 
+{\bfseries Tri\+Tree} (\mbox{\hyperlink{struct_map_container}{Map\+Container}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ container, \mbox{\hyperlink{class_tri_tree}{Tri\+Tree}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ $\ast$head)
+\item 
+\mbox{\Hypertarget{class_tri_tree_a1486be4a3f31195cb91ece9068ca7be1}\label{class_tri_tree_a1486be4a3f31195cb91ece9068ca7be1}} 
+{\bfseries Tri\+Tree} (\mbox{\hyperlink{struct_map_container}{Map\+Container}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ container)
+\item 
+\mbox{\Hypertarget{class_tri_tree_aa15de6392aea8ea8a3375b31ccae2c1e}\label{class_tri_tree_aa15de6392aea8ea8a3375b31ccae2c1e}} 
+void {\bfseries add} (\mbox{\hyperlink{struct_map_container}{Map\+Container}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ container)
+\item 
+\mbox{\Hypertarget{class_tri_tree_a6ab6bfbee512c4e718eff864e080268b}\label{class_tri_tree_a6ab6bfbee512c4e718eff864e080268b}} 
+\+\_\+\+Value $\ast$ {\bfseries find} (u32 hash, \+\_\+\+Key \&key) const
+\item 
+\mbox{\Hypertarget{class_tri_tree_a06651c4cddb99f98706d0f6a010bf618}\label{class_tri_tree_a06651c4cddb99f98706d0f6a010bf618}} 
+void {\bfseries dump} (const u32 indent\+Count, char left\+Right) const
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a90ff0ac9397345b6d6c27396f97a057b}\label{class_tri_tree_a90ff0ac9397345b6d6c27396f97a057b}} 
+friend {\bfseries Tri\+Tree\+Container$<$ \+\_\+\+Key, \+\_\+\+Value $>$}
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a3941d9f8c976c69392cdad32b6c5091d}\label{class_tri_tree_a3941d9f8c976c69392cdad32b6c5091d}} 
+void {\bfseries rotate\+Left} (\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}} $\ast$child)
+\item 
+\mbox{\Hypertarget{class_tri_tree_a5eb3cbd936fd6911f0864e437dd11209}\label{class_tri_tree_a5eb3cbd936fd6911f0864e437dd11209}} 
+void {\bfseries rotate\+Right} (\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}} $\ast$child)
+\item 
+\mbox{\Hypertarget{class_tri_tree_a9838f8fa97b53336cb104110fb5381bf}\label{class_tri_tree_a9838f8fa97b53336cb104110fb5381bf}} 
+void {\bfseries rotate\+Right\+Left} (\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}} $\ast$child)
+\item 
+\mbox{\Hypertarget{class_tri_tree_a7bd50859afd22131b7165e083cf42752}\label{class_tri_tree_a7bd50859afd22131b7165e083cf42752}} 
+void {\bfseries rotate\+Left\+Right} (\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}} $\ast$child)
+\item 
+\mbox{\Hypertarget{class_tri_tree_a8451d8033afab411a4fb6c96be16a5a2}\label{class_tri_tree_a8451d8033afab411a4fb6c96be16a5a2}} 
+void {\bfseries rebalance} (\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}} $\ast$child)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a999c341621dcf1440b31a328d2cfb310}\label{class_tri_tree_a999c341621dcf1440b31a328d2cfb310}} 
+\mbox{\hyperlink{struct_map_container}{Map\+Container}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ {\bfseries \+\_\+container}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a877cafd66d392b94eaf243c8fce32bb0}\label{class_tri_tree_a877cafd66d392b94eaf243c8fce32bb0}} 
+\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ $\ast$ {\bfseries \+\_\+head}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a4ff2bdcca2c35ca5c3ac0103dde4da20}\label{class_tri_tree_a4ff2bdcca2c35ca5c3ac0103dde4da20}} 
+\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ $\ast$ {\bfseries \+\_\+less\+Than}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a7207d4424a319a5b0843683b6ed1d57d}\label{class_tri_tree_a7207d4424a319a5b0843683b6ed1d57d}} 
+\mbox{\hyperlink{class_tri_tree}{Tri\+Tree}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ $\ast$ {\bfseries \+\_\+greater\+Than}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a0f7ea126ee849bf6ad88700c294d427f}\label{class_tri_tree_a0f7ea126ee849bf6ad88700c294d427f}} 
+\mbox{\hyperlink{class_tri_tree_equal_element}{Tri\+Tree\+Equal\+Element}}$<$ \+\_\+\+Key, \+\_\+\+Value $>$ $\ast$ {\bfseries \+\_\+equal}
+\item 
+\mbox{\Hypertarget{class_tri_tree_a36b239c302760c59a91f6b7a10a66b37}\label{class_tri_tree_a36b239c302760c59a91f6b7a10a66b37}} 
+i32 {\bfseries \+\_\+balance}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+Tau\+Utils/include/Hash\+Map.\+hpp\end{DoxyCompactItemize}

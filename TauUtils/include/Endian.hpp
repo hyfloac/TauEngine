@@ -1,3 +1,10 @@
+/**
+ * @file
+ * 
+ * A series of things to determine the endian of system.
+ * 
+ * This does not work with a middle endian (`3 4 1 2`).
+ */
 #pragma once
 
 #if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
@@ -25,8 +32,20 @@
   #error "Unknown Endianness."
 #endif
 
+/**
+ *   A simple little union that determines what endian the 
+ * system is.
+ * 
+ *   I'm not entirely sure if this is runtime or compile time.
+ * I would guess compile time if optimizations are on.
+ * 
+ */
 #define NON_PP_IS_LITTLE_ENDIAN (((union { unsigned short x; unsigned char c; }){ 1 }).c)
 
+/**
+ *   A runtime function used to determine what endian the 
+ * system is.
+ */
 static inline bool isLittleEndian()
 {
     static const unsigned short number = 0x0001;

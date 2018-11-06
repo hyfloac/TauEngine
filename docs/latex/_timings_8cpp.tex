@@ -1,0 +1,114 @@
+\hypertarget{_timings_8cpp}{}\section{Tau\+Engine/src/\+Timings.cpp File Reference}
+\label{_timings_8cpp}\index{Tau\+Engine/src/\+Timings.\+cpp@{Tau\+Engine/src/\+Timings.\+cpp}}
+{\ttfamily \#include $<$Timings.\+hpp$>$}\newline
+{\ttfamily \#include $<$intrin.\+h$>$}\newline
+{\ttfamily \#include $<$Windows.\+h$>$}\newline
+{\ttfamily \#include $<$chrono$>$}\newline
+{\ttfamily \#include $<$thread$>$}\newline
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+u64 \mbox{\hyperlink{_timings_8cpp_a29e5222634f200e5d94c967eb0134f78}{rdtsc}} () noexcept
+\item 
+u64 \mbox{\hyperlink{_timings_8cpp_a805618c0542f6f6b1e85589e6e10fb3a}{current\+Time\+Millis}} () noexcept
+\item 
+void \mbox{\hyperlink{_timings_8cpp_a625e3cbd6388df2f4d62aff0c9bfc6fe}{compute\+Clock\+Cycles\+Per\+Time}} (const u64 timeout\+MS) noexcept
+\item 
+void \mbox{\hyperlink{_timings_8cpp_a44c6294ee29499dde5ae96411b2db1de}{init\+Program\+Start\+Times}} () noexcept
+\item 
+void \mbox{\hyperlink{_timings_8cpp_aec38c3ef0e7efda6435e916b0d5b0f30}{compute\+Clock\+Cycles\+From\+Runtime}} () noexcept
+\item 
+const \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}} $\ast$ \mbox{\hyperlink{_timings_8cpp_a92cd5436979a51cca9ef6e63672a0780}{get\+Clock\+Cycles\+Per\+Time\+Frame}} () noexcept
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}} \mbox{\hyperlink{_timings_8cpp_aba5d261af83021687fe7ecb966c2474d}{clock\+Cycles}}
+\item 
+static u64 \mbox{\hyperlink{_timings_8cpp_a6e4ac1a9311b750135c024775da69d7e}{program\+Start\+Time}} = 0
+\item 
+static u64 \mbox{\hyperlink{_timings_8cpp_ae8a58293ba3cfa3166d713089d09f00a}{program\+Start\+Clock\+Cycles}} = 0
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{_timings_8cpp_aec38c3ef0e7efda6435e916b0d5b0f30}\label{_timings_8cpp_aec38c3ef0e7efda6435e916b0d5b0f30}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!compute\+Clock\+Cycles\+From\+Runtime@{compute\+Clock\+Cycles\+From\+Runtime}}
+\index{compute\+Clock\+Cycles\+From\+Runtime@{compute\+Clock\+Cycles\+From\+Runtime}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{compute\+Clock\+Cycles\+From\+Runtime()}{computeClockCyclesFromRuntime()}}
+{\footnotesize\ttfamily void compute\+Clock\+Cycles\+From\+Runtime (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Used to compute the \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}} from how long the program has been running for. This function produces an average clock speed unlike \mbox{\hyperlink{_timings_8cpp_a625e3cbd6388df2f4d62aff0c9bfc6fe}{compute\+Clock\+Cycles\+Per\+Time(const u64)}} which computes a current clock speed. \mbox{\Hypertarget{_timings_8cpp_a625e3cbd6388df2f4d62aff0c9bfc6fe}\label{_timings_8cpp_a625e3cbd6388df2f4d62aff0c9bfc6fe}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!compute\+Clock\+Cycles\+Per\+Time@{compute\+Clock\+Cycles\+Per\+Time}}
+\index{compute\+Clock\+Cycles\+Per\+Time@{compute\+Clock\+Cycles\+Per\+Time}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{compute\+Clock\+Cycles\+Per\+Time()}{computeClockCyclesPerTime()}}
+{\footnotesize\ttfamily void compute\+Clock\+Cycles\+Per\+Time (\begin{DoxyParamCaption}\item[{const u64}]{timeout\+MS = {\ttfamily 50} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+Used to recompute the number of clock cycles over a given period of time. The time frame over which this calculation is taken is passed by the parameter {\ttfamily timeout\+MS}. If this is taking too long to compute lower the value. If lowering the value causes it to return odd results, increase the value.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em timeout\+MS} & The number of milliseconds to timeout for. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{_timings_8cpp_a805618c0542f6f6b1e85589e6e10fb3a}\label{_timings_8cpp_a805618c0542f6f6b1e85589e6e10fb3a}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!current\+Time\+Millis@{current\+Time\+Millis}}
+\index{current\+Time\+Millis@{current\+Time\+Millis}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{current\+Time\+Millis()}{currentTimeMillis()}}
+{\footnotesize\ttfamily u64 current\+Time\+Millis (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+This gets the current unix epoch in milliseconds.
+
+\begin{DoxyReturn}{Returns}
+The current unix epoch in milliseconds. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{_timings_8cpp_a92cd5436979a51cca9ef6e63672a0780}\label{_timings_8cpp_a92cd5436979a51cca9ef6e63672a0780}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!get\+Clock\+Cycles\+Per\+Time\+Frame@{get\+Clock\+Cycles\+Per\+Time\+Frame}}
+\index{get\+Clock\+Cycles\+Per\+Time\+Frame@{get\+Clock\+Cycles\+Per\+Time\+Frame}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{get\+Clock\+Cycles\+Per\+Time\+Frame()}{getClockCyclesPerTimeFrame()}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}}$\ast$ get\+Clock\+Cycles\+Per\+Time\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+This function simply retrieves the current clock speed information.
+
+\begin{DoxyReturn}{Returns}
+A pointer to the current clock speed information. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{_timings_8cpp_a44c6294ee29499dde5ae96411b2db1de}\label{_timings_8cpp_a44c6294ee29499dde5ae96411b2db1de}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!init\+Program\+Start\+Times@{init\+Program\+Start\+Times}}
+\index{init\+Program\+Start\+Times@{init\+Program\+Start\+Times}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{init\+Program\+Start\+Times()}{initProgramStartTimes()}}
+{\footnotesize\ttfamily void init\+Program\+Start\+Times (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+This is a mostly hidden function used to initialize the variables \mbox{\hyperlink{_timings_8cpp_a6e4ac1a9311b750135c024775da69d7e}{program\+Start\+Time}} and \mbox{\hyperlink{_timings_8cpp_ae8a58293ba3cfa3166d713089d09f00a}{program\+Start\+Clock\+Cycles}}. It is called from \mbox{\hyperlink{}{D\+L\+L\+Main(\+H\+M\+O\+D\+U\+L\+E,\+D\+W\+O\+R\+D,\+L\+P\+V\+O\+I\+D)}}. \mbox{\Hypertarget{_timings_8cpp_a29e5222634f200e5d94c967eb0134f78}\label{_timings_8cpp_a29e5222634f200e5d94c967eb0134f78}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!rdtsc@{rdtsc}}
+\index{rdtsc@{rdtsc}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{rdtsc()}{rdtsc()}}
+{\footnotesize\ttfamily u64 rdtsc (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+
+This retrieves the number of clock cycles that has passed since the start of the system. It is primarily an alias to the {\ttfamily rdtsc} assembly instruction.
+
+\begin{DoxyReturn}{Returns}
+Returns the number of clock cycles since launch. 
+\end{DoxyReturn}
+
+
+\subsection{Variable Documentation}
+\mbox{\Hypertarget{_timings_8cpp_aba5d261af83021687fe7ecb966c2474d}\label{_timings_8cpp_aba5d261af83021687fe7ecb966c2474d}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!clock\+Cycles@{clock\+Cycles}}
+\index{clock\+Cycles@{clock\+Cycles}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{clock\+Cycles}{clockCycles}}
+{\footnotesize\ttfamily \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}} clock\+Cycles\hspace{0.3cm}{\ttfamily [static]}}
+
+The current clock speed information. \mbox{\Hypertarget{_timings_8cpp_ae8a58293ba3cfa3166d713089d09f00a}\label{_timings_8cpp_ae8a58293ba3cfa3166d713089d09f00a}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!program\+Start\+Clock\+Cycles@{program\+Start\+Clock\+Cycles}}
+\index{program\+Start\+Clock\+Cycles@{program\+Start\+Clock\+Cycles}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{program\+Start\+Clock\+Cycles}{programStartClockCycles}}
+{\footnotesize\ttfamily u64 program\+Start\+Clock\+Cycles = 0\hspace{0.3cm}{\ttfamily [static]}}
+
+The number of clock cycles that have occured when the program started. This is initialized in \mbox{\hyperlink{_timings_8cpp_a44c6294ee29499dde5ae96411b2db1de}{init\+Program\+Start\+Times(void)}} which is called from \mbox{\hyperlink{}{D\+L\+L\+Main(\+H\+M\+O\+D\+U\+L\+E,\+D\+W\+O\+R\+D,\+L\+P\+V\+O\+I\+D)}}, so it is really initialized at the time the D\+LL is first loaded. \mbox{\Hypertarget{_timings_8cpp_a6e4ac1a9311b750135c024775da69d7e}\label{_timings_8cpp_a6e4ac1a9311b750135c024775da69d7e}} 
+\index{Timings.\+cpp@{Timings.\+cpp}!program\+Start\+Time@{program\+Start\+Time}}
+\index{program\+Start\+Time@{program\+Start\+Time}!Timings.\+cpp@{Timings.\+cpp}}
+\subsubsection{\texorpdfstring{program\+Start\+Time}{programStartTime}}
+{\footnotesize\ttfamily u64 program\+Start\+Time = 0\hspace{0.3cm}{\ttfamily [static]}}
+
+The unix epoch for which the program started. This is initialized in \mbox{\hyperlink{_timings_8cpp_a44c6294ee29499dde5ae96411b2db1de}{init\+Program\+Start\+Times(void)}} which is called from \mbox{\hyperlink{}{D\+L\+L\+Main(\+H\+M\+O\+D\+U\+L\+E,\+D\+W\+O\+R\+D,\+L\+P\+V\+O\+I\+D)}}, so it is really initialized at the time the D\+LL is first loaded. 
