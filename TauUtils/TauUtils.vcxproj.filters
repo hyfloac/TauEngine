@@ -33,7 +33,13 @@
     <ClInclude Include="include\EnumBitFields.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\HashMap.hpp">
+    <ClInclude Include="include\Alignment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Endian.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DynamicallySizedArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
