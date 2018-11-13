@@ -29,9 +29,9 @@ u64 currentTimeMillis() noexcept
      * to a LARGE_INTEGER structure. */
     GetSystemTimeAsFileTime(&fileTime);
     fileTimeInt.LowPart = fileTime.dwLowDateTime;
-    fileTimeInt.HighPart = (LONG) fileTime.dwHighDateTime;
+    fileTimeInt.HighPart = static_cast<LONG>(fileTime.dwHighDateTime);
 
-    u64 ret = (u64) fileTimeInt.QuadPart;
+    u64 ret = static_cast<u64>(fileTimeInt.QuadPart);
     ret -= 116444736000000000uLL; /* Convert from file time to UNIX epoch time. */
     ret /= 10000; /* From 100 nano seconds (10^-7) to 1 millisecond (10^-3) intervals */
 
@@ -71,17 +71,17 @@ void computeClockCyclesPerTime(const u64 timeoutMS) noexcept
 
     clockCycles = {};
 
-    clockCycles.clockCyclesPerMillisecondF = (f64) clock / (f64) time;
-    clockCycles.clockCyclesPerMillisecond = (u64) clockCycles.clockCyclesPerMillisecondF;
+    clockCycles.clockCyclesPerMillisecondF = static_cast<f64>(clock) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerMillisecond = static_cast<u64>(clockCycles.clockCyclesPerMillisecondF);
 
     clockCycles.clockCyclesPerSecondF = clockCycles.clockCyclesPerMillisecondF / 1000.0;
-    clockCycles.clockCyclesPerSecond = (u64) clockCycles.clockCyclesPerSecondF;
+    clockCycles.clockCyclesPerSecond = static_cast<u64>(clockCycles.clockCyclesPerSecondF);
 
-    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / (f64) time;
-    clockCycles.clockCyclesPerMicrosecond = (u64) clockCycles.clockCyclesPerMicrosecondF;
+    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerMicrosecond = static_cast<u64>(clockCycles.clockCyclesPerMicrosecondF);
 
-    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / (f64) time;
-    clockCycles.clockCyclesPerNanosecond = (u64) clockCycles.clockCyclesPerNanosecondF;
+    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerNanosecond = static_cast<u64>(clockCycles.clockCyclesPerNanosecondF);
 }
 
 /**
@@ -123,17 +123,17 @@ void computeClockCyclesFromRuntime() noexcept
 
     clockCycles = {};
 
-    clockCycles.clockCyclesPerMillisecondF = (f64) clock / (f64) time;
-    clockCycles.clockCyclesPerMillisecond = (u64) clockCycles.clockCyclesPerMillisecondF;
+    clockCycles.clockCyclesPerMillisecondF = static_cast<f64>(clock) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerMillisecond = static_cast<u64>(clockCycles.clockCyclesPerMillisecondF);
 
     clockCycles.clockCyclesPerSecondF = clockCycles.clockCyclesPerMillisecondF / 1000.0;
-    clockCycles.clockCyclesPerSecond = (u64) clockCycles.clockCyclesPerSecondF;
+    clockCycles.clockCyclesPerSecond = static_cast<u64>(clockCycles.clockCyclesPerSecondF);
 
-    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / (f64) time;
-    clockCycles.clockCyclesPerMicrosecond = (u64) clockCycles.clockCyclesPerMicrosecondF;
+    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerMicrosecond = static_cast<u64>(clockCycles.clockCyclesPerMicrosecondF);
 
-    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / (f64) time;
-    clockCycles.clockCyclesPerNanosecond = (u64) clockCycles.clockCyclesPerNanosecondF;
+    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerNanosecond = static_cast<u64>(clockCycles.clockCyclesPerNanosecondF);
 }
 
 const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept

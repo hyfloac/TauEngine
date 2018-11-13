@@ -4,7 +4,7 @@
 
 void initProgramStartTimes() noexcept;
 
-BOOL APIENTRY DllMain(HMODULE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+BOOL APIENTRY DllMain(HMODULE hInstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     switch(fdwReason)
     {
