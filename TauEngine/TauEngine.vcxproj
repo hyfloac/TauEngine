@@ -27,9 +27,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\BufferedBinaryReader.cpp" />
-    <ClCompile Include="src\BufferedTextFileReader.cpp" />
+    <ClCompile Include="src\BinaryReader.cpp" />
     <ClCompile Include="src\DLLMain.cpp" />
+    <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\GLProgram.cpp" />
@@ -39,13 +39,17 @@
     <ClCompile Include="src\String.cpp" />
     <ClCompile Include="src\TauEngine.cpp" />
     <ClCompile Include="src\Timings.cpp" />
+    <ClCompile Include="src\TUID.cpp" />
+    <ClCompile Include="src\VertexArray.cpp" />
+    <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\VirtualIO.cpp" />
     <ClCompile Include="src\Win32Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DLL.hpp" />
-    <ClInclude Include="include\file\BufferedBinaryReader.hpp" />
-    <ClInclude Include="include\file\BufferedBinaryWriter.hpp" />
+    <ClInclude Include="include\FastRand.hpp" />
+    <ClInclude Include="include\file\BinaryReader.hpp" />
+    <ClInclude Include="include\file\BinaryWriter.hpp" />
     <ClInclude Include="include\file\FileHandling.hpp" />
     <ClInclude Include="include\file\FileUtils.hpp" />
     <ClInclude Include="include\file\VirtualIO.hpp" />
@@ -53,15 +57,20 @@
     <ClInclude Include="include\gl\GLUtils.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\Maths.hpp" />
+    <ClInclude Include="include\model\VertexArray.hpp" />
+    <ClInclude Include="include\model\VertexBuffer.hpp" />
     <ClInclude Include="include\Mouse.hpp" />
     <ClInclude Include="include\shader\GLShader.hpp" />
     <ClInclude Include="include\shader\IShader.hpp" />
-    <ClInclude Include="include\SingleThreadedMemoryManager.hpp" />
     <ClInclude Include="include\String.hpp" />
     <ClInclude Include="include\TauEngine.hpp" />
     <ClInclude Include="include\Timings.hpp" />
+    <ClInclude Include="include\TUID.hpp" />
     <ClInclude Include="include\Window.hpp" />
     <ClInclude Include="include\_SysWindowContainer.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="natvis\Window.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -171,27 +180,27 @@
     <LibraryPath>$(SolutionDir)bin\Release-x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClangClAdditionalOptions>-gcodeview</ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClangClAdditionalOptions>-gcodeview</ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClangClAdditionalOptions>-gcodeview</ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview </ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|Win32'">
-    <ClangClAdditionalOptions>-gcodeview</ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview </ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClangClAdditionalOptions>-gcodeview</ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview </ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
-    <ClangClAdditionalOptions>-gcodeview</ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview </ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -345,7 +354,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <Optimization>Custom</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
@@ -417,7 +426,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <Optimization>Custom</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
