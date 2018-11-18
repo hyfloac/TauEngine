@@ -1,6 +1,8 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <cstdio>
+#pragma warning(pop)
 #include <NumTypes.hpp>
 #include <Endian.hpp>
 #include <DLL.hpp>
@@ -9,15 +11,15 @@
   #define BUFFER_SIZE ((u32) 8192)
 #endif
 
-class TAU_DLL BufferedBinaryWriter
+class TAU_DLL BinaryWriter
 {
 private:
     FILE* _file;
     bool _littleEndian;
     char buffer[BUFFER_SIZE];
 public:
-    BufferedBinaryWriter(FILE* file, bool littleEndian = true) noexcept;
-    BufferedBinaryWriter(const char* name, bool littleEndian = true) noexcept;
+    BinaryWriter(FILE* file, bool littleEndian = true) noexcept;
+    BinaryWriter(const char* name, bool littleEndian = true) noexcept;
 
     inline operator FILE*()             const noexcept { return _file; }
     inline operator const FILE* const() const noexcept { return _file; }

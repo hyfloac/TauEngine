@@ -1,22 +1,25 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <cstdio>
+#pragma warning(pop)
 #include <NumTypes.hpp>
 #include <Endian.hpp>
 #include <Utils.hpp>
 #include <DLL.hpp>
 
-class TAU_DLL BufferedBinaryReader
+class TAU_DLL BinaryReader
 {
 private:
     FILE*       _file;
     const char* _fileName;
     bool        _littleEndian;
 public:
-    BufferedBinaryReader(const char* name, bool littleEndian = true) noexcept;
+    BinaryReader(const char* name, bool littleEndian = true) noexcept;
 
     inline operator FILE*()             const noexcept { return _file; }
     inline operator const FILE* const() const noexcept { return _file; }
+    inline const char* fileName() const noexcept { return _fileName; }
 
     int close() const noexcept;
 
