@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,12 +83,29 @@ namespace I18nEditor
                 byteCount += s.Length;
             }
 
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             byte[] bytes = DataCompressor.Compress(unlocalizedStrings);
+            sw.Stop();
+
+            long compressTime = sw.ElapsedMilliseconds;
+            sw = new Stopwatch();
             
+
             // Console.WriteLine("Compressed Bytes {0}", BitConverter.ToString(bytes));
             // Console.WriteLine("Compressed Bytes as String {0}", Encoding.UTF8.GetString(bytes));
 
+            sw.Start();
             string[] strings = DataCompressor.Decompress(bytes);
+            sw.Stop();
+
+            long decompressTime = sw.ElapsedMilliseconds;
+
+            sw = new Stopwatch();
+
+            sw.Start();
+            List<string> patterns = DataCompressor.FindPatterns(32, 16, 6, 4, unlocalizedStrings);
+            sw.Stop();
 
             for(int i = 0; i < strings.Length; ++i)
             {
@@ -95,6 +113,7 @@ namespace I18nEditor
             }
 
             Console.WriteLine("Uncompressed Size: {0}\nCompressed Size: {1}\nRatio: {2}", byteCount, bytes.Length, (float) bytes.Length / (float) byteCount);
+            Console.WriteLine("Compression Time: {0}\nDecompression Time: {1}\nPattern Identification Time: {2}", compressTime, decompressTime, sw.ElapsedMilliseconds);
 
             File.WriteAllBytes("compressedLocale.blang", bytes);
 

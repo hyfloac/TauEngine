@@ -67,7 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataCompressor.cs" />
+    <Compile Include="src\DataCompressor.cs" />
     <Compile Include="src\LocalizationEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
