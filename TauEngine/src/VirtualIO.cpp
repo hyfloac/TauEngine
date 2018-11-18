@@ -1,10 +1,12 @@
+#pragma warning(push, 0)
+#include <cstring>
+#include <cstdarg>
+#include <malloc.h>
+#pragma warning(pop)
 #include <file/VirtualIO.hpp>
 #include <file/FileUtils.hpp>
 #include <Utils.hpp>
 #include <EnumBitFields.hpp>
-#include <cstring>
-#include <cstdarg>
-#include <malloc.h>
 
 static std::vector<VFILE*> virtualFiles;
 

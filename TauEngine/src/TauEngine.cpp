@@ -1,7 +1,11 @@
+#pragma warning(push, 0)
+#include <spdlog/sinks/stdout_color_sinks.h>
+#pragma warning(pop)
 #include <TauEngine.hpp>
-#include <Utils.hpp>
-#include <GL/glew.h>
 #include <NumTypes.hpp>
+#include <Utils.hpp>
+
+static std::shared_ptr<spdlog::logger> engineLogger;
 
 bool tauInit() noexcept
 {
@@ -10,22 +14,36 @@ bool tauInit() noexcept
     if(!_initializationComplete)
     {
         _initializationComplete = true;
-        // const GLenum success = glewInit();
-        // if(success != GLEW_OK)
-        // {
-        //     return false;
-        // }
+        spdlog::set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
+        engineLogger = spdlog::stdout_color_mt("TauEngine");
+        engineLogger->set_level(spdlog::level::trace);
+        engineLogger->set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
     }
 
     return true;
 }
 
+std::shared_ptr<spdlog::logger> getEngineLogger() noexcept
+{
+    return engineLogger;
+}
+
+
+volatile static bool shouldExit = false;
+
+bool tauShouldExit() noexcept
+{
+    return shouldExit;
+}
+
+#ifdef _WIN32
+#pragma warning(push, 0)
+#include <Windows.h>
+#pragma warning(pop)
+
 #ifndef NUM_MESSAGES_TO_READ
   #define NUM_MESSAGES_TO_READ 8
 #endif
-
-#ifdef _WIN32
-#include <Windows.h>
 
 void tauRunMessageLoop() noexcept
 {
@@ -36,13 +54,6 @@ void tauRunMessageLoop() noexcept
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
     }
-}
-
-volatile static bool shouldExit = false;
-
-bool tauShouldExit() noexcept
-{
-    return shouldExit;
 }
 
 void tauExit(int code) noexcept

@@ -18,6 +18,7 @@
 #include <DLL.hpp>
 #include <Utils.hpp>
 #include <Mouse.hpp>
+#include <Safeties.hpp>
 
 class Window;
 
@@ -26,7 +27,7 @@ class Window;
  * 
  * Do not call {@link Window#resize(const u32,const u32)}.
  */
-typedef void(*onWindowResized_f)(const u32 width, const u32 height, Window* window);
+typedef void(*onWindowResized_f)(const u32 width, const u32 height, NonNull Window* window);
 
 /**
  * Handles a mouse event.
@@ -42,9 +43,9 @@ typedef void(*onWindowResized_f)(const u32 width, const u32 height, Window* wind
  * @param[in] window
  *      A pointer to the window for which this event was triggered.
  */
-typedef void(*onMouseEvent_f)(const MouseEvent mouseEvent, const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, Window* window);
+typedef void(*onMouseEvent_f)(const MouseEvent mouseEvent, const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, NonNull Window* window);
 
-typedef void(*onMouseMove_f)(const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, Window* window);
+typedef void(*onMouseMove_f)(const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, NonNull Window* window);
 
 enum WindowState : u8
 {
@@ -52,6 +53,30 @@ enum WindowState : u8
     MAXIMIZED,
     NEITHER
 };
+
+struct ContextSettings
+{
+    u8 majorVersion;
+    u8 minorVersion;
+    union
+    {
+        struct
+        {
+            bool debug : 1;
+            bool forwardCompatible : 1;
+            bool coreProfile : 1;
+            bool compatProfile : 1;
+            u8 u0 : 1, u1 : 1, u2 : 1, u3 : 1;
+        };
+        u8 _compressed;
+    };
+};
+
+#ifdef _WIN32
+static LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
+static void removeWindow(NotNull<Window>);
+static Nullable Window* getWindowFromHandle(HWND);
+#endif
 
 class TAU_DLL Window
 {
@@ -88,6 +113,7 @@ private:
      * The parent window. This cannot be modified.
      */
     const Window* _parent;
+    ContextSettings _contextSettings;
 
     /**
      * The current window state.
@@ -114,7 +140,7 @@ public:
     static void unloadCurrentContext() noexcept;
 public:
 #pragma region Constructor
-    Window(u32 width, u32 height, const char* title, const void* userContainer = null, const Window* parent = null) noexcept;
+    Window(u32 width, u32 height, Nullable const char* title, Nullable const void* userContainer = null, Nullable const Window* parent = null) noexcept;
     Window(const Window& copy) noexcept = default;
     Window(Window&& move) noexcept = default;
 #pragma endregion
@@ -132,6 +158,7 @@ public:
     inline const char* title() const noexcept { return _title; }
     inline const void* userContainer() const noexcept { return _userContainer; }
     inline const Window* parent() const noexcept { return _parent; }
+    inline ContextSettings& contextSettings() noexcept { return _contextSettings; }
 #pragma endregion
 
     /**
@@ -146,9 +173,9 @@ public:
 
     void setTitle(const char* title) noexcept;
 
-    inline void setResizeWindowHandler(onWindowResized_f windowResizeHandler) { _windowResizeHandler = windowResizeHandler; }
-    inline void setMouseEventHandler(onMouseEvent_f mouseEventHandler) { _mouseEventHandler = mouseEventHandler; }
-    inline void setMouseMoveHandler(onMouseMove_f mouseMoveHandler) { _mouseMoveHandler = mouseMoveHandler; }
+    inline void setResizeWindowHandler(Nullable onWindowResized_f windowResizeHandler) { _windowResizeHandler = windowResizeHandler; }
+    inline void setMouseEventHandler(Nullable onMouseEvent_f mouseEventHandler) { _mouseEventHandler = mouseEventHandler; }
+    inline void setMouseMoveHandler(Nullable onMouseMove_f mouseMoveHandler) { _mouseMoveHandler = mouseMoveHandler; }
 
     bool createWindow() noexcept;
     void closeWindow() noexcept;
@@ -175,8 +202,8 @@ public:
     void swapBuffers() const noexcept;
 public:
 #ifdef _WIN32
-    friend static LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
-    friend static void removeWindow(Window*);
-    friend static Window* getWindowFromHandle(HWND);
+    friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
+    friend void removeWindow(NotNull<Window>);
+    friend Nullable Window* getWindowFromHandle(HWND);
 #endif
 };

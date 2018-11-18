@@ -1,8 +1,11 @@
-#include <String.hpp>
+#pragma warning(push, 0)
 #include <cstring>
+#pragma warning(pop)
+#include <String.hpp>
+#include <Safeties.hpp>
 
 
-String::String(const char* string) noexcept
+String::String(NotNull<const char> string) noexcept
     : _string(string), _length(static_cast<u32>(strlen(string))), _hash(findHashCode(string)) { }
 
 String::String(String&& move) noexcept
@@ -17,7 +20,7 @@ String& String::operator =(String&& move) noexcept
     return *this;
 }
 
-u32 String::findHashCode(const char* str) noexcept
+u32 String::findHashCode(NonNull const char* str) noexcept
 {
     u32 hash = 0;
     u32 i    = 0;

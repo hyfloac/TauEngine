@@ -1,6 +1,8 @@
 #pragma once
+
 #include <NumTypes.hpp>
 #include <CVersion.hpp>
+#include <Safeties.hpp>
 
 class String
 {
@@ -9,16 +11,16 @@ private:
     u32         _length;
     u32         _hash;
 private:
-    static u32 findHashCode(const char* str) noexcept;
+    static u32 findHashCode(NonNull const char* str) noexcept;
 public:
-    String(const char* string) noexcept;
+    String(NotNull<const char> string) noexcept;
     String(const String& copy) noexcept = default;
     String(String&& move) noexcept;
 
     String& operator =(const String& copy) noexcept = default;
-    String& operator =(String&& copy) noexcept;
+    String& operator =(String&& move) noexcept;
 
-    inline const char* c_str() const noexcept { return _string; }
+    inline NonNull const char* c_str() const noexcept { return _string; }
     inline u32 length() const noexcept { return _length; }
 
     inline operator const char*() const noexcept { return _string; }

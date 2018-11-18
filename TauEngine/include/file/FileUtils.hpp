@@ -1,6 +1,7 @@
 #pragma once
 
 #include <NumTypes.hpp>
+#include <Safeties.hpp>
 
 /**
  * The list of different file modes.
@@ -102,6 +103,6 @@ enum FileMode : u8
  * @return
  *    The string form of the {@link FileMode}.
  */
-const char* getFileModeStr(FileMode fileMode) noexcept;
+NonNull const char* getFileModeStr(FileMode fileMode) noexcept;
 
 FileMode getFileMode(const char* fileMode) noexcept;

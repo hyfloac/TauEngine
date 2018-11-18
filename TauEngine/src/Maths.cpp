@@ -3,6 +3,7 @@
  */
 #include <Maths.hpp>
 #include <MathDefines.hpp>
+#include <Safeties.hpp>
 
 /**
  * A unit circle with 2**16 elements.
@@ -43,21 +44,33 @@ void initSinTable() noexcept
 
 float fastSin(float value) noexcept
 {
+    Ensure(value == value);
+    Ensure(!isinf(value));
+
     return SIN_TABLE_F[static_cast<u32>(value * 10430.3783504704F) & 65535];
 }
 
 double fastSin(double value) noexcept
 {
+    Ensure(value == value);
+    Ensure(!isinf(value));
+
     return SIN_TABLE_D[static_cast<u32>(value * 10430.3783504704527249495663163811) & 65535];
 }
 
 float fastCos(float value) noexcept
 {
+    Ensure(value == value);
+    Ensure(!isinf(value));
+
     // return SIN_TABLE_F[(int) (value * (65536.0f / (2.0f * (float) T_PI)) + 4.0f / 65536.0f) & 65535];
     return SIN_TABLE_F[static_cast<u32>(value * 10430.3783504704F + 16384.0F) & 65535];
 }
 
 double fastCos(double value) noexcept
 {
+    Ensure(value == value);
+    Ensure(!isinf(value));
+
     return SIN_TABLE_D[static_cast<u32>(value * 10430.3783504704527249495663163811 + 16384.0) & 65535];
 }

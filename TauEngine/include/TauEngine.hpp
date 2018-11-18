@@ -5,13 +5,18 @@
  */
 #pragma once
 
+#pragma warning(push, 0)
+#include <spdlog/spdlog.h>
+#pragma warning(pop)
 #include <DLL.hpp>
+
+std::shared_ptr<spdlog::logger> getEngineLogger() noexcept;
 
 /**
  * @return
  *    Returns true if initialization was successful. 
  */
-TAU_DLL bool tauInit() noexcept;
+bool tauInit() noexcept;
 
 /**
  *   Gets up to `NUM_MESSAGES_TO_READ` [default `8`] messages 

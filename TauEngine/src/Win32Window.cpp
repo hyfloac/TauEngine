@@ -4,13 +4,14 @@
  * The windows implementation of {@link Window}.
  */
 #ifdef _WIN32
-#include <Window.hpp>
+#pragma warning(push, 0)
 #include <Windowsx.h>
-#include <TauEngine.hpp>
-
 #include <GL/glew.h>
 #include <GL/wglew.h>
-#include <GL/GL.h>
+#pragma warning(pop)
+
+#include <TauEngine.hpp>
+#include <Window.hpp>
 #include <EnumBitFields.hpp>
 
 #ifndef MAX_WINDOW_COUNT
@@ -58,7 +59,7 @@ static u32 currentWindowHandleIndex = 0;
  *      Returns true if the `systemWindowContainer` was 
  *    successfully added to {@link windowHandles}.
  */
-static bool addWindow(Window* systemWindowContainer)
+static bool addWindow(NonNull Window* systemWindowContainer)
 {
     if(currentWindowHandleIndex < MAX_WINDOW_COUNT)
     {
@@ -76,7 +77,7 @@ static bool addWindow(Window* systemWindowContainer)
  * @param[in] systemWindowContainer
  *    The {@link Window} to remove from {@link windowHandles}.
  */
-static void removeWindow(Window* systemWindowContainer)
+static void removeWindow(NotNull<Window> systemWindowContainer)
 {
     for(u32 i = 0; i < currentWindowHandleIndex; ++i)
     {
@@ -104,7 +105,7 @@ static void removeWindow(Window* systemWindowContainer)
  *    {@link HWND} `handle`. returns null if no window is 
  *    currently holding the referenced handle.
  */
-static Window* getWindowFromHandle(HWND handle)
+static Nullable Window* getWindowFromHandle(HWND handle)
 {
     for(u32 i = 0; i < currentWindowHandleIndex; ++i)
     {
@@ -134,10 +135,10 @@ static Window* getWindowFromHandle(HWND handle)
  */
 static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
 {
-#if TRUST_RAW_MOUSE_PARAM
+#ifdef TRUST_RAW_MOUSE_PARAM
     return static_cast<MouseFlags>(wParam);
 #else
-    auto out = static_cast<MouseFlags>(0);
+    MouseFlags out = static_cast<MouseFlags>(0);
 
     if(wParam & MK_LBUTTON)
     {
@@ -219,25 +220,6 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
 
     switch(uMsg)
     {
-        case WM_ENTERSIZEMOVE:
-            if(window)
-            {
-                window->_isResizing = true;
-            }
-            break;
-        case WM_EXITSIZEMOVE:
-            if(window)
-            {
-                window->_isResizing = false;
-                CALL_WINDOW_RESIZE_HANDLER:
-                if(window->_windowResizeHandler)
-                {
-                    const u32 width = LOWORD(lParam);
-                    const u32 height = HIWORD(lParam);
-                    window->_windowResizeHandler(width, height, window);
-                }
-            }
-            break;
         case WM_SIZE:
             if(window)
             {
@@ -247,15 +229,25 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 } 
                 else if(wParam == SIZE_MAXIMIZED)
                 {
-                    window->_windowState = MAXIMIZED;
-                    goto CALL_WINDOW_RESIZE_HANDLER;
+                    window->_windowState = MAXIMIZED; 
+                    if(window)
+                    {
+                    CALL_WINDOW_RESIZE_HANDLER:
+                        if(window->_windowResizeHandler)
+                        {
+                            const u32 width = LOWORD(lParam);
+                            const u32 height = HIWORD(lParam);
+                            window->_width = width;
+                            window->_height = height;
+                            window->_windowResizeHandler(width, height, window);
+                        }
+                    }
                 }
                 else if(wParam == SIZE_RESTORED)
                 {
                     if(window->_windowState == MINIMIZED || window->_windowState == MAXIMIZED)
                     {
                         window->_windowState = NEITHER;
-                        goto CALL_WINDOW_RESIZE_HANDLER;
                     }
                     goto CALL_WINDOW_RESIZE_HANDLER;
                 }
@@ -308,6 +300,7 @@ Window::Window(u32 width, u32 height, const char* title, const void* userContain
       _windowContainer({ { }, null, null, null }),
       _userContainer(userContainer),
       _parent(parent),
+      _contextSettings({ 3, 1, { { false, false, true, false, 0,0,0,0 } } }),
       _windowState(NEITHER),
       _isResizing(false),
       _windowResizeHandler(null),
@@ -358,7 +351,7 @@ bool Window::createWindow() noexcept
                                                           this->_title,
                                                           WS_OVERLAPPEDWINDOW,
                                                           CW_USEDEFAULT, CW_USEDEFAULT, 
-                                                          this->_width, this->_height,
+                                                          static_cast<i32>(this->_width), static_cast<i32>(this->_height),
                                                           parent,
                                                           null,
                                                           windowClass->hInstance,
@@ -398,7 +391,8 @@ bool Window::createContext() noexcept
     pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 32;
-    pfd.cDepthBits = 32;
+    pfd.cDepthBits = 24;
+    pfd.cStencilBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
 
     const int pixelFormat = ChoosePixelFormat(this->_windowContainer.hdc, &pfd);
@@ -424,16 +418,19 @@ bool Window::createContext() noexcept
         return false;
     }
 
-    static const int attribs[] =
+    if(WGLEW_ARB_create_context)
     {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-        WGL_CONTEXT_MINOR_VERSION_ARB, 1,
-        WGL_CONTEXT_FLAGS_ARB, 0,
-        0
-    };
+        const int attribs[] =
+        {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, this->_contextSettings.majorVersion,
+            WGL_CONTEXT_MINOR_VERSION_ARB, this->_contextSettings.minorVersion,
+            WGL_CONTEXT_FLAGS_ARB, (this->_contextSettings.debug ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
+                                   (this->_contextSettings.forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB : 0),
+            WGL_CONTEXT_PROFILE_MASK_ARB, (this->_contextSettings.coreProfile ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB : 0) |
+                                          (this->_contextSettings.compatProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
+            0
+        };
 
-    if(wglewIsSupported("WGL_ARB_create_context") == 1)
-    {
         this->_windowContainer.renderingContext = wglCreateContextAttribsARB(this->_windowContainer.hdc, null, attribs);
         wglMakeCurrent(null, null);
         wglDeleteContext(tempContext);
@@ -443,6 +440,8 @@ bool Window::createContext() noexcept
     {
         this->_windowContainer.renderingContext = tempContext;
     }
+
+    glViewport(0, 0, this->_width, this->_height);
 
     return this->_windowContainer.renderingContext;
 }

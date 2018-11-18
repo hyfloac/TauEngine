@@ -5,11 +5,7 @@
  */
 #pragma once
 
-#include <cstdio>
-#include <NumTypes.hpp>
-#include <file/FileUtils.hpp>
 #include <DLL.hpp>
-#include <cstring>
 
 // enum WindowsFileAttributes
 // {
@@ -44,42 +40,4 @@
 //     u64 accessDate;
 // };
 
-#define BUFFER_SIZE 8192
-
-class TAU_DLL BufferedTextFileReader
-{
-private:
-    FILE*       _file;
-    const char* _fileName;
-    char        _buffer[BUFFER_SIZE];
-    i32         _index;
-    i32         _finished;
-private:
-    void bufferData() noexcept;
-public:
-    BufferedTextFileReader(const char* fileName) noexcept;
-    ~BufferedTextFileReader() noexcept;
-
-    char readChar() noexcept;
-
-    u32 readString(u32 len, char* buffer) noexcept;
-
-    u32 readLine(char* buffer, u32 maxLen) noexcept;
-
-    inline bool eof() const noexcept { return _finished >= 0; }
-};
-
-static char* readFile(const char* filePath)
-{
-    FILE* file;
-    fopen_s(&file, filePath, "rt");
-    fseek(file, 0, SEEK_END);
-    const u32 length = ftell(file);
-    char* data = new char[length + 1];
-    memset(data, 0, length + 1);
-    fseek(file, 0, SEEK_SET);
-    fread(data, 1, length, file);
-    fclose(file);
-
-    return data;
-}
+TAU_DLL char* readFile(const char* filePath) noexcept;

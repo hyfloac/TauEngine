@@ -5,9 +5,11 @@
  */
 #pragma once
 
-#include <DLL.hpp>
+#pragma warning(push, 0)
 #include <cmath>
+#pragma warning(pop)
 #include <NumTypes.hpp>
+#include <DLL.hpp>
 
 /**
  * Equal to pi/180.
@@ -82,7 +84,7 @@ long double logN(long double x) noexcept
  *
  * \f$\LARGE \frac{i * 2 * \pi}{65536}\f$ -> \f$\LARGE \frac{i*\pi}{32768}\f$
  */
-TAU_DLL void initSinTable() noexcept;
+void initSinTable() noexcept;
 
 /**
  * Sin looked up in a table

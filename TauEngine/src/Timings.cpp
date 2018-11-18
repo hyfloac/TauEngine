@@ -1,6 +1,7 @@
 /** @file */
 #include <Timings.hpp>
 
+#pragma warning(push, 0)
 #ifdef _WIN32
   #include <intrin.h>
   #include <Windows.h>
@@ -12,6 +13,7 @@
 
 #include <chrono>
 #include <thread>
+#pragma warning(pop)
 
 u64 rdtsc() noexcept
 {
@@ -60,6 +62,8 @@ static ClockCyclesTimeFrame clockCycles;
 
 void computeClockCyclesPerTime(const u64 timeoutMS) noexcept
 {
+    Ensure(timeoutMS > 0);
+
     const u64 timeBegin = currentTimeMillis();
     const u64 clockBegin = rdtsc();
     std::this_thread::sleep_for(std::chrono::milliseconds(timeoutMS));
