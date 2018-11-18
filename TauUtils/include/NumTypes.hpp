@@ -1,6 +1,8 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <cstdint>
+#pragma warning(pop)
 
 typedef int8_t   i8;
 typedef int16_t  i16;

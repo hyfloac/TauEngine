@@ -1,7 +1,9 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <type_traits>
 #include <typeinfo>
+#pragma warning(push, 0)
 
 template<typename _T>
 struct TypeName

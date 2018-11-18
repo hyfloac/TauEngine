@@ -153,6 +153,8 @@
     <ClInclude Include="include\EnumBitFields.hpp" />
     <ClInclude Include="include\MathDefines.hpp" />
     <ClInclude Include="include\NumTypes.hpp" />
+    <ClInclude Include="include\Objects.hpp" />
+    <ClInclude Include="include\Safeties.hpp" />
     <ClInclude Include="include\Template.hpp" />
     <ClInclude Include="include\Utils.hpp" />
   </ItemGroup>
