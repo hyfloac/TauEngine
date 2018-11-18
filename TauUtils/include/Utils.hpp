@@ -34,5 +34,5 @@
 #ifdef _WIN32
   #define DEBUG_BREAK __debugbreak()
 #else
-  #define DEBUG_BREAK asm volatile ("int 3;")
+  #define DEBUG_BREAK asm volatile ("int $3;")
 #endif
