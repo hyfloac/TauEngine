@@ -72,6 +72,12 @@
     <ClCompile Include="src\Vector3i.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ConsoleHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vector4f.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Maths.hpp">
@@ -152,8 +158,15 @@
     <ClInclude Include="include\maths\ComponentVector4.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\console\ConsoleHandler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\maths\Vector4f.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Window.natvis" />
+    <Natvis Include="natvis\Vector.natvis" />
   </ItemGroup>
 </Project>

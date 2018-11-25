@@ -57,9 +57,9 @@ Vector3f& Vector3f::operator =(const i32 filler) noexcept
     return *this;
 }
 
-Vector3f& Vector3f::operator =(const CompVec4& data) noexcept
+Vector3f& Vector3f::operator =(const CompVec4& copy) noexcept
 {
-    this->_data.vec = data.vec;
+    this->_data.vec = copy.vec;
 
     return *this;
 }
@@ -226,6 +226,19 @@ float Vector3f::magnitude() const noexcept
 }
 #pragma endregion
 
+Vector3f Vector3f::inverseSqrt() const noexcept
+{
+    __m128 inv = _mm_rsqrt_ss(this->_data.vec);
+
+    const __m128 tmp = _mm_mul_ps(inv, _mm_set1_ps(1.5f));
+
+    inv = _mm_mul_ps(inv, inv);
+    inv = _mm_mul_ps(this->_data.vec, inv);
+    inv = _mm_mul_ps(inv, _mm_set1_ps(0.5f));
+
+    return _mm_sub_ps(tmp, inv);
+}
+
 float Vector3f::dot(const float x, const float y, const float z) const noexcept
 {
     return this->_data.x * x + this->_data.y * y + this->_data.z * z;
@@ -286,7 +299,7 @@ Vector3f Vector3f::crossC(const CompVec4& data) const noexcept
 Vector3f& Vector3f::normalize() noexcept
 {
     const float mag = this->magnitude();
-    if(mag > 0) { return this->div(mag); }
+    if(mag > 0) { return this->mul(mag); }
     return *this;
 }
 

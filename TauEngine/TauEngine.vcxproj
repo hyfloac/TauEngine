@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BinaryReader.cpp" />
+    <ClCompile Include="src\ConsoleHandler.cpp" />
     <ClCompile Include="src\DLLMain.cpp" />
     <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="src\TUID.cpp" />
     <ClCompile Include="src\Vector3f.cpp" />
     <ClCompile Include="src\Vector3i.cpp" />
+    <ClCompile Include="src\Vector4f.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\VirtualIO.cpp" />
@@ -49,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Users\donovan.Michelle-PC\source\repos\VectorLib\VectorLib\ComponentVector4.hpp" />
+    <ClInclude Include="include\console\ConsoleHandler.hpp" />
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\FastRand.hpp" />
     <ClInclude Include="include\file\BinaryReader.hpp" />
@@ -63,6 +66,7 @@
     <ClInclude Include="include\maths\ComponentVector4.hpp" />
     <ClInclude Include="include\maths\Vector3f.hpp" />
     <ClInclude Include="include\maths\Vector3i.hpp" />
+    <ClInclude Include="include\maths\Vector4f.hpp" />
     <ClInclude Include="include\model\VertexArray.hpp" />
     <ClInclude Include="include\model\VertexBuffer.hpp" />
     <ClInclude Include="include\Mouse.hpp" />
@@ -76,6 +80,7 @@
     <ClInclude Include="include\_SysWindowContainer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="natvis\Vector.natvis" />
     <Natvis Include="natvis\Window.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

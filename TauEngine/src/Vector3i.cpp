@@ -70,9 +70,9 @@ Vector3i& Vector3i::operator =(const i32 filler) noexcept
     return *this;
 }
 
-Vector3i& Vector3i::operator =(const CompVec4& data) noexcept
+Vector3i& Vector3i::operator =(const CompVec4& copy) noexcept
 {
-    this->_data.vec = data.vec;
+    this->_data.vec = copy.vec;
 
     return *this;
 }

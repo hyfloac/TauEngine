@@ -1,8 +1,9 @@
 #pragma once
 
 #include <maths/ComponentVector4.hpp>
+#include <DLL.hpp>
 
-class Vector3f
+class TAU_DLL Vector3f
 {
 private:
     CompVec4 _data;
@@ -23,7 +24,7 @@ public:
     Vector3f& operator =(const float filler) noexcept;
     Vector3f& operator =(const i32   filler) noexcept;
 
-    Vector3f& operator =(const CompVec4& other) noexcept;
+    Vector3f& operator =(const CompVec4& copy) noexcept;
 #pragma endregion
 
 #pragma region Accessor
@@ -85,6 +86,8 @@ public:
     inline float lengthSquared() const noexcept { return magnitudeSquared(); }
     inline float length()        const noexcept { return magnitude();        }
 #pragma endregion
+
+    Vector3f inverseSqrt() const noexcept;
 
     RAW_VEC_FUNC(float, dot, const noexcept);
     RAW_VEC_FUNC(Vector3f&, cross, noexcept);

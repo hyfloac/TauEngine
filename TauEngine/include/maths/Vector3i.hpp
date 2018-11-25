@@ -2,8 +2,9 @@
 
 #include <maths/ComponentVector4.hpp>
 #include <maths/Vector3f.hpp>
+#include <DLL.hpp>
 
-class Vector3i
+class TAU_DLL Vector3i
 {
 private:
     CompVec4 _data;
@@ -24,7 +25,7 @@ public:
     Vector3i& operator =(const float filler) noexcept;
     Vector3i& operator =(const i32   filler) noexcept;
 
-    Vector3i& operator =(const CompVec4& other) noexcept;
+    Vector3i& operator =(const CompVec4& copy) noexcept;
 #pragma endregion
 
 #pragma region Accessor
