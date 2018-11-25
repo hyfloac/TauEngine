@@ -134,6 +134,7 @@
       </GenerateWindowsMetadata>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalOptions>/IGNORE:4075 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
     </Link>
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
@@ -272,6 +273,7 @@
       </GenerateWindowsMetadata>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalOptions>/IGNORE:4075 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
     </Link>
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
