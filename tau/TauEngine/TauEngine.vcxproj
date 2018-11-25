@@ -50,7 +50,6 @@
     <ClCompile Include="src\Win32Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Users\donovan.Michelle-PC\source\repos\VectorLib\VectorLib\ComponentVector4.hpp" />
     <ClInclude Include="include\console\ConsoleHandler.hpp" />
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\FastRand.hpp" />
@@ -147,7 +146,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SolutionDir)bin\Debug-x86\;$(LibraryPath)</LibraryPath>
@@ -155,7 +154,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <LibraryPath>$(SolutionDir)bin\Debug-x86\;$(LibraryPath)</LibraryPath>
@@ -163,14 +162,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SolutionDir)bin\Release-x86\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SolutionDir)bin\Debug-x64\;$(LibraryPath)</LibraryPath>
@@ -178,7 +177,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <LibraryPath>$(SolutionDir)bin\Debug-x64\;$(LibraryPath)</LibraryPath>
@@ -186,7 +185,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SolutionDir)bin\Release-x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -240,7 +239,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -314,7 +313,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
@@ -372,7 +371,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>TAU_DLL_BUILD;_CRT_SECURE_NO_WARNINGS;GLEW_NO_GLU;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4577;4514;4710;4100;5045;4668;4635;4191;4820;4668;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -444,7 +443,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>TAU_DLL_BUILD;_CRT_SECURE_NO_WARNINGS;GLEW_NO_GLU;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4577;4514;4710;4100;5045;4668;4635;4191;4820;4668;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -555,7 +554,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
       <ConformanceMode>true</ConformanceMode>
@@ -634,7 +633,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauUtils\include\;$(SolutionDir)GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
       <ConformanceMode>true</ConformanceMode>

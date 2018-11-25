@@ -88,41 +88,41 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\Debug-x86\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\OptimizedDebug-x86\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\Release-x86\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\Debug-x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\OptimizedDebug-x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)bin\Release-x64\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -158,7 +158,7 @@
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -218,7 +218,7 @@
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -279,7 +279,7 @@
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -339,7 +339,7 @@
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -401,7 +401,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -464,7 +464,7 @@
       <MinimalRebuild>true</MinimalRebuild>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>TAU_DLL_LINK;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)GLEW\include\;$(SolutionDir)SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)TauUtils\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
