@@ -5,6 +5,11 @@
 #pragma warning(pop)
 #include <DLL.hpp>
 
+/**
+ * Represents an OpenGL program.
+ * 
+ * The OpenGL program contains all of your shaders.
+ */
 class TAU_DLL GLProgram
 {
 private:
@@ -22,5 +27,9 @@ public:
 
     inline static void deactivate() noexcept { glUseProgram(0); }
 
+    /**
+     *   Once you have created all of your shaders you have to
+     * link and validate your program.
+     */
     bool linkAndValidate() noexcept;
 };

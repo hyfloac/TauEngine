@@ -4,6 +4,9 @@
 #include <shader/IShader.hpp>
 #include <Safeties.hpp>
 
+/**
+ * Represents an OpenGL shader.
+ */
 class TAU_DLL GLShader : public IShader
 {
 private:
