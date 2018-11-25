@@ -3,8 +3,19 @@
 #include <NumTypes.hpp>
 #include <CVersion.hpp>
 #include <Safeties.hpp>
+#include <unordered_map>
+#include <DLL.hpp>
+#include <cctype>
 
-class String
+TAU_DLL bool equalsIgnoreCase(const char* lhs, const char* rhs) noexcept;
+
+TAU_DLL void toLower(char* str) noexcept;
+TAU_DLL void toLower(const char* str, char* store) noexcept;
+
+TAU_DLL void toUpper(char* str) noexcept;
+TAU_DLL void toUpper(const char* str, char* store) noexcept;
+
+class TAU_DLL String
 {
 private:
     const char* _string;
@@ -14,6 +25,7 @@ private:
     static u32 findHashCode(NonNull const char* str) noexcept;
 public:
     String(NotNull<const char> string) noexcept;
+    String(const char* string) noexcept;
     String(const String& copy) noexcept = default;
     String(String&& move) noexcept;
 
@@ -44,10 +56,14 @@ public:
     inline bool operator >=(const String& other) const noexcept { return compareTo(other) >= 0; }
 };
 
-struct StringHasher
+namespace std
 {
-    inline size_t operator()(const String& str) const
+    template<>
+    struct hash<String>
     {
-        return static_cast<size_t>(str.hashCode());
-    }
-};
+        inline size_t operator()(const String& str) const
+        {
+            return static_cast<size_t>(str.hashCode());
+        }
+    };
+}

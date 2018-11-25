@@ -4,13 +4,61 @@
 #include <String.hpp>
 #include <Safeties.hpp>
 
+bool equalsIgnoreCase(const char* lhs, const char* rhs) noexcept
+{
+    while(*lhs != '\0' && *rhs != '\0')
+    {
+        if(tolower(*lhs) != tolower(*rhs))
+        {
+            return false;
+        }
+        ++lhs;
+        ++rhs;
+    }
+
+    return *lhs == '\0' && *rhs == '\0';
+}
+
+void toLower(char* str) noexcept
+{
+    while(*str != '\0')
+    {
+        *str = tolower(*str);
+        ++str;
+    }
+}
+
+void toLower(const char* str, char* store) noexcept
+{
+    while(*str != '\0')
+    {
+        *store = tolower(*str);
+        ++str;
+        ++store;
+    }
+}
+
+void toUpper(const char* str, char* store) noexcept
+{
+    while(*str != '\0')
+    {
+        *store = toupper(*str);
+        ++str;
+        ++store;
+    }
+}
 
 String::String(NotNull<const char> string) noexcept
     : _string(string), _length(static_cast<u32>(strlen(string))), _hash(findHashCode(string)) { }
 
+String::String(const char* string) noexcept
+    : _string(string), _length(static_cast<u32>(strlen(string))), _hash(findHashCode(string))
+{
+    Ensure(string != nullptr);
+}
+
 String::String(String&& move) noexcept
     : _string(move._string), _length(move._length), _hash(move._hash) { }
-
 
 String& String::operator =(String&& move) noexcept
 {
