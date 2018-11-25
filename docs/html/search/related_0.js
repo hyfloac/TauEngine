@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['getwindowfromhandle',['getWindowFromHandle',['../class_window.html#aca83cc9021e3e6075031093398621437',1,'Window']]]
+  ['getwindowfromhandle',['getWindowFromHandle',['../class_window.html#a56aa20fd34aba260a2f15d54541ea396',1,'Window']]]
 ];

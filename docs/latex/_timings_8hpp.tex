@@ -1,7 +1,8 @@
-\hypertarget{_timings_8hpp}{}\section{Tau\+Engine/include/\+Timings.hpp File Reference}
-\label{_timings_8hpp}\index{Tau\+Engine/include/\+Timings.\+hpp@{Tau\+Engine/include/\+Timings.\+hpp}}
+\hypertarget{_timings_8hpp}{}\section{tau/\+Tau\+Engine/include/\+Timings.hpp File Reference}
+\label{_timings_8hpp}\index{tau/\+Tau\+Engine/include/\+Timings.\+hpp@{tau/\+Tau\+Engine/include/\+Timings.\+hpp}}
 {\ttfamily \#include $<$Num\+Types.\+hpp$>$}\newline
 {\ttfamily \#include $<$D\+L\+L.\+hpp$>$}\newline
+{\ttfamily \#include $<$Safeties.\+hpp$>$}\newline
 \subsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -18,7 +19,7 @@ T\+A\+U\+\_\+\+D\+LL void \mbox{\hyperlink{_timings_8hpp_a79f7800b39ca88e5f2786d
 \item 
 T\+A\+U\+\_\+\+D\+LL void \mbox{\hyperlink{_timings_8hpp_a4d110b028bf1e2b9927b3c408398ba20}{compute\+Clock\+Cycles\+From\+Runtime}} () noexcept
 \item 
-T\+A\+U\+\_\+\+D\+LL const \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}} $\ast$ \mbox{\hyperlink{_timings_8hpp_ac545c96af724104ed1408fa14fb173ec}{get\+Clock\+Cycles\+Per\+Time\+Frame}} () noexcept
+T\+A\+U\+\_\+\+D\+LL Non\+Null const \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}} $\ast$ \mbox{\hyperlink{_timings_8hpp_a78d2e97aff983133a8c0ba1ed9e79a1d}{get\+Clock\+Cycles\+Per\+Time\+Frame}} () noexcept
 \end{DoxyCompactItemize}
 
 
@@ -56,11 +57,11 @@ This gets the current unix epoch in milliseconds.
 \begin{DoxyReturn}{Returns}
 The current unix epoch in milliseconds. 
 \end{DoxyReturn}
-\mbox{\Hypertarget{_timings_8hpp_ac545c96af724104ed1408fa14fb173ec}\label{_timings_8hpp_ac545c96af724104ed1408fa14fb173ec}} 
+\mbox{\Hypertarget{_timings_8hpp_a78d2e97aff983133a8c0ba1ed9e79a1d}\label{_timings_8hpp_a78d2e97aff983133a8c0ba1ed9e79a1d}} 
 \index{Timings.\+hpp@{Timings.\+hpp}!get\+Clock\+Cycles\+Per\+Time\+Frame@{get\+Clock\+Cycles\+Per\+Time\+Frame}}
 \index{get\+Clock\+Cycles\+Per\+Time\+Frame@{get\+Clock\+Cycles\+Per\+Time\+Frame}!Timings.\+hpp@{Timings.\+hpp}}
 \subsubsection{\texorpdfstring{get\+Clock\+Cycles\+Per\+Time\+Frame()}{getClockCyclesPerTimeFrame()}}
-{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL const \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}}$\ast$ get\+Clock\+Cycles\+Per\+Time\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL Non\+Null const \mbox{\hyperlink{struct_clock_cycles_time_frame}{Clock\+Cycles\+Time\+Frame}}$\ast$ get\+Clock\+Cycles\+Per\+Time\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
 
 This function simply retrieves the current clock speed information.
 

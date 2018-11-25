@@ -1,4 +1,8 @@
 var searchData=
 [
-  ['logn',['logN',['../_maths_8hpp.html#ae2afbd72b2782692727a6f01eb90920b',1,'logN(float x) noexcept:&#160;Maths.hpp'],['../_maths_8hpp.html#a11e983be7424f994da8c4699d168b981',1,'logN(double x) noexcept:&#160;Maths.hpp'],['../_maths_8hpp.html#a8dc89beb22b73b7ccfabb4ac4876b0aa',1,'logN(long double x) noexcept:&#160;Maths.hpp']]]
+  ['i18n',['I18n',['../class_i18n.html',1,'']]],
+  ['initprogramstarttimes',['initProgramStartTimes',['../_timings_8cpp.html#a44c6294ee29499dde5ae96411b2db1de',1,'Timings.cpp']]],
+  ['initsintable',['initSinTable',['../_maths_8hpp.html#a47b59e010596a29d5c508f6a50a85b75',1,'initSinTable() noexcept:&#160;Maths.cpp'],['../_maths_8cpp.html#a47b59e010596a29d5c508f6a50a85b75',1,'initSinTable() noexcept:&#160;Maths.cpp']]],
+  ['islittleendian',['isLittleEndian',['../_endian_8hpp.html#a35e4d6610c6cafa218ce75d42ca67061',1,'Endian.hpp']]],
+  ['item',['Item',['../class_item.html',1,'']]]
 ];

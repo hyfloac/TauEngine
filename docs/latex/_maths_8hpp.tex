@@ -1,8 +1,8 @@
-\hypertarget{_maths_8hpp}{}\section{Tau\+Engine/include/\+Maths.hpp File Reference}
-\label{_maths_8hpp}\index{Tau\+Engine/include/\+Maths.\+hpp@{Tau\+Engine/include/\+Maths.\+hpp}}
-{\ttfamily \#include $<$D\+L\+L.\+hpp$>$}\newline
+\hypertarget{_maths_8hpp}{}\section{tau/\+Tau\+Engine/include/\+Maths.hpp File Reference}
+\label{_maths_8hpp}\index{tau/\+Tau\+Engine/include/\+Maths.\+hpp@{tau/\+Tau\+Engine/include/\+Maths.\+hpp}}
 {\ttfamily \#include $<$cmath$>$}\newline
 {\ttfamily \#include $<$Num\+Types.\+hpp$>$}\newline
+{\ttfamily \#include $<$D\+L\+L.\+hpp$>$}\newline
 \subsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
@@ -33,7 +33,7 @@
 \item 
 {\footnotesize template$<$u32 \+\_\+\+Base$>$ }\\long double \mbox{\hyperlink{_maths_8hpp_a8dc89beb22b73b7ccfabb4ac4876b0aa}{logN}} (long double x) noexcept
 \item 
-T\+A\+U\+\_\+\+D\+LL void \mbox{\hyperlink{_maths_8hpp_aeab2bfe7ad959ecef222e449b485a703}{init\+Sin\+Table}} () noexcept
+void \mbox{\hyperlink{_maths_8hpp_a47b59e010596a29d5c508f6a50a85b75}{init\+Sin\+Table}} () noexcept
 \item 
 T\+A\+U\+\_\+\+D\+LL float \mbox{\hyperlink{_maths_8hpp_ae0f179e2253da7cc5a3cb6ea39b58821}{fast\+Sin}} (float value) noexcept
 \item 
@@ -136,11 +136,11 @@ Access index by multiplying the input by blip count divided by Tau (2pi), binary
 
 $\LARGE x * \frac{65536}{\tau} \normalsize \& \large 65535$
 
-$\LARGE x * \frac{32768}{\pi} \normalsize \& \large 65535$ \mbox{\Hypertarget{_maths_8hpp_aeab2bfe7ad959ecef222e449b485a703}\label{_maths_8hpp_aeab2bfe7ad959ecef222e449b485a703}} 
+$\LARGE x * \frac{32768}{\pi} \normalsize \& \large 65535$ \mbox{\Hypertarget{_maths_8hpp_a47b59e010596a29d5c508f6a50a85b75}\label{_maths_8hpp_a47b59e010596a29d5c508f6a50a85b75}} 
 \index{Maths.\+hpp@{Maths.\+hpp}!init\+Sin\+Table@{init\+Sin\+Table}}
 \index{init\+Sin\+Table@{init\+Sin\+Table}!Maths.\+hpp@{Maths.\+hpp}}
 \subsubsection{\texorpdfstring{init\+Sin\+Table()}{initSinTable()}}
-{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL void init\+Sin\+Table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+{\footnotesize\ttfamily void init\+Sin\+Table (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
 
 Initializes the sin table.
 

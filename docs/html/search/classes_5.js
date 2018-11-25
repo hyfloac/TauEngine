@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['tritree',['TriTree',['../class_tri_tree.html',1,'']]],
-  ['tritreecontainer',['TriTreeContainer',['../class_tri_tree_container.html',1,'']]],
-  ['tritreeequalelement',['TriTreeEqualElement',['../class_tri_tree_equal_element.html',1,'']]],
-  ['typename',['TypeName',['../struct_type_name.html',1,'']]]
+  ['i18n',['I18n',['../class_i18n.html',1,'']]],
+  ['item',['Item',['../class_item.html',1,'']]]
 ];

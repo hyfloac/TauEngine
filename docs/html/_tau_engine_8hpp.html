@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TauEngine: TauEngine/include/TauEngine.hpp File Reference</title>
+<title>TauEngine: tau/TauEngine/include/TauEngine.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -67,7 +67,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_efd8b08497ac628cee31bb5a9739fb95.html">TauEngine</a></li><li class="navelem"><a class="el" href="dir_02b387507c14e0fdd951bc6a58c0de72.html">include</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_0acab76c99a188243bf940a51881c51b.html">tau</a></li><li class="navelem"><a class="el" href="dir_7c051ce92b11e329b0f52b63f19fd4e8.html">TauEngine</a></li><li class="navelem"><a class="el" href="dir_60c666dc0bf1c767b741f07b916501d6.html">include</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -77,14 +77,18 @@ $(function() {
 <div class="title">TauEngine.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;DLL.hpp&gt;</code><br />
+<div class="textblock"><code>#include &lt;spdlog/spdlog.h&gt;</code><br />
+<code>#include &lt;DLL.hpp&gt;</code><br />
 </div>
 <p><a href="_tau_engine_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3a24ffd002a5fa2566c11f85e3b9e30c"><td class="memItemLeft" align="right" valign="top">TAU_DLL bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_tau_engine_8hpp.html#a3a24ffd002a5fa2566c11f85e3b9e30c">tauInit</a> () noexcept</td></tr>
-<tr class="separator:a3a24ffd002a5fa2566c11f85e3b9e30c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b767a4d9902439cd24ce211dc37ebf8"><td class="memItemLeft" align="right" valign="top"><a id="a6b767a4d9902439cd24ce211dc37ebf8"></a>
+std::shared_ptr&lt; spdlog::logger &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getEngineLogger</b> () noexcept</td></tr>
+<tr class="separator:a6b767a4d9902439cd24ce211dc37ebf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a271a2b64cdaf10dc78704ac34a1d9ad9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_tau_engine_8hpp.html#a271a2b64cdaf10dc78704ac34a1d9ad9">tauInit</a> () noexcept</td></tr>
+<tr class="separator:a271a2b64cdaf10dc78704ac34a1d9ad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6dfbe323c60d57b00a92c14956e8d122"><td class="memItemLeft" align="right" valign="top">TAU_DLL void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_tau_engine_8hpp.html#a6dfbe323c60d57b00a92c14956e8d122">tauRunMessageLoop</a> () noexcept</td></tr>
 <tr class="separator:a6dfbe323c60d57b00a92c14956e8d122"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a7003d36dd116a1fb85e1e40a95df6e"><td class="memItemLeft" align="right" valign="top">TAU_DLL bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_tau_engine_8hpp.html#a8a7003d36dd116a1fb85e1e40a95df6e">tauShouldExit</a> () noexcept</td></tr>
@@ -128,8 +132,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a3a24ffd002a5fa2566c11f85e3b9e30c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a24ffd002a5fa2566c11f85e3b9e30c">&#9670;&nbsp;</a></span>tauInit()</h2>
+<a id="a271a2b64cdaf10dc78704ac34a1d9ad9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a271a2b64cdaf10dc78704ac34a1d9ad9">&#9670;&nbsp;</a></span>tauInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -138,7 +142,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">TAU_DLL bool tauInit </td>
+          <td class="memname">bool tauInit </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>

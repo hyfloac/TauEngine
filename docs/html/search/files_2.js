@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['tauengine_2ehpp',['TauEngine.hpp',['../_tau_engine_8hpp.html',1,'']]],
-  ['timings_2ecpp',['Timings.cpp',['../_timings_8cpp.html',1,'']]],
-  ['timings_2ehpp',['Timings.hpp',['../_timings_8hpp.html',1,'']]]
+  ['mathdefines_2ehpp',['MathDefines.hpp',['../_math_defines_8hpp.html',1,'']]],
+  ['maths_2ecpp',['Maths.cpp',['../_maths_8cpp.html',1,'']]],
+  ['maths_2ehpp',['Maths.hpp',['../_maths_8hpp.html',1,'']]],
+  ['mouse_2ehpp',['Mouse.hpp',['../_mouse_8hpp.html',1,'']]]
 ];

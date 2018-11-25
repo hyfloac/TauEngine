@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TauEngine: TauEngine/src/Win32Window.cpp File Reference</title>
+<title>TauEngine: tau/TauEngine/src/Win32Window.cpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -67,7 +67,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_efd8b08497ac628cee31bb5a9739fb95.html">TauEngine</a></li><li class="navelem"><a class="el" href="dir_0ebc761ef7cd09db51fd0053bff3600f.html">src</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_0acab76c99a188243bf940a51881c51b.html">tau</a></li><li class="navelem"><a class="el" href="dir_7c051ce92b11e329b0f52b63f19fd4e8.html">TauEngine</a></li><li class="navelem"><a class="el" href="dir_7c610212fea8892b0d025b9d9eb31300.html">src</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -79,12 +79,11 @@ $(function() {
 <div class="title">Win32Window.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="_window_8hpp_source.html">Window.hpp</a>&gt;</code><br />
-<code>#include &lt;Windowsx.h&gt;</code><br />
-<code>#include &lt;<a class="el" href="_tau_engine_8hpp_source.html">TauEngine.hpp</a>&gt;</code><br />
+<div class="textblock"><code>#include &lt;Windowsx.h&gt;</code><br />
 <code>#include &lt;GL/glew.h&gt;</code><br />
 <code>#include &lt;GL/wglew.h&gt;</code><br />
-<code>#include &lt;GL/GL.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="_tau_engine_8hpp_source.html">TauEngine.hpp</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="_window_8hpp_source.html">Window.hpp</a>&gt;</code><br />
 <code>#include &lt;EnumBitFields.hpp&gt;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -94,12 +93,12 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:afe3a16b144783b486691238a85e83e83"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#afe3a16b144783b486691238a85e83e83">addWindow</a> (<a class="el" href="class_window.html">Window</a> *systemWindowContainer)</td></tr>
-<tr class="separator:afe3a16b144783b486691238a85e83e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8e54635ebc1771c329100943a4b1bb0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#ac8e54635ebc1771c329100943a4b1bb0">removeWindow</a> (<a class="el" href="class_window.html">Window</a> *systemWindowContainer)</td></tr>
-<tr class="separator:ac8e54635ebc1771c329100943a4b1bb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a924608fa4a8d1686c162d0cb1a3c56aa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_window.html">Window</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#a924608fa4a8d1686c162d0cb1a3c56aa">getWindowFromHandle</a> (HWND handle)</td></tr>
-<tr class="separator:a924608fa4a8d1686c162d0cb1a3c56aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9dc2971916146e5168dea357e8062f7"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#aa9dc2971916146e5168dea357e8062f7">addWindow</a> (NonNull <a class="el" href="class_window.html">Window</a> *systemWindowContainer)</td></tr>
+<tr class="separator:aa9dc2971916146e5168dea357e8062f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bb87263e963ec476ed4b9cb81ff8a18"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#a9bb87263e963ec476ed4b9cb81ff8a18">removeWindow</a> (<a class="el" href="class_not_null.html">NotNull</a>&lt; <a class="el" href="class_window.html">Window</a> &gt; systemWindowContainer)</td></tr>
+<tr class="separator:a9bb87263e963ec476ed4b9cb81ff8a18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05fcc40e3162ae9767a91f29bd60ccf6"><td class="memItemLeft" align="right" valign="top">static Nullable <a class="el" href="class_window.html">Window</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#a05fcc40e3162ae9767a91f29bd60ccf6">getWindowFromHandle</a> (HWND handle)</td></tr>
+<tr class="separator:a05fcc40e3162ae9767a91f29bd60ccf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03d8f58815b431af50087f17d86fd6ff"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_mouse_8hpp.html#ab9e4743e55d6727025943a6a29a85d1d">MouseFlags</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#a03d8f58815b431af50087f17d86fd6ff">mouseFlagsFromWParam</a> (WPARAM wParam)</td></tr>
 <tr class="separator:a03d8f58815b431af50087f17d86fd6ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2518162fd7b7074ca4ac2f75c8fae10e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="_mouse_8hpp.html#a16f77233bd7e08699b6701740cbed216">MouseEvent</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_win32_window_8cpp.html#a2518162fd7b7074ca4ac2f75c8fae10e">mouseEventFromMsg</a> (UINT uMsg, WPARAM wParam)</td></tr>
@@ -140,8 +139,8 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="afe3a16b144783b486691238a85e83e83"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe3a16b144783b486691238a85e83e83">&#9670;&nbsp;</a></span>addWindow()</h2>
+<a id="aa9dc2971916146e5168dea357e8062f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9dc2971916146e5168dea357e8062f7">&#9670;&nbsp;</a></span>addWindow()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -152,7 +151,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">static bool addWindow </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="class_window.html">Window</a> *&#160;</td>
+          <td class="paramtype">NonNull <a class="el" href="class_window.html">Window</a> *&#160;</td>
           <td class="paramname"><em>systemWindowContainer</em></td><td>)</td>
           <td></td>
         </tr>
@@ -174,8 +173,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a924608fa4a8d1686c162d0cb1a3c56aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a924608fa4a8d1686c162d0cb1a3c56aa">&#9670;&nbsp;</a></span>getWindowFromHandle()</h2>
+<a id="a05fcc40e3162ae9767a91f29bd60ccf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05fcc40e3162ae9767a91f29bd60ccf6">&#9670;&nbsp;</a></span>getWindowFromHandle()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -184,7 +183,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="class_window.html">Window</a>* getWindowFromHandle </td>
+          <td class="memname">static Nullable <a class="el" href="class_window.html">Window</a>* getWindowFromHandle </td>
           <td>(</td>
           <td class="paramtype">HWND&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
@@ -288,8 +287,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="ac8e54635ebc1771c329100943a4b1bb0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8e54635ebc1771c329100943a4b1bb0">&#9670;&nbsp;</a></span>removeWindow()</h2>
+<a id="a9bb87263e963ec476ed4b9cb81ff8a18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9bb87263e963ec476ed4b9cb81ff8a18">&#9670;&nbsp;</a></span>removeWindow()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -300,7 +299,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">static void removeWindow </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="class_window.html">Window</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="class_not_null.html">NotNull</a>&lt; <a class="el" href="class_window.html">Window</a> &gt;&#160;</td>
           <td class="paramname"><em>systemWindowContainer</em></td><td>)</td>
           <td></td>
         </tr>

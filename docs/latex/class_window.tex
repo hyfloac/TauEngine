@@ -3,8 +3,8 @@
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{class_window_a517728afaacf4c1b4af19d6ff35bed07}\label{class_window_a517728afaacf4c1b4af19d6ff35bed07}} 
-{\bfseries Window} (u32 width, u32 height, const char $\ast$title, const void $\ast$user\+Container=null, const \mbox{\hyperlink{class_window}{Window}} $\ast$parent=null) noexcept
+\mbox{\Hypertarget{class_window_abbfc29942c5764d56c383d06dede1d54}\label{class_window_abbfc29942c5764d56c383d06dede1d54}} 
+{\bfseries Window} (u32 width, u32 height, Nullable const char $\ast$title, Nullable const void $\ast$user\+Container=null, Nullable const \mbox{\hyperlink{class_window}{Window}} $\ast$parent=null) noexcept
 \item 
 \mbox{\Hypertarget{class_window_ab4bf82a7032223e2f4a0c9033706826b}\label{class_window_ab4bf82a7032223e2f4a0c9033706826b}} 
 {\bfseries Window} (const \mbox{\hyperlink{class_window}{Window}} \&copy) noexcept=default
@@ -33,19 +33,22 @@ const void $\ast$ {\bfseries user\+Container} () const noexcept
 \mbox{\Hypertarget{class_window_a3e379ed7a8891981f98d1cd46ec21e01}\label{class_window_a3e379ed7a8891981f98d1cd46ec21e01}} 
 const \mbox{\hyperlink{class_window}{Window}} $\ast$ {\bfseries parent} () const noexcept
 \item 
+\mbox{\Hypertarget{class_window_a38fb1fd2a5a195451684f9570b31ca2b}\label{class_window_a38fb1fd2a5a195451684f9570b31ca2b}} 
+\mbox{\hyperlink{struct_context_settings}{Context\+Settings}} \& {\bfseries context\+Settings} () noexcept
+\item 
 void \mbox{\hyperlink{class_window_ad465b342c02505c01f38afa99d7fcbfe}{resize}} (const u32 width, const u32 height) noexcept
 \item 
 \mbox{\Hypertarget{class_window_a1d3b5b6ac567d76dddab35bcf318890f}\label{class_window_a1d3b5b6ac567d76dddab35bcf318890f}} 
 void {\bfseries set\+Title} (const char $\ast$title) noexcept
 \item 
-\mbox{\Hypertarget{class_window_a835e14bb4349d7ee0a32bdb0dfa8fec3}\label{class_window_a835e14bb4349d7ee0a32bdb0dfa8fec3}} 
-void {\bfseries set\+Resize\+Window\+Handler} (\mbox{\hyperlink{_window_8hpp_a6849c0abbb7ea93481de9f39ddaf5c79}{on\+Window\+Resized\+\_\+f}} window\+Resize\+Handler)
+\mbox{\Hypertarget{class_window_a984c0f60001d7c45a6410d0c939120c9}\label{class_window_a984c0f60001d7c45a6410d0c939120c9}} 
+void {\bfseries set\+Resize\+Window\+Handler} (Nullable \mbox{\hyperlink{_window_8hpp_ada6d9541330d61d26fa6ba699a2d27ca}{on\+Window\+Resized\+\_\+f}} window\+Resize\+Handler)
 \item 
-\mbox{\Hypertarget{class_window_af0f2b7177136feda401590a6ec81f73a}\label{class_window_af0f2b7177136feda401590a6ec81f73a}} 
-void {\bfseries set\+Mouse\+Event\+Handler} (\mbox{\hyperlink{_window_8hpp_ad1980bd4a8619653dab87e3d48f94780}{on\+Mouse\+Event\+\_\+f}} mouse\+Event\+Handler)
+\mbox{\Hypertarget{class_window_a942f8a92e2c3d8c45f9382162b67898b}\label{class_window_a942f8a92e2c3d8c45f9382162b67898b}} 
+void {\bfseries set\+Mouse\+Event\+Handler} (Nullable \mbox{\hyperlink{_window_8hpp_ab1aedf6a053ebea9af5d50b0888dcedd}{on\+Mouse\+Event\+\_\+f}} mouse\+Event\+Handler)
 \item 
-\mbox{\Hypertarget{class_window_a5641f98b1f9c66ecc28d800a7b9013d2}\label{class_window_a5641f98b1f9c66ecc28d800a7b9013d2}} 
-void {\bfseries set\+Mouse\+Move\+Handler} (on\+Mouse\+Move\+\_\+f mouse\+Move\+Handler)
+\mbox{\Hypertarget{class_window_a1a7f5685815a9784844cf4bf00c84445}\label{class_window_a1a7f5685815a9784844cf4bf00c84445}} 
+void {\bfseries set\+Mouse\+Move\+Handler} (Nullable on\+Mouse\+Move\+\_\+f mouse\+Move\+Handler)
 \item 
 \mbox{\Hypertarget{class_window_a81dbff4890442cf1dae94ab22456a716}\label{class_window_a81dbff4890442cf1dae94ab22456a716}} 
 bool {\bfseries create\+Window} () noexcept
@@ -85,15 +88,18 @@ const void $\ast$ \mbox{\hyperlink{class_window_a23e83496dec6b6ec76cb6a194d81879
 \item 
 const \mbox{\hyperlink{class_window}{Window}} $\ast$ \mbox{\hyperlink{class_window_ae3b7f41531e0e9dc71e5b1e2381a6123}{\+\_\+parent}}
 \item 
+\mbox{\Hypertarget{class_window_ac012c3920d86b12f924075eb285a8001}\label{class_window_ac012c3920d86b12f924075eb285a8001}} 
+\mbox{\hyperlink{struct_context_settings}{Context\+Settings}} {\bfseries \+\_\+context\+Settings}
+\item 
 Window\+State \mbox{\hyperlink{class_window_a43c5622f0faf50873784dceb427e4e4f}{\+\_\+window\+State}}
 \item 
 bool \mbox{\hyperlink{class_window_a09e7ef3b8eadc8eb251447132997fc6b}{\+\_\+is\+Resizing}}
 \item 
 \mbox{\Hypertarget{class_window_a991c23d5739e2d69121650485e9285f4}\label{class_window_a991c23d5739e2d69121650485e9285f4}} 
-\mbox{\hyperlink{_window_8hpp_a6849c0abbb7ea93481de9f39ddaf5c79}{on\+Window\+Resized\+\_\+f}} {\bfseries \+\_\+window\+Resize\+Handler}
+\mbox{\hyperlink{_window_8hpp_ada6d9541330d61d26fa6ba699a2d27ca}{on\+Window\+Resized\+\_\+f}} {\bfseries \+\_\+window\+Resize\+Handler}
 \item 
 \mbox{\Hypertarget{class_window_a74374a7848ad07fc35f833c0279e3b46}\label{class_window_a74374a7848ad07fc35f833c0279e3b46}} 
-\mbox{\hyperlink{_window_8hpp_ad1980bd4a8619653dab87e3d48f94780}{on\+Mouse\+Event\+\_\+f}} {\bfseries \+\_\+mouse\+Event\+Handler}
+\mbox{\hyperlink{_window_8hpp_ab1aedf6a053ebea9af5d50b0888dcedd}{on\+Mouse\+Event\+\_\+f}} {\bfseries \+\_\+mouse\+Event\+Handler}
 \item 
 \mbox{\Hypertarget{class_window_a5105786903589e50010dfdf8d98a3c9d}\label{class_window_a5105786903589e50010dfdf8d98a3c9d}} 
 on\+Mouse\+Move\+\_\+f {\bfseries \+\_\+mouse\+Move\+Handler}
@@ -101,12 +107,12 @@ on\+Mouse\+Move\+\_\+f {\bfseries \+\_\+mouse\+Move\+Handler}
 \subsection*{Friends}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{class_window_afe803be2ab51884970c2a5bf9dfa61b0}\label{class_window_afe803be2ab51884970c2a5bf9dfa61b0}} 
-static friend L\+R\+E\+S\+U\+LT C\+A\+L\+L\+B\+A\+CK {\bfseries Window\+Proc} (H\+W\+ND, U\+I\+NT, W\+P\+A\+R\+AM, L\+P\+A\+R\+AM)
+\mbox{\Hypertarget{class_window_a322e1f1b8964238cce26e206645caf33}\label{class_window_a322e1f1b8964238cce26e206645caf33}} 
+L\+R\+E\+S\+U\+LT C\+A\+L\+L\+B\+A\+CK {\bfseries Window\+Proc} (H\+W\+ND, U\+I\+NT, W\+P\+A\+R\+AM, L\+P\+A\+R\+AM)
 \item 
-static friend void \mbox{\hyperlink{class_window_a893ed9ae2158e583c7bac06deddc8bb3}{remove\+Window}} (\mbox{\hyperlink{class_window}{Window}} $\ast$)
+void \mbox{\hyperlink{class_window_ac4632fb84e38a760660b81ad8663d4a6}{remove\+Window}} (\mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ \mbox{\hyperlink{class_window}{Window}} $>$)
 \item 
-static friend \mbox{\hyperlink{class_window}{Window}} $\ast$ \mbox{\hyperlink{class_window_aca83cc9021e3e6075031093398621437}{get\+Window\+From\+Handle}} (H\+W\+ND)
+Nullable \mbox{\hyperlink{class_window}{Window}} $\ast$ \mbox{\hyperlink{class_window_a56aa20fd34aba260a2f15d54541ea396}{get\+Window\+From\+Handle}} (H\+W\+ND)
 \end{DoxyCompactItemize}
 
 
@@ -160,11 +166,11 @@ Unloads the current context.
 Not much use for this except when exiting. 
 
 \subsection{Friends And Related Function Documentation}
-\mbox{\Hypertarget{class_window_aca83cc9021e3e6075031093398621437}\label{class_window_aca83cc9021e3e6075031093398621437}} 
+\mbox{\Hypertarget{class_window_a56aa20fd34aba260a2f15d54541ea396}\label{class_window_a56aa20fd34aba260a2f15d54541ea396}} 
 \index{Window@{Window}!get\+Window\+From\+Handle@{get\+Window\+From\+Handle}}
 \index{get\+Window\+From\+Handle@{get\+Window\+From\+Handle}!Window@{Window}}
 \subsubsection{\texorpdfstring{get\+Window\+From\+Handle}{getWindowFromHandle}}
-{\footnotesize\ttfamily static friend \mbox{\hyperlink{class_window}{Window}}$\ast$ get\+Window\+From\+Handle (\begin{DoxyParamCaption}\item[{H\+W\+ND}]{handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+{\footnotesize\ttfamily Nullable \mbox{\hyperlink{class_window}{Window}}$\ast$ get\+Window\+From\+Handle (\begin{DoxyParamCaption}\item[{H\+W\+ND}]{handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
 
 Retrieves a \mbox{\hyperlink{class_window}{Window}} from \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b32cecd}{window\+Handles}}.
 
@@ -176,11 +182,11 @@ Retrieves a \mbox{\hyperlink{class_window}{Window}} from \mbox{\hyperlink{_win32
 \begin{DoxyReturn}{Returns}
 A pointer to the \mbox{\hyperlink{class_window}{Window}} containing the \mbox{\hyperlink{}{H\+W\+ND}} {\ttfamily handle}. returns null if no window is currently holding the referenced handle. 
 \end{DoxyReturn}
-\mbox{\Hypertarget{class_window_a893ed9ae2158e583c7bac06deddc8bb3}\label{class_window_a893ed9ae2158e583c7bac06deddc8bb3}} 
+\mbox{\Hypertarget{class_window_ac4632fb84e38a760660b81ad8663d4a6}\label{class_window_ac4632fb84e38a760660b81ad8663d4a6}} 
 \index{Window@{Window}!remove\+Window@{remove\+Window}}
 \index{remove\+Window@{remove\+Window}!Window@{Window}}
 \subsubsection{\texorpdfstring{remove\+Window}{removeWindow}}
-{\footnotesize\ttfamily static friend void remove\+Window (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_window}{Window}} $\ast$}]{system\+Window\+Container }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+{\footnotesize\ttfamily void remove\+Window (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ \mbox{\hyperlink{class_window}{Window}} $>$}]{system\+Window\+Container }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
 
 Removes a window from \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b32cecd}{window\+Handles}}. After the window is removed, all other pointers are shifted down if necessary.
 
@@ -248,5 +254,5 @@ See \mbox{\hyperlink{}{Window\+State}}.
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-Tau\+Engine/include/\mbox{\hyperlink{_window_8hpp}{Window.\+hpp}}\item 
-Tau\+Engine/src/\mbox{\hyperlink{_win32_window_8cpp}{Win32\+Window.\+cpp}}\end{DoxyCompactItemize}
+tau/\+Tau\+Engine/include/\mbox{\hyperlink{_window_8hpp}{Window.\+hpp}}\item 
+tau/\+Tau\+Engine/src/\mbox{\hyperlink{_win32_window_8cpp}{Win32\+Window.\+cpp}}\end{DoxyCompactItemize}

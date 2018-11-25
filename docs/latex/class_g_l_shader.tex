@@ -1,0 +1,51 @@
+\hypertarget{class_g_l_shader}{}\section{G\+L\+Shader Class Reference}
+\label{class_g_l_shader}\index{G\+L\+Shader@{G\+L\+Shader}}
+
+
+{\ttfamily \#include $<$G\+L\+Shader.\+hpp$>$}
+
+Inheritance diagram for G\+L\+Shader\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_g_l_shader}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_g_l_shader_ad46f3d02c2fa896227aea1e83aa95286}\label{class_g_l_shader_ad46f3d02c2fa896227aea1e83aa95286}} 
+{\bfseries G\+L\+Shader} (Shader\+Type shader\+Type, \mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ const char $>$ shader\+Path, \mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ \mbox{\hyperlink{class_g_l_program}{G\+L\+Program}} $>$ gl\+Program) noexcept
+\item 
+\mbox{\Hypertarget{class_g_l_shader_a6269c8efc2e099fd16275c93c8109b67}\label{class_g_l_shader_a6269c8efc2e099fd16275c93c8109b67}} 
+Shader\+Type {\bfseries shader\+Type} () const noexcept override
+\item 
+\mbox{\Hypertarget{class_g_l_shader_af2012a97450e3b7b1fc5c1569df3a736}\label{class_g_l_shader_af2012a97450e3b7b1fc5c1569df3a736}} 
+bool {\bfseries load\+Shader} () noexcept override
+\item 
+\mbox{\Hypertarget{class_g_l_shader_ab3a52ea131e8d8c322f4398a597f24b9}\label{class_g_l_shader_ab3a52ea131e8d8c322f4398a597f24b9}} 
+void {\bfseries activate\+Shader} () const noexcept override
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_g_l_shader_ade645efccab5c92733f0238240639544}\label{class_g_l_shader_ade645efccab5c92733f0238240639544}} 
+Shader\+Type {\bfseries \+\_\+shader\+Type}
+\item 
+\mbox{\Hypertarget{class_g_l_shader_a93a52afc055c6497c2029ac7793d611f}\label{class_g_l_shader_a93a52afc055c6497c2029ac7793d611f}} 
+const char $\ast$ {\bfseries \+\_\+shader\+Path}
+\item 
+\mbox{\Hypertarget{class_g_l_shader_a3c8a2c7a3753ede2c60ad537989715d4}\label{class_g_l_shader_a3c8a2c7a3753ede2c60ad537989715d4}} 
+\mbox{\hyperlink{class_g_l_program}{G\+L\+Program}} $\ast$ {\bfseries \+\_\+gl\+Program}
+\item 
+\mbox{\Hypertarget{class_g_l_shader_a98c823944de9e8446adb82701420aa5c}\label{class_g_l_shader_a98c823944de9e8446adb82701420aa5c}} 
+G\+Luint {\bfseries \+\_\+shader\+Id}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Represents an Open\+GL shader. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+tau/\+Tau\+Engine/include/shader/G\+L\+Shader.\+hpp\item 
+tau/\+Tau\+Engine/src/G\+L\+Shader.\+cpp\end{DoxyCompactItemize}

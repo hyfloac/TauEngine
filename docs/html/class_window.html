@@ -80,9 +80,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a517728afaacf4c1b4af19d6ff35bed07"><td class="memItemLeft" align="right" valign="top"><a id="a517728afaacf4c1b4af19d6ff35bed07"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Window</b> (u32 width, u32 height, const char *title, const void *userContainer=null, const <a class="el" href="class_window.html">Window</a> *parent=null) noexcept</td></tr>
-<tr class="separator:a517728afaacf4c1b4af19d6ff35bed07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbfc29942c5764d56c383d06dede1d54"><td class="memItemLeft" align="right" valign="top"><a id="abbfc29942c5764d56c383d06dede1d54"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Window</b> (u32 width, u32 height, Nullable const char *title, Nullable const void *userContainer=null, Nullable const <a class="el" href="class_window.html">Window</a> *parent=null) noexcept</td></tr>
+<tr class="separator:abbfc29942c5764d56c383d06dede1d54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4bf82a7032223e2f4a0c9033706826b"><td class="memItemLeft" align="right" valign="top"><a id="ab4bf82a7032223e2f4a0c9033706826b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Window</b> (const <a class="el" href="class_window.html">Window</a> &amp;copy) noexcept=default</td></tr>
 <tr class="separator:ab4bf82a7032223e2f4a0c9033706826b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,20 +110,23 @@ const void *&#160;</td><td class="memItemRight" valign="bottom"><b>userContainer
 <tr class="memitem:a3e379ed7a8891981f98d1cd46ec21e01"><td class="memItemLeft" align="right" valign="top"><a id="a3e379ed7a8891981f98d1cd46ec21e01"></a>
 const <a class="el" href="class_window.html">Window</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>parent</b> () const noexcept</td></tr>
 <tr class="separator:a3e379ed7a8891981f98d1cd46ec21e01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38fb1fd2a5a195451684f9570b31ca2b"><td class="memItemLeft" align="right" valign="top"><a id="a38fb1fd2a5a195451684f9570b31ca2b"></a>
+<a class="el" href="struct_context_settings.html">ContextSettings</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>contextSettings</b> () noexcept</td></tr>
+<tr class="separator:a38fb1fd2a5a195451684f9570b31ca2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad465b342c02505c01f38afa99d7fcbfe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#ad465b342c02505c01f38afa99d7fcbfe">resize</a> (const u32 width, const u32 height) noexcept</td></tr>
 <tr class="separator:ad465b342c02505c01f38afa99d7fcbfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d3b5b6ac567d76dddab35bcf318890f"><td class="memItemLeft" align="right" valign="top"><a id="a1d3b5b6ac567d76dddab35bcf318890f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setTitle</b> (const char *title) noexcept</td></tr>
 <tr class="separator:a1d3b5b6ac567d76dddab35bcf318890f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a835e14bb4349d7ee0a32bdb0dfa8fec3"><td class="memItemLeft" align="right" valign="top"><a id="a835e14bb4349d7ee0a32bdb0dfa8fec3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setResizeWindowHandler</b> (<a class="el" href="_window_8hpp.html#a6849c0abbb7ea93481de9f39ddaf5c79">onWindowResized_f</a> windowResizeHandler)</td></tr>
-<tr class="separator:a835e14bb4349d7ee0a32bdb0dfa8fec3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0f2b7177136feda401590a6ec81f73a"><td class="memItemLeft" align="right" valign="top"><a id="af0f2b7177136feda401590a6ec81f73a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setMouseEventHandler</b> (<a class="el" href="_window_8hpp.html#ad1980bd4a8619653dab87e3d48f94780">onMouseEvent_f</a> mouseEventHandler)</td></tr>
-<tr class="separator:af0f2b7177136feda401590a6ec81f73a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5641f98b1f9c66ecc28d800a7b9013d2"><td class="memItemLeft" align="right" valign="top"><a id="a5641f98b1f9c66ecc28d800a7b9013d2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setMouseMoveHandler</b> (onMouseMove_f mouseMoveHandler)</td></tr>
-<tr class="separator:a5641f98b1f9c66ecc28d800a7b9013d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a984c0f60001d7c45a6410d0c939120c9"><td class="memItemLeft" align="right" valign="top"><a id="a984c0f60001d7c45a6410d0c939120c9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setResizeWindowHandler</b> (Nullable <a class="el" href="_window_8hpp.html#ada6d9541330d61d26fa6ba699a2d27ca">onWindowResized_f</a> windowResizeHandler)</td></tr>
+<tr class="separator:a984c0f60001d7c45a6410d0c939120c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a942f8a92e2c3d8c45f9382162b67898b"><td class="memItemLeft" align="right" valign="top"><a id="a942f8a92e2c3d8c45f9382162b67898b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setMouseEventHandler</b> (Nullable <a class="el" href="_window_8hpp.html#ab1aedf6a053ebea9af5d50b0888dcedd">onMouseEvent_f</a> mouseEventHandler)</td></tr>
+<tr class="separator:a942f8a92e2c3d8c45f9382162b67898b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a7f5685815a9784844cf4bf00c84445"><td class="memItemLeft" align="right" valign="top"><a id="a1a7f5685815a9784844cf4bf00c84445"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setMouseMoveHandler</b> (Nullable onMouseMove_f mouseMoveHandler)</td></tr>
+<tr class="separator:a1a7f5685815a9784844cf4bf00c84445"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81dbff4890442cf1dae94ab22456a716"><td class="memItemLeft" align="right" valign="top"><a id="a81dbff4890442cf1dae94ab22456a716"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>createWindow</b> () noexcept</td></tr>
 <tr class="separator:a81dbff4890442cf1dae94ab22456a716"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,15 +165,18 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a23e83496dec6b6ec76cb6a194d818796"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3b7f41531e0e9dc71e5b1e2381a6123"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_window.html">Window</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#ae3b7f41531e0e9dc71e5b1e2381a6123">_parent</a></td></tr>
 <tr class="separator:ae3b7f41531e0e9dc71e5b1e2381a6123"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac012c3920d86b12f924075eb285a8001"><td class="memItemLeft" align="right" valign="top"><a id="ac012c3920d86b12f924075eb285a8001"></a>
+<a class="el" href="struct_context_settings.html">ContextSettings</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_contextSettings</b></td></tr>
+<tr class="separator:ac012c3920d86b12f924075eb285a8001"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43c5622f0faf50873784dceb427e4e4f"><td class="memItemLeft" align="right" valign="top">WindowState&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#a43c5622f0faf50873784dceb427e4e4f">_windowState</a></td></tr>
 <tr class="separator:a43c5622f0faf50873784dceb427e4e4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09e7ef3b8eadc8eb251447132997fc6b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#a09e7ef3b8eadc8eb251447132997fc6b">_isResizing</a></td></tr>
 <tr class="separator:a09e7ef3b8eadc8eb251447132997fc6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a991c23d5739e2d69121650485e9285f4"><td class="memItemLeft" align="right" valign="top"><a id="a991c23d5739e2d69121650485e9285f4"></a>
-<a class="el" href="_window_8hpp.html#a6849c0abbb7ea93481de9f39ddaf5c79">onWindowResized_f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_windowResizeHandler</b></td></tr>
+<a class="el" href="_window_8hpp.html#ada6d9541330d61d26fa6ba699a2d27ca">onWindowResized_f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_windowResizeHandler</b></td></tr>
 <tr class="separator:a991c23d5739e2d69121650485e9285f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74374a7848ad07fc35f833c0279e3b46"><td class="memItemLeft" align="right" valign="top"><a id="a74374a7848ad07fc35f833c0279e3b46"></a>
-<a class="el" href="_window_8hpp.html#ad1980bd4a8619653dab87e3d48f94780">onMouseEvent_f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_mouseEventHandler</b></td></tr>
+<a class="el" href="_window_8hpp.html#ab1aedf6a053ebea9af5d50b0888dcedd">onMouseEvent_f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_mouseEventHandler</b></td></tr>
 <tr class="separator:a74374a7848ad07fc35f833c0279e3b46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5105786903589e50010dfdf8d98a3c9d"><td class="memItemLeft" align="right" valign="top"><a id="a5105786903589e50010dfdf8d98a3c9d"></a>
 onMouseMove_f&#160;</td><td class="memItemRight" valign="bottom"><b>_mouseMoveHandler</b></td></tr>
@@ -178,13 +184,13 @@ onMouseMove_f&#160;</td><td class="memItemRight" valign="bottom"><b>_mouseMoveHa
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
-<tr class="memitem:afe803be2ab51884970c2a5bf9dfa61b0"><td class="memItemLeft" align="right" valign="top"><a id="afe803be2ab51884970c2a5bf9dfa61b0"></a>
-static friend LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom"><b>WindowProc</b> (HWND, UINT, WPARAM, LPARAM)</td></tr>
-<tr class="separator:afe803be2ab51884970c2a5bf9dfa61b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a893ed9ae2158e583c7bac06deddc8bb3"><td class="memItemLeft" align="right" valign="top">static friend void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#a893ed9ae2158e583c7bac06deddc8bb3">removeWindow</a> (<a class="el" href="class_window.html">Window</a> *)</td></tr>
-<tr class="separator:a893ed9ae2158e583c7bac06deddc8bb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca83cc9021e3e6075031093398621437"><td class="memItemLeft" align="right" valign="top">static friend <a class="el" href="class_window.html">Window</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#aca83cc9021e3e6075031093398621437">getWindowFromHandle</a> (HWND)</td></tr>
-<tr class="separator:aca83cc9021e3e6075031093398621437"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a322e1f1b8964238cce26e206645caf33"><td class="memItemLeft" align="right" valign="top"><a id="a322e1f1b8964238cce26e206645caf33"></a>
+LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom"><b>WindowProc</b> (HWND, UINT, WPARAM, LPARAM)</td></tr>
+<tr class="separator:a322e1f1b8964238cce26e206645caf33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4632fb84e38a760660b81ad8663d4a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#ac4632fb84e38a760660b81ad8663d4a6">removeWindow</a> (<a class="el" href="class_not_null.html">NotNull</a>&lt; <a class="el" href="class_window.html">Window</a> &gt;)</td></tr>
+<tr class="separator:ac4632fb84e38a760660b81ad8663d4a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56aa20fd34aba260a2f15d54541ea396"><td class="memItemLeft" align="right" valign="top">Nullable <a class="el" href="class_window.html">Window</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_window.html#a56aa20fd34aba260a2f15d54541ea396">getWindowFromHandle</a> (HWND)</td></tr>
+<tr class="separator:a56aa20fd34aba260a2f15d54541ea396"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="ae8f88271d37b496acde43280b8e7d99c"></a>
@@ -338,8 +344,8 @@ static friend LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom
 </div>
 </div>
 <h2 class="groupheader">Friends And Related Function Documentation</h2>
-<a id="aca83cc9021e3e6075031093398621437"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca83cc9021e3e6075031093398621437">&#9670;&nbsp;</a></span>getWindowFromHandle</h2>
+<a id="a56aa20fd34aba260a2f15d54541ea396"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56aa20fd34aba260a2f15d54541ea396">&#9670;&nbsp;</a></span>getWindowFromHandle</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -348,7 +354,7 @@ static friend LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static friend <a class="el" href="class_window.html">Window</a>* getWindowFromHandle </td>
+          <td class="memname">Nullable <a class="el" href="class_window.html">Window</a>* getWindowFromHandle </td>
           <td>(</td>
           <td class="paramtype">HWND&#160;</td>
           <td class="paramname"><em>handle</em></td><td>)</td>
@@ -372,8 +378,8 @@ static friend LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom
 
 </div>
 </div>
-<a id="a893ed9ae2158e583c7bac06deddc8bb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a893ed9ae2158e583c7bac06deddc8bb3">&#9670;&nbsp;</a></span>removeWindow</h2>
+<a id="ac4632fb84e38a760660b81ad8663d4a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4632fb84e38a760660b81ad8663d4a6">&#9670;&nbsp;</a></span>removeWindow</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -382,9 +388,9 @@ static friend LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static friend void removeWindow </td>
+          <td class="memname">void removeWindow </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="class_window.html">Window</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="class_not_null.html">NotNull</a>&lt; <a class="el" href="class_window.html">Window</a> &gt;&#160;</td>
           <td class="paramname"><em>systemWindowContainer</em></td><td>)</td>
           <td></td>
         </tr>
@@ -593,8 +599,8 @@ static friend LRESULT CALLBACK&#160;</td><td class="memItemRight" valign="bottom
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>TauEngine/include/<a class="el" href="_window_8hpp_source.html">Window.hpp</a></li>
-<li>TauEngine/src/<a class="el" href="_win32_window_8cpp.html">Win32Window.cpp</a></li>
+<li>tau/TauEngine/include/<a class="el" href="_window_8hpp_source.html">Window.hpp</a></li>
+<li>tau/TauEngine/src/<a class="el" href="_win32_window_8cpp.html">Win32Window.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

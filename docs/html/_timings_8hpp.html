@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.14"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TauEngine: TauEngine/include/Timings.hpp File Reference</title>
+<title>TauEngine: tau/TauEngine/include/Timings.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -67,7 +67,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_efd8b08497ac628cee31bb5a9739fb95.html">TauEngine</a></li><li class="navelem"><a class="el" href="dir_02b387507c14e0fdd951bc6a58c0de72.html">include</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_0acab76c99a188243bf940a51881c51b.html">tau</a></li><li class="navelem"><a class="el" href="dir_7c051ce92b11e329b0f52b63f19fd4e8.html">TauEngine</a></li><li class="navelem"><a class="el" href="dir_60c666dc0bf1c767b741f07b916501d6.html">include</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -80,6 +80,7 @@ $(function() {
 <div class="contents">
 <div class="textblock"><code>#include &lt;NumTypes.hpp&gt;</code><br />
 <code>#include &lt;DLL.hpp&gt;</code><br />
+<code>#include &lt;Safeties.hpp&gt;</code><br />
 </div>
 <p><a href="_timings_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -98,8 +99,8 @@ Functions</h2></td></tr>
 <tr class="separator:a79f7800b39ca88e5f2786d47d0635f7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d110b028bf1e2b9927b3c408398ba20"><td class="memItemLeft" align="right" valign="top">TAU_DLL void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_timings_8hpp.html#a4d110b028bf1e2b9927b3c408398ba20">computeClockCyclesFromRuntime</a> () noexcept</td></tr>
 <tr class="separator:a4d110b028bf1e2b9927b3c408398ba20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac545c96af724104ed1408fa14fb173ec"><td class="memItemLeft" align="right" valign="top">TAU_DLL const <a class="el" href="struct_clock_cycles_time_frame.html">ClockCyclesTimeFrame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_timings_8hpp.html#ac545c96af724104ed1408fa14fb173ec">getClockCyclesPerTimeFrame</a> () noexcept</td></tr>
-<tr class="separator:ac545c96af724104ed1408fa14fb173ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78d2e97aff983133a8c0ba1ed9e79a1d"><td class="memItemLeft" align="right" valign="top">TAU_DLL NonNull const <a class="el" href="struct_clock_cycles_time_frame.html">ClockCyclesTimeFrame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_timings_8hpp.html#a78d2e97aff983133a8c0ba1ed9e79a1d">getClockCyclesPerTimeFrame</a> () noexcept</td></tr>
+<tr class="separator:a78d2e97aff983133a8c0ba1ed9e79a1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Some functions for computing timings. </p>
@@ -190,8 +191,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac545c96af724104ed1408fa14fb173ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac545c96af724104ed1408fa14fb173ec">&#9670;&nbsp;</a></span>getClockCyclesPerTimeFrame()</h2>
+<a id="a78d2e97aff983133a8c0ba1ed9e79a1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78d2e97aff983133a8c0ba1ed9e79a1d">&#9670;&nbsp;</a></span>getClockCyclesPerTimeFrame()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -200,7 +201,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">TAU_DLL const <a class="el" href="struct_clock_cycles_time_frame.html">ClockCyclesTimeFrame</a>* getClockCyclesPerTimeFrame </td>
+          <td class="memname">TAU_DLL NonNull const <a class="el" href="struct_clock_cycles_time_frame.html">ClockCyclesTimeFrame</a>* getClockCyclesPerTimeFrame </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>

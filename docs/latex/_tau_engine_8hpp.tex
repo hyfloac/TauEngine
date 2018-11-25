@@ -1,10 +1,14 @@
-\hypertarget{_tau_engine_8hpp}{}\section{Tau\+Engine/include/\+Tau\+Engine.hpp File Reference}
-\label{_tau_engine_8hpp}\index{Tau\+Engine/include/\+Tau\+Engine.\+hpp@{Tau\+Engine/include/\+Tau\+Engine.\+hpp}}
+\hypertarget{_tau_engine_8hpp}{}\section{tau/\+Tau\+Engine/include/\+Tau\+Engine.hpp File Reference}
+\label{_tau_engine_8hpp}\index{tau/\+Tau\+Engine/include/\+Tau\+Engine.\+hpp@{tau/\+Tau\+Engine/include/\+Tau\+Engine.\+hpp}}
+{\ttfamily \#include $<$spdlog/spdlog.\+h$>$}\newline
 {\ttfamily \#include $<$D\+L\+L.\+hpp$>$}\newline
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-T\+A\+U\+\_\+\+D\+LL bool \mbox{\hyperlink{_tau_engine_8hpp_a3a24ffd002a5fa2566c11f85e3b9e30c}{tau\+Init}} () noexcept
+\mbox{\Hypertarget{_tau_engine_8hpp_a6b767a4d9902439cd24ce211dc37ebf8}\label{_tau_engine_8hpp_a6b767a4d9902439cd24ce211dc37ebf8}} 
+std\+::shared\+\_\+ptr$<$ spdlog\+::logger $>$ {\bfseries get\+Engine\+Logger} () noexcept
+\item 
+bool \mbox{\hyperlink{_tau_engine_8hpp_a271a2b64cdaf10dc78704ac34a1d9ad9}{tau\+Init}} () noexcept
 \item 
 T\+A\+U\+\_\+\+D\+LL void \mbox{\hyperlink{_tau_engine_8hpp_a6dfbe323c60d57b00a92c14956e8d122}{tau\+Run\+Message\+Loop}} () noexcept
 \item 
@@ -31,11 +35,11 @@ Tells the application that we are ready to exit.
 \mbox{\tt in}  & {\em code} & The exit code of the program. \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{_tau_engine_8hpp_a3a24ffd002a5fa2566c11f85e3b9e30c}\label{_tau_engine_8hpp_a3a24ffd002a5fa2566c11f85e3b9e30c}} 
+\mbox{\Hypertarget{_tau_engine_8hpp_a271a2b64cdaf10dc78704ac34a1d9ad9}\label{_tau_engine_8hpp_a271a2b64cdaf10dc78704ac34a1d9ad9}} 
 \index{Tau\+Engine.\+hpp@{Tau\+Engine.\+hpp}!tau\+Init@{tau\+Init}}
 \index{tau\+Init@{tau\+Init}!Tau\+Engine.\+hpp@{Tau\+Engine.\+hpp}}
 \subsubsection{\texorpdfstring{tau\+Init()}{tauInit()}}
-{\footnotesize\ttfamily T\+A\+U\+\_\+\+D\+LL bool tau\+Init (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
+{\footnotesize\ttfamily bool tau\+Init (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
 
 \begin{DoxyReturn}{Returns}
 Returns true if initialization was successful. 

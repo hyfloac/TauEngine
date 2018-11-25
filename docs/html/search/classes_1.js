@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['clockcyclestimeframe',['ClockCyclesTimeFrame',['../struct_clock_cycles_time_frame.html',1,'']]]
+  ['binaryreader',['BinaryReader',['../class_binary_reader.html',1,'']]],
+  ['binarywriter',['BinaryWriter',['../class_binary_writer.html',1,'']]]
 ];

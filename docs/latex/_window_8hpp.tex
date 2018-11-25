@@ -1,24 +1,27 @@
-\hypertarget{_window_8hpp}{}\section{Tau\+Engine/include/\+Window.hpp File Reference}
-\label{_window_8hpp}\index{Tau\+Engine/include/\+Window.\+hpp@{Tau\+Engine/include/\+Window.\+hpp}}
+\hypertarget{_window_8hpp}{}\section{tau/\+Tau\+Engine/include/\+Window.hpp File Reference}
+\label{_window_8hpp}\index{tau/\+Tau\+Engine/include/\+Window.\+hpp@{tau/\+Tau\+Engine/include/\+Window.\+hpp}}
 {\ttfamily \#include $<$Num\+Types.\+hpp$>$}\newline
 {\ttfamily \#include $<$\+\_\+\+Sys\+Window\+Container.\+hpp$>$}\newline
 {\ttfamily \#include $<$D\+L\+L.\+hpp$>$}\newline
 {\ttfamily \#include $<$Utils.\+hpp$>$}\newline
 {\ttfamily \#include $<$Mouse.\+hpp$>$}\newline
+{\ttfamily \#include $<$Safeties.\+hpp$>$}\newline
 \subsection*{Classes}
 \begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_context_settings}{Context\+Settings}}
 \item 
 class \mbox{\hyperlink{class_window}{Window}}
 \end{DoxyCompactItemize}
 \subsection*{Typedefs}
 \begin{DoxyCompactItemize}
 \item 
-typedef void($\ast$ \mbox{\hyperlink{_window_8hpp_a6849c0abbb7ea93481de9f39ddaf5c79}{on\+Window\+Resized\+\_\+f}}) (const u32 width, const u32 height, \mbox{\hyperlink{class_window}{Window}} $\ast$window)
+typedef void($\ast$ \mbox{\hyperlink{_window_8hpp_ada6d9541330d61d26fa6ba699a2d27ca}{on\+Window\+Resized\+\_\+f}}) (const u32 width, const u32 height, Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$window)
 \item 
-typedef void($\ast$ \mbox{\hyperlink{_window_8hpp_ad1980bd4a8619653dab87e3d48f94780}{on\+Mouse\+Event\+\_\+f}}) (const \mbox{\hyperlink{_mouse_8hpp_a16f77233bd7e08699b6701740cbed216}{Mouse\+Event}} mouse\+Event, const \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} mouse\+Flags, const u32 x\+Pos, const u32 y\+Pos, \mbox{\hyperlink{class_window}{Window}} $\ast$window)
+typedef void($\ast$ \mbox{\hyperlink{_window_8hpp_ab1aedf6a053ebea9af5d50b0888dcedd}{on\+Mouse\+Event\+\_\+f}}) (const \mbox{\hyperlink{_mouse_8hpp_a16f77233bd7e08699b6701740cbed216}{Mouse\+Event}} mouse\+Event, const \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} mouse\+Flags, const u32 x\+Pos, const u32 y\+Pos, Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$window)
 \item 
-\mbox{\Hypertarget{_window_8hpp_ab907ebe270e470b3df3b507d2f47b147}\label{_window_8hpp_ab907ebe270e470b3df3b507d2f47b147}} 
-typedef void($\ast$ {\bfseries on\+Mouse\+Move\+\_\+f}) (const \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} mouse\+Flags, const u32 x\+Pos, const u32 y\+Pos, \mbox{\hyperlink{class_window}{Window}} $\ast$window)
+\mbox{\Hypertarget{_window_8hpp_a4aa071884935a97feb193b26ed5c823e}\label{_window_8hpp_a4aa071884935a97feb193b26ed5c823e}} 
+typedef void($\ast$ {\bfseries on\+Mouse\+Move\+\_\+f}) (const \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} mouse\+Flags, const u32 x\+Pos, const u32 y\+Pos, Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$window)
 \end{DoxyCompactItemize}
 \subsection*{Enumerations}
 \begin{DoxyCompactItemize}
@@ -28,6 +31,18 @@ enum {\bfseries Window\+State} \+: u8 \{ {\bfseries M\+I\+N\+I\+M\+I\+Z\+ED} = 0
 {\bfseries M\+A\+X\+I\+M\+I\+Z\+ED}, 
 {\bfseries N\+E\+I\+T\+H\+ER}
  \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{_window_8hpp_a924751bb68f66c234c434b6ae4992790}\label{_window_8hpp_a924751bb68f66c234c434b6ae4992790}} 
+static L\+R\+E\+S\+U\+LT C\+A\+L\+L\+B\+A\+CK {\bfseries Window\+Proc} (H\+W\+ND, U\+I\+NT, W\+P\+A\+R\+AM, L\+P\+A\+R\+AM)
+\item 
+\mbox{\Hypertarget{_window_8hpp_a4cb07210ab24d47188fe8351efcfee50}\label{_window_8hpp_a4cb07210ab24d47188fe8351efcfee50}} 
+static void {\bfseries remove\+Window} (\mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ \mbox{\hyperlink{class_window}{Window}} $>$)
+\item 
+\mbox{\Hypertarget{_window_8hpp_a58ae813185b9d3279c90d78e79eef572}\label{_window_8hpp_a58ae813185b9d3279c90d78e79eef572}} 
+static Nullable \mbox{\hyperlink{class_window}{Window}} $\ast$ {\bfseries get\+Window\+From\+Handle} (H\+W\+ND)
 \end{DoxyCompactItemize}
 
 
@@ -51,11 +66,11 @@ Windows  &\mbox{\hyperlink{_win32_window_8cpp}{Win32\+Window.\+cpp}}   \\\cline{
 
 
 \subsection{Typedef Documentation}
-\mbox{\Hypertarget{_window_8hpp_ad1980bd4a8619653dab87e3d48f94780}\label{_window_8hpp_ad1980bd4a8619653dab87e3d48f94780}} 
+\mbox{\Hypertarget{_window_8hpp_ab1aedf6a053ebea9af5d50b0888dcedd}\label{_window_8hpp_ab1aedf6a053ebea9af5d50b0888dcedd}} 
 \index{Window.\+hpp@{Window.\+hpp}!on\+Mouse\+Event\+\_\+f@{on\+Mouse\+Event\+\_\+f}}
 \index{on\+Mouse\+Event\+\_\+f@{on\+Mouse\+Event\+\_\+f}!Window.\+hpp@{Window.\+hpp}}
 \subsubsection{\texorpdfstring{on\+Mouse\+Event\+\_\+f}{onMouseEvent\_f}}
-{\footnotesize\ttfamily typedef void($\ast$ on\+Mouse\+Event\+\_\+f) (const \mbox{\hyperlink{_mouse_8hpp_a16f77233bd7e08699b6701740cbed216}{Mouse\+Event}} mouse\+Event, const \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} mouse\+Flags, const u32 x\+Pos, const u32 y\+Pos, \mbox{\hyperlink{class_window}{Window}} $\ast$window)}
+{\footnotesize\ttfamily typedef void($\ast$ on\+Mouse\+Event\+\_\+f) (const \mbox{\hyperlink{_mouse_8hpp_a16f77233bd7e08699b6701740cbed216}{Mouse\+Event}} mouse\+Event, const \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} mouse\+Flags, const u32 x\+Pos, const u32 y\+Pos, Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$window)}
 
 Handles a mouse event.
 
@@ -72,11 +87,11 @@ Handles a mouse event.
 \mbox{\tt in}  & {\em window} & A pointer to the window for which this event was triggered. \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{_window_8hpp_a6849c0abbb7ea93481de9f39ddaf5c79}\label{_window_8hpp_a6849c0abbb7ea93481de9f39ddaf5c79}} 
+\mbox{\Hypertarget{_window_8hpp_ada6d9541330d61d26fa6ba699a2d27ca}\label{_window_8hpp_ada6d9541330d61d26fa6ba699a2d27ca}} 
 \index{Window.\+hpp@{Window.\+hpp}!on\+Window\+Resized\+\_\+f@{on\+Window\+Resized\+\_\+f}}
 \index{on\+Window\+Resized\+\_\+f@{on\+Window\+Resized\+\_\+f}!Window.\+hpp@{Window.\+hpp}}
 \subsubsection{\texorpdfstring{on\+Window\+Resized\+\_\+f}{onWindowResized\_f}}
-{\footnotesize\ttfamily typedef void($\ast$ on\+Window\+Resized\+\_\+f) (const u32 width, const u32 height, \mbox{\hyperlink{class_window}{Window}} $\ast$window)}
+{\footnotesize\ttfamily typedef void($\ast$ on\+Window\+Resized\+\_\+f) (const u32 width, const u32 height, Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$window)}
 
 Handles a resize of the window. This should only be used to reset the graphics.
 

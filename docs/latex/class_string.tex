@@ -1,0 +1,86 @@
+\hypertarget{class_string}{}\section{String Class Reference}
+\label{class_string}\index{String@{String}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_string_a227778609438ca052a4b7f325c1f0502}\label{class_string_a227778609438ca052a4b7f325c1f0502}} 
+{\bfseries String} (\mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ const char $>$ string) noexcept
+\item 
+\mbox{\Hypertarget{class_string_a4b39c4282829506796cf9c1d09538b6c}\label{class_string_a4b39c4282829506796cf9c1d09538b6c}} 
+{\bfseries String} (const char $\ast$string) noexcept
+\item 
+\mbox{\Hypertarget{class_string_a4f8f3179fcb176ac3d204094426a5ada}\label{class_string_a4f8f3179fcb176ac3d204094426a5ada}} 
+{\bfseries String} (const \mbox{\hyperlink{class_string}{String}} \&copy) noexcept=default
+\item 
+\mbox{\Hypertarget{class_string_add2fb3ec45b7fe597bae40ed09ee0785}\label{class_string_add2fb3ec45b7fe597bae40ed09ee0785}} 
+{\bfseries String} (\mbox{\hyperlink{class_string}{String}} \&\&move) noexcept
+\item 
+\mbox{\Hypertarget{class_string_ab509631465fd32f0e1ec84d7087a304f}\label{class_string_ab509631465fd32f0e1ec84d7087a304f}} 
+\mbox{\hyperlink{class_string}{String}} \& {\bfseries operator=} (const \mbox{\hyperlink{class_string}{String}} \&copy) noexcept=default
+\item 
+\mbox{\Hypertarget{class_string_a374418081acd87d867367ae823861ee0}\label{class_string_a374418081acd87d867367ae823861ee0}} 
+\mbox{\hyperlink{class_string}{String}} \& {\bfseries operator=} (\mbox{\hyperlink{class_string}{String}} \&\&move) noexcept
+\item 
+\mbox{\Hypertarget{class_string_a8fe82324a99bae66cab74d308fe22e1d}\label{class_string_a8fe82324a99bae66cab74d308fe22e1d}} 
+Non\+Null const char $\ast$ {\bfseries c\+\_\+str} () const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a5f96a6ada25cdf853b7a1f39783ce64d}\label{class_string_a5f96a6ada25cdf853b7a1f39783ce64d}} 
+u32 {\bfseries length} () const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a6ce9d8ee2ecadf146944dc48b1fb292f}\label{class_string_a6ce9d8ee2ecadf146944dc48b1fb292f}} 
+{\bfseries operator const char $\ast$} () const noexcept
+\item 
+\mbox{\Hypertarget{class_string_aeb704926e1c7309c55c281b2e8078830}\label{class_string_aeb704926e1c7309c55c281b2e8078830}} 
+u32 {\bfseries operator()} () const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a8fd0c05e3a9ee76784cde5818b9146c7}\label{class_string_a8fd0c05e3a9ee76784cde5818b9146c7}} 
+u32 {\bfseries hash\+Code} () const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a8a6813758d1896dbf09665775416800a}\label{class_string_a8a6813758d1896dbf09665775416800a}} 
+bool {\bfseries equals} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a4f5c978f41165bed85197a8c15e2c39e}\label{class_string_a4f5c978f41165bed85197a8c15e2c39e}} 
+i32 {\bfseries compare\+To} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a039a56a34f761f9fd60f0c292e739de7}\label{class_string_a039a56a34f761f9fd60f0c292e739de7}} 
+bool {\bfseries operator==} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a7952b22541d9ea1550b03da964274fca}\label{class_string_a7952b22541d9ea1550b03da964274fca}} 
+bool {\bfseries operator!=} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_ad97ae77967881f018f12c1d73e10655a}\label{class_string_ad97ae77967881f018f12c1d73e10655a}} 
+bool {\bfseries operator$<$} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_a4e553df61d67f5a74b11baab4846743f}\label{class_string_a4e553df61d67f5a74b11baab4846743f}} 
+bool {\bfseries operator$>$} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_adb110f5512e42a8cb4562a78a41591b9}\label{class_string_adb110f5512e42a8cb4562a78a41591b9}} 
+bool {\bfseries operator$<$=} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\item 
+\mbox{\Hypertarget{class_string_ab3dd8e113a19317a31d9ca91c78b6ec0}\label{class_string_ab3dd8e113a19317a31d9ca91c78b6ec0}} 
+bool {\bfseries operator$>$=} (const \mbox{\hyperlink{class_string}{String}} \&other) const noexcept
+\end{DoxyCompactItemize}
+\subsection*{Static Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_string_ada0c2bbb5447b10a4a4bf52f777bcbda}\label{class_string_ada0c2bbb5447b10a4a4bf52f777bcbda}} 
+static u32 {\bfseries find\+Hash\+Code} (Non\+Null const char $\ast$str) noexcept
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_string_a5daeeb0eb9fb5a569e296f59f1e0c6c6}\label{class_string_a5daeeb0eb9fb5a569e296f59f1e0c6c6}} 
+const char $\ast$ {\bfseries \+\_\+string}
+\item 
+\mbox{\Hypertarget{class_string_afbd91c4ee8068ee71deb5672bdf98204}\label{class_string_afbd91c4ee8068ee71deb5672bdf98204}} 
+u32 {\bfseries \+\_\+length}
+\item 
+\mbox{\Hypertarget{class_string_a2cb285b307912ad2ac5cfe700cd11827}\label{class_string_a2cb285b307912ad2ac5cfe700cd11827}} 
+u32 {\bfseries \+\_\+hash}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+tau/\+Tau\+Engine/include/String.\+hpp\item 
+tau/\+Tau\+Engine/src/String.\+cpp\end{DoxyCompactItemize}

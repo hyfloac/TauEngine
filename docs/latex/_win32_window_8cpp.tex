@@ -1,11 +1,10 @@
-\hypertarget{_win32_window_8cpp}{}\section{Tau\+Engine/src/\+Win32\+Window.cpp File Reference}
-\label{_win32_window_8cpp}\index{Tau\+Engine/src/\+Win32\+Window.\+cpp@{Tau\+Engine/src/\+Win32\+Window.\+cpp}}
-{\ttfamily \#include $<$Window.\+hpp$>$}\newline
+\hypertarget{_win32_window_8cpp}{}\section{tau/\+Tau\+Engine/src/\+Win32\+Window.cpp File Reference}
+\label{_win32_window_8cpp}\index{tau/\+Tau\+Engine/src/\+Win32\+Window.\+cpp@{tau/\+Tau\+Engine/src/\+Win32\+Window.\+cpp}}
 {\ttfamily \#include $<$Windowsx.\+h$>$}\newline
-{\ttfamily \#include $<$Tau\+Engine.\+hpp$>$}\newline
 {\ttfamily \#include $<$G\+L/glew.\+h$>$}\newline
 {\ttfamily \#include $<$G\+L/wglew.\+h$>$}\newline
-{\ttfamily \#include $<$G\+L/\+G\+L.\+h$>$}\newline
+{\ttfamily \#include $<$Tau\+Engine.\+hpp$>$}\newline
+{\ttfamily \#include $<$Window.\+hpp$>$}\newline
 {\ttfamily \#include $<$Enum\+Bit\+Fields.\+hpp$>$}\newline
 \subsection*{Macros}
 \begin{DoxyCompactItemize}
@@ -15,11 +14,11 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-static bool \mbox{\hyperlink{_win32_window_8cpp_afe3a16b144783b486691238a85e83e83}{add\+Window}} (\mbox{\hyperlink{class_window}{Window}} $\ast$system\+Window\+Container)
+static bool \mbox{\hyperlink{_win32_window_8cpp_aa9dc2971916146e5168dea357e8062f7}{add\+Window}} (Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$system\+Window\+Container)
 \item 
-static void \mbox{\hyperlink{_win32_window_8cpp_ac8e54635ebc1771c329100943a4b1bb0}{remove\+Window}} (\mbox{\hyperlink{class_window}{Window}} $\ast$system\+Window\+Container)
+static void \mbox{\hyperlink{_win32_window_8cpp_a9bb87263e963ec476ed4b9cb81ff8a18}{remove\+Window}} (\mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ \mbox{\hyperlink{class_window}{Window}} $>$ system\+Window\+Container)
 \item 
-static \mbox{\hyperlink{class_window}{Window}} $\ast$ \mbox{\hyperlink{_win32_window_8cpp_a924608fa4a8d1686c162d0cb1a3c56aa}{get\+Window\+From\+Handle}} (H\+W\+ND handle)
+static Nullable \mbox{\hyperlink{class_window}{Window}} $\ast$ \mbox{\hyperlink{_win32_window_8cpp_a05fcc40e3162ae9767a91f29bd60ccf6}{get\+Window\+From\+Handle}} (H\+W\+ND handle)
 \item 
 static \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} \mbox{\hyperlink{_win32_window_8cpp_a03d8f58815b431af50087f17d86fd6ff}{mouse\+Flags\+From\+W\+Param}} (W\+P\+A\+R\+AM w\+Param)
 \item 
@@ -58,11 +57,11 @@ This is used with \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76
 This can be overriden by defining {\ttfamily M\+A\+X\+\_\+\+W\+I\+N\+D\+O\+W\+\_\+\+C\+O\+U\+NT} in the pre processor before building the D\+LL. 
 
 \subsection{Function Documentation}
-\mbox{\Hypertarget{_win32_window_8cpp_afe3a16b144783b486691238a85e83e83}\label{_win32_window_8cpp_afe3a16b144783b486691238a85e83e83}} 
+\mbox{\Hypertarget{_win32_window_8cpp_aa9dc2971916146e5168dea357e8062f7}\label{_win32_window_8cpp_aa9dc2971916146e5168dea357e8062f7}} 
 \index{Win32\+Window.\+cpp@{Win32\+Window.\+cpp}!add\+Window@{add\+Window}}
 \index{add\+Window@{add\+Window}!Win32\+Window.\+cpp@{Win32\+Window.\+cpp}}
 \subsubsection{\texorpdfstring{add\+Window()}{addWindow()}}
-{\footnotesize\ttfamily static bool add\+Window (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_window}{Window}} $\ast$}]{system\+Window\+Container }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+{\footnotesize\ttfamily static bool add\+Window (\begin{DoxyParamCaption}\item[{Non\+Null \mbox{\hyperlink{class_window}{Window}} $\ast$}]{system\+Window\+Container }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
 
 Adds a window to \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b32cecd}{window\+Handles}}.
 
@@ -74,11 +73,11 @@ Adds a window to \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b
 \begin{DoxyReturn}{Returns}
 Returns true if the {\ttfamily system\+Window\+Container} was successfully added to \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b32cecd}{window\+Handles}}. 
 \end{DoxyReturn}
-\mbox{\Hypertarget{_win32_window_8cpp_a924608fa4a8d1686c162d0cb1a3c56aa}\label{_win32_window_8cpp_a924608fa4a8d1686c162d0cb1a3c56aa}} 
+\mbox{\Hypertarget{_win32_window_8cpp_a05fcc40e3162ae9767a91f29bd60ccf6}\label{_win32_window_8cpp_a05fcc40e3162ae9767a91f29bd60ccf6}} 
 \index{Win32\+Window.\+cpp@{Win32\+Window.\+cpp}!get\+Window\+From\+Handle@{get\+Window\+From\+Handle}}
 \index{get\+Window\+From\+Handle@{get\+Window\+From\+Handle}!Win32\+Window.\+cpp@{Win32\+Window.\+cpp}}
 \subsubsection{\texorpdfstring{get\+Window\+From\+Handle()}{getWindowFromHandle()}}
-{\footnotesize\ttfamily static \mbox{\hyperlink{class_window}{Window}}$\ast$ get\+Window\+From\+Handle (\begin{DoxyParamCaption}\item[{H\+W\+ND}]{handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+{\footnotesize\ttfamily static Nullable \mbox{\hyperlink{class_window}{Window}}$\ast$ get\+Window\+From\+Handle (\begin{DoxyParamCaption}\item[{H\+W\+ND}]{handle }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
 
 Retrieves a \mbox{\hyperlink{class_window}{Window}} from \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b32cecd}{window\+Handles}}.
 
@@ -126,11 +125,11 @@ If {\ttfamily T\+R\+U\+S\+T\+\_\+\+R\+A\+W\+\_\+\+M\+O\+U\+S\+E\+\_\+\+P\+A\+R\+
 \begin{DoxyReturn}{Returns}
 An equivalent \mbox{\hyperlink{_mouse_8hpp_ab9e4743e55d6727025943a6a29a85d1d}{Mouse\+Flags}} enum bit mask. 
 \end{DoxyReturn}
-\mbox{\Hypertarget{_win32_window_8cpp_ac8e54635ebc1771c329100943a4b1bb0}\label{_win32_window_8cpp_ac8e54635ebc1771c329100943a4b1bb0}} 
+\mbox{\Hypertarget{_win32_window_8cpp_a9bb87263e963ec476ed4b9cb81ff8a18}\label{_win32_window_8cpp_a9bb87263e963ec476ed4b9cb81ff8a18}} 
 \index{Win32\+Window.\+cpp@{Win32\+Window.\+cpp}!remove\+Window@{remove\+Window}}
 \index{remove\+Window@{remove\+Window}!Win32\+Window.\+cpp@{Win32\+Window.\+cpp}}
 \subsubsection{\texorpdfstring{remove\+Window()}{removeWindow()}}
-{\footnotesize\ttfamily static void remove\+Window (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_window}{Window}} $\ast$}]{system\+Window\+Container }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+{\footnotesize\ttfamily static void remove\+Window (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_not_null}{Not\+Null}}$<$ \mbox{\hyperlink{class_window}{Window}} $>$}]{system\+Window\+Container }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
 
 Removes a window from \mbox{\hyperlink{_win32_window_8cpp_a0694e9af65d10d69624aa9a76b32cecd}{window\+Handles}}. After the window is removed, all other pointers are shifted down if necessary.
 
