@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="ComponentVector4">
+        <DisplayString>{{4 Component Vector Container}}</DisplayString>
+        <Expand>
+            <Item Name="[X|R]">x</Item>
+            <Item Name="[Y|G]">y</Item>
+            <Item Name="[Z|B]">z</Item>
+            <Item Name="[W|A]">w</Item>
+            
+            <Item Name="[iX]">ix</Item>
+            <Item Name="[iY]">iy</Item>
+            <Item Name="[iZ]">iz</Item>
+            <Item Name="[iW]">iw</Item>
+        </Expand>
+    </Type>
+    
+    <Type Name="Vector3f">
+        <DisplayString>{{vec3f ({_data.x}, {_data.y}, {_data.z})}}</DisplayString>
+        <Expand>
+            <Item Name="[X]">_data.x</Item>
+            <Item Name="[Y]">_data.y</Item>
+            <Item Name="[Z]">_data.z</Item>
+            <Item Name="[Components]">_data</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="Vector3i">
+        <DisplayString>{{vec3i ({_data.ix}, {_data.iy}, {_data.iz})}}</DisplayString>
+        <Expand>
+            <Item Name="[X]">_data.ix</Item>
+            <Item Name="[Y]">_data.iy</Item>
+            <Item Name="[Z]">_data.iz</Item>
+            <Item Name="[Components]">_data</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="Vector4f">
+        <DisplayString>{{vec4f ({_data.x}, {_data.y}, {_data.z}, {_data.w})}}</DisplayString>
+        <Expand>
+            <Item Name="[X]">_data.x</Item>
+            <Item Name="[Y]">_data.y</Item>
+            <Item Name="[Z]">_data.z</Item>
+            <Item Name="[W]">_data.w</Item>
+            <Item Name="[Components]">_data</Item>
+        </Expand>
+    </Type>
+    
+</AutoVisualizer>
