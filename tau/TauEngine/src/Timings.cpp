@@ -25,13 +25,13 @@ u64 currentTimeMillis() noexcept
 #ifdef _WIN32
     /* Windows */
     FILETIME fileTime;
-    LARGE_INTEGER fileTimeInt;
+    ULARGE_INTEGER fileTimeInt;
 
     /* Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it
      * to a LARGE_INTEGER structure. */
     GetSystemTimeAsFileTime(&fileTime);
     fileTimeInt.LowPart = fileTime.dwLowDateTime;
-    fileTimeInt.HighPart = static_cast<LONG>(fileTime.dwHighDateTime);
+    fileTimeInt.HighPart = fileTime.dwHighDateTime;
 
     u64 ret = static_cast<u64>(fileTimeInt.QuadPart);
     ret -= 116444736000000000uLL; /* Convert from file time to UNIX epoch time. */
