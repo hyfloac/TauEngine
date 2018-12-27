@@ -3,10 +3,10 @@
 #include <vector>
 #pragma warning(pop)
 #include <shader/GLShader.hpp>
-#include <EnumBitFields.hpp>
 #include <file/FileHandling.hpp>
 #include <Utils.hpp>
 #include <DynamicallySizedArray.hpp>
+#include <maths/Matrix4x4f.hpp>
 
 GLShader::GLShader(ShaderType shaderType, NotNull<const char> shaderPath, NotNull<GLProgram> glProgram) noexcept
     : _shaderType(shaderType), _shaderPath(shaderPath), _glProgram(glProgram), _shaderId(0)
@@ -24,7 +24,7 @@ GLShader::~GLShader() noexcept
 
 bool GLShader::loadShader() noexcept
 {
-    GLenum shaderType = 0;
+    GLenum shaderType;
     
     switch(_shaderType)
     {
@@ -107,3 +107,206 @@ void GLShader::activateShader() const noexcept
 {
     this->_glProgram->activate();
 }
+
+i32 GLShader::createUniform(String name) noexcept
+{
+    const GLint location = glGetUniformLocation(_glProgram->programId(), name.c_str());
+    if(location >= 0) { _uniforms[name] = location; }
+    return location;
+}
+
+void GLShader::setUniform(i32 location, i8 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, i16 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, i32 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, i64 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, u8 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, u16 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, u32 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, u64 value) const noexcept
+{
+    glUniform1i(location, value);
+}
+
+void GLShader::setUniform(i32 location, f32 value) const noexcept
+{
+    glUniform1f(location, value);
+}
+
+void GLShader::setUniform(i32 location, f64 value) const noexcept
+{
+    glUniform1d(location, value);
+}
+
+void GLShader::setUniform(i32 location, Vector3f& value) const noexcept
+{
+    glUniform3f(location, value.x(), value.y(), value.z());
+}
+
+void GLShader::setUniform(i32 location, Vector3i& value) const noexcept
+{
+    glUniform3i(location, value.x(), value.y(), value.z());
+}
+
+void GLShader::setUniform(i32 location, Vector4f& value) const noexcept
+{
+    glUniform4f(location, value.x(), value.y(), value.z(), value.w());
+}
+
+void GLShader::setUniform(i32 location, Matrix4x4f& value) const noexcept
+{
+    glUniformMatrix4fv(location, 1, GL_FALSE, (float*) value.data().m);
+}
+
+void GLShader::setUniform(i32 location, bool value) const noexcept
+{
+    this->setUniform(location, value ? 1 : 0);
+}
+
+void GLShader::setUniform(String& name, i8 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, i16 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, i32 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, i64 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, u8 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, u16 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, u32 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, u64 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, f32 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, f64 value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, Vector3f& value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, Vector3i& value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, Vector4f& value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, Matrix4x4f& value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+
+void GLShader::setUniform(String& name, bool value) const noexcept
+{
+    if(_uniforms.count(name) > 0)
+    {
+        this->setUniform(_uniforms.at(name), value);
+    }
+}
+

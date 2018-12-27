@@ -1,5 +1,6 @@
 #pragma warning(push, 0)
 #include <cstdio>
+#include <GL/glew.h>
 #pragma warning(pop)
 #include <gl/GLProgram.hpp>
 #include <DynamicallySizedArray.hpp>

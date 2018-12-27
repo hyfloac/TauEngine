@@ -23,11 +23,11 @@
 /**
  * Converts radians to degrees (single precision).
  */
-#define RAD_2_DEG_F(__F) (float) (__F * RADIANS_TO_DEGREES_CONVERTER_VAL##f)
+#define RAD_2_DEG_F(__F) (float) (__F * RADIANS_TO_DEGREES_CONVERTER_VAL)
  /**
   * Converts degrees to radians (single precision).
   */
-#define DEG_2_RAD_F(__F) (float) (__F * DEGREES_TO_RADIANS_CONVERTER_VAL##f)
+#define DEG_2_RAD_F(__F) (float) (__F * DEGREES_TO_RADIANS_CONVERTER_VAL)
  /**
   * Converts radians to degrees (double precision).
   */

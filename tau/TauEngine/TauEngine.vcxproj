@@ -37,6 +37,8 @@
     <ClCompile Include="src\GLShader.cpp" />
     <ClCompile Include="src\GLUtils.cpp" />
     <ClCompile Include="src\Maths.cpp" />
+    <ClCompile Include="src\Matrix4x4f.cpp" />
+    <ClCompile Include="src\OBJLoader.cpp" />
     <ClCompile Include="src\String.cpp" />
     <ClCompile Include="src\TauEngine.cpp" />
     <ClCompile Include="src\Timings.cpp" />
@@ -63,6 +65,7 @@
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\Maths.hpp" />
     <ClInclude Include="include\maths\ComponentVector4.hpp" />
+    <ClInclude Include="include\maths\Matrix4x4f.hpp" />
     <ClInclude Include="include\maths\Vector3f.hpp" />
     <ClInclude Include="include\maths\Vector3i.hpp" />
     <ClInclude Include="include\maths\Vector4f.hpp" />

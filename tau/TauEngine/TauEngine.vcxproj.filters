@@ -78,6 +78,12 @@
     <ClCompile Include="src\Vector4f.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Matrix4x4f.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\OBJLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Maths.hpp">
@@ -152,9 +158,6 @@
     <ClInclude Include="include\maths\Vector3i.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Users\donovan.Michelle-PC\source\repos\VectorLib\VectorLib\ComponentVector4.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\maths\ComponentVector4.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -162,6 +165,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\maths\Vector4f.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\maths\Matrix4x4f.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
