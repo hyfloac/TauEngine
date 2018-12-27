@@ -1,12 +1,25 @@
 #include <cstdio>
+#include <cstdlib>
 
-void printSizes();
+#define PHASE_SHIFT (-24)
+
 void printCasting();
+void printSizes();
+void printAtoI(); 
+void printStrToL();
+void printStrToUL();
+void printAtoF(); 
+void printStrToF();
 
 int main()
 {
-    printSizes();
     printCasting();
+    printSizes();
+    printAtoI();
+    printStrToL();
+    printStrToUL();
+    printAtoF();
+    printStrToF();
 
     getchar();
 }
@@ -66,7 +79,7 @@ void printCasting()
 
 void printSizes()
 {
-#define PRINT_SIZE(__TYPE) printf("sizeof(" #__TYPE "): %llu\n", sizeof(__TYPE))
+#define PRINT_SIZE(__TYPE) printf("%-32s %llu\n", "sizeof(" #__TYPE "):", sizeof(__TYPE))
 
 #define PRINT__US(__TYPE) PRINT_SIZE(__TYPE); PRINT_SIZE(signed __TYPE); PRINT_SIZE(unsigned __TYPE);
 
@@ -105,3 +118,74 @@ void printSizes()
     PRINT_SIZE(wchar_t*);
     printf("---------------------\n\n");
 }
+
+void printAtoI()
+{
+#define TEST_ATOI(__NUM_STR) printf("\"%*s : %d\n", PHASE_SHIFT, __NUM_STR "\"", std::atoi(__NUM_STR));
+
+    TEST_ATOI("1");
+    TEST_ATOI("0");
+    TEST_ATOI("340.846");
+    TEST_ATOI("   0");
+    TEST_ATOI("   346873   ");
+    TEST_ATOI("   346873");
+    TEST_ATOI("   346873 adg");
+    printf("---------------------\n\n");
+}
+
+void printStrToL()
+{
+#define TEST_STRTOL(__NUM_STR) printf("\"%*s : % ld\n", PHASE_SHIFT, __NUM_STR "\"", std::strtol(__NUM_STR, nullptr, 10));
+
+    TEST_STRTOL("1");
+    TEST_STRTOL("0");
+    TEST_STRTOL("-340.846");
+    TEST_STRTOL("   -0");
+    TEST_STRTOL("   -346873   ");
+    TEST_STRTOL("   346873");
+    TEST_STRTOL("   346873 adg");
+    printf("---------------------\n\n");
+}
+
+void printStrToUL()
+{
+#define TEST_STRTOUL(__NUM_STR) printf("\"%*s : %lu\n", PHASE_SHIFT, __NUM_STR "\"", std::strtoul(__NUM_STR, nullptr, 10));
+
+    TEST_STRTOUL("1");
+    TEST_STRTOUL("0");
+    TEST_STRTOUL("-340.846");
+    TEST_STRTOUL("   -0");
+    TEST_STRTOUL("   -346873   ");
+    TEST_STRTOUL("   346873");
+    TEST_STRTOUL("   346873 adg");
+    printf("---------------------\n\n");
+}
+
+void printAtoF()
+{
+#define TEST_ATOF(__NUM_STR) printf("\"%*s : %f\n", PHASE_SHIFT, __NUM_STR "\"", std::atof(__NUM_STR));
+    
+    TEST_ATOF("1.0");
+    TEST_ATOF("0.00001");
+    TEST_ATOF("0.0000");
+    TEST_ATOF("   0.3467");
+    TEST_ATOF("   346873.3467967   ");
+    TEST_ATOF("   346873.3467adg");
+    TEST_ATOF("   346873.3467 adg");
+    printf("---------------------\n\n");
+}
+
+void printStrToF()
+{
+#define TEST_STRTOF(__NUM_STR) printf("\"%*s : %f\n", PHASE_SHIFT, __NUM_STR "\"", std::strtof(__NUM_STR, nullptr));
+
+    TEST_STRTOF("1.0");
+    TEST_STRTOF("0.00001");
+    TEST_STRTOF("0.0000");
+    TEST_STRTOF("   0.3467");
+    TEST_STRTOF("   346873.3467967   ");
+    TEST_STRTOF("  346873.3467adg");
+    TEST_STRTOF("   346873.3467 adg");
+    printf("---------------------\n\n");
+}
+

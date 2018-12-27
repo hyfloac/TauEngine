@@ -5,8 +5,13 @@
 #pragma warning(pop)
 #include <Utils.hpp>
 
+#define ____str(__X) #__X
+#define ___str(__X) ____str(__X)
+
+#define Assert(__STATE) if(!(__STATE)) { fprintf(stderr, "`" #__STATE "` Evaluated to false at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; }
+
 #ifdef _DEBUG
-  #define Ensure(__STATE) if(!(__STATE)) { fprintf(stderr, "`" #__STATE "` Evaluated to false.\n"); DEBUG_BREAK; }
+  #define Ensure(__STATE) Assert(__STATE)
 #else
   #define Ensure(__STATE)
 #endif

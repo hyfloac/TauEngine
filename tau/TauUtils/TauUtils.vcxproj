@@ -149,6 +149,7 @@
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\CVersion.hpp" />
     <ClInclude Include="include\DynamicallySizedArray.hpp" />
+    <ClInclude Include="include\DynArray.hpp" />
     <ClInclude Include="include\Endian.hpp" />
     <ClInclude Include="include\EnumBitFields.hpp" />
     <ClInclude Include="include\MathDefines.hpp" />
