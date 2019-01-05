@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 #include <gl/GLProgram.hpp>
-#include <DynamicallySizedArray.hpp>
+#include <VariableLengthArray.hpp>
 #include <Safeties.hpp>
 
 GLProgram::GLProgram() noexcept
@@ -41,7 +41,7 @@ bool GLProgram::linkAndValidate() noexcept
         }
         else
         {
-            DSA(GLchar, errorMsg, result);
+            VLA(GLchar, errorMsg, result);
             glGetShaderInfoLog(_programId, result, &result, errorMsg);
             printf("OpenGL failed to link program.\n  Error Message: %s\n", errorMsg);
         }
@@ -69,7 +69,7 @@ bool GLProgram::linkAndValidate() noexcept
         }
         else
         {
-            DSA(GLchar, errorMsg, result);
+            VLA(GLchar, errorMsg, result);
             glGetShaderInfoLog(_programId, result, &result, errorMsg);
             printf("OpenGL failed to validate program.\n  Error Message: %s\n", errorMsg);
         }

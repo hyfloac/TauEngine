@@ -276,7 +276,7 @@ Matrix4x4f& Matrix4x4f::rotateZ(float angle) noexcept
     return *this;
 }
 
-Matrix4x4f& Matrix4x4f::translate(Vector3f& translation) noexcept
+Matrix4x4f& Matrix4x4f::translate(const Vector3f& translation) noexcept
 {
     this->_data.rowMajorArr[3][0] += translation.x();
     this->_data.rowMajorArr[3][1] += translation.y();
@@ -285,7 +285,58 @@ Matrix4x4f& Matrix4x4f::translate(Vector3f& translation) noexcept
     return *this;
 }
 
-Matrix4x4f& Matrix4x4f::rotate(Vector3f& rotation) noexcept
+Matrix4x4f& Matrix4x4f::rotateST(const Vector3f& rotation) noexcept
+{
+    const float z_sin = fastSin(rotation.z());
+    const float z_cos = fastCos(rotation.z());
+    const float z_nSin = -z_sin; 
+
+    const float x_sin = fastSin(rotation.x());
+    const float x_cos = fastCos(rotation.x());
+    const float x_nSin = -x_sin;
+
+    const float y_sin = fastSin(rotation.y());
+    const float y_cos = fastCos(rotation.y());
+    const float y_nSin = -y_sin;
+
+
+    const float z_nm01 = _data.rowMajorArr[1][1] * z_sin;
+
+    _data.rowMajorArr[1][0] = _data.rowMajorArr[0][0] * z_nSin;
+    _data.rowMajorArr[1][1] = _data.rowMajorArr[1][1] * z_cos;
+
+    _data.rowMajorArr[0][0] = _data.rowMajorArr[0][0] * z_cos;
+    _data.rowMajorArr[0][1] = z_nm01;
+
+
+    const float x_nm12 = _data.rowMajorArr[2][2] * x_sin;
+
+    _data.rowMajorArr[2][0] = _data.rowMajorArr[1][0] * x_nSin;
+    _data.rowMajorArr[2][1] = _data.rowMajorArr[1][1] * x_nSin;
+    _data.rowMajorArr[2][2] = _data.rowMajorArr[2][2] * x_cos;
+
+    _data.rowMajorArr[1][0] = _data.rowMajorArr[1][0] * x_cos;
+    _data.rowMajorArr[1][1] = _data.rowMajorArr[1][1] * x_cos;
+    _data.rowMajorArr[1][2] = x_nm12;
+
+
+    const float y_nm00 = _data.rowMajorArr[0][0] * y_cos + _data.rowMajorArr[2][0] * y_nSin;
+    const float y_nm01 = _data.rowMajorArr[0][1] * y_cos + _data.rowMajorArr[2][1] * y_nSin;
+    const float y_nm02 = _data.rowMajorArr[2][2] * y_nSin;
+
+    _data.rowMajorArr[2][0] = _data.rowMajorArr[0][0] * y_sin + _data.rowMajorArr[2][0] * y_cos;
+    _data.rowMajorArr[2][1] = _data.rowMajorArr[0][1] * y_sin + _data.rowMajorArr[2][1] * y_cos;
+    _data.rowMajorArr[2][2] = _data.rowMajorArr[2][2] * y_cos;
+
+    _data.rowMajorArr[0][0] = y_nm00;
+    _data.rowMajorArr[0][1] = y_nm01;
+    _data.rowMajorArr[0][2] = y_nm02;
+
+
+    return *this;
+}
+
+Matrix4x4f& Matrix4x4f::rotate(const Vector3f& rotation) noexcept
 {
     this->rotateZ(rotation.z());
     this->rotateX(rotation.x());
@@ -294,7 +345,7 @@ Matrix4x4f& Matrix4x4f::rotate(Vector3f& rotation) noexcept
     return *this;
 }
 
-Matrix4x4f& Matrix4x4f::scale(Vector3f& scaling) noexcept
+Matrix4x4f& Matrix4x4f::scale(const Vector3f& scaling) noexcept
 {
     this->_data.m00 += scaling.x();
     this->_data.m11 += scaling.y();
@@ -303,7 +354,7 @@ Matrix4x4f& Matrix4x4f::scale(Vector3f& scaling) noexcept
     return *this;
 }
 
-Matrix4x4f& Matrix4x4f::scale(float scaling) noexcept
+Matrix4x4f& Matrix4x4f::scale(const float scaling) noexcept
 {
     this->_data.m00 += scaling;
     this->_data.m11 += scaling;
@@ -312,7 +363,7 @@ Matrix4x4f& Matrix4x4f::scale(float scaling) noexcept
     return *this;
 }
 
-Matrix4x4f Matrix4x4f::translation(Vector3f& translation) noexcept
+Matrix4x4f Matrix4x4f::translation(const Vector3f& translation) noexcept
 {
     Matrix4x4f matrix;
 
@@ -340,7 +391,7 @@ Matrix4x4f Matrix4x4f::translation(Vector3f& translation) noexcept
     return matrix;
 }
 
-Matrix4x4f Matrix4x4f::rotation(Vector3f& rotation) noexcept
+Matrix4x4f Matrix4x4f::rotation(const Vector3f& rotation) noexcept
 {
     Matrix4x4f matrix;
 
@@ -349,7 +400,7 @@ Matrix4x4f Matrix4x4f::rotation(Vector3f& rotation) noexcept
     return matrix;
 }
 
-Matrix4x4f Matrix4x4f::scalar(Vector3f& scaling) noexcept
+Matrix4x4f Matrix4x4f::scalar(const Vector3f& scaling) noexcept
 {
     Matrix4x4f matrix;
 
@@ -415,51 +466,86 @@ Matrix4x4f Matrix4x4f::perspective(float fov, float aspect, float nearPlane, flo
     return matrix;
 }
 
-Matrix4x4f& Matrix4x4f::tMatRotX(float angle) noexcept
+Matrix4x4f Matrix4x4f::transformation(const Vector3f& translation, const Vector3f& rotation, const Vector3f& scale) noexcept
 {
-    const float sin = fastSin(angle);
-    const float cos = fastCos(angle);
+    Matrix4x4f matrix(0.0f);
 
-    _data.rowMajorArr[1][1] *= cos;
-    _data.rowMajorArr[2][2] *= cos;
-    _data.rowMajorArr[2][1] = -sin;
-    _data.rowMajorArr[1][2] =  sin;
+    matrix._data.rowMajorArr[3][0] = translation.x();
+    matrix._data.rowMajorArr[3][1] = translation.y();
+    matrix._data.rowMajorArr[3][2] = translation.z();
 
-    return *this;
-}
+    matrix._data.m00 = scale.x();
+    matrix._data.m11 = scale.y();
+    matrix._data.m22 = scale.z();
 
-Matrix4x4f& Matrix4x4f::tMatRotY(float angle) noexcept
-{
-    const float sin = fastSin(angle);
-    const float cos = fastCos(angle);
-    _data.rowMajorArr[0][0] *= cos;
-    _data.rowMajorArr[2][2] *= cos;
-    _data.rowMajorArr[0][2] = -sin;
-    _data.rowMajorArr[2][0] =  sin;
+    matrix._data.m33 = 1.0f;
 
-    return *this;
-}
-
-Matrix4x4f& Matrix4x4f::tMatRotZ(float angle) noexcept
-{
-    const float sin = fastSin(angle);
-    const float cos = fastCos(angle);
-
-    _data.rowMajorArr[0][0] *= cos;
-    _data.rowMajorArr[1][1] *= cos;
-    _data.rowMajorArr[1][0] = -sin;
-    _data.rowMajorArr[0][1] =  sin;
-
-    return *this;
-}
-
-Matrix4x4f Matrix4x4f::transformation(Vector3f& translation, Vector3f& rotation, Vector3f& scale) noexcept
-{
-    Matrix4x4f matrix;
-
-    matrix.translate(translation);
-    matrix.scale(scale);
     matrix.rotate(rotation);
 
     return matrix;
+}
+
+Matrix4x4f Matrix4x4f::transformation(const Vector3f& translation, const Vector3f& rotation, const float scale) noexcept
+{
+    Matrix4x4f matrix(0.0f);
+
+    matrix._data.rowMajorArr[3][0] = translation.x();
+    matrix._data.rowMajorArr[3][1] = translation.y();
+    matrix._data.rowMajorArr[3][2] = translation.z();
+
+    matrix._data.m00 = scale;
+    matrix._data.m11 = scale;
+    matrix._data.m22 = scale;
+
+    matrix._data.m33 = 1.0f;
+
+    matrix.rotate(rotation);
+
+    return matrix;
+}
+
+Matrix4x4f& Matrix4x4f::transformation(const Vector3f& rotation, const Vector3f& scale) noexcept
+{
+    this->_data.rowMajorArr[0][0] = scale.x();
+    this->_data.rowMajorArr[1][1] = scale.y();
+    this->_data.rowMajorArr[2][2] = scale.z();
+
+    this->_data.rowMajorArr[0][1] = 0.0f;
+    this->_data.rowMajorArr[0][2] = 0.0f;
+    this->_data.rowMajorArr[0][3] = 0.0f;
+
+    this->_data.rowMajorArr[1][0] = 0.0f;
+    this->_data.rowMajorArr[1][2] = 0.0f;
+    this->_data.rowMajorArr[1][3] = 0.0f;
+
+    this->_data.rowMajorArr[2][0] = 0.0f;
+    this->_data.rowMajorArr[2][1] = 0.0f;
+    this->_data.rowMajorArr[2][3] = 0.0f;
+
+    this->rotateST(rotation);
+
+    return *this;
+}
+
+Matrix4x4f& Matrix4x4f::transformation(const Vector3f& rotation, const float scale) noexcept
+{
+    this->_data.rowMajorArr[0][0] = scale;
+    this->_data.rowMajorArr[1][1] = scale;
+    this->_data.rowMajorArr[2][2] = scale;
+
+    this->_data.rowMajorArr[0][1] = 0.0f;
+    this->_data.rowMajorArr[0][2] = 0.0f;
+    this->_data.rowMajorArr[0][3] = 0.0f;
+
+    this->_data.rowMajorArr[1][0] = 0.0f;
+    this->_data.rowMajorArr[1][2] = 0.0f;
+    this->_data.rowMajorArr[1][3] = 0.0f;
+
+    this->_data.rowMajorArr[2][0] = 0.0f;
+    this->_data.rowMajorArr[2][1] = 0.0f;
+    this->_data.rowMajorArr[2][3] = 0.0f;
+
+    this->rotateST(rotation);
+
+    return *this;
 }

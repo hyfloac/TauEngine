@@ -27,7 +27,7 @@ TUID TUID::generate() noexcept
 {
     static u32 s_incremental = 0;
 
-    u32 inc = s_incremental++;
+    const u32 inc = s_incremental++;
 
     u64 b0 = fastRand();
     u32 b1 = fastRand();
@@ -49,26 +49,6 @@ TUID TUID::generate() noexcept
     b1 |= inc & 0xFF000000;
 
     return TUID((b0 << 32) | b1, (b2 << 32) | b3);
-}
-
-u32 getSeed(TUID tuid) noexcept
-{
-    u32 b0 = tuid.highBits() >> 32;
-    u32 b1 = tuid.highBits() & 0xFFFFFFFF;
-    u32 b2 = tuid.lowBits() >> 32;
-    u32 b3 = tuid.lowBits() & 0xFFFFFFFF;
-    u32 inc = 0;
-
-    inc |= b1 & 0xFF000000;
-    b1 &= 0x00FFFFFF;
-
-    u32 b1_t = b3 ^ b2;
-    u32 b1_final = b1 |= b1_t << 3;
-
-    u32 seed = (b1_final - 2531011) / 214013;
-    seed = (seed - 2531011) / 214013;
-
-    return seed;
 }
 
 TUID::TUID(u64 highBits, u64 lowBits) noexcept

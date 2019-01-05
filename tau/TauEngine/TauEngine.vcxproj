@@ -71,15 +71,16 @@
     <ClInclude Include="include\maths\Vector4f.hpp" />
     <ClInclude Include="include\model\VertexArray.hpp" />
     <ClInclude Include="include\model\VertexBuffer.hpp" />
-    <ClInclude Include="include\Mouse.hpp" />
+    <ClInclude Include="include\system\Keyboard.hpp" />
+    <ClInclude Include="include\system\Mouse.hpp" />
     <ClInclude Include="include\shader\GLShader.hpp" />
     <ClInclude Include="include\shader\IShader.hpp" />
     <ClInclude Include="include\String.hpp" />
     <ClInclude Include="include\TauEngine.hpp" />
     <ClInclude Include="include\Timings.hpp" />
     <ClInclude Include="include\TUID.hpp" />
-    <ClInclude Include="include\Window.hpp" />
-    <ClInclude Include="include\_SysWindowContainer.hpp" />
+    <ClInclude Include="include\system\Window.hpp" />
+    <ClInclude Include="include\system\_SysWindowContainer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Vector.natvis" />

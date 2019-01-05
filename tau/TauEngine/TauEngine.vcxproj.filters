@@ -92,19 +92,10 @@
     <ClInclude Include="include\DLL.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\_SysWindowContainer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\TauEngine.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Timings.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Mouse.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\IShader.hpp">
@@ -168,6 +159,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\maths\Matrix4x4f.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\system\Mouse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\system\Window.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\system\_SysWindowContainer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\system\Keyboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

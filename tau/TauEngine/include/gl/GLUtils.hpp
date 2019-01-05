@@ -15,11 +15,26 @@ TAU_DLL void __internal__clearGLErrors();
 
 TAU_DLL bool __internal__logGLCall(const char* glFunc, const char* file, u32 line);
 
-#define ASSERT(__TEST) if(!(__TEST)) { DEBUG_BREAK; }
+#define ___ASSERT(__TEST) if(!(__TEST)) { DEBUG_BREAK; }
 #ifdef _DEBUG
-  #define CALL_GL_FUNC(__CALL) __internal__clearGLErrors(), __CALL; ASSERT(__internal__logGLCall(#__CALL, __FILE__, __LINE__))
+  #define CALL_GL_FUNC(__CALL) __internal__clearGLErrors(), __CALL; ___ASSERT(__internal__logGLCall(#__CALL, __FILE__, __LINE__))
 #else
   #define CALL_GL_FUNC(__CALL)
 #endif
 
 #define GLCall(__CALL) CALL_GL_FUNC(__CALL)
+
+#define GL_STATE_CONTROLLER(__F_NAME, __E_NAME) inline static void enableGL##__F_NAME() noexcept { glEnable(__E_NAME); }   \
+                                                inline static void disableGL##__F_NAME() noexcept { glDisable(__E_NAME); } \
+                                                inline static void setGL##__F_NAME(bool state) noexcept                    \
+                                                {                                                                          \
+                                                    if (state) { enableGL##__F_NAME(); }                                   \
+                                                    else { disableGL##__F_NAME(); }                                        \
+                                                }                                                                          \
+                                                inline static void toggleGL##__F_NAME() noexcept { setGL##__F_NAME(!glIsEnabled(__E_NAME)); }
+
+GL_STATE_CONTROLLER(Blend, GL_BLEND)
+GL_STATE_CONTROLLER(CullFace, GL_CULL_FACE)
+GL_STATE_CONTROLLER(DebugOutput, GL_DEBUG_OUTPUT)
+GL_STATE_CONTROLLER(DebugOutputSync, GL_DEBUG_OUTPUT_SYNCHRONOUS)
+GL_STATE_CONTROLLER(DepthTest, GL_DEPTH_TEST)

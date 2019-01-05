@@ -29,12 +29,11 @@ std::shared_ptr<spdlog::logger> getEngineLogger() noexcept
     return engineLogger;
 }
 
-
-volatile static bool shouldExit = false;
+volatile static bool should_exit = false;
 
 bool tauShouldExit() noexcept
 {
-    return shouldExit;
+    return should_exit;
 }
 
 #ifdef _WIN32
@@ -46,7 +45,7 @@ bool tauShouldExit() noexcept
   #define NUM_MESSAGES_TO_READ 8
 #endif
 
-void tauRunMessageLoop() noexcept
+static void runMessageLoop() noexcept
 {
     MSG msg;
     u32 cnt = 0;
@@ -59,73 +58,61 @@ void tauRunMessageLoop() noexcept
 
 void tauExit(int code) noexcept
 {
-    shouldExit = true;
+    should_exit = true;
     PostQuitMessage(code);
 }
 #else
-void tauRunMessageLoop() noexcept
+static void runMessageLoop() noexcept
 {
+}
+
+void tauExit(int code) noexcept
+{
+    should_exit = true;
 }
 #endif
 
-
-void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF) noexcept
+void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSInterval) noexcept
 {
-#ifndef PRINT_FPS
-  #define PRINT_FPS 0 || _DEBUG
-#endif
-
     const float MS_PER_UPDATE = 1000.0f / targetUPS;
     u64 lastTime = currentTimeMillis();
     float lag = 0.0f;
 
-#if PRINT_FPS
     u64 counterTime = lastTime;
     u32 fps = 0;
     u32 ups = 0;
-#endif
 
-#if PRINT_FPS
-#define PSC(__COUNTER, __FUNC, ...) __FUNC(__VA_ARGS__); ++(__COUNTER);
-#else
-#define PSC(__COUNTER, __FUNC, ...) __FUNC(__VA_ARGS__);
-#endif
+    const u64 _timeInterval = printFPSInterval * 1000;
 
-
-    while (!tauShouldExit())
+    while(!should_exit)
     {
         const u64 currentTime = currentTimeMillis();
         const u64 elapsed = currentTime - lastTime;
         lastTime = currentTime;
         lag += static_cast<float>(elapsed);
 
-        tauRunMessageLoop();
+        runMessageLoop();
 
-        while (lag >= MS_PER_UPDATE)
+        while(lag >= MS_PER_UPDATE)
         {
-            PSC(ups, updateF);
+            updateF(); 
+            ++ups;
             lag -= MS_PER_UPDATE;
         }
 
-        PSC(fps, renderF, (lag / MS_PER_UPDATE));
-
-#if PRINT_FPS
-#ifndef PRINT_FPS_INTERVAL
-  #define PRINT_FPS_INTERVAL 3
-#endif
-        constexpr u64 _timeInterval = PRINT_FPS_INTERVAL * 1000;
+        renderF(lag / MS_PER_UPDATE); 
+        ++fps;
 
         const u64 currentCounterTime = currentTimeMillis();
 
-        if ((currentCounterTime - counterTime) >= _timeInterval)
+        if(printFPSInterval && currentCounterTime - counterTime >= _timeInterval)
         {
             counterTime = currentCounterTime;
-            engineLogger->debug("UPS {}", ups / PRINT_FPS_INTERVAL);
-            engineLogger->debug("FPS {}", fps / PRINT_FPS_INTERVAL);
+            engineLogger->debug("UPS {}", ups / printFPSInterval);
+            engineLogger->debug("FPS {}", fps / printFPSInterval);
 
             ups = 0;
             fps = 0;
         }
-#endif
     }
 }

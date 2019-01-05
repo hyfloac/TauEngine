@@ -25,5 +25,3 @@ public:
 
     void toString(char str[38]) const noexcept;
 };
-
-TAU_DLL u32 getSeed(TUID tuid) noexcept;

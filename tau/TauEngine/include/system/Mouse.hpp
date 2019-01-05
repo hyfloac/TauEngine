@@ -5,14 +5,14 @@
  */
 #pragma once
 #include <NumTypes.hpp>
+#include <Objects.hpp>
 
-/* [Flags] */
 /**
  * A series of flags for use with Mouse Events.
  * 
  * These value are equivalent to the Win32 API values.
  */
-enum MouseFlags : u8
+flags MouseFlags : u8
 {
     /** The left mouse button is currently pressed.                  */ MF_LEFT_BUTTON_DOWN   = 1 << 0,
     /** The right mouse button is currently pressed.                 */ MF_RIGHT_BUTTON_DOWN  = 1 << 1,
@@ -23,7 +23,7 @@ enum MouseFlags : u8
     /** The second side mouse button is currently pressed.           */ MF_X_BUTTON_2_DOWN    = 1 << 6
 };
 
-enum MouseEvent : u8
+enum class MouseEvent : u8
 {
     /** The left mouse button has just been pressed.                   */ ME_LEFT_BUTTON_DOWN = 0,
     /** The left mouse button has just been released.                  */ ME_LEFT_BUTTON_UP,

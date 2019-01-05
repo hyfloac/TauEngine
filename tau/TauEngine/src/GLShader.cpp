@@ -5,7 +5,7 @@
 #include <shader/GLShader.hpp>
 #include <file/FileHandling.hpp>
 #include <Utils.hpp>
-#include <DynamicallySizedArray.hpp>
+#include <VariableLengthArray.hpp>
 #include <maths/Matrix4x4f.hpp>
 
 GLShader::GLShader(ShaderType shaderType, NotNull<const char> shaderPath, NotNull<GLProgram> glProgram) noexcept
@@ -57,7 +57,7 @@ bool GLShader::loadShader() noexcept
         }
         else
         {
-            DSA(GLchar, errorMsg, result);
+            VLA(GLchar, errorMsg, result);
             glGetShaderInfoLog(shaderId, result, &result, errorMsg);
             printf("OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
         }
@@ -88,7 +88,7 @@ bool GLShader::loadShader() noexcept
         }
         else
         {
-            DSA(GLchar, errorMsg, result);
+            VLA(GLchar, errorMsg, result);
             glGetShaderInfoLog(shaderId, result, &result, errorMsg);
             printf("OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
         }

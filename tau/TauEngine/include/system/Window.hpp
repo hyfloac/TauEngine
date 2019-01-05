@@ -14,10 +14,11 @@
 #pragma once
 
 #include <NumTypes.hpp>
-#include <_SysWindowContainer.hpp>
+#include <system/_SysWindowContainer.hpp>
 #include <DLL.hpp>
 #include <Utils.hpp>
-#include <Mouse.hpp>
+#include <system/Mouse.hpp>
+#include <system/Keyboard.hpp>
 #include <Safeties.hpp>
 
 class Window;
@@ -47,7 +48,9 @@ typedef void(*onMouseEvent_f)(const MouseEvent mouseEvent, const MouseFlags mous
 
 typedef void(*onMouseMove_f)(const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, NonNull Window* window);
 
-enum WindowState : u8
+typedef void(*onKeyEvent_f)(const KeyboardEvent keyboardEvent, const KeyboardFlags keyboardFlags, const u64 key, const wchar_t unicodeChar, const char asciiChar, NonNull Window* window);
+
+enum class WindowState : u8
 {
     MINIMIZED = 0,
     MAXIMIZED,
@@ -131,6 +134,7 @@ private:
     onWindowResized_f _windowResizeHandler;
     onMouseEvent_f _mouseEventHandler;
     onMouseMove_f _mouseMoveHandler;
+    onKeyEvent_f _keyEventHandler;
 public:
     /**
      * Unloads the current context. 
@@ -173,9 +177,10 @@ public:
 
     void setTitle(const char* title) noexcept;
 
-    inline void setResizeWindowHandler(Nullable onWindowResized_f windowResizeHandler) { _windowResizeHandler = windowResizeHandler; }
-    inline void setMouseEventHandler(Nullable onMouseEvent_f mouseEventHandler) { _mouseEventHandler = mouseEventHandler; }
-    inline void setMouseMoveHandler(Nullable onMouseMove_f mouseMoveHandler) { _mouseMoveHandler = mouseMoveHandler; }
+    inline void setResizeWindowHandler(Nullable onWindowResized_f windowResizeHandler) noexcept { _windowResizeHandler = windowResizeHandler; }
+    inline void setMouseEventHandler(Nullable onMouseEvent_f mouseEventHandler) noexcept { _mouseEventHandler = mouseEventHandler; }
+    inline void setMouseMoveHandler(Nullable onMouseMove_f mouseMoveHandler) noexcept { _mouseMoveHandler = mouseMoveHandler; }
+    inline void setKeyEventHandler(Nullable onKeyEvent_f keyEventHandler) noexcept { _keyEventHandler = keyEventHandler; }
 
     bool createWindow() noexcept;
     void closeWindow() noexcept;

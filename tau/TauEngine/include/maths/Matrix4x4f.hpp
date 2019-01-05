@@ -35,18 +35,17 @@ public:
     };
 private:
     Matrix4x4fData _data;
-private:
-    Matrix4x4f& tMatRotX(float angle) noexcept;
-    Matrix4x4f& tMatRotY(float angle) noexcept;
-    Matrix4x4f& tMatRotZ(float angle) noexcept;
+
+    Matrix4x4f& rotateST(const Vector3f& rotation) noexcept;
 public:
     static Matrix4x4f perspective(float fov, float aspect, float nearPlane, float farPlane, bool leftHanded = true) noexcept;
 
-    static Matrix4x4f transformation(Vector3f& translation, Vector3f& rotation, Vector3f& scale) noexcept;
+    static Matrix4x4f transformation(const Vector3f& translation, const Vector3f& rotation, const Vector3f& scale) noexcept;
+    static Matrix4x4f transformation(const Vector3f& translation, const Vector3f& rotation, const float scale) noexcept;
 
-    static Matrix4x4f translation(Vector3f& translation) noexcept;
-    static Matrix4x4f rotation(Vector3f& rotation) noexcept;
-    static Matrix4x4f scalar(Vector3f& scaling) noexcept;
+    static Matrix4x4f translation(const Vector3f& translation) noexcept;
+    static Matrix4x4f rotation(const Vector3f& rotation) noexcept;
+    static Matrix4x4f scalar(const Vector3f& scaling) noexcept;
 public:
     Matrix4x4f() noexcept;
     Matrix4x4f(float filler) noexcept;
@@ -121,10 +120,13 @@ public:
     Matrix4x4f& rotateY(float angle) noexcept;
     Matrix4x4f& rotateZ(float angle) noexcept;
 
-    Matrix4x4f& translate(Vector3f& translation) noexcept;
-    Matrix4x4f& rotate(Vector3f& rotation) noexcept;
-    Matrix4x4f& scale(Vector3f& scaling) noexcept;
-    Matrix4x4f& scale(float scaling) noexcept;
+    Matrix4x4f& translate(const Vector3f& translation) noexcept;
+    Matrix4x4f& rotate(const Vector3f& rotation) noexcept;
+    Matrix4x4f& scale(const Vector3f& scaling) noexcept;
+    Matrix4x4f& scale(const float scaling) noexcept;
+
+    Matrix4x4f& transformation(const Vector3f& rotation, const Vector3f& scale) noexcept;
+    Matrix4x4f& transformation(const Vector3f& rotation, const float scale) noexcept;
 };
 
 typedef Matrix4x4f Matrix4;

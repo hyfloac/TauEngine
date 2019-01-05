@@ -38,6 +38,15 @@ void toLower(const char* str, char* store) noexcept
     }
 }
 
+void toUpper(char* str) noexcept
+{
+    while(*str != '\0')
+    {
+        *str = toupper(*str);
+        ++str;
+    }
+}
+
 void toUpper(const char* str, char* store) noexcept
 {
     while(*str != '\0')

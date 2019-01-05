@@ -29,6 +29,8 @@ public:
     String(const String& copy) noexcept = default;
     String(String&& move) noexcept;
 
+    ~String() noexcept = default;
+
     String& operator =(const String& copy) noexcept = default;
     String& operator =(String&& move) noexcept;
 
@@ -61,7 +63,7 @@ namespace std
     template<>
     struct hash<String>
     {
-        inline size_t operator()(const String& str) const
+        inline size_t operator()(const String& str) const noexcept
         {
             return static_cast<size_t>(str.hashCode());
         }

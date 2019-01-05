@@ -48,7 +48,9 @@ bool __internal__logGLCall(const char* glFunc, const char* file, u32 line)
         }
         else
         {
-            return noErrors;
+            break;
         }
     } while(true);
+
+    return noErrors;
 }

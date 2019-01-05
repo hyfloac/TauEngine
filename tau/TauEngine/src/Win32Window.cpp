@@ -5,13 +5,13 @@
  */
 #ifdef _WIN32
 #pragma warning(push, 0)
-#include <Windowsx.h>
+#include <windowsx.h>
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #pragma warning(pop)
 
 #include <TauEngine.hpp>
-#include <Window.hpp>
+#include <system/Window.hpp>
 #include <EnumBitFields.hpp>
 
 #ifndef MAX_WINDOW_COUNT
@@ -225,11 +225,11 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             {
                 if(wParam == SIZE_MINIMIZED)
                 {
-                    window->_windowState = MINIMIZED;
+                    window->_windowState = WindowState::MINIMIZED;
                 } 
                 else if(wParam == SIZE_MAXIMIZED)
                 {
-                    window->_windowState = MAXIMIZED; 
+                    window->_windowState = WindowState::MAXIMIZED; 
                     if(window)
                     {
                     CALL_WINDOW_RESIZE_HANDLER:
@@ -245,9 +245,9 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 }
                 else if(wParam == SIZE_RESTORED)
                 {
-                    if(window->_windowState == MINIMIZED || window->_windowState == MAXIMIZED)
+                    if(window->_windowState == WindowState::MINIMIZED || window->_windowState == WindowState::MAXIMIZED)
                     {
-                        window->_windowState = NEITHER;
+                        window->_windowState = WindowState::NEITHER;
                     }
                     goto CALL_WINDOW_RESIZE_HANDLER;
                 }
@@ -288,6 +288,13 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 window->_mouseMoveHandler(mouseFlagsFromWParam(wParam), xPos, yPos, window);
             }
             break;
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+            if(window && window->_keyEventHandler && false)
+            {
+                window->_keyEventHandler(KeyboardEvent::KE_KEY_PRESSED, (KeyboardFlags) 0, wParam, 0, '\0', window);
+            }
+            break;
         default: return DefWindowProc(windowHandle, uMsg, wParam, lParam);
     }
     return 0;
@@ -301,7 +308,7 @@ Window::Window(u32 width, u32 height, const char* title, const void* userContain
       _userContainer(userContainer),
       _parent(parent),
       _contextSettings({ 3, 1, { { false, false, true, false, 0,0,0,0 } } }),
-      _windowState(NEITHER),
+      _windowState(WindowState::NEITHER),
       _isResizing(false),
       _windowResizeHandler(null),
       _mouseEventHandler(null),
