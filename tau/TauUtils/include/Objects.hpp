@@ -1,5 +1,5 @@
 #pragma once
 
-#define flags enum
+#define flags_e enum
 
-#define interface class
+#define interface_c class

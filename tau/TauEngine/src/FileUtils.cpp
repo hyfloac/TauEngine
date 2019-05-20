@@ -1,3 +1,4 @@
+#include <TauEngine.hpp>
 #include <Safeties.hpp>
 #include <file/FileUtils.hpp>
 
@@ -82,3 +83,16 @@ FileMode getFileMode(const char* fileMode) noexcept
 
     return static_cast<FileMode>(0);
 }
+
+#ifdef _WIN32
+#include <Windows.h>
+
+void loadResourceFile(int name, int type, int* size, const char** data) noexcept
+{
+    static const HMODULE handle = tauGetDLLModule();
+    const HRSRC rc = FindResource(handle, MAKEINTRESOURCE(name), MAKEINTRESOURCE(type));
+    const HGLOBAL rcData = LoadResource(handle, rc);
+    *size = SizeofResource(handle, rc);
+    *data = static_cast<const char*>(LockResource(rcData));
+}
+#endif

@@ -31,11 +31,7 @@
  *   This is the name of a Windows class. This is used for 
  * interfacing with the OS.
  */
-static const char*    CLASS_NAME   =  "TauEngineWindowClass";
-/**
- * This is a wide string version of {@link CLASS_NAME}.
- */
-static const wchar_t* CLASS_NAME_W = L"TauEngineWindowClass";
+static const char* CLASS_NAME = "TauEngineWindowClass";
 
 /**
  *   When we get a message for a window we only receive the
@@ -59,7 +55,7 @@ static u32 currentWindowHandleIndex = 0;
  *      Returns true if the `systemWindowContainer` was 
  *    successfully added to {@link windowHandles}.
  */
-static bool addWindow(NonNull Window* systemWindowContainer)
+static bool addWindow(NonNull Window* systemWindowContainer) noexcept
 {
     if(currentWindowHandleIndex < MAX_WINDOW_COUNT)
     {
@@ -77,7 +73,7 @@ static bool addWindow(NonNull Window* systemWindowContainer)
  * @param[in] systemWindowContainer
  *    The {@link Window} to remove from {@link windowHandles}.
  */
-static void removeWindow(NotNull<Window> systemWindowContainer)
+static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
 {
     for(u32 i = 0; i < currentWindowHandleIndex; ++i)
     {
@@ -105,7 +101,7 @@ static void removeWindow(NotNull<Window> systemWindowContainer)
  *    {@link HWND} `handle`. returns null if no window is 
  *    currently holding the referenced handle.
  */
-static Nullable Window* getWindowFromHandle(HWND handle)
+static Nullable Window* getWindowFromHandle(HWND handle) noexcept
 {
     for(u32 i = 0; i < currentWindowHandleIndex; ++i)
     {
@@ -133,7 +129,7 @@ static Nullable Window* getWindowFromHandle(HWND handle)
  * @return
  *    An equivalent {@link MouseFlags} enum bit mask.
  */
-static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
+static MouseFlags mouseFlagsFromWParam(WPARAM wParam) noexcept
 {
 #ifdef TRUST_RAW_MOUSE_PARAM
     return static_cast<MouseFlags>(wParam);
@@ -188,31 +184,49 @@ static MouseFlags mouseFlagsFromWParam(WPARAM wParam)
  * @return
  *    A {@link MouseEvent} representing which event was fired.
  */
-static MouseEvent mouseEventFromMsg(UINT uMsg, WPARAM wParam)
+static MouseEvent mouseEventFromMsg(UINT uMsg, WPARAM wParam) noexcept
 {
     const UINT xButton = GET_XBUTTON_WPARAM(wParam);
     switch(uMsg)
     {
-        case WM_LBUTTONDOWN: return ME_LEFT_BUTTON_DOWN;
-        case WM_LBUTTONUP:   return ME_LEFT_BUTTON_UP;
-        case WM_MBUTTONDOWN: return ME_MIDDLE_BUTTON_DOWN;
-        case WM_MBUTTONUP:   return ME_MIDDLE_BUTTON_UP;
-        case WM_RBUTTONDOWN: return ME_RIGHT_BUTTON_DOWN;
-        case WM_RBUTTONUP:   return ME_RIGHT_BUTTON_UP;
+        case WM_LBUTTONDOWN: return MouseEvent::ME_LEFT_BUTTON_DOWN;
+        case WM_LBUTTONUP:   return MouseEvent::ME_LEFT_BUTTON_UP;
+        case WM_MBUTTONDOWN: return MouseEvent::ME_MIDDLE_BUTTON_DOWN;
+        case WM_MBUTTONUP:   return MouseEvent::ME_MIDDLE_BUTTON_UP;
+        case WM_RBUTTONDOWN: return MouseEvent::ME_RIGHT_BUTTON_DOWN;
+        case WM_RBUTTONUP:   return MouseEvent::ME_RIGHT_BUTTON_UP;
         case WM_XBUTTONDOWN:
-            if(xButton == XBUTTON1) { return ME_X_BUTTON_1_DOWN; }
-            if(xButton == XBUTTON2) { return ME_X_BUTTON_2_DOWN; }
+            if(xButton == XBUTTON1) { return MouseEvent::ME_X_BUTTON_1_DOWN; }
+            if(xButton == XBUTTON2) { return MouseEvent::ME_X_BUTTON_2_DOWN; }
             break;
         case WM_XBUTTONUP:
-            if(xButton == XBUTTON1) { return ME_X_BUTTON_1_UP; }
-            if(xButton == XBUTTON2) { return ME_X_BUTTON_2_UP; }
+            if(xButton == XBUTTON1) { return MouseEvent::ME_X_BUTTON_1_UP; }
+            if(xButton == XBUTTON2) { return MouseEvent::ME_X_BUTTON_2_UP; }
             break;
         default: break;
     }
     return static_cast<MouseEvent>(0xFF);
 }
 
-LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static KeyboardFlags getKeyboardFlags() noexcept
+{
+    KeyboardFlags ret = static_cast<KeyboardFlags>(0);
+
+    if(GetKeyState(VK_SHIFT)    & 0x8000) { ret |= KeyboardFlags::KF_SHIFT;       }
+    if(GetKeyState(VK_CONTROL)  & 0x8000) { ret |= KeyboardFlags::KF_CTRL;        }
+    if(GetKeyState(VK_MENU)     & 0x8000) { ret |= KeyboardFlags::KF_ALT;         }
+
+    if(GetKeyState(VK_LSHIFT)   & 0x8000) { ret |= KeyboardFlags::KF_LEFT_SHIFT;  }
+    if(GetKeyState(VK_RSHIFT)   & 0x8000) { ret |= KeyboardFlags::KF_RIGHT_SHIFT; }
+    if(GetKeyState(VK_LCONTROL) & 0x8000) { ret |= KeyboardFlags::KF_LEFT_CTRL;   }
+    if(GetKeyState(VK_RCONTROL) & 0x8000) { ret |= KeyboardFlags::KF_RIGHT_CTRL;  }
+    if(GetKeyState(VK_LMENU)    & 0x8000) { ret |= KeyboardFlags::KF_LEFT_ALT;    }
+    if(GetKeyState(VK_RMENU)    & 0x8000) { ret |= KeyboardFlags::KF_RIGHT_ALT;   }
+
+    return ret;
+}
+
+LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
     Window* window = getWindowFromHandle(windowHandle);
     const u32 xPos = static_cast<u32>(GET_X_LPARAM(lParam));
@@ -220,6 +234,12 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
 
     switch(uMsg)
     {
+        case WM_ACTIVATE:
+            if(window && window->_windowActiveHandler)
+            {
+                window->_windowActiveHandler(wParam != WA_INACTIVE, window);
+            }
+            break;
         case WM_SIZE:
             if(window)
             {
@@ -230,17 +250,14 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 else if(wParam == SIZE_MAXIMIZED)
                 {
                     window->_windowState = WindowState::MAXIMIZED; 
-                    if(window)
-                    {
                     CALL_WINDOW_RESIZE_HANDLER:
-                        if(window->_windowResizeHandler)
-                        {
-                            const u32 width = LOWORD(lParam);
-                            const u32 height = HIWORD(lParam);
-                            window->_width = width;
-                            window->_height = height;
-                            window->_windowResizeHandler(width, height, window);
-                        }
+                    if(window->_windowResizeHandler)
+                    {
+                        const u32 width = LOWORD(lParam);
+                        const u32 height = HIWORD(lParam);
+                        window->_width = width;
+                        window->_height = height;
+                        window->_windowResizeHandler(width, height, window);
                     }
                 }
                 else if(wParam == SIZE_RESTORED)
@@ -254,20 +271,11 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             }
             break;
         case WM_CLOSE:
-            if(window)
-            {
-                window->closeWindow();
-            }
+            if(window) { window->closeWindow(); }
             break;
         case WM_DESTROY:
-            if(window)
-            {
-                window->closeWindow();
-            }
-            if(currentWindowHandleIndex == 0)
-            {
-                tauExit(0);
-            }
+            if(window) { window->closeWindow(); }
+            if(currentWindowHandleIndex == 0) { tauExit(0); }
             break;
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
@@ -290,9 +298,36 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             break;
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
-            if(window && window->_keyEventHandler && false)
+            if(window && window->_keyEventHandler)
             {
-                window->_keyEventHandler(KeyboardEvent::KE_KEY_PRESSED, (KeyboardFlags) 0, wParam, 0, '\0', window);
+                if(lParam & (1 << 30))
+                {
+                    window->_keyEventHandler(KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam, window);
+                }
+                else
+                {
+                    window->_keyEventHandler(KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam, window);
+                }
+            }
+            break;
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            if (window && window->_keyEventHandler)
+            {
+                window->_keyEventHandler(KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam, window);
+            }
+            break;
+        case WM_CHAR:
+            if(window && window->_asciiKeyEventHandler)
+            {
+                window->_asciiKeyEventHandler((wchar_t) wParam, (char) wParam, window);
+            }
+            break;
+        case WM_MOVE:
+            if(window)
+            {
+                window->_xPos = xPos;
+                window->_yPos = yPos;
             }
             break;
         default: return DefWindowProc(windowHandle, uMsg, wParam, lParam);
@@ -300,19 +335,23 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
     return 0;
 }
 
-Window::Window(u32 width, u32 height, const char* title, const void* userContainer, const Window* parent) noexcept
+Window::Window(u32 width, u32 height, Nullable const char* title, Nullable const void* userContainer, Nullable const Window* parent) noexcept
     : _width(width), 
       _height(height), 
+      _xPos(0),
+      _yPos(0),
       _title(title),
       _windowContainer({ { }, null, null, null }),
       _userContainer(userContainer),
       _parent(parent),
       _contextSettings({ 3, 1, { { false, false, true, false, 0,0,0,0 } } }),
       _windowState(WindowState::NEITHER),
-      _isResizing(false),
       _windowResizeHandler(null),
       _mouseEventHandler(null),
-      _mouseMoveHandler(null)
+      _mouseMoveHandler(null),
+      _keyEventHandler(null),
+      _asciiKeyEventHandler(null),
+      _windowActiveHandler(null)
 { }
 
 Window::~Window() noexcept
@@ -325,6 +364,7 @@ void Window::resize(const u32 width, const u32 height) noexcept
     this->_width = width;
     this->_height = height;
     SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+    updateViewPort(0, 0);
 }
 
 void Window::setTitle(const char* title) noexcept
@@ -337,14 +377,14 @@ bool Window::createWindow() noexcept
 {
     addWindow(this);
 
-    WNDCLASS* windowClass = &this->_windowContainer.windowClass;
+    WNDCLASSA* windowClass = &this->_windowContainer.windowClass;
 
     windowClass->lpfnWndProc = WindowProc;
     windowClass->hInstance = GetModuleHandleA(null);
     windowClass->lpszClassName = CLASS_NAME;
     windowClass->style = CS_DBLCLKS;
 
-    RegisterClass(windowClass);
+    RegisterClassA(windowClass);
 
     HWND parent = null;
 
@@ -366,12 +406,22 @@ bool Window::createWindow() noexcept
 
     this->_windowContainer.hdc = GetDC(this->_windowContainer.windowHandle);
 
+    RECT clientArea;
+    GetClientRect(this->_windowContainer.windowHandle, &clientArea);
+    this->_width = clientArea.right;
+    this->_height = clientArea.bottom;
+
     return this->_windowContainer.windowHandle;
 }
 
-void Window::closeWindow() noexcept
+void Window::closeWindow() const noexcept
 {
     removeWindow(this);
+    if(this->_windowContainer.renderingContext)
+    {
+        unloadCurrentContext();
+        wglDeleteContext(this->_windowContainer.renderingContext);      // TODO: Fix crash
+    }
     if(this->_windowContainer.windowHandle)
     {
         DestroyWindow(_windowContainer.windowHandle);
@@ -382,6 +432,8 @@ void Window::showWindow() const noexcept
 {
     ShowWindow(this->_windowContainer.windowHandle, SW_SHOWNA);
     UpdateWindow(this->_windowContainer.windowHandle);
+
+    SetActiveWindow(this->_windowContainer.windowHandle);
 }
 
 void Window::hideWindow() const noexcept
@@ -393,6 +445,7 @@ bool Window::createContext() noexcept
 {
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+
     pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
     pfd.nVersion = 1;
     pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
@@ -404,26 +457,16 @@ bool Window::createContext() noexcept
 
     const int pixelFormat = ChoosePixelFormat(this->_windowContainer.hdc, &pfd);
 
-    if(pixelFormat == 0)
-    {
-        return false;
-    }
+    if(pixelFormat == 0) { return false; }
 
     const BOOL res = SetPixelFormat(this->_windowContainer.hdc, pixelFormat, &pfd);
 
-    if(!res) 
-    {
-        return false;
-    }
+    if(!res) { return false; }
 
     const HGLRC tempContext = wglCreateContext(this->_windowContainer.hdc);  // NOLINT(misc-misplaced-const)
     wglMakeCurrent(this->_windowContainer.hdc, tempContext);
 
-    const GLenum glewSuccess = glewInit();
-    if(glewSuccess != GLEW_OK)
-    {
-        return false;
-    }
+    if(glewInit() != GLEW_OK) { return false; }
 
     if(WGLEW_ARB_create_context)
     {
@@ -431,10 +474,10 @@ bool Window::createContext() noexcept
         {
             WGL_CONTEXT_MAJOR_VERSION_ARB, this->_contextSettings.majorVersion,
             WGL_CONTEXT_MINOR_VERSION_ARB, this->_contextSettings.minorVersion,
-            WGL_CONTEXT_FLAGS_ARB, (this->_contextSettings.debug ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
-                                   (this->_contextSettings.forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB : 0),
-            WGL_CONTEXT_PROFILE_MASK_ARB, (this->_contextSettings.coreProfile ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB : 0) |
-                                          (this->_contextSettings.compatProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
+            WGL_CONTEXT_FLAGS_ARB,        (this->_contextSettings.debug             ? WGL_CONTEXT_DEBUG_BIT_ARB                 : 0) |
+                                          (this->_contextSettings.forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB    : 0),
+            WGL_CONTEXT_PROFILE_MASK_ARB, (this->_contextSettings.coreProfile       ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB          : 0) |
+                                          (this->_contextSettings.compatProfile     ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
             0
         };
 
@@ -448,7 +491,7 @@ bool Window::createContext() noexcept
         this->_windowContainer.renderingContext = tempContext;
     }
 
-    glViewport(0, 0, this->_width, this->_height);
+    updateViewPort(0, 0, this->_width, this->_height);
 
     return this->_windowContainer.renderingContext;
 }
@@ -473,5 +516,15 @@ void Window::swapBuffers() const noexcept
     {
         SwapBuffers(this->_windowContainer.hdc);
     }
+}
+
+void Window::updateViewPort(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) const noexcept
+{
+    glViewport(x, y, width, height);
+}
+
+void Window::updateViewPort(u32 x, u32 y, float minZ, float maxZ) const noexcept
+{
+    glViewport(x, y, this->_width, this->_height);
 }
 #endif

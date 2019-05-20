@@ -1,10 +1,12 @@
 #pragma warning(push, 0)
 #include <spdlog/sinks/stdout_color_sinks.h>
 #pragma warning(pop)
+
 #include <TauEngine.hpp>
 #include <NumTypes.hpp>
 #include <Utils.hpp>
 #include <Timings.hpp>
+#include <system/Window.hpp>
 
 static std::shared_ptr<spdlog::logger> engineLogger;
 
@@ -29,6 +31,11 @@ std::shared_ptr<spdlog::logger> getEngineLogger() noexcept
     return engineLogger;
 }
 
+void setEngineLoggerLevel(spdlog::level::level_enum level) noexcept
+{
+    engineLogger->set_level(level);
+}
+
 volatile static bool should_exit = false;
 
 bool tauShouldExit() noexcept
@@ -42,7 +49,7 @@ bool tauShouldExit() noexcept
 #pragma warning(pop)
 
 #ifndef NUM_MESSAGES_TO_READ
-  #define NUM_MESSAGES_TO_READ 8
+  #define NUM_MESSAGES_TO_READ 24
 #endif
 
 static void runMessageLoop() noexcept
@@ -56,7 +63,7 @@ static void runMessageLoop() noexcept
     }
 }
 
-void tauExit(int code) noexcept
+void tauExit(i32 code) noexcept
 {
     should_exit = true;
     PostQuitMessage(code);
@@ -72,7 +79,7 @@ void tauExit(int code) noexcept
 }
 #endif
 
-void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSInterval) noexcept
+void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSInterval, Window* window) noexcept
 {
     const float MS_PER_UPDATE = 1000.0f / targetUPS;
     u64 lastTime = currentTimeMillis();
@@ -81,6 +88,22 @@ void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSI
     u64 counterTime = lastTime;
     u32 fps = 0;
     u32 ups = 0;
+
+    const char* originalTitle = "";
+
+    if(!window)
+    {
+        printFPSInterval = 0;
+    }
+    else
+    {
+        originalTitle = window->title();
+    }
+
+    // " - FPS/UPS: 10000/10000"
+    const u32 titleLen = strlen(originalTitle) + 24;
+    char* newTitle = new char[titleLen];
+    newTitle[titleLen - 1] = '\0';
 
     const u64 _timeInterval = printFPSInterval * 1000;
 
@@ -91,11 +114,11 @@ void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSI
         lastTime = currentTime;
         lag += static_cast<float>(elapsed);
 
-        runMessageLoop();
-
         while(lag >= MS_PER_UPDATE)
         {
-            updateF(); 
+            runMessageLoop();
+
+            updateF(MS_PER_UPDATE); 
             ++ups;
             lag -= MS_PER_UPDATE;
         }
@@ -108,11 +131,17 @@ void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSI
         if(printFPSInterval && currentCounterTime - counterTime >= _timeInterval)
         {
             counterTime = currentCounterTime;
-            engineLogger->debug("UPS {}", ups / printFPSInterval);
-            engineLogger->debug("FPS {}", fps / printFPSInterval);
+            // engineLogger->debug("UPS {}", ups / printFPSInterval);
+            // engineLogger->debug("FPS {}", fps / printFPSInterval);
+
+            snprintf(newTitle, titleLen, "%s - UPS/FPS: %u/%u", originalTitle, ups / printFPSInterval, fps / printFPSInterval);
+
+            window->setTitle(newTitle);
 
             ups = 0;
             fps = 0;
         }
     }
+
+    delete[] newTitle;
 }

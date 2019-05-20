@@ -4,12 +4,10 @@
 #include <shader/IShader.hpp>
 #include <Safeties.hpp>
 
-class Matrix4x4f;
-
 /**
  * Represents an OpenGL shader.
  */
-class TAU_DLL GLShader : public IShader
+class TAU_DLL GLShader final : public IShader
 {
 private:
     ShaderType _shaderType;
@@ -23,7 +21,7 @@ public:
 
     inline ShaderType shaderType() const noexcept override final { return _shaderType; };
 
-    bool loadShader() noexcept override final;
+    bool loadShader(const char* src = nullptr) noexcept override final;
 
     void activateShader() const noexcept override final;
 
@@ -42,7 +40,7 @@ public:
     void setUniform(i32 location, Vector3f& value)   const noexcept override final;
     void setUniform(i32 location, Vector3i& value)   const noexcept override final;
     void setUniform(i32 location, Vector4f& value)   const noexcept override final;
-    void setUniform(i32 location, Matrix4x4f& value) const noexcept override final;
+    void setUniform(i32 location, const Matrix4x4f& value) const noexcept override final;
     void setUniform(i32 location, bool value)        const noexcept override final;
 
     void setUniform(String& name, i8 value)          const noexcept override final;

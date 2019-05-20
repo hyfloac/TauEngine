@@ -4,7 +4,7 @@
 #include <String.hpp>
 #include <Safeties.hpp>
 
-bool equalsIgnoreCase(const char* lhs, const char* rhs) noexcept
+bool equalsIgnoreCase(const char* RESTRICT lhs, const char* RESTRICT rhs) noexcept
 {
     while(*lhs != '\0' && *rhs != '\0')
     {
@@ -23,7 +23,7 @@ void toLower(char* str) noexcept
 {
     while(*str != '\0')
     {
-        *str = tolower(*str);
+        *str = static_cast<char>(tolower(*str));
         ++str;
     }
 }
@@ -32,7 +32,7 @@ void toLower(const char* str, char* store) noexcept
 {
     while(*str != '\0')
     {
-        *store = tolower(*str);
+        *store = static_cast<char>(tolower(*str));
         ++str;
         ++store;
     }
@@ -42,7 +42,7 @@ void toUpper(char* str) noexcept
 {
     while(*str != '\0')
     {
-        *str = toupper(*str);
+        *str = static_cast<char>(toupper(*str));
         ++str;
     }
 }
@@ -51,7 +51,7 @@ void toUpper(const char* str, char* store) noexcept
 {
     while(*str != '\0')
     {
-        *store = toupper(*str);
+        *store = static_cast<char>(toupper(*str));
         ++str;
         ++store;
     }
@@ -81,7 +81,7 @@ u32 String::findHashCode(NonNull const char* str) noexcept
 {
     u32 hash = 0;
     u32 i    = 0;
-    while (str[i])
+    while(str[i])
     {
         hash = 31u * hash + static_cast<u32>(str[i++]);
     }

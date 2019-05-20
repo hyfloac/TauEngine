@@ -4,6 +4,7 @@
 #include <Maths.hpp>
 #include <MathDefines.hpp>
 #include <Safeties.hpp>
+#include <immintrin.h>
 
 /**
  * A unit circle with 2**16 elements.
@@ -73,4 +74,30 @@ double fastCos(double value) noexcept
     Ensure(!isinf(value));
 
     return SIN_TABLE_D[(static_cast<u32>(value * 10430.3783504704527249495663163811) + 16384) & 65535];
+}
+
+float fastInverseSqrt(float x) noexcept
+{
+    const float halfX = x * 0.5f;
+    // i32 i = *(i32*) &x;
+    i32 i = *reinterpret_cast<i32*>(&x);
+
+    i = 0x5F3759DF - (i >> 1);
+    // const float y = *(float*) &i;
+    const float y = *reinterpret_cast<float*>(&i);
+
+    return y * (1.5f - (halfX * y * y));
+}
+
+double fastInverseSqrt(double x) noexcept
+{
+    const double halfX = x * 0.5f;
+    // i32 i = *(i32*) &x;
+    i64 i = *reinterpret_cast<i64*>(&x);
+
+    i = 0x5FE6EB50C7B537A9 - (i >> 1);
+    // const float y = *(float*) &i;
+    const double y = *reinterpret_cast<double*>(&i);
+
+    return y * (1.5f - (halfX * y * y));
 }

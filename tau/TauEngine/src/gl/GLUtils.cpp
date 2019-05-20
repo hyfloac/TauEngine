@@ -2,7 +2,7 @@
 #include <gl/GLUtils.hpp>
 #include <Utils.hpp>
 
-void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullable void* userParam, bool synchronous)
+void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullable void* userParam, bool synchronous) noexcept
 {
     if(glDebugMessageCallback)
     {
@@ -30,12 +30,30 @@ void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullabl
     }
 }
 
-void __internal__clearGLErrors()
+void stopDebugOutput() noexcept
+{
+    if(glDebugMessageCallback)
+    {
+        glDisable(GL_DEBUG_OUTPUT);
+        glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    }
+    else if(GLEW_ARB_debug_output)
+    {
+        glDisable(GL_DEBUG_OUTPUT);
+        glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+    }
+    else if(glDebugMessageCallbackAMD)
+    {
+        glDisable(GL_DEBUG_OUTPUT);
+    }
+}
+
+void __internal__clearGLErrors() noexcept
 {
     while(glGetError() != GL_NO_ERROR);
 }
 
-bool __internal__logGLCall(const char* glFunc, const char* file, u32 line)
+bool __internal__logGLCall(const char* glFunc, const char* file, u32 line) noexcept
 {
     bool noErrors = true;
     do

@@ -12,7 +12,7 @@
  * 
  * These value are equivalent to the Win32 API values.
  */
-flags MouseFlags : u8
+flags_e MouseFlags : u8
 {
     /** The left mouse button is currently pressed.                  */ MF_LEFT_BUTTON_DOWN   = 1 << 0,
     /** The right mouse button is currently pressed.                 */ MF_RIGHT_BUTTON_DOWN  = 1 << 1,

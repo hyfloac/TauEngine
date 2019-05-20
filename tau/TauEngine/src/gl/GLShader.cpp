@@ -7,6 +7,9 @@
 #include <Utils.hpp>
 #include <VariableLengthArray.hpp>
 #include <maths/Matrix4x4f.hpp>
+#include <maths/Vector3f.hpp>
+#include <maths/Vector3i.hpp>
+#include <maths/Vector4f.hpp>
 
 GLShader::GLShader(ShaderType shaderType, NotNull<const char> shaderPath, NotNull<GLProgram> glProgram) noexcept
     : _shaderType(shaderType), _shaderPath(shaderPath), _glProgram(glProgram), _shaderId(0)
@@ -22,16 +25,16 @@ GLShader::~GLShader() noexcept
     }
 }
 
-bool GLShader::loadShader() noexcept
+bool GLShader::loadShader(const char* src) noexcept
 {
     GLenum shaderType;
     
     switch(_shaderType)
     {
-        case VERTEX: 
+        case ShaderType::VERTEX: 
             shaderType = GL_VERTEX_SHADER;
             break;
-        case FRAGMENT: 
+        case ShaderType::FRAGMENT: 
             shaderType = GL_FRAGMENT_SHADER;
             break;
         default: return false;
@@ -44,54 +47,57 @@ bool GLShader::loadShader() noexcept
     if(shaderId == GL_FALSE)
     {
         glGetShaderiv(GL_FALSE, GL_INFO_LOG_LENGTH, &result);
-        if(!result)
+        if(result <= 0)
         {
             printf("OpenGL failed to create a shader, but no error message was generated.\n");
         }
-        else if(result >= 8192)
+        else// if(result >= 8192)
         {
             GLchar* errorMsg = new GLchar[result];
             glGetShaderInfoLog(shaderId, result, &result, errorMsg);
             printf("OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
         }
-        else
-        {
-            VLA(GLchar, errorMsg, result);
-            glGetShaderInfoLog(shaderId, result, &result, errorMsg);
-            printf("OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
-        }
+        // else
+        // {
+        //     VLA(GLchar, errorMsg, result);
+        //     glGetShaderInfoLog(shaderId, result, &result, errorMsg);
+        //     printf("OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
+        // }
         return false;
     }
 
-    const GLchar* shaderSrc = readFile(this->_shaderPath);
+    const GLchar* shaderSrc = src ? src : readFile(this->_shaderPath);
 
     glShaderSource(shaderId, 1, &shaderSrc, null);
     glCompileShader(shaderId);
 
-    delete[] shaderSrc;
+    if(src != shaderSrc)
+    {
+        delete[] shaderSrc;
+    }
 
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
     if(result == GL_FALSE)
     {
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &result);
-        if(!result)
+        if(result <= 0)
         {
             printf("OpenGL failed to compile a shader, but no error message was generated.\n");
         }
-        else if(result >= 8192)
+        else// if(result >= 8192)
         {
             GLchar* errorMsg = new GLchar[result];
             glGetShaderInfoLog(shaderId, result, &result, errorMsg);
             printf("OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
         }
-        else
-        {
-            VLA(GLchar, errorMsg, result);
-            glGetShaderInfoLog(shaderId, result, &result, errorMsg);
-            printf("OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
-        }
+        // else
+        // {
+        //     VLA(GLchar, errorMsg, result);
+        //     glGetShaderInfoLog(shaderId, result, &result, errorMsg);
+        //     printf("OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
+        // }
         glDeleteShader(shaderId);
         return false;
     }
@@ -132,7 +138,7 @@ void GLShader::setUniform(i32 location, i32 value) const noexcept
 
 void GLShader::setUniform(i32 location, i64 value) const noexcept
 {
-    glUniform1i(location, value);
+    glUniform1i(location, static_cast<GLint>(value));
 }
 
 void GLShader::setUniform(i32 location, u8 value) const noexcept
@@ -152,7 +158,7 @@ void GLShader::setUniform(i32 location, u32 value) const noexcept
 
 void GLShader::setUniform(i32 location, u64 value) const noexcept
 {
-    glUniform1i(location, value);
+    glUniform1i(location, static_cast<GLuint>(value));
 }
 
 void GLShader::setUniform(i32 location, f32 value) const noexcept
@@ -180,7 +186,7 @@ void GLShader::setUniform(i32 location, Vector4f& value) const noexcept
     glUniform4f(location, value.x(), value.y(), value.z(), value.w());
 }
 
-void GLShader::setUniform(i32 location, Matrix4x4f& value) const noexcept
+void GLShader::setUniform(i32 location, const Matrix4x4f& value) const noexcept
 {
     glUniformMatrix4fv(location, 1, GL_FALSE, (float*) value.data().m);
 }

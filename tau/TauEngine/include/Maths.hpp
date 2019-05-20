@@ -7,7 +7,9 @@
 
 #pragma warning(push, 0)
 #include <cmath>
+#include <immintrin.h>
 #pragma warning(pop)
+
 #include <NumTypes.hpp>
 #include <DLL.hpp>
 
@@ -23,19 +25,19 @@
 /**
  * Converts radians to degrees (single precision).
  */
-#define RAD_2_DEG_F(__F) (float) (__F * RADIANS_TO_DEGREES_CONVERTER_VAL)
+#define RAD_2_DEG_F(__F) (float) ((__F) * RADIANS_TO_DEGREES_CONVERTER_VAL)
  /**
   * Converts degrees to radians (single precision).
   */
-#define DEG_2_RAD_F(__F) (float) (__F * DEGREES_TO_RADIANS_CONVERTER_VAL)
+#define DEG_2_RAD_F(__F) (float) ((__F) * DEGREES_TO_RADIANS_CONVERTER_VAL)
  /**
   * Converts radians to degrees (double precision).
   */
-#define RAD_2_DEG_D(__D) (double) (__D * RADIANS_TO_DEGREES_CONVERTER_VAL)
+#define RAD_2_DEG_D(__D) (double) ((__D) * RADIANS_TO_DEGREES_CONVERTER_VAL)
   /**
    * Converts degrees to radians (double precision).
    */
-#define DEG_2_RAD_D(__D) (double) (__D * DEGREES_TO_RADIANS_CONVERTER_VAL)
+#define DEG_2_RAD_D(__D) (double) ((__D) * DEGREES_TO_RADIANS_CONVERTER_VAL)
 
 #define RAD_2_DEG(__F) RAD_2_DEG_F(__F)
 #define DEG_2_RAD(__F) DEG_2_RAD_F(__F)
@@ -49,7 +51,7 @@
 template<u32 _Base>
 float logN(float x) noexcept
 {
-    return log(x) * log(_Base);
+    return log(x) / log(_Base);
 }
 
 /**
@@ -61,7 +63,7 @@ float logN(float x) noexcept
 template<u32 _Base>
 double logN(double x) noexcept
 {
-    return log(x) * log(_Base);
+    return log(x) / log(_Base);
 }
 
 /**
@@ -74,7 +76,7 @@ double logN(double x) noexcept
 template<u32 _Base>
 long double logN(long double x) noexcept
 {
-    return log(x) * log(_Base);
+    return log(x) / log(_Base);
 }
 
 /**
@@ -129,3 +131,17 @@ TAU_DLL float fastCos(float value) noexcept;
  * \f$\huge[ \LARGE x * \frac{32768}{\pi} \Large + \large 16384 \huge] \large \& \Large 65535\f$
  */
 TAU_DLL double fastCos(double value) noexcept;
+
+TAU_DLL float fastInverseSqrt(float x) noexcept;
+
+static inline float rSqrt(float x) noexcept
+{
+    union _Vec
+    {
+        __m128 v;
+        float x;
+    };
+    return _Vec { _mm_rsqrt_ss(_Vec{ x }.v) }.x;
+}
+
+TAU_DLL double fastInverseSqrt(double x) noexcept;

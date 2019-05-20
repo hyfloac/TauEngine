@@ -3,6 +3,7 @@
 #pragma warning(pop)
 
 #include <maths/Vector4f.hpp>
+#include <Maths.hpp>
 
 #pragma region Constructor
 Vector4f::Vector4f(const __m128 vec) noexcept
@@ -14,27 +15,27 @@ Vector4f::Vector4f(const __m128i vec) noexcept
 { }
 
 Vector4f::Vector4f(const float x, const float y, const float z, const float w) noexcept
-    : _data({ x, y, z, w })
+    : _data(x, y, z, w)
 { }
 
 Vector4f::Vector4f(const i32 x, const i32 y, const i32 z, const i32 w) noexcept
-    : _data({ (float) x, (float) y, (float) z, (float) w })
+    : _data((float) x, (float) y, (float) z, (float) w)
 { }
 
 Vector4f::Vector4f(const float filler) noexcept
-    : _data({ filler, filler, filler, filler })
+    : _data(filler, filler, filler, filler)
 { }
 
 Vector4f::Vector4f(const i32 filler) noexcept
-    : _data({ (float) filler, (float) filler, (float) filler, (float) filler })
+    : _data((float) filler, (float) filler, (float) filler, (float) filler)
 { }
 
 Vector4f::Vector4f() noexcept
-    : _data({ 0, 0, 0, 0 })
+    : _data(0, 0, 0, 0)
 { }
 
-Vector4f::Vector4f(const CompVec4& data) noexcept
-    : _data({ data.vec })
+Vector4f::Vector4f(const CompVec4& copy) noexcept
+    : _data({ copy.vec })
 { }
 #pragma endregion
 
@@ -259,24 +260,24 @@ float Vector4f::dot(const float x, const float y, const float z, const float w) 
     return this->_data.x * x + this->_data.y * y + this->_data.z * z + this->_data.w * w;
 }
 
-float Vector4f::dot(const CompVec4& vec) const noexcept
-{
+float Vector4f::dot(const CompVec4& data) const noexcept
+{ 
     CompVec4 comp;
-    comp.vec = _mm_mul_ps(this->_data.vec, vec.vec);
+    comp.vec = _mm_mul_ps(this->_data.vec, data.vec);
 
     return comp.x + comp.y + comp.z + comp.w;
 }
 
 Vector4f& Vector4f::normalize() noexcept
 {
-    const float mag = this->magnitude();
-    if(mag > 0) { return this->mul(mag); }
+    const float mag = this->magnitudeSquared();
+    if(mag > 0) { return this->mul(rSqrt(mag)); }
     return *this;
 }
 
 Vector4f Vector4f::normalizeC() const noexcept
 {
-    const float mag = this->magnitude();
-    if(mag > 0) { return this->divC(mag); }
+    const float mag = this->magnitudeSquared();
+    if(mag > 0) { return this->mulC(rSqrt(mag)); }
     return { this->_data };
 }

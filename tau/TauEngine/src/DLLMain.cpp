@@ -1,20 +1,33 @@
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 #pragma warning(push, 0)
-#include <windows.h>
+#include <Windows.h>
 #pragma warning(pop)
 #include <Maths.hpp>
 #include <TauEngine.hpp>
 
 void initProgramStartTimes() noexcept;
 
+HMODULE ___currDLL__HMODULE = 0;
+
+HMODULE tauGetDLLModule() noexcept
+{
+    return ___currDLL__HMODULE;
+}
+
+void tauMain()
+{
+    tauInit();
+    initSinTable();
+    initProgramStartTimes();
+}
+
 BOOL APIENTRY DllMain(HMODULE hInstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
     switch(fdwReason)
     {
         case DLL_PROCESS_ATTACH:
-            tauInit();
-            initSinTable();
-            initProgramStartTimes();
+            ___currDLL__HMODULE = hInstDLL;
+            tauMain();
             break;
         case DLL_THREAD_ATTACH:
         case DLL_THREAD_DETACH:

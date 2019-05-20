@@ -18,9 +18,9 @@ public:
     GLProgram() noexcept;
     ~GLProgram() noexcept;
 
-    inline GLuint programId() const noexcept { return _programId; }
+    inline GLuint programId()   const noexcept { return _programId; }
 
-    inline operator GLuint() const noexcept { return _programId; }
+    inline operator GLuint()    const noexcept { return _programId; }
     inline GLuint operator ()() const noexcept { return _programId; }
 
     inline void activate() const noexcept { glUseProgram(_programId); }

@@ -51,5 +51,8 @@
     <ClInclude Include="include\VariableLengthArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\CoreFuncs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

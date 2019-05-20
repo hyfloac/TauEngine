@@ -106,3 +106,5 @@ enum FileMode : u8
 NonNull const char* getFileModeStr(FileMode fileMode) noexcept;
 
 FileMode getFileMode(const char* fileMode) noexcept;
+
+void loadResourceFile(int name, int type, int* size, const char** data) noexcept;

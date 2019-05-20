@@ -36,3 +36,9 @@
 #else
   #define DEBUG_BREAK asm volatile ("int $3;")
 #endif
+
+#if defined(__GNUC__) || defined(__CLANG__) || defined(_MSC_VER)
+  #define RESTRICT __restrict
+#else
+  #define RESTRICT
+#endif

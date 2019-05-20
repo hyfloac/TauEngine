@@ -1,13 +1,17 @@
 #pragma once
 
+#pragma warning(push, 0)
+#include <cctype>
+#include <unordered_map>
+#pragma warning(pop)
+
 #include <NumTypes.hpp>
 #include <CVersion.hpp>
 #include <Safeties.hpp>
-#include <unordered_map>
 #include <DLL.hpp>
-#include <cctype>
+#include <Utils.hpp>
 
-TAU_DLL bool equalsIgnoreCase(const char* lhs, const char* rhs) noexcept;
+TAU_DLL bool equalsIgnoreCase(const char* RESTRICT lhs, const char* RESTRICT rhs) noexcept;
 
 TAU_DLL void toLower(char* str) noexcept;
 TAU_DLL void toLower(const char* str, char* store) noexcept;
@@ -15,7 +19,41 @@ TAU_DLL void toLower(const char* str, char* store) noexcept;
 TAU_DLL void toUpper(char* str) noexcept;
 TAU_DLL void toUpper(const char* str, char* store) noexcept;
 
-class TAU_DLL String
+namespace cexpr
+{
+    template<size_t _Len>
+    constexpr inline size_t strlen(const char(&str)[_Len]) noexcept { return _Len - 1; }
+
+    template<size_t _Len>
+    constexpr inline size_t strlen(const wchar_t(&str)[_Len]) noexcept { return _Len - 1; }
+
+    template<size_t _Len>
+    constexpr inline size_t strlen(const char16_t(&str)[_Len]) noexcept { return _Len - 1; }
+
+    template<size_t _Len>
+    constexpr inline size_t strlen(const char32_t(&str)[_Len]) noexcept { return _Len - 1; }
+
+    template<typename _Type, size_t _Len>
+    constexpr inline size_t arrlen(const _Type(&arr)[_Len]) noexcept { return _Len - 1; }
+
+    template<size_t _Len>
+    constexpr bool streq(const char(&RESTRICT lhs)[_Len], const char(&RESTRICT rhs)[_Len])
+    {
+        while(*lhs != '\0' && *rhs != '\0')
+        {
+            if(tolower(*lhs) != tolower(*rhs))
+            {
+                return false;
+            }
+            ++lhs;
+            ++rhs;
+        }
+
+        return *lhs == '\0' && *rhs == '\0';
+    }
+}
+
+class TAU_DLL String final
 {
 private:
     const char* _string;

@@ -1,76 +1,95 @@
 #include <model/VertexArray.hpp>
 
-GLenum getGLType(DataType type) noexcept
+GLenum getGLType(const DataType type) noexcept
 {
     switch(type)
     {
-        case Byte:                return GL_BYTE;
-        case UByte:               return GL_UNSIGNED_BYTE;
-        case Short:               return GL_SHORT;
-        case UShort:              return GL_UNSIGNED_SHORT;
-        case Int:                 return GL_INT;
-        case UInt:                return GL_UNSIGNED_INT;
-        case HalfFloat:           return GL_HALF_FLOAT;
-        case Float:               return GL_FLOAT;
-        case Double:              return GL_DOUBLE;
-        case Fixed:               return GL_FIXED;
-        case Int2_10_10_10_Rev:   return GL_INT_2_10_10_10_REV;
-        case UInt2_10_10_10_Rev:  return GL_UNSIGNED_INT_2_10_10_10_REV;
-        case UInt10F_11F_11F_Rev: return GL_UNSIGNED_INT_10F_11F_11F_REV;
-        default:                  return -1;
+        case DataType::Byte:                return GL_BYTE;
+        case DataType::UByte:               return GL_UNSIGNED_BYTE;
+        case DataType::Short:               return GL_SHORT;
+        case DataType::UShort:              return GL_UNSIGNED_SHORT;
+        case DataType::Int:                 return GL_INT;
+        case DataType::UInt:                return GL_UNSIGNED_INT;
+        case DataType::HalfFloat:           return GL_HALF_FLOAT;
+        case DataType::Float:               return GL_FLOAT;
+        case DataType::Double:              return GL_DOUBLE;
+        case DataType::Fixed:               return GL_FIXED;
+        case DataType::Int2_10_10_10_Rev:   return GL_INT_2_10_10_10_REV;
+        case DataType::UInt2_10_10_10_Rev:  return GL_UNSIGNED_INT_2_10_10_10_REV;
+        case DataType::UInt10F_11F_11F_Rev: return GL_UNSIGNED_INT_10F_11F_11F_REV;
+        default:                            return static_cast<GLenum>(-1);
     }
 }
 
-DataType getType(GLenum type) noexcept
+DataType getType(const GLenum type) noexcept
 {
     switch(type)
     {
-    case GL_BYTE:                         return  Byte;
-    case GL_UNSIGNED_BYTE:                return  UByte;
-    case GL_SHORT:                        return  Short;
-    case GL_UNSIGNED_SHORT:               return  UShort;
-    case GL_INT:                          return  Int;
-    case GL_UNSIGNED_INT:                 return  UInt;
-    case GL_HALF_FLOAT:                   return  HalfFloat;
-    case GL_FLOAT:                        return  Float;
-    case GL_DOUBLE:                       return  Double;
-    case GL_FIXED:                        return  Fixed;
-    case GL_INT_2_10_10_10_REV:           return  Int2_10_10_10_Rev;
-    case GL_UNSIGNED_INT_2_10_10_10_REV:  return  UInt2_10_10_10_Rev;
-    case GL_UNSIGNED_INT_10F_11F_11F_REV: return  UInt10F_11F_11F_Rev;
-    default:                              return static_cast<DataType>(-1);
+        case GL_BYTE:                         return DataType::Byte;
+        case GL_UNSIGNED_BYTE:                return DataType::UByte;
+        case GL_SHORT:                        return DataType::Short;
+        case GL_UNSIGNED_SHORT:               return DataType::UShort;
+        case GL_INT:                          return DataType::Int;
+        case GL_UNSIGNED_INT:                 return DataType::UInt;
+        case GL_HALF_FLOAT:                   return DataType::HalfFloat;
+        case GL_FLOAT:                        return DataType::Float;
+        case GL_DOUBLE:                       return DataType::Double;
+        case GL_FIXED:                        return DataType::Fixed;
+        case GL_INT_2_10_10_10_REV:           return DataType::Int2_10_10_10_Rev;
+        case GL_UNSIGNED_INT_2_10_10_10_REV:  return DataType::UInt2_10_10_10_Rev;
+        case GL_UNSIGNED_INT_10F_11F_11F_REV: return DataType::UInt10F_11F_11F_Rev;
+        default:                              return static_cast<DataType>(-1);
     }
 }
 
-VertexArray::VertexArray() noexcept
-    : _array()
+VertexArrayShared::VertexArrayShared() noexcept
+    : _array(), _refCount(new u32)
 {
+    *_refCount = 1;
     glGenVertexArrays(1, &_array);
 }
 
-VertexArray::~VertexArray() noexcept
+VertexArrayShared::VertexArrayShared(const VertexArrayShared& copy) noexcept
+    : _array(copy._array), _refCount(copy._refCount)
 {
-    glDeleteVertexArrays(1, &_array);
+    ++(*_refCount);
 }
 
-void VertexArray::bind() const noexcept
+VertexArrayShared::VertexArrayShared(VertexArrayShared&& move) noexcept
+    : _array(move._array), _refCount(move._refCount)
 {
-    glBindVertexArray(this->_array);
+    ++(*_refCount);
 }
 
-void VertexArray::unbind() noexcept
+VertexArrayShared::~VertexArrayShared() noexcept
 {
-    glBindVertexArray(0);
+    if(--(*_refCount) <= 0)
+    {
+        glDeleteVertexArrays(1, &_array);
+        delete _refCount;
+    }
 }
 
-void VertexArray::setAttribute(GLuint index, GLuint size, DataType type, GLboolean normalized, GLsizei stride, const GLvoid* pointer) noexcept
+VertexArrayShared& VertexArrayShared::operator =(const VertexArrayShared& copy) noexcept
 {
-    glVertexAttribPointer(index, size, getGLType(type), normalized, stride, pointer);
+    if(this != &copy)
+    {
+        _array = copy._array;
+        _refCount = copy._refCount;
+        ++(*_refCount);
+    }
+
+    return *this;
 }
 
-void VertexArray::enableAttribute(GLuint index) noexcept
+VertexArrayShared& VertexArrayShared::operator =(VertexArrayShared&& move) noexcept
 {
-    glEnableVertexAttribArray(index);
+    if(this != &move)
+    {
+        _array = move._array;
+        _refCount = move._refCount;
+        ++(*_refCount);
+    }
+
+    return *this;
 }
-
-

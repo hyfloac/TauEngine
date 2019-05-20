@@ -3,7 +3,7 @@
 #include <maths/ComponentVector4.hpp>
 #include <DLL.hpp>
 
-class TAU_DLL Vector4f
+class TAU_DLL Vector4f final
 {
 private:
     CompVec4 _data;
@@ -70,10 +70,10 @@ public:
 
 #undef SCALAR_MATH
 
-    inline Vector4f& scale(const float scalar)       noexcept { return mul(scalar); }
-    inline Vector4f& scale(const i32   scalar)       noexcept { return mul(scalar); }
-    inline Vector4f scaleC(const float scalar) const noexcept { return mulC(scalar); }
-    inline Vector4f scaleC(const i32   scalar) const noexcept { return mulC(scalar); }
+    inline Vector4f& scale(const float scalar) noexcept { return mul(scalar); }
+    inline Vector4f& scale(const i32   scalar) noexcept { return mul(scalar); }
+    inline Vector4f scaleC(const float scalar)           const noexcept { return mulC(scalar); }
+    inline Vector4f scaleC(const i32   scalar)           const noexcept { return mulC(scalar); }
 
 #pragma region Negate
     Vector4f& negate()               noexcept;
@@ -122,6 +122,7 @@ public:
 
 #undef OPERATOR
 #undef SCALAR_OPERATOR
+#undef RAW_VEC_FUNC
 
     inline Vector4f& operator -()       noexcept { return neg(); }
     inline Vector4f  operator -() const noexcept { return negCopy(); }

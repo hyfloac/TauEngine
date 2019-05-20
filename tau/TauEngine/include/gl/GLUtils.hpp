@@ -9,13 +9,16 @@
 
 typedef void (GLAPIENTRY *debugMessageCallback_f)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
-TAU_DLL void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullable void* userParam, bool synchronous);
+TAU_DLL void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullable void* userParam, bool synchronous) noexcept;
 
-TAU_DLL void __internal__clearGLErrors();
+TAU_DLL void stopDebugOutput() noexcept;
 
-TAU_DLL bool __internal__logGLCall(const char* glFunc, const char* file, u32 line);
+TAU_DLL void __internal__clearGLErrors() noexcept;
+
+TAU_DLL bool __internal__logGLCall(const char* glFunc, const char* file, u32 line) noexcept;
 
 #define ___ASSERT(__TEST) if(!(__TEST)) { DEBUG_BREAK; }
+
 #ifdef _DEBUG
   #define CALL_GL_FUNC(__CALL) __internal__clearGLErrors(), __CALL; ___ASSERT(__internal__logGLCall(#__CALL, __FILE__, __LINE__))
 #else
@@ -28,8 +31,8 @@ TAU_DLL bool __internal__logGLCall(const char* glFunc, const char* file, u32 lin
                                                 inline static void disableGL##__F_NAME() noexcept { glDisable(__E_NAME); } \
                                                 inline static void setGL##__F_NAME(bool state) noexcept                    \
                                                 {                                                                          \
-                                                    if (state) { enableGL##__F_NAME(); }                                   \
-                                                    else { disableGL##__F_NAME(); }                                        \
+                                                    if(state) { enableGL##__F_NAME();  }                                   \
+                                                    else      { disableGL##__F_NAME(); }                                   \
                                                 }                                                                          \
                                                 inline static void toggleGL##__F_NAME() noexcept { setGL##__F_NAME(!glIsEnabled(__E_NAME)); }
 
@@ -38,3 +41,7 @@ GL_STATE_CONTROLLER(CullFace, GL_CULL_FACE)
 GL_STATE_CONTROLLER(DebugOutput, GL_DEBUG_OUTPUT)
 GL_STATE_CONTROLLER(DebugOutputSync, GL_DEBUG_OUTPUT_SYNCHRONOUS)
 GL_STATE_CONTROLLER(DepthTest, GL_DEPTH_TEST)
+
+inline static void glWireframe()  noexcept { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  }
+inline static void glFilled()     noexcept { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  }
+inline static void glVertices()   noexcept { glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); }

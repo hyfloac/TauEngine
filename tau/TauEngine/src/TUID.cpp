@@ -7,20 +7,20 @@
 
 static inline u32 rotL32(u32 n, u32 c)
 {
-    const unsigned int mask = (CHAR_BIT * sizeof(n) - 1);  // assumes width is a power of 2.
+    const u32 mask = (CHAR_BIT * sizeof(n) - 1);  // assumes width is a power of 2.
 
-    // assert ( (c<=mask) &&"rotate by type width or more");
     c &= mask;
-    return (n << c) | (n >> ((-c)&mask));
+    const u32 negC = static_cast<u32>(-static_cast<i32>(c));
+    return (n << c) | (n >> (negC & mask));
 }
 
 static inline u32 rotR32(u32 n, u32 c)
 {
-    const unsigned int mask = (CHAR_BIT * sizeof(n) - 1);
+    const u32 mask = (CHAR_BIT * sizeof(n) - 1);
 
-    // assert ( (c<=mask) &&"rotate by type width or more");
     c &= mask;
-    return (n >> c) | (n << ((-c)&mask));
+    const u32 negC = static_cast<u32>(-static_cast<i32>(c));
+    return (n >> c) | (n << (negC & mask));
 }
 
 TUID TUID::generate() noexcept 
@@ -57,10 +57,10 @@ TUID::TUID(u64 highBits, u64 lowBits) noexcept
 
 void TUID::toString(char str[38]) const noexcept
 {
-    u32 b0 = _highBits >> 32;
-    u32 b1 = _highBits & 0xFFFFFFFF;
-    u32 b2 = _lowBits >> 32;
-    u32 b3 = _lowBits & 0xFFFFFFFF;
+    const u32 b0 = _highBits >> 32;
+    const u32 b1 = _highBits & 0xFFFFFFFF;
+    const u32 b2 = _lowBits >> 32;
+    const u32 b3 = _lowBits & 0xFFFFFFFF;
     sprintf(str, "%.4X-%.8X-%.6X-%.4X-%.4X-%.6X",
         b0 >> 16, 
         (b0 << 16) | (b1 >> 16),

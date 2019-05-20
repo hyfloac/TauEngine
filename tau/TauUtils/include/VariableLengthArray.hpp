@@ -8,3 +8,5 @@
 #else
   #define VLA(_TYPE, _NAME, _SIZE) _TYPE _NAME[_SIZE]
 #endif
+
+#define VLA_MAX_LEN (512)
