@@ -36,4 +36,14 @@
 #include <DynArray.hpp>
 #include <EnumBitFields.hpp>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
+template<typename _T, typename _D = std::default_delete<_T>>
+using Scoped = std::unique_ptr<_T, _D>;
+
+template<typename _T>
+using Ref = std::shared_ptr<_T>;
+
 #endif
