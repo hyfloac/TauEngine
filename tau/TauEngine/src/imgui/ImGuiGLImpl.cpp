@@ -25,14 +25,59 @@ bool ImGui_ImplGL_Init() noexcept
     _vertexShader = new GLShader(ShaderType::VERTEX, "exe|resources/imgui_vertex.glsl", _program);
     _fragmentShader = new GLShader(ShaderType::FRAGMENT, "exe|resources/imgui_fragment.glsl", _program);
 
-    int size;
-    const char* src;
+    const char* vertexSrc = R"(
+    #version 330 core
 
-    loadResourceFile(IDR_IMGUI_VERTEX_SHADER, TEXT_FILE, &size, &src);
+    layout(location = 0) in vec2 pos;
+    layout(location = 1) in vec2 uv;
+    layout(location = 2) in vec4 color;
+
+    out vec2 f_uv;
+    out vec4 f_color;
+
+    uniform mat4 projectionMatrix;
+
+    void main(void)
+    {
+        f_uv = uv;
+        f_color = color;
+        gl_Position = projectionMatrix * vec4(pos.xy, 0.0, 1.0);
+    }
+    )";
+
+    const char* fragmentSrc = R"(
+    #version 330 core
+
+    in vec2 f_uv;
+    in vec4 f_color;
+
+    layout(location = 0) out vec4 fragColor;
+
+    uniform sampler2D textureSampler;
+
+    void main(void)
+    {
+        fragColor = f_color * texture(textureSampler, f_uv.st);
+    }
+    )";
+
+    int size = strlen(vertexSrc);
+    char* src = reinterpret_cast<char*>(calloc(size + 1, 1));
+    memcpy(src, vertexSrc, size);
+
+    // loadResourceFile(IDR_IMGUI_VERTEX_SHADER, TEXT_FILE, &size, &src);
     _vertexShader->loadShader(src);
 
-    loadResourceFile(IDR_IMGUI_FRAGMENT_SHADER, TEXT_FILE, &size, &src);
+    // free(src);
+
+    size = strlen(fragmentSrc);
+    src = reinterpret_cast<char*>(calloc(size + 1, 1));
+    memcpy(src, fragmentSrc, size);
+
+    // loadResourceFile(IDR_IMGUI_FRAGMENT_SHADER, TEXT_FILE, &size, &src);
     _fragmentShader->loadShader(src);
+
+    // free(src);
 
     _program->linkAndValidate();
 
@@ -57,7 +102,7 @@ void ImGui_ImplGL_Render(ImDrawData* drawData) noexcept
 
 
     glEnable(GL_BLEND);
-    glBlendEquation(GL_ADD);
+    glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glDisable(GL_CULL_FACE);

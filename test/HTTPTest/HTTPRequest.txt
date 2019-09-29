@@ -1,0 +1,10 @@
+GET /ajax.html HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0
+Accept:  text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Cookie: 
+Upgrade-Insecure-Requests: 1
+Cache-control: max-age=0
+

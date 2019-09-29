@@ -20,15 +20,17 @@
 #include <system/Mouse.hpp>
 #include <system/Keyboard.hpp>
 #include <Safeties.hpp>
+#include <RenderingMode.hpp>
 
 class Window;
+class Event;
 
 /**
  * Handles a resize of the window. This should only be used to reset the graphics.
  * 
  * Do not call {@link Window#resize(const u32,const u32)}.
  */
-typedef void (* onWindowResized_f)(const u32 width, const u32 height, NonNull Window* window);
+// typedef void (* onWindowResized_f)(const u32 width, const u32 height, NonNull Window* window);
 
 /**
  * Handles a mouse event.
@@ -47,12 +49,6 @@ typedef void (* onWindowResized_f)(const u32 width, const u32 height, NonNull Wi
 typedef void (* onMouseEvent_f)(const MouseEvent mouseEvent, const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, NonNull Window* window);
 
 typedef void (* onMouseMove_f)(const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, NonNull Window* window);
-
-typedef void (* onKeyEvent_f)(const KeyboardEvent keyboardEvent, const KeyboardFlags keyboardFlags, const u64 key, NonNull Window* window);
-
-typedef void (* onAsciiKeyEvent_f)(const wchar_t c16, const char c, NonNull Window* window);
-
-typedef void (* onWindowActive_f)(bool active, NonNull Window* window);
 
 enum class WindowState : u8
 {
@@ -87,6 +83,8 @@ static Nullable Window* getWindowFromHandle(HWND) noexcept;
 
 class TAU_DLL Window
 {
+public:
+    typedef void(*onEvent_f)(Event&);
 private:
     /**
      *   The current width of the window. This can change by 
@@ -100,7 +98,17 @@ private:
      * programatically resized.
      */
     u32 _height;
+    /**
+     *   The current X position of the window. This can change
+     * by either being manually resized, or by being
+     * programatically resized.
+     */
     u32 _xPos;
+    /**
+     *   The current Y position of the window. This can change
+     * by either being manually resized, or by being
+     * programatically resized.
+     */
     u32 _yPos;
     /**
      *   The title of the window. The string can change, the 
@@ -123,6 +131,7 @@ private:
      */
     const Window* _parent;
     ContextSettings _contextSettings;
+    RenderingMode& _renderingMode;
 
     /**
      * The current window state.
@@ -131,12 +140,10 @@ private:
      */
     WindowState _windowState;
 
-    onWindowResized_f _windowResizeHandler;
+    onEvent_f _eventHandler;
+
     onMouseEvent_f    _mouseEventHandler;
     onMouseMove_f     _mouseMoveHandler;
-    onKeyEvent_f      _keyEventHandler;
-    onAsciiKeyEvent_f _asciiKeyEventHandler;
-    onWindowActive_f  _windowActiveHandler;
 public:
     /**
      * Unloads the current context. 
@@ -145,28 +152,28 @@ public:
      */
     static void unloadCurrentContext() noexcept;
 public:
-#pragma region Constructor
     Window(u32 width, u32 height, Nullable const char* title, Nullable const void* userContainer = null, Nullable const Window* parent = null) noexcept;
-    Window(const Window& copy) noexcept = default;
-    Window(Window&& move) noexcept = default;
-#pragma endregion
 
     ~Window() noexcept;
 
-#pragma region Assignment Operator
-    Window& operator =(const Window& copy) noexcept = default;
-    Window& operator =(Window&& move) noexcept = default;
+#pragma region Copy and Move Operations
+    Window(const Window& copy) noexcept = delete;
+    Window(Window&& move) noexcept = delete;
+
+    Window& operator =(const Window& copy) noexcept = delete;
+    Window& operator =(Window&& move) noexcept = delete;
 #pragma endregion
 
 #pragma region Getters
-    inline u32 width()  const noexcept { return _width;  }
-    inline u32 height() const noexcept { return _height; }
-    inline u32 xPos()   const noexcept { return _xPos; }
-    inline u32 yPos()   const noexcept { return _yPos; }
-    inline const char* title() const noexcept { return _title; }
-    inline const void* userContainer() const noexcept { return _userContainer; }
-    inline const Window* parent() const noexcept { return _parent; }
-    inline ContextSettings& contextSettings() noexcept { return _contextSettings; }
+    [[nodiscard]] inline u32 width()  const noexcept { return _width;  }
+    [[nodiscard]] inline u32 height() const noexcept { return _height; }
+    [[nodiscard]] inline u32 xPos()   const noexcept { return _xPos; }
+    [[nodiscard]] inline u32 yPos()   const noexcept { return _yPos; }
+    [[nodiscard]] inline const char* title() const noexcept { return _title; }
+    [[nodiscard]] inline const void* userContainer() const noexcept { return _userContainer; }
+    [[nodiscard]] inline const Window* parent() const noexcept { return _parent; }
+    [[nodiscard]] inline ContextSettings& contextSettings() noexcept { return _contextSettings; }
+    [[nodiscard]] inline RenderingMode& renderingMode() noexcept { return _renderingMode; }
 #pragma endregion
 
     /**
@@ -179,14 +186,36 @@ public:
      */
     void resize(const u32 width, const u32 height) noexcept;
 
+    /**
+     * Moves the window.
+     *
+     * @param[in] xPos
+     *      The new x position of the window.
+     * @param[in] yPos
+     *      The new y position of the window.
+     */
+    void move(const u32 xPos, const u32 yPos) noexcept;
+
+    /**
+     * Moves and resizes the window.
+     *
+     * @param[in] xPos
+     *      The new x position of the window.
+     * @param[in] yPos
+     *      The new y position of the window.
+     * @param[in] width
+     *      The new width of the window.
+     * @param[in] height
+     *      The new height of the window.
+     */
+    void moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept;
+
     void setTitle(const char* title) noexcept;
 
-    inline void setResizeWindowHandler(Nullable onWindowResized_f windowResizeHandler)   noexcept { _windowResizeHandler  = windowResizeHandler;  }
+    inline void setEventHandler(Nullable onEvent_f eventHandler) noexcept { _eventHandler = eventHandler;  }
+
     inline void setMouseEventHandler(Nullable onMouseEvent_f mouseEventHandler)          noexcept { _mouseEventHandler    = mouseEventHandler;    }
     inline void setMouseMoveHandler(Nullable onMouseMove_f mouseMoveHandler)             noexcept { _mouseMoveHandler     = mouseMoveHandler;     }
-    inline void setKeyEventHandler(Nullable onKeyEvent_f keyEventHandler)                noexcept { _keyEventHandler      = keyEventHandler;      }
-    inline void setAsciiKeyEventHandler(Nullable onAsciiKeyEvent_f asciiKeyEventHandler) noexcept { _asciiKeyEventHandler = asciiKeyEventHandler; }
-    inline void setWindowActiveHandler(Nullable onWindowActive_f windowActiveHandler)    noexcept { _windowActiveHandler  = windowActiveHandler;  }
 
     bool createWindow()      noexcept;
     void closeWindow() const noexcept;
@@ -214,8 +243,11 @@ public:
 
     void updateViewPort(u32 x, u32 y, u32 width, u32 height, float minZ = 0.0f, float maxZ = 1.0f) const noexcept;
     void updateViewPort(u32 x, u32 y, float minZ = 0.0f, float maxZ = 1.0f) const noexcept;
+
+    void getMousePos(i32& x, i32& y) const noexcept;
+    void setMousePos(i32 x, i32 y) const noexcept;
 public:
-#ifdef _WIN32
+#ifdef _MSVC_LANG
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;
     friend void removeWindow(NotNull<const Window>) noexcept;
     friend Nullable Window* getWindowFromHandle(HWND) noexcept;

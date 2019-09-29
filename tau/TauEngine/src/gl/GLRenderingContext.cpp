@@ -67,6 +67,23 @@ void GLRenderingContext::createContext(void* param)
         this->_context = tmpContext;
     }
 }
+
+void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue)
+{
+    GLbitfield flags = 0;
+    if(clearColorBuffer)   { flags  = GL_COLOR_BUFFER_BIT;   }
+    if(clearDepthBuffer)   { flags |= GL_DEPTH_BUFFER_BIT;   }
+    if(clearStencilBuffer) { flags |= GL_STENCIL_BUFFER_BIT; }
+
+    glClearDepth(depthValue);
+    glClearStencil(stencilValue);
+    glClearColor(static_cast<float>(color.r) / 255.0f,
+                 static_cast<float>(color.g) / 255.0f,
+                 static_cast<float>(color.b) / 255.0f,
+                 static_cast<float>(color.a) / 255.0f);
+    glClear(flags);
+}
+
 #else
 void GLRenderingContext::createContext()
 { }

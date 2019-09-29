@@ -1,76 +1,75 @@
 #pragma warning(push, 0)
 #include <cstdio>
-#include <cmath>
+#include <cstring>
 #pragma warning(pop)
+#include <maths/Maths.hpp>
 #include <model/OBJLoader.hpp>
-// #include <MathDefines.hpp>
+#include <memory>
 
 namespace objl
 {
-    Vector2::Vector2() noexcept
-        : _x(0.0f), _y(0.0f)
-    { }
-
-    Vector2::Vector2(const float x, const float y) noexcept
-        : _x(x), _y(y)
-    { }
-
-    Vector3::Vector3() noexcept
-        : _x(0.0f), _y(0.0f), _z(0.0f)
-    { }
-
-    Vector3::Vector3(const float x, const float y, const float z) noexcept
-        : _x(x), _y(y), _z(z)
-    { }
-
-    Vector3 Vector3::cross(const Vector3& other) const noexcept
-    {
-        return Vector3(this->_y * other._z - this->_z * other._y,
-                       this->_z * other._x - this->_x * other._z,
-                       this->_x * other._y - this->_y * other._x);
-    }
-
     float Vector3::magnitude() const noexcept
     {
         return sqrtf(this->magnitudeSquared());
     }
 
-    static float fastInverseSqrt(float x) noexcept
-    {
-        const float halfX = x * 0.5f;
-        i32 i = *(i32*)&x;
-
-        i = 0x5F3759DF - (i >> 1);
-        const float y = *(float*)&i;
-
-        return y * (1.5f - (halfX * y * y));
-    }
-
     float Vector3::midAngleCos(const Vector3& other) const noexcept
     {
-        return this->dot(other) * fastInverseSqrt(this->magnitudeSquared() * other.magnitudeSquared());
+        return this->dot(other) * rSqrt(this->magnitudeSquared() * other.magnitudeSquared());
     }
 
     Vector3 Vector3::projection(const Vector3& other) const noexcept
     {
-        const Vector3 bn = other * fastInverseSqrt(this->magnitudeSquared());
+        const Vector3 bn = other * rSqrt(this->magnitudeSquared());
         return bn * this->dot(other);
     }
 
-    Material::Material() noexcept
-        : name(""), 
-          Ns(0.0f), 
-          Ni(0.0f),
-          d(0.0f),
-          illum(0)
-    { }
-
-    Mesh::Mesh(std::vector<Vertex>& _vertices, std::vector<u32> _indices) noexcept
-        : vertices(_vertices), indices(std::move(_indices))
-    { }
-
     namespace algorithm
     {
+        bool strEmpty(const char* str) noexcept { return !(str && strlen(str)); }
+
+        bool strEmpty(const char* str, const size_t len) noexcept { return !(str && len); }
+
+        size_t strFindLastNotOf(const char* str, const char* chars) noexcept
+        {
+            if(!str || !chars) { return 0; }
+
+            size_t ret = 0;
+
+            while(*chars != '\0')
+            {
+                const char* fnd = strrchr(str, *chars);
+
+                if(!fnd) { return strlen(str) - 1; }
+
+                const size_t offset = fnd - str;
+
+                if(offset > ret) { ret = offset; }
+
+                ++chars;
+            }
+
+            return ret;
+        }
+
+        const char* subString(const char* str, const size_t count) noexcept
+        {
+            char* retStr = new(std::nothrow) char[count + 1];
+            if(!retStr) { return nullptr; }
+            retStr[count] = '\0';
+            strncpy_s(retStr, count + 1, str, count);
+            return retStr;
+        }
+
+        const char* subString(const char* str, const size_t start, const size_t count) noexcept
+        {
+            char* retStr = new(std::nothrow) char[count + 1];
+            if(!retStr) { return nullptr; }
+            retStr[count] = '\0';
+            strncpy_s(retStr, count + 1, str + start, count);
+            return retStr;
+        }
+
         bool sameSide(const Vector3& RESTRICT p1, const Vector3& RESTRICT p2, const Vector3& RESTRICT a, const Vector3& RESTRICT b) noexcept
         {
             const Vector3 ba = b - a;
@@ -115,11 +114,11 @@ namespace objl
 
             std::string temp;
 
-            const u32 inSize = static_cast<u32>(in.size());
-            const u32 tokenSize = static_cast<u32>(token.size());
-            const u32 tokenSize1 = static_cast<u32>(token.size() + 1);
+            const size_t inSize = in.size();
+            const size_t tokenSize = token.size();
+            const size_t tokenSize1 = tokenSize + 1;
 
-            for(u32 i = 0; i < inSize; ++i)
+            for(size_t i = 0; i < inSize; ++i)
             {
                 std::string test = in.substr(i, tokenSize);
 
@@ -143,71 +142,89 @@ namespace objl
             }
         }
 
-        void split(const std::string& RESTRICT in, std::vector<std::string>& RESTRICT out, const char token) noexcept
+        void split(const char* RESTRICT in, std::vector<std::string>& RESTRICT out, const char token) noexcept
         {
             out.clear();
 
-            std::string temp;
+            const size_t len = strlen(in);
 
-            for(char test : in)
+            char* temp = new(std::nothrow) char[len + 1];
+            if(!temp) { return; }
+            char* tempIndex = temp;
+
+            while(*in != '\0')
             {
+                const char test = *in;
+
                 if(test == token)
                 {
-                    if(!temp.empty())
+                    if(tempIndex != temp)
                     {
-                        out.push_back(temp);
-                        temp.clear();
+                        *tempIndex = '\0';
+                        out.emplace_back(temp);
+                        tempIndex = temp;
                     }
                     else { out.emplace_back(""); }
                 }
-                else { temp += test; }
+                else 
+                { 
+                    *tempIndex = test;
+                    ++tempIndex;
+                }
+
+                ++in;
             }
 
-            out.push_back(temp);
+            *tempIndex = '\0';
+            out.emplace_back(temp);
+
+            delete[] temp;
         }
 
-        std::string tail(const std::string& in) noexcept
+        const char* tail(const char* in) noexcept
         {
-            if(!in.empty())
+            const size_t inLen = strlen(in);
+
+            if(!strEmpty(in, inLen))
             {
-                const size_t token_start = in.find_first_not_of(" \t");
-                const size_t space_start = in.find_first_of(" \t", token_start);
-                const size_t tail_start = in.find_first_not_of(" \t", space_start);
-                const size_t tail_end = in.find_last_not_of(" \t");
+                const size_t cTokenStart = strspn(in, " \t");
+                const size_t cSpaceStart = strcspn(in + cTokenStart, "  \t") + cTokenStart;
+                const size_t cTailStart = strspn(in + cSpaceStart, " \t") + cSpaceStart;
+                const size_t cTailEnd = strFindLastNotOf(in, " \t");
 
-                if (tail_start != std::string::npos)
+                if(cTailStart != inLen)
                 {
-                    if (tail_end != std::string::npos)
+                    if(cTailEnd != inLen)
                     {
-                        return in.substr(tail_start, tail_end - tail_start + 1);
+                        return subString(in, cTailStart, cTailEnd - cTailStart + 1);
                     }
-
-                    return in.substr(tail_start);
+                    return subString(in, cTailStart);
                 }
             }
 
-            return "";
+            return nullptr;
         }
 
-        std::string firstToken(const std::string& in) noexcept
+        const char* firstToken(const char* in) noexcept
         {
-            if(!in.empty())
+            const size_t inLen = strlen(in);
+
+            if(!strEmpty(in, inLen))
             {
-                const size_t token_start = in.find_first_not_of(" \t");
-                const size_t token_end = in.find_first_of(" \t", token_start);
+                const size_t cTokenStart = strspn(in, " \t");
+                const size_t cTokenEnd = strcspn(in + cTokenStart, "  \t") + cTokenStart;
 
-                if(token_start != std::string::npos)
+                if(cTokenStart != inLen)
                 {
-                    if(token_end != std::string::npos)
+                    if(cTokenEnd != inLen)
                     {
-                        return in.substr(token_start, token_end - token_start);
+                        return subString(in, cTokenStart, cTokenEnd - cTokenStart);
                     }
-
-                    return in.substr(token_start);
+                    return subString(in, cTokenStart);
                 }
             }
 
-            return "";
+            return nullptr;
         }
 
         template<typename _T>
@@ -220,11 +237,13 @@ namespace objl
         }
     }
 
-    void Loader::genVerticesFromRawOBJ(std::vector<Vertex>& RESTRICT vertices, const std::vector<Vector3>& RESTRICT positions, const std::vector<Vector2>& RESTRICT textureCoords, const std::vector<Vector3>& RESTRICT normals, std::string currentLine) noexcept
+    void Loader::genVerticesFromRawOBJ(std::vector<Vertex>& RESTRICT vertices, const std::vector<Vector3>& RESTRICT positions, const std::vector<Vector2>& RESTRICT textureCoords, const std::vector<Vector3>& RESTRICT normals, const char* currentLine) noexcept
     {
         std::vector<std::string> faceSplit, vertexSplit;
         Vertex vertex;
-        algorithm::split(algorithm::tail(currentLine), faceSplit, ' ');
+        const char* cTail = algorithm::tail(currentLine);
+        algorithm::split(cTail, faceSplit, ' ');
+        delete[] cTail;
 
         bool noNormal = false;
 
@@ -242,7 +261,7 @@ namespace objl
             // See What type the vertex is.
             VerticeTypes verticeType = static_cast<VerticeTypes>(-1);
 
-            algorithm::split(faceElm, vertexSplit, '/');
+            algorithm::split(faceElm.c_str(), vertexSplit, '/');
 
             switch(vertexSplit.size())
             {
@@ -444,97 +463,109 @@ namespace objl
         }
     }
 
-    bool Loader::loadMaterials(const std::string& path) noexcept
+    bool Loader::loadMaterials(const char* path) noexcept
     {
-        if(path.substr(path.size() - 4, 4) != ".mtl") { return false; }
+        const size_t pathLen = strlen(path);
+
+        if(!(pathLen > 4 && path[pathLen - 4] == '.' && path[pathLen - 3] == 'm' && path[pathLen - 2] == 't' && path[pathLen - 1] == 'l')) { return false; }
 
         FILE* cFile;
-        if (fopen_s(&cFile, path.c_str(), "r")) { return false; }
+        if (fopen_s(&cFile, path, "r")) { return false; }
 
         Material tempMaterial;
 
         bool listening = false;
 
-        char cCurrentLine[256];
+        { // Block used to destruct the line buffer.
+            char cCurrentLine[256];
 
-        while(fgets(cCurrentLine, sizeof(cCurrentLine), cFile))
-        {
-            if(cCurrentLine[0] == '\0' ||
-               cCurrentLine[0] == '\r' ||
-               cCurrentLine[0] == '\n' ||
-               cCurrentLine[0] == '#') { continue; }
-
-            const u32 lastChar = static_cast<u32>(strlen(cCurrentLine) - 1);
-            if (cCurrentLine[lastChar] == '\n') { cCurrentLine[lastChar] = '\0'; }
-
-            const std::string currentLine = cCurrentLine;
-
-            std::string sFirstToken = algorithm::firstToken(currentLine);
-
-            if (sFirstToken.empty()) { continue; }
-
-            std::string tokenTail = algorithm::tail(currentLine);
-
-            // new material and material name
-            if(sFirstToken == "newmtl")
+            while(fgets(cCurrentLine, sizeof(cCurrentLine), cFile))
             {
-                if(!listening) { listening = true; }
-                else
+                if(cCurrentLine[0] == '\0' ||
+                   cCurrentLine[0] == '\r' ||
+                   cCurrentLine[0] == '\n' ||
+                   cCurrentLine[0] == '#') { continue; }
+
+                const size_t lineLen = strlen(cCurrentLine);
+
+                if(cCurrentLine[lineLen - 1] == '\n') { cCurrentLine[lineLen - 1] = '\0'; }
+
+                const std::string currentLine = cCurrentLine;
+
+                // std::string sFirstToken = algorithm::firstToken(currentLine);
+                const char* sFirstToken = algorithm::firstToken(cCurrentLine);
+
+                if(algorithm::strEmpty(sFirstToken, lineLen)) { continue; }
+
+                const char* clTail = algorithm::tail(cCurrentLine);
+                // std::string tokenTail = clTail;
+                // delete[] clTail;
+
+                // new material and material name
+                if(strcmp(sFirstToken, "newmtl") == 0)
                 {
-                    // Generate the material
+                    if(!listening) { listening = true; }
+                    else
+                    {
+                        // Generate the material
 
-                    // Push Back loaded Material
-                    _materials.push_back(tempMaterial);
+                        // Push Back loaded Material
+                        _materials.push_back(tempMaterial);
 
-                    // Clear Loaded Material
-                    tempMaterial = Material();
+                        // Clear Loaded Material
+                        tempMaterial = Material();
+                    }
+
+                    if(currentLine.size() > 7) { tempMaterial.name = clTail; }
+                    else { tempMaterial.name = "none"; }
                 }
-
-                if(currentLine.size() > 7) { tempMaterial.name = tokenTail; }
-                else { tempMaterial.name = "none"; }
-            }
-            else if(sFirstToken[0] == 'K' && sFirstToken.size() == 2)
-            {
-                std::vector<std::string> temp;
-                algorithm::split(tokenTail, temp, ' ');
-
-                if(temp.size() != 3) { continue; }
-
-                Vector3* vp = nullptr;
-
-                if(     sFirstToken[1] == 'a') { vp = &tempMaterial.Ka; } // Ambient Color
-                else if(sFirstToken[1] == 'd') { vp = &tempMaterial.Kd; } // Diffuse Color
-                else if(sFirstToken[1] == 's') { vp = &tempMaterial.Ks; } // Specular Color
-
-                if(vp)
+                else if(sFirstToken[0] == 'K' && strlen(sFirstToken) == 2)
                 {
-                    vp->x() = std::stof(temp[0]);
-                    vp->y() = std::stof(temp[1]);
-                    vp->z() = std::stof(temp[2]);
+                    std::vector<std::string> temp;
+                    algorithm::split(clTail, temp, ' ');
+
+                    if(temp.size() != 3) { continue; }
+
+                    Vector3* vp = nullptr;
+
+                    if(sFirstToken[1] == 'a') { vp = &tempMaterial.Ka; } // Ambient Color
+                    else if(sFirstToken[1] == 'd') { vp = &tempMaterial.Kd; } // Diffuse Color
+                    else if(sFirstToken[1] == 's') { vp = &tempMaterial.Ks; } // Specular Color
+
+                    if(vp)
+                    {
+                        vp->x() = std::stof(temp[0]);
+                        vp->y() = std::stof(temp[1]);
+                        vp->z() = std::stof(temp[2]);
+                    }
                 }
+                // Specular Exponent
+                else if(strcmp(sFirstToken, "Ns") == 0) { tempMaterial.Ns = std::stof(clTail); }
+                // Optical Density
+                else if(strcmp(sFirstToken, "Ni") == 0) { tempMaterial.Ni = std::stof(clTail); }
+                // Dissolve
+                else if(strcmp(sFirstToken, "d") == 0) { tempMaterial.d = std::stof(clTail); }
+                // Illumination
+                else if(strcmp(sFirstToken, "illum") == 0) { tempMaterial.illum = std::stoi(clTail); }
+                // Ambient Texture Map
+                else if(strcmp(sFirstToken, "map_Ka") == 0) { tempMaterial.map_Ka = clTail; }
+                // Diffuse Texture Map
+                else if(strcmp(sFirstToken, "map_Kd") == 0) { tempMaterial.map_Kd = clTail; }
+                // Specular Texture Map
+                else if(strcmp(sFirstToken, "map_Ks") == 0) { tempMaterial.map_Ks = clTail; }
+                // Specular Highlight Map
+                else if(strcmp(sFirstToken, "map_Ns") == 0) { tempMaterial.map_Ns = clTail; }
+                // Alpha Texture Map
+                else if(strcmp(sFirstToken, "map_d") == 0) { tempMaterial.map_d = clTail; }
+                // Bump Map
+                else if(strcmp(sFirstToken, "map_Bump") == 0 ||
+                        strcmp(sFirstToken, "map_bump") == 0 ||
+                        strcmp(sFirstToken, "bump") == 0)
+                { tempMaterial.map_bump = clTail; }
+
+                delete[] clTail;
+                delete[] sFirstToken;
             }
-            // Specular Exponent
-            else if(sFirstToken == "Ns") { tempMaterial.Ns = std::stof(tokenTail); }
-            // Optical Density
-            else if(sFirstToken == "Ni") { tempMaterial.Ni = std::stof(tokenTail); }
-            // Dissolve
-            else if(sFirstToken == "d") { tempMaterial.d = std::stof(tokenTail); }
-            // Illumination
-            else if(sFirstToken == "illum") { tempMaterial.illum = std::stoi(tokenTail); }
-            // Ambient Texture Map
-            else if(sFirstToken == "map_Ka") { tempMaterial.map_Ka = tokenTail; }
-            // Diffuse Texture Map
-            else if(sFirstToken == "map_Kd") { tempMaterial.map_Kd = tokenTail; }
-            // Specular Texture Map
-            else if(sFirstToken == "map_Ks") { tempMaterial.map_Ks = tokenTail; }
-            // Specular Highlight Map
-            else if(sFirstToken == "map_Ns") { tempMaterial.map_Ns = tokenTail; }
-            // Alpha Texture Map
-            else if(sFirstToken == "map_d") { tempMaterial.map_d = tokenTail; }
-            // Bump Map
-            else if(sFirstToken == "map_Bump" ||
-                    sFirstToken == "map_bump" ||
-                    sFirstToken == "bump") { tempMaterial.map_bump = tokenTail; }
         }
 
         // Deal with last material
@@ -546,12 +577,13 @@ namespace objl
         return !_materials.empty();
     }
 
-    bool Loader::loadFile(const std::string& path) noexcept
+    bool Loader::loadFile(const char* path) noexcept
     {
-        if(path.substr(path.size() - 4, 4) != ".obj") { return false; }
+        const size_t pathLen = strlen(path);
+        if(!(pathLen > 4 && path[pathLen - 4] == '.' && path[pathLen - 3] == 'o' && path[pathLen - 2] == 'b' && path[pathLen - 1] == 'j')) { return false; }
 
         FILE* cFile;
-        if(fopen_s(&cFile, path.c_str(), "r")) { return false; }
+        if(fopen_s(&cFile, path, "r")) { return false; }
 
         _meshes.clear();
         _vertices.clear();
@@ -570,171 +602,179 @@ namespace objl
 
         Mesh tempMesh;
 
-        char cCurrentLine[256];
+        { // Block used to destruct the line buffer.
+            char currentLine[256];
 
-        while(fgets(cCurrentLine, sizeof(cCurrentLine), cFile))
-        {
-            if(cCurrentLine[0] == '\0' ||
-               cCurrentLine[0] == '\r' ||
-               cCurrentLine[0] == '\n' ||
-               cCurrentLine[0] == '#') { continue; }
-
-            const u32 lastChar = static_cast<u32>(strlen(cCurrentLine) - 1);
-            if(cCurrentLine[lastChar] == '\n') { cCurrentLine[lastChar] = '\0'; }
-
-            const std::string currentLine = cCurrentLine;
-
-            std::string sFirstToken = algorithm::firstToken(currentLine);
-            
-            if(sFirstToken.empty()) { continue; }
-            const char cFirstToken = sFirstToken[0];
-
-            // Generate a Mesh Object or Prepare for an object to be created
-            if(cFirstToken == 'o' ||
-               cFirstToken == 'g')
+            while(fgets(currentLine, sizeof(currentLine), cFile))
             {
-                std::string tmpMeshName = algorithm::tail(currentLine);
+                if(currentLine[0] == '\0' ||
+                   currentLine[0] == '\r' ||
+                   currentLine[0] == '\n' ||
+                   currentLine[0] == '#') { continue; }
 
-                // Generate the mesh to put into the array
+                const size_t lastChar = strlen(currentLine) - 1;
+                if(currentLine[lastChar] == '\n') { currentLine[lastChar] = '\0'; }
 
-                if(!Indices.empty() && !Vertices.empty())
+                const char* sFirstToken = algorithm::firstToken(currentLine);
+                const size_t sFTLen = strlen(sFirstToken);
+
+                if(algorithm::strEmpty(sFirstToken, sFTLen)) { continue; }
+                const char cFirstToken = sFirstToken[0];
+
+                // Generate a Mesh Object or Prepare for an object to be created
+                if(cFirstToken == 'o' ||
+                   cFirstToken == 'g')
                 {
-                    // Create Mesh
-                    tempMesh = Mesh(Vertices, Indices);
-                    tempMesh.name = meshName;
+                    const char* cTmpMeshName = algorithm::tail(currentLine);
 
-                    // Insert Mesh
-                    _meshes.push_back(tempMesh);
+                    // Generate the mesh to put into the array
 
-                    // Cleanup
-                    Vertices.clear();
-                    Indices.clear();
-                    meshName.clear();
-
-                    if (!tmpMeshName.empty()) { meshName = tmpMeshName; }
-                    else { meshName = "unnamed"; }
-                }
-                else
-                {
-                    if (!tmpMeshName.empty()) { meshName = tmpMeshName; }
-                    else { meshName = "unnamed"; }
-                }
-            } // Generate a Vertex Position
-            else if(cFirstToken == 'v')
-            {
-                if(sFirstToken.size() > 1)
-                {
-                    const char cSecondToken = sFirstToken[1];
-                    // Generate a Vertex Texture Coordinate
-                    if(cSecondToken == 't')
+                    if(!Indices.empty() && !Vertices.empty())
                     {
-                        std::vector<std::string> stex;
-                        Vector2 vtex;
-                        algorithm::split(algorithm::tail(currentLine), stex, ' ');
+                        // Create Mesh
+                        tempMesh = Mesh(Vertices, Indices);
+                        tempMesh.name = meshName;
 
-                        vtex.x() = std::stof(stex[0]);
-                        vtex.y() = std::stof(stex[1]);
+                        // Insert Mesh
+                        _meshes.push_back(tempMesh);
 
-                        TCoords.push_back(vtex);
-                    } // Generate a Vertex Normal;
-                    else if(cSecondToken == 'n')
-                    {
-                        std::vector<std::string> snor;
-                        Vector3 vnor;
-                        algorithm::split(algorithm::tail(currentLine), snor, ' ');
-
-                        vnor.x() = std::stof(snor[0]);
-                        vnor.y() = std::stof(snor[1]);
-                        vnor.z() = std::stof(snor[2]);
-
-                        Normals.push_back(vnor);
+                        // Cleanup
+                        Vertices.clear();
+                        Indices.clear();
+                        meshName.clear();
                     }
-                }
-                else
+
+                    if(!algorithm::strEmpty(cTmpMeshName)) { meshName = cTmpMeshName; }
+                    else { meshName = "unnamed"; }
+
+                    delete[] cTmpMeshName;
+                } // Generate a Vertex Position
+                else if(cFirstToken == 'v')
                 {
-                    std::vector<std::string> spos;
-                    Vector3 vpos;
-                    algorithm::split(algorithm::tail(currentLine), spos, ' ');
-
-                    vpos.x() = std::stof(spos[0]);
-                    vpos.y() = std::stof(spos[1]);
-                    vpos.z() = std::stof(spos[2]);
-
-                    Positions.push_back(vpos);
-                }
-            } // Generate a Face (vertices & indices)
-            else if(cFirstToken == 'f')
-            {
-                // Generate the vertices
-                std::vector<Vertex> vVerts;
-                genVerticesFromRawOBJ(vVerts, Positions, TCoords, Normals, currentLine);
-
-                // Add Vertices
-                for(const auto& vVert : vVerts)
-                {
-                    Vertices.push_back(vVert);
-
-                    _vertices.push_back(vVert);
-                }
-
-                std::vector<unsigned int> iIndices;
-
-                vertexTriangulation(iIndices, vVerts);
-
-                // Add Indices
-                for(u32 iIndice : iIndices)
-                {
-                    u32 indNum = (u32)(Vertices.size() - vVerts.size()) + iIndice;
-                    Indices.push_back(indNum);
-
-                    indNum = (u32)(_vertices.size() - vVerts.size()) + iIndice;
-                    _indices.push_back(indNum);
-                }
-            } // Get Mesh Material Name
-            else if(sFirstToken == "usemtl")
-            {
-                MeshMatNames.push_back(algorithm::tail(currentLine));
-
-                // Create new Mesh, if Material changes within a group
-                if(!Indices.empty() && !Vertices.empty())
-                {
-                    // Create Mesh
-                    tempMesh = Mesh(Vertices, Indices);
-                    tempMesh.name = meshName + "_2";
-
-                    // Insert Mesh
-                    _meshes.push_back(tempMesh);
-
-                    // Cleanup
-                    Vertices.clear();
-                    Indices.clear();
-                }
-            } // Load Materials
-            else if(sFirstToken == "mtllib")
-            {
-                // Generate LoadedMaterial
-
-                // Generate a path to the material file
-                std::vector<std::string> temp;
-                algorithm::split(path, temp, '/');
-
-                std::string pathToMat;
-
-                const u32 tSize = static_cast<u32>(temp.size() - 1);
-                if(tSize >= 0)
-                {
-                    for(u32 i = 0; i < tSize; ++i)
+                    const char* clTail = algorithm::tail(currentLine);
+                    if(sFTLen > 1)
                     {
-                        pathToMat += temp[i] + "/";
+                        const char cSecondToken = sFirstToken[1];
+                        // Generate a Vertex Texture Coordinate
+                        if(cSecondToken == 't')
+                        {
+                            std::vector<std::string> stex;
+                            Vector2 vtex;
+                            algorithm::split(clTail, stex, ' ');
+
+                            vtex.x() = std::stof(stex[0]);
+                            vtex.y() = std::stof(stex[1]);
+
+                            TCoords.push_back(vtex);
+                        } // Generate a Vertex Normal;
+                        else if(cSecondToken == 'n')
+                        {
+                            std::vector<std::string> snor;
+                            Vector3 vnor;
+                            algorithm::split(clTail, snor, ' ');
+
+                            vnor.x() = std::stof(snor[0]);
+                            vnor.y() = std::stof(snor[1]);
+                            vnor.z() = std::stof(snor[2]);
+
+                            Normals.push_back(vnor);
+                        }
                     }
+                    else
+                    {
+                        std::vector<std::string> spos;
+                        Vector3 vpos;
+                        algorithm::split(clTail, spos, ' ');
+
+                        vpos.x() = std::stof(spos[0]);
+                        vpos.y() = std::stof(spos[1]);
+                        vpos.z() = std::stof(spos[2]);
+
+                        Positions.push_back(vpos);
+                    }
+                    delete[] clTail;
+                } // Generate a Face (vertices & indices)
+                else if(cFirstToken == 'f')
+                {
+                    // Generate the vertices
+                    std::vector<Vertex> vVerts;
+                    genVerticesFromRawOBJ(vVerts, Positions, TCoords, Normals, currentLine);
+
+                    // Subtract Vertices
+                    for(const Vertex& vVert : vVerts)
+                    {
+                        Vertices.push_back(vVert);
+
+                        _vertices.push_back(vVert);
+                    }
+
+                    std::vector<u32> iIndices;
+
+                    vertexTriangulation(iIndices, vVerts);
+
+                    // Subtract Indices
+                    for(u32 iIndice : iIndices)
+                    {
+                        u32 indNum = static_cast<u32>(Vertices.size() - vVerts.size()) + iIndice;
+                        Indices.push_back(indNum);
+
+                        indNum = static_cast<u32>(_vertices.size() - vVerts.size()) + iIndice;
+                        _indices.push_back(indNum);
+                    }
+                } // Get Mesh Material Name
+                else if(strcmp(sFirstToken, "usemtl") == 0)
+                {
+                    const char* clTail = algorithm::tail(currentLine);
+                    MeshMatNames.emplace_back(clTail);
+                    delete[] clTail;
+
+                    // Create new Mesh, if Material changes within a group
+                    if(!Indices.empty() && !Vertices.empty())
+                    {
+                        // Create Mesh
+                        tempMesh = Mesh(Vertices, Indices);
+                        tempMesh.name = meshName + "_2";
+
+                        // Insert Mesh
+                        _meshes.push_back(tempMesh);
+
+                        // Cleanup
+                        Vertices.clear();
+                        Indices.clear();
+                    }
+                } // Load Materials
+                else if(strcmp(sFirstToken, "mtllib") == 0)
+                {
+                    // Generate LoadedMaterial
+
+                    // Generate a path to the material file
+                    std::vector<std::string> temp;
+                    algorithm::split(path, temp, '/');
+
+                    std::string pathToMat;
+
+                    const size_t tSize = temp.size() - 1;
+                    if(tSize >= 0)
+                    {
+                        for(size_t i = 0; i < tSize; ++i)
+                        {
+                            pathToMat += temp[i] + "/";
+                        }
+                    }
+
+                    const char* clTail = algorithm::tail(currentLine);
+                    pathToMat += clTail;
+                    delete[] clTail;
+
+                    // Load Materials
+                    loadMaterials(pathToMat.c_str());
                 }
 
-                pathToMat += algorithm::tail(currentLine);
-
-                // Load Materials
-                loadMaterials(pathToMat);
+                delete[] sFirstToken;
             }
         }
+
+        fclose(cFile);
 
         // Deal with last mesh
 
@@ -747,9 +787,6 @@ namespace objl
             // Insert Mesh
             _meshes.push_back(tempMesh);
         }
-
-        // file.close();
-        fclose(cFile);
 
         // Set Materials for each Mesh
         for(u32 i = 0; i < MeshMatNames.size(); ++i)

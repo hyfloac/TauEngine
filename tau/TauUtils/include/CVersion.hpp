@@ -17,7 +17,7 @@
   #warning("__cplusplus is not defined.")
 #endif
 
-#if __CPP_REAL >= 201704L
+#if __CPP_REAL > 201704L
   #define __CPP_20
   #define __CPP_17
   #define __CPP_14

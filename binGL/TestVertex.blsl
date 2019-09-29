@@ -1,0 +1,26 @@
+shaderType: vertex
+version: 330, core
+
+input: v3f, loc0, position
+input: v3f, loc1, normal
+input: v2f, loc2, texture
+
+output: v3f, fPosition
+output: v3f, fNormal
+output: v2f, fTexture
+
+uniform: m4f, projectionMatrx
+uniform: m4f, cameraViewMatrix
+uniform: m4f, modelViewMatrix
+
+declEntry
+    vexpand: 4, float, input position, 1.0, var 0
+    m4mulv4: uniform modelViewMatrix, var 0, var 1
+    m4mulv4: uniform cameraViewMatrx, var 1, var 2
+    m4mulv4: uniform projectionMatrix, var 2, var 3
+    setVar: gl gl_Position, var 3
+
+    setVar: output fPosition, input position
+    setVar: output fNormal, input normal
+    setVar: output fTexture, input texture
+endFunc

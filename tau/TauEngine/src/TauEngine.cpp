@@ -79,69 +79,46 @@ void tauExit(int code) noexcept
 }
 #endif
 
-void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSInterval, Window* window) noexcept
+void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, renderFPS_f renderFPS) noexcept
 {
-    const float MS_PER_UPDATE = 1000.0f / targetUPS;
-    u64 lastTime = currentTimeMillis();
+    const float Mu_PER_UPDATE = 1000000.0f / targetUPS;
+    u64 lastTime = microTime();
     float lag = 0.0f;
 
     u64 counterTime = lastTime;
     u32 fps = 0;
     u32 ups = 0;
 
-    const char* originalTitle = "";
-
-    if(!window)
-    {
-        printFPSInterval = 0;
-    }
-    else
-    {
-        originalTitle = window->title();
-    }
-
-    // " - FPS/UPS: 10000/10000"
-    const u32 titleLen = strlen(originalTitle) + 24;
-    char* newTitle = new char[titleLen];
-    newTitle[titleLen - 1] = '\0';
-
-    const u64 _timeInterval = printFPSInterval * 1000;
-
     while(!should_exit)
     {
-        const u64 currentTime = currentTimeMillis();
+        const u64 currentTime = microTime();
         const u64 elapsed = currentTime - lastTime;
         lastTime = currentTime;
         lag += static_cast<float>(elapsed);
 
-        while(lag >= MS_PER_UPDATE)
+        while(lag >= Mu_PER_UPDATE)
         {
             runMessageLoop();
 
-            updateF(MS_PER_UPDATE); 
+            updateF(Mu_PER_UPDATE);
             ++ups;
-            lag -= MS_PER_UPDATE;
+            lag -= Mu_PER_UPDATE;
         }
 
-        renderF(lag / MS_PER_UPDATE); 
-        ++fps;
-
-        const u64 currentCounterTime = currentTimeMillis();
-
-        if(printFPSInterval && currentCounterTime - counterTime >= _timeInterval)
+        if(elapsed != 0)
         {
-            counterTime = currentCounterTime;
-            // engineLogger->debug("UPS {}", ups / printFPSInterval);
-            // engineLogger->debug("FPS {}", fps / printFPSInterval);
+            renderF(static_cast<float>(elapsed));
+            ++fps;
+        }
 
-            snprintf(newTitle, titleLen, "%s - UPS/FPS: %u/%u", originalTitle, ups / printFPSInterval, fps / printFPSInterval);
+        if(currentTime - counterTime >= 1000000)
+        {
+            counterTime = currentTime;
 
-            window->setTitle(newTitle);
+            if(renderFPS) { renderFPS(ups, fps); }
 
             ups = 0;
             fps = 0;
         }
     }
-
-    delete[] newTitle;
 }

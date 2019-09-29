@@ -5,14 +5,14 @@
 #include <shader/GLShader.hpp>
 #include <file/FileHandling.hpp>
 #include <Utils.hpp>
-#include <VariableLengthArray.hpp>
 #include <maths/Matrix4x4f.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Vector3i.hpp>
 #include <maths/Vector4f.hpp>
+#include <cstdio>
 
 GLShader::GLShader(ShaderType shaderType, NotNull<const char> shaderPath, NotNull<GLProgram> glProgram) noexcept
-    : _shaderType(shaderType), _shaderPath(shaderPath), _glProgram(glProgram), _shaderId(0)
+    : IShader(shaderType), _shaderPath(shaderPath), _glProgram(glProgram), _shaderId(0)
 { }
 
 GLShader::~GLShader() noexcept
@@ -49,33 +49,22 @@ bool GLShader::loadShader(const char* src) noexcept
         glGetShaderiv(GL_FALSE, GL_INFO_LOG_LENGTH, &result);
         if(result <= 0)
         {
-            printf("OpenGL failed to create a shader, but no error message was generated.\n");
+            fprintf(stderr, "OpenGL failed to create a shader, but no error message was generated.\n");
         }
-        else// if(result >= 8192)
+        else
         {
             GLchar* errorMsg = new GLchar[result];
             glGetShaderInfoLog(shaderId, result, &result, errorMsg);
-            printf("OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
+            fprintf(stderr, "OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
         }
-        // else
-        // {
-        //     VLA(GLchar, errorMsg, result);
-        //     glGetShaderInfoLog(shaderId, result, &result, errorMsg);
-        //     printf("OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
-        // }
         return false;
     }
 
-    const GLchar* shaderSrc = src ? src : readFile(this->_shaderPath);
+    const GLchar* shaderSrc = src ? src : readFileFast(this->_shaderPath);
 
     glShaderSource(shaderId, 1, &shaderSrc, null);
     glCompileShader(shaderId);
-
-    if(src != shaderSrc)
-    {
-        delete[] shaderSrc;
-    }
 
     glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result);
     if(result == GL_FALSE)
@@ -83,23 +72,26 @@ bool GLShader::loadShader(const char* src) noexcept
         glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &result);
         if(result <= 0)
         {
-            printf("OpenGL failed to compile a shader, but no error message was generated.\n");
+            fprintf(stderr, "OpenGL failed to compile a shader, but no error message was generated.\n");
         }
-        else// if(result >= 8192)
+        else
         {
             GLchar* errorMsg = new GLchar[result];
             glGetShaderInfoLog(shaderId, result, &result, errorMsg);
-            printf("OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
+            fprintf(stderr, "OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
+            fprintf(stderr, "File Path: %s\n", this->_shaderPath);
+            fprintf(stderr, "File Data: \n%s\n", shaderSrc);
         }
-        // else
-        // {
-        //     VLA(GLchar, errorMsg, result);
-        //     glGetShaderInfoLog(shaderId, result, &result, errorMsg);
-        //     printf("OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
-        // }
+
         glDeleteShader(shaderId);
+        freeFileData(shaderSrc);
         return false;
+    }
+
+    if(src != shaderSrc)
+    {
+        freeFileData(shaderSrc);
     }
 
     glAttachShader(this->_glProgram->programId(), shaderId);
@@ -121,67 +113,67 @@ i32 GLShader::createUniform(String name) noexcept
     return location;
 }
 
-void GLShader::setUniform(i32 location, i8 value) const noexcept
+void GLShader::setUniform(i32 location, const i8 value) const noexcept
 {
     glUniform1i(location, value);
 }
 
-void GLShader::setUniform(i32 location, i16 value) const noexcept
+void GLShader::setUniform(i32 location, const i16 value) const noexcept
 {
     glUniform1i(location, value);
 }
 
-void GLShader::setUniform(i32 location, i32 value) const noexcept
+void GLShader::setUniform(i32 location, const i32 value) const noexcept
 {
     glUniform1i(location, value);
 }
 
-void GLShader::setUniform(i32 location, i64 value) const noexcept
+void GLShader::setUniform(i32 location, const i64 value) const noexcept
 {
     glUniform1i(location, static_cast<GLint>(value));
 }
 
-void GLShader::setUniform(i32 location, u8 value) const noexcept
+void GLShader::setUniform(i32 location, const u8 value) const noexcept
 {
     glUniform1i(location, value);
 }
 
-void GLShader::setUniform(i32 location, u16 value) const noexcept
+void GLShader::setUniform(i32 location, const u16 value) const noexcept
 {
     glUniform1i(location, value);
 }
 
-void GLShader::setUniform(i32 location, u32 value) const noexcept
+void GLShader::setUniform(i32 location, const u32 value) const noexcept
 {
     glUniform1i(location, value);
 }
 
-void GLShader::setUniform(i32 location, u64 value) const noexcept
+void GLShader::setUniform(i32 location, const u64 value) const noexcept
 {
     glUniform1i(location, static_cast<GLuint>(value));
 }
 
-void GLShader::setUniform(i32 location, f32 value) const noexcept
+void GLShader::setUniform(i32 location, const f32 value) const noexcept
 {
     glUniform1f(location, value);
 }
 
-void GLShader::setUniform(i32 location, f64 value) const noexcept
+void GLShader::setUniform(i32 location, const f64 value) const noexcept
 {
     glUniform1d(location, value);
 }
 
-void GLShader::setUniform(i32 location, Vector3f& value) const noexcept
+void GLShader::setUniform(i32 location, const Vector3f& value) const noexcept
 {
     glUniform3f(location, value.x(), value.y(), value.z());
 }
 
-void GLShader::setUniform(i32 location, Vector3i& value) const noexcept
+void GLShader::setUniform(i32 location, const Vector3i& value) const noexcept
 {
     glUniform3i(location, value.x(), value.y(), value.z());
 }
 
-void GLShader::setUniform(i32 location, Vector4f& value) const noexcept
+void GLShader::setUniform(i32 location, const Vector4f& value) const noexcept
 {
     glUniform4f(location, value.x(), value.y(), value.z(), value.w());
 }
@@ -191,12 +183,12 @@ void GLShader::setUniform(i32 location, const Matrix4x4f& value) const noexcept
     glUniformMatrix4fv(location, 1, GL_FALSE, (float*) value.data().m);
 }
 
-void GLShader::setUniform(i32 location, bool value) const noexcept
+void GLShader::setUniform(i32 location, const bool value) const noexcept
 {
     this->setUniform(location, value ? 1 : 0);
 }
 
-void GLShader::setUniform(String& name, i8 value) const noexcept
+void GLShader::setUniform(String& name, const i8 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -204,7 +196,7 @@ void GLShader::setUniform(String& name, i8 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, i16 value) const noexcept
+void GLShader::setUniform(String& name, const i16 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -212,7 +204,7 @@ void GLShader::setUniform(String& name, i16 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, i32 value) const noexcept
+void GLShader::setUniform(String& name, const i32 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -220,7 +212,7 @@ void GLShader::setUniform(String& name, i32 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, i64 value) const noexcept
+void GLShader::setUniform(String& name, const i64 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -228,7 +220,7 @@ void GLShader::setUniform(String& name, i64 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, u8 value) const noexcept
+void GLShader::setUniform(String& name, const u8 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -236,7 +228,7 @@ void GLShader::setUniform(String& name, u8 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, u16 value) const noexcept
+void GLShader::setUniform(String& name, const u16 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -244,7 +236,7 @@ void GLShader::setUniform(String& name, u16 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, u32 value) const noexcept
+void GLShader::setUniform(String& name, const u32 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -252,7 +244,7 @@ void GLShader::setUniform(String& name, u32 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, u64 value) const noexcept
+void GLShader::setUniform(String& name, const u64 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -260,7 +252,7 @@ void GLShader::setUniform(String& name, u64 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, f32 value) const noexcept
+void GLShader::setUniform(String& name, const f32 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -268,7 +260,7 @@ void GLShader::setUniform(String& name, f32 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, f64 value) const noexcept
+void GLShader::setUniform(String& name, const f64 value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -276,7 +268,7 @@ void GLShader::setUniform(String& name, f64 value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, Vector3f& value) const noexcept
+void GLShader::setUniform(String& name, const Vector3f& value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -284,7 +276,7 @@ void GLShader::setUniform(String& name, Vector3f& value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, Vector3i& value) const noexcept
+void GLShader::setUniform(String& name, const Vector3i& value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -292,7 +284,7 @@ void GLShader::setUniform(String& name, Vector3i& value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, Vector4f& value) const noexcept
+void GLShader::setUniform(String& name, const Vector4f& value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -300,7 +292,7 @@ void GLShader::setUniform(String& name, Vector4f& value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, Matrix4x4f& value) const noexcept
+void GLShader::setUniform(String& name, const Matrix4x4f& value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
@@ -308,7 +300,7 @@ void GLShader::setUniform(String& name, Matrix4x4f& value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, bool value) const noexcept
+void GLShader::setUniform(String& name, const bool value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {

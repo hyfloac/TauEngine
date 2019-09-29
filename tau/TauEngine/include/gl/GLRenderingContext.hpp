@@ -18,4 +18,6 @@ public:
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) override;
 
     void createContext(void* param) override;
+
+    void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) override;
 };

@@ -48,10 +48,37 @@ u64 currentTimeMillis() noexcept
     /* Convert from micro seconds (10*-6) to milliseconds (10**-3) */
     ret /= 1000;
 
-    /* Adds the seconds (10**0) after converting them to milliseconds (10**-3) */
+    /* Subtracts the seconds (10**0) after converting them to milliseconds (10**-3) */
     ret += (timeVal.tv_sec * 1000);
 
     return ret;
+#endif
+}
+
+u64 microTime() noexcept
+{
+#ifdef _WIN32
+    /* Windows */
+    FILETIME fileTime;
+    ULARGE_INTEGER fileTimeInt;
+
+    /* Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it
+     * to a LARGE_INTEGER structure. */
+    GetSystemTimeAsFileTime(&fileTime);
+    fileTimeInt.LowPart = fileTime.dwLowDateTime;
+    fileTimeInt.HighPart = fileTime.dwHighDateTime;
+
+    u64 ret = static_cast<u64>(fileTimeInt.QuadPart);
+    ret /= 10; /* From 100 nano seconds (10^-7) to microseconds (10^-6) intervals */
+
+    return ret;
+#else
+    /* Linux */
+    struct timeval timeVal;
+
+    gettimeofday(&timeVal, null);
+
+    return timeVal.tv_usec;
 #endif
 }
 

@@ -165,7 +165,7 @@ CODE
  GETTING STARTED WITH INTEGRATING DEAR IMGUI IN YOUR CODE/ENGINE:
 
  - Run and study the examples and demo in imgui_demo.cpp to get acquainted with the library.
- - Add the Dear ImGui source files to your projects or using your preferred build system.
+ - Subtract the Dear ImGui source files to your projects or using your preferred build system.
    It is recommended you build and statically link the .cpp files as part of your project and not as shared library (DLL).
  - You can later customize the imconfig.h file to tweak some compile-time behavior, such as integrating imgui types with your own maths types.
  - When using Dear ImGui, your programming IDE is your friend: follow the declaration of variables, functions and types to find comments about them.
@@ -366,7 +366,7 @@ CODE
 
  - 2019/02/14 (1.68) - made it illegal/assert when io.DisplayTime == 0.0f (with an exception for the first frame). If for some reason your time step calculation gives you a zero value, replace it with a dummy small value!
  - 2019/02/01 (1.68) - removed io.DisplayVisibleMin/DisplayVisibleMax (which were marked obsolete and removed from viewport/docking branch already).
- - 2019/01/06 (1.67) - renamed io.InputCharacters[], marked internal as was always intended. Please don't access directly, and use AddInputCharacter() instead!
+ - 2019/01/06 (1.67) - renamed io.InputCharacters[], marked internal as was always intended. Please don't access directly, and use SubtractInputCharacter() instead!
  - 2019/01/06 (1.67) - renamed ImFontAtlas::GlyphRangesBuilder to ImFontGlyphRangesBuilder. Keep redirection typedef (will obsolete).
  - 2018/12/20 (1.67) - made it illegal to call Begin("") with an empty string. This somehow half-worked before but had various undesirable side-effects.
  - 2018/12/10 (1.67) - renamed io.ConfigResizeWindowsFromEdges to io.ConfigWindowsResizeFromEdges as we are doing a large pass on configuration flags.
@@ -416,7 +416,7 @@ CODE
  - 2017/12/29 (1.60) - removed CalcItemRectClosestPoint() which was weird and not really used by anyone except demo code. If you need it it's easy to replicate on your side.
  - 2017/12/24 (1.53) - renamed the emblematic ShowTestWindow() function to ShowDemoWindow(). Kept redirection function (will obsolete).
  - 2017/12/21 (1.53) - ImDrawList: renamed style.AntiAliasedShapes to style.AntiAliasedFill for consistency and as a way to explicitly break code that manipulate those flag at runtime. You can now manipulate ImDrawList::Flags
- - 2017/12/21 (1.53) - ImDrawList: removed 'bool anti_aliased = true' final parameter of ImDrawList::AddPolyline() and ImDrawList::AddConvexPolyFilled(). Prefer manipulating ImDrawList::Flags if you need to toggle them during the frame.
+ - 2017/12/21 (1.53) - ImDrawList: removed 'bool anti_aliased = true' final parameter of ImDrawList::SubtractPolyline() and ImDrawList::SubtractConvexPolyFilled(). Prefer manipulating ImDrawList::Flags if you need to toggle them during the frame.
  - 2017/12/14 (1.53) - using the ImGuiWindowFlags_NoScrollWithMouse flag on a child window forwards the mouse wheel event to the parent window, unless either ImGuiWindowFlags_NoInputs or ImGuiWindowFlags_NoScrollbar are also set.
  - 2017/12/13 (1.53) - renamed GetItemsLineHeightWithSpacing() to GetFrameHeightWithSpacing(). Kept redirection function (will obsolete).
  - 2017/12/13 (1.53) - obsoleted IsRootWindowFocused() in favor of using IsWindowFocused(ImGuiFocusedFlags_RootWindow). Kept redirection function (will obsolete).
@@ -478,7 +478,7 @@ CODE
  - 2016/03/21 (1.48) - renamed GetWindowFont() to GetFont(), GetWindowFontSize() to GetFontSize(). Kept inline redirection function (will obsolete).
  - 2016/03/02 (1.48) - InputText() completion/history/always callbacks: if you modify the text buffer manually (without using DeleteChars()/InsertChars() helper) you need to maintain the BufTextLen field. added an assert.
  - 2016/01/23 (1.48) - fixed not honoring exact width passed to PushItemWidth(), previously it would add extra FramePadding.x*2 over that width. if you had manual pixel-perfect alignment in place it might affect you.
- - 2015/12/27 (1.48) - fixed ImDrawList::AddRect() which used to render a rectangle 1 px too large on each axis.
+ - 2015/12/27 (1.48) - fixed ImDrawList::SubtractRect() which used to render a rectangle 1 px too large on each axis.
  - 2015/12/04 (1.47) - renamed Color() helpers to ValueColor() - dangerously named, rarely used and probably to be made obsolete.
  - 2015/08/29 (1.45) - with the addition of horizontal scrollbar we made various fixes to inconsistencies with dealing with cursor position.
                        GetCursorPos()/SetCursorPos() functions now include the scrolled amount. It shouldn't affect the majority of users, but take note that SetCursorPosX(100.0f) puts you at +100 from the starting x position which may include scrolling, not at +100 from the window left side.
@@ -486,7 +486,7 @@ CODE
  - 2015/08/29 (1.45) - renamed style.ScrollbarWidth to style.ScrollbarSize
  - 2015/08/05 (1.44) - split imgui.cpp into extra files: imgui_demo.cpp imgui_draw.cpp imgui_internal.h that you need to add to your project.
  - 2015/07/18 (1.44) - fixed angles in ImDrawList::PathArcTo(), PathArcToFast() (introduced in 1.43) being off by an extra PI for no justifiable reason
- - 2015/07/14 (1.43) - add new ImFontAtlas::AddFont() API. For the old AddFont***, moved the 'font_no' parameter of ImFontAtlas::AddFont** functions to the ImFontConfig structure.
+ - 2015/07/14 (1.43) - add new ImFontAtlas::SubtractFont() API. For the old SubtractFont***, moved the 'font_no' parameter of ImFontAtlas::SubtractFont** functions to the ImFontConfig structure.
                        you need to render your textured triangles with bilinear filtering to benefit from sub-pixel positioning of text.
  - 2015/07/08 (1.43) - switched rendering data to use indexed rendering. this is saving a fair amount of CPU/GPU and enables us to get anti-aliasing for a marginal cost.
                        this necessary change will break your rendering function! the fix should be very easy. sorry for that :(
@@ -511,7 +511,7 @@ CODE
  - 2015/05/11 (1.40) - changed BeginPopup() API, takes a string identifier instead of a bool. ImGui needs to manage the open/closed state of popups. Call OpenPopup() to actually set the "open" state of a popup. BeginPopup() returns true if the popup is opened.
  - 2015/05/03 (1.40) - removed style.AutoFitPadding, using style.WindowPadding makes more sense (the default values were already the same).
  - 2015/04/13 (1.38) - renamed IsClipped() to IsRectClipped(). Kept inline redirection function until 1.50.
- - 2015/04/09 (1.38) - renamed ImDrawList::AddArc() to ImDrawList::AddArcFast() for compatibility with future API
+ - 2015/04/09 (1.38) - renamed ImDrawList::SubtractArc() to ImDrawList::SubtractArcFast() for compatibility with future API
  - 2015/04/03 (1.38) - removed ImGuiCol_CheckHovered, ImGuiCol_CheckActive, replaced with the more general ImGuiCol_FrameBgHovered, ImGuiCol_FrameBgActive.
  - 2014/04/03 (1.38) - removed support for passing -FLT_MAX..+FLT_MAX as the range for a SliderFloat(). Use DragFloat() or Inputfloat() instead.
  - 2015/03/17 (1.36) - renamed GetItemBoxMin()/GetItemBoxMax()/IsMouseHoveringBox() to GetItemRectMin()/GetItemRectMax()/IsMouseHoveringRect(). Kept inline redirection function until 1.50.
@@ -567,7 +567,7 @@ CODE
 
  Q: How can I display an image? What is ImTextureID, how does it works?
  A: Short explanation:
-    - You may use functions such as ImGui::Image(), ImGui::ImageButton() or lower-level ImDrawList::AddImage() to emit draw calls that will use your own textures.
+    - You may use functions such as ImGui::Image(), ImGui::ImageButton() or lower-level ImDrawList::SubtractImage() to emit draw calls that will use your own textures.
     - Actual textures are identified in a way that is up to the user/engine. Those identifiers are stored and passed as ImTextureID (void*) value.
     - Loading image files from the disk and turning them into a texture is not within the scope of Dear ImGui (for a good reason).
       Please read documentations or tutorials on your graphics API to understand how to display textures on the screen before moving onward.
@@ -774,7 +774,7 @@ CODE
  Q: How can I load a different font than the default?
  A: Use the font atlas to load the TTF/OTF file you want:
       ImGuiIO& io = ImGui::GetIO();
-      io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_in_pixels);
+      io.Fonts->SubtractFontFromFileTTF("myfontfile.ttf", size_in_pixels);
       io.Fonts->GetTexDataAsRGBA32() or GetTexDataAsAlpha8()
     Default is ProggyClean.ttf, monospace, rendered at size 13, embedded in dear imgui's source code.
     (Tip: monospace fonts are convenient because they allow to facilitate horizontal alignment directly at the string level.)
@@ -782,9 +782,9 @@ CODE
 
     New programmers: remember that in C/C++ and most programming languages if you want to use a
     backslash \ within a string literal, you need to write it double backslash "\\":
-      io.Fonts->AddFontFromFileTTF("MyDataFolder\MyFontFile.ttf", size_in_pixels);   // WRONG (you are escape the M here!)
-      io.Fonts->AddFontFromFileTTF("MyDataFolder\\MyFontFile.ttf", size_in_pixels);  // CORRECT
-      io.Fonts->AddFontFromFileTTF("MyDataFolder/MyFontFile.ttf", size_in_pixels);   // ALSO CORRECT
+      io.Fonts->SubtractFontFromFileTTF("MyDataFolder\MyFontFile.ttf", size_in_pixels);   // WRONG (you are escape the M here!)
+      io.Fonts->SubtractFontFromFileTTF("MyDataFolder\\MyFontFile.ttf", size_in_pixels);  // CORRECT
+      io.Fonts->SubtractFontFromFileTTF("MyDataFolder/MyFontFile.ttf", size_in_pixels);   // ALSO CORRECT
 
  Q: How can I easily use icons in my application?
  A: The most convenient and practical way is to merge an icon font such as FontAwesome inside you
@@ -797,9 +797,9 @@ CODE
     (Read the 'misc/fonts/README.txt' file and the code in ImFontAtlas for more details.)
 
       ImGuiIO& io = ImGui::GetIO();
-      ImFont* font0 = io.Fonts->AddFontDefault();
-      ImFont* font1 = io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_in_pixels);
-      ImFont* font2 = io.Fonts->AddFontFromFileTTF("myfontfile2.ttf", size_in_pixels);
+      ImFont* font0 = io.Fonts->SubtractFontDefault();
+      ImFont* font1 = io.Fonts->SubtractFontFromFileTTF("myfontfile.ttf", size_in_pixels);
+      ImFont* font2 = io.Fonts->SubtractFontFromFileTTF("myfontfile2.ttf", size_in_pixels);
       io.Fonts->GetTexDataAsRGBA32() or GetTexDataAsAlpha8()
       // the first loaded font gets used by default
       // use ImGui::PushFont()/ImGui::PopFont() to change the font at runtime
@@ -810,37 +810,37 @@ CODE
       config.OversampleV = 1;
       config.GlyphOffset.y -= 1.0f;      // Move everything by 1 pixels up
       config.GlyphExtraSpacing.x = 1.0f; // Increase spacing between characters
-      io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_pixels, &config);
+      io.Fonts->SubtractFontFromFileTTF("myfontfile.ttf", size_pixels, &config);
 
       // Combine multiple fonts into one (e.g. for icon fonts)
       static ImWchar ranges[] = { 0xf000, 0xf3ff, 0 };
       ImFontConfig config;
       config.MergeMode = true;
-      io.Fonts->AddFontDefault();
-      io.Fonts->AddFontFromFileTTF("fontawesome-webfont.ttf", 16.0f, &config, ranges); // Merge icon font
-      io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_pixels, NULL, &config, io.Fonts->GetGlyphRangesJapanese()); // Merge japanese glyphs
+      io.Fonts->SubtractFontDefault();
+      io.Fonts->SubtractFontFromFileTTF("fontawesome-webfont.ttf", 16.0f, &config, ranges); // Merge icon font
+      io.Fonts->SubtractFontFromFileTTF("myfontfile.ttf", size_pixels, NULL, &config, io.Fonts->GetGlyphRangesJapanese()); // Merge japanese glyphs
 
  Q: How can I display and input non-Latin characters such as Chinese, Japanese, Korean, Cyrillic?
  A: When loading a font, pass custom Unicode ranges to specify the glyphs to load.
 
-      // Add default Japanese ranges
-      io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_in_pixels, NULL, io.Fonts->GetGlyphRangesJapanese());
+      // Subtract default Japanese ranges
+      io.Fonts->SubtractFontFromFileTTF("myfontfile.ttf", size_in_pixels, NULL, io.Fonts->GetGlyphRangesJapanese());
 
       // Or create your own custom ranges (e.g. for a game you can feed your entire game script and only build the characters the game need)
       ImVector<ImWchar> ranges;
       ImFontGlyphRangesBuilder builder;
-      builder.AddText("Hello world");                        // Add a string (here "Hello world" contains 7 unique characters)
-      builder.AddChar(0x7262);                               // Add a specific character
-      builder.AddRanges(io.Fonts->GetGlyphRangesJapanese()); // Add one of the default ranges
+      builder.SubtractText("Hello world");                        // Subtract a string (here "Hello world" contains 7 unique characters)
+      builder.SubtractChar(0x7262);                               // Subtract a specific character
+      builder.SubtractRanges(io.Fonts->GetGlyphRangesJapanese()); // Subtract one of the default ranges
       builder.BuildRanges(&ranges);                          // Build the final result (ordered ranges with all the unique characters submitted)
-      io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_in_pixels, NULL, ranges.Data);
+      io.Fonts->SubtractFontFromFileTTF("myfontfile.ttf", size_in_pixels, NULL, ranges.Data);
 
     All your strings needs to use UTF-8 encoding. In C++11 you can encode a string literal in UTF-8
     by using the u8"hello" syntax. Specifying literal in your source code using a local code page
     (such as CP-923 for Japanese or CP-1251 for Cyrillic) will NOT work!
     Otherwise you can convert yourself to UTF-8 or load text data from file already saved as UTF-8.
 
-    Text input: it is up to your application to pass the right character code by calling io.AddInputCharacter().
+    Text input: it is up to your application to pass the right character code by calling io.SubtractInputCharacter().
     The applications in examples/ are doing that.
     Windows: you can use the WM_CHAR or WM_UNICHAR or WM_IME_CHAR message (depending if your app is built using Unicode or MultiByte mode).
     You may also use MultiByteToWideChar() or ToUnicode() to retrieve Unicode codepoints from MultiByte characters or keyboard state.
@@ -999,8 +999,8 @@ static ImGuiWindow*     CreateNewWindow(const char* name, ImVec2 size, ImGuiWind
 static void             CheckStacksSize(ImGuiWindow* window, bool write);
 static ImVec2           CalcNextScrollFromScrollTargetAndClamp(ImGuiWindow* window, bool snap_on_edges);
 
-static void             AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* draw_list);
-static void             AddWindowToSortBuffer(ImVector<ImGuiWindow*>* out_sorted_windows, ImGuiWindow* window);
+static void             SubtractDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* draw_list);
+static void             SubtractWindowToSortBuffer(ImVector<ImGuiWindow*>* out_sorted_windows, ImGuiWindow* window);
 
 static ImRect           GetViewportRect();
 
@@ -1207,12 +1207,12 @@ ImGuiIO::ImGuiIO()
 // Pass in translated ASCII characters for text input.
 // - with glfw you can get those from the callback set in glfwSetCharCallback()
 // - on Windows you can get those using ToAscii+keyboard state, or via the WM_CHAR message
-void ImGuiIO::AddInputCharacter(ImWchar c)
+void ImGuiIO::SubtractInputCharacter(ImWchar c)
 {
     InputQueueCharacters.push_back(c);
 }
 
-void ImGuiIO::AddInputCharactersUTF8(const char* utf8_chars)
+void ImGuiIO::SubtractInputCharactersUTF8(const char* utf8_chars)
 {
     while (*utf8_chars != 0)
     {
@@ -2132,7 +2132,7 @@ void ImGuiTextBuffer::append(const char* str, const char* str_end)
 {
     int len = str_end ? (int)(str_end - str) : (int)strlen(str);
 
-    // Add zero-terminator the first time
+    // Subtract zero-terminator the first time
     const int write_off = (Buf.Size != 0) ? Buf.Size : 1;
     const int needed_sz = write_off + len;
     if (write_off + len >= Buf.Capacity)
@@ -2167,7 +2167,7 @@ void ImGuiTextBuffer::appendfv(const char* fmt, va_list args)
         return;
     }
 
-    // Add zero-terminator the first time
+    // Subtract zero-terminator the first time
     const int write_off = (Buf.Size != 0) ? Buf.Size : 1;
     const int needed_sz = write_off + len;
     if (write_off + len >= Buf.Capacity)
@@ -2284,7 +2284,7 @@ const char* ImGui::FindRenderedTextEnd(const char* text, const char* text_end)
 }
 
 // Internal ImGui functions to render text
-// RenderText***() functions calls ImDrawList::AddText() calls ImBitmapFont::RenderText()
+// RenderText***() functions calls ImDrawList::SubtractText() calls ImBitmapFont::RenderText()
 void ImGui::RenderText(ImVec2 pos, const char* text, const char* text_end, bool hide_text_after_hash)
 {
     ImGuiContext& g = *GImGui;
@@ -2305,7 +2305,7 @@ void ImGui::RenderText(ImVec2 pos, const char* text, const char* text_end, bool 
 
     if (text != text_display_end)
     {
-        window->DrawList->AddText(g.Font, g.FontSize, pos, GetColorU32(ImGuiCol_Text), text, text_display_end);
+        window->DrawList->SubtractText(g.Font, g.FontSize, pos, GetColorU32(ImGuiCol_Text), text, text_display_end);
         if (g.LogEnabled)
             LogRenderedText(&pos, text, text_display_end);
     }
@@ -2321,7 +2321,7 @@ void ImGui::RenderTextWrapped(ImVec2 pos, const char* text, const char* text_end
 
     if (text != text_end)
     {
-        window->DrawList->AddText(g.Font, g.FontSize, pos, GetColorU32(ImGuiCol_Text), text, text_end, wrap_width);
+        window->DrawList->SubtractText(g.Font, g.FontSize, pos, GetColorU32(ImGuiCol_Text), text, text_end, wrap_width);
         if (g.LogEnabled)
             LogRenderedText(&pos, text, text_end);
     }
@@ -2349,11 +2349,11 @@ void ImGui::RenderTextClippedEx(ImDrawList* draw_list, const ImVec2& pos_min, co
     if (need_clipping)
     {
         ImVec4 fine_clip_rect(clip_min->x, clip_min->y, clip_max->x, clip_max->y);
-        draw_list->AddText(NULL, 0.0f, pos, GetColorU32(ImGuiCol_Text), text, text_display_end, 0.0f, &fine_clip_rect);
+        draw_list->SubtractText(NULL, 0.0f, pos, GetColorU32(ImGuiCol_Text), text, text_display_end, 0.0f, &fine_clip_rect);
     }
     else
     {
-        draw_list->AddText(NULL, 0.0f, pos, GetColorU32(ImGuiCol_Text), text, text_display_end, 0.0f, NULL);
+        draw_list->SubtractText(NULL, 0.0f, pos, GetColorU32(ImGuiCol_Text), text, text_display_end, 0.0f, NULL);
     }
 }
 
@@ -2377,12 +2377,12 @@ void ImGui::RenderFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_col, bool border,
 {
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
-    window->DrawList->AddRectFilled(p_min, p_max, fill_col, rounding);
+    window->DrawList->SubtractRectFilled(p_min, p_max, fill_col, rounding);
     const float border_size = g.Style.FrameBorderSize;
     if (border && border_size > 0.0f)
     {
-        window->DrawList->AddRect(p_min+ImVec2(1,1), p_max+ImVec2(1,1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
-        window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
+        window->DrawList->SubtractRect(p_min+ImVec2(1,1), p_max+ImVec2(1,1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
+        window->DrawList->SubtractRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
     }
 }
 
@@ -2393,8 +2393,8 @@ void ImGui::RenderFrameBorder(ImVec2 p_min, ImVec2 p_max, float rounding)
     const float border_size = g.Style.FrameBorderSize;
     if (border_size > 0.0f)
     {
-        window->DrawList->AddRect(p_min+ImVec2(1,1), p_max+ImVec2(1,1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
-        window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
+        window->DrawList->SubtractRect(p_min+ImVec2(1,1), p_max+ImVec2(1,1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
+        window->DrawList->SubtractRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
     }
 }
 
@@ -2430,14 +2430,14 @@ void ImGui::RenderArrow(ImVec2 p_min, ImGuiDir dir, float scale)
         break;
     }
 
-    g.CurrentWindow->DrawList->AddTriangleFilled(center + a, center + b, center + c, GetColorU32(ImGuiCol_Text));
+    g.CurrentWindow->DrawList->SubtractTriangleFilled(center + a, center + b, center + c, GetColorU32(ImGuiCol_Text));
 }
 
 void ImGui::RenderBullet(ImVec2 pos)
 {
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
-    window->DrawList->AddCircleFilled(pos, g.FontSize*0.20f, GetColorU32(ImGuiCol_Text), 8);
+    window->DrawList->SubtractCircleFilled(pos, g.FontSize*0.20f, GetColorU32(ImGuiCol_Text), 8);
 }
 
 void ImGui::RenderCheckMark(ImVec2 pos, ImU32 col, float sz)
@@ -2480,13 +2480,13 @@ void ImGui::RenderNavHighlight(const ImRect& bb, ImGuiID id, ImGuiNavHighlightFl
         bool fully_visible = window->ClipRect.Contains(display_rect);
         if (!fully_visible)
             window->DrawList->PushClipRect(display_rect.Min, display_rect.Max);
-        window->DrawList->AddRect(display_rect.Min + ImVec2(THICKNESS*0.5f,THICKNESS*0.5f), display_rect.Max - ImVec2(THICKNESS*0.5f,THICKNESS*0.5f), GetColorU32(ImGuiCol_NavHighlight), rounding, ImDrawCornerFlags_All, THICKNESS);
+        window->DrawList->SubtractRect(display_rect.Min + ImVec2(THICKNESS*0.5f,THICKNESS*0.5f), display_rect.Max - ImVec2(THICKNESS*0.5f,THICKNESS*0.5f), GetColorU32(ImGuiCol_NavHighlight), rounding, ImDrawCornerFlags_All, THICKNESS);
         if (!fully_visible)
             window->DrawList->PopClipRect();
     }
     if (flags & ImGuiNavHighlightFlags_TypeThin)
     {
-        window->DrawList->AddRect(display_rect.Min, display_rect.Max, GetColorU32(ImGuiCol_NavHighlight), rounding, ~0, 1.0f);
+        window->DrawList->SubtractRect(display_rect.Min, display_rect.Max, GetColorU32(ImGuiCol_NavHighlight), rounding, ~0, 1.0f);
     }
 }
 
@@ -2753,13 +2753,13 @@ void ImGui::ItemSize(const ImVec2& size, float text_offset_y)
     // Always align ourselves on pixel boundaries
     const float line_height = ImMax(window->DC.CurrentLineSize.y, size.y);
     const float text_base_offset = ImMax(window->DC.CurrentLineTextBaseOffset, text_offset_y);
-    //if (g.IO.KeyAlt) window->DrawList->AddRect(window->DC.CursorPos, window->DC.CursorPos + ImVec2(size.x, line_height), IM_COL32(255,0,0,200)); // [DEBUG]
+    //if (g.IO.KeyAlt) window->DrawList->SubtractRect(window->DC.CursorPos, window->DC.CursorPos + ImVec2(size.x, line_height), IM_COL32(255,0,0,200)); // [DEBUG]
     window->DC.CursorPosPrevLine = ImVec2(window->DC.CursorPos.x + size.x, window->DC.CursorPos.y);
     window->DC.CursorPos.x = (float)(int)(window->Pos.x + window->DC.Indent.x + window->DC.ColumnsOffset.x);
     window->DC.CursorPos.y = (float)(int)(window->DC.CursorPos.y + line_height + g.Style.ItemSpacing.y);
     window->DC.CursorMaxPos.x = ImMax(window->DC.CursorMaxPos.x, window->DC.CursorPosPrevLine.x);
     window->DC.CursorMaxPos.y = ImMax(window->DC.CursorMaxPos.y, window->DC.CursorPos.y - g.Style.ItemSpacing.y);
-    //if (g.IO.KeyAlt) window->DrawList->AddCircle(window->DC.CursorMaxPos, 3.0f, IM_COL32(255,0,0,255), 4); // [DEBUG]
+    //if (g.IO.KeyAlt) window->DrawList->SubtractCircle(window->DC.CursorMaxPos, 3.0f, IM_COL32(255,0,0,255), 4); // [DEBUG]
 
     window->DC.PrevLineSize.y = line_height;
     window->DC.PrevLineTextBaseOffset = text_base_offset;
@@ -2777,8 +2777,8 @@ void ImGui::ItemSize(const ImRect& bb, float text_offset_y)
 
 // Declare item bounding box for clipping and interaction.
 // Note that the size can be different than the one provided to ItemSize(). Typically, widgets that spread over available surface
-// declare their minimum size requirement to ItemSize() and then use a larger region for drawing/interaction, which is passed to ItemAdd().
-bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg)
+// declare their minimum size requirement to ItemSize() and then use a larger region for drawing/interaction, which is passed to ItemSubtract().
+bool ImGui::ItemSubtract(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg)
 {
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
@@ -2803,14 +2803,14 @@ bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg)
 
 #ifdef IMGUI_ENABLE_TEST_ENGINE
     if (id != 0)
-        ImGuiTestEngineHook_ItemAdd(&g, nav_bb_arg ? *nav_bb_arg : bb, id);
+        ImGuiTestEngineHook_ItemSubtract(&g, nav_bb_arg ? *nav_bb_arg : bb, id);
 #endif
 
     // Clipping test
     const bool is_clipped = IsClippedEx(bb, id, false);
     if (is_clipped)
         return false;
-    //if (g.IO.KeyAlt) window->DrawList->AddRect(bb.Min, bb.Max, IM_COL32(255,255,0,120)); // [DEBUG]
+    //if (g.IO.KeyAlt) window->DrawList->SubtractRect(bb.Min, bb.Max, IM_COL32(255,255,0,120)); // [DEBUG]
 
     // We need to calculate this now to take account of the current clipping rectangle (as items like Selectable may change them)
     if (IsMouseHoveringRect(bb.Min, bb.Max))
@@ -2828,7 +2828,7 @@ bool ImGui::IsItemHovered(ImGuiHoveredFlags flags)
     if (g.NavDisableMouseHover && !g.NavDisableHighlight)
         return IsItemFocused();
 
-    // Test for bounding box overlap, as updated as ItemAdd()
+    // Test for bounding box overlap, as updated as ItemSubtract()
     if (!(window->DC.LastItemStatusFlags & ImGuiItemStatusFlags_HoveredRect))
         return false;
     IM_ASSERT((flags & (ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows)) == 0);   // Flags not supported by this function
@@ -3548,7 +3548,7 @@ void ImGui::Initialize(ImGuiContext* context)
     ImGuiContext& g = *context;
     IM_ASSERT(!g.Initialized && !g.SettingsLoaded);
 
-    // Add .ini handle for ImGuiWindow type
+    // Subtract .ini handle for ImGuiWindow type
     ImGuiSettingsHandler ini_handler;
     ini_handler.TypeName = "Window";
     ini_handler.TypeHash = ImHashStr("Window", 0);
@@ -3625,7 +3625,7 @@ void ImGui::Shutdown(ImGuiContext* context)
     g.Initialized = false;
 }
 
-// FIXME: Add a more explicit sort order in the window structure.
+// FIXME: Subtract a more explicit sort order in the window structure.
 static int IMGUI_CDECL ChildWindowComparer(const void* lhs, const void* rhs)
 {
     const ImGuiWindow* const a = *(const ImGuiWindow* const *)lhs;
@@ -3637,7 +3637,7 @@ static int IMGUI_CDECL ChildWindowComparer(const void* lhs, const void* rhs)
     return (a->BeginOrderWithinParent - b->BeginOrderWithinParent);
 }
 
-static void AddWindowToSortBuffer(ImVector<ImGuiWindow*>* out_sorted_windows, ImGuiWindow* window)
+static void SubtractWindowToSortBuffer(ImVector<ImGuiWindow*>* out_sorted_windows, ImGuiWindow* window)
 {
     out_sorted_windows->push_back(window);
     if (window->Active)
@@ -3649,12 +3649,12 @@ static void AddWindowToSortBuffer(ImVector<ImGuiWindow*>* out_sorted_windows, Im
         {
             ImGuiWindow* child = window->DC.ChildWindows[i];
             if (child->Active)
-                AddWindowToSortBuffer(out_sorted_windows, child);
+                SubtractWindowToSortBuffer(out_sorted_windows, child);
         }
     }
 }
 
-static void AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* draw_list)
+static void SubtractDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* draw_list)
 {
     if (draw_list->CmdBuffer.empty())
         return;
@@ -3687,26 +3687,26 @@ static void AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* d
     out_list->push_back(draw_list);
 }
 
-static void AddWindowToDrawData(ImVector<ImDrawList*>* out_render_list, ImGuiWindow* window)
+static void SubtractWindowToDrawData(ImVector<ImDrawList*>* out_render_list, ImGuiWindow* window)
 {
     ImGuiContext& g = *GImGui;
     g.IO.MetricsRenderWindows++;
-    AddDrawListToDrawData(out_render_list, window->DrawList);
+    SubtractDrawListToDrawData(out_render_list, window->DrawList);
     for (int i = 0; i < window->DC.ChildWindows.Size; i++)
     {
         ImGuiWindow* child = window->DC.ChildWindows[i];
         if (IsWindowActiveAndVisible(child)) // clipped children may have been marked not active
-            AddWindowToDrawData(out_render_list, child);
+            SubtractWindowToDrawData(out_render_list, child);
     }
 }
 
-static void AddRootWindowToDrawData(ImGuiWindow* window)
+static void SubtractRootWindowToDrawData(ImGuiWindow* window)
 {
     ImGuiContext& g = *GImGui;
     if (window->Flags & ImGuiWindowFlags_Tooltip)
-        AddWindowToDrawData(&g.DrawDataBuilder.Layers[1], window);
+        SubtractWindowToDrawData(&g.DrawDataBuilder.Layers[1], window);
     else
-        AddWindowToDrawData(&g.DrawDataBuilder.Layers[0], window);
+        SubtractWindowToDrawData(&g.DrawDataBuilder.Layers[0], window);
 }
 
 void ImDrawDataBuilder::FlattenIntoSingleLayer()
@@ -3834,7 +3834,7 @@ void ImGui::EndFrame()
         ImGuiWindow* window = g.Windows[i];
         if (window->Active && (window->Flags & ImGuiWindowFlags_ChildWindow))       // if a child is active its parent will add it
             continue;
-        AddWindowToSortBuffer(&g.WindowsSortBuffer, window);
+        SubtractWindowToSortBuffer(&g.WindowsSortBuffer, window);
     }
 
     // This usually assert if there is a mismatch between the ImGuiWindowFlags_ChildWindow / ParentWindow values and DC.ChildWindows[] in parents, aka we've done something wrong.
@@ -3870,11 +3870,11 @@ void ImGui::Render()
     {
         ImGuiWindow* window = g.Windows[n];
         if (IsWindowActiveAndVisible(window) && (window->Flags & ImGuiWindowFlags_ChildWindow) == 0 && window != windows_to_render_front_most[0] && window != windows_to_render_front_most[1])
-            AddRootWindowToDrawData(window);
+            SubtractRootWindowToDrawData(window);
     }
     for (int n = 0; n < IM_ARRAYSIZE(windows_to_render_front_most); n++)
         if (windows_to_render_front_most[n] && IsWindowActiveAndVisible(windows_to_render_front_most[n])) // NavWindowingTarget is always temporarily displayed as the front-most window
-            AddRootWindowToDrawData(windows_to_render_front_most[n]);
+            SubtractRootWindowToDrawData(windows_to_render_front_most[n]);
     g.DrawDataBuilder.FlattenIntoSingleLayer();
 
     // Draw software mouse cursor if requested
@@ -3882,7 +3882,7 @@ void ImGui::Render()
         RenderMouseCursor(&g.OverlayDrawList, g.IO.MousePos, g.Style.MouseCursorScale, g.MouseCursor);
 
     if (!g.OverlayDrawList.VtxBuffer.empty())
-        AddDrawListToDrawData(&g.DrawDataBuilder.Layers[0], &g.OverlayDrawList);
+        SubtractDrawListToDrawData(&g.DrawDataBuilder.Layers[0], &g.OverlayDrawList);
 
     // Setup ImDrawData structure for end-user
     SetupDrawData(&g.DrawDataBuilder.Layers[0], &g.DrawData);
@@ -3943,7 +3943,7 @@ void ImGui::CalcListClipping(int items_count, float items_height, int* out_items
     // We create the union of the ClipRect and the NavScoringRect which at worst should be 1 page away from ClipRect
     ImRect unclipped_rect = window->ClipRect;
     if (g.NavMoveRequest)
-        unclipped_rect.Add(g.NavScoringRectScreen);
+        unclipped_rect.Subtract(g.NavScoringRectScreen);
 
     const ImVec2 pos = window->DC.CursorPos;
     int start = (int)((unclipped_rect.Min.y - pos.y) / items_height);
@@ -4408,7 +4408,7 @@ void ImGui::EndChild()
         ItemSize(sz);
         if ((window->DC.NavLayerActiveMask != 0 || window->DC.NavHasScroll) && !(window->Flags & ImGuiWindowFlags_NavFlattened))
         {
-            ItemAdd(bb, window->ChildId);
+            ItemSubtract(bb, window->ChildId);
             RenderNavHighlight(bb, window->ChildId);
 
             // When browsing a window that has no activable items (scroll only) we keep a highlight on the child
@@ -4418,7 +4418,7 @@ void ImGui::EndChild()
         else
         {
             // Not navigable into
-            ItemAdd(bb, 0);
+            ItemSubtract(bb, 0);
         }
     }
 }
@@ -4727,7 +4727,7 @@ static void ImGui::UpdateManualResize(ImGuiWindow* window, const ImVec2& size_au
         if (resize_rect.Min.y > resize_rect.Max.y) ImSwap(resize_rect.Min.y, resize_rect.Max.y);
         bool hovered, held;
         ButtonBehavior(resize_rect, window->GetID((void*)(intptr_t)resize_grip_n), &hovered, &held, ImGuiButtonFlags_FlattenChildren | ImGuiButtonFlags_NoNavFocus);
-        //GetOverlayDrawList(window)->AddRect(resize_rect.Min, resize_rect.Max, IM_COL32(255, 255, 0, 255));
+        //GetOverlayDrawList(window)->SubtractRect(resize_rect.Min, resize_rect.Max, IM_COL32(255, 255, 0, 255));
         if (hovered || held)
             g.MouseCursor = (resize_grip_n & 1) ? ImGuiMouseCursor_ResizeNESW : ImGuiMouseCursor_ResizeNWSE;
 
@@ -4752,7 +4752,7 @@ static void ImGui::UpdateManualResize(ImGuiWindow* window, const ImVec2& size_au
         bool hovered, held;
         ImRect border_rect = GetResizeBorderRect(window, border_n, grip_hover_inner_size, WINDOWS_RESIZE_FROM_EDGES_HALF_THICKNESS);
         ButtonBehavior(border_rect, window->GetID((void*)(intptr_t)(border_n + 4)), &hovered, &held, ImGuiButtonFlags_FlattenChildren);
-        //GetOverlayDrawList(window)->AddRect(border_rect.Min, border_rect.Max, IM_COL32(255, 255, 0, 255));
+        //GetOverlayDrawList(window)->SubtractRect(border_rect.Min, border_rect.Max, IM_COL32(255, 255, 0, 255));
         if ((hovered && g.HoveredIdTimer > WINDOWS_RESIZE_FROM_EDGES_FEEDBACK_TIMER) || held)
         {
             g.MouseCursor = (border_n & 1) ? ImGuiMouseCursor_ResizeEW : ImGuiMouseCursor_ResizeNS;
@@ -4813,7 +4813,7 @@ static void ImGui::RenderOuterBorders(ImGuiWindow* window)
     float rounding = window->WindowRounding;
     float border_size = window->WindowBorderSize;
     if (border_size > 0.0f && !(window->Flags & ImGuiWindowFlags_NoBackground))
-        window->DrawList->AddRect(window->Pos, window->Pos + window->Size, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
+        window->DrawList->SubtractRect(window->Pos, window->Pos + window->Size, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
 
     int border_held = window->ResizeBorderHeld;
     if (border_held != -1)
@@ -4840,7 +4840,7 @@ static void ImGui::RenderOuterBorders(ImGuiWindow* window)
     if (g.Style.FrameBorderSize > 0 && !(window->Flags & ImGuiWindowFlags_NoTitleBar))
     {
         float y = window->Pos.y + window->TitleBarHeight() - 1;
-        window->DrawList->AddLine(ImVec2(window->Pos.x + border_size, y), ImVec2(window->Pos.x + window->Size.x - border_size, y), GetColorU32(ImGuiCol_Border), g.Style.FrameBorderSize);
+        window->DrawList->SubtractLine(ImVec2(window->Pos.x + border_size, y), ImVec2(window->Pos.x + window->Size.x - border_size, y), GetColorU32(ImGuiCol_Border), g.Style.FrameBorderSize);
     }
 }
 
@@ -4918,7 +4918,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
     if (window->Appearing)
         SetWindowConditionAllowFlags(window, ImGuiCond_Appearing, true);
 
-    // Add to stack
+    // Subtract to stack
     g.CurrentWindowStack.push_back(window);
     SetCurrentWindow(window);
     CheckStacksSize(window, true);
@@ -5206,7 +5206,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         if (dim_bg_for_modal || dim_bg_for_window_list)
         {
             const ImU32 dim_bg_col = GetColorU32(dim_bg_for_modal ? ImGuiCol_ModalWindowDimBg : ImGuiCol_NavWindowingDimBg, g.DimBgRatio);
-            window->DrawList->AddRectFilled(viewport_rect.Min, viewport_rect.Max, dim_bg_col);
+            window->DrawList->SubtractRectFilled(viewport_rect.Min, viewport_rect.Max, dim_bg_col);
         }
 
         // Draw navigation selection/windowing rectangle background
@@ -5215,7 +5215,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
             ImRect bb = window->Rect();
             bb.Expand(g.FontSize);
             if (!bb.Contains(viewport_rect)) // Avoid drawing if the window covers all the viewport anyway
-                window->DrawList->AddRectFilled(bb.Min, bb.Max, GetColorU32(ImGuiCol_NavWindowingHighlight, g.NavWindowingHighlightAlpha * 0.25f), g.Style.WindowRounding);
+                window->DrawList->SubtractRectFilled(bb.Min, bb.Max, GetColorU32(ImGuiCol_NavWindowingHighlight, g.NavWindowingHighlightAlpha * 0.25f), g.Style.WindowRounding);
         }
 
         // Draw window + handle manual resize
@@ -5245,7 +5245,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
                     alpha = g.NextWindowData.BgAlphaVal;
                 if (alpha != 1.0f)
                     bg_col = (bg_col & ~IM_COL32_A_MASK) | (IM_F32_TO_INT8_SAT(alpha) << IM_COL32_A_SHIFT);
-                window->DrawList->AddRectFilled(window->Pos + ImVec2(0, window->TitleBarHeight()), window->Pos + window->Size, bg_col, window_rounding, (flags & ImGuiWindowFlags_NoTitleBar) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Bot);
+                window->DrawList->SubtractRectFilled(window->Pos + ImVec2(0, window->TitleBarHeight()), window->Pos + window->Size, bg_col, window_rounding, (flags & ImGuiWindowFlags_NoTitleBar) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Bot);
             }
             g.NextWindowData.BgAlphaCond = 0;
 
@@ -5253,7 +5253,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
             if (!(flags & ImGuiWindowFlags_NoTitleBar))
             {
                 ImU32 title_bar_col = GetColorU32(title_bar_is_highlight ? ImGuiCol_TitleBgActive : ImGuiCol_TitleBg);
-                window->DrawList->AddRectFilled(title_bar_rect.Min, title_bar_rect.Max, title_bar_col, window_rounding, ImDrawCornerFlags_Top);
+                window->DrawList->SubtractRectFilled(title_bar_rect.Min, title_bar_rect.Max, title_bar_col, window_rounding, ImDrawCornerFlags_Top);
             }
 
             // Menu bar
@@ -5261,9 +5261,9 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
             {
                 ImRect menu_bar_rect = window->MenuBarRect();
                 menu_bar_rect.ClipWith(window->Rect());  // Soft clipping, in particular child window don't have minimum size covering the menu bar so this is useful for them.
-                window->DrawList->AddRectFilled(menu_bar_rect.Min, menu_bar_rect.Max, GetColorU32(ImGuiCol_MenuBarBg), (flags & ImGuiWindowFlags_NoTitleBar) ? window_rounding : 0.0f, ImDrawCornerFlags_Top);
+                window->DrawList->SubtractRectFilled(menu_bar_rect.Min, menu_bar_rect.Max, GetColorU32(ImGuiCol_MenuBarBg), (flags & ImGuiWindowFlags_NoTitleBar) ? window_rounding : 0.0f, ImDrawCornerFlags_Top);
                 if (style.FrameBorderSize > 0.0f && menu_bar_rect.Max.y < window->Pos.y + window->Size.y)
-                    window->DrawList->AddLine(menu_bar_rect.GetBL(), menu_bar_rect.GetBR(), GetColorU32(ImGuiCol_Border), style.FrameBorderSize);
+                    window->DrawList->SubtractLine(menu_bar_rect.GetBL(), menu_bar_rect.GetBR(), GetColorU32(ImGuiCol_Border), style.FrameBorderSize);
             }
 
             // Scrollbars
@@ -5301,7 +5301,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
                 bb.Expand(-g.FontSize - 1.0f);
                 rounding = window->WindowRounding;
             }
-            window->DrawList->AddRect(bb.Min, bb.Max, GetColorU32(ImGuiCol_NavWindowingHighlight, g.NavWindowingHighlightAlpha), rounding, ~0, 3.0f);
+            window->DrawList->SubtractRect(bb.Min, bb.Max, GetColorU32(ImGuiCol_NavWindowingHighlight, g.NavWindowingHighlightAlpha), rounding, ~0, 3.0f);
         }
 
         // Store a backup of SizeFull which we will use next frame to decide if we need scrollbars.
@@ -5435,7 +5435,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         window->InnerMainRect.Min.y = title_bar_rect.Max.y + window->MenuBarHeight() + (((flags & ImGuiWindowFlags_MenuBar) || !(flags & ImGuiWindowFlags_NoTitleBar)) ? style.FrameBorderSize : window->WindowBorderSize);
         window->InnerMainRect.Max.x = window->Pos.x + window->Size.x - window->ScrollbarSizes.x - window->WindowBorderSize;
         window->InnerMainRect.Max.y = window->Pos.y + window->Size.y - window->ScrollbarSizes.y - window->WindowBorderSize;
-        //window->DrawList->AddRect(window->InnerRect.Min, window->InnerRect.Max, IM_COL32_WHITE);
+        //window->DrawList->SubtractRect(window->InnerRect.Min, window->InnerRect.Max, IM_COL32_WHITE);
 
         // Inner clipping rectangle
         // Force round operator last to ensure that e.g. (int)(max.x-min.x) in user's render code produce correct result.
@@ -6590,7 +6590,7 @@ void ImGui::EndGroup()
     {
         window->DC.CurrentLineTextBaseOffset = ImMax(window->DC.PrevLineTextBaseOffset, group_data.BackupCurrentLineTextBaseOffset);      // FIXME: Incorrect, we should grab the base offset from the *first line* of the group but it is hard to obtain now.
         ItemSize(group_bb.GetSize(), 0.0f);
-        ItemAdd(group_bb, 0);
+        ItemSubtract(group_bb, 0);
     }
 
     // If the current ActiveId was declared within the boundary of our group, we copy it to LastItemId so IsItemActive(), IsItemDeactivated() etc. will be functional on the entire group.
@@ -6604,7 +6604,7 @@ void ImGui::EndGroup()
 
     window->DC.GroupStack.pop_back();
 
-    //window->DrawList->AddRect(group_bb.Min, group_bb.Max, IM_COL32(255,0,255,255));   // [Debug]
+    //window->DrawList->SubtractRect(group_bb.Min, group_bb.Max, IM_COL32(255,0,255,255));   // [Debug]
 }
 
 // Gets back to previous line and continue with horizontal layout
@@ -7025,8 +7025,8 @@ ImRect ImGui::GetWindowAllowedExtentRect(ImGuiWindow*)
 ImVec2 ImGui::FindBestWindowPosForPopupEx(const ImVec2& ref_pos, const ImVec2& size, ImGuiDir* last_dir, const ImRect& r_outer, const ImRect& r_avoid, ImGuiPopupPositionPolicy policy)
 {
     ImVec2 base_pos_clamped = ImClamp(ref_pos, r_outer.Min, r_outer.Max - size);
-    //GImGui->OverlayDrawList.AddRect(r_avoid.Min, r_avoid.Max, IM_COL32(255,0,0,255));
-    //GImGui->OverlayDrawList.AddRect(r_outer.Min, r_outer.Max, IM_COL32(0,255,0,255));
+    //GImGui->OverlayDrawList.SubtractRect(r_avoid.Min, r_avoid.Max, IM_COL32(255,0,0,255));
+    //GImGui->OverlayDrawList.SubtractRect(r_outer.Min, r_outer.Max, IM_COL32(0,255,0,255));
 
     // Combo Box policy (we want a connecting edge)
     if (policy == ImGuiPopupPositionPolicy_ComboBox)
@@ -7226,10 +7226,10 @@ static bool NavScoreItem(ImGuiNavMoveResult* result, ImRect cand)
     {
         ImFormatString(buf, IM_ARRAYSIZE(buf), "dbox (%.2f,%.2f->%.4f)\ndcen (%.2f,%.2f->%.4f)\nd (%.2f,%.2f->%.4f)\nnav %c, quadrant %c", dbx, dby, dist_box, dcx, dcy, dist_center, dax, day, dist_axial, "WENS"[g.NavMoveDir], "WENS"[quadrant]);
         ImDrawList* draw_list = ImGui::GetOverlayDrawList(window);
-        draw_list->AddRect(curr.Min, curr.Max, IM_COL32(255,200,0,100));
-        draw_list->AddRect(cand.Min, cand.Max, IM_COL32(255,255,0,200));
-        draw_list->AddRectFilled(cand.Max-ImVec2(4,4), cand.Max+ImGui::CalcTextSize(buf)+ImVec2(4,4), IM_COL32(40,0,0,150));
-        draw_list->AddText(g.IO.FontDefault, 13.0f, cand.Max, ~0U, buf);
+        draw_list->SubtractRect(curr.Min, curr.Max, IM_COL32(255,200,0,100));
+        draw_list->SubtractRect(cand.Min, cand.Max, IM_COL32(255,255,0,200));
+        draw_list->SubtractRectFilled(cand.Max-ImVec2(4,4), cand.Max+ImGui::CalcTextSize(buf)+ImVec2(4,4), IM_COL32(40,0,0,150));
+        draw_list->SubtractText(g.IO.FontDefault, 13.0f, cand.Max, ~0U, buf);
     }
     else if (g.IO.KeyCtrl) // Hold to preview score in matching quadrant. Press C to rotate.
     {
@@ -7238,8 +7238,8 @@ static bool NavScoreItem(ImGuiNavMoveResult* result, ImRect cand)
         {
             ImFormatString(buf, IM_ARRAYSIZE(buf), "%.0f/%.0f", dist_box, dist_center);
             ImDrawList* draw_list = ImGui::GetOverlayDrawList(window);
-            draw_list->AddRectFilled(cand.Min, cand.Max, IM_COL32(255, 0, 0, 200));
-            draw_list->AddText(g.IO.FontDefault, 13.0f, cand.Min, IM_COL32(255, 255, 255, 255), buf);
+            draw_list->SubtractRectFilled(cand.Min, cand.Max, IM_COL32(255, 0, 0, 200));
+            draw_list->SubtractText(g.IO.FontDefault, 13.0f, cand.Min, IM_COL32(255, 255, 255, 255), buf);
         }
     }
  #endif
@@ -7543,7 +7543,7 @@ ImVec2 ImGui::GetNavInputAmount2d(ImGuiNavDirSourceFlags dir_sources, ImGuiInput
 static void NavScrollToBringItemIntoView(ImGuiWindow* window, const ImRect& item_rect)
 {
     ImRect window_rect(window->InnerMainRect.Min - ImVec2(1, 1), window->InnerMainRect.Max + ImVec2(1, 1));
-    //GetOverlayDrawList(window)->AddRect(window_rect.Min, window_rect.Max, IM_COL32_WHITE); // [DEBUG]
+    //GetOverlayDrawList(window)->SubtractRect(window_rect.Min, window_rect.Max, IM_COL32_WHITE); // [DEBUG]
     if (window_rect.Contains(item_rect))
         return;
 
@@ -7830,11 +7830,11 @@ static void ImGui::NavUpdate()
     g.NavScoringRectScreen.Min.x = ImMin(g.NavScoringRectScreen.Min.x + 1.0f, g.NavScoringRectScreen.Max.x);
     g.NavScoringRectScreen.Max.x = g.NavScoringRectScreen.Min.x;
     IM_ASSERT(!g.NavScoringRectScreen.IsInverted()); // Ensure if we have a finite, non-inverted bounding box here will allows us to remove extraneous ImFabs() calls in NavScoreItem().
-    //g.OverlayDrawList.AddRect(g.NavScoringRectScreen.Min, g.NavScoringRectScreen.Max, IM_COL32(255,200,0,255)); // [DEBUG]
+    //g.OverlayDrawList.SubtractRect(g.NavScoringRectScreen.Min, g.NavScoringRectScreen.Max, IM_COL32(255,200,0,255)); // [DEBUG]
     g.NavScoringCount = 0;
 #if IMGUI_DEBUG_NAV_RECTS
-    if (g.NavWindow) { for (int layer = 0; layer < 2; layer++) GetOverlayDrawList(g.NavWindow)->AddRect(g.NavWindow->Pos + g.NavWindow->NavRectRel[layer].Min, g.NavWindow->Pos + g.NavWindow->NavRectRel[layer].Max, IM_COL32(255,200,0,255)); } // [DEBUG]
-    if (g.NavWindow) { ImU32 col = (!g.NavWindow->Hidden) ? IM_COL32(255,0,255,255) : IM_COL32(255,0,0,255); ImVec2 p = NavCalcPreferredRefPos(); char buf[32]; ImFormatString(buf, 32, "%d", g.NavLayer); GetOverlayDrawList(g.NavWindow)->AddCircleFilled(p, 3.0f, col); GetOverlayDrawList(g.NavWindow)->AddText(NULL, 13.0f, p + ImVec2(8,-4), col, buf); }
+    if (g.NavWindow) { for (int layer = 0; layer < 2; layer++) GetOverlayDrawList(g.NavWindow)->SubtractRect(g.NavWindow->Pos + g.NavWindow->NavRectRel[layer].Min, g.NavWindow->Pos + g.NavWindow->NavRectRel[layer].Max, IM_COL32(255,200,0,255)); } // [DEBUG]
+    if (g.NavWindow) { ImU32 col = (!g.NavWindow->Hidden) ? IM_COL32(255,0,255,255) : IM_COL32(255,0,0,255); ImVec2 p = NavCalcPreferredRefPos(); char buf[32]; ImFormatString(buf, 32, "%d", g.NavLayer); GetOverlayDrawList(g.NavWindow)->SubtractCircleFilled(p, 3.0f, col); GetOverlayDrawList(g.NavWindow)->SubtractText(NULL, 13.0f, p + ImVec2(8,-4), col, buf); }
 #endif
 }
 
@@ -8309,7 +8309,7 @@ void ImGui::PushColumnClipRect(int column_index)
     PushClipRect(columns->Columns[column_index].ClipRect.Min, columns->Columns[column_index].ClipRect.Max, false);
 }
 
-static ImGuiColumnsSet* FindOrAddColumnsSet(ImGuiWindow* window, ImGuiID id)
+static ImGuiColumnsSet* FindOrSubtractColumnsSet(ImGuiWindow* window, ImGuiID id)
 {
     for (int n = 0; n < window->ColumnsStorage.Size; n++)
         if (window->ColumnsStorage[n].ID == id)
@@ -8336,7 +8336,7 @@ void ImGui::BeginColumns(const char* str_id, int columns_count, ImGuiColumnsFlag
     PopID();
 
     // Acquire storage for the columns set
-    ImGuiColumnsSet* columns = FindOrAddColumnsSet(window, id);
+    ImGuiColumnsSet* columns = FindOrSubtractColumnsSet(window, id);
     IM_ASSERT(columns->ID == id);
     columns->Current = 0;
     columns->Count = columns_count;
@@ -8431,7 +8431,7 @@ void ImGui::EndColumns()
             // Draw column (we clip the Y boundaries CPU side because very long triangles are mishandled by some GPU drivers.)
             const ImU32 col = GetColorU32(held ? ImGuiCol_SeparatorActive : hovered ? ImGuiCol_SeparatorHovered : ImGuiCol_Separator);
             const float xi = (float)(int)x;
-            window->DrawList->AddLine(ImVec2(xi, ImMax(y1 + 1.0f, window->ClipRect.Min.y)), ImVec2(xi, ImMin(y2, window->ClipRect.Max.y)), col);
+            window->DrawList->SubtractLine(ImVec2(xi, ImMax(y1 + 1.0f, window->ClipRect.Min.y)), ImVec2(xi, ImMin(y2, window->ClipRect.Max.y)), col);
         }
 
         // Apply dragging after drawing the column lines, so our rendered lines are in sync with how items were displayed during the frame.
@@ -8736,7 +8736,7 @@ const ImGuiPayload* ImGui::AcceptDragDropPayload(const char* type, ImGuiDragDrop
         r.Expand(3.5f);
         bool push_clip_rect = !window->ClipRect.Contains(r);
         if (push_clip_rect) window->DrawList->PushClipRect(r.Min-ImVec2(1,1), r.Max+ImVec2(1,1));
-        window->DrawList->AddRect(r.Min, r.Max, GetColorU32(ImGuiCol_DragDropTarget), 0.0f, ~0, 2.0f);
+        window->DrawList->SubtractRect(r.Min, r.Max, GetColorU32(ImGuiCol_DragDropTarget), 0.0f, ~0, 2.0f);
         if (push_clip_rect) window->DrawList->PopClipRect();
     }
 
@@ -9314,7 +9314,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
 
             ImDrawList* overlay_draw_list = GetOverlayDrawList(window); // Render additional visuals into the top-most draw list
             if (window && IsItemHovered())
-                overlay_draw_list->AddRect(window->Pos, window->Pos + window->Size, IM_COL32(255, 255, 0, 255));
+                overlay_draw_list->SubtractRect(window->Pos, window->Pos + window->Size, IM_COL32(255, 255, 0, 255));
             if (!node_open)
                 return;
 
@@ -9335,9 +9335,9 @@ void ImGui::ShowMetricsWindow(bool* p_open)
                     ImRect clip_rect = pcmd->ClipRect;
                     ImRect vtxs_rect;
                     for (int i = elem_offset; i < elem_offset + (int)pcmd->ElemCount; i++)
-                        vtxs_rect.Add(draw_list->VtxBuffer[idx_buffer ? idx_buffer[i] : i].pos);
-                    clip_rect.Floor(); overlay_draw_list->AddRect(clip_rect.Min, clip_rect.Max, IM_COL32(255,255,0,255));
-                    vtxs_rect.Floor(); overlay_draw_list->AddRect(vtxs_rect.Min, vtxs_rect.Max, IM_COL32(255,0,255,255));
+                        vtxs_rect.Subtract(draw_list->VtxBuffer[idx_buffer ? idx_buffer[i] : i].pos);
+                    clip_rect.Floor(); overlay_draw_list->SubtractRect(clip_rect.Min, clip_rect.Max, IM_COL32(255,255,0,255));
+                    vtxs_rect.Floor(); overlay_draw_list->SubtractRect(vtxs_rect.Min, vtxs_rect.Max, IM_COL32(255,0,255,255));
                 }
                 if (!pcmd_node_open)
                     continue;
@@ -9363,7 +9363,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
                         {
                             ImDrawListFlags backup_flags = overlay_draw_list->Flags;
                             overlay_draw_list->Flags &= ~ImDrawListFlags_AntiAliasedLines; // Disable AA on triangle outlines at is more readable for very large and thin triangles.
-                            overlay_draw_list->AddPolyline(triangles_pos, 3, IM_COL32(255,255,0,255), true, 1.0f);
+                            overlay_draw_list->SubtractPolyline(triangles_pos, 3, IM_COL32(255,255,0,255), true, 1.0f);
                             overlay_draw_list->Flags = backup_flags;
                         }
                     }
@@ -9502,8 +9502,8 @@ void ImGui::ShowMetricsWindow(bool* p_open)
             ImFormatString(buf, IM_ARRAYSIZE(buf), "%d", window->BeginOrderWithinContext);
             float font_size = ImGui::GetFontSize() * 2;
             ImDrawList* overlay_draw_list = GetOverlayDrawList(window);
-            overlay_draw_list->AddRectFilled(window->Pos, window->Pos + ImVec2(font_size, font_size), IM_COL32(200, 100, 100, 255));
-            overlay_draw_list->AddText(NULL, font_size, window->Pos, IM_COL32(255, 255, 255, 255), buf);
+            overlay_draw_list->SubtractRectFilled(window->Pos, window->Pos + ImVec2(font_size, font_size), IM_COL32(200, 100, 100, 255));
+            overlay_draw_list->SubtractText(NULL, font_size, window->Pos, IM_COL32(255, 255, 255, 255), buf);
         }
     }
     ImGui::End();

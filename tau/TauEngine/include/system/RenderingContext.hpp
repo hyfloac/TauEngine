@@ -1,15 +1,27 @@
 #pragma once
 
 #include <NumTypes.hpp>
+#include <Color.hpp>
+#include <DLL.hpp>
 
-class IRenderingContext
+class TAU_DLL IRenderingContext
 {
 public:
+    IRenderingContext() = default;
+
     virtual ~IRenderingContext() = default;
+
+    IRenderingContext(const IRenderingContext& copy) = delete;
+    IRenderingContext(IRenderingContext&& move) = delete;
+
+    IRenderingContext& operator =(const IRenderingContext& copy) = delete;
+    IRenderingContext& operator =(IRenderingContext&& move) = delete;
 
     virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) = 0;
 
     virtual void createContext(void* param) = 0;
+
+    virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) = 0;
 };
 
 struct GLContextSettings final
@@ -30,6 +42,6 @@ struct GLContextSettings final
     };
 };
 
-IRenderingContext* createGLContext(GLContextSettings settings) noexcept;
+TAU_DLL IRenderingContext* createGLContext(GLContextSettings settings) noexcept;
 
-IRenderingContext* createDXContext() noexcept;
+TAU_DLL IRenderingContext* createDXContext() noexcept;

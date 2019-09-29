@@ -43,7 +43,7 @@ void Renderer::render() const noexcept
                 model->render();
             } while(modelObjectPair != worldObjects.end() && model == modelObjectPair->first);
 
-            RenderableObject::postRender();
+            model->postRender();
         }
 
         GLProgram::deactivate();

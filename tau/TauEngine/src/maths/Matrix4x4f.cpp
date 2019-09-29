@@ -2,9 +2,8 @@
 #include <maths/Vector4f.hpp>
 #include <maths/Vector3f.hpp>
 #include <Safeties.hpp>
-#include <Maths.hpp>
+#include <maths/Maths.hpp>
 #include <maths/ComponentVector4.hpp>
-#include <immintrin.h>
 #include <pmmintrin.h>
 
 #ifdef __clang__
@@ -143,56 +142,56 @@ Matrix4x4f& Matrix4x4f::mul(const Matrix4x4f& other) noexcept
     return *this;
 }
 
-Matrix4x4f& Matrix4x4f::mulSIMD(const Matrix4x4f& other) noexcept
-{
-    const Matrix4x4fData oldData = this->_data;
-    const Matrix4x4fData otherData = {
-        other._data.m00, other._data.m10, other._data.m20, other._data.m30,
-        other._data.m01, other._data.m11, other._data.m21, other._data.m31,
-        other._data.m02, other._data.m12, other._data.m22, other._data.m32,
-        other._data.m03, other._data.m13, other._data.m23, other._data.m33
-    };
-
-    CompVec4 postMul;
-
-    postMul = { _mm_mul_ps(oldData.x, otherData.x) };
-    this->_data.m00 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.x, otherData.y) };
-    this->_data.m01 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.x, otherData.z) };
-    this->_data.m02 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.x, otherData.w) };
-    this->_data.m03 = postMul.x + postMul.y + postMul.z + postMul.w;
-
-    postMul = { _mm_mul_ps(oldData.y, otherData.x) };
-    this->_data.m10 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.y, otherData.y) };
-    this->_data.m11 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.y, otherData.z) };
-    this->_data.m12 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.y, otherData.w) };
-    this->_data.m13 = postMul.x + postMul.y + postMul.z + postMul.w;
-
-    postMul = { _mm_mul_ps(oldData.z, otherData.x) };
-    this->_data.m20 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.z, otherData.y) };
-    this->_data.m21 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.z, otherData.z) };
-    this->_data.m22 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.z, otherData.w) };
-    this->_data.m23 = postMul.x + postMul.y + postMul.z + postMul.w;
-
-    postMul = { _mm_mul_ps(oldData.w, otherData.x) };
-    this->_data.m30 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.w, otherData.y) };
-    this->_data.m31 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.w, otherData.z) };
-    this->_data.m32 = postMul.x + postMul.y + postMul.z + postMul.w;
-    postMul = { _mm_mul_ps(oldData.w, otherData.w) };
-    this->_data.m33 = postMul.x + postMul.y + postMul.z + postMul.w;
-
-    return *this;
-}
+// Matrix4x4f& Matrix4x4f::mulSIMD(const Matrix4x4f& other) noexcept
+// {
+//     const Matrix4x4fData oldData = this->_data;
+//     const Matrix4x4fData otherData = {
+//         other._data.m00, other._data.m10, other._data.m20, other._data.m30,
+//         other._data.m01, other._data.m11, other._data.m21, other._data.m31,
+//         other._data.m02, other._data.m12, other._data.m22, other._data.m32,
+//         other._data.m03, other._data.m13, other._data.m23, other._data.m33
+//     };
+//
+//     CompVec4 postMul;
+//
+//     postMul = { _mm_mul_ps(oldData.x, otherData.x) };
+//     this->_data.m00 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.x, otherData.y) };
+//     this->_data.m01 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.x, otherData.z) };
+//     this->_data.m02 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.x, otherData.w) };
+//     this->_data.m03 = postMul.x + postMul.y + postMul.z + postMul.w;
+//
+//     postMul = { _mm_mul_ps(oldData.y, otherData.x) };
+//     this->_data.m10 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.y, otherData.y) };
+//     this->_data.m11 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.y, otherData.z) };
+//     this->_data.m12 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.y, otherData.w) };
+//     this->_data.m13 = postMul.x + postMul.y + postMul.z + postMul.w;
+//
+//     postMul = { _mm_mul_ps(oldData.z, otherData.x) };
+//     this->_data.m20 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.z, otherData.y) };
+//     this->_data.m21 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.z, otherData.z) };
+//     this->_data.m22 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.z, otherData.w) };
+//     this->_data.m23 = postMul.x + postMul.y + postMul.z + postMul.w;
+//
+//     postMul = { _mm_mul_ps(oldData.w, otherData.x) };
+//     this->_data.m30 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.w, otherData.y) };
+//     this->_data.m31 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.w, otherData.z) };
+//     this->_data.m32 = postMul.x + postMul.y + postMul.z + postMul.w;
+//     postMul = { _mm_mul_ps(oldData.w, otherData.w) };
+//     this->_data.m33 = postMul.x + postMul.y + postMul.z + postMul.w;
+//
+//     return *this;
+// }
 
 Matrix4x4f& Matrix4x4f::mulSIMD_SSE3(const Matrix4x4f& other) noexcept
 {
@@ -419,8 +418,8 @@ CompVec4& Matrix4x4f::mulSIMD_SSE3(Vector4f& vec) const noexcept
 
 Matrix4x4f& Matrix4x4f::rotateX(float angle) noexcept
 {
-    const float sin = fastSin(angle);
-    const float cos = fastCos(angle);
+    const float sin = fastSinR(angle);
+    const float cos = fastCosR(angle);
     const float nSin = -sin;
 
     const float nm10 = _data.glColumnMajorArr[1][0] * cos + _data.glColumnMajorArr[2][0] * sin;
@@ -443,8 +442,8 @@ Matrix4x4f& Matrix4x4f::rotateX(float angle) noexcept
 
 Matrix4x4f& Matrix4x4f::rotateY(float angle) noexcept
 {
-    const float sin = fastSin(angle);
-    const float cos = fastCos(angle);
+    const float sin = fastSinR(angle);
+    const float cos = fastCosR(angle);
     const float nSin = -sin;
 
     const float nm00 = _data.glColumnMajorArr[0][0] * cos + _data.glColumnMajorArr[2][0] * nSin;
@@ -467,8 +466,8 @@ Matrix4x4f& Matrix4x4f::rotateY(float angle) noexcept
 
 Matrix4x4f& Matrix4x4f::rotateZ(float angle) noexcept
 {
-    const float sin = fastSin(angle);
-    const float cos = fastCos(angle);
+    const float sin = fastSinR(angle);
+    const float cos = fastCosR(angle);
     const float nSin = -sin;
 
     const float nm00 = _data.glColumnMajorArr[0][0] * cos + _data.glColumnMajorArr[1][0] * sin;
@@ -500,16 +499,16 @@ Matrix4x4f& Matrix4x4f::translate(const Vector3f& translation) noexcept
 
 Matrix4x4f& Matrix4x4f::rotateOptimized(const Vector3f& rotation) noexcept
 {
-    const float z_sin = fastSin(rotation.z());
-    const float z_cos = fastCos(rotation.z());
+    const float z_sin = fastSinR(rotation.z());
+    const float z_cos = fastCosR(rotation.z());
     const float z_nSin = -z_sin;
 
-    const float y_sin = fastSin(rotation.y());
-    const float y_cos = fastCos(rotation.y());
+    const float y_sin = fastSinR(rotation.y());
+    const float y_cos = fastCosR(rotation.y());
     const float y_nSin = -y_sin;
 
-    const float x_sin = fastSin(rotation.x());
-    const float x_cos = fastCos(rotation.x());
+    const float x_sin = fastSinR(rotation.x());
+    const float x_cos = fastCosR(rotation.x());
     const float x_nSin = -x_sin;
 
 
@@ -556,12 +555,12 @@ Matrix4x4f& Matrix4x4f::rotateOptimized(const Vector3f& rotation) noexcept
  */
 Matrix4x4f& Matrix4x4f::rotateCamera(const float pitch, const float yaw) noexcept
 {
-    const float pitch_sin = fastSin(pitch);
-    const float pitch_cos = fastCos(pitch);
+    const float pitch_sin = fastSinR(pitch);
+    const float pitch_cos = fastCosR(pitch);
     const float pitch_nSin = -pitch_sin;
 
-    const float yaw_sin = fastSin(yaw);
-    const float yaw_cos = fastCos(yaw);
+    const float yaw_sin = fastSinR(yaw);
+    const float yaw_cos = fastCosR(yaw);
     const float yaw_nSin = -yaw_sin;
 
 
@@ -717,7 +716,7 @@ Matrix4x4f Matrix4x4f::perspective(float fov, float aspect, float nearPlane, flo
 
     const float halfFOV = fov * 0.5f;
 
-    matrix.m11 = fastCos(halfFOV) / fastSin(halfFOV);
+    matrix.m11 = fastCosR(halfFOV) / fastSinR(halfFOV);
     matrix.m00 = (leftHanded ? 1 : -1) * matrix.m11 / aspect;
     matrix.m22 = (farPlane + nearPlane) * rDepth;
     matrix.m23 = (-2 * farPlane * nearPlane) * rDepth;
@@ -750,7 +749,7 @@ Matrix4x4f Matrix4x4f::infDepthPerspective(float fov, float aspect, bool leftHan
 
     const float halfFOV = fov * 0.5f;
 
-    matrix.m11 = fastCos(halfFOV) / fastSin(halfFOV);
+    matrix.m11 = fastCosR(halfFOV) / fastSinR(halfFOV);
     matrix.m00 = (leftHanded ? 1 : -1) * matrix.m11 / aspect;
     matrix.m22 = 1.0f;
     matrix.m23 = 0.0f;
@@ -933,28 +932,23 @@ Matrix4x4f& Matrix4x4f::view(const Vector3f& translation, const float pitch, con
     return *this;
 }
 
-Matrix4x4f& Matrix4x4f::fps(const Vector3f& translation, const float pitch, const float yaw) noexcept
+Matrix4x4f& Matrix4x4f::fps(const Vector3f translation, const SinCos<float> pitchSC, const SinCos<float> yawSC) noexcept
 {
-    const float pitch_cos = fastCos(pitch);
-    const float pitch_sin = fastSin(pitch);
-    const float pitch_nSin = -pitch_sin;
+    const float pitch_nSin = -pitchSC.sin;
+    const float yaw_nSin = -yawSC.sin;
 
-    const float yaw_cos = fastCos(yaw);
-    const float yaw_sin = fastSin(yaw);
-    const float yaw_nSin = -yaw_sin;
+    const float ySpS = yawSC.sin * pitchSC.sin;
+    const float ySpC = yawSC.sin * pitchSC.cos;
+    const float yCpS = yawSC.cos * pitchSC.sin;
+    const float pCyC = pitchSC.cos * yawSC.cos;
 
-    const float ySpS = yaw_sin * pitch_sin;
-    const float ySpC = yaw_sin * pitch_cos;
-    const float yCpS = yaw_cos * pitch_sin;
-    const float pCyC = pitch_cos * yaw_cos;
-
-    this->_data.glColumnMajorArr[0][0] = yaw_cos;
+    this->_data.glColumnMajorArr[0][0] = yawSC.cos;
     this->_data.glColumnMajorArr[0][1] = ySpS;
     this->_data.glColumnMajorArr[0][2] = ySpC;
     this->_data.glColumnMajorArr[0][3] = 0.0f;
 
-    this->_data.glColumnMajorArr[1][0] = 0;
-    this->_data.glColumnMajorArr[1][1] = pitch_cos;
+    this->_data.glColumnMajorArr[1][0] = 0.0f;
+    this->_data.glColumnMajorArr[1][1] = pitchSC.cos;
     this->_data.glColumnMajorArr[1][2] = pitch_nSin;
     this->_data.glColumnMajorArr[1][3] = 0.0f;
 
@@ -963,10 +957,26 @@ Matrix4x4f& Matrix4x4f::fps(const Vector3f& translation, const float pitch, cons
     this->_data.glColumnMajorArr[2][2] = pCyC;
     this->_data.glColumnMajorArr[2][3] = 0.0f;
 
-    this->_data.glColumnMajorArr[3][0] = -(yaw_cos * translation.x() + yaw_nSin * translation.z());
-    this->_data.glColumnMajorArr[3][1] = -(ySpS * translation.x() + pitch_cos * translation.y() + yCpS * translation.z());
+    this->_data.glColumnMajorArr[3][0] = -(yawSC.cos * translation.x() + yaw_nSin * translation.z());
+    this->_data.glColumnMajorArr[3][1] = -(ySpS * translation.x() + pitchSC.cos * translation.y() + yCpS * translation.z());
     this->_data.glColumnMajorArr[3][2] = -(ySpC * translation.x() + pitch_nSin * translation.y() + pCyC * translation.z());
     this->_data.glColumnMajorArr[3][3] = 1.0f;
 
     return *this;
+}
+
+Matrix4x4f& Matrix4x4f::fps(const Vector3f translation, const float pitch, const float yaw) noexcept
+{
+    const SinCos<float> pitchSC = fastSinCosR(-pitch);
+    const SinCos<float> yawSC = fastSinCosR(-yaw);
+
+    return fps(translation, pitchSC, yawSC);
+}
+
+Matrix4x4f& Matrix4x4f::fpsD(const Vector3f translation, const float pitch, const float yaw) noexcept
+{
+    const SinCos<float> pitchSC = fastSinCosD(-pitch);
+    const SinCos<float> yawSC = fastSinCosD(-yaw);
+
+    return fps(translation, pitchSC, yawSC);
 }

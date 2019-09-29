@@ -215,7 +215,7 @@ void ImGui::TextUnformatted(const char* text, const char* text_end)
 
         ImRect bb(text_pos, text_pos + text_size);
         ItemSize(text_size);
-        ItemAdd(bb, 0);
+        ItemSubtract(bb, 0);
     }
     else
     {
@@ -225,7 +225,7 @@ void ImGui::TextUnformatted(const char* text, const char* text_end)
         // Account of baseline offset
         ImRect bb(text_pos, text_pos + text_size);
         ItemSize(text_size);
-        if (!ItemAdd(bb, 0))
+        if (!ItemSubtract(bb, 0))
             return;
 
         // Render (we don't hide text after ## in this end-user function)
@@ -308,7 +308,7 @@ void ImGui::LabelText(const char* label, const char* fmt, ...)
     va_end(args);
 }
 
-// Add a label+text combo aligned to other label+value widgets
+// Subtract a label+text combo aligned to other label+value widgets
 void ImGui::LabelTextV(const char* label, const char* fmt, va_list args)
 {
     ImGuiWindow* window = GetCurrentWindow();
@@ -323,7 +323,7 @@ void ImGui::LabelTextV(const char* label, const char* fmt, va_list args)
     const ImRect value_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y*2));
     const ImRect total_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w + (label_size.x > 0.0f ? style.ItemInnerSpacing.x : 0.0f), style.FramePadding.y*2) + label_size);
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, 0))
+    if (!ItemSubtract(total_bb, 0))
         return;
 
     // Render
@@ -359,7 +359,7 @@ void ImGui::BulletTextV(const char* fmt, va_list args)
     const float line_height = ImMax(ImMin(window->DC.CurrentLineSize.y, g.FontSize + g.Style.FramePadding.y*2), g.FontSize);
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(g.FontSize + (label_size.x > 0.0f ? (label_size.x + style.FramePadding.x*2) : 0.0f), ImMax(line_height, label_size.y)));  // Empty text doesn't add padding
     ItemSize(bb);
-    if (!ItemAdd(bb, 0))
+    if (!ItemSubtract(bb, 0))
         return;
 
     // Render
@@ -410,7 +410,7 @@ bool ImGui::ButtonBehavior(const ImRect& bb, ImGuiID id, bool* out_hovered, bool
 
 #ifdef IMGUI_ENABLE_TEST_ENGINE
     if (id != 0 && window->DC.LastItemId != id)
-        ImGuiTestEngineHook_ItemAdd(&g, bb, id);
+        ImGuiTestEngineHook_ItemSubtract(&g, bb, id);
 #endif
 
     bool pressed = false;
@@ -561,7 +561,7 @@ bool ImGui::ButtonEx(const char* label, const ImVec2& size_arg, ImGuiButtonFlags
 
     const ImRect bb(pos, pos + size);
     ItemSize(size, style.FramePadding.y);
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
         return false;
 
     if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
@@ -616,7 +616,7 @@ bool ImGui::InvisibleButton(const char* str_id, const ImVec2& size_arg)
     ImVec2 size = CalcItemSize(size_arg, 0.0f, 0.0f);
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
     ItemSize(size);
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
         return false;
 
     bool hovered, held;
@@ -636,7 +636,7 @@ bool ImGui::ArrowButtonEx(const char* str_id, ImGuiDir dir, ImVec2 size, ImGuiBu
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
     const float default_size = GetFrameHeight();
     ItemSize(bb, (size.y >= default_size) ? g.Style.FramePadding.y : 0.0f);
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
         return false;
 
     if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
@@ -669,7 +669,7 @@ bool ImGui::CloseButton(ImGuiID id, const ImVec2& pos, float radius)
     // We intentionally allow interaction when clipped so that a mechanical Alt,Right,Validate sequence close a window.
     // (this isn't the regular behavior of buttons, but it doesn't affect the user much because navigation tends to keep items visible).
     const ImRect bb(pos - ImVec2(radius,radius), pos + ImVec2(radius,radius));
-    bool is_clipped = !ItemAdd(bb, id);
+    bool is_clipped = !ItemSubtract(bb, id);
 
     bool hovered, held;
     bool pressed = ButtonBehavior(bb, id, &hovered, &held);
@@ -679,13 +679,13 @@ bool ImGui::CloseButton(ImGuiID id, const ImVec2& pos, float radius)
     // Render
     ImVec2 center = bb.GetCenter();
     if (hovered)
-        window->DrawList->AddCircleFilled(center, ImMax(2.0f, radius), GetColorU32(held ? ImGuiCol_ButtonActive : ImGuiCol_ButtonHovered), 9);
+        window->DrawList->SubtractCircleFilled(center, ImMax(2.0f, radius), GetColorU32(held ? ImGuiCol_ButtonActive : ImGuiCol_ButtonHovered), 9);
 
     float cross_extent = (radius * 0.7071f) - 1.0f;
     ImU32 cross_col = GetColorU32(ImGuiCol_Text);
     center -= ImVec2(0.5f, 0.5f);
-    window->DrawList->AddLine(center + ImVec2(+cross_extent,+cross_extent), center + ImVec2(-cross_extent,-cross_extent), cross_col, 1.0f);
-    window->DrawList->AddLine(center + ImVec2(+cross_extent,-cross_extent), center + ImVec2(-cross_extent,+cross_extent), cross_col, 1.0f);
+    window->DrawList->SubtractLine(center + ImVec2(+cross_extent,+cross_extent), center + ImVec2(-cross_extent,-cross_extent), cross_col, 1.0f);
+    window->DrawList->SubtractLine(center + ImVec2(+cross_extent,-cross_extent), center + ImVec2(-cross_extent,+cross_extent), cross_col, 1.0f);
 
     return pressed;
 }
@@ -696,13 +696,13 @@ bool ImGui::CollapseButton(ImGuiID id, const ImVec2& pos)
     ImGuiWindow* window = g.CurrentWindow;
 
     ImRect bb(pos, pos + ImVec2(g.FontSize, g.FontSize) + g.Style.FramePadding * 2.0f);
-    ItemAdd(bb, id);
+    ItemSubtract(bb, id);
     bool hovered, held;
     bool pressed = ButtonBehavior(bb, id, &hovered, &held, ImGuiButtonFlags_None);
 
     ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
     if (hovered || held)
-        window->DrawList->AddCircleFilled(bb.GetCenter() + ImVec2(0.0f, -0.5f), g.FontSize * 0.5f + 1.0f, col, 9);
+        window->DrawList->SubtractCircleFilled(bb.GetCenter() + ImVec2(0.0f, -0.5f), g.FontSize * 0.5f + 1.0f, col, 9);
     RenderArrow(bb.Min + g.Style.FramePadding, window->Collapsed ? ImGuiDir_Right : ImGuiDir_Down, 1.0f);
 
     // Switch to moving the window after mouse is moved beyond the initial drag threshold
@@ -763,7 +763,7 @@ void ImGui::Scrollbar(ImGuiLayoutType direction)
         window_rounding_corners = ImDrawCornerFlags_BotLeft | (other_scrollbar ? 0 : ImDrawCornerFlags_BotRight);
     else
         window_rounding_corners = (((window->Flags & ImGuiWindowFlags_NoTitleBar) && !(window->Flags & ImGuiWindowFlags_MenuBar)) ? ImDrawCornerFlags_TopRight : 0) | (other_scrollbar ? 0 : ImDrawCornerFlags_BotRight);
-    window->DrawList->AddRectFilled(bb.Min, bb.Max, GetColorU32(ImGuiCol_ScrollbarBg), window->WindowRounding, window_rounding_corners);
+    window->DrawList->SubtractRectFilled(bb.Min, bb.Max, GetColorU32(ImGuiCol_ScrollbarBg), window->WindowRounding, window_rounding_corners);
     bb.Expand(ImVec2(-ImClamp((float)(int)((bb.Max.x - bb.Min.x - 2.0f) * 0.5f), 0.0f, 3.0f), -ImClamp((float)(int)((bb.Max.y - bb.Min.y - 2.0f) * 0.5f), 0.0f, 3.0f)));
 
     // V denote the main, longer axis of the scrollbar (= height for a vertical scrollbar)
@@ -774,7 +774,7 @@ void ImGui::Scrollbar(ImGuiLayoutType direction)
 
     // Calculate the height of our grabbable box. It generally represent the amount visible (vs the total scrollable amount)
     // But we maintain a minimum size in pixel to allow for the user to still aim inside.
-    IM_ASSERT(ImMax(win_size_contents_v, win_size_avail_v) > 0.0f); // Adding this assert to check if the ImMax(XXX,1.0f) is still needed. PLEASE CONTACT ME if this triggers.
+    IM_ASSERT(ImMax(win_size_contents_v, win_size_avail_v) > 0.0f); // Subtracting this assert to check if the ImMax(XXX,1.0f) is still needed. PLEASE CONTACT ME if this triggers.
     const float win_size_v = ImMax(ImMax(win_size_contents_v, win_size_avail_v), 1.0f);
     const float grab_h_pixels = ImClamp(scrollbar_size_v * (win_size_avail_v / win_size_v), style.GrabMinSize, scrollbar_size_v);
     const float grab_h_norm = grab_h_pixels / scrollbar_size_v;
@@ -838,7 +838,7 @@ void ImGui::Scrollbar(ImGuiLayoutType direction)
         grab_rect = ImRect(ImLerp(bb.Min.x, bb.Max.x, grab_v_norm), bb.Min.y, ImMin(ImLerp(bb.Min.x, bb.Max.x, grab_v_norm) + grab_h_pixels, window_rect.Max.x), bb.Max.y);
     else
         grab_rect = ImRect(bb.Min.x, ImLerp(bb.Min.y, bb.Max.y, grab_v_norm), bb.Max.x, ImMin(ImLerp(bb.Min.y, bb.Max.y, grab_v_norm) + grab_h_pixels, window_rect.Max.y));
-    window->DrawList->AddRectFilled(grab_rect.Min, grab_rect.Max, grab_col, style.ScrollbarRounding);
+    window->DrawList->SubtractRectFilled(grab_rect.Min, grab_rect.Max, grab_col, style.ScrollbarRounding);
 }
 
 void ImGui::Image(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec4& tint_col, const ImVec4& border_col)
@@ -851,17 +851,17 @@ void ImGui::Image(ImTextureID user_texture_id, const ImVec2& size, const ImVec2&
     if (border_col.w > 0.0f)
         bb.Max += ImVec2(2, 2);
     ItemSize(bb);
-    if (!ItemAdd(bb, 0))
+    if (!ItemSubtract(bb, 0))
         return;
 
     if (border_col.w > 0.0f)
     {
-        window->DrawList->AddRect(bb.Min, bb.Max, GetColorU32(border_col), 0.0f);
-        window->DrawList->AddImage(user_texture_id, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), uv0, uv1, GetColorU32(tint_col));
+        window->DrawList->SubtractRect(bb.Min, bb.Max, GetColorU32(border_col), 0.0f);
+        window->DrawList->SubtractImage(user_texture_id, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), uv0, uv1, GetColorU32(tint_col));
     }
     else
     {
-        window->DrawList->AddImage(user_texture_id, bb.Min, bb.Max, uv0, uv1, GetColorU32(tint_col));
+        window->DrawList->SubtractImage(user_texture_id, bb.Min, bb.Max, uv0, uv1, GetColorU32(tint_col));
     }
 }
 
@@ -888,7 +888,7 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 2);
     const ImRect image_bb(window->DC.CursorPos + padding, window->DC.CursorPos + padding + size);
     ItemSize(bb);
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
         return false;
 
     bool hovered, held;
@@ -899,8 +899,8 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
     RenderNavHighlight(bb, id);
     RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
     if (bg_col.w > 0.0f)
-        window->DrawList->AddRectFilled(image_bb.Min, image_bb.Max, GetColorU32(bg_col));
-    window->DrawList->AddImage(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
+        window->DrawList->SubtractRectFilled(image_bb.Min, image_bb.Max, GetColorU32(bg_col));
+    window->DrawList->SubtractImage(user_texture_id, image_bb.Min, image_bb.Max, uv0, uv1, GetColorU32(tint_col));
 
     return pressed;
 }
@@ -920,7 +920,7 @@ bool ImGui::Checkbox(const char* label, bool* v)
     const ImVec2 pos = window->DC.CursorPos;
     const ImRect total_bb(pos, pos + ImVec2(square_sz + (label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f), label_size.y + style.FramePadding.y * 2.0f));
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, id))
+    if (!ItemSubtract(total_bb, id))
         return false;
 
     bool hovered, held;
@@ -980,7 +980,7 @@ bool ImGui::RadioButton(const char* label, bool active)
     const ImRect check_bb(pos, pos + ImVec2(square_sz, square_sz));
     const ImRect total_bb(pos, pos + ImVec2(square_sz + (label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f), label_size.y + style.FramePadding.y * 2.0f));
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, id))
+    if (!ItemSubtract(total_bb, id))
         return false;
 
     ImVec2 center = check_bb.GetCenter();
@@ -994,17 +994,17 @@ bool ImGui::RadioButton(const char* label, bool active)
         MarkItemEdited(id);
 
     RenderNavHighlight(total_bb, id);
-    window->DrawList->AddCircleFilled(center, radius, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), 16);
+    window->DrawList->SubtractCircleFilled(center, radius, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), 16);
     if (active)
     {
         const float pad = ImMax(1.0f, (float)(int)(square_sz / 6.0f));
-        window->DrawList->AddCircleFilled(center, radius - pad, GetColorU32(ImGuiCol_CheckMark), 16);
+        window->DrawList->SubtractCircleFilled(center, radius - pad, GetColorU32(ImGuiCol_CheckMark), 16);
     }
 
     if (style.FrameBorderSize > 0.0f)
     {
-        window->DrawList->AddCircle(center + ImVec2(1,1), radius, GetColorU32(ImGuiCol_BorderShadow), 16, style.FrameBorderSize);
-        window->DrawList->AddCircle(center, radius, GetColorU32(ImGuiCol_Border), 16, style.FrameBorderSize);
+        window->DrawList->SubtractCircle(center + ImVec2(1,1), radius, GetColorU32(ImGuiCol_BorderShadow), 16, style.FrameBorderSize);
+        window->DrawList->SubtractCircle(center, radius, GetColorU32(ImGuiCol_Border), 16, style.FrameBorderSize);
     }
 
     if (g.LogEnabled)
@@ -1036,7 +1036,7 @@ void ImGui::ProgressBar(float fraction, const ImVec2& size_arg, const char* over
     ImVec2 pos = window->DC.CursorPos;
     ImRect bb(pos, pos + CalcItemSize(size_arg, CalcItemWidth(), g.FontSize + style.FramePadding.y*2.0f));
     ItemSize(bb, style.FramePadding.y);
-    if (!ItemAdd(bb, 0))
+    if (!ItemSubtract(bb, 0))
         return;
 
     // Render
@@ -1070,7 +1070,7 @@ void ImGui::Bullet()
     const float line_height = ImMax(ImMin(window->DC.CurrentLineSize.y, g.FontSize + g.Style.FramePadding.y*2), g.FontSize);
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(g.FontSize, line_height));
     ItemSize(bb);
-    if (!ItemAdd(bb, 0))
+    if (!ItemSubtract(bb, 0))
     {
         SameLine(0, style.FramePadding.x*2);
         return;
@@ -1109,7 +1109,7 @@ void ImGui::Dummy(const ImVec2& size)
 
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
     ItemSize(bb);
-    ItemAdd(bb, 0);
+    ItemSubtract(bb, 0);
 }
 
 void ImGui::NewLine()
@@ -1167,14 +1167,14 @@ void ImGui::Separator()
 
     const ImRect bb(ImVec2(x1, window->DC.CursorPos.y), ImVec2(x2, window->DC.CursorPos.y+1.0f));
     ItemSize(ImVec2(0.0f, 0.0f)); // NB: we don't provide our width so that it doesn't get feed back into AutoFit, we don't provide height to not alter layout.
-    if (!ItemAdd(bb, 0))
+    if (!ItemSubtract(bb, 0))
     {
         if (window->DC.ColumnsSet)
             PushColumnClipRect();
         return;
     }
 
-    window->DrawList->AddLine(bb.Min, ImVec2(bb.Max.x,bb.Min.y), GetColorU32(ImGuiCol_Separator));
+    window->DrawList->SubtractLine(bb.Min, ImVec2(bb.Max.x,bb.Min.y), GetColorU32(ImGuiCol_Separator));
 
     if (g.LogEnabled)
         LogRenderedText(&bb.Min, "--------------------------------");
@@ -1197,10 +1197,10 @@ void ImGui::VerticalSeparator()
     float y2 = window->DC.CursorPos.y + window->DC.CurrentLineSize.y;
     const ImRect bb(ImVec2(window->DC.CursorPos.x, y1), ImVec2(window->DC.CursorPos.x + 1.0f, y2));
     ItemSize(ImVec2(bb.GetWidth(), 0.0f));
-    if (!ItemAdd(bb, 0))
+    if (!ItemSubtract(bb, 0))
         return;
 
-    window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y), ImVec2(bb.Min.x, bb.Max.y), GetColorU32(ImGuiCol_Separator));
+    window->DrawList->SubtractLine(ImVec2(bb.Min.x, bb.Min.y), ImVec2(bb.Min.x, bb.Max.y), GetColorU32(ImGuiCol_Separator));
     if (g.LogEnabled)
         LogText(" |");
 }
@@ -1213,7 +1213,7 @@ bool ImGui::SplitterBehavior(const ImRect& bb, ImGuiID id, ImGuiAxis axis, float
 
     const ImGuiItemFlags item_flags_backup = window->DC.ItemFlags;
     window->DC.ItemFlags |= ImGuiItemFlags_NoNav | ImGuiItemFlags_NoNavDefaultFocus;
-    bool item_add = ItemAdd(bb, id);
+    bool item_add = ItemSubtract(bb, id);
     window->DC.ItemFlags = item_flags_backup;
     if (!item_add)
         return false;
@@ -1258,7 +1258,7 @@ bool ImGui::SplitterBehavior(const ImRect& bb, ImGuiID id, ImGuiAxis axis, float
 
     // Render
     const ImU32 col = GetColorU32(held ? ImGuiCol_SeparatorActive : (hovered && g.HoveredIdTimer >= hover_visibility_delay) ? ImGuiCol_SeparatorHovered : ImGuiCol_Separator);
-    window->DrawList->AddRectFilled(bb_render.Min, bb_render.Max, col, g.Style.FrameRounding);
+    window->DrawList->SubtractRectFilled(bb_render.Min, bb_render.Max, col, g.Style.FrameRounding);
 
     return held;
 }
@@ -1301,7 +1301,7 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
     const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y*2.0f));
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, id, &frame_bb))
+    if (!ItemSubtract(total_bb, id, &frame_bb))
         return false;
 
     bool hovered, held;
@@ -1312,10 +1312,10 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
     const ImU32 frame_col = GetColorU32(hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
     RenderNavHighlight(frame_bb, id);
     if (!(flags & ImGuiComboFlags_NoPreview))
-        window->DrawList->AddRectFilled(frame_bb.Min, ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Max.y), frame_col, style.FrameRounding, ImDrawCornerFlags_Left);
+        window->DrawList->SubtractRectFilled(frame_bb.Min, ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Max.y), frame_col, style.FrameRounding, ImDrawCornerFlags_Left);
     if (!(flags & ImGuiComboFlags_NoArrowButton))
     {
-        window->DrawList->AddRectFilled(ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Min.y), frame_bb.Max, GetColorU32((popup_open || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button), style.FrameRounding, (w <= arrow_size) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right);
+        window->DrawList->SubtractRectFilled(ImVec2(frame_bb.Max.x - arrow_size, frame_bb.Min.y), frame_bb.Max, GetColorU32((popup_open || hovered) ? ImGuiCol_ButtonHovered : ImGuiCol_Button), style.FrameRounding, (w <= arrow_size) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right);
         RenderArrow(ImVec2(frame_bb.Max.x - arrow_size + style.FramePadding.y, frame_bb.Min.y + style.FramePadding.y), ImGuiDir_Down);
     }
     RenderFrameBorder(frame_bb.Min, frame_bb.Max, style.FrameRounding);
@@ -1550,7 +1550,7 @@ static inline int DataTypeFormatString(char* buf, int buf_size, ImGuiDataType da
     return 0;
 }
 
-// FIXME: Adding support for clamping on boundaries of the data type would be nice.
+// FIXME: Subtracting support for clamping on boundaries of the data type would be nice.
 static void DataTypeApplyOp(ImGuiDataType data_type, int op, void* output, void* arg1, const void* arg2)
 {
     IM_ASSERT(op == '+' || op == '-');
@@ -1626,7 +1626,7 @@ static bool DataTypeApplyOpFromText(const char* buf, const char* initial_value_b
         if (op && sscanf(initial_value_buf, format, &arg0i) < 1)
             return false;
         // Store operand in a float so we can use fractional value for multipliers (*1.1), but constant always parsed as integer so we can fit big integers (e.g. 2000000003) past float precision
-        if (op == '+')      { if (sscanf(buf, "%d", &arg1i)) *v = (int)(arg0i + arg1i); }                   // Add (use "+-" to subtract)
+        if (op == '+')      { if (sscanf(buf, "%d", &arg1i)) *v = (int)(arg0i + arg1i); }                   // Subtract (use "+-" to subtract)
         else if (op == '*') { if (sscanf(buf, "%f", &arg1f)) *v = (int)(arg0i * arg1f); }                   // Multiply
         else if (op == '/') { if (sscanf(buf, "%f", &arg1f) && arg1f != 0.0f) *v = (int)(arg0i / arg1f); }  // Divide
         else                { if (sscanf(buf, format, &arg1i) == 1) *v = arg1i; }                           // Assign constant
@@ -1647,7 +1647,7 @@ static bool DataTypeApplyOpFromText(const char* buf, const char* initial_value_b
             return false;
         if (sscanf(buf, format, &arg1f) < 1)
             return false;
-        if (op == '+')      { *v = arg0f + arg1f; }                    // Add (use "+-" to subtract)
+        if (op == '+')      { *v = arg0f + arg1f; }                    // Subtract (use "+-" to subtract)
         else if (op == '*') { *v = arg0f * arg1f; }                    // Multiply
         else if (op == '/') { if (arg1f != 0.0f) *v = arg0f / arg1f; } // Divide
         else                { *v = arg1f; }                            // Assign constant
@@ -1661,7 +1661,7 @@ static bool DataTypeApplyOpFromText(const char* buf, const char* initial_value_b
             return false;
         if (sscanf(buf, format, &arg1f) < 1)
             return false;
-        if (op == '+')      { *v = arg0f + arg1f; }                    // Add (use "+-" to subtract)
+        if (op == '+')      { *v = arg0f + arg1f; }                    // Subtract (use "+-" to subtract)
         else if (op == '*') { *v = arg0f * arg1f; }                    // Multiply
         else if (op == '/') { if (arg1f != 0.0f) *v = arg0f / arg1f; } // Divide
         else                { *v = arg1f; }                            // Assign constant
@@ -1879,7 +1879,7 @@ bool ImGui::DragScalar(const char* label, ImGuiDataType data_type, void* v, floa
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
 
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, id, &frame_bb))
+    if (!ItemSubtract(total_bb, id, &frame_bb))
         return false;
 
     const bool hovered = ItemHoverable(frame_bb, id);
@@ -2312,7 +2312,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
 
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, id, &frame_bb))
+    if (!ItemSubtract(total_bb, id, &frame_bb))
         return false;
 
     // Default format string when passing NULL
@@ -2358,7 +2358,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
         MarkItemEdited(id);
 
     // Render grab
-    window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+    window->DrawList->SubtractRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
     char value_buf[64];
@@ -2372,7 +2372,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* v, co
     return value_changed;
 }
 
-// Add multiple sliders on 1 line for compact edition of multiple components
+// Subtract multiple sliders on 1 line for compact edition of multiple components
 bool ImGui::SliderScalarN(const char* label, ImGuiDataType data_type, void* v, int components, const void* v_min, const void* v_max, const char* format, float power)
 {
     ImGuiWindow* window = GetCurrentWindow();
@@ -2466,7 +2466,7 @@ bool ImGui::VSliderScalar(const char* label, const ImVec2& size, ImGuiDataType d
     const ImRect bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
 
     ItemSize(bb, style.FramePadding.y);
-    if (!ItemAdd(frame_bb, id))
+    if (!ItemSubtract(frame_bb, id))
         return false;
 
     // Default format string when passing NULL
@@ -2498,7 +2498,7 @@ bool ImGui::VSliderScalar(const char* label, const ImVec2& size, ImGuiDataType d
         MarkItemEdited(id);
 
     // Render grab
-    window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+    window->DrawList->SubtractRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
     // For the vertical slider we allow centered text to overlap the frame padding
@@ -3160,7 +3160,7 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
     ImGuiWindow* draw_window = window;
     if (is_multiline)
     {
-        if (!ItemAdd(total_bb, id, &frame_bb))
+        if (!ItemSubtract(total_bb, id, &frame_bb))
         {
             ItemSize(total_bb, style.FramePadding.y);
             EndGroup();
@@ -3179,7 +3179,7 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
     else
     {
         ItemSize(total_bb, style.FramePadding.y);
-        if (!ItemAdd(total_bb, id, &frame_bb))
+        if (!ItemSubtract(total_bb, id, &frame_bb))
             return false;
     }
     const bool hovered = ItemHoverable(frame_bb, id);
@@ -3486,7 +3486,7 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
         {
             // Apply new value immediately - copy modified buffer back
             // Note that as soon as the input box is active, the in-widget value gets priority over any underlying modification of the input buffer
-            // FIXME: We actually always render 'buf' when calling DrawList->AddText, making the comment above incorrect.
+            // FIXME: We actually always render 'buf' when calling DrawList->SubtractText, making the comment above incorrect.
             // FIXME-OPT: CPU waste to do this every time the widget is active, should mark dirty state from the stb_textedit callbacks.
             if (is_editable)
             {
@@ -3743,7 +3743,7 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
                     ImRect rect(rect_pos + ImVec2(0.0f, bg_offy_up - g.FontSize), rect_pos +ImVec2(rect_size.x, bg_offy_dn));
                     rect.ClipWith(clip_rect);
                     if (rect.Overlaps(clip_rect))
-                        draw_window->DrawList->AddRectFilled(rect.Min, rect.Max, bg_color);
+                        draw_window->DrawList->SubtractRectFilled(rect.Min, rect.Max, bg_color);
                 }
                 rect_pos.x = render_pos.x - render_scroll.x;
                 rect_pos.y += g.FontSize;
@@ -3752,14 +3752,14 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
 
         const int buf_display_len = edit_state.CurLenA;
         if (is_multiline || buf_display_len < buf_display_max_length)
-            draw_window->DrawList->AddText(g.Font, g.FontSize, render_pos - render_scroll, GetColorU32(ImGuiCol_Text), buf_display, buf_display + buf_display_len, 0.0f, is_multiline ? NULL : &clip_rect);
+            draw_window->DrawList->SubtractText(g.Font, g.FontSize, render_pos - render_scroll, GetColorU32(ImGuiCol_Text), buf_display, buf_display + buf_display_len, 0.0f, is_multiline ? NULL : &clip_rect);
 
         // Draw blinking cursor
         bool cursor_is_visible = (!g.IO.ConfigInputTextCursorBlink) || (g.InputTextState.CursorAnim <= 0.0f) || ImFmod(g.InputTextState.CursorAnim, 1.20f) <= 0.80f;
         ImVec2 cursor_screen_pos = render_pos + cursor_offset - render_scroll;
         ImRect cursor_screen_rect(cursor_screen_pos.x, cursor_screen_pos.y-g.FontSize+0.5f, cursor_screen_pos.x+1.0f, cursor_screen_pos.y-1.5f);
         if (cursor_is_visible && cursor_screen_rect.Overlaps(clip_rect))
-            draw_window->DrawList->AddLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), GetColorU32(ImGuiCol_Text));
+            draw_window->DrawList->SubtractLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), GetColorU32(ImGuiCol_Text));
 
         // Notify OS of text input position for advanced IME (-1 x offset so that Windows IME can cover our cursor. Bit of an extra nicety.)
         if (is_editable)
@@ -3774,7 +3774,7 @@ bool ImGui::InputTextEx(const char* label, char* buf, int buf_size, const ImVec2
         else
             buf_end = buf_display + strlen(buf_display);
         if (is_multiline || (buf_end - buf_display) < buf_display_max_length)
-            draw_window->DrawList->AddText(g.Font, g.FontSize, render_pos, GetColorU32(ImGuiCol_Text), buf_display, buf_end, 0.0f, is_multiline ? NULL : &clip_rect);
+            draw_window->DrawList->SubtractText(g.Font, g.FontSize, render_pos, GetColorU32(ImGuiCol_Text), buf_display, buf_end, 0.0f, is_multiline ? NULL : &clip_rect);
     }
 
     if (is_multiline)
@@ -4063,7 +4063,7 @@ void ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2 p_min, ImVec2 p_max, ImU
     {
         ImU32 col_bg1 = GetColorU32(ImAlphaBlendColor(IM_COL32(204,204,204,255), col));
         ImU32 col_bg2 = GetColorU32(ImAlphaBlendColor(IM_COL32(128,128,128,255), col));
-        window->DrawList->AddRectFilled(p_min, p_max, col_bg1, rounding, rounding_corners_flags);
+        window->DrawList->SubtractRectFilled(p_min, p_max, col_bg1, rounding, rounding_corners_flags);
 
         int yi = 0;
         for (float y = p_min.y + grid_off.y; y < p_max.y; y += grid_step, yi++)
@@ -4080,13 +4080,13 @@ void ImGui::RenderColorRectWithAlphaCheckerboard(ImVec2 p_min, ImVec2 p_max, ImU
                 if (y1 <= p_min.y) { if (x1 <= p_min.x) rounding_corners_flags_cell |= ImDrawCornerFlags_TopLeft; if (x2 >= p_max.x) rounding_corners_flags_cell |= ImDrawCornerFlags_TopRight; }
                 if (y2 >= p_max.y) { if (x1 <= p_min.x) rounding_corners_flags_cell |= ImDrawCornerFlags_BotLeft; if (x2 >= p_max.x) rounding_corners_flags_cell |= ImDrawCornerFlags_BotRight; }
                 rounding_corners_flags_cell &= rounding_corners_flags;
-                window->DrawList->AddRectFilled(ImVec2(x1,y1), ImVec2(x2,y2), col_bg2, rounding_corners_flags_cell ? rounding : 0.0f, rounding_corners_flags_cell);
+                window->DrawList->SubtractRectFilled(ImVec2(x1,y1), ImVec2(x2,y2), col_bg2, rounding_corners_flags_cell ? rounding : 0.0f, rounding_corners_flags_cell);
             }
         }
     }
     else
     {
-        window->DrawList->AddRectFilled(p_min, p_max, col, rounding, rounding_corners_flags);
+        window->DrawList->SubtractRectFilled(p_min, p_max, col, rounding, rounding_corners_flags);
     }
 }
 
@@ -4340,9 +4340,9 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         ImVec2 hue_cursor_pos(wheel_center.x + cos_hue_angle * (wheel_r_inner+wheel_r_outer)*0.5f, wheel_center.y + sin_hue_angle * (wheel_r_inner+wheel_r_outer)*0.5f);
         float hue_cursor_rad = value_changed_h ? wheel_thickness * 0.65f : wheel_thickness * 0.55f;
         int hue_cursor_segments = ImClamp((int)(hue_cursor_rad / 1.4f), 9, 32);
-        draw_list->AddCircleFilled(hue_cursor_pos, hue_cursor_rad, hue_color32, hue_cursor_segments);
-        draw_list->AddCircle(hue_cursor_pos, hue_cursor_rad+1, IM_COL32(128,128,128,255), hue_cursor_segments);
-        draw_list->AddCircle(hue_cursor_pos, hue_cursor_rad, IM_COL32_WHITE, hue_cursor_segments);
+        draw_list->SubtractCircleFilled(hue_cursor_pos, hue_cursor_rad, hue_color32, hue_cursor_segments);
+        draw_list->SubtractCircle(hue_cursor_pos, hue_cursor_rad+1, IM_COL32(128,128,128,255), hue_cursor_segments);
+        draw_list->SubtractCircle(hue_cursor_pos, hue_cursor_rad, IM_COL32_WHITE, hue_cursor_segments);
 
         // Render SV triangle (rotated according to hue)
         ImVec2 tra = wheel_center + ImRotate(triangle_pa, cos_hue_angle, sin_hue_angle);
@@ -4356,21 +4356,21 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         draw_list->PrimVtx(tra, uv_white, IM_COL32_BLACK_TRANS);
         draw_list->PrimVtx(trb, uv_white, IM_COL32_BLACK);
         draw_list->PrimVtx(trc, uv_white, IM_COL32_BLACK_TRANS);
-        draw_list->AddTriangle(tra, trb, trc, IM_COL32(128,128,128,255), 1.5f);
+        draw_list->SubtractTriangle(tra, trb, trc, IM_COL32(128,128,128,255), 1.5f);
         sv_cursor_pos = ImLerp(ImLerp(trc, tra, ImSaturate(S)), trb, ImSaturate(1 - V));
     }
     else if (flags & ImGuiColorEditFlags_PickerHueBar)
     {
         // Render SV Square
-        draw_list->AddRectFilledMultiColor(picker_pos, picker_pos + ImVec2(sv_picker_size,sv_picker_size), IM_COL32_WHITE, hue_color32, hue_color32, IM_COL32_WHITE);
-        draw_list->AddRectFilledMultiColor(picker_pos, picker_pos + ImVec2(sv_picker_size,sv_picker_size), IM_COL32_BLACK_TRANS, IM_COL32_BLACK_TRANS, IM_COL32_BLACK, IM_COL32_BLACK);
+        draw_list->SubtractRectFilledMultiColor(picker_pos, picker_pos + ImVec2(sv_picker_size,sv_picker_size), IM_COL32_WHITE, hue_color32, hue_color32, IM_COL32_WHITE);
+        draw_list->SubtractRectFilledMultiColor(picker_pos, picker_pos + ImVec2(sv_picker_size,sv_picker_size), IM_COL32_BLACK_TRANS, IM_COL32_BLACK_TRANS, IM_COL32_BLACK, IM_COL32_BLACK);
         RenderFrameBorder(picker_pos, picker_pos + ImVec2(sv_picker_size,sv_picker_size), 0.0f);
         sv_cursor_pos.x = ImClamp((float)(int)(picker_pos.x + ImSaturate(S)     * sv_picker_size + 0.5f), picker_pos.x + 2, picker_pos.x + sv_picker_size - 2); // Sneakily prevent the circle to stick out too much
         sv_cursor_pos.y = ImClamp((float)(int)(picker_pos.y + ImSaturate(1 - V) * sv_picker_size + 0.5f), picker_pos.y + 2, picker_pos.y + sv_picker_size - 2);
 
         // Render Hue Bar
         for (int i = 0; i < 6; ++i)
-            draw_list->AddRectFilledMultiColor(ImVec2(bar0_pos_x, picker_pos.y + i * (sv_picker_size / 6)), ImVec2(bar0_pos_x + bars_width, picker_pos.y + (i + 1) * (sv_picker_size / 6)), hue_colors[i], hue_colors[i], hue_colors[i + 1], hue_colors[i + 1]);
+            draw_list->SubtractRectFilledMultiColor(ImVec2(bar0_pos_x, picker_pos.y + i * (sv_picker_size / 6)), ImVec2(bar0_pos_x + bars_width, picker_pos.y + (i + 1) * (sv_picker_size / 6)), hue_colors[i], hue_colors[i], hue_colors[i + 1], hue_colors[i + 1]);
         float bar0_line_y = (float)(int)(picker_pos.y + H * sv_picker_size + 0.5f);
         RenderFrameBorder(ImVec2(bar0_pos_x, picker_pos.y), ImVec2(bar0_pos_x + bars_width, picker_pos.y + sv_picker_size), 0.0f);
         RenderArrowsForVerticalBar(draw_list, ImVec2(bar0_pos_x - 1, bar0_line_y), ImVec2(bars_triangles_half_sz + 1, bars_triangles_half_sz), bars_width + 2.0f);
@@ -4378,9 +4378,9 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
 
     // Render cursor/preview circle (clamp S/V within 0..1 range because floating points colors may lead HSV values to be out of range)
     float sv_cursor_rad = value_changed_sv ? 10.0f : 6.0f;
-    draw_list->AddCircleFilled(sv_cursor_pos, sv_cursor_rad, col32_no_alpha, 12);
-    draw_list->AddCircle(sv_cursor_pos, sv_cursor_rad+1, IM_COL32(128,128,128,255), 12);
-    draw_list->AddCircle(sv_cursor_pos, sv_cursor_rad, IM_COL32_WHITE, 12);
+    draw_list->SubtractCircleFilled(sv_cursor_pos, sv_cursor_rad, col32_no_alpha, 12);
+    draw_list->SubtractCircle(sv_cursor_pos, sv_cursor_rad+1, IM_COL32(128,128,128,255), 12);
+    draw_list->SubtractCircle(sv_cursor_pos, sv_cursor_rad, IM_COL32_WHITE, 12);
 
     // Render alpha bar
     if (alpha_bar)
@@ -4388,7 +4388,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         float alpha = ImSaturate(col[3]);
         ImRect bar1_bb(bar1_pos_x, picker_pos.y, bar1_pos_x + bars_width, picker_pos.y + sv_picker_size);
         RenderColorRectWithAlphaCheckerboard(bar1_bb.Min, bar1_bb.Max, IM_COL32(0,0,0,0), bar1_bb.GetWidth() / 2.0f, ImVec2(0.0f, 0.0f));
-        draw_list->AddRectFilledMultiColor(bar1_bb.Min, bar1_bb.Max, col32_no_alpha, col32_no_alpha, col32_no_alpha & ~IM_COL32_A_MASK, col32_no_alpha & ~IM_COL32_A_MASK);
+        draw_list->SubtractRectFilledMultiColor(bar1_bb.Min, bar1_bb.Max, col32_no_alpha, col32_no_alpha, col32_no_alpha & ~IM_COL32_A_MASK, col32_no_alpha & ~IM_COL32_A_MASK);
         float bar1_line_y = (float)(int)(picker_pos.y + (1.0f - alpha) * sv_picker_size + 0.5f);
         RenderFrameBorder(bar1_bb.Min, bar1_bb.Max, 0.0f);
         RenderArrowsForVerticalBar(draw_list, ImVec2(bar1_pos_x - 1, bar1_line_y), ImVec2(bars_triangles_half_sz + 1, bars_triangles_half_sz), bars_width + 2.0f);
@@ -4424,7 +4424,7 @@ bool ImGui::ColorButton(const char* desc_id, const ImVec4& col, ImGuiColorEditFl
         size.y = default_size;
     const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
     ItemSize(bb, (size.y >= default_size) ? g.Style.FramePadding.y : 0.0f);
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
         return false;
 
     bool hovered, held;
@@ -4443,7 +4443,7 @@ bool ImGui::ColorButton(const char* desc_id, const ImVec4& col, ImGuiColorEditFl
     {
         float mid_x = (float)(int)((bb_inner.Min.x + bb_inner.Max.x) * 0.5f + 0.5f);
         RenderColorRectWithAlphaCheckerboard(ImVec2(bb_inner.Min.x + grid_step, bb_inner.Min.y), bb_inner.Max, GetColorU32(col), grid_step, ImVec2(-grid_step + off, off), rounding, ImDrawCornerFlags_TopRight| ImDrawCornerFlags_BotRight);
-        window->DrawList->AddRectFilled(bb_inner.Min, ImVec2(mid_x, bb_inner.Max.y), GetColorU32(col_without_alpha), rounding, ImDrawCornerFlags_TopLeft|ImDrawCornerFlags_BotLeft);
+        window->DrawList->SubtractRectFilled(bb_inner.Min, ImVec2(mid_x, bb_inner.Max.y), GetColorU32(col_without_alpha), rounding, ImDrawCornerFlags_TopLeft|ImDrawCornerFlags_BotLeft);
     }
     else
     {
@@ -4452,13 +4452,13 @@ bool ImGui::ColorButton(const char* desc_id, const ImVec4& col, ImGuiColorEditFl
         if (col_source.w < 1.0f)
             RenderColorRectWithAlphaCheckerboard(bb_inner.Min, bb_inner.Max, GetColorU32(col_source), grid_step, ImVec2(off, off), rounding);
         else
-            window->DrawList->AddRectFilled(bb_inner.Min, bb_inner.Max, GetColorU32(col_source), rounding, ImDrawCornerFlags_All);
+            window->DrawList->SubtractRectFilled(bb_inner.Min, bb_inner.Max, GetColorU32(col_source), rounding, ImDrawCornerFlags_All);
     }
     RenderNavHighlight(bb, id);
     if (g.Style.FrameBorderSize > 0.0f)
         RenderFrameBorder(bb.Min, bb.Max, rounding);
     else
-        window->DrawList->AddRect(bb.Min, bb.Max, GetColorU32(ImGuiCol_FrameBg), rounding); // Color button are often in need of some sort of border
+        window->DrawList->SubtractRect(bb.Min, bb.Max, GetColorU32(ImGuiCol_FrameBg), rounding); // Color button are often in need of some sort of border
 
     // Drag and Drop Source
     // NB: The ActiveId test is merely an optional micro-optimization, BeginDragDropSource() does the same test.
@@ -4800,7 +4800,7 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
     if (is_open && !g.NavIdIsAlive && (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
         window->DC.TreeDepthMayJumpToParentOnPop |= (1 << window->DC.TreeDepth);
 
-    bool item_add = ItemAdd(interact_bb, id);
+    bool item_add = ItemSubtract(interact_bb, id);
     window->DC.LastItemStatusFlags |= ImGuiItemStatusFlags_HasDisplayRect;
     window->DC.LastItemDisplayRect = frame_bb;
 
@@ -5058,7 +5058,7 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
     bb.Min.y -= spacing_U;
     bb.Max.x += spacing_R;
     bb.Max.y += spacing_D;
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
     {
         if ((flags & ImGuiSelectableFlags_SpanAllColumns) && window->DC.ColumnsSet)
             PushColumnClipRect();
@@ -5152,7 +5152,7 @@ bool ImGui::ListBoxHeader(const char* label, const ImVec2& size_arg)
     if (!IsRectVisible(bb.Min, bb.Max))
     {
         ItemSize(bb.GetSize(), style.FramePadding.y);
-        ItemAdd(bb, 0, &frame_bb);
+        ItemSubtract(bb, 0, &frame_bb);
         return false;
     }
 
@@ -5268,7 +5268,7 @@ void ImGui::PlotEx(ImGuiPlotType plot_type, const char* label, float (*values_ge
     const ImRect inner_bb(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding);
     const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0));
     ItemSize(total_bb, style.FramePadding.y);
-    if (!ItemAdd(total_bb, 0, &frame_bb))
+    if (!ItemSubtract(total_bb, 0, &frame_bb))
         return;
     const bool hovered = ItemHoverable(frame_bb, id);
 
@@ -5337,13 +5337,13 @@ void ImGui::PlotEx(ImGuiPlotType plot_type, const char* label, float (*values_ge
             ImVec2 pos1 = ImLerp(inner_bb.Min, inner_bb.Max, (plot_type == ImGuiPlotType_Lines) ? tp1 : ImVec2(tp1.x, histogram_zero_line_t));
             if (plot_type == ImGuiPlotType_Lines)
             {
-                window->DrawList->AddLine(pos0, pos1, v_hovered == v1_idx ? col_hovered : col_base);
+                window->DrawList->SubtractLine(pos0, pos1, v_hovered == v1_idx ? col_hovered : col_base);
             }
             else if (plot_type == ImGuiPlotType_Histogram)
             {
                 if (pos1.x >= pos0.x + 2.0f)
                     pos1.x -= 1.0f;
-                window->DrawList->AddRectFilled(pos0, pos1, v_hovered == v1_idx ? col_hovered : col_base);
+                window->DrawList->SubtractRectFilled(pos0, pos1, v_hovered == v1_idx ? col_hovered : col_base);
             }
 
             t0 = t1;
@@ -5659,7 +5659,7 @@ bool ImGui::BeginMenu(const char* label, bool enabled)
                 tb.y = ta.y + ImMax((tb.y - extra) - ta.y, -100.0f);             // triangle is maximum 200 high to limit the slope and the bias toward large sub-menus // FIXME: Multiply by fb_scale?
                 tc.y = ta.y + ImMin((tc.y + extra) - ta.y, +100.0f);
                 moving_within_opened_triangle = ImTriangleContainsPoint(ta, tb, tc, g.IO.MousePos);
-                //window->DrawList->PushClipRectFullScreen(); window->DrawList->AddTriangleFilled(ta, tb, tc, moving_within_opened_triangle ? IM_COL32(0,128,0,128) : IM_COL32(128,0,0,128)); window->DrawList->PopClipRect(); // Debug
+                //window->DrawList->PushClipRectFullScreen(); window->DrawList->SubtractTriangleFilled(ta, tb, tc, moving_within_opened_triangle ? IM_COL32(0,128,0,128) : IM_COL32(128,0,0,128)); window->DrawList->PopClipRect(); // Debug
             }
         }
 
@@ -5870,7 +5870,7 @@ bool    ImGui::BeginTabBar(const char* str_id, ImGuiTabBarFlags flags)
         return false;
 
     ImGuiID id = window->GetID(str_id);
-    ImGuiTabBar* tab_bar = g.TabBars.GetOrAddByKey(id);
+    ImGuiTabBar* tab_bar = g.TabBars.GetOrSubtractByKey(id);
     ImRect tab_bar_bb = ImRect(window->DC.CursorPos.x, window->DC.CursorPos.y, window->InnerClipRect.Max.x, window->DC.CursorPos.y + g.FontSize + g.Style.FramePadding.y * 2);
     tab_bar->ID = id;
     return BeginTabBarEx(tab_bar, tab_bar_bb, flags | ImGuiTabBarFlags_IsFocused);
@@ -5920,7 +5920,7 @@ bool    ImGui::BeginTabBarEx(ImGuiTabBar* tab_bar, const ImRect& tab_bar_bb, ImG
     {
         const float separator_min_x = tab_bar->BarRect.Min.x - window->WindowPadding.x;
         const float separator_max_x = tab_bar->BarRect.Max.x + window->WindowPadding.x;
-        window->DrawList->AddLine(ImVec2(separator_min_x, y), ImVec2(separator_max_x, y), col, 1.0f);
+        window->DrawList->SubtractLine(ImVec2(separator_min_x, y), ImVec2(separator_max_x, y), col, 1.0f);
     }
     return true;
 }
@@ -6030,8 +6030,8 @@ static void ImGui::TabBarLayout(ImGuiTabBar* tab_bar)
             found_selected_tab_id = true;
 
         // Refresh tab width immediately, otherwise changes of style e.g. style.FramePadding.x would noticeably lag in the tab bar.
-        // Additionally, when using TabBarAddTab() to manipulate tab bar order we occasionally insert new tabs that don't have a width yet,
-        // and we cannot wait for the next BeginTabItem() call. We cannot compute this width within TabBarAddTab() because font size depends on the active window.
+        // Subtractitionally, when using TabBarSubtractTab() to manipulate tab bar order we occasionally insert new tabs that don't have a width yet,
+        // and we cannot wait for the next BeginTabItem() call. We cannot compute this width within TabBarSubtractTab() because font size depends on the active window.
         const char* tab_name = tab_bar->GetTabName(tab);
         tab->WidthContents = TabItemCalcSize(tab_name, (tab->Flags & ImGuiTabItemFlags_NoCloseButton) ? false : true).x;
 
@@ -6212,7 +6212,7 @@ static ImGuiTabItem* ImGui::TabBarScrollingButtons(ImGuiTabBar* tab_bar)
     const float scrolling_buttons_width = arrow_button_size.x * 2.0f;
 
     const ImVec2 backup_cursor_pos = window->DC.CursorPos;
-    //window->DrawList->AddRect(ImVec2(tab_bar->BarRect.Max.x - scrolling_buttons_width, tab_bar->BarRect.Min.y), ImVec2(tab_bar->BarRect.Max.x, tab_bar->BarRect.Max.y), IM_COL32(255,0,0,255));
+    //window->DrawList->SubtractRect(ImVec2(tab_bar->BarRect.Max.x - scrolling_buttons_width, tab_bar->BarRect.Min.y), ImVec2(tab_bar->BarRect.Max.x, tab_bar->BarRect.Max.y), IM_COL32(255,0,0,255));
 
     const ImRect avail_bar_rect = tab_bar->BarRect;
     bool want_clip_rect = !avail_bar_rect.Contains(ImRect(window->DC.CursorPos, window->DC.CursorPos + ImVec2(scrolling_buttons_width, 0.0f)));
@@ -6352,11 +6352,11 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
     const ImGuiStyle& style = g.Style;
     const ImGuiID id = TabBarCalcTabID(tab_bar, label);
 
-    // If the user called us with *p_open == false, we early out and don't render. We make a dummy call to ItemAdd() so that attempts to use a contextual popup menu with an implicit ID won't use an older ID.
+    // If the user called us with *p_open == false, we early out and don't render. We make a dummy call to ItemSubtract() so that attempts to use a contextual popup menu with an implicit ID won't use an older ID.
     if (p_open && !*p_open)
     {
         PushItemFlag(ImGuiItemFlags_NoNav | ImGuiItemFlags_NoNavDefaultFocus, true);
-        ItemAdd(ImRect(), id);
+        ItemSubtract(ImRect(), id);
         PopItemFlag();
         return false;
     }
@@ -6417,7 +6417,7 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
     if (tab_appearing && !(tab_bar_appearing && !tab_is_new))
     {
         PushItemFlag(ImGuiItemFlags_NoNav | ImGuiItemFlags_NoNavDefaultFocus, true);
-        ItemAdd(ImRect(), id);
+        ItemSubtract(ImRect(), id);
         PopItemFlag();
         return tab_contents_visible;
     }
@@ -6440,7 +6440,7 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
         PushClipRect(ImVec2(ImMax(bb.Min.x, tab_bar->BarRect.Min.x), bb.Min.y - 1), ImVec2(tab_bar->BarRect.Max.x, bb.Max.y), true);
 
     ItemSize(bb, style.FramePadding.y);
-    if (!ItemAdd(bb, id))
+    if (!ItemSubtract(bb, id))
     {
         if (want_clip_rect)
             PopClipRect();

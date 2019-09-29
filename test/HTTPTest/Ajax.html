@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    Ajax! <br/>
+    <div id="ajax"></div> <br/>
+    <button type="button" onclick="loadUUID()">Load UUID</button>
+    <script>
+        function loadUUID()
+        {
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function()
+            {
+                document.getElementById("ajax").innerText = this.responseText;
+            }
+            req.open("GET", "ajax_req", true);
+            req.send();
+        }
+
+        loadUUID();
+    </script>
+</body>
+</html>

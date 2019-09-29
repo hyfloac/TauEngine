@@ -8,11 +8,13 @@
 #include <windowsx.h>
 #include <GL/glew.h>
 #include <GL/wglew.h>
+#include <cstdio>
 #pragma warning(pop)
 
 #include <TauEngine.hpp>
 #include <system/Window.hpp>
 #include <EnumBitFields.hpp>
+#include <events/WindowEvent.hpp>
 
 #ifndef MAX_WINDOW_COUNT
 /**
@@ -47,7 +49,7 @@ static Window* windowHandles[MAX_WINDOW_COUNT];
 static u32 currentWindowHandleIndex = 0;
 
 /**
- * Adds a window to {@link windowHandles}.
+ * Subtracts a window to {@link windowHandles}.
  * 
  * @param[in] systemWindowContainer
  *    The {@link Window} to put into {@link windowHandles}.
@@ -235,9 +237,10 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
     switch(uMsg)
     {
         case WM_ACTIVATE:
-            if(window && window->_windowActiveHandler)
+            if(window && window->_eventHandler)
             {
-                window->_windowActiveHandler(wParam != WA_INACTIVE, window);
+                WindowActiveEvent evt(window, wParam != WA_INACTIVE);
+                window->_eventHandler(evt);
             }
             break;
         case WM_SIZE:
@@ -251,13 +254,16 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 {
                     window->_windowState = WindowState::MAXIMIZED; 
                     CALL_WINDOW_RESIZE_HANDLER:
-                    if(window->_windowResizeHandler)
+                    if(window->_eventHandler)
                     {
                         const u32 width = LOWORD(lParam);
                         const u32 height = HIWORD(lParam);
+
+                        WindowResizeEvent evt(window, window->_width, window->_height, width, height);
+                        window->_eventHandler(evt);
+
                         window->_width = width;
                         window->_height = height;
-                        window->_windowResizeHandler(width, height, window);
                     }
                 }
                 else if(wParam == SIZE_RESTORED)
@@ -298,29 +304,33 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             break;
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
-            if(window && window->_keyEventHandler)
+            if(window && window->_eventHandler)
             {
                 if(lParam & (1 << 30))
                 {
-                    window->_keyEventHandler(KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam, window);
+                    WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam);
+                    window->_eventHandler(evt);
                 }
                 else
                 {
-                    window->_keyEventHandler(KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam, window);
+                    WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam);
+                    window->_eventHandler(evt);
                 }
             }
             break;
         case WM_KEYUP:
         case WM_SYSKEYUP:
-            if (window && window->_keyEventHandler)
+            if(window && window->_eventHandler)
             {
-                window->_keyEventHandler(KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam, window);
+                WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam);
+                window->_eventHandler(evt);
             }
             break;
         case WM_CHAR:
-            if(window && window->_asciiKeyEventHandler)
+            if(window && window->_eventHandler)
             {
-                window->_asciiKeyEventHandler((wchar_t) wParam, (char) wParam, window);
+                WindowAsciiKeyEvent evt(window, static_cast<wchar_t>(wParam), static_cast<char>(wParam));
+                window->_eventHandler(evt);
             }
             break;
         case WM_MOVE:
@@ -336,22 +346,18 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
 }
 
 Window::Window(u32 width, u32 height, Nullable const char* title, Nullable const void* userContainer, Nullable const Window* parent) noexcept
-    : _width(width), 
-      _height(height), 
-      _xPos(0),
-      _yPos(0),
+    : _width(width), _height(height), 
+      _xPos(0), _yPos(0),
       _title(title),
       _windowContainer({ { }, null, null, null }),
       _userContainer(userContainer),
       _parent(parent),
       _contextSettings({ 3, 1, { { false, false, true, false, 0,0,0,0 } } }),
+      _renderingMode(RenderingMode::getGlobalMode()),
       _windowState(WindowState::NEITHER),
-      _windowResizeHandler(null),
+      _eventHandler(null),
       _mouseEventHandler(null),
-      _mouseMoveHandler(null),
-      _keyEventHandler(null),
-      _asciiKeyEventHandler(null),
-      _windowActiveHandler(null)
+      _mouseMoveHandler(null)
 { }
 
 Window::~Window() noexcept
@@ -363,8 +369,25 @@ void Window::resize(const u32 width, const u32 height) noexcept
 {
     this->_width = width;
     this->_height = height;
-    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
-    updateViewPort(0, 0);
+    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+    updateViewPort(0, 0, width, height);
+}
+
+void Window::move(const u32 xPos, const u32 yPos) noexcept
+{
+    this->_xPos = xPos;
+    this->_yPos = yPos;
+    SetWindowPos(_windowContainer.windowHandle, null, static_cast<int>(xPos), static_cast<int>(yPos), 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+}
+
+void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept
+{
+    this->_xPos = xPos;
+    this->_yPos = yPos;
+    this->_width = width;
+    this->_height = height;
+    SetWindowPos(_windowContainer.windowHandle, null, xPos, yPos, width, height, SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+    updateViewPort(0, 0, width, height);
 }
 
 void Window::setTitle(const char* title) noexcept
@@ -402,7 +425,7 @@ bool Window::createWindow() noexcept
                                                           parent,
                                                           null,
                                                           windowClass->hInstance,
-                                                          (LPVOID) null);
+                                                          static_cast<LPVOID>(null));
 
     this->_windowContainer.hdc = GetDC(this->_windowContainer.windowHandle);
 
@@ -481,14 +504,135 @@ bool Window::createContext() noexcept
             0
         };
 
-        this->_windowContainer.renderingContext = wglCreateContextAttribsARB(this->_windowContainer.hdc, null, attribs);
+        const HGLRC attribContext = wglCreateContextAttribsARB(this->_windowContainer.hdc, null, attribs);  // NOLINT(misc-misplaced-const)
+
+        if(!attribContext)
+        {
+            const ContextSettings& cs = this->_contextSettings;
+
+            const DWORD errorCode     = GetLastError();
+            const DWORD errorCodeLow  = errorCode & 0xFFFF;
+            const DWORD errorCodeHigh = errorCode >> 16;
+
+            fputs("Error creating context with attributes.\n", stderr);
+             
+            LPVOID lpMsgBuf;
+            FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                           null,
+                           errorCodeLow,
+                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                           reinterpret_cast<LPSTR>(&lpMsgBuf),
+                           0, null);
+
+            fprintf(stderr, "Error string from system (may not be accurate): %s\n", reinterpret_cast<LPSTR>(lpMsgBuf));
+            LocalFree(lpMsgBuf);
+
+            fprintf(stderr, "Error: %lu (0x%08lX)\n", errorCode, errorCode);
+            fprintf(stderr, "Error Low: %lu (0x%04lX)\n", errorCodeLow, errorCodeLow);
+            fprintf(stderr, "Error High: %lu [%lu] (0x%04lX)\n", errorCodeHigh, errorCodeHigh << 16, errorCodeHigh);
+
+            fputs("Requested OpenGL\n", stderr);
+            fprintf(stderr, "  Version: %u.%u%s\n", cs.majorVersion, cs.minorVersion, cs.forwardCompatible ? " Forward Compatible" : "");
+            if(cs.coreProfile)
+            {
+                fputs("  Core Profile\n", stderr);
+            }
+            if(cs.compatProfile)
+            {
+                fputs("  Compatibility Profile\n", stderr);
+            }
+            if(cs.debug)
+            {
+                fputs("  Debug Context\n", stderr);
+            }
+
+            if(errorCodeLow == ERROR_INVALID_VERSION_ARB)
+            {
+                fputs("Error Code Enum: ERROR_INVALID_VERSION_ARB\n", stderr);
+                fputs("Invalid OpenGL Version Requested\n", stderr);
+
+                if(cs.majorVersion < 1)
+                {
+                    fputs("The minimum requestable OpenGL major version is 1.\n", stderr);
+                }
+                else if(cs.majorVersion == 1 && cs.minorVersion > 5)
+                {
+                    fputs("The maximum requestable OpenGL minor version with major version 1 is 5.\n", stderr);
+                }
+                else if(cs.majorVersion == 2 && cs.minorVersion > 1)
+                {
+                    fputs("The maximum requestable OpenGL minor version with major version 2 is 1.\n", stderr);
+                }
+                else if(cs.majorVersion > 4)
+                {
+                    fputs("At the time of compilation the maximum requestable OpenGL major version is 4.\n", stderr);
+                }
+
+                if(cs.majorVersion < 3 && cs.majorVersion > 0 && cs.forwardCompatible)
+                {
+                    fputs("Forward Compatible profiles are not compatible with OpenGL major version less than 3.\n", stderr);
+                }
+            }
+            else if(errorCodeLow == ERROR_INVALID_PROFILE_ARB)
+            {
+                fputs("Error Code Enum: ERROR_INVALID_PROFILE_ARB\n", stderr);
+                fputs("Invalid OpenGL Profile Requested\n", stderr);
+
+                if(!cs.coreProfile && !cs.compatProfile)
+                {
+                    fputs("Neither Core Profile nor Compatibility Profile was requested. This is an invalid request.\n", stderr);
+                }
+                else if(cs.coreProfile && cs.compatProfile)
+                {
+                    fputs("Core Profile and Compatibility Profile was requested. This is an invalid request.\n", stderr);
+                }
+
+                const u32 otherFlags = attribs[7] & ~(WGL_CONTEXT_CORE_PROFILE_BIT_ARB | WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB);
+                if(otherFlags != 0)
+                {
+                    fputs("Flags other than `WGL_CONTEXT_CORE_PROFILE_BIT_ARB` and `WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB` were set.\n", stderr);
+                    fprintf(stderr, "Flags: 0x%x\n", attribs[7]);
+                    fprintf(stderr, "Other Flags Flags: 0x%08x\n", otherFlags);
+                }
+            }
+            else if(errorCodeLow == ERROR_INVALID_OPERATION)
+            {
+                fputs("Error Code Enum: ERROR_INVALID_OPERATION\n", stderr);
+                fprintf(stderr, "hSharedContext is neither null nor a valid context.\n");
+            }
+            else if(errorCodeLow == ERROR_DC_NOT_FOUND)
+            {
+                fputs("Error Code Enum: ERROR_DC_NOT_FOUND\n", stderr);
+                fprintf(stderr, "Invalid Device Context\n");
+            }
+            else if(errorCodeLow == ERROR_INVALID_PIXEL_FORMAT)
+            {
+                fputs("Error Code Enum: ERROR_INVALID_PIXEL_FORMAT\n", stderr);
+                fprintf(stderr, "Invalid Pixel Format\n");
+            }
+            else if(errorCodeLow == ERROR_NO_SYSTEM_RESOURCES)
+            {
+                fputs("Error Code Enum: ERROR_NO_SYSTEM_RESOURCES\n", stderr);
+                fprintf(stderr, "Insufficient System Resources\n");
+            }
+            else if(errorCodeLow == ERROR_INVALID_PARAMETER)
+            {
+                fputs("Error Code Enum: ERROR_INVALID_PARAMETER\n", stderr);
+                fprintf(stderr, "Unrecognized Attribute In Attribute List\n");
+            }
+            else
+            {
+                fprintf(stderr, "Error code did not match any expected errors.\n");
+            }
+
+            return false;
+        }
+
         wglMakeCurrent(null, null);
         wglDeleteContext(tempContext);
         wglMakeCurrent(this->_windowContainer.hdc, this->_windowContainer.renderingContext);
-    }
-    else
-    {
-        this->_windowContainer.renderingContext = tempContext;
+
+        this->_windowContainer.renderingContext = attribContext;
     }
 
     updateViewPort(0, 0, this->_width, this->_height);
@@ -527,4 +671,23 @@ void Window::updateViewPort(u32 x, u32 y, float minZ, float maxZ) const noexcept
 {
     glViewport(x, y, this->_width, this->_height);
 }
+
+void Window::getMousePos(i32& x, i32& y) const noexcept
+{
+    POINT p;
+    GetCursorPos(&p);
+
+    ScreenToClient(this->_windowContainer.windowHandle, &p);
+
+    x = p.x;
+    y = p.y;
+}
+
+void Window::setMousePos(i32 x, i32 y) const noexcept
+{
+    POINT p { x, y };
+    ClientToScreen(this->_windowContainer.windowHandle, &p);
+    SetCursorPos(p.x, p.y);
+}
+
 #endif

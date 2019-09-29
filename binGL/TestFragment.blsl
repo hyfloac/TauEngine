@@ -1,0 +1,58 @@
+shaderType: fragment
+version: 330, core
+
+input: v3f, fPosition
+input: v3f, fNormal
+input: v2f, fTexture
+
+output: v4f, fragColor
+
+declStruct Attenuation
+    float constant
+    float linear
+    float exponent
+endStruct
+
+declStruct PointLight
+    v3f color
+    v3f position
+    float intensity
+    struct Attenuation attenuation
+endStruct
+
+declStruct Material
+    vec4 color
+    i32 useLight
+    sampler2D textureSampler
+    i32 useTexture
+    float reflectance
+endStruct
+
+uniform: struct Material, material
+uniform: v3f, ambientLight
+uniform: v3f, cameraPos
+uniform: struct PointLight, pointLight
+uniform: float, specularPower
+
+declFunc: calcPointLight, v4f, 3, struct PointLight, v3f, v3f
+
+endFunc
+
+declEntry
+    accessStruct: material, color, var 0                        // var 0 ~ baseColor
+
+    accessStruct: material, textureSampler, var 1               // var 1 ~ material.textureSampler
+    callGLFunc: texture, 2, var 1, input fTexture, var 2        // var 2 ~ textureColor
+
+    accessStruct: material, useTexture, var 3                   // var 3 ~ material.useTexture
+    fcvt: var 3, var 4                                          // var 4 ~ (float) material.useTexture
+    createv: 4, var 4, var 4, var 4, var 4, var 5               // var 5 ~ vec4((float) material.useTexture)
+
+    v4mulv4: var 2, var 5, var 6                                // var 6 ~ textureColor * var 5
+    v4addv4: var 0, var 6, var 7                                // var 7 ~ |new| baseColor
+
+    accessStruct: material, useTexture, var 8                   // var 8 ~ material.useTexture
+    fcvt: var 8, var 9                                          // var 9 ~ (float) material.useTexture
+    fsub: immediate 1.0, var 9, var 10                          // var 10 ~ 1.0f - (float) material.useTexture
+    createv: 4, var 10, var 10, var 10, var 10, var 11          // var 11 ~ vec4(var 10)
+endFunc

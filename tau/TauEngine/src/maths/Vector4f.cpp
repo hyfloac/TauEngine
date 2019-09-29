@@ -3,7 +3,7 @@
 #pragma warning(pop)
 
 #include <maths/Vector4f.hpp>
-#include <Maths.hpp>
+#include <maths/Maths.hpp>
 
 #pragma region Constructor
 Vector4f::Vector4f(const __m128 vec) noexcept

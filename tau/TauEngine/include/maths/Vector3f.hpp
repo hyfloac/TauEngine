@@ -2,7 +2,7 @@
 
 #include <maths/ComponentVector4.hpp>
 #include <DLL.hpp>
-#include <Maths.hpp>
+#include <maths/Maths.hpp>
 
 class TAU_DLL Vector3f final
 {

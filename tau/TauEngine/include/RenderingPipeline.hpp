@@ -2,24 +2,34 @@
 
 #pragma warning(push, 0)
 #include <thread>
-#include <mutex>
 #pragma warning(pop)
 
+#include <DLL.hpp>
 #include <NumTypes.hpp>
 #include <system/Window.hpp>
-#include <Safeties.hpp>
+#include <system/Win32Event.hpp>
+
+class TextHandler;
+class Vector3f;
+class Matrix4x4f;
+class ITexture;
+class IBufferDescriptor;
+class ImDrawData;
 
 enum class RenderingOpcode : u8
 {
     FINISH_RENDER = 1,
     LOAD_SHADER_UNIFORM,
     ACTIVATE_SHADER_PROGRAM,
-    ACTIVATE_TEXTURE_UNIT,
+    // ACTIVATE_TEXTURE_UNIT,
     BIND_TEXTURE,
-    BIND_VAO,
+    UNBIND_TEXTURE,
+    ENABLE_BUFFER_DESCRIPTOR,
+    DISABLE_BUFFER_DESCRIPTOR,
+    // BIND_VAO,
     BIND_VBO,
-    ENABLE_VAO_ATTRIBUTE,
-    DISABLE_VAO_ATTRIBUTE,
+    // ENABLE_VAO_ATTRIBUTE,
+    // DISABLE_VAO_ATTRIBUTE,
     GL_DRAW_ARRAYS,
     GL_DRAW_ELEMENTS,
     GL_CLEAR_BUFFERS,
@@ -28,7 +38,9 @@ enum class RenderingOpcode : u8
     GL_ENABLE,
     GL_DISABLE,
     GL_FACE_WINDING,
-    RESIZE_VIEWPORT
+    RESIZE_VIEWPORT,
+    RENDER_TEXT,
+    IMGUI_RENDER
 };
 
 enum class ShaderUniformType : u8
@@ -64,20 +76,26 @@ struct ParameterPack final
     ParameterPack& operator =(ParameterPack&&) noexcept = default;
 };
 
-class RenderingPipeline final
+class TAU_DLL RenderingPipeline final
 {
 private:
     u8* _instBuffer;
-    volatile u32 _insertPtr;
+    u8* _backBuffer;
     volatile u32 _instPtr;
+    volatile u32 _insertPtr;
 private:
-    volatile bool _initialReady;
-    volatile bool _readyForInsert;
-    volatile bool _running;
-    std::mutex    _mutex;
-    std::thread   _renderThread;
+    bool _async;
+    std::thread* _renderThread;
+    Win32Event   _insertSignal;
+    Win32Event   _renderSignal;
+    Win32Event   _possession0Signal;
+    Win32Event   _possession1Signal;
+    Win32Event   _possession2Signal;
+    Win32Event   _exitSignal;
 public:
     RenderingPipeline(Window* window, const u32 bufferSize = 16384) noexcept;
+
+    RenderingPipeline(const u32 bufferSize = 16384) noexcept;
     
     ~RenderingPipeline() noexcept;
 
@@ -87,372 +105,154 @@ public:
     RenderingPipeline& operator =(const RenderingPipeline& copy) noexcept = delete;
     RenderingPipeline& operator =(RenderingPipeline&& move) noexcept = delete;
 
-    template<RenderingOpcode _Opcode>
-    void pushInstruction(const ParameterPack&& params) noexcept
-    {
-        static_assert(_Opcode == RenderingOpcode::LOAD_SHADER_UNIFORM, "`LOAD_SHADER_UNIFORM` cannot be used with `pushInstruction`, you must use `pushLoadUniform`");
-
-        do
-        {
-            _mutex.lock();
-            if(_readyForInsert)
-            {
-                _mutex.unlock();
-                break;
-            }
-            _mutex.unlock();
-            std::this_thread::yield();
-        } while(true);
-
-        _mutex.lock();
-
-        _instBuffer[_insertPtr++] = static_cast<u8>(_Opcode);
-
-#define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<volatile void*>(_instBuffer + _insertPtr), reinterpret_cast<const void*>(&__VAR), sizeof(__VAR)); \
+#define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(&(__VAR)), sizeof(__VAR)); \
                           _insertPtr += sizeof(__VAR);
 
-        switch(_Opcode)
-        {
-            case RenderingOpcode::FINISH_RENDER:
-            {
-                _readyForInsert = false;
-                break;
-            }
-            case RenderingOpcode::ACTIVATE_SHADER_PROGRAM:
-            {
-                const GLuint shaderProgramID = static_cast<GLuint>(params.p0);
-                LOAD_VALUE(shaderProgramID);
-                break;
-            }
-            case RenderingOpcode::ACTIVATE_TEXTURE_UNIT:
-                _instBuffer[_insertPtr++] = static_cast<u8>(params.p0);
-                break;
-            case RenderingOpcode::BIND_TEXTURE:
-            {
-                const GLuint textureID = static_cast<GLuint>(params.p0);
-                LOAD_VALUE(textureID);
-                break;
-            }
-            case RenderingOpcode::BIND_VAO:
-            {
-                const GLuint vaoID = static_cast<GLuint>(params.p0);
-                LOAD_VALUE(vaoID);
-                break;
-            }
-            case RenderingOpcode::BIND_VBO:
-            {
-                const GLenum target = static_cast<GLenum>(params.p0);
-                const GLuint vboID = static_cast<GLuint>(params.p1);
-                LOAD_VALUE(target);
-                LOAD_VALUE(vboID);
-                break;
-            }
-            case RenderingOpcode::ENABLE_VAO_ATTRIBUTE:
-            {
-                const GLuint vaoAttribEnable = static_cast<GLuint>(params.p0);
-                LOAD_VALUE(vaoAttribEnable);
-                break;
-            }
-            case RenderingOpcode::DISABLE_VAO_ATTRIBUTE:
-            {
-                const GLuint vaoAttribDisable = static_cast<GLuint>(params.p0);
-                LOAD_VALUE(vaoAttribDisable);
-                break;
-            }
-            case RenderingOpcode::GL_DRAW_ARRAYS:
-            {
-                const GLenum  drawArraysMode = static_cast<GLenum>(params.p0);
-                const GLint   drawArraysFirst = static_cast<GLint>(params.p1);
-                const GLsizei drawArraysCount = static_cast<GLsizei>(params.p2);
-
-                LOAD_VALUE(drawArraysMode);
-                LOAD_VALUE(drawArraysFirst);
-                LOAD_VALUE(drawArraysCount);
-                break;
-            }
-            case RenderingOpcode::GL_DRAW_ELEMENTS:
-            {
-                const GLenum      drawElemsMode = static_cast<GLenum>(params.p0);
-                const GLsizei     drawElemsCount = static_cast<GLsizei>(params.p1);
-                const GLenum      drawElemsType = static_cast<GLenum>(params.p2);
-                const void* const drawElemsIndices = reinterpret_cast<const void*>(params.p3);
-
-                LOAD_VALUE(drawElemsMode);
-                LOAD_VALUE(drawElemsCount);
-                LOAD_VALUE(drawElemsType);
-                LOAD_VALUE(drawElemsIndices);
-                break;
-            }
-            case RenderingOpcode::GL_CLEAR_BUFFERS:
-            {
-                const GLbitfield clearBuffers = static_cast<GLbitfield>(params.p0);
-                LOAD_VALUE(clearBuffers);
-                break;
-            }
-            case RenderingOpcode::LOAD_BUFFER_DATA:
-            {
-                const GLenum target = static_cast<GLenum>(params.p0);
-                const GLsizeiptr size = static_cast<GLsizeiptr>(params.p1);
-                const void* data = reinterpret_cast<const void*>(params.p2);
-                const GLenum usage = static_cast<GLenum>(params.p3);
-                LOAD_VALUE(target);
-                LOAD_VALUE(size);
-
-                std::memcpy(reinterpret_cast<void*>(_instBuffer + _insertPtr), data, size);
-                _insertPtr += size;
-
-                LOAD_VALUE(usage);
-                break;
-            }
-            case RenderingOpcode::MODIFY_BUFFER_DATA:
-            {
-                const GLenum target = static_cast<GLenum>(params.p0);
-                const GLintptr offset = static_cast<GLenum>(params.p1);
-                const GLsizeiptr size = static_cast<GLsizeiptr>(params.p2);
-                const void* data = reinterpret_cast<const void*>(params.p3);
-                LOAD_VALUE(target);
-                LOAD_VALUE(offset);
-                LOAD_VALUE(size);
-
-                std::memcpy(reinterpret_cast<void*>(_instBuffer + _insertPtr), data, size);
-                _insertPtr += size;
-                break;
-            }
-            case RenderingOpcode::GL_ENABLE:
-            case RenderingOpcode::GL_DISABLE:
-            case RenderingOpcode::GL_FACE_WINDING:
-            {
-                const GLenum cap = static_cast<GLenum>(params.p0);
-                LOAD_VALUE(cap);
-                break;
-            }
-            case RenderingOpcode::RESIZE_VIEWPORT:
-            {
-                const GLint x = static_cast<GLint>(params.p0);
-                const GLint y = static_cast<GLint>(params.p1);
-                const GLsizei width = static_cast<GLsizei>(params.p2);
-                const GLsizei height = static_cast<GLsizei>(params.p3);
-                LOAD_VALUE(x);
-                LOAD_VALUE(y);
-                LOAD_VALUE(width);
-                LOAD_VALUE(height);
-                break;
-            }
-            default: 
-            {
-                RUNTIME_ERROR("Invalid Opcode Pushed");
-                break;
-            }
-        }
-
-#undef LOAD_VALUE
-
-        _mutex.unlock();
+    void pushActivateShaderProgram(const GLuint shaderProgramID) noexcept
+    {
+        prePushInst<RenderingOpcode::ACTIVATE_SHADER_PROGRAM>();
+        LOAD_VALUE(shaderProgramID);
+        postPushInst();
     }
 
-    template<RenderingOpcode _Opcode>
-    void pushInstruction(const u64 param) noexcept
+    void pushBindTexture(const ITexture* texture, const u8 textureUnit) noexcept
     {
-        static_assert(_Opcode == RenderingOpcode::LOAD_SHADER_UNIFORM, "`RenderingOpcode::LOAD_SHADER_UNIFORM` cannot be used with `pushInstruction(u64)`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::BIND_VBO, "`RenderingOpcode::BIND_VBO` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::GL_DRAW_ARRAYS, "`RenderingOpcode::GL_DRAW_ARRAYS` cannot be used with `pushInstruction(u64)`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::GL_DRAW_ELEMENTS, "`RenderingOpcode::GL_DRAW_ELEMENTS` cannot be used with `pushInstruction(u64)`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::LOAD_BUFFER_DATA, "`RenderingOpcode::LOAD_BUFFER_DATA` cannot be used with `pushInstruction(u64)`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::MODIFY_BUFFER_DATA, "`RenderingOpcode::MODIFY_BUFFER_DATA` cannot be used with `pushInstruction(u64)`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::RESIZE_VIEWPORT, "`RenderingOpcode::RESIZE_VIEWPORT` cannot be used with `pushInstruction(u64)`, you must use `pushInstruction(const ParameterPack&&)`");
-
-        do
-        {
-            _mutex.lock();
-            if(_readyForInsert)
-            {
-                _mutex.unlock();
-                break;
-            }
-            _mutex.unlock();
-            std::this_thread::yield();
-        } while(true);
-
-        _mutex.lock();
-
-        _instBuffer[_insertPtr++] = static_cast<u8>(_Opcode);
-
-#define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<volatile void*>(_instBuffer + _insertPtr), reinterpret_cast<const void*>(&__VAR), sizeof(__VAR)); \
-                          _insertPtr += sizeof(__VAR);
-
-        switch(_Opcode)
-        {
-            case RenderingOpcode::FINISH_RENDER:
-            {
-                _readyForInsert = false;
-                break;
-            }
-            case RenderingOpcode::ACTIVATE_SHADER_PROGRAM:
-            {
-                const GLuint shaderProgramID = static_cast<GLuint>(param);
-                LOAD_VALUE(shaderProgramID);
-                break;
-            }
-            case RenderingOpcode::ACTIVATE_TEXTURE_UNIT:
-                _instBuffer[_insertPtr++] = static_cast<u8>(param);
-                break;
-            case RenderingOpcode::BIND_TEXTURE:
-            {
-                const GLuint textureID = static_cast<GLuint>(param);
-                LOAD_VALUE(textureID);
-                break;
-            }
-            case RenderingOpcode::BIND_VAO:
-            {
-                const GLuint vaoID = static_cast<GLuint>(param);
-                LOAD_VALUE(vaoID);
-                break;
-            }
-            case RenderingOpcode::ENABLE_VAO_ATTRIBUTE:
-            {
-                const GLuint vaoAttribEnable = static_cast<GLuint>(param);
-                LOAD_VALUE(vaoAttribEnable);
-                break;
-            }
-            case RenderingOpcode::DISABLE_VAO_ATTRIBUTE:
-            {
-                const GLuint vaoAttribDisable = static_cast<GLuint>(param);
-                LOAD_VALUE(vaoAttribDisable);
-                break;
-            }
-            case RenderingOpcode::GL_CLEAR_BUFFERS:
-            {
-                const GLbitfield clearBuffers = static_cast<GLbitfield>(param);
-                LOAD_VALUE(clearBuffers);
-                break;
-            }
-            case RenderingOpcode::GL_ENABLE:
-            case RenderingOpcode::GL_DISABLE:
-            case RenderingOpcode::GL_FACE_WINDING:
-            {
-                const GLenum cap = static_cast<GLenum>(param);
-                LOAD_VALUE(cap);
-                break;
-            }
-            default: break;
-        }
-
-#undef LOAD_VALUE
-
-        _mutex.unlock();
+        prePushInst<RenderingOpcode::BIND_TEXTURE>();
+        LOAD_VALUE(texture);
+        _backBuffer[_insertPtr++] = textureUnit;
+        postPushInst();
     }
 
-    template<RenderingOpcode _Opcode, u64 _Param>
-    void pushInstruction() noexcept
+    void pushUnbindTexture(const ITexture* texture, const u8 textureUnit) noexcept
     {
-        static_assert(_Opcode == RenderingOpcode::LOAD_SHADER_UNIFORM, "`RenderingOpcode::LOAD_SHADER_UNIFORM` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::ACTIVATE_SHADER_PROGRAM, "`RenderingOpcode::ACTIVATE_SHADER_PROGRAM` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)` or `pushInstruction(u64)`");
-        static_assert(_Opcode == RenderingOpcode::BIND_VAO, "`RenderingOpcode::BIND_VAO` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)` or `pushInstruction(u64)`");
-        static_assert(_Opcode == RenderingOpcode::BIND_VBO, "`RenderingOpcode::BIND_VBO` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::GL_DRAW_ARRAYS, "`RenderingOpcode::GL_DRAW_ARRAYS` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::GL_DRAW_ELEMENTS, "`RenderingOpcode::GL_DRAW_ELEMENTS` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::LOAD_BUFFER_DATA, "`RenderingOpcode::LOAD_BUFFER_DATA` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::MODIFY_BUFFER_DATA, "`RenderingOpcode::MODIFY_BUFFER_DATA` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
-        static_assert(_Opcode == RenderingOpcode::RESIZE_VIEWPORT, "`RenderingOpcode::RESIZE_VIEWPORT` cannot be used with `pushInstruction()`, you must use `pushInstruction(const ParameterPack&&)`");
+        prePushInst<RenderingOpcode::UNBIND_TEXTURE>();
+        LOAD_VALUE(texture);
+        _backBuffer[_insertPtr++] = textureUnit;
+        postPushInst();
+    }
 
-        do
-        {
-            _mutex.lock();
-            if(_readyForInsert)
-            {
-                _mutex.unlock();
-                break;
-            }
-            _mutex.unlock();
-            std::this_thread::yield();
-        } while(true);
+    void pushEnableBufferDescriptor(const IBufferDescriptor* bufferDescriptor) noexcept
+    {
+        prePushInst<RenderingOpcode::ENABLE_BUFFER_DESCRIPTOR>();
+        LOAD_VALUE(bufferDescriptor);
+        postPushInst();
+    }
+    
+    void pushDisableBufferDescriptor(const IBufferDescriptor* bufferDescriptor) noexcept
+    {
+        prePushInst<RenderingOpcode::DISABLE_BUFFER_DESCRIPTOR>();
+        LOAD_VALUE(bufferDescriptor);
+        postPushInst();
+    }
+    
+    void pushBindVBO(const GLenum target, const GLuint vboID) noexcept
+    {
+        prePushInst<RenderingOpcode::BIND_VBO>();
+        LOAD_VALUE(target);
+        LOAD_VALUE(vboID);
+        postPushInst();
+    }
+    
+    void pushGLDrawArrays(const GLenum mode, const GLint first, const GLsizei count) noexcept
+    {
+        prePushInst<RenderingOpcode::GL_DRAW_ARRAYS>();
+        LOAD_VALUE(mode);
+        LOAD_VALUE(first);
+        LOAD_VALUE(count);
+        postPushInst();
+    }
 
-        _mutex.lock();
+    void pushGLDrawElements(const GLenum mode, const GLsizei count, const GLenum type, const void* const indices) noexcept
+    {
+        prePushInst<RenderingOpcode::GL_DRAW_ELEMENTS>();
+        LOAD_VALUE(mode);
+        LOAD_VALUE(count);
+        LOAD_VALUE(type);
+        LOAD_VALUE(indices);
+        postPushInst();
+    }
 
-        _instBuffer[_insertPtr++] = static_cast<u8>(_Opcode);
+    void pushGLClearBuffers(const GLbitfield clearBuffers) noexcept
+    {
+        prePushInst<RenderingOpcode::GL_CLEAR_BUFFERS>();
+        LOAD_VALUE(clearBuffers);
+        postPushInst();
+    }
 
-#define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<volatile void*>(_instBuffer + _insertPtr), reinterpret_cast<const void*>(&__VAR), sizeof(__VAR)); \
-                          _insertPtr += sizeof(__VAR);
+    void pushLoadBufferData(const GLenum target, const GLsizeiptr size, const void* const data, GLenum usage) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_BUFFER_DATA>();
+        LOAD_VALUE(target);
+        LOAD_VALUE(size);
 
-        switch(_Opcode)
-        {
-            case RenderingOpcode::FINISH_RENDER:
-            {
-                _readyForInsert = false;
-                break;
-            }
-            case RenderingOpcode::ACTIVATE_TEXTURE_UNIT:
-                _instBuffer[_insertPtr++] = static_cast<u8>(_Param);
-                break;
-            case RenderingOpcode::BIND_TEXTURE:
-            {
-                const GLuint textureID = static_cast<GLuint>(_Param);
-                LOAD_VALUE(textureID);
-                break;
-            }
-            case RenderingOpcode::BIND_VAO:
-            {
-                const GLuint vaoID = static_cast<GLuint>(_Param);
-                LOAD_VALUE(vaoID);
-                break;
-            }
-            case RenderingOpcode::ENABLE_VAO_ATTRIBUTE:
-            {
-                const GLuint vaoAttribEnable = static_cast<GLuint>(_Param);
-                LOAD_VALUE(vaoAttribEnable);
-                break;
-            }
-            case RenderingOpcode::DISABLE_VAO_ATTRIBUTE:
-            {
-                const GLuint vaoAttribDisable = static_cast<GLuint>(_Param);
-                LOAD_VALUE(vaoAttribDisable);
-                break;
-            }
-            case RenderingOpcode::GL_CLEAR_BUFFERS:
-            {
-                const GLbitfield clearBuffers = static_cast<GLbitfield>(_Param);
-                LOAD_VALUE(clearBuffers);
-                break;
-            }
-            case RenderingOpcode::GL_ENABLE:
-            case RenderingOpcode::GL_DISABLE:
-            case RenderingOpcode::GL_FACE_WINDING:
-            {
-                const GLenum cap = static_cast<GLenum>(_Param);
-                LOAD_VALUE(cap);
-                break;
-            }
-            default: break;
-        }
+        std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), data, size);
+        _insertPtr += static_cast<u32>(size);
 
-#undef LOAD_VALUE
+        LOAD_VALUE(usage);
+        postPushInst();
+    }
 
-        _mutex.unlock();
+    void pushModifyBufferData(const GLenum target, const GLintptr offset, const GLsizeiptr size, const void* const data) noexcept
+    {
+        prePushInst<RenderingOpcode::MODIFY_BUFFER_DATA>();
+        LOAD_VALUE(target);
+        LOAD_VALUE(offset);
+        LOAD_VALUE(size);
+
+        std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), data, size);
+        _insertPtr += static_cast<u32>(size);
+
+        postPushInst();
+    }
+
+    template<RenderingOpcode _Op>
+    void pushGLFunc(const GLenum cap) noexcept
+    {
+        prePushInst<_Op>();
+        LOAD_VALUE(cap);
+        postPushInst();
+    }
+
+    void pushGLEnable(const GLenum cap) noexcept { pushGLFunc<RenderingOpcode::GL_ENABLE>(cap); }
+    void pushGLDisable(const GLenum cap) noexcept { pushGLFunc<RenderingOpcode::GL_DISABLE>(cap); }
+    void pushGLFaceWinding(const GLenum mode) noexcept { pushGLFunc<RenderingOpcode::GL_FACE_WINDING>(mode); }
+
+    void pushResizeViewport(const GLint x, const GLint y, const GLsizei width, const GLsizei height) noexcept
+    {
+        prePushInst<RenderingOpcode::RESIZE_VIEWPORT>();
+        LOAD_VALUE(x);
+        LOAD_VALUE(y);
+        LOAD_VALUE(width);
+        LOAD_VALUE(height);
+        postPushInst();
+    }
+
+    void pushRenderText(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4x4f& proj) noexcept;
+
+    void pushImGuiRender(const ImDrawData* data) noexcept
+    {
+        prePushInst<RenderingOpcode::IMGUI_RENDER>();
+        LOAD_VALUE(data);
+        postPushInst();
+    }
+
+    void pushFinishRender() noexcept
+    {
+        prePushInst<RenderingOpcode::FINISH_RENDER>();
+        _insertPtr = 0;
+        postPushInst();
+        (void) _insertSignal.waitUntilSignaled();
+        u8* tmp = _instBuffer;
+        _instBuffer = _backBuffer;
+        _backBuffer = tmp;
+        _renderSignal.signal();
     }
 
     template<ShaderUniformType _UniType>
     void pushLoadUniform(const ParameterPack&& params) noexcept
     {
-        do
-        {
-            _mutex.lock();
-            if(_readyForInsert)
-            {
-                _mutex.unlock();
-                break;
-            }
-            _mutex.unlock();
-            std::this_thread::yield();
-        } while(true);
-
-        _mutex.lock();
-
-
-#define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<volatile void*>(_instBuffer + _insertPtr), reinterpret_cast<const void*>(&__VAR), sizeof(__VAR)); \
-                          _insertPtr += sizeof(__VAR);
-
-        _instBuffer[_insertPtr++] = static_cast<u8>(RenderingOpcode::LOAD_SHADER_UNIFORM);
-        _instBuffer[_insertPtr++] = static_cast<u8>(_UniType);
+        _backBuffer[_insertPtr++] = static_cast<u8>(RenderingOpcode::LOAD_SHADER_UNIFORM);
+        _backBuffer[_insertPtr++] = static_cast<u8>(_UniType);
 
         const i32 uniformID = static_cast<i32>(params.p0);
         LOAD_VALUE(uniformID);
@@ -518,18 +318,42 @@ public:
             case ShaderUniformType::MAT4F:
             {
                 const float* const mat = reinterpret_cast<const float*>(params.p1);
-                LOAD_VALUE(mat);
+                std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(mat), sizeof(float) * 16); 
+                _insertPtr += sizeof(float) * 16;
                 break;
             }
             default: break;
         }
+    }
 
 #undef LOAD_VALUE
 
-        _mutex.unlock();
+    inline void runRenderingCycleSync() noexcept
+    {
+        if(!_async) { runRenderingCycle(); }
     }
+
+    // void dumpCommandBufferToFile(FILE* file) const noexcept;
+
+    void takeControlOfContext(Window* window) noexcept;
+
+    void returnControlOfContext() noexcept;
 private:
-    void pushInstruction(const RenderingOpcode opcode, const ParameterPack&& params) noexcept;
+    void prePushInst(const RenderingOpcode opcode)
+    {
+        _backBuffer[_insertPtr++] = static_cast<u8>(opcode);
+    }
+
+    template<RenderingOpcode _Opcode>
+    void prePushInst() noexcept
+    {
+        static_assert(_Opcode != RenderingOpcode::LOAD_SHADER_UNIFORM, "`LOAD_SHADER_UNIFORM` cannot be used with `pushInstruction`, you must use `pushLoadUniform`");
+        prePushInst(_Opcode);
+    }
+
+    void postPushInst() const noexcept { }
+
+    void _passContext(Window* window) const noexcept;
 
     void runRenderingCycle() noexcept;
 

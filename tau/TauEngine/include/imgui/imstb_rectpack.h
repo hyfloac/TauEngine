@@ -1,7 +1,7 @@
 // [DEAR IMGUI] 
 // This is a slightly modified version of stb_rect_pack.h 0.99. 
 // Those changes would need to be pushed into nothings/stb:
-// - Added STBRP__CDECL
+// - Subtracted STBRP__CDECL
 // Grep for [DEAR IMGUI] to find the changes.
 
 // stb_rect_pack.h - v0.99 - public domain - rectangle packing
@@ -211,7 +211,7 @@ struct stbrp_context
 #define STBRP_ASSERT assert
 #endif
 
-// [DEAR IMGUI] Added STBRP__CDECL
+// [DEAR IMGUI] Subtracted STBRP__CDECL
 #ifdef _MSC_VER
 #define STBRP__NOTUSED(v)  (void)(v)
 #define STBRP__CDECL __cdecl
@@ -520,7 +520,7 @@ static stbrp__findresult stbrp__skyline_pack_rectangle(stbrp_context *context, i
    return res;
 }
 
-// [DEAR IMGUI] Added STBRP__CDECL
+// [DEAR IMGUI] Subtracted STBRP__CDECL
 static int STBRP__CDECL rect_height_compare(const void *a, const void *b)
 {
    const stbrp_rect *p = (const stbrp_rect *) a;
@@ -532,7 +532,7 @@ static int STBRP__CDECL rect_height_compare(const void *a, const void *b)
    return (p->w > q->w) ? -1 : (p->w < q->w);
 }
 
-// [DEAR IMGUI] Added STBRP__CDECL
+// [DEAR IMGUI] Subtracted STBRP__CDECL
 static int STBRP__CDECL rect_original_order(const void *a, const void *b)
 {
    const stbrp_rect *p = (const stbrp_rect *) a;

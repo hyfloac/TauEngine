@@ -27,6 +27,8 @@ TAU_DLL u64 rdtsc() noexcept;
  */
 TAU_DLL u64 currentTimeMillis() noexcept;
 
+TAU_DLL u64 microTime() noexcept;
+
 /**
  *   This structure stores the number of clock cycles that 
  * occur over a set period of time.

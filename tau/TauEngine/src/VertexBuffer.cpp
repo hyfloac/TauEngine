@@ -118,12 +118,12 @@ void VertexBuffer::drawIndexed() const noexcept
 
 void VertexBuffer::draw(RenderingPipeline& rp) const noexcept
 {
-    rp.pushInstruction(RenderingOpcode::GL_DRAW_ARRAYS, ParameterPack(GL_TRIANGLES, 0, this->_count));
+    rp.pushGLDrawArrays(GL_TRIANGLES, 0, this->_count);
 }
 
 void VertexBuffer::drawIndexed(RenderingPipeline& rp) const noexcept
 {
-    rp.pushInstruction(RenderingOpcode::GL_DRAW_ELEMENTS, ParameterPack(GL_TRIANGLES, this->_count, GL_UNSIGNED_INT, (u64) nullptr));
+    rp.pushGLDrawElements(GL_TRIANGLES, this->_count, GL_UNSIGNED_INT, nullptr);
 }
 
 VertexBufferShared::VertexBufferShared(const BufferType type, const BufferUsageType usage) noexcept
@@ -225,10 +225,10 @@ void VertexBufferShared::drawIndexed() const noexcept
 
 void VertexBufferShared::draw(RenderingPipeline& rp) const noexcept
 {
-    rp.pushInstruction(RenderingOpcode::GL_DRAW_ARRAYS, ParameterPack(GL_TRIANGLES, 0, this->_count));
+    rp.pushGLDrawArrays(GL_TRIANGLES, 0, this->_count);
 }
 
 void VertexBufferShared::drawIndexed(RenderingPipeline& rp) const noexcept
 {
-    rp.pushInstruction(RenderingOpcode::GL_DRAW_ELEMENTS, ParameterPack(GL_TRIANGLES, this->_count, GL_UNSIGNED_INT, (u64) nullptr));
+    rp.pushGLDrawElements(GL_TRIANGLES, this->_count, GL_UNSIGNED_INT, nullptr);
 }

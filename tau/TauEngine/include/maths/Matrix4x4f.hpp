@@ -4,6 +4,7 @@
 #include <DLL.hpp>
 #include <Alignment.h>
 #include <Utils.hpp>
+#include "Maths.hpp"
 
 class Vector3f;
 class Vector4f;
@@ -115,7 +116,7 @@ public:
     Matrix4x4f& add(const Matrix4x4f& other) noexcept;
     Matrix4x4f& sub(const Matrix4x4f& other) noexcept;
     Matrix4x4f& mul(const Matrix4x4f& other) noexcept;
-    Matrix4x4f& mulSIMD(const Matrix4x4f& other) noexcept;
+    // Matrix4x4f& mulSIMD(const Matrix4x4f& other) noexcept;
     Matrix4x4f& mulSIMD_SSE3(const Matrix4x4f& other) noexcept;
 
     Matrix4x4f& add(float scalar) noexcept;
@@ -159,7 +160,9 @@ public:
     Matrix4x4f& rotateCamera(const float pitch, const float yaw) noexcept;
 
     Matrix4x4f& view(const Vector3f& translation, const float pitch, const float yaw) noexcept;
-    Matrix4x4f& fps(const Vector3f& translation, const float pitch, const float yaw) noexcept;
+    Matrix4x4f& fps(const Vector3f translation, const SinCos<float> pitchSC, const SinCos<float> yawSC) noexcept;
+    Matrix4x4f& fps(const Vector3f translation, const float pitch, const float yaw) noexcept;
+    Matrix4x4f& fpsD(const Vector3f translation, const float pitch, const float yaw) noexcept;
 };
 
 typedef Matrix4x4f Matrix4;

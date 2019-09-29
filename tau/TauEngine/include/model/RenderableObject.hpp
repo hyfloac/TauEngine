@@ -1,10 +1,7 @@
 #pragma once
 
-#pragma warning(push, 0)
-#include <unordered_map>
-#pragma warning(pop)
-
-#include <model/VertexArray.hpp>
+#include <TauEngine.hpp>
+#include <model/BufferDescriptor.hpp>
 #include <model/VertexBuffer.hpp>
 #include <model/OBJLoader.hpp>
 #include <RenderingPipeline.hpp>
@@ -39,8 +36,9 @@ struct VerticeSet final
 class TAU_DLL RenderableObject final
 {
 private:
-    VertexArrayShared _vao;
-    VerticeSet  _vertices;
+    // VertexArrayShared _vao;
+    Ref<IBufferDescriptor> _vao;
+    VerticeSet _vertices;
 public:
     RenderableObject(objl::Mesh mesh) noexcept;
     RenderableObject(const RenderableObject& copy) noexcept = default;
@@ -55,20 +53,20 @@ public:
 
     void render() const noexcept;
 
-    static void postRender() noexcept;
+    void postRender() const noexcept;
 
     void preRender(RenderingPipeline& rp) const noexcept;
 
     void render(RenderingPipeline& rp) const noexcept;
 
-    static void postRender(RenderingPipeline& rp) noexcept;
+    void postRender(RenderingPipeline& rp) const noexcept;
 
-    inline size_t hashCode() const noexcept { return _vao.array(); }
-    inline GLuint getVAO() const noexcept { return _vao.array(); }
+    inline size_t hashCode() const noexcept { return (size_t) _vao.get(); }
+    // inline GLuint getVAO() const noexcept { return _vao.array(); }
     inline const VerticeSet& getVerticeSet() const noexcept { return _vertices; }
 
-    inline bool operator ==(const RenderableObject& other) const noexcept { return _vao.array() == other._vao.array(); }
-    inline bool operator !=(const RenderableObject& other) const noexcept { return _vao.array() != other._vao.array(); }
+    inline bool operator ==(const RenderableObject& other) const noexcept { return _vao.get() == other._vao.get(); }
+    inline bool operator !=(const RenderableObject& other) const noexcept { return !(*this == other); }
 };
 
 namespace std

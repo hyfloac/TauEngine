@@ -15,9 +15,13 @@ namespace objl
         float _x;
         float _y;
     public:
-        Vector2() noexcept;
+        Vector2() noexcept
+            : _x(0.0f), _y(0.0f)
+        { }
 
-        Vector2(const float x, const float y) noexcept;
+        Vector2(const float x, const float y) noexcept
+            : _x(x), _y(y)
+        { }
 
         inline float& x() noexcept { return _x; }
         inline float& y() noexcept { return _y; }
@@ -41,9 +45,13 @@ namespace objl
         float _y;
         float _z;
     public:
-        Vector3() noexcept;
+        Vector3() noexcept
+            : _x(0.0f), _y(0.0f), _z(0.0f)
+        { }
 
-        Vector3(const float x, const float y, const float z) noexcept;
+        Vector3(const float x, const float y, const float z) noexcept
+            : _x(x), _y(y), _z(z)
+        { }
 
         inline float& x() noexcept { return _x; }
         inline float& y() noexcept { return _y; }
@@ -62,13 +70,20 @@ namespace objl
         inline Vector3 operator  *(const float   scalar) const noexcept { return Vector3(this->_x * scalar, this->_y * scalar, this->_z * scalar); }
         inline Vector3 operator  /(const float   scalar) const noexcept { return Vector3(this->_x / scalar, this->_y / scalar, this->_z / scalar); }
 
-        Vector3 cross(const Vector3& other) const noexcept;
+        Vector3 cross(const Vector3& other) const noexcept
+        {
+            return Vector3(this->_y * other._z - this->_z * other._y,
+                           this->_z * other._x - this->_x * other._z,
+                           this->_x * other._y - this->_y * other._x);
+        }
 
-        inline float magnitudeSquared() const noexcept { return this->_x * this->_x + this->_y * this->_y + this->_z * this->_z; }
+        inline float magnitudeSquared() const noexcept 
+        { return this->_x * this->_x + this->_y * this->_y + this->_z * this->_z; }
 
         float magnitude() const noexcept;
 
-        inline float dot(const Vector3& other) const noexcept { return this->_x * other._x + this->_y * other._y + this->_z * other._z; }
+        inline float dot(const Vector3& other) const noexcept 
+        { return this->_x * other._x + this->_y * other._y + this->_z * other._z; }
 
         float midAngleCos(const Vector3& other) const noexcept;
 
@@ -113,7 +128,13 @@ namespace objl
         // Bump Map
         std::string map_bump;
 
-        Material() noexcept;
+        Material() noexcept
+            : name(""),
+              Ns(0.0f),
+              Ni(0.0f),
+              d(0.0f),
+              illum(0)
+        { }
     };
 
     struct Mesh
@@ -126,7 +147,9 @@ namespace objl
 
         Mesh() noexcept = default;
 
-        Mesh(std::vector<Vertex>& vertices, std::vector<u32> indices) noexcept;
+        Mesh(std::vector<Vertex>& _vertices, std::vector<u32> _indices) noexcept
+            : vertices(_vertices), indices(std::move(_indices))
+        { }
     };
 
     namespace algorithm
@@ -144,13 +167,13 @@ namespace objl
     private:
         // Generate vertices from a list of positions, 
         //	tcoords, normals and a face line
-        static void genVerticesFromRawOBJ(std::vector<Vertex>& RESTRICT vertices, const std::vector<Vector3>& RESTRICT positions, const std::vector<Vector2>& RESTRICT textureCoords, const std::vector<Vector3>& RESTRICT normals, std::string currentLine) noexcept;
+        static void genVerticesFromRawOBJ(std::vector<Vertex>& RESTRICT vertices, const std::vector<Vector3>& RESTRICT positions, const std::vector<Vector2>& RESTRICT textureCoords, const std::vector<Vector3>& RESTRICT normals, const char* currentLine) noexcept;
 
         // Triangulate a list of vertices into a face by printing
         //	indices corresponding with triangles within it
         static void vertexTriangulation(std::vector<u32>& RESTRICT indices, const std::vector<Vertex>& RESTRICT vertices) noexcept;
 
-        bool loadMaterials(const std::string& path) noexcept;
+        bool loadMaterials(const char* path) noexcept;
     public:
         Loader() noexcept = default;
 
@@ -172,6 +195,6 @@ namespace objl
         //
         // If the file is unable to be found
         // or unable to be loaded return false
-        bool loadFile(const std::string& path) noexcept;
+        bool loadFile(const char* path) noexcept;
     };
 }

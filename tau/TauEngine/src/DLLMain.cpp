@@ -2,7 +2,7 @@
 #pragma warning(push, 0)
 #include <Windows.h>
 #pragma warning(pop)
-#include <Maths.hpp>
+#include <maths/Maths.hpp>
 #include <TauEngine.hpp>
 
 void initProgramStartTimes() noexcept;

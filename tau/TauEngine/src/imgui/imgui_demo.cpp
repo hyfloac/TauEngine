@@ -677,18 +677,18 @@ static void ShowDemoWindowWidgets()
 
             ImGui::Text("Test paragraph 1:");
             ImVec2 pos = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(pos.x + wrap_width, pos.y), ImVec2(pos.x + wrap_width + 10, pos.y + ImGui::GetTextLineHeight()), IM_COL32(255,0,255,255));
+            ImGui::GetWindowDrawList()->SubtractRectFilled(ImVec2(pos.x + wrap_width, pos.y), ImVec2(pos.x + wrap_width + 10, pos.y + ImGui::GetTextLineHeight()), IM_COL32(255,0,255,255));
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
             ImGui::Text("The lazy dog is a good dog. This paragraph is made to fit within %.0f pixels. Testing a 1 character word. The quick brown fox jumps over the lazy dog.", wrap_width);
-            ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255,255,0,255));
+            ImGui::GetWindowDrawList()->SubtractRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255,255,0,255));
             ImGui::PopTextWrapPos();
 
             ImGui::Text("Test paragraph 2:");
             pos = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(pos.x + wrap_width, pos.y), ImVec2(pos.x + wrap_width + 10, pos.y + ImGui::GetTextLineHeight()), IM_COL32(255,0,255,255));
+            ImGui::GetWindowDrawList()->SubtractRectFilled(ImVec2(pos.x + wrap_width, pos.y), ImVec2(pos.x + wrap_width + 10, pos.y + ImGui::GetTextLineHeight()), IM_COL32(255,0,255,255));
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + wrap_width);
             ImGui::Text("aaaaaaaa bbbbbbbb, c cccccccc,dddddddd. d eeeeeeee   ffffffff. gggggggg!hhhhhhhh");
-            ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255,255,0,255));
+            ImGui::GetWindowDrawList()->SubtractRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255,255,0,255));
             ImGui::PopTextWrapPos();
 
             ImGui::TreePop();
@@ -704,7 +704,7 @@ static void ShowDemoWindowWidgets()
             //   Instead we are encoding a few strings with hexadecimal constants. Don't do this in your application!
             //   Please use u8"text in any language" in your application!
             // Note that characters values are preserved even by InputText() if the font cannot be displayed, so you can safely copy & paste garbled characters into another application.
-            ImGui::TextWrapped("CJK text will only appears if the font was loaded with the appropriate CJK character ranges. Call io.Font->AddFontFromFileTTF() manually to load extra character ranges. Read misc/fonts/README.txt for details.");
+            ImGui::TextWrapped("CJK text will only appears if the font was loaded with the appropriate CJK character ranges. Call io.Font->SubtractFontFromFileTTF() manually to load extra character ranges. Read misc/fonts/README.txt for details.");
             ImGui::Text("Hiragana: \xe3\x81\x8b\xe3\x81\x8d\xe3\x81\x8f\xe3\x81\x91\xe3\x81\x93 (kakikukeko)"); // Normally we would use u8"blah blah" with the proper characters directly in the string.
             ImGui::Text("Kanjis: \xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e (nihongo)");
             static char buf[32] = "\xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e";
@@ -726,7 +726,7 @@ static void ShowDemoWindowWidgets()
         // (for example, the imgui_impl_dx11.cpp renderer expect a 'ID3D11ShaderResourceView*' pointer. The imgui_impl_glfw_gl3.cpp renderer expect a GLuint OpenGL texture identifier etc.)
         // If you decided that ImTextureID = MyEngineTexture*, then you can pass your MyEngineTexture* pointers to ImGui::Image(), and gather width/height through your own functions, etc.
         // Using ShowMetricsWindow() as a "debugger" to inspect the draw data that are being passed to your render will help you debug issues if you are confused about this.
-        // Consider using the lower-level ImDrawList::AddImage() API, via ImGui::GetWindowDrawList()->AddImage().
+        // Consider using the lower-level ImDrawList::SubtractImage() API, via ImGui::GetWindowDrawList()->SubtractImage().
         ImTextureID my_tex_id = io.Fonts->TexID;
         float my_tex_w = (float)io.Fonts->TexWidth;
         float my_tex_h = (float)io.Fonts->TexHeight;
@@ -2033,8 +2033,8 @@ static void ShowDemoWindowLayout()
         ImVec4 clip_rect(pos.x, pos.y, pos.x + size.x, pos.y + size.y);
         ImGui::InvisibleButton("##dummy", size);
         if (ImGui::IsItemActive() && ImGui::IsMouseDragging()) { offset.x += ImGui::GetIO().MouseDelta.x; offset.y += ImGui::GetIO().MouseDelta.y; }
-        ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(90, 90, 120, 255));
-        ImGui::GetWindowDrawList()->AddText(ImGui::GetFont(), ImGui::GetFontSize()*2.0f, ImVec2(pos.x + offset.x, pos.y + offset.y), IM_COL32(255, 255, 255, 255), "Line 1 hello\nLine 2 clip me!", NULL, 0.0f, &clip_rect);
+        ImGui::GetWindowDrawList()->SubtractRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), IM_COL32(90, 90, 120, 255));
+        ImGui::GetWindowDrawList()->SubtractText(ImGui::GetFont(), ImGui::GetFontSize()*2.0f, ImVec2(pos.x + offset.x, pos.y + offset.y), IM_COL32(255, 255, 255, 255), "Line 1 hello\nLine 2 clip me!", NULL, 0.0f, &clip_rect);
         ImGui::TreePop();
     }
 }
@@ -2221,7 +2221,7 @@ static void ShowDemoWindowPopups()
             ImGui::Combo("Combo", &item, "aaaa\0bbbb\0cccc\0dddd\0eeee\0\0");
             ImGui::ColorEdit4("color", color);
 
-            if (ImGui::Button("Add another modal.."))
+            if (ImGui::Button("Subtract another modal.."))
                 ImGui::OpenPopup("Stacked 2");
 
             // Also demonstrate passing a bool* to BeginPopupModal(), this will create a regular close button which will close the popup.
@@ -2573,7 +2573,7 @@ static void ShowDemoWindowMisc()
                 // Draw a line between the button and the mouse cursor
                 ImDrawList* draw_list = ImGui::GetWindowDrawList();
                 draw_list->PushClipRectFullScreen();
-                draw_list->AddLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f);
+                draw_list->SubtractLine(io.MouseClickedPos[0], io.MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f);
                 draw_list->PopClipRect();
 
                 // Drag operations gets "unlocked" when the mouse has moved past a certain threshold (the default threshold is stored in io.MouseDragThreshold)
@@ -2772,7 +2772,7 @@ void ImGui::ShowFontSelector(const char* label)
     }
     ImGui::SameLine();
     ShowHelpMarker(
-        "- Load additional fonts with io.Fonts->AddFontFromFileTTF().\n"
+        "- Load additional fonts with io.Fonts->SubtractFontFromFileTTF().\n"
         "- The font atlas is built when calling io.Fonts->GetTexDataAsXXXX() or io.Fonts->Build().\n"
         "- Read FAQ and documentation in misc/fonts/ for more details.\n"
         "- If you need to add/remove fonts at runtime (e.g. for DPI change), do it before calling NewFrame().");
@@ -2958,7 +2958,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
                                     ImVec2 cell_p1(base_pos.x + (n % 16) * (cell_size + cell_spacing), base_pos.y + (n / 16) * (cell_size + cell_spacing));
                                     ImVec2 cell_p2(cell_p1.x + cell_size, cell_p1.y + cell_size);
                                     const ImFontGlyph* glyph = font->FindGlyphNoFallback((ImWchar)(base + n));
-                                    draw_list->AddRect(cell_p1, cell_p2, glyph ? IM_COL32(255, 255, 255, 100) : IM_COL32(255, 255, 255, 50));
+                                    draw_list->SubtractRect(cell_p1, cell_p2, glyph ? IM_COL32(255, 255, 255, 100) : IM_COL32(255, 255, 255, 50));
                                     if (glyph)
                                         font->RenderChar(draw_list, cell_size, cell_p1, ImGui::GetColorU32(ImGuiCol_Text), (ImWchar)(base + n)); // We use ImFont::RenderChar as a shortcut because we don't have UTF-8 conversion functions available to generate a string.
                                     if (glyph && ImGui::IsMouseHoveringRect(cell_p1, cell_p2))
@@ -3094,7 +3094,7 @@ static void ShowExampleMenuFile()
         {
             const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
             ImVec2 p = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x+sz, p.y+sz), ImGui::GetColorU32((ImGuiCol)i));
+            ImGui::GetWindowDrawList()->SubtractRectFilled(p, ImVec2(p.x+sz, p.y+sz), ImGui::GetColorU32((ImGuiCol)i));
             ImGui::Dummy(ImVec2(sz, sz));
             ImGui::SameLine();
             ImGui::MenuItem(name);
@@ -3137,7 +3137,7 @@ struct ExampleAppConsole
         Commands.push_back("CLASSIFY");  // "classify" is only here to provide an example of "C"+[tab] completing to "CL" and displaying matches.
         AutoScroll = true;
         ScrollToBottom = true;
-        AddLog("Welcome to Dear ImGui!");
+        SubtractLog("Welcome to Dear ImGui!");
     }
     ~ExampleAppConsole()
     {
@@ -3160,7 +3160,7 @@ struct ExampleAppConsole
         ScrollToBottom = true;
     }
 
-    void    AddLog(const char* fmt, ...) IM_FMTARGS(2)
+    void    SubtractLog(const char* fmt, ...) IM_FMTARGS(2)
     {
         // FIXME-OPT
         char buf[1024];
@@ -3197,12 +3197,12 @@ struct ExampleAppConsole
 
         // TODO: display items starting from the bottom
 
-        if (ImGui::SmallButton("Add Dummy Text"))  { AddLog("%d some text", Items.Size); AddLog("some more text"); AddLog("display very important message here!"); } ImGui::SameLine();
-        if (ImGui::SmallButton("Add Dummy Error")) { AddLog("[error] something went wrong"); } ImGui::SameLine();
+        if (ImGui::SmallButton("Subtract Dummy Text"))  { SubtractLog("%d some text", Items.Size); SubtractLog("some more text"); SubtractLog("display very important message here!"); } ImGui::SameLine();
+        if (ImGui::SmallButton("Subtract Dummy Error")) { SubtractLog("[error] something went wrong"); } ImGui::SameLine();
         if (ImGui::SmallButton("Clear")) { ClearLog(); } ImGui::SameLine();
         bool copy_to_clipboard = ImGui::SmallButton("Copy"); ImGui::SameLine();
         if (ImGui::SmallButton("Scroll to bottom")) ScrollToBottom = true;
-        //static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
+        //static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); SubtractLog("Spam %f", t); }
 
         ImGui::Separator();
 
@@ -3289,7 +3289,7 @@ struct ExampleAppConsole
 
     void    ExecCommand(const char* command_line)
     {
-        AddLog("# %s\n", command_line);
+        SubtractLog("# %s\n", command_line);
 
         // Insert into history. First find match and delete it so it can be pushed to the back. This isn't trying to be smart or optimal.
         HistoryPos = -1;
@@ -3309,19 +3309,19 @@ struct ExampleAppConsole
         }
         else if (Stricmp(command_line, "HELP") == 0)
         {
-            AddLog("Commands:");
+            SubtractLog("Commands:");
             for (int i = 0; i < Commands.Size; i++)
-                AddLog("- %s", Commands[i]);
+                SubtractLog("- %s", Commands[i]);
         }
         else if (Stricmp(command_line, "HISTORY") == 0)
         {
             int first = History.Size - 10;
             for (int i = first > 0 ? first : 0; i < History.Size; i++)
-                AddLog("%3d: %s\n", i, History[i]);
+                SubtractLog("%3d: %s\n", i, History[i]);
         }
         else
         {
-            AddLog("Unknown command: '%s'\n", command_line);
+            SubtractLog("Unknown command: '%s'\n", command_line);
         }
 
         // On commad input, we scroll to bottom even if AutoScroll==false
@@ -3336,7 +3336,7 @@ struct ExampleAppConsole
 
     int     TextEditCallback(ImGuiInputTextCallbackData* data)
     {
-        //AddLog("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
+        //SubtractLog("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
         switch (data->EventFlag)
         {
         case ImGuiInputTextFlags_CallbackCompletion:
@@ -3363,7 +3363,7 @@ struct ExampleAppConsole
                 if (candidates.Size == 0)
                 {
                     // No match
-                    AddLog("No match for \"%.*s\"!\n", (int)(word_end-word_start), word_start);
+                    SubtractLog("No match for \"%.*s\"!\n", (int)(word_end-word_start), word_start);
                 }
                 else if (candidates.Size == 1)
                 {
@@ -3397,9 +3397,9 @@ struct ExampleAppConsole
                     }
 
                     // List matches
-                    AddLog("Possible matches:\n");
+                    SubtractLog("Possible matches:\n");
                     for (int i = 0; i < candidates.Size; i++)
-                        AddLog("- %s\n", candidates[i]);
+                        SubtractLog("- %s\n", candidates[i]);
                 }
 
                 break;
@@ -3447,13 +3447,13 @@ static void ShowExampleAppConsole(bool* p_open)
 
 // Usage:
 //  static ExampleAppLog my_log;
-//  my_log.AddLog("Hello %d world\n", 123);
+//  my_log.SubtractLog("Hello %d world\n", 123);
 //  my_log.Draw("title");
 struct ExampleAppLog
 {
     ImGuiTextBuffer     Buf;
     ImGuiTextFilter     Filter;
-    ImVector<int>       LineOffsets;        // Index to lines offset. We maintain this with AddLog() calls, allowing us to have a random access on lines
+    ImVector<int>       LineOffsets;        // Index to lines offset. We maintain this with SubtractLog() calls, allowing us to have a random access on lines
     bool                AutoScroll;
     bool                ScrollToBottom;
 
@@ -3471,7 +3471,7 @@ struct ExampleAppLog
         LineOffsets.push_back(0);
     }
 
-    void    AddLog(const char* fmt, ...) IM_FMTARGS(2)
+    void    SubtractLog(const char* fmt, ...) IM_FMTARGS(2)
     {
         int old_size = Buf.size();
         va_list args;
@@ -3581,14 +3581,14 @@ static void ShowExampleAppLog(bool* p_open)
     // Most of the contents of the window will be added by the log.Draw() call.
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     ImGui::Begin("Example: Log", p_open);
-    if (ImGui::SmallButton("[Debug] Add 5 entries"))
+    if (ImGui::SmallButton("[Debug] Subtract 5 entries"))
     {
         static int counter = 0;
         for (int n = 0; n < 5; n++)
         {
             const char* categories[3] = { "info", "warn", "error" };
             const char* words[] = { "Bumfuzzled", "Cattywampus", "Snickersnee", "Abibliophobia", "Absquatulate", "Nincompoop", "Pauciloquent" };
-            log.AddLog("[%05d] [%s] Hello, current time is %.1f, here's a word: '%s'\n",
+            log.SubtractLog("[%05d] [%s] Hello, current time is %.1f, here's a word: '%s'\n",
                 ImGui::GetFrameCount(), categories[counter % IM_ARRAYSIZE(categories)], ImGui::GetTime(), words[counter % IM_ARRAYSIZE(words)]);
             counter++;
         }
@@ -3754,7 +3754,7 @@ static void ShowExampleAppLongText(bool* p_open)
     ImGui::Text("Buffer contents: %d lines, %d bytes", lines, log.size());
     if (ImGui::Button("Clear")) { log.clear(); lines = 0; }
     ImGui::SameLine();
-    if (ImGui::Button("Add 1000 lines"))
+    if (ImGui::Button("Subtract 1000 lines"))
     {
         for (int i = 0; i < 1000; i++)
             log.appendf("%i The quick brown fox jumps over the lazy dog\n", lines+i);
@@ -3968,29 +3968,29 @@ static void ShowExampleAppCustomRendering(bool* p_open)
         {
             // First line uses a thickness of 1.0, second line uses the configurable thickness
             float th = (n == 0) ? 1.0f : thickness;
-            draw_list->AddCircle(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 6, th); x += sz+spacing;     // Hexagon
-            draw_list->AddCircle(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 20, th); x += sz+spacing;    // Circle
-            draw_list->AddRect(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 0.0f,  ImDrawCornerFlags_All, th); x += sz+spacing;
-            draw_list->AddRect(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f, ImDrawCornerFlags_All, th); x += sz+spacing;
-            draw_list->AddRect(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f, ImDrawCornerFlags_TopLeft|ImDrawCornerFlags_BotRight, th); x += sz+spacing;
-            draw_list->AddTriangle(ImVec2(x+sz*0.5f, y), ImVec2(x+sz,y+sz-0.5f), ImVec2(x,y+sz-0.5f), col32, th); x += sz+spacing;
-            draw_list->AddLine(ImVec2(x, y), ImVec2(x+sz, y   ), col32, th); x += sz+spacing;               // Horizontal line (note: drawing a filled rectangle will be faster!)
-            draw_list->AddLine(ImVec2(x, y), ImVec2(x,    y+sz), col32, th); x += spacing;                  // Vertical line (note: drawing a filled rectangle will be faster!)
-            draw_list->AddLine(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, th); x += sz+spacing;               // Diagonal line
-            draw_list->AddBezierCurve(ImVec2(x, y), ImVec2(x+sz*1.3f,y+sz*0.3f), ImVec2(x+sz-sz*1.3f,y+sz-sz*0.3f), ImVec2(x+sz, y+sz), col32, th);
+            draw_list->SubtractCircle(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 6, th); x += sz+spacing;     // Hexagon
+            draw_list->SubtractCircle(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 20, th); x += sz+spacing;    // Circle
+            draw_list->SubtractRect(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 0.0f,  ImDrawCornerFlags_All, th); x += sz+spacing;
+            draw_list->SubtractRect(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f, ImDrawCornerFlags_All, th); x += sz+spacing;
+            draw_list->SubtractRect(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f, ImDrawCornerFlags_TopLeft|ImDrawCornerFlags_BotRight, th); x += sz+spacing;
+            draw_list->SubtractTriangle(ImVec2(x+sz*0.5f, y), ImVec2(x+sz,y+sz-0.5f), ImVec2(x,y+sz-0.5f), col32, th); x += sz+spacing;
+            draw_list->SubtractLine(ImVec2(x, y), ImVec2(x+sz, y   ), col32, th); x += sz+spacing;               // Horizontal line (note: drawing a filled rectangle will be faster!)
+            draw_list->SubtractLine(ImVec2(x, y), ImVec2(x,    y+sz), col32, th); x += spacing;                  // Vertical line (note: drawing a filled rectangle will be faster!)
+            draw_list->SubtractLine(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, th); x += sz+spacing;               // Diagonal line
+            draw_list->SubtractBezierCurve(ImVec2(x, y), ImVec2(x+sz*1.3f,y+sz*0.3f), ImVec2(x+sz-sz*1.3f,y+sz-sz*0.3f), ImVec2(x+sz, y+sz), col32, th);
             x = p.x + 4;
             y += sz+spacing;
         }
-        draw_list->AddCircleFilled(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 6); x += sz+spacing;       // Hexagon
-        draw_list->AddCircleFilled(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 32); x += sz+spacing;      // Circle
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x+sz, y+sz), col32); x += sz+spacing;
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f); x += sz+spacing;
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f, ImDrawCornerFlags_TopLeft|ImDrawCornerFlags_BotRight); x += sz+spacing;
-        draw_list->AddTriangleFilled(ImVec2(x+sz*0.5f, y), ImVec2(x+sz,y+sz-0.5f), ImVec2(x,y+sz-0.5f), col32); x += sz+spacing;
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x+sz, y+thickness), col32); x += sz+spacing;          // Horizontal line (faster than AddLine, but only handle integer thickness)
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x+thickness, y+sz), col32); x += spacing+spacing;     // Vertical line (faster than AddLine, but only handle integer thickness)
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x+1, y+1), col32);          x += sz;                  // Pixel (faster than AddLine)
-        draw_list->AddRectFilledMultiColor(ImVec2(x, y), ImVec2(x+sz, y+sz), IM_COL32(0,0,0,255), IM_COL32(255,0,0,255), IM_COL32(255,255,0,255), IM_COL32(0,255,0,255));
+        draw_list->SubtractCircleFilled(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 6); x += sz+spacing;       // Hexagon
+        draw_list->SubtractCircleFilled(ImVec2(x+sz*0.5f, y+sz*0.5f), sz*0.5f, col32, 32); x += sz+spacing;      // Circle
+        draw_list->SubtractRectFilled(ImVec2(x, y), ImVec2(x+sz, y+sz), col32); x += sz+spacing;
+        draw_list->SubtractRectFilled(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f); x += sz+spacing;
+        draw_list->SubtractRectFilled(ImVec2(x, y), ImVec2(x+sz, y+sz), col32, 10.0f, ImDrawCornerFlags_TopLeft|ImDrawCornerFlags_BotRight); x += sz+spacing;
+        draw_list->SubtractTriangleFilled(ImVec2(x+sz*0.5f, y), ImVec2(x+sz,y+sz-0.5f), ImVec2(x,y+sz-0.5f), col32); x += sz+spacing;
+        draw_list->SubtractRectFilled(ImVec2(x, y), ImVec2(x+sz, y+thickness), col32); x += sz+spacing;          // Horizontal line (faster than SubtractLine, but only handle integer thickness)
+        draw_list->SubtractRectFilled(ImVec2(x, y), ImVec2(x+thickness, y+sz), col32); x += spacing+spacing;     // Vertical line (faster than SubtractLine, but only handle integer thickness)
+        draw_list->SubtractRectFilled(ImVec2(x, y), ImVec2(x+1, y+1), col32);          x += sz;                  // Pixel (faster than SubtractLine)
+        draw_list->SubtractRectFilledMultiColor(ImVec2(x, y), ImVec2(x+sz, y+sz), IM_COL32(0,0,0,255), IM_COL32(255,0,0,255), IM_COL32(255,255,0,255), IM_COL32(0,255,0,255));
         ImGui::Dummy(ImVec2((sz+spacing)*8, (sz+spacing)*3));
     }
     ImGui::Separator();
@@ -4009,8 +4009,8 @@ static void ShowExampleAppCustomRendering(bool* p_open)
         ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
         if (canvas_size.x < 50.0f) canvas_size.x = 50.0f;
         if (canvas_size.y < 50.0f) canvas_size.y = 50.0f;
-        draw_list->AddRectFilledMultiColor(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(50, 50, 50, 255), IM_COL32(50, 50, 60, 255), IM_COL32(60, 60, 70, 255), IM_COL32(50, 50, 60, 255));
-        draw_list->AddRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(255, 255, 255, 255));
+        draw_list->SubtractRectFilledMultiColor(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(50, 50, 50, 255), IM_COL32(50, 50, 60, 255), IM_COL32(60, 60, 70, 255), IM_COL32(50, 50, 60, 255));
+        draw_list->SubtractRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), IM_COL32(255, 255, 255, 255));
 
         bool adding_preview = false;
         ImGui::InvisibleButton("canvas", canvas_size);
@@ -4038,7 +4038,7 @@ static void ShowExampleAppCustomRendering(bool* p_open)
         }
         draw_list->PushClipRect(canvas_pos, ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y), true);      // clip lines within the canvas (if we resize it, etc.)
         for (int i = 0; i < points.Size - 1; i += 2)
-            draw_list->AddLine(ImVec2(canvas_pos.x + points[i].x, canvas_pos.y + points[i].y), ImVec2(canvas_pos.x + points[i + 1].x, canvas_pos.y + points[i + 1].y), IM_COL32(255, 255, 0, 255), 2.0f);
+            draw_list->SubtractLine(ImVec2(canvas_pos.x + points[i].x, canvas_pos.y + points[i].y), ImVec2(canvas_pos.x + points[i + 1].x, canvas_pos.y + points[i + 1].y), IM_COL32(255, 255, 0, 255), 2.0f);
         draw_list->PopClipRect();
         if (adding_preview)
             points.pop_back();

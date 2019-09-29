@@ -6,12 +6,12 @@
 #pragma warning(push, 0)
 
 template<typename _T>
-struct TypeName
+struct TypeName final
 {
-    static const char* Name() { return typeid(_T).name(); }
+    constexpr static const char* Name() { return typeid(_T).name(); }
 };
 
-#define TYPE_NAME(__TYPE, __NAME) template<> struct TypeName<__TYPE> { static const char* Name() { return __NAME; } };
+#define TYPE_NAME(__TYPE, __NAME) template<> struct TypeName<__TYPE> final { constexpr static const char* Name() { return __NAME; } };
 #define TYPE_NAME_T(__TYPE) TYPE_NAME(__TYPE, #__TYPE)
 
 #ifdef CHAR_IS_BYTE

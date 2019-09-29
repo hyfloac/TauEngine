@@ -18,9 +18,18 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EditorApplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Item.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\OBJLoaderOld.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EditorApplication.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -29,5 +38,7 @@
     <None Include="resources\SimpleFragmentShader.glsl" />
     <None Include="resources\CBFillerVertexShader.glsl" />
     <None Include="resources\CBFillerFragmentShader.glsl" />
+    <None Include="resources\TextFragmentShader.glsl" />
+    <None Include="resources\TextVertexShader.glsl" />
   </ItemGroup>
 </Project>

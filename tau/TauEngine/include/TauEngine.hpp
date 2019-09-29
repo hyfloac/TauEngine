@@ -7,10 +7,18 @@
 
 #pragma warning(push, 0)
 #include <spdlog/spdlog.h>
+#include <memory>
 #pragma warning(pop)
 
 #include <DLL.hpp>
 #include <NumTypes.hpp>
+
+template<typename _T, typename _D = std::default_delete<_T>>
+using Scoped = std::unique_ptr<_T, _D>;
+
+template<typename _T>
+using Ref = std::shared_ptr<_T>;
+
 
 std::shared_ptr<spdlog::logger> getEngineLogger() noexcept;
 
@@ -46,6 +54,7 @@ TAU_DLL void tauExit(i32 code) noexcept;
 
 typedef void (* update_f)(float);
 typedef void (* render_f)(float);
+typedef void (* renderFPS_f)(u32, u32);
 
 class Window;
 
@@ -58,11 +67,10 @@ class Window;
  *    The update function.
  * @param[in] renderF
  *    The render function.
- * @param[in] printFPSInterval
- *    How often to print FPS and UPS. If value is equal to `0` 
- *   then it will not print any clock counts.
+ * @param[in] renderFPS
+ *    A function to render the current FPS.
  */
-TAU_DLL void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, u8 printFPSInterval, Window* window) noexcept;
+TAU_DLL void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, renderFPS_f renderFPS) noexcept;
 
 #ifdef _WIN32
 HMODULE tauGetDLLModule() noexcept;

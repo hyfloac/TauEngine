@@ -1,7 +1,7 @@
 #pragma once
 
 #include <DLL.hpp>
-#include <Maths.hpp>
+#include <maths/Maths.hpp>
 
 class TAU_DLL Vector2f final
 {
