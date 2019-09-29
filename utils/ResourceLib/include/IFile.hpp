@@ -19,13 +19,31 @@ class IFile
 private:
     IFile(const IFile& copy) noexcept = delete;
     IFile(IFile&& move) noexcept = delete;
-
+    
     IFile& operator=(const IFile& copy) noexcept = delete;
     IFile& operator=(IFile&& move) noexcept = delete;
 public:
+    IFile() noexcept = default;
+
     virtual ~IFile() noexcept = default;
 
     virtual i64 size() noexcept = 0;
+
+    virtual bool exists() noexcept = 0;
+
+    virtual const char* name() noexcept = 0;
+
+    /**
+     * Sets the current read/write index pointer of the file.
+     *
+     *   For resetting the read/write index use {@link IFile::resetPos() @endlink}
+     * as a specific implementation may have changed how the
+     * index pointer works.
+     */
+    virtual void setPos(u64 pos) noexcept = 0;
+
+    virtual void resetPos() noexcept
+    { setPos(0); }
 
     virtual i64 readBytes(u8* buffer, u64 len) noexcept = 0;
 
@@ -39,10 +57,10 @@ public:
 };
 
 /**
- * An interface used to load {@link IFile}'s.
+ * An interface used to load {@link IFile @endlink}'s.
  *
- *   Any implementation of {@link IFile} should implement
- * a corresponding {@link IFileLoader}.
+ *   Any implementation of {@link IFile @endlink} should implement
+ * a corresponding {@link IFileLoader @endlink}.
  */
 class IFileLoader
 {
