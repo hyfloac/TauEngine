@@ -1,7 +1,7 @@
 /**
  * @file
  * 
- * The windows implementation of {@link Window}.
+ * The windows implementation of {@link Window @endlink}.
  */
 #ifdef _WIN32
 #pragma warning(push, 0)
@@ -20,8 +20,8 @@
 /**
  * The maximum number of windows that are being stored.
  * 
- *   This is used with {@link windowHandles} to be able to 
- * retrieve a {@link Window} from an {@link HWND}.
+ *   This is used with {@link windowHandles @endlink} to be able to 
+ * retrieve a {@link Window @endlink} from an {@link HWND @endlink}.
  * 
  *   This can be overriden by defining `MAX_WINDOW_COUNT`
  * in the pre processor before building the DLL.
@@ -43,19 +43,19 @@ static const char* CLASS_NAME = "TauEngineWindowClass";
 static Window* windowHandles[MAX_WINDOW_COUNT];
 
 /**
- * This is the current index for the {@link windowHandles} array.
+ * This is the current index for the {@link windowHandles @endlink} array.
  * It serves to let us easily insert the next window.
  */
 static u32 currentWindowHandleIndex = 0;
 
 /**
- * Subtracts a window to {@link windowHandles}.
+ * Subtracts a window to {@link windowHandles @endlink}.
  * 
  * @param[in] systemWindowContainer
- *    The {@link Window} to put into {@link windowHandles}.
+ *    The {@link Window @endlink} to put into {@link windowHandles @endlink}.
  * @return 
  *      Returns true if the `systemWindowContainer` was 
- *    successfully added to {@link windowHandles}.
+ *    successfully added to {@link windowHandles @endlink}.
  */
 static bool addWindow(NonNull Window* systemWindowContainer) noexcept
 {
@@ -68,12 +68,12 @@ static bool addWindow(NonNull Window* systemWindowContainer) noexcept
 }
 
 /**
- *   Removes a window from {@link windowHandles}. After the 
+ *   Removes a window from {@link windowHandles @endlink}. After the 
  * window is removed, all other pointers are shifted down if
  * necessary.
  * 
  * @param[in] systemWindowContainer
- *    The {@link Window} to remove from {@link windowHandles}.
+ *    The {@link Window @endlink} to remove from {@link windowHandles @endlink}.
  */
 static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
 {
@@ -94,13 +94,13 @@ static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
 }
 
 /**
- * Retrieves a {@link Window} from {@link windowHandles}.
+ * Retrieves a {@link Window @endlink} from {@link windowHandles @endlink}.
  * 
  * @param[in] handle
- *    The handle of the {@link Window} to retrieve.
+ *    The handle of the {@link Window @endlink} to retrieve.
  * @return 
- *      A pointer to the {@link Window} containing the 
- *    {@link HWND} `handle`. returns null if no window is 
+ *      A pointer to the {@link Window @endlink} containing the 
+ *    {@link HWND @endlink} `handle`. returns null if no window is 
  *    currently holding the referenced handle.
  */
 static Nullable Window* getWindowFromHandle(HWND handle) noexcept
@@ -117,19 +117,19 @@ static Nullable Window* getWindowFromHandle(HWND handle) noexcept
 }
 
 /**
- *   Returns a {@link MouseFlags} bit field represented by the 
- * {@link WPARAM}.
+ *   Returns a {@link MouseFlags @endlink} bit field represented by the 
+ * {@link WPARAM @endlink}.
  * 
  *   If `TRUST_RAW_MOUSE_PARAM` is defined as `true` then this 
  * is just a simple cast, otherwise we manually go through 
  * each flag and binary OR in the equivalent 
- * {@link MouseFlags}.
+ * {@link MouseFlags @endlink}.
  * 
  * @param[in] wParam
- *      The {@link WPARAM} representing a bit mask of flags 
+ *      The {@link WPARAM @endlink} representing a bit mask of flags 
  *    for use with mouse events.
  * @return
- *    An equivalent {@link MouseFlags} enum bit mask.
+ *    An equivalent {@link MouseFlags @endlink} enum bit mask.
  */
 static MouseFlags mouseFlagsFromWParam(WPARAM wParam) noexcept
 {
@@ -174,17 +174,17 @@ static MouseFlags mouseFlagsFromWParam(WPARAM wParam) noexcept
 }
 
 /**
- *   Returns a {@link MouseEvent} based on the message type. 
+ *   Returns a {@link MouseEvent @endlink} based on the message type. 
  * `wParam` is also needed for identifying which X button was
  * pressed.
  * 
  * @param[in] uMsg
  *      The message type, this is the primary component in 
- *    creating the {@link MouseEvent}.
+ *    creating the {@link MouseEvent @endlink}.
  * @param[in] wParam
  *    Used to determine which X button may have been pressed.
  * @return
- *    A {@link MouseEvent} representing which event was fired.
+ *    A {@link MouseEvent @endlink} representing which event was fired.
  */
 static MouseEvent mouseEventFromMsg(UINT uMsg, WPARAM wParam) noexcept
 {
@@ -272,7 +272,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                     {
                         window->_windowState = WindowState::NEITHER;
                     }
-                    goto CALL_WINDOW_RESIZE_HANDLER;
+                    goto CALL_WINDOW_RESIZE_HANDLER;  // NOLINT(cppcoreguidelines-avoid-goto, hicpp-avoid-goto)
                 }
             }
             break;

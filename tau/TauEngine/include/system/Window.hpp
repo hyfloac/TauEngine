@@ -4,7 +4,7 @@
  * Describes an abstract window.
  * 
  *   This class should be fairly OS-independent. Any OS 
- * dependent stuff should either be put in {@link _SysWindowContainer}
+ * dependent stuff should either be put in {@link _SysWindowContainer @endlink}
  * or be in the implementation file.
  * 
  * OS      | Implementation  
@@ -18,7 +18,6 @@
 #include <DLL.hpp>
 #include <Utils.hpp>
 #include <system/Mouse.hpp>
-#include <system/Keyboard.hpp>
 #include <Safeties.hpp>
 #include <RenderingMode.hpp>
 
@@ -28,7 +27,7 @@ class Event;
 /**
  * Handles a resize of the window. This should only be used to reset the graphics.
  * 
- * Do not call {@link Window#resize(const u32,const u32)}.
+ * Do not call {@link Window::resize(const u32,const u32) @endlink}.
  */
 // typedef void (* onWindowResized_f)(const u32 width, const u32 height, NonNull Window* window);
 
@@ -118,7 +117,7 @@ private:
     /**
      * A system dependent container of information.
      * 
-     * See {@link _SysWindowContainer}.
+     * See {@link _SysWindowContainer @endlink}.
      */
     _SysWindowContainer _windowContainer;
     /**
@@ -136,7 +135,7 @@ private:
     /**
      * The current window state.
      * 
-     * See {@link WindowState}.
+     * See {@link WindowState @endlink}.
      */
     WindowState _windowState;
 
