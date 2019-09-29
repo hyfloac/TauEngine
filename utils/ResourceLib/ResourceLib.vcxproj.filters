@@ -32,7 +32,10 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ResourceLib.cpp">
+    <ClCompile Include="src\CFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Win32File.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
