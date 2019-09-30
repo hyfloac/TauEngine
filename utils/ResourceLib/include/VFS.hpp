@@ -30,9 +30,9 @@ class VFS final
 {
 public:
     static VFS& Instance() noexcept;
-private:
     using Container = std::pair<DynString, Ref<IFileLoader>>;
     using MountMap = std::unordered_multimap<DynString, Container>;
+private:
 
     Ref<IFileLoader> _defaultLoader;
     MountMap _mountPoints;
@@ -53,6 +53,14 @@ public:
 
     void unmount(const DynString& mountPoint) noexcept;
 
+    /**
+     * Converts the relative path to a physical path.
+     *
+     *   If the path does not start with a pipe '|' then this
+     * will simply fall back to returning the path. The pipe
+     * was chosen as it is generally an illegal character to
+     * show up in a path, especially at the beginning.
+     */
     VFS::Container resolvePath(const char* path) const noexcept;
 
     Ref<IFile> openFile(const char* path) const noexcept;
