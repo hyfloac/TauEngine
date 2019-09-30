@@ -196,7 +196,7 @@ int EXPORT initGame() noexcept
     {
         clientLogger->error("FreeType Initialization Error: {0}", thError);
     }
-    thError = th.loadTTFFile(R"(E:\TauEngine\tau\TauEditor\resources\MonoConsole.ttf)");
+    thError = th.loadTTFFile("|TERes/MonoConsole.ttf");
     if(thError)
     {
         clientLogger->error("FreeType TTF Loading Error: {0}", thError);
@@ -243,7 +243,7 @@ int EXPORT initGame() noexcept
 
     objl::Loader loader;
 
-    bool loaded = loader.loadFile(R"(E:\TauEngine\tau\TauEditor\resources\nanosuit\nanosuit.obj)");
+    bool loaded = loader.loadFile("|TERes/nanosuit/nanosuit.obj");
 
     RENDER_TEXT("NanoSuit OBJ Loaded.");
 
@@ -260,8 +260,8 @@ int EXPORT initGame() noexcept
     RENDER_TEXT("NanoSuit Meshes Loaded.");
 
     GLProgram* glProgram = new GLProgram;
-    IShader* vertexShader = new GLShader(ShaderType::VERTEX, R"(E:\TauEngine\tau\TauEditor\resources\SimpleVertexShader.glsl)", glProgram);
-    IShader* pixelShader = new GLShader(ShaderType::PIXEL, R"(E:\TauEngine\tau\TauEditor\resources\SimpleFragmentShader.glsl)", glProgram);
+    IShader* vertexShader = new GLShader(ShaderType::VERTEX, "|TERes/SimpleVertexShader.glsl", glProgram);
+    IShader* pixelShader = new GLShader(ShaderType::PIXEL, "|TERes/SimpleFragmentShader.glsl", glProgram);
 
     baseProgram = glProgram;
 
@@ -310,7 +310,7 @@ int EXPORT initGame() noexcept
 
     TextureLoadError texError;
 
-    ITexture* textureID = loadTexture(R"(E:\TauEngine\tau\TauEditor\resources\TestTexture.png)", true, &texError);
+    ITexture* textureID = loadTexture("|TERes/TestTexture.png", true, &texError);
 
     if(textureID == null)
     {
@@ -322,7 +322,7 @@ int EXPORT initGame() noexcept
         clientLogger->error("Error Code: {0}", (u32) texError);
     }
 
-    ITexture* overlayID = loadTexture(R"(E:\TauEngine\tau\TauEditor\resources\Overlay.png)", true, &texError);
+    ITexture* overlayID = loadTexture("|TERes/Overlay.png", true, &texError);
 
     if(overlayID == null)
     {
@@ -753,13 +753,13 @@ bool onCharPress(WindowAsciiKeyEvent& e) noexcept
         GLShader* pixelShader;
         if(c == '[')
         {
-            vertexShader = new GLShader(ShaderType::VERTEX, R"(E:\TauEngine\tau\TauEditor\resources\DebugVertexShader.glsl)", glProgram);
-            pixelShader = new GLShader(ShaderType::PIXEL, R"(E:\TauEngine\tau\TauEditor\resources\DebugFragmentShader.glsl)", glProgram);
+            vertexShader = new GLShader(ShaderType::VERTEX, "|TERes/DebugVertexShader.glsl", glProgram);
+            pixelShader = new GLShader(ShaderType::PIXEL, "|TERes/DebugFragmentShader.glsl", glProgram);
         }
         else
         {
-            vertexShader = new GLShader(ShaderType::VERTEX, R"(E:\TauEngine\tau\TauEditor\resources\SimpleVertexShader.glsl)", glProgram);
-            pixelShader = new GLShader(ShaderType::PIXEL, R"(E:\TauEngine\tau\TauEditor\resources\SimpleFragmentShader.glsl)", glProgram);
+            vertexShader = new GLShader(ShaderType::VERTEX, "|TERes/SimpleVertexShader.glsl", glProgram);
+            pixelShader = new GLShader(ShaderType::PIXEL, "|TERes/SimpleFragmentShader.glsl", glProgram);
         }
 
         baseProgram = glProgram;

@@ -5,6 +5,7 @@
 #include <maths/Maths.hpp>
 #include <model/OBJLoader.hpp>
 #include <memory>
+#include "VFS.hpp"
 
 namespace objl
 {
@@ -581,6 +582,15 @@ namespace objl
     {
         const size_t pathLen = strlen(path);
         if(!(pathLen > 4 && path[pathLen - 4] == '.' && path[pathLen - 3] == 'o' && path[pathLen - 2] == 'b' && path[pathLen - 1] == 'j')) { return false; }
+
+        VFS::Container physPath = VFS::Instance().resolvePath(path);
+
+        if(physPath.first.length() == 0)
+        {
+            return false;
+        }
+
+        path = physPath.first.c_str();
 
         FILE* cFile;
         if(fopen_s(&cFile, path, "r")) { return false; }

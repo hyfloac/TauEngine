@@ -3,6 +3,7 @@
 #include <texture/Texture.hpp>
 #include <RenderingMode.hpp>
 #include <model/BufferDescriptor.hpp>
+#include "VFS.hpp"
 
 // GlyphCharacter::~GlyphCharacter() noexcept
 // {
@@ -59,7 +60,14 @@ FT_Error TextHandler::init() noexcept
 
 FT_Error TextHandler::loadTTFFile(const char* fileName) noexcept
 {
-    const FT_Error error = FT_New_Face(_ft, fileName, 0, &_face);
+    const VFS::Container path = VFS::Instance().resolvePath(fileName);
+
+    if(path.first.length() == 0)
+    {
+        return -1;
+    }
+
+    const FT_Error error = FT_New_Face(_ft, path.first.c_str(), 0, &_face);
 
     FT_Set_Pixel_Sizes(_face, 0, 48);
 

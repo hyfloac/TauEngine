@@ -6,10 +6,17 @@
 #include <maths/Maths.hpp>
 #include <texture/Texture.hpp>
 #include <RenderingMode.hpp>
+#include "VFS.hpp"
 
 ITexture* loadTexture(const char* RESTRICT filename, const bool smooth, TextureLoadError* RESTRICT const error, i32 mipmapLevel) noexcept
 {
 #define ERR_EXIT(__ERR, __CHECK) if((__CHECK)) { *error = __ERR; return nullptr; }
+
+    const VFS::Container physPath = VFS::Instance().resolvePath(filename);
+
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.first.length() == 0);
+
+    filename = physPath.first.c_str();
 
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename);
 
@@ -82,6 +89,12 @@ ITexture* loadTexture(const char* RESTRICT filename, const bool smooth, TextureL
 ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRICT const error, GPUTextureSettings&& settings) noexcept
 {
 #define ERR_EXIT(__ERR, __CHECK) if((__CHECK)) { *error = __ERR; return nullptr; }
+
+    const VFS::Container physPath = VFS::Instance().resolvePath(filename);
+
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.first.length() == 0);
+
+    filename = physPath.first.c_str();
 
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename);
 

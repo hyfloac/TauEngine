@@ -14,6 +14,7 @@ enum class TextureLoadError : u8
 {
     NONE = 0,
     UNKNOWN_FORMAT,
+    INVALID_PATH,
     TEXTURE_FAILED_TO_LOAD,
     NULL_TEXTURE_DATA,
     NULL_WIDTH,
