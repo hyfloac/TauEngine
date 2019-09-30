@@ -3,7 +3,7 @@
 #include <cstring>
 
 template<typename _T>
-class DynArray
+class DynArray final
 {
 private:
     _T* _arr;
@@ -58,6 +58,9 @@ public:
 
     operator const _T*() const noexcept { return _arr; }
     operator       _T*()       noexcept { return _arr; }
+
+    const _T* arr() const noexcept { return _arr; }
+          _T* arr()       noexcept { return _arr; }
 
     size_t size()   const noexcept { return _size; }
     size_t length() const noexcept { return _size; }
