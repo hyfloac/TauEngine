@@ -3,8 +3,12 @@
  */
 #pragma once
 
-#include "pch.h"
+// #include "pch.h"
+
+#include <utility>
+#include <unordered_map>
 #include "IFile.hpp"
+#include <String.hpp>
 
 /**
  * Implements a Virtual File System.
@@ -27,11 +31,14 @@ class VFS final
 public:
     static VFS& Instance() noexcept;
 private:
-    using MountMap = std::unordered_multimap<String, const char*>;
+    using Container = std::pair<DynString, Ref<IFileLoader>>;
+    using MountMap = std::unordered_multimap<DynString, Container>;
 
+    Ref<IFileLoader> _defaultLoader;
     MountMap _mountPoints;
 public:
-    VFS() noexcept
+    explicit VFS(Ref<IFileLoader> defaultLoader) noexcept
+        : _defaultLoader(std::move(defaultLoader)), _mountPoints()
     { }
 
     ~VFS() noexcept = default;
@@ -42,9 +49,9 @@ public:
     VFS& operator=(const VFS& copy) noexcept = default;
     VFS& operator=(VFS&& move) noexcept = default;
 
-    void mount(String mountPoint, const char* path) noexcept;
+    void mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader) noexcept;
 
-    void unmount(String mountPoint) noexcept;
+    void unmount(const DynString& mountPoint) noexcept;
 
     Ref<IFile> openFile(const char* path) noexcept;
 };

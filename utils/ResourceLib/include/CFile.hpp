@@ -5,8 +5,10 @@
  */
 #pragma once
 
-#include "pch.h"
+// #include "pch.h"
 #include "IFile.hpp"
+#include <cstdio>
+#include <Utils.hpp>
 
 class Win32File;
 class Win32FileLoader;
@@ -60,8 +62,10 @@ public:
  * handling system. In general there may be a much faster
  * and more optimized implementation like {@link Win32FileLoader @endlink}.
  */
-class CFileLoader final : IFileLoader
+class CFileLoader final : public IFileLoader
 {
+public:
+    static Ref<CFileLoader>& Instance() noexcept;
 private:
     CFileLoader(const CFileLoader& copy) noexcept = delete;
     CFileLoader(CFileLoader&& move) noexcept = delete;
@@ -69,10 +73,14 @@ private:
     CFileLoader& operator=(const CFileLoader& copy) noexcept = delete;
     CFileLoader& operator=(CFileLoader&& move) noexcept = delete;
 public:
+    CFileLoader() noexcept = default;
+
     ~CFileLoader() noexcept override = default;
 
-    Ref<IFile> load(const char* path) noexcept override;
+    bool fileExists(const char* path) const noexcept override;
 
-    Ref<CFile> load2(const char* path) noexcept
+    Ref<IFile> load(const char* path) const noexcept override;
+
+    Ref<CFile> load2(const char* path) const noexcept
     { return RefCast<CFile>(load(path)); }
 };

@@ -1,4 +1,4 @@
-#include "pch.h"
+// #include "pch.h"
 #include "CFile.hpp"
 
 i64 CFile::size() noexcept
@@ -34,11 +34,29 @@ i64 CFile::readBytes(u8* buffer, u64 len) noexcept
 i64 CFile::writeBytes(const u8* buffer, u64 len) noexcept
 {
     if(_file == null)
-    { return; }
+    { return -1; }
     return fwrite(buffer, sizeof(u8), len, _file);
 }
 
-Ref<IFile> CFileLoader::load(const char* path) noexcept
+Ref<CFileLoader>& CFileLoader::Instance() noexcept
+{
+    static Ref<CFileLoader> instance = Ref<CFileLoader>(new CFileLoader);
+    return instance;
+}
+
+
+bool CFileLoader::fileExists(const char* path) const noexcept
+{
+    FILE* file;
+    if((file = fopen(path, "r")))
+    {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
+
+Ref<IFile> CFileLoader::load(const char* path) const noexcept
 {
     FILE* handle = fopen(path, "r+");
     return Ref<CFile>(new CFile(handle, path));

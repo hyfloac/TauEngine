@@ -1,4 +1,4 @@
-#include "pch.h"
+// #include "pch.h"
 #include "Win32File.hpp"
 
 i64 Win32File::size() noexcept
@@ -34,10 +34,6 @@ i64 Win32File::readBytes(u8* buffer, u64 len) noexcept
 {
     OVERLAPPED ol;
     ZeroMemory(&ol, sizeof(ol));
-
-    i64 retSize;
-    i64* retSizePtr = &retSize;
-
     ReadFileEx(_file, buffer, len, &ol, FileIOCompletionRoutine);
     return _retBytesRead;
 }
@@ -51,7 +47,19 @@ i64 Win32File::writeBytes(const u8* buffer, u64 len) noexcept
     return written;
 }
 
-Ref<IFile> Win32FileLoader::load(const char* path) noexcept
+Ref<Win32FileLoader>& Win32FileLoader::Instance() noexcept
+{
+    static Ref<Win32FileLoader> instance = Ref<Win32FileLoader>(new Win32FileLoader);
+    return instance;
+}
+
+
+bool Win32FileLoader::fileExists(const char* path) const noexcept
+{
+    return !(GetFileAttributesA(path) == INVALID_FILE_ATTRIBUTES && GetLastError() == ERROR_FILE_NOT_FOUND);
+}
+
+Ref<IFile> Win32FileLoader::load(const char* path) const noexcept
 {
     HANDLE file = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(!file && GetLastError() == ERROR_FILE_NOT_FOUND)

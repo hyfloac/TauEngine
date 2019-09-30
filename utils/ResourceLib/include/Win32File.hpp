@@ -7,8 +7,10 @@
 
 #ifdef _WIN32
 
-#include "pch.h"
+// #include "pch.h"
 #include "IFile.hpp"
+#include <Windows.h>
+#include <NumTypes.hpp>
 
 class CFile;
 class CFileLoader;
@@ -67,8 +69,10 @@ public:
  *   On Windows it is recommended to use this instead of
  * {@link CFileLoader @endlink}.
  */
-class Win32FileLoader final : IFileLoader
+class Win32FileLoader final : public IFileLoader
 {
+public:
+    static Ref<Win32FileLoader>& Instance() noexcept;
 private:
     Win32FileLoader(const Win32FileLoader& copy) noexcept = delete;
     Win32FileLoader(Win32FileLoader&& move) noexcept = delete;
@@ -76,11 +80,15 @@ private:
     Win32FileLoader& operator=(const Win32FileLoader& copy) noexcept = delete;
     Win32FileLoader& operator=(Win32FileLoader&& move) noexcept = delete;
 public:
+    Win32FileLoader() noexcept = default;
+
     ~Win32FileLoader() noexcept override = default;
 
-    Ref<IFile> load(const char* path) noexcept override;
+    bool fileExists(const char* path) const noexcept override;
 
-    Ref<Win32File> load2(const char* path) noexcept
+    Ref<IFile> load(const char* path) const noexcept override;
+
+    Ref<Win32File> load2(const char* path) const noexcept
     { return RefCast<Win32File>(load(path)); }
 };
 

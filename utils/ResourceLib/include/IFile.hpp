@@ -5,7 +5,11 @@
  */
 #pragma once
 
-#include "pch.h"
+// #include "pch.h"
+
+#include "RSLib.hpp"
+#include <NumTypes.hpp>
+#include <DynArray.hpp>
 
 /**
  * An interface used to represent an abstract file handle.
@@ -52,8 +56,9 @@ public:
 
     virtual DynArray<u8> readFile() noexcept
     {
-        DynArray<u8> arr(size());
+        DynArray<u8> arr(size() + 1);
         readBytes(arr.arr(), arr.size());
+        arr.arr()[size()] = '\0';
         return arr;
     }
 
@@ -78,7 +83,11 @@ private:
     IFileLoader& operator=(const IFileLoader& copy) noexcept = delete;
     IFileLoader& operator=(IFileLoader&& move) noexcept = delete;
 public:
+    IFileLoader() noexcept = default;
+
     virtual ~IFileLoader() noexcept = default;
 
-    virtual Ref<IFile> load(const char* path) noexcept = 0;
+    virtual bool fileExists(const char* path) const noexcept = 0;
+
+    virtual Ref<IFile> load(const char* path) const noexcept = 0;
 };
