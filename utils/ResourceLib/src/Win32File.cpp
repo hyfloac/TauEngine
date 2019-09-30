@@ -3,28 +3,61 @@
 
 i64 Win32File::size() noexcept
 {
-    return -1;
+    if(_file == INVALID_HANDLE_VALUE)
+    { return -1; }
+
+    LARGE_INTEGER size;
+    if(!GetFileSizeEx(_file, &size))
+    { return -1; }
+
+    return size.QuadPart;
 }
 
 bool Win32File::exists() noexcept
 {
-    return false;
+    return _file != INVALID_HANDLE_VALUE;
 }
 
 void Win32File::setPos(u64 pos) noexcept
 {
+    LONG high = pos >> 32;
+
+    SetFilePointer(_file, pos, &high, FILE_BEGIN);
 }
+
+static thread_local i64 _retBytesRead;
+
+static void CALLBACK FileIOCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransferred, LPOVERLAPPED lpOverlapped) noexcept
+{ _retBytesRead = dwNumberOfBytesTransferred; }
 
 i64 Win32File::readBytes(u8* buffer, u64 len) noexcept
 {
-    return -1;
+    OVERLAPPED ol;
+    ZeroMemory(&ol, sizeof(ol));
+
+    i64 retSize;
+    i64* retSizePtr = &retSize;
+
+    ReadFileEx(_file, buffer, len, &ol, FileIOCompletionRoutine);
+    return _retBytesRead;
 }
 
-void Win32File::writeBytes(const u8* buffer, u64 len) noexcept
+i64 Win32File::writeBytes(const u8* buffer, u64 len) noexcept
 {
+    OVERLAPPED ol;
+    ZeroMemory(&ol, sizeof(ol));
+    DWORD written;
+    WriteFile(_file, buffer, len, &written, &ol);
+    return written;
 }
 
 Ref<IFile> Win32FileLoader::load(const char* path) noexcept
 {
-    return nullptr;
+    HANDLE file = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(!file && GetLastError() == ERROR_FILE_NOT_FOUND)
+    {
+        file = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, NULL, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    }
+
+    return Ref<Win32File>(new Win32File(file, path));
 }

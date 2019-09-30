@@ -50,7 +50,7 @@ public:
 
     i64 readBytes(u8* buffer, u64 len) noexcept override;
 
-    void writeBytes(const u8* buffer, u64 len) noexcept override;
+    i64 writeBytes(const u8* buffer, u64 len) noexcept override;
 };
 
 /**

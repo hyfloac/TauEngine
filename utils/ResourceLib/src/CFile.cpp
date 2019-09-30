@@ -31,11 +31,11 @@ i64 CFile::readBytes(u8* buffer, u64 len) noexcept
     return fread(buffer, sizeof(u8), len, _file);
 }
 
-void CFile::writeBytes(const u8* buffer, u64 len) noexcept
+i64 CFile::writeBytes(const u8* buffer, u64 len) noexcept
 {
     if(_file == null)
     { return; }
-    fwrite(buffer, sizeof(u8), len, _file);
+    return fwrite(buffer, sizeof(u8), len, _file);
 }
 
 Ref<IFile> CFileLoader::load(const char* path) noexcept

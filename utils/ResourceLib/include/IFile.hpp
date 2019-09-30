@@ -50,10 +50,17 @@ public:
     virtual i64 readString(char* buffer, u64 len) noexcept
     { return readBytes(reinterpret_cast<u8*>(buffer), len); }
 
-    virtual void writeBytes(const u8* buffer, u64 len) noexcept = 0;
+    virtual DynArray<u8> readFile() noexcept
+    {
+        DynArray<u8> arr(size());
+        readBytes(arr.arr(), arr.size());
+        return arr;
+    }
 
-    virtual void writeString(const char* str) noexcept
-    { writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str)); }
+    virtual i64 writeBytes(const u8* buffer, u64 len) noexcept = 0;
+
+    virtual i64 writeString(const char* str) noexcept
+    { return writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str)); }
 };
 
 /**
