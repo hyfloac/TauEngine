@@ -54,18 +54,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)bin\Debug-x64\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)bin\Release-x64\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
-    <IncludePath>$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -113,13 +114,13 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;FreeImage.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\Debug-x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4075 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ProjectReference>
@@ -176,11 +177,11 @@
       <LargeAddressAware>true</LargeAddressAware>
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;FreeImage.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\Release-x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <Profile>true</Profile>
     </Link>
     <ProjectReference>
@@ -195,9 +196,12 @@
       <AdditionalIncludeDirectories>$(IncludePath)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;FreeImage.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -194,25 +194,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(SolutionDir)bin\Debug-x64\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(SolutionDir)bin\Release-x64\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(SolutionDir)bin\Release-x64\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
@@ -305,7 +305,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\Debug-x64\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibraryPath)</AdditionalLibraryDirectories>
     </Lib>
     <ResourceCompile>
       <NullTerminateStrings>true</NullTerminateStrings>
@@ -389,7 +389,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\Release-x64\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibraryPath)</AdditionalLibraryDirectories>
     </Lib>
     <ResourceCompile>
       <NullTerminateStrings>true</NullTerminateStrings>
@@ -472,7 +472,7 @@
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\Release-x64\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LibraryPath)</AdditionalLibraryDirectories>
     </Lib>
     <ResourceCompile>
       <NullTerminateStrings>true</NullTerminateStrings>

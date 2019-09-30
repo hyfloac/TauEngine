@@ -52,16 +52,18 @@
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
@@ -91,11 +93,13 @@
     </Lib>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -130,11 +134,14 @@
     </Lib>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\CFile.hpp" />
     <ClInclude Include="include\IFile.hpp" />
+    <ClInclude Include="include\RSLib.hpp" />
     <ClInclude Include="include\VFS.hpp" />
     <ClInclude Include="include\Win32File.hpp" />
     <ClInclude Include="pch.h" />
