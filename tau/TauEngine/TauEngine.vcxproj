@@ -111,7 +111,6 @@
     <ClInclude Include="include\system\Mouse.hpp" />
     <ClInclude Include="include\shader\GLShader.hpp" />
     <ClInclude Include="include\shader\IShader.hpp" />
-    <ClInclude Include="include\String.hpp" />
     <ClInclude Include="include\system\Mutex.hpp" />
     <ClInclude Include="include\system\RenderingContext.hpp" />
     <ClInclude Include="include\system\Semaphore.hpp" />

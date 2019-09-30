@@ -163,6 +163,7 @@
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\CoreFuncs.h" />
     <ClInclude Include="include\CVersion.hpp" />
+    <ClInclude Include="include\String.hpp" />
     <ClInclude Include="include\VariableLengthArray.hpp" />
     <ClInclude Include="include\DynArray.hpp" />
     <ClInclude Include="include\Endian.hpp" />

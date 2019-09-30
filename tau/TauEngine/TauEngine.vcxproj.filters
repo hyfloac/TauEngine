@@ -167,9 +167,6 @@
     <ClInclude Include="include\file\FileUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\String.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\I18n.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

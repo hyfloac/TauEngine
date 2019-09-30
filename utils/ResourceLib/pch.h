@@ -35,6 +35,7 @@
 #include <Alignment.h>
 #include <DynArray.hpp>
 #include <EnumBitFields.hpp>
+#include <String.hpp>
 
 #ifdef _WIN32
 #include <Windows.h>
