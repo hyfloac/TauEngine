@@ -14,7 +14,7 @@ class Vector3f;
 class Matrix4x4f;
 class ITexture;
 class IBufferDescriptor;
-class ImDrawData;
+struct ImDrawData;
 
 enum class RenderingOpcode : u8
 {

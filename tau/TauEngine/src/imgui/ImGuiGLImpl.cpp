@@ -61,18 +61,20 @@ bool ImGui_ImplGL_Init() noexcept
     }
     )";
 
-    int size = strlen(vertexSrc);
+    size_t size = std::strlen(vertexSrc);
     char* src = reinterpret_cast<char*>(calloc(size + 1, 1));
-    memcpy(src, vertexSrc, size);
+    if(!src) { return false; }
+    (void) std::memcpy(src, vertexSrc, size);
 
     // loadResourceFile(IDR_IMGUI_VERTEX_SHADER, TEXT_FILE, &size, &src);
     _vertexShader->loadShader(src);
 
     // free(src);
 
-    size = strlen(fragmentSrc);
+    size = std::strlen(fragmentSrc);
     src = reinterpret_cast<char*>(calloc(size + 1, 1));
-    memcpy(src, fragmentSrc, size);
+    if(!src) { return false; }
+    (void) std::memcpy(src, fragmentSrc, size);
 
     // loadResourceFile(IDR_IMGUI_FRAGMENT_SHADER, TEXT_FILE, &size, &src);
     _fragmentShader->loadShader(src);
