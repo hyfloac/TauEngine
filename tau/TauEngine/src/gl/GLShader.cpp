@@ -10,6 +10,7 @@
 #include <maths/Vector3i.hpp>
 #include <maths/Vector4f.hpp>
 #include <cstdio>
+#include "VFS.hpp"
 
 GLShader::GLShader(ShaderType shaderType, NotNull<const char> shaderPath, NotNull<GLProgram> glProgram) noexcept
     : IShader(shaderType), _shaderPath(shaderPath), _glProgram(glProgram), _shaderId(0)
@@ -61,7 +62,18 @@ bool GLShader::loadShader(const char* src) noexcept
         return false;
     }
 
-    const GLchar* shaderSrc = src ? src : readFileFast(this->_shaderPath);
+    // const GLchar* shaderSrc = src ? src : readFileFast(this->_shaderPath);
+    const GLchar* shaderSrc;
+    DynArray<u8> data(0);
+    if(src)
+    {
+        shaderSrc = src;
+    }
+    else
+    {
+        data = VFS::Instance().openFile(this->_shaderPath)->readFile();
+        shaderSrc = reinterpret_cast<GLchar*>(data.arr());
+    }
 
     glShaderSource(shaderId, 1, &shaderSrc, null);
     glCompileShader(shaderId);
@@ -85,13 +97,13 @@ bool GLShader::loadShader(const char* src) noexcept
         }
 
         glDeleteShader(shaderId);
-        freeFileData(shaderSrc);
+        // freeFileData(shaderSrc);
         return false;
     }
 
     if(src != shaderSrc)
     {
-        freeFileData(shaderSrc);
+        // freeFileData(shaderSrc);
     }
 
     glAttachShader(this->_glProgram->programId(), shaderId);

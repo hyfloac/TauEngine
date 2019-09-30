@@ -25,6 +25,8 @@
 #include <Camera.hpp>
 #include <events/Event.hpp>
 #include <events/WindowEvent.hpp>
+#include "VFS.hpp"
+#include "Win32File.hpp"
 #pragma warning(pop)
 
 std::shared_ptr<spdlog::logger> clientLogger;
@@ -148,6 +150,8 @@ int EXPORT initGame() noexcept
                            matA.m30(), matA.m31(), matA.m32(), matA.m33());
     }
 
+    VFS::Instance().mount("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+
     Window window(800, 600, "Tau Editor");
 #if !defined(TAU_PRODUCTION)
     ContextSettings& contextSettings = window.contextSettings();
@@ -185,7 +189,8 @@ int EXPORT initGame() noexcept
 
     clientLogger->debug("OpenGL Debug Error Callback Setup.");
 
-    TextHandler th(R"(E:\TauEngine\tau\TauEditor\resources\TextVertexShader.glsl)", R"(E:\TauEngine\tau\TauEditor\resources\TextFragmentShader.glsl)");
+    // TextHandler th(R"(E:\TauEngine\tau\TauEditor\resources\TextVertexShader.glsl)", R"(E:\TauEngine\tau\TauEditor\resources\TextFragmentShader.glsl)");
+    TextHandler th("|TERes/TextVertexShader.glsl", "|TERes/TextFragmentShader.glsl");
     FT_Error thError = th.init();
     if(thError)
     {
