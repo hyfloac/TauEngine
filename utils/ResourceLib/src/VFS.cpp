@@ -52,22 +52,29 @@ static std::pair<DynString, DynString> split(const char* str, char separator, bo
     return { DynString(begin), DynString("") };
 }
 
-Ref<IFile> VFS::openFile(const char* path) noexcept
+
+VFS::Container VFS::resolvePath(const char* path) const noexcept
 {
-    if(!path) { return null; }
+    if(!path) { return { "", null }; }
 
     const std::size_t len = std::strlen(path);
-    if(!len) { return null; }
+    if(!len) { return { "", null }; }
 
     if(path[0] != '|')
     {
-        return _defaultLoader->load(path);
+        if(_defaultLoader->fileExists(path))
+        {
+            return { path, null };
+        }
+        return { "", null };
     }
 
     const auto splitStr = split(path + 1, '/', true);
 
     if(splitStr.second.length() == 0)
-    { return null; }
+    {
+        return { "", null };
+    }
 
     for(auto it = _mountPoints.find(splitStr.first); it != _mountPoints.end(); ++it)
     {
@@ -75,9 +82,45 @@ Ref<IFile> VFS::openFile(const char* path) noexcept
         DynString compound = it->second.first.concat(splitStr.second);
         if(cont.second->fileExists(compound.c_str()))
         {
-            return cont.second->load(compound.c_str());
+            return { compound, cont.second };
         }
     }
 
-    return null;
+    return { "", null };
+}
+
+Ref<IFile> VFS::openFile(const char* path) const noexcept
+{
+    // if(!path) { return null; }
+    //
+    // const std::size_t len = std::strlen(path);
+    // if(!len) { return null; }
+    //
+    // if(path[0] != '|')
+    // {
+    //     return _defaultLoader->load(path);
+    // }
+    //
+    // const auto splitStr = split(path + 1, '/', true);
+    //
+    // if(splitStr.second.length() == 0)
+    // { return null; }
+    //
+    // for(auto it = _mountPoints.find(splitStr.first); it != _mountPoints.end(); ++it)
+    // {
+    //     const VFS::Container cont = it->second;
+    //     DynString compound = it->second.first.concat(splitStr.second);
+    //     if(cont.second->fileExists(compound.c_str()))
+    //     {
+    //         return cont.second->load(compound.c_str());
+    //     }
+    // }
+
+    VFS::Container physPath = resolvePath(path);
+
+    if(physPath.first.length() == 0)
+    { return null; }
+
+
+    return physPath.second->load(physPath.first);
 }

@@ -53,5 +53,7 @@ public:
 
     void unmount(const DynString& mountPoint) noexcept;
 
-    Ref<IFile> openFile(const char* path) noexcept;
+    VFS::Container resolvePath(const char* path) const noexcept;
+
+    Ref<IFile> openFile(const char* path) const noexcept;
 };
