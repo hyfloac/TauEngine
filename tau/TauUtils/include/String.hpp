@@ -241,7 +241,7 @@ public:
 
     inline DynString(DynString&& move) noexcept
         : _string(move._string), _length(move._length), _hash(move._hash), _refCount(move._refCount)
-    { }
+    { ++(*_refCount); }
 
     inline DynString& operator =(const DynString& copy) noexcept
     {
@@ -270,6 +270,7 @@ public:
         _length = move._length;
         _hash = move._hash;
         _refCount = move._refCount;
+        ++(*_refCount);
 
         return *this;
     }
