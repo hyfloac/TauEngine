@@ -331,9 +331,9 @@ int EXPORT initGame() noexcept
 
     RENDER_TEXT("Textures Loaded.");
 
-    ImGui::CreateContext();
-
-    ImGui_ImplGL_Init();
+    // ImGui::CreateContext();
+    //
+    // ImGui_ImplGL_Init();
 
     RenderingPipeline rp(&window);
 
@@ -352,18 +352,18 @@ int EXPORT initGame() noexcept
 
     RENDER_TEXT("Commands Setup.");
 
-    ImGui::NewFrame();
-
-    {
-        ImGui::Begin("Test Window");
-        
-        ImGui::Text("Random Text");
-        ImGui::Text("Random Float: %f", 3.141592653589793);
-        
-        ImGui::End();
-        
-        ImGui::Render();
-    }
+    // ImGui::NewFrame();
+    //
+    // {
+    //     ImGui::Begin("Test Window");
+    //     
+    //     ImGui::Text("Random Text");
+    //     ImGui::Text("Random Float: %f", 3.141592653589793);
+    //     
+    //     ImGui::End();
+    //     
+    //     ImGui::Render();
+    // }
 
 
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
@@ -388,7 +388,7 @@ int EXPORT initGame() noexcept
 int EXPORT finalizeGame() noexcept
 {
     stopDebugOutput();
-    ImGui_ImplGL_Destroy();
+    // ImGui_ImplGL_Destroy();
 
     return 0;
 }
