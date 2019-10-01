@@ -107,7 +107,7 @@ void MY_FAST_CALL AesCbc_Decode_Intel(__m128i *p, __m128i *data, size_t numBlock
   *p = iv;
 }
 
-typedef union __declspec(intrin_type) __declspec(align(16)) myVec128i {
+typedef union __declspec(align(16)) myVec128i {
     __int8              m128i_i8[16];
     __int16             m128i_i16[8];
     __int32             m128i_i32[4];

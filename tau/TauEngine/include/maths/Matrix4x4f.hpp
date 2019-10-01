@@ -19,8 +19,8 @@ public:
      */
     union ALIGN_MSVC(16) Matrix4x4fData
     {
-        float glColumnMajorArr[4][4];
         float m[16];
+        float glColumnMajorArr[4][4];
         struct ALIGN_MSVC(16)
         {
             float m00, m10, m20, m30,

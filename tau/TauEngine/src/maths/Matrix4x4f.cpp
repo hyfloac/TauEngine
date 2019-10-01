@@ -197,10 +197,12 @@ Matrix4x4f& Matrix4x4f::mulSIMD_SSE3(const Matrix4x4f& other) noexcept
 {
     const Matrix4x4fData oldData = this->_data;
     const Matrix4x4fData otherData = {
-        other._data.m00, other._data.m01, other._data.m02, other._data.m03,
+        {
+            other._data.m00, other._data.m01, other._data.m02, other._data.m03,
         other._data.m10, other._data.m11, other._data.m12, other._data.m13,
         other._data.m20, other._data.m21, other._data.m22, other._data.m23,
         other._data.m30, other._data.m31, other._data.m32, other._data.m33
+        }
     };
 
     CompVec4 postMul;

@@ -5,14 +5,14 @@
 #include <TUID.hpp>
 #include <FastRand.hpp>
 
-static inline u32 rotL32(u32 n, u32 c)
-{
-    const u32 mask = (CHAR_BIT * sizeof(n) - 1);  // assumes width is a power of 2.
-
-    c &= mask;
-    const u32 negC = static_cast<u32>(-static_cast<i32>(c));
-    return (n << c) | (n >> (negC & mask));
-}
+// static inline u32 rotL32(u32 n, u32 c)
+// {
+//     const u32 mask = (CHAR_BIT * sizeof(n) - 1);  // assumes width is a power of 2.
+//
+//     c &= mask;
+//     const u32 negC = static_cast<u32>(-static_cast<i32>(c));
+//     return (n << c) | (n >> (negC & mask));
+// }
 
 static inline u32 rotR32(u32 n, u32 c)
 {

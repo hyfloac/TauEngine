@@ -119,11 +119,11 @@ void ImGui_ImplGL_Render(ImDrawData* drawData) noexcept
 
     const float L = drawData->DisplayPos.x;
     const float R = drawData->DisplayPos.x + drawData->DisplaySize.x;
-    const float xs = drawData->DisplaySize.x;
+    // const float xs = drawData->DisplaySize.x;
 
     const float T = drawData->DisplayPos.y;
     const float B = drawData->DisplayPos.y + drawData->DisplaySize.y;
-    const float ys = drawData->DisplaySize.y;
+    // const float ys = drawData->DisplaySize.y;
 
     const float ortho_projection[4][4] = 
     {
@@ -133,13 +133,13 @@ void ImGui_ImplGL_Render(ImDrawData* drawData) noexcept
         { (R+L)/(L-R), (T+B)/(B-T),  0.0f, 1.0f }
     };
     
-    const float ortho_projection0[4][4] = 
-    {
-        { 2.0f/(xs),   0.0f,         0.0f, 0.0f },
-        { 0.0f,        2.0f/(-ys),   0.0f, 0.0f },
-        { 0.0f,        0.0f,        -1.0f, 0.0f },
-        { (R+L)/(-xs), (T+B)/(ys),   0.0f, 1.0f }
-    };
+    // const float ortho_projection0[4][4] = 
+    // {
+    //     { 2.0f/(xs),   0.0f,         0.0f, 0.0f },
+    //     { 0.0f,        2.0f/(-ys),   0.0f, 0.0f },
+    //     { 0.0f,        0.0f,        -1.0f, 0.0f },
+    //     { (R+L)/(-xs), (T+B)/(ys),   0.0f, 1.0f }
+    // };
 
 
     glActiveTexture(GL_TEXTURE0);
