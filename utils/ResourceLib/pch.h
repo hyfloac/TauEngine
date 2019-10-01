@@ -41,6 +41,4 @@
 #include <Windows.h>
 #endif
 
-#include "RSLib.hpp"
-
 #endif

@@ -30,9 +30,6 @@
     <ClInclude Include="include\VFS.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\RSLib.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

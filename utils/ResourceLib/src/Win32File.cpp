@@ -1,5 +1,6 @@
 // #include "pch.h"
 #include "Win32File.hpp"
+#include <Utils.hpp>
 
 i64 Win32File::size() noexcept
 {
@@ -28,7 +29,11 @@ void Win32File::setPos(u64 pos) noexcept
 static thread_local i64 _retBytesRead;
 
 static void CALLBACK FileIOCompletionRoutine(DWORD dwErrorCode, DWORD dwNumberOfBytesTransferred, LPOVERLAPPED lpOverlapped) noexcept
-{ _retBytesRead = dwNumberOfBytesTransferred; }
+{
+    UNUSED(dwErrorCode);
+    UNUSED(lpOverlapped);
+    _retBytesRead = dwNumberOfBytesTransferred;
+}
 
 i64 Win32File::readBytes(u8* buffer, u64 len) noexcept
 {
