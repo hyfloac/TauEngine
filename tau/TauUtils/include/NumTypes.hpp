@@ -1,13 +1,11 @@
 #pragma once
 
+#ifndef NUM_TYPES_HPP
+#define NUM_TYPES_HPP
+
 #pragma warning(push, 0)
-#ifdef __cplusplus
 #include <cstdint>
 #include <cstddef>
-#else
-#include <stdint.h>
-#include <stddef.h>
-#endif
 #pragma warning(pop)
 
 #include <CVersion.hpp>
@@ -22,8 +20,8 @@ typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;
 
-#if !defined(__CPP_20) || 0
-// typedef char char8_t;
+#if !defined(__cpp_char8_t)
+enum char8_t : unsigned char { };
 #endif
 
 typedef char8_t  c8;
@@ -97,3 +95,5 @@ struct IntMaxMin<u64> final
     static u64 Min() noexcept { return 0; }
     static u64 Max() noexcept { return UINT64_MAX; }
 };
+
+#endif
