@@ -35,8 +35,8 @@ void Camera::updateRotation(const float delta, const i32 dMouseX, const i32 dMou
     if(dMouseX != 0 && dMouseY != 0)
     {
         const float speed = MOUSE_SCALE * delta / 1000.0f;
-        _pitch += dMouseY * MOUSE_SCALE;
-        _yaw += dMouseX * MOUSE_SCALE;
+        _pitch += dMouseY * speed;
+        _yaw += dMouseX * speed;
 
         if(_pitch > 80.0f)  { _pitch = 80.0f; }
         if(_pitch < -87.0f) { _pitch = -87.0f; }
