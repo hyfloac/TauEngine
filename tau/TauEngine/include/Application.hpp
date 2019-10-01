@@ -1,12 +1,11 @@
 #pragma once
 
 #include <NumTypes.hpp>
+#include "TauEngine.hpp"
 #include <DLL.hpp>
 
 class TAU_DLL Application
 {
-private:
-    static Application* _instance;
 private:
     u32 _targetUPS;
 protected:
@@ -20,28 +19,38 @@ public:
     Application& operator =(const Application& copy) noexcept = delete;
     Application& operator =(Application&& move) noexcept = delete;
 
-    virtual void init(int argCount, char* args[]) noexcept = 0;
-
+    virtual bool init(int argCount, char* args[]) noexcept = 0;
+protected:
     virtual void update(const float fixedDelta) noexcept = 0;
 
     virtual void render(const float delta) noexcept = 0;
 
     virtual void renderFPS(const u32 ups, const u32 fps) noexcept = 0;
 
-    void startGameLoop() const noexcept;
+    virtual void runMessageLoop() noexcept = 0;
+public:
+    void startGameLoop() noexcept;
 };
 
-#ifndef APP_IMPL
+#if defined(APP_MAIN) || 1
 Application* startGame() noexcept;
 
 int main(int argCount, char* args[]) noexcept
 {
+#ifndef TAU_DLL_LINK
     tauMain();
+#endif
 
     Application* app = startGame();
 
-    app->init(argCount, args);
+    if(!app->init(argCount, args))
+    {
+        delete app;
+        return -1;
+    }
     app->startGameLoop();
+
+    delete app;
 
     return 0;
 }

@@ -2,6 +2,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <imgui/imgui.h>
 #include <imgui/ImGuiGLImpl.hpp>
+#include <Utils.hpp>
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #include <TauEngine.hpp>
@@ -28,6 +29,9 @@
 #include "VFS.hpp"
 #include "Win32File.hpp"
 #pragma warning(pop)
+
+#define APP_MAIN
+#include "Application.hpp"
 
 std::shared_ptr<spdlog::logger> clientLogger;
 
@@ -105,11 +109,6 @@ public:
     }
 };
 
-void EXPORT receiveArguments(const Arguments* args) noexcept
-{
-
-}
-
 int EXPORT initGame() noexcept
 {
 #ifndef TAU_DLL_LINK
@@ -119,36 +118,8 @@ int EXPORT initGame() noexcept
     clientLogger = spdlog::stdout_color_mt("TauEditor");
     clientLogger->set_level(spdlog::level::trace);
     clientLogger->set_pattern("%^[%H:%M:%S:%e] [%n] [%l]%$: %v");
-
+    
     clientLogger->info("Starting Tau Engine Editor.");
-
-    {
-        using Mat4Data = Matrix4x4f::Matrix4x4fData;
-        Mat4Data _a = { 1, 2, 3, 4,
-                        5, 6, 7, 8,
-                        9, 10, 11, 12,
-                        13, 14, 15, 16 };
-
-        Matrix4x4f matA(_a);
-        Matrix4x4f matB(_a);
-        matB.add(1.0f);
-        matA.mul(matB);
-
-        clientLogger->info("Matrix [ [ {}, {}, {}, {} ], [ {}, {}, {}, {} ], [ {}, {}, {}, {} ], [ {}, {}, {}, {} ] ]",
-                           matA.m00(), matA.m01(), matA.m02(), matA.m03(),
-                           matA.m10(), matA.m11(), matA.m12(), matA.m13(),
-                           matA.m20(), matA.m21(), matA.m22(), matA.m23(),
-                           matA.m30(), matA.m31(), matA.m32(), matA.m33());
-
-        matA = Matrix4x4f(_a);
-        matA.mulSIMD_SSE3(matB);
-
-        clientLogger->info("Matrix [ [ {}, {}, {}, {} ], [ {}, {}, {}, {} ], [ {}, {}, {}, {} ], [ {}, {}, {}, {} ] ]",
-                           matA.m00(), matA.m01(), matA.m02(), matA.m03(),
-                           matA.m10(), matA.m11(), matA.m12(), matA.m13(),
-                           matA.m20(), matA.m21(), matA.m22(), matA.m23(),
-                           matA.m30(), matA.m31(), matA.m32(), matA.m33());
-    }
 
     VFS::Instance().mount("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 
@@ -331,7 +302,7 @@ int EXPORT initGame() noexcept
 
     if(texError != TextureLoadError::NONE)
     {
-        clientLogger->error("Error Code: {0}", (u32) texError);
+        clientLogger->error("Error Code: {0}", static_cast<u32>(texError));
     }
 
     RENDER_TEXT("Textures Loaded.");
@@ -405,6 +376,8 @@ GameLoopData EXPORT getGameLoopData() noexcept
 
 i32 debugCommand(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
 {
+    UNUSED4(commandName, args, argCount, consoleHandler);
+
     clientLogger->info("Debug!!!");
 
     return 0;
@@ -582,11 +555,14 @@ bool setupDebugCallback() noexcept
 
 void onMouseMove(const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, Window* window) noexcept
 {
-    
+    UNUSED4(mouseFlags, xPos, yPos, window);
 }
 
 void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) noexcept
 {
+    UNUSED2(length, userParam);
+    UNUSED2(id, message);
+
 #define STR_CASE(__ENUM, __STR) case __ENUM: str = __STR; break
 #define DEFAULT_CASE default: str = "Unknown"; break
 

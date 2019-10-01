@@ -1,6 +1,5 @@
-#define APP_IMPL
-// #include <TauEngine.hpp>
 #include <Application.hpp>
+#include "Timings.hpp"
 
 Application::Application(const u32 targetUPS) noexcept
     : _targetUPS(targetUPS)
@@ -10,11 +9,46 @@ Application::Application(const u32 targetUPS) noexcept
 
 Application::~Application() noexcept = default;
 
-void Application::startGameLoop() const noexcept
+void Application::startGameLoop() noexcept
 {
-    // const update_f updateBox = [](const float fixedDelta) { Application::_instance->update(fixedDelta); };
-    // const render_f renderBox = [](const float delta) { Application::_instance->render(delta); };
-    // const renderFPS_f fpsBox = [](const u32 ups, const u32 fps) { Application::_instance->renderFPS(ups, fps); };
-    //
-    // tauGameLoop(this->_targetUPS, updateBox, renderBox, fpsBox);
+    const float Mu_PER_UPDATE = 1000000.0f / _targetUPS;
+    u64 lastTime = microTime();
+    float lag = 0.0f;
+
+    u64 counterTime = lastTime;
+    u32 fps = 0;
+    u32 ups = 0;
+
+    while(!tauShouldExit())
+    {
+        const u64 currentTime = microTime();
+        const u64 elapsed = currentTime - lastTime;
+        lastTime = currentTime;
+        lag += static_cast<float>(elapsed);
+
+        while(lag >= Mu_PER_UPDATE)
+        {
+            runMessageLoop();
+
+            update(Mu_PER_UPDATE);
+            ++ups;
+            lag -= Mu_PER_UPDATE;
+        }
+
+        if(elapsed != 0)
+        {
+            render(static_cast<float>(elapsed));
+            ++fps;
+        }
+
+        if(currentTime - counterTime >= 1000000)
+        {
+            counterTime = currentTime;
+
+            renderFPS(ups, fps);
+
+            ups = 0;
+            fps = 0;
+        }
+    }
 }
