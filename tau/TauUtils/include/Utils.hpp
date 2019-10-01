@@ -56,3 +56,9 @@
 #else
   #define RESTRICT
 #endif
+
+#define UNUSED(_X) ((void) (_X))
+#define UNUSED2(_0, _1) ((void) (_0)); ((void) (_1))
+#define UNUSED3(_0, _1, _2) ((void) (_0)); ((void) (_1)); ((void) (_2))
+#define UNUSED4(_0, _1, _2, _3) ((void) (_0)); ((void) (_1)); ((void) (_2)); ((void) (_3))
+#define UNUSED5(_0, _1, _2, _3, _4) ((void) (_0)); ((void) (_1)); ((void) (_2)); ((void) (_3)); ((void) (_4))
