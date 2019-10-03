@@ -164,7 +164,7 @@ struct EGLClientPixmapHI;
 
 #define EGL_DEFAULT_DISPLAY               ((EGLNativeDisplayType)0)
 
-EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY eglGetProcSubtractress (const char *procname);
+EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY eglGetProcAddress (const char *procname);
 /* ---------------------------- EGL_VERSION_1_0 ---------------------------- */
 
 #ifndef EGL_VERSION_1_0

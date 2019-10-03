@@ -329,7 +329,7 @@ typedef void ( * PFNGLXSELECTEVENTPROC) (Display *dpy, GLXDrawable draw, unsigne
 #define GLX_SAMPLE_BUFFERS 100000
 #define GLX_SAMPLES 100001
 
-extern void ( * glXGetProcSubtractress (const GLubyte *procName)) (void);
+extern void ( * glXGetProcAddress (const GLubyte *procName)) (void);
 
 #define GLXEW_VERSION_1_4 GLXEW_GET_VAR(__GLXEW_VERSION_1_4)
 
@@ -479,7 +479,7 @@ typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display* dpy, GLXFBCo
 #ifndef GLX_ARB_get_proc_address
 #define GLX_ARB_get_proc_address 1
 
-extern void ( * glXGetProcSubtractressARB (const GLubyte *procName)) (void);
+extern void ( * glXGetProcAddressARB (const GLubyte *procName)) (void);
 
 #define GLXEW_ARB_get_proc_address GLXEW_GET_VAR(__GLXEW_ARB_get_proc_address)
 

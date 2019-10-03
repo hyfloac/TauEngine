@@ -1,6 +1,3 @@
-#pragma warning(disable:4365)
-#pragma warning(disable:4456)
-
 /*
 ** The OpenGL Extension Wrangler Library
 ** Copyright (C) 2008-2017, Nigel Stewart <nigels[]users sourceforge net>
@@ -47,7 +44,7 @@
 #elif defined(_WIN32)
 /*
  * If NOGDI is defined, wingdi.h won't be included by windows.h, and thus
- * wglGetProcSubtractress won't be declared. It will instead be implicitly declared,
+ * wglGetProcAddress won't be declared. It will instead be implicitly declared,
  * potentially incorrectly, which we don't want.
  */
 #  if defined(NOGDI)
@@ -64,25 +61,25 @@
 #elif defined(GLEW_REGAL)
 
 /* In GLEW_REGAL mode we call direcly into the linked
-   libRegal.so glGetProcSubtractressREGAL for looking up
+   libRegal.so glGetProcAddressREGAL for looking up
    the GL function pointers. */
 
-#  undef glGetProcSubtractressREGAL
+#  undef glGetProcAddressREGAL
 #  ifdef WIN32
-extern void *  __stdcall glGetProcSubtractressREGAL(const GLchar *name);
-static void * (__stdcall * regalGetProcSubtractress) (const GLchar *) = glGetProcSubtractressREGAL;
+extern void *  __stdcall glGetProcAddressREGAL(const GLchar *name);
+static void * (__stdcall * regalGetProcAddress) (const GLchar *) = glGetProcAddressREGAL;
 #    else
-extern void * glGetProcSubtractressREGAL(const GLchar *name);
-static void * (*regalGetProcSubtractress) (const GLchar *) = glGetProcSubtractressREGAL;
+extern void * glGetProcAddressREGAL(const GLchar *name);
+static void * (*regalGetProcAddress) (const GLchar *) = glGetProcAddressREGAL;
 #  endif
-#  define glGetProcSubtractressREGAL GLEW_GET_FUN(__glewGetProcSubtractressREGAL)
+#  define glGetProcAddressREGAL GLEW_GET_FUN(__glewGetProcAddressREGAL)
 
 #elif defined(__sgi) || defined (__sun) || defined(__HAIKU__) || defined(GLEW_APPLE_GLX)
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-void* dlGetProcSubtractress (const GLubyte* name)
+void* dlGetProcAddress (const GLubyte* name)
 {
   static void* h = NULL;
   static void* gpa;
@@ -90,7 +87,7 @@ void* dlGetProcSubtractress (const GLubyte* name)
   if (h == NULL)
   {
     if ((h = dlopen(NULL, RTLD_LAZY | RTLD_LOCAL)) == NULL) return NULL;
-    gpa = dlsym(h, "glXGetProcSubtractress");
+    gpa = dlsym(h, "glXGetProcAddress");
   }
 
   if (gpa != NULL)
@@ -109,7 +106,7 @@ void* dlGetProcSubtractress (const GLubyte* name)
 
 #include <dlfcn.h>
 
-void* NSGLGetProcSubtractress (const GLubyte *name)
+void* NSGLGetProcAddress (const GLubyte *name)
 {
   static void* image = NULL;
   void* addr;
@@ -121,7 +118,7 @@ void* NSGLGetProcSubtractress (const GLubyte *name)
   addr = dlsym(image, (const char*)name);
   if( addr ) return addr;
 #ifdef GLEW_APPLE_GLX
-  return dlGetProcSubtractress( name ); // try next for glx symbols
+  return dlGetProcAddress( name ); // try next for glx symbols
 #else
   return NULL;
 #endif
@@ -130,14 +127,14 @@ void* NSGLGetProcSubtractress (const GLubyte *name)
 
 #include <mach-o/dyld.h>
 
-void* NSGLGetProcSubtractress (const GLubyte *name)
+void* NSGLGetProcAddress (const GLubyte *name)
 {
   static const struct mach_header* image = NULL;
   NSSymbol symbol;
   char* symbolName;
   if (NULL == image)
   {
-    image = NSSubtractImage("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", NSADDIMAGE_OPTION_RETURN_ON_ERROR);
+    image = NSAddImage("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL", NSADDIMAGE_OPTION_RETURN_ON_ERROR);
   }
   /* prepend a '_' for the Unix C symbol mangling convention */
   symbolName = malloc(strlen((const char*)name) + 2);
@@ -148,9 +145,9 @@ void* NSGLGetProcSubtractress (const GLubyte *name)
 	 symbol = NSLookupAndBindSymbol(symbolName); */
   symbol = image ? NSLookupSymbolInImage(image, symbolName, NSLOOKUPSYMBOLINIMAGE_OPTION_BIND | NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR) : NULL;
   free(symbolName);
-  if( symbol ) return NSSubtractressOfSymbol(symbol);
+  if( symbol ) return NSAddressOfSymbol(symbol);
 #ifdef GLEW_APPLE_GLX
-  return dlGetProcSubtractress( name ); // try next for glx symbols
+  return dlGetProcAddress( name ); // try next for glx symbols
 #else
   return NULL;
 #endif
@@ -159,26 +156,26 @@ void* NSGLGetProcSubtractress (const GLubyte *name)
 #endif /* __APPLE__ */
 
 /*
- * Define glewGetProcSubtractress.
+ * Define glewGetProcAddress.
  */
 #if defined(GLEW_REGAL)
-#  define glewGetProcSubtractress(name) regalGetProcSubtractress((const GLchar *)name)
+#  define glewGetProcAddress(name) regalGetProcAddress((const GLchar *)name)
 #elif defined(GLEW_OSMESA)
-#  define glewGetProcSubtractress(name) OSMesaGetProcSubtractress((const char *)name)
+#  define glewGetProcAddress(name) OSMesaGetProcAddress((const char *)name)
 #elif defined(GLEW_EGL)
-#  define glewGetProcSubtractress(name) eglGetProcSubtractress((const char *)name)
+#  define glewGetProcAddress(name) eglGetProcAddress((const char *)name)
 #elif defined(_WIN32)
-#  define glewGetProcSubtractress(name) wglGetProcSubtractress((LPCSTR)name)
+#  define glewGetProcAddress(name) wglGetProcAddress((LPCSTR)name)
 #elif defined(__APPLE__) && !defined(GLEW_APPLE_GLX)
-#  define glewGetProcSubtractress(name) NSGLGetProcSubtractress(name)
+#  define glewGetProcAddress(name) NSGLGetProcAddress(name)
 #elif defined(__sgi) || defined(__sun) || defined(__HAIKU__)
-#  define glewGetProcSubtractress(name) dlGetProcSubtractress(name)
+#  define glewGetProcAddress(name) dlGetProcAddress(name)
 #elif defined(__ANDROID__)
-#  define glewGetProcSubtractress(name) NULL /* TODO */
+#  define glewGetProcAddress(name) NULL /* TODO */
 #elif defined(__native_client__)
-#  define glewGetProcSubtractress(name) NULL /* TODO */
+#  define glewGetProcAddress(name) NULL /* TODO */
 #else /* __linux */
-#  define glewGetProcSubtractress(name) (*glXGetProcSubtractressARB)(name)
+#  define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
 #endif
 
 /*
@@ -2501,9 +2498,9 @@ PFNGLCREATECOMMANDLISTSNVPROC __glewCreateCommandListsNV = NULL;
 PFNGLCREATESTATESNVPROC __glewCreateStatesNV = NULL;
 PFNGLDELETECOMMANDLISTSNVPROC __glewDeleteCommandListsNV = NULL;
 PFNGLDELETESTATESNVPROC __glewDeleteStatesNV = NULL;
-PFNGLDRAWCOMMANDSADDRESSNVPROC __glewDrawCommandsSubtractressNV = NULL;
+PFNGLDRAWCOMMANDSADDRESSNVPROC __glewDrawCommandsAddressNV = NULL;
 PFNGLDRAWCOMMANDSNVPROC __glewDrawCommandsNV = NULL;
-PFNGLDRAWCOMMANDSSTATESADDRESSNVPROC __glewDrawCommandsStatesSubtractressNV = NULL;
+PFNGLDRAWCOMMANDSSTATESADDRESSNVPROC __glewDrawCommandsStatesAddressNV = NULL;
 PFNGLDRAWCOMMANDSSTATESNVPROC __glewDrawCommandsStatesNV = NULL;
 PFNGLGETCOMMANDHEADERNVPROC __glewGetCommandHeaderNV = NULL;
 PFNGLGETSTAGEINDEXNVPROC __glewGetStageIndexNV = NULL;
@@ -2537,7 +2534,7 @@ PFNGLDRAWELEMENTSINSTANCEDNVPROC __glewDrawElementsInstancedNV = NULL;
 PFNGLDRAWTEXTURENVPROC __glewDrawTextureNV = NULL;
 
 PFNGLDRAWVKIMAGENVPROC __glewDrawVkImageNV = NULL;
-PFNGLGETVKPROCADDRNVPROC __glewGetVkProcSubtractrNV = NULL;
+PFNGLGETVKPROCADDRNVPROC __glewGetVkProcAddrNV = NULL;
 PFNGLSIGNALVKFENCENVPROC __glewSignalVkFenceNV = NULL;
 PFNGLSIGNALVKSEMAPHORENVPROC __glewSignalVkSemaphoreNV = NULL;
 PFNGLWAITVKSEMAPHORENVPROC __glewWaitVkSemaphoreNV = NULL;
@@ -2899,7 +2896,7 @@ PFNGLVERTEXATTRIBL4UI64NVPROC __glewVertexAttribL4ui64NV = NULL;
 PFNGLVERTEXATTRIBL4UI64VNVPROC __glewVertexAttribL4ui64vNV = NULL;
 PFNGLVERTEXATTRIBLFORMATNVPROC __glewVertexAttribLFormatNV = NULL;
 
-PFNGLBUFFERADDRESSRANGENVPROC __glewBufferSubtractressRangeNV = NULL;
+PFNGLBUFFERADDRESSRANGENVPROC __glewBufferAddressRangeNV = NULL;
 PFNGLCOLORFORMATNVPROC __glewColorFormatNV = NULL;
 PFNGLEDGEFLAGFORMATNVPROC __glewEdgeFlagFormatNV = NULL;
 PFNGLFOGCOORDFORMATNVPROC __glewFogCoordFormatNV = NULL;
@@ -3091,7 +3088,7 @@ PFNGLISSUPPORTEDREGALPROC __glewIsSupportedREGAL = NULL;
 
 PFNGLLOGMESSAGECALLBACKREGALPROC __glewLogMessageCallbackREGAL = NULL;
 
-PFNGLGETPROCADDRESSREGALPROC __glewGetProcSubtractressREGAL = NULL;
+PFNGLGETPROCADDRESSREGALPROC __glewGetProcAddressREGAL = NULL;
 
 PFNGLDETAILTEXFUNCSGISPROC __glewDetailTexFuncSGIS = NULL;
 PFNGLGETDETAILTEXFUNCSGISPROC __glewGetDetailTexFuncSGIS = NULL;
@@ -3125,7 +3122,7 @@ PFNGLGENASYNCMARKERSSGIXPROC __glewGenAsyncMarkersSGIX = NULL;
 PFNGLISASYNCMARKERSGIXPROC __glewIsAsyncMarkerSGIX = NULL;
 PFNGLPOLLASYNCSGIXPROC __glewPollAsyncSGIX = NULL;
 
-PFNGLADDRESSSPACEPROC __glewSubtractressSpace = NULL;
+PFNGLADDRESSSPACEPROC __glewAddressSpace = NULL;
 PFNGLDATAPIPEPROC __glewDataPipe = NULL;
 
 PFNGLFLUSHRASTERSGIXPROC __glewFlushRasterSGIX = NULL;
@@ -3279,7 +3276,7 @@ PFNGLTEXCOORD4FCOLOR4FNORMAL3FVERTEX4FVSUNPROC __glewTexCoord4fColor4fNormal3fVe
 PFNGLTEXCOORD4FVERTEX4FSUNPROC __glewTexCoord4fVertex4fSUN = NULL;
 PFNGLTEXCOORD4FVERTEX4FVSUNPROC __glewTexCoord4fVertex4fvSUN = NULL;
 
-PFNGLADDSWAPHINTRECTWINPROC __glewSubtractSwapHintRectWIN = NULL;
+PFNGLADDSWAPHINTRECTWINPROC __glewAddSwapHintRectWIN = NULL;
 
 GLboolean __GLEW_VERSION_1_1 = GL_FALSE;
 GLboolean __GLEW_VERSION_1_2 = GL_FALSE;
@@ -9258,10 +9255,10 @@ static GLboolean _glewInit_GL_VERSION_1_2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyTexSubImage3D = (PFNGLCOPYTEXSUBIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexSubImage3D")) == NULL) || r;
-  r = ((glDrawRangeElements = (PFNGLDRAWRANGEELEMENTSPROC)glewGetProcSubtractress((const GLubyte*)"glDrawRangeElements")) == NULL) || r;
-  r = ((glTexImage3D = (PFNGLTEXIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage3D")) == NULL) || r;
-  r = ((glTexSubImage3D = (PFNGLTEXSUBIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glTexSubImage3D")) == NULL) || r;
+  r = ((glCopyTexSubImage3D = (PFNGLCOPYTEXSUBIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glCopyTexSubImage3D")) == NULL) || r;
+  r = ((glDrawRangeElements = (PFNGLDRAWRANGEELEMENTSPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElements")) == NULL) || r;
+  r = ((glTexImage3D = (PFNGLTEXIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glTexImage3D")) == NULL) || r;
+  r = ((glTexSubImage3D = (PFNGLTEXSUBIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glTexSubImage3D")) == NULL) || r;
 
   return r;
 }
@@ -9274,52 +9271,52 @@ static GLboolean _glewInit_GL_VERSION_1_3 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glActiveTexture = (PFNGLACTIVETEXTUREPROC)glewGetProcSubtractress((const GLubyte*)"glActiveTexture")) == NULL) || r;
-  r = ((glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC)glewGetProcSubtractress((const GLubyte*)"glClientActiveTexture")) == NULL) || r;
-  r = ((glCompressedTexImage1D = (PFNGLCOMPRESSEDTEXIMAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage1D")) == NULL) || r;
-  r = ((glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage2D")) == NULL) || r;
-  r = ((glCompressedTexImage3D = (PFNGLCOMPRESSEDTEXIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage3D")) == NULL) || r;
-  r = ((glCompressedTexSubImage1D = (PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage1D")) == NULL) || r;
-  r = ((glCompressedTexSubImage2D = (PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage2D")) == NULL) || r;
-  r = ((glCompressedTexSubImage3D = (PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage3D")) == NULL) || r;
-  r = ((glGetCompressedTexImage = (PFNGLGETCOMPRESSEDTEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetCompressedTexImage")) == NULL) || r;
-  r = ((glLoadTransposeMatrixd = (PFNGLLOADTRANSPOSEMATRIXDPROC)glewGetProcSubtractress((const GLubyte*)"glLoadTransposeMatrixd")) == NULL) || r;
-  r = ((glLoadTransposeMatrixf = (PFNGLLOADTRANSPOSEMATRIXFPROC)glewGetProcSubtractress((const GLubyte*)"glLoadTransposeMatrixf")) == NULL) || r;
-  r = ((glMultTransposeMatrixd = (PFNGLMULTTRANSPOSEMATRIXDPROC)glewGetProcSubtractress((const GLubyte*)"glMultTransposeMatrixd")) == NULL) || r;
-  r = ((glMultTransposeMatrixf = (PFNGLMULTTRANSPOSEMATRIXFPROC)glewGetProcSubtractress((const GLubyte*)"glMultTransposeMatrixf")) == NULL) || r;
-  r = ((glMultiTexCoord1d = (PFNGLMULTITEXCOORD1DPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1d")) == NULL) || r;
-  r = ((glMultiTexCoord1dv = (PFNGLMULTITEXCOORD1DVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1dv")) == NULL) || r;
-  r = ((glMultiTexCoord1f = (PFNGLMULTITEXCOORD1FPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1f")) == NULL) || r;
-  r = ((glMultiTexCoord1fv = (PFNGLMULTITEXCOORD1FVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1fv")) == NULL) || r;
-  r = ((glMultiTexCoord1i = (PFNGLMULTITEXCOORD1IPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1i")) == NULL) || r;
-  r = ((glMultiTexCoord1iv = (PFNGLMULTITEXCOORD1IVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1iv")) == NULL) || r;
-  r = ((glMultiTexCoord1s = (PFNGLMULTITEXCOORD1SPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1s")) == NULL) || r;
-  r = ((glMultiTexCoord1sv = (PFNGLMULTITEXCOORD1SVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1sv")) == NULL) || r;
-  r = ((glMultiTexCoord2d = (PFNGLMULTITEXCOORD2DPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2d")) == NULL) || r;
-  r = ((glMultiTexCoord2dv = (PFNGLMULTITEXCOORD2DVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2dv")) == NULL) || r;
-  r = ((glMultiTexCoord2f = (PFNGLMULTITEXCOORD2FPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2f")) == NULL) || r;
-  r = ((glMultiTexCoord2fv = (PFNGLMULTITEXCOORD2FVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2fv")) == NULL) || r;
-  r = ((glMultiTexCoord2i = (PFNGLMULTITEXCOORD2IPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2i")) == NULL) || r;
-  r = ((glMultiTexCoord2iv = (PFNGLMULTITEXCOORD2IVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2iv")) == NULL) || r;
-  r = ((glMultiTexCoord2s = (PFNGLMULTITEXCOORD2SPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2s")) == NULL) || r;
-  r = ((glMultiTexCoord2sv = (PFNGLMULTITEXCOORD2SVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2sv")) == NULL) || r;
-  r = ((glMultiTexCoord3d = (PFNGLMULTITEXCOORD3DPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3d")) == NULL) || r;
-  r = ((glMultiTexCoord3dv = (PFNGLMULTITEXCOORD3DVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3dv")) == NULL) || r;
-  r = ((glMultiTexCoord3f = (PFNGLMULTITEXCOORD3FPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3f")) == NULL) || r;
-  r = ((glMultiTexCoord3fv = (PFNGLMULTITEXCOORD3FVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3fv")) == NULL) || r;
-  r = ((glMultiTexCoord3i = (PFNGLMULTITEXCOORD3IPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3i")) == NULL) || r;
-  r = ((glMultiTexCoord3iv = (PFNGLMULTITEXCOORD3IVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3iv")) == NULL) || r;
-  r = ((glMultiTexCoord3s = (PFNGLMULTITEXCOORD3SPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3s")) == NULL) || r;
-  r = ((glMultiTexCoord3sv = (PFNGLMULTITEXCOORD3SVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3sv")) == NULL) || r;
-  r = ((glMultiTexCoord4d = (PFNGLMULTITEXCOORD4DPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4d")) == NULL) || r;
-  r = ((glMultiTexCoord4dv = (PFNGLMULTITEXCOORD4DVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4dv")) == NULL) || r;
-  r = ((glMultiTexCoord4f = (PFNGLMULTITEXCOORD4FPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4f")) == NULL) || r;
-  r = ((glMultiTexCoord4fv = (PFNGLMULTITEXCOORD4FVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4fv")) == NULL) || r;
-  r = ((glMultiTexCoord4i = (PFNGLMULTITEXCOORD4IPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4i")) == NULL) || r;
-  r = ((glMultiTexCoord4iv = (PFNGLMULTITEXCOORD4IVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4iv")) == NULL) || r;
-  r = ((glMultiTexCoord4s = (PFNGLMULTITEXCOORD4SPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4s")) == NULL) || r;
-  r = ((glMultiTexCoord4sv = (PFNGLMULTITEXCOORD4SVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4sv")) == NULL) || r;
-  r = ((glSampleCoverage = (PFNGLSAMPLECOVERAGEPROC)glewGetProcSubtractress((const GLubyte*)"glSampleCoverage")) == NULL) || r;
+  r = ((glActiveTexture = (PFNGLACTIVETEXTUREPROC)glewGetProcAddress((const GLubyte*)"glActiveTexture")) == NULL) || r;
+  r = ((glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC)glewGetProcAddress((const GLubyte*)"glClientActiveTexture")) == NULL) || r;
+  r = ((glCompressedTexImage1D = (PFNGLCOMPRESSEDTEXIMAGE1DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage1D")) == NULL) || r;
+  r = ((glCompressedTexImage2D = (PFNGLCOMPRESSEDTEXIMAGE2DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage2D")) == NULL) || r;
+  r = ((glCompressedTexImage3D = (PFNGLCOMPRESSEDTEXIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage3D")) == NULL) || r;
+  r = ((glCompressedTexSubImage1D = (PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage1D")) == NULL) || r;
+  r = ((glCompressedTexSubImage2D = (PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage2D")) == NULL) || r;
+  r = ((glCompressedTexSubImage3D = (PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage3D")) == NULL) || r;
+  r = ((glGetCompressedTexImage = (PFNGLGETCOMPRESSEDTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetCompressedTexImage")) == NULL) || r;
+  r = ((glLoadTransposeMatrixd = (PFNGLLOADTRANSPOSEMATRIXDPROC)glewGetProcAddress((const GLubyte*)"glLoadTransposeMatrixd")) == NULL) || r;
+  r = ((glLoadTransposeMatrixf = (PFNGLLOADTRANSPOSEMATRIXFPROC)glewGetProcAddress((const GLubyte*)"glLoadTransposeMatrixf")) == NULL) || r;
+  r = ((glMultTransposeMatrixd = (PFNGLMULTTRANSPOSEMATRIXDPROC)glewGetProcAddress((const GLubyte*)"glMultTransposeMatrixd")) == NULL) || r;
+  r = ((glMultTransposeMatrixf = (PFNGLMULTTRANSPOSEMATRIXFPROC)glewGetProcAddress((const GLubyte*)"glMultTransposeMatrixf")) == NULL) || r;
+  r = ((glMultiTexCoord1d = (PFNGLMULTITEXCOORD1DPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1d")) == NULL) || r;
+  r = ((glMultiTexCoord1dv = (PFNGLMULTITEXCOORD1DVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1dv")) == NULL) || r;
+  r = ((glMultiTexCoord1f = (PFNGLMULTITEXCOORD1FPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1f")) == NULL) || r;
+  r = ((glMultiTexCoord1fv = (PFNGLMULTITEXCOORD1FVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1fv")) == NULL) || r;
+  r = ((glMultiTexCoord1i = (PFNGLMULTITEXCOORD1IPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1i")) == NULL) || r;
+  r = ((glMultiTexCoord1iv = (PFNGLMULTITEXCOORD1IVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1iv")) == NULL) || r;
+  r = ((glMultiTexCoord1s = (PFNGLMULTITEXCOORD1SPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1s")) == NULL) || r;
+  r = ((glMultiTexCoord1sv = (PFNGLMULTITEXCOORD1SVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1sv")) == NULL) || r;
+  r = ((glMultiTexCoord2d = (PFNGLMULTITEXCOORD2DPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2d")) == NULL) || r;
+  r = ((glMultiTexCoord2dv = (PFNGLMULTITEXCOORD2DVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2dv")) == NULL) || r;
+  r = ((glMultiTexCoord2f = (PFNGLMULTITEXCOORD2FPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2f")) == NULL) || r;
+  r = ((glMultiTexCoord2fv = (PFNGLMULTITEXCOORD2FVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2fv")) == NULL) || r;
+  r = ((glMultiTexCoord2i = (PFNGLMULTITEXCOORD2IPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2i")) == NULL) || r;
+  r = ((glMultiTexCoord2iv = (PFNGLMULTITEXCOORD2IVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2iv")) == NULL) || r;
+  r = ((glMultiTexCoord2s = (PFNGLMULTITEXCOORD2SPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2s")) == NULL) || r;
+  r = ((glMultiTexCoord2sv = (PFNGLMULTITEXCOORD2SVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2sv")) == NULL) || r;
+  r = ((glMultiTexCoord3d = (PFNGLMULTITEXCOORD3DPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3d")) == NULL) || r;
+  r = ((glMultiTexCoord3dv = (PFNGLMULTITEXCOORD3DVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3dv")) == NULL) || r;
+  r = ((glMultiTexCoord3f = (PFNGLMULTITEXCOORD3FPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3f")) == NULL) || r;
+  r = ((glMultiTexCoord3fv = (PFNGLMULTITEXCOORD3FVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3fv")) == NULL) || r;
+  r = ((glMultiTexCoord3i = (PFNGLMULTITEXCOORD3IPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3i")) == NULL) || r;
+  r = ((glMultiTexCoord3iv = (PFNGLMULTITEXCOORD3IVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3iv")) == NULL) || r;
+  r = ((glMultiTexCoord3s = (PFNGLMULTITEXCOORD3SPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3s")) == NULL) || r;
+  r = ((glMultiTexCoord3sv = (PFNGLMULTITEXCOORD3SVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3sv")) == NULL) || r;
+  r = ((glMultiTexCoord4d = (PFNGLMULTITEXCOORD4DPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4d")) == NULL) || r;
+  r = ((glMultiTexCoord4dv = (PFNGLMULTITEXCOORD4DVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4dv")) == NULL) || r;
+  r = ((glMultiTexCoord4f = (PFNGLMULTITEXCOORD4FPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4f")) == NULL) || r;
+  r = ((glMultiTexCoord4fv = (PFNGLMULTITEXCOORD4FVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4fv")) == NULL) || r;
+  r = ((glMultiTexCoord4i = (PFNGLMULTITEXCOORD4IPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4i")) == NULL) || r;
+  r = ((glMultiTexCoord4iv = (PFNGLMULTITEXCOORD4IVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4iv")) == NULL) || r;
+  r = ((glMultiTexCoord4s = (PFNGLMULTITEXCOORD4SPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4s")) == NULL) || r;
+  r = ((glMultiTexCoord4sv = (PFNGLMULTITEXCOORD4SVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4sv")) == NULL) || r;
+  r = ((glSampleCoverage = (PFNGLSAMPLECOVERAGEPROC)glewGetProcAddress((const GLubyte*)"glSampleCoverage")) == NULL) || r;
 
   return r;
 }
@@ -9332,53 +9329,53 @@ static GLboolean _glewInit_GL_VERSION_1_4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendColor = (PFNGLBLENDCOLORPROC)glewGetProcSubtractress((const GLubyte*)"glBlendColor")) == NULL) || r;
-  r = ((glBlendEquation = (PFNGLBLENDEQUATIONPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquation")) == NULL) || r;
-  r = ((glBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncSeparate")) == NULL) || r;
-  r = ((glFogCoordPointer = (PFNGLFOGCOORDPOINTERPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordPointer")) == NULL) || r;
-  r = ((glFogCoordd = (PFNGLFOGCOORDDPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordd")) == NULL) || r;
-  r = ((glFogCoorddv = (PFNGLFOGCOORDDVPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoorddv")) == NULL) || r;
-  r = ((glFogCoordf = (PFNGLFOGCOORDFPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordf")) == NULL) || r;
-  r = ((glFogCoordfv = (PFNGLFOGCOORDFVPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordfv")) == NULL) || r;
-  r = ((glMultiDrawArrays = (PFNGLMULTIDRAWARRAYSPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArrays")) == NULL) || r;
-  r = ((glMultiDrawElements = (PFNGLMULTIDRAWELEMENTSPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElements")) == NULL) || r;
-  r = ((glPointParameterf = (PFNGLPOINTPARAMETERFPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterf")) == NULL) || r;
-  r = ((glPointParameterfv = (PFNGLPOINTPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterfv")) == NULL) || r;
-  r = ((glPointParameteri = (PFNGLPOINTPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameteri")) == NULL) || r;
-  r = ((glPointParameteriv = (PFNGLPOINTPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameteriv")) == NULL) || r;
-  r = ((glSecondaryColor3b = (PFNGLSECONDARYCOLOR3BPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3b")) == NULL) || r;
-  r = ((glSecondaryColor3bv = (PFNGLSECONDARYCOLOR3BVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3bv")) == NULL) || r;
-  r = ((glSecondaryColor3d = (PFNGLSECONDARYCOLOR3DPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3d")) == NULL) || r;
-  r = ((glSecondaryColor3dv = (PFNGLSECONDARYCOLOR3DVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3dv")) == NULL) || r;
-  r = ((glSecondaryColor3f = (PFNGLSECONDARYCOLOR3FPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3f")) == NULL) || r;
-  r = ((glSecondaryColor3fv = (PFNGLSECONDARYCOLOR3FVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3fv")) == NULL) || r;
-  r = ((glSecondaryColor3i = (PFNGLSECONDARYCOLOR3IPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3i")) == NULL) || r;
-  r = ((glSecondaryColor3iv = (PFNGLSECONDARYCOLOR3IVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3iv")) == NULL) || r;
-  r = ((glSecondaryColor3s = (PFNGLSECONDARYCOLOR3SPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3s")) == NULL) || r;
-  r = ((glSecondaryColor3sv = (PFNGLSECONDARYCOLOR3SVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3sv")) == NULL) || r;
-  r = ((glSecondaryColor3ub = (PFNGLSECONDARYCOLOR3UBPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3ub")) == NULL) || r;
-  r = ((glSecondaryColor3ubv = (PFNGLSECONDARYCOLOR3UBVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3ubv")) == NULL) || r;
-  r = ((glSecondaryColor3ui = (PFNGLSECONDARYCOLOR3UIPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3ui")) == NULL) || r;
-  r = ((glSecondaryColor3uiv = (PFNGLSECONDARYCOLOR3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3uiv")) == NULL) || r;
-  r = ((glSecondaryColor3us = (PFNGLSECONDARYCOLOR3USPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3us")) == NULL) || r;
-  r = ((glSecondaryColor3usv = (PFNGLSECONDARYCOLOR3USVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3usv")) == NULL) || r;
-  r = ((glSecondaryColorPointer = (PFNGLSECONDARYCOLORPOINTERPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColorPointer")) == NULL) || r;
-  r = ((glWindowPos2d = (PFNGLWINDOWPOS2DPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2d")) == NULL) || r;
-  r = ((glWindowPos2dv = (PFNGLWINDOWPOS2DVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2dv")) == NULL) || r;
-  r = ((glWindowPos2f = (PFNGLWINDOWPOS2FPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2f")) == NULL) || r;
-  r = ((glWindowPos2fv = (PFNGLWINDOWPOS2FVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2fv")) == NULL) || r;
-  r = ((glWindowPos2i = (PFNGLWINDOWPOS2IPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2i")) == NULL) || r;
-  r = ((glWindowPos2iv = (PFNGLWINDOWPOS2IVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2iv")) == NULL) || r;
-  r = ((glWindowPos2s = (PFNGLWINDOWPOS2SPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2s")) == NULL) || r;
-  r = ((glWindowPos2sv = (PFNGLWINDOWPOS2SVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2sv")) == NULL) || r;
-  r = ((glWindowPos3d = (PFNGLWINDOWPOS3DPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3d")) == NULL) || r;
-  r = ((glWindowPos3dv = (PFNGLWINDOWPOS3DVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3dv")) == NULL) || r;
-  r = ((glWindowPos3f = (PFNGLWINDOWPOS3FPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3f")) == NULL) || r;
-  r = ((glWindowPos3fv = (PFNGLWINDOWPOS3FVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3fv")) == NULL) || r;
-  r = ((glWindowPos3i = (PFNGLWINDOWPOS3IPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3i")) == NULL) || r;
-  r = ((glWindowPos3iv = (PFNGLWINDOWPOS3IVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3iv")) == NULL) || r;
-  r = ((glWindowPos3s = (PFNGLWINDOWPOS3SPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3s")) == NULL) || r;
-  r = ((glWindowPos3sv = (PFNGLWINDOWPOS3SVPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3sv")) == NULL) || r;
+  r = ((glBlendColor = (PFNGLBLENDCOLORPROC)glewGetProcAddress((const GLubyte*)"glBlendColor")) == NULL) || r;
+  r = ((glBlendEquation = (PFNGLBLENDEQUATIONPROC)glewGetProcAddress((const GLubyte*)"glBlendEquation")) == NULL) || r;
+  r = ((glBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncSeparate")) == NULL) || r;
+  r = ((glFogCoordPointer = (PFNGLFOGCOORDPOINTERPROC)glewGetProcAddress((const GLubyte*)"glFogCoordPointer")) == NULL) || r;
+  r = ((glFogCoordd = (PFNGLFOGCOORDDPROC)glewGetProcAddress((const GLubyte*)"glFogCoordd")) == NULL) || r;
+  r = ((glFogCoorddv = (PFNGLFOGCOORDDVPROC)glewGetProcAddress((const GLubyte*)"glFogCoorddv")) == NULL) || r;
+  r = ((glFogCoordf = (PFNGLFOGCOORDFPROC)glewGetProcAddress((const GLubyte*)"glFogCoordf")) == NULL) || r;
+  r = ((glFogCoordfv = (PFNGLFOGCOORDFVPROC)glewGetProcAddress((const GLubyte*)"glFogCoordfv")) == NULL) || r;
+  r = ((glMultiDrawArrays = (PFNGLMULTIDRAWARRAYSPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArrays")) == NULL) || r;
+  r = ((glMultiDrawElements = (PFNGLMULTIDRAWELEMENTSPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElements")) == NULL) || r;
+  r = ((glPointParameterf = (PFNGLPOINTPARAMETERFPROC)glewGetProcAddress((const GLubyte*)"glPointParameterf")) == NULL) || r;
+  r = ((glPointParameterfv = (PFNGLPOINTPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glPointParameterfv")) == NULL) || r;
+  r = ((glPointParameteri = (PFNGLPOINTPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glPointParameteri")) == NULL) || r;
+  r = ((glPointParameteriv = (PFNGLPOINTPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glPointParameteriv")) == NULL) || r;
+  r = ((glSecondaryColor3b = (PFNGLSECONDARYCOLOR3BPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3b")) == NULL) || r;
+  r = ((glSecondaryColor3bv = (PFNGLSECONDARYCOLOR3BVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3bv")) == NULL) || r;
+  r = ((glSecondaryColor3d = (PFNGLSECONDARYCOLOR3DPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3d")) == NULL) || r;
+  r = ((glSecondaryColor3dv = (PFNGLSECONDARYCOLOR3DVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3dv")) == NULL) || r;
+  r = ((glSecondaryColor3f = (PFNGLSECONDARYCOLOR3FPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3f")) == NULL) || r;
+  r = ((glSecondaryColor3fv = (PFNGLSECONDARYCOLOR3FVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3fv")) == NULL) || r;
+  r = ((glSecondaryColor3i = (PFNGLSECONDARYCOLOR3IPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3i")) == NULL) || r;
+  r = ((glSecondaryColor3iv = (PFNGLSECONDARYCOLOR3IVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3iv")) == NULL) || r;
+  r = ((glSecondaryColor3s = (PFNGLSECONDARYCOLOR3SPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3s")) == NULL) || r;
+  r = ((glSecondaryColor3sv = (PFNGLSECONDARYCOLOR3SVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3sv")) == NULL) || r;
+  r = ((glSecondaryColor3ub = (PFNGLSECONDARYCOLOR3UBPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3ub")) == NULL) || r;
+  r = ((glSecondaryColor3ubv = (PFNGLSECONDARYCOLOR3UBVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3ubv")) == NULL) || r;
+  r = ((glSecondaryColor3ui = (PFNGLSECONDARYCOLOR3UIPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3ui")) == NULL) || r;
+  r = ((glSecondaryColor3uiv = (PFNGLSECONDARYCOLOR3UIVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3uiv")) == NULL) || r;
+  r = ((glSecondaryColor3us = (PFNGLSECONDARYCOLOR3USPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3us")) == NULL) || r;
+  r = ((glSecondaryColor3usv = (PFNGLSECONDARYCOLOR3USVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3usv")) == NULL) || r;
+  r = ((glSecondaryColorPointer = (PFNGLSECONDARYCOLORPOINTERPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColorPointer")) == NULL) || r;
+  r = ((glWindowPos2d = (PFNGLWINDOWPOS2DPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2d")) == NULL) || r;
+  r = ((glWindowPos2dv = (PFNGLWINDOWPOS2DVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2dv")) == NULL) || r;
+  r = ((glWindowPos2f = (PFNGLWINDOWPOS2FPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2f")) == NULL) || r;
+  r = ((glWindowPos2fv = (PFNGLWINDOWPOS2FVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2fv")) == NULL) || r;
+  r = ((glWindowPos2i = (PFNGLWINDOWPOS2IPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2i")) == NULL) || r;
+  r = ((glWindowPos2iv = (PFNGLWINDOWPOS2IVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2iv")) == NULL) || r;
+  r = ((glWindowPos2s = (PFNGLWINDOWPOS2SPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2s")) == NULL) || r;
+  r = ((glWindowPos2sv = (PFNGLWINDOWPOS2SVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2sv")) == NULL) || r;
+  r = ((glWindowPos3d = (PFNGLWINDOWPOS3DPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3d")) == NULL) || r;
+  r = ((glWindowPos3dv = (PFNGLWINDOWPOS3DVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3dv")) == NULL) || r;
+  r = ((glWindowPos3f = (PFNGLWINDOWPOS3FPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3f")) == NULL) || r;
+  r = ((glWindowPos3fv = (PFNGLWINDOWPOS3FVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3fv")) == NULL) || r;
+  r = ((glWindowPos3i = (PFNGLWINDOWPOS3IPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3i")) == NULL) || r;
+  r = ((glWindowPos3iv = (PFNGLWINDOWPOS3IVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3iv")) == NULL) || r;
+  r = ((glWindowPos3s = (PFNGLWINDOWPOS3SPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3s")) == NULL) || r;
+  r = ((glWindowPos3sv = (PFNGLWINDOWPOS3SVPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3sv")) == NULL) || r;
 
   return r;
 }
@@ -9391,25 +9388,25 @@ static GLboolean _glewInit_GL_VERSION_1_5 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginQuery = (PFNGLBEGINQUERYPROC)glewGetProcSubtractress((const GLubyte*)"glBeginQuery")) == NULL) || r;
-  r = ((glBindBuffer = (PFNGLBINDBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glBindBuffer")) == NULL) || r;
-  r = ((glBufferData = (PFNGLBUFFERDATAPROC)glewGetProcSubtractress((const GLubyte*)"glBufferData")) == NULL) || r;
-  r = ((glBufferSubData = (PFNGLBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glBufferSubData")) == NULL) || r;
-  r = ((glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteBuffers")) == NULL) || r;
-  r = ((glDeleteQueries = (PFNGLDELETEQUERIESPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteQueries")) == NULL) || r;
-  r = ((glEndQuery = (PFNGLENDQUERYPROC)glewGetProcSubtractress((const GLubyte*)"glEndQuery")) == NULL) || r;
-  r = ((glGenBuffers = (PFNGLGENBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glGenBuffers")) == NULL) || r;
-  r = ((glGenQueries = (PFNGLGENQUERIESPROC)glewGetProcSubtractress((const GLubyte*)"glGenQueries")) == NULL) || r;
-  r = ((glGetBufferParameteriv = (PFNGLGETBUFFERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferParameteriv")) == NULL) || r;
-  r = ((glGetBufferPointerv = (PFNGLGETBUFFERPOINTERVPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferPointerv")) == NULL) || r;
-  r = ((glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferSubData")) == NULL) || r;
-  r = ((glGetQueryObjectiv = (PFNGLGETQUERYOBJECTIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectiv")) == NULL) || r;
-  r = ((glGetQueryObjectuiv = (PFNGLGETQUERYOBJECTUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectuiv")) == NULL) || r;
-  r = ((glGetQueryiv = (PFNGLGETQUERYIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryiv")) == NULL) || r;
-  r = ((glIsBuffer = (PFNGLISBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glIsBuffer")) == NULL) || r;
-  r = ((glIsQuery = (PFNGLISQUERYPROC)glewGetProcSubtractress((const GLubyte*)"glIsQuery")) == NULL) || r;
-  r = ((glMapBuffer = (PFNGLMAPBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glMapBuffer")) == NULL) || r;
-  r = ((glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glUnmapBuffer")) == NULL) || r;
+  r = ((glBeginQuery = (PFNGLBEGINQUERYPROC)glewGetProcAddress((const GLubyte*)"glBeginQuery")) == NULL) || r;
+  r = ((glBindBuffer = (PFNGLBINDBUFFERPROC)glewGetProcAddress((const GLubyte*)"glBindBuffer")) == NULL) || r;
+  r = ((glBufferData = (PFNGLBUFFERDATAPROC)glewGetProcAddress((const GLubyte*)"glBufferData")) == NULL) || r;
+  r = ((glBufferSubData = (PFNGLBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glBufferSubData")) == NULL) || r;
+  r = ((glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glDeleteBuffers")) == NULL) || r;
+  r = ((glDeleteQueries = (PFNGLDELETEQUERIESPROC)glewGetProcAddress((const GLubyte*)"glDeleteQueries")) == NULL) || r;
+  r = ((glEndQuery = (PFNGLENDQUERYPROC)glewGetProcAddress((const GLubyte*)"glEndQuery")) == NULL) || r;
+  r = ((glGenBuffers = (PFNGLGENBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glGenBuffers")) == NULL) || r;
+  r = ((glGenQueries = (PFNGLGENQUERIESPROC)glewGetProcAddress((const GLubyte*)"glGenQueries")) == NULL) || r;
+  r = ((glGetBufferParameteriv = (PFNGLGETBUFFERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetBufferParameteriv")) == NULL) || r;
+  r = ((glGetBufferPointerv = (PFNGLGETBUFFERPOINTERVPROC)glewGetProcAddress((const GLubyte*)"glGetBufferPointerv")) == NULL) || r;
+  r = ((glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glGetBufferSubData")) == NULL) || r;
+  r = ((glGetQueryObjectiv = (PFNGLGETQUERYOBJECTIVPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectiv")) == NULL) || r;
+  r = ((glGetQueryObjectuiv = (PFNGLGETQUERYOBJECTUIVPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectuiv")) == NULL) || r;
+  r = ((glGetQueryiv = (PFNGLGETQUERYIVPROC)glewGetProcAddress((const GLubyte*)"glGetQueryiv")) == NULL) || r;
+  r = ((glIsBuffer = (PFNGLISBUFFERPROC)glewGetProcAddress((const GLubyte*)"glIsBuffer")) == NULL) || r;
+  r = ((glIsQuery = (PFNGLISQUERYPROC)glewGetProcAddress((const GLubyte*)"glIsQuery")) == NULL) || r;
+  r = ((glMapBuffer = (PFNGLMAPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glMapBuffer")) == NULL) || r;
+  r = ((glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glUnmapBuffer")) == NULL) || r;
 
   return r;
 }
@@ -9422,99 +9419,99 @@ static GLboolean _glewInit_GL_VERSION_2_0 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAttachShader = (PFNGLATTACHSHADERPROC)glewGetProcSubtractress((const GLubyte*)"glAttachShader")) == NULL) || r;
-  r = ((glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glBindAttribLocation")) == NULL) || r;
-  r = ((glBlendEquationSeparate = (PFNGLBLENDEQUATIONSEPARATEPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationSeparate")) == NULL) || r;
-  r = ((glCompileShader = (PFNGLCOMPILESHADERPROC)glewGetProcSubtractress((const GLubyte*)"glCompileShader")) == NULL) || r;
-  r = ((glCreateProgram = (PFNGLCREATEPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glCreateProgram")) == NULL) || r;
-  r = ((glCreateShader = (PFNGLCREATESHADERPROC)glewGetProcSubtractress((const GLubyte*)"glCreateShader")) == NULL) || r;
-  r = ((glDeleteProgram = (PFNGLDELETEPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteProgram")) == NULL) || r;
-  r = ((glDeleteShader = (PFNGLDELETESHADERPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteShader")) == NULL) || r;
-  r = ((glDetachShader = (PFNGLDETACHSHADERPROC)glewGetProcSubtractress((const GLubyte*)"glDetachShader")) == NULL) || r;
-  r = ((glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVertexAttribArray")) == NULL) || r;
-  r = ((glDrawBuffers = (PFNGLDRAWBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBuffers")) == NULL) || r;
-  r = ((glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVertexAttribArray")) == NULL) || r;
-  r = ((glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveAttrib")) == NULL) || r;
-  r = ((glGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveUniform")) == NULL) || r;
-  r = ((glGetAttachedShaders = (PFNGLGETATTACHEDSHADERSPROC)glewGetProcSubtractress((const GLubyte*)"glGetAttachedShaders")) == NULL) || r;
-  r = ((glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glGetAttribLocation")) == NULL) || r;
-  r = ((glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramInfoLog")) == NULL) || r;
-  r = ((glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramiv")) == NULL) || r;
-  r = ((glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glewGetProcSubtractress((const GLubyte*)"glGetShaderInfoLog")) == NULL) || r;
-  r = ((glGetShaderSource = (PFNGLGETSHADERSOURCEPROC)glewGetProcSubtractress((const GLubyte*)"glGetShaderSource")) == NULL) || r;
-  r = ((glGetShaderiv = (PFNGLGETSHADERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetShaderiv")) == NULL) || r;
-  r = ((glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformLocation")) == NULL) || r;
-  r = ((glGetUniformfv = (PFNGLGETUNIFORMFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformfv")) == NULL) || r;
-  r = ((glGetUniformiv = (PFNGLGETUNIFORMIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformiv")) == NULL) || r;
-  r = ((glGetVertexAttribPointerv = (PFNGLGETVERTEXATTRIBPOINTERVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribPointerv")) == NULL) || r;
-  r = ((glGetVertexAttribdv = (PFNGLGETVERTEXATTRIBDVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribdv")) == NULL) || r;
-  r = ((glGetVertexAttribfv = (PFNGLGETVERTEXATTRIBFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribfv")) == NULL) || r;
-  r = ((glGetVertexAttribiv = (PFNGLGETVERTEXATTRIBIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribiv")) == NULL) || r;
-  r = ((glIsProgram = (PFNGLISPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glIsProgram")) == NULL) || r;
-  r = ((glIsShader = (PFNGLISSHADERPROC)glewGetProcSubtractress((const GLubyte*)"glIsShader")) == NULL) || r;
-  r = ((glLinkProgram = (PFNGLLINKPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glLinkProgram")) == NULL) || r;
-  r = ((glShaderSource = (PFNGLSHADERSOURCEPROC)glewGetProcSubtractress((const GLubyte*)"glShaderSource")) == NULL) || r;
-  r = ((glStencilFuncSeparate = (PFNGLSTENCILFUNCSEPARATEPROC)glewGetProcSubtractress((const GLubyte*)"glStencilFuncSeparate")) == NULL) || r;
-  r = ((glStencilMaskSeparate = (PFNGLSTENCILMASKSEPARATEPROC)glewGetProcSubtractress((const GLubyte*)"glStencilMaskSeparate")) == NULL) || r;
-  r = ((glStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)glewGetProcSubtractress((const GLubyte*)"glStencilOpSeparate")) == NULL) || r;
-  r = ((glUniform1f = (PFNGLUNIFORM1FPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1f")) == NULL) || r;
-  r = ((glUniform1fv = (PFNGLUNIFORM1FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1fv")) == NULL) || r;
-  r = ((glUniform1i = (PFNGLUNIFORM1IPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1i")) == NULL) || r;
-  r = ((glUniform1iv = (PFNGLUNIFORM1IVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1iv")) == NULL) || r;
-  r = ((glUniform2f = (PFNGLUNIFORM2FPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2f")) == NULL) || r;
-  r = ((glUniform2fv = (PFNGLUNIFORM2FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2fv")) == NULL) || r;
-  r = ((glUniform2i = (PFNGLUNIFORM2IPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2i")) == NULL) || r;
-  r = ((glUniform2iv = (PFNGLUNIFORM2IVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2iv")) == NULL) || r;
-  r = ((glUniform3f = (PFNGLUNIFORM3FPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3f")) == NULL) || r;
-  r = ((glUniform3fv = (PFNGLUNIFORM3FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3fv")) == NULL) || r;
-  r = ((glUniform3i = (PFNGLUNIFORM3IPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3i")) == NULL) || r;
-  r = ((glUniform3iv = (PFNGLUNIFORM3IVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3iv")) == NULL) || r;
-  r = ((glUniform4f = (PFNGLUNIFORM4FPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4f")) == NULL) || r;
-  r = ((glUniform4fv = (PFNGLUNIFORM4FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4fv")) == NULL) || r;
-  r = ((glUniform4i = (PFNGLUNIFORM4IPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4i")) == NULL) || r;
-  r = ((glUniform4iv = (PFNGLUNIFORM4IVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4iv")) == NULL) || r;
-  r = ((glUniformMatrix2fv = (PFNGLUNIFORMMATRIX2FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2fv")) == NULL) || r;
-  r = ((glUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3fv")) == NULL) || r;
-  r = ((glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4fv")) == NULL) || r;
-  r = ((glUseProgram = (PFNGLUSEPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glUseProgram")) == NULL) || r;
-  r = ((glValidateProgram = (PFNGLVALIDATEPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glValidateProgram")) == NULL) || r;
-  r = ((glVertexAttrib1d = (PFNGLVERTEXATTRIB1DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1d")) == NULL) || r;
-  r = ((glVertexAttrib1dv = (PFNGLVERTEXATTRIB1DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1dv")) == NULL) || r;
-  r = ((glVertexAttrib1f = (PFNGLVERTEXATTRIB1FPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1f")) == NULL) || r;
-  r = ((glVertexAttrib1fv = (PFNGLVERTEXATTRIB1FVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1fv")) == NULL) || r;
-  r = ((glVertexAttrib1s = (PFNGLVERTEXATTRIB1SPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1s")) == NULL) || r;
-  r = ((glVertexAttrib1sv = (PFNGLVERTEXATTRIB1SVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1sv")) == NULL) || r;
-  r = ((glVertexAttrib2d = (PFNGLVERTEXATTRIB2DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2d")) == NULL) || r;
-  r = ((glVertexAttrib2dv = (PFNGLVERTEXATTRIB2DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2dv")) == NULL) || r;
-  r = ((glVertexAttrib2f = (PFNGLVERTEXATTRIB2FPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2f")) == NULL) || r;
-  r = ((glVertexAttrib2fv = (PFNGLVERTEXATTRIB2FVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2fv")) == NULL) || r;
-  r = ((glVertexAttrib2s = (PFNGLVERTEXATTRIB2SPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2s")) == NULL) || r;
-  r = ((glVertexAttrib2sv = (PFNGLVERTEXATTRIB2SVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2sv")) == NULL) || r;
-  r = ((glVertexAttrib3d = (PFNGLVERTEXATTRIB3DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3d")) == NULL) || r;
-  r = ((glVertexAttrib3dv = (PFNGLVERTEXATTRIB3DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3dv")) == NULL) || r;
-  r = ((glVertexAttrib3f = (PFNGLVERTEXATTRIB3FPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3f")) == NULL) || r;
-  r = ((glVertexAttrib3fv = (PFNGLVERTEXATTRIB3FVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3fv")) == NULL) || r;
-  r = ((glVertexAttrib3s = (PFNGLVERTEXATTRIB3SPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3s")) == NULL) || r;
-  r = ((glVertexAttrib3sv = (PFNGLVERTEXATTRIB3SVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3sv")) == NULL) || r;
-  r = ((glVertexAttrib4Nbv = (PFNGLVERTEXATTRIB4NBVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Nbv")) == NULL) || r;
-  r = ((glVertexAttrib4Niv = (PFNGLVERTEXATTRIB4NIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Niv")) == NULL) || r;
-  r = ((glVertexAttrib4Nsv = (PFNGLVERTEXATTRIB4NSVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Nsv")) == NULL) || r;
-  r = ((glVertexAttrib4Nub = (PFNGLVERTEXATTRIB4NUBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Nub")) == NULL) || r;
-  r = ((glVertexAttrib4Nubv = (PFNGLVERTEXATTRIB4NUBVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Nubv")) == NULL) || r;
-  r = ((glVertexAttrib4Nuiv = (PFNGLVERTEXATTRIB4NUIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Nuiv")) == NULL) || r;
-  r = ((glVertexAttrib4Nusv = (PFNGLVERTEXATTRIB4NUSVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4Nusv")) == NULL) || r;
-  r = ((glVertexAttrib4bv = (PFNGLVERTEXATTRIB4BVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4bv")) == NULL) || r;
-  r = ((glVertexAttrib4d = (PFNGLVERTEXATTRIB4DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4d")) == NULL) || r;
-  r = ((glVertexAttrib4dv = (PFNGLVERTEXATTRIB4DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4dv")) == NULL) || r;
-  r = ((glVertexAttrib4f = (PFNGLVERTEXATTRIB4FPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4f")) == NULL) || r;
-  r = ((glVertexAttrib4fv = (PFNGLVERTEXATTRIB4FVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4fv")) == NULL) || r;
-  r = ((glVertexAttrib4iv = (PFNGLVERTEXATTRIB4IVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4iv")) == NULL) || r;
-  r = ((glVertexAttrib4s = (PFNGLVERTEXATTRIB4SPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4s")) == NULL) || r;
-  r = ((glVertexAttrib4sv = (PFNGLVERTEXATTRIB4SVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4sv")) == NULL) || r;
-  r = ((glVertexAttrib4ubv = (PFNGLVERTEXATTRIB4UBVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4ubv")) == NULL) || r;
-  r = ((glVertexAttrib4uiv = (PFNGLVERTEXATTRIB4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4uiv")) == NULL) || r;
-  r = ((glVertexAttrib4usv = (PFNGLVERTEXATTRIB4USVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4usv")) == NULL) || r;
-  r = ((glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribPointer")) == NULL) || r;
+  r = ((glAttachShader = (PFNGLATTACHSHADERPROC)glewGetProcAddress((const GLubyte*)"glAttachShader")) == NULL) || r;
+  r = ((glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glBindAttribLocation")) == NULL) || r;
+  r = ((glBlendEquationSeparate = (PFNGLBLENDEQUATIONSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparate")) == NULL) || r;
+  r = ((glCompileShader = (PFNGLCOMPILESHADERPROC)glewGetProcAddress((const GLubyte*)"glCompileShader")) == NULL) || r;
+  r = ((glCreateProgram = (PFNGLCREATEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glCreateProgram")) == NULL) || r;
+  r = ((glCreateShader = (PFNGLCREATESHADERPROC)glewGetProcAddress((const GLubyte*)"glCreateShader")) == NULL) || r;
+  r = ((glDeleteProgram = (PFNGLDELETEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glDeleteProgram")) == NULL) || r;
+  r = ((glDeleteShader = (PFNGLDELETESHADERPROC)glewGetProcAddress((const GLubyte*)"glDeleteShader")) == NULL) || r;
+  r = ((glDetachShader = (PFNGLDETACHSHADERPROC)glewGetProcAddress((const GLubyte*)"glDetachShader")) == NULL) || r;
+  r = ((glDisableVertexAttribArray = (PFNGLDISABLEVERTEXATTRIBARRAYPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexAttribArray")) == NULL) || r;
+  r = ((glDrawBuffers = (PFNGLDRAWBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffers")) == NULL) || r;
+  r = ((glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexAttribArray")) == NULL) || r;
+  r = ((glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC)glewGetProcAddress((const GLubyte*)"glGetActiveAttrib")) == NULL) || r;
+  r = ((glGetActiveUniform = (PFNGLGETACTIVEUNIFORMPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniform")) == NULL) || r;
+  r = ((glGetAttachedShaders = (PFNGLGETATTACHEDSHADERSPROC)glewGetProcAddress((const GLubyte*)"glGetAttachedShaders")) == NULL) || r;
+  r = ((glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetAttribLocation")) == NULL) || r;
+  r = ((glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)glewGetProcAddress((const GLubyte*)"glGetProgramInfoLog")) == NULL) || r;
+  r = ((glGetProgramiv = (PFNGLGETPROGRAMIVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramiv")) == NULL) || r;
+  r = ((glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)glewGetProcAddress((const GLubyte*)"glGetShaderInfoLog")) == NULL) || r;
+  r = ((glGetShaderSource = (PFNGLGETSHADERSOURCEPROC)glewGetProcAddress((const GLubyte*)"glGetShaderSource")) == NULL) || r;
+  r = ((glGetShaderiv = (PFNGLGETSHADERIVPROC)glewGetProcAddress((const GLubyte*)"glGetShaderiv")) == NULL) || r;
+  r = ((glGetUniformLocation = (PFNGLGETUNIFORMLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetUniformLocation")) == NULL) || r;
+  r = ((glGetUniformfv = (PFNGLGETUNIFORMFVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformfv")) == NULL) || r;
+  r = ((glGetUniformiv = (PFNGLGETUNIFORMIVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformiv")) == NULL) || r;
+  r = ((glGetVertexAttribPointerv = (PFNGLGETVERTEXATTRIBPOINTERVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribPointerv")) == NULL) || r;
+  r = ((glGetVertexAttribdv = (PFNGLGETVERTEXATTRIBDVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribdv")) == NULL) || r;
+  r = ((glGetVertexAttribfv = (PFNGLGETVERTEXATTRIBFVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribfv")) == NULL) || r;
+  r = ((glGetVertexAttribiv = (PFNGLGETVERTEXATTRIBIVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribiv")) == NULL) || r;
+  r = ((glIsProgram = (PFNGLISPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glIsProgram")) == NULL) || r;
+  r = ((glIsShader = (PFNGLISSHADERPROC)glewGetProcAddress((const GLubyte*)"glIsShader")) == NULL) || r;
+  r = ((glLinkProgram = (PFNGLLINKPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glLinkProgram")) == NULL) || r;
+  r = ((glShaderSource = (PFNGLSHADERSOURCEPROC)glewGetProcAddress((const GLubyte*)"glShaderSource")) == NULL) || r;
+  r = ((glStencilFuncSeparate = (PFNGLSTENCILFUNCSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glStencilFuncSeparate")) == NULL) || r;
+  r = ((glStencilMaskSeparate = (PFNGLSTENCILMASKSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glStencilMaskSeparate")) == NULL) || r;
+  r = ((glStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)glewGetProcAddress((const GLubyte*)"glStencilOpSeparate")) == NULL) || r;
+  r = ((glUniform1f = (PFNGLUNIFORM1FPROC)glewGetProcAddress((const GLubyte*)"glUniform1f")) == NULL) || r;
+  r = ((glUniform1fv = (PFNGLUNIFORM1FVPROC)glewGetProcAddress((const GLubyte*)"glUniform1fv")) == NULL) || r;
+  r = ((glUniform1i = (PFNGLUNIFORM1IPROC)glewGetProcAddress((const GLubyte*)"glUniform1i")) == NULL) || r;
+  r = ((glUniform1iv = (PFNGLUNIFORM1IVPROC)glewGetProcAddress((const GLubyte*)"glUniform1iv")) == NULL) || r;
+  r = ((glUniform2f = (PFNGLUNIFORM2FPROC)glewGetProcAddress((const GLubyte*)"glUniform2f")) == NULL) || r;
+  r = ((glUniform2fv = (PFNGLUNIFORM2FVPROC)glewGetProcAddress((const GLubyte*)"glUniform2fv")) == NULL) || r;
+  r = ((glUniform2i = (PFNGLUNIFORM2IPROC)glewGetProcAddress((const GLubyte*)"glUniform2i")) == NULL) || r;
+  r = ((glUniform2iv = (PFNGLUNIFORM2IVPROC)glewGetProcAddress((const GLubyte*)"glUniform2iv")) == NULL) || r;
+  r = ((glUniform3f = (PFNGLUNIFORM3FPROC)glewGetProcAddress((const GLubyte*)"glUniform3f")) == NULL) || r;
+  r = ((glUniform3fv = (PFNGLUNIFORM3FVPROC)glewGetProcAddress((const GLubyte*)"glUniform3fv")) == NULL) || r;
+  r = ((glUniform3i = (PFNGLUNIFORM3IPROC)glewGetProcAddress((const GLubyte*)"glUniform3i")) == NULL) || r;
+  r = ((glUniform3iv = (PFNGLUNIFORM3IVPROC)glewGetProcAddress((const GLubyte*)"glUniform3iv")) == NULL) || r;
+  r = ((glUniform4f = (PFNGLUNIFORM4FPROC)glewGetProcAddress((const GLubyte*)"glUniform4f")) == NULL) || r;
+  r = ((glUniform4fv = (PFNGLUNIFORM4FVPROC)glewGetProcAddress((const GLubyte*)"glUniform4fv")) == NULL) || r;
+  r = ((glUniform4i = (PFNGLUNIFORM4IPROC)glewGetProcAddress((const GLubyte*)"glUniform4i")) == NULL) || r;
+  r = ((glUniform4iv = (PFNGLUNIFORM4IVPROC)glewGetProcAddress((const GLubyte*)"glUniform4iv")) == NULL) || r;
+  r = ((glUniformMatrix2fv = (PFNGLUNIFORMMATRIX2FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2fv")) == NULL) || r;
+  r = ((glUniformMatrix3fv = (PFNGLUNIFORMMATRIX3FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3fv")) == NULL) || r;
+  r = ((glUniformMatrix4fv = (PFNGLUNIFORMMATRIX4FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4fv")) == NULL) || r;
+  r = ((glUseProgram = (PFNGLUSEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glUseProgram")) == NULL) || r;
+  r = ((glValidateProgram = (PFNGLVALIDATEPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glValidateProgram")) == NULL) || r;
+  r = ((glVertexAttrib1d = (PFNGLVERTEXATTRIB1DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1d")) == NULL) || r;
+  r = ((glVertexAttrib1dv = (PFNGLVERTEXATTRIB1DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1dv")) == NULL) || r;
+  r = ((glVertexAttrib1f = (PFNGLVERTEXATTRIB1FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1f")) == NULL) || r;
+  r = ((glVertexAttrib1fv = (PFNGLVERTEXATTRIB1FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1fv")) == NULL) || r;
+  r = ((glVertexAttrib1s = (PFNGLVERTEXATTRIB1SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1s")) == NULL) || r;
+  r = ((glVertexAttrib1sv = (PFNGLVERTEXATTRIB1SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1sv")) == NULL) || r;
+  r = ((glVertexAttrib2d = (PFNGLVERTEXATTRIB2DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2d")) == NULL) || r;
+  r = ((glVertexAttrib2dv = (PFNGLVERTEXATTRIB2DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2dv")) == NULL) || r;
+  r = ((glVertexAttrib2f = (PFNGLVERTEXATTRIB2FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2f")) == NULL) || r;
+  r = ((glVertexAttrib2fv = (PFNGLVERTEXATTRIB2FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2fv")) == NULL) || r;
+  r = ((glVertexAttrib2s = (PFNGLVERTEXATTRIB2SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2s")) == NULL) || r;
+  r = ((glVertexAttrib2sv = (PFNGLVERTEXATTRIB2SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2sv")) == NULL) || r;
+  r = ((glVertexAttrib3d = (PFNGLVERTEXATTRIB3DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3d")) == NULL) || r;
+  r = ((glVertexAttrib3dv = (PFNGLVERTEXATTRIB3DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3dv")) == NULL) || r;
+  r = ((glVertexAttrib3f = (PFNGLVERTEXATTRIB3FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3f")) == NULL) || r;
+  r = ((glVertexAttrib3fv = (PFNGLVERTEXATTRIB3FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3fv")) == NULL) || r;
+  r = ((glVertexAttrib3s = (PFNGLVERTEXATTRIB3SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3s")) == NULL) || r;
+  r = ((glVertexAttrib3sv = (PFNGLVERTEXATTRIB3SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3sv")) == NULL) || r;
+  r = ((glVertexAttrib4Nbv = (PFNGLVERTEXATTRIB4NBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nbv")) == NULL) || r;
+  r = ((glVertexAttrib4Niv = (PFNGLVERTEXATTRIB4NIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Niv")) == NULL) || r;
+  r = ((glVertexAttrib4Nsv = (PFNGLVERTEXATTRIB4NSVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nsv")) == NULL) || r;
+  r = ((glVertexAttrib4Nub = (PFNGLVERTEXATTRIB4NUBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nub")) == NULL) || r;
+  r = ((glVertexAttrib4Nubv = (PFNGLVERTEXATTRIB4NUBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nubv")) == NULL) || r;
+  r = ((glVertexAttrib4Nuiv = (PFNGLVERTEXATTRIB4NUIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nuiv")) == NULL) || r;
+  r = ((glVertexAttrib4Nusv = (PFNGLVERTEXATTRIB4NUSVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4Nusv")) == NULL) || r;
+  r = ((glVertexAttrib4bv = (PFNGLVERTEXATTRIB4BVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4bv")) == NULL) || r;
+  r = ((glVertexAttrib4d = (PFNGLVERTEXATTRIB4DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4d")) == NULL) || r;
+  r = ((glVertexAttrib4dv = (PFNGLVERTEXATTRIB4DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4dv")) == NULL) || r;
+  r = ((glVertexAttrib4f = (PFNGLVERTEXATTRIB4FPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4f")) == NULL) || r;
+  r = ((glVertexAttrib4fv = (PFNGLVERTEXATTRIB4FVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4fv")) == NULL) || r;
+  r = ((glVertexAttrib4iv = (PFNGLVERTEXATTRIB4IVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4iv")) == NULL) || r;
+  r = ((glVertexAttrib4s = (PFNGLVERTEXATTRIB4SPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4s")) == NULL) || r;
+  r = ((glVertexAttrib4sv = (PFNGLVERTEXATTRIB4SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4sv")) == NULL) || r;
+  r = ((glVertexAttrib4ubv = (PFNGLVERTEXATTRIB4UBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4ubv")) == NULL) || r;
+  r = ((glVertexAttrib4uiv = (PFNGLVERTEXATTRIB4UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4uiv")) == NULL) || r;
+  r = ((glVertexAttrib4usv = (PFNGLVERTEXATTRIB4USVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4usv")) == NULL) || r;
+  r = ((glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribPointer")) == NULL) || r;
 
   return r;
 }
@@ -9527,12 +9524,12 @@ static GLboolean _glewInit_GL_VERSION_2_1 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glUniformMatrix2x3fv = (PFNGLUNIFORMMATRIX2X3FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2x3fv")) == NULL) || r;
-  r = ((glUniformMatrix2x4fv = (PFNGLUNIFORMMATRIX2X4FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2x4fv")) == NULL) || r;
-  r = ((glUniformMatrix3x2fv = (PFNGLUNIFORMMATRIX3X2FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3x2fv")) == NULL) || r;
-  r = ((glUniformMatrix3x4fv = (PFNGLUNIFORMMATRIX3X4FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3x4fv")) == NULL) || r;
-  r = ((glUniformMatrix4x2fv = (PFNGLUNIFORMMATRIX4X2FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4x2fv")) == NULL) || r;
-  r = ((glUniformMatrix4x3fv = (PFNGLUNIFORMMATRIX4X3FVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4x3fv")) == NULL) || r;
+  r = ((glUniformMatrix2x3fv = (PFNGLUNIFORMMATRIX2X3FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2x3fv")) == NULL) || r;
+  r = ((glUniformMatrix2x4fv = (PFNGLUNIFORMMATRIX2X4FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2x4fv")) == NULL) || r;
+  r = ((glUniformMatrix3x2fv = (PFNGLUNIFORMMATRIX3X2FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3x2fv")) == NULL) || r;
+  r = ((glUniformMatrix3x4fv = (PFNGLUNIFORMMATRIX3X4FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3x4fv")) == NULL) || r;
+  r = ((glUniformMatrix4x2fv = (PFNGLUNIFORMMATRIX4X2FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4x2fv")) == NULL) || r;
+  r = ((glUniformMatrix4x3fv = (PFNGLUNIFORMMATRIX4X3FVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4x3fv")) == NULL) || r;
 
   return r;
 }
@@ -9550,61 +9547,61 @@ static GLboolean _glewInit_GL_VERSION_3_0 ()
   r = _glewInit_GL_ARB_uniform_buffer_object() || r;
   r = _glewInit_GL_ARB_vertex_array_object() || r;
 
-  r = ((glBeginConditionalRender = (PFNGLBEGINCONDITIONALRENDERPROC)glewGetProcSubtractress((const GLubyte*)"glBeginConditionalRender")) == NULL) || r;
-  r = ((glBeginTransformFeedback = (PFNGLBEGINTRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glBeginTransformFeedback")) == NULL) || r;
-  r = ((glBindFragDataLocation = (PFNGLBINDFRAGDATALOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glBindFragDataLocation")) == NULL) || r;
-  r = ((glClampColor = (PFNGLCLAMPCOLORPROC)glewGetProcSubtractress((const GLubyte*)"glClampColor")) == NULL) || r;
-  r = ((glClearBufferfi = (PFNGLCLEARBUFFERFIPROC)glewGetProcSubtractress((const GLubyte*)"glClearBufferfi")) == NULL) || r;
-  r = ((glClearBufferfv = (PFNGLCLEARBUFFERFVPROC)glewGetProcSubtractress((const GLubyte*)"glClearBufferfv")) == NULL) || r;
-  r = ((glClearBufferiv = (PFNGLCLEARBUFFERIVPROC)glewGetProcSubtractress((const GLubyte*)"glClearBufferiv")) == NULL) || r;
-  r = ((glClearBufferuiv = (PFNGLCLEARBUFFERUIVPROC)glewGetProcSubtractress((const GLubyte*)"glClearBufferuiv")) == NULL) || r;
-  r = ((glColorMaski = (PFNGLCOLORMASKIPROC)glewGetProcSubtractress((const GLubyte*)"glColorMaski")) == NULL) || r;
-  r = ((glDisablei = (PFNGLDISABLEIPROC)glewGetProcSubtractress((const GLubyte*)"glDisablei")) == NULL) || r;
-  r = ((glEnablei = (PFNGLENABLEIPROC)glewGetProcSubtractress((const GLubyte*)"glEnablei")) == NULL) || r;
-  r = ((glEndConditionalRender = (PFNGLENDCONDITIONALRENDERPROC)glewGetProcSubtractress((const GLubyte*)"glEndConditionalRender")) == NULL) || r;
-  r = ((glEndTransformFeedback = (PFNGLENDTRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glEndTransformFeedback")) == NULL) || r;
-  r = ((glGetBooleani_v = (PFNGLGETBOOLEANI_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetBooleani_v")) == NULL) || r;
-  r = ((glGetFragDataLocation = (PFNGLGETFRAGDATALOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragDataLocation")) == NULL) || r;
-  r = ((glGetStringi = (PFNGLGETSTRINGIPROC)glewGetProcSubtractress((const GLubyte*)"glGetStringi")) == NULL) || r;
-  r = ((glGetTexParameterIiv = (PFNGLGETTEXPARAMETERIIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexParameterIiv")) == NULL) || r;
-  r = ((glGetTexParameterIuiv = (PFNGLGETTEXPARAMETERIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexParameterIuiv")) == NULL) || r;
-  r = ((glGetTransformFeedbackVarying = (PFNGLGETTRANSFORMFEEDBACKVARYINGPROC)glewGetProcSubtractress((const GLubyte*)"glGetTransformFeedbackVarying")) == NULL) || r;
-  r = ((glGetUniformuiv = (PFNGLGETUNIFORMUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformuiv")) == NULL) || r;
-  r = ((glGetVertexAttribIiv = (PFNGLGETVERTEXATTRIBIIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribIiv")) == NULL) || r;
-  r = ((glGetVertexAttribIuiv = (PFNGLGETVERTEXATTRIBIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribIuiv")) == NULL) || r;
-  r = ((glIsEnabledi = (PFNGLISENABLEDIPROC)glewGetProcSubtractress((const GLubyte*)"glIsEnabledi")) == NULL) || r;
-  r = ((glTexParameterIiv = (PFNGLTEXPARAMETERIIVPROC)glewGetProcSubtractress((const GLubyte*)"glTexParameterIiv")) == NULL) || r;
-  r = ((glTexParameterIuiv = (PFNGLTEXPARAMETERIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glTexParameterIuiv")) == NULL) || r;
-  r = ((glTransformFeedbackVaryings = (PFNGLTRANSFORMFEEDBACKVARYINGSPROC)glewGetProcSubtractress((const GLubyte*)"glTransformFeedbackVaryings")) == NULL) || r;
-  r = ((glUniform1ui = (PFNGLUNIFORM1UIPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1ui")) == NULL) || r;
-  r = ((glUniform1uiv = (PFNGLUNIFORM1UIVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1uiv")) == NULL) || r;
-  r = ((glUniform2ui = (PFNGLUNIFORM2UIPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2ui")) == NULL) || r;
-  r = ((glUniform2uiv = (PFNGLUNIFORM2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2uiv")) == NULL) || r;
-  r = ((glUniform3ui = (PFNGLUNIFORM3UIPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3ui")) == NULL) || r;
-  r = ((glUniform3uiv = (PFNGLUNIFORM3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3uiv")) == NULL) || r;
-  r = ((glUniform4ui = (PFNGLUNIFORM4UIPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4ui")) == NULL) || r;
-  r = ((glUniform4uiv = (PFNGLUNIFORM4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4uiv")) == NULL) || r;
-  r = ((glVertexAttribI1i = (PFNGLVERTEXATTRIBI1IPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1i")) == NULL) || r;
-  r = ((glVertexAttribI1iv = (PFNGLVERTEXATTRIBI1IVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1iv")) == NULL) || r;
-  r = ((glVertexAttribI1ui = (PFNGLVERTEXATTRIBI1UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1ui")) == NULL) || r;
-  r = ((glVertexAttribI1uiv = (PFNGLVERTEXATTRIBI1UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1uiv")) == NULL) || r;
-  r = ((glVertexAttribI2i = (PFNGLVERTEXATTRIBI2IPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2i")) == NULL) || r;
-  r = ((glVertexAttribI2iv = (PFNGLVERTEXATTRIBI2IVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2iv")) == NULL) || r;
-  r = ((glVertexAttribI2ui = (PFNGLVERTEXATTRIBI2UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2ui")) == NULL) || r;
-  r = ((glVertexAttribI2uiv = (PFNGLVERTEXATTRIBI2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2uiv")) == NULL) || r;
-  r = ((glVertexAttribI3i = (PFNGLVERTEXATTRIBI3IPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3i")) == NULL) || r;
-  r = ((glVertexAttribI3iv = (PFNGLVERTEXATTRIBI3IVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3iv")) == NULL) || r;
-  r = ((glVertexAttribI3ui = (PFNGLVERTEXATTRIBI3UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3ui")) == NULL) || r;
-  r = ((glVertexAttribI3uiv = (PFNGLVERTEXATTRIBI3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3uiv")) == NULL) || r;
-  r = ((glVertexAttribI4bv = (PFNGLVERTEXATTRIBI4BVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4bv")) == NULL) || r;
-  r = ((glVertexAttribI4i = (PFNGLVERTEXATTRIBI4IPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4i")) == NULL) || r;
-  r = ((glVertexAttribI4iv = (PFNGLVERTEXATTRIBI4IVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4iv")) == NULL) || r;
-  r = ((glVertexAttribI4sv = (PFNGLVERTEXATTRIBI4SVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4sv")) == NULL) || r;
-  r = ((glVertexAttribI4ubv = (PFNGLVERTEXATTRIBI4UBVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4ubv")) == NULL) || r;
-  r = ((glVertexAttribI4ui = (PFNGLVERTEXATTRIBI4UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4ui")) == NULL) || r;
-  r = ((glVertexAttribI4uiv = (PFNGLVERTEXATTRIBI4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4uiv")) == NULL) || r;
-  r = ((glVertexAttribI4usv = (PFNGLVERTEXATTRIBI4USVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4usv")) == NULL) || r;
-  r = ((glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribIPointer")) == NULL) || r;
+  r = ((glBeginConditionalRender = (PFNGLBEGINCONDITIONALRENDERPROC)glewGetProcAddress((const GLubyte*)"glBeginConditionalRender")) == NULL) || r;
+  r = ((glBeginTransformFeedback = (PFNGLBEGINTRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glBeginTransformFeedback")) == NULL) || r;
+  r = ((glBindFragDataLocation = (PFNGLBINDFRAGDATALOCATIONPROC)glewGetProcAddress((const GLubyte*)"glBindFragDataLocation")) == NULL) || r;
+  r = ((glClampColor = (PFNGLCLAMPCOLORPROC)glewGetProcAddress((const GLubyte*)"glClampColor")) == NULL) || r;
+  r = ((glClearBufferfi = (PFNGLCLEARBUFFERFIPROC)glewGetProcAddress((const GLubyte*)"glClearBufferfi")) == NULL) || r;
+  r = ((glClearBufferfv = (PFNGLCLEARBUFFERFVPROC)glewGetProcAddress((const GLubyte*)"glClearBufferfv")) == NULL) || r;
+  r = ((glClearBufferiv = (PFNGLCLEARBUFFERIVPROC)glewGetProcAddress((const GLubyte*)"glClearBufferiv")) == NULL) || r;
+  r = ((glClearBufferuiv = (PFNGLCLEARBUFFERUIVPROC)glewGetProcAddress((const GLubyte*)"glClearBufferuiv")) == NULL) || r;
+  r = ((glColorMaski = (PFNGLCOLORMASKIPROC)glewGetProcAddress((const GLubyte*)"glColorMaski")) == NULL) || r;
+  r = ((glDisablei = (PFNGLDISABLEIPROC)glewGetProcAddress((const GLubyte*)"glDisablei")) == NULL) || r;
+  r = ((glEnablei = (PFNGLENABLEIPROC)glewGetProcAddress((const GLubyte*)"glEnablei")) == NULL) || r;
+  r = ((glEndConditionalRender = (PFNGLENDCONDITIONALRENDERPROC)glewGetProcAddress((const GLubyte*)"glEndConditionalRender")) == NULL) || r;
+  r = ((glEndTransformFeedback = (PFNGLENDTRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glEndTransformFeedback")) == NULL) || r;
+  r = ((glGetBooleani_v = (PFNGLGETBOOLEANI_VPROC)glewGetProcAddress((const GLubyte*)"glGetBooleani_v")) == NULL) || r;
+  r = ((glGetFragDataLocation = (PFNGLGETFRAGDATALOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetFragDataLocation")) == NULL) || r;
+  r = ((glGetStringi = (PFNGLGETSTRINGIPROC)glewGetProcAddress((const GLubyte*)"glGetStringi")) == NULL) || r;
+  r = ((glGetTexParameterIiv = (PFNGLGETTEXPARAMETERIIVPROC)glewGetProcAddress((const GLubyte*)"glGetTexParameterIiv")) == NULL) || r;
+  r = ((glGetTexParameterIuiv = (PFNGLGETTEXPARAMETERIUIVPROC)glewGetProcAddress((const GLubyte*)"glGetTexParameterIuiv")) == NULL) || r;
+  r = ((glGetTransformFeedbackVarying = (PFNGLGETTRANSFORMFEEDBACKVARYINGPROC)glewGetProcAddress((const GLubyte*)"glGetTransformFeedbackVarying")) == NULL) || r;
+  r = ((glGetUniformuiv = (PFNGLGETUNIFORMUIVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformuiv")) == NULL) || r;
+  r = ((glGetVertexAttribIiv = (PFNGLGETVERTEXATTRIBIIVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribIiv")) == NULL) || r;
+  r = ((glGetVertexAttribIuiv = (PFNGLGETVERTEXATTRIBIUIVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribIuiv")) == NULL) || r;
+  r = ((glIsEnabledi = (PFNGLISENABLEDIPROC)glewGetProcAddress((const GLubyte*)"glIsEnabledi")) == NULL) || r;
+  r = ((glTexParameterIiv = (PFNGLTEXPARAMETERIIVPROC)glewGetProcAddress((const GLubyte*)"glTexParameterIiv")) == NULL) || r;
+  r = ((glTexParameterIuiv = (PFNGLTEXPARAMETERIUIVPROC)glewGetProcAddress((const GLubyte*)"glTexParameterIuiv")) == NULL) || r;
+  r = ((glTransformFeedbackVaryings = (PFNGLTRANSFORMFEEDBACKVARYINGSPROC)glewGetProcAddress((const GLubyte*)"glTransformFeedbackVaryings")) == NULL) || r;
+  r = ((glUniform1ui = (PFNGLUNIFORM1UIPROC)glewGetProcAddress((const GLubyte*)"glUniform1ui")) == NULL) || r;
+  r = ((glUniform1uiv = (PFNGLUNIFORM1UIVPROC)glewGetProcAddress((const GLubyte*)"glUniform1uiv")) == NULL) || r;
+  r = ((glUniform2ui = (PFNGLUNIFORM2UIPROC)glewGetProcAddress((const GLubyte*)"glUniform2ui")) == NULL) || r;
+  r = ((glUniform2uiv = (PFNGLUNIFORM2UIVPROC)glewGetProcAddress((const GLubyte*)"glUniform2uiv")) == NULL) || r;
+  r = ((glUniform3ui = (PFNGLUNIFORM3UIPROC)glewGetProcAddress((const GLubyte*)"glUniform3ui")) == NULL) || r;
+  r = ((glUniform3uiv = (PFNGLUNIFORM3UIVPROC)glewGetProcAddress((const GLubyte*)"glUniform3uiv")) == NULL) || r;
+  r = ((glUniform4ui = (PFNGLUNIFORM4UIPROC)glewGetProcAddress((const GLubyte*)"glUniform4ui")) == NULL) || r;
+  r = ((glUniform4uiv = (PFNGLUNIFORM4UIVPROC)glewGetProcAddress((const GLubyte*)"glUniform4uiv")) == NULL) || r;
+  r = ((glVertexAttribI1i = (PFNGLVERTEXATTRIBI1IPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1i")) == NULL) || r;
+  r = ((glVertexAttribI1iv = (PFNGLVERTEXATTRIBI1IVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1iv")) == NULL) || r;
+  r = ((glVertexAttribI1ui = (PFNGLVERTEXATTRIBI1UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1ui")) == NULL) || r;
+  r = ((glVertexAttribI1uiv = (PFNGLVERTEXATTRIBI1UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1uiv")) == NULL) || r;
+  r = ((glVertexAttribI2i = (PFNGLVERTEXATTRIBI2IPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2i")) == NULL) || r;
+  r = ((glVertexAttribI2iv = (PFNGLVERTEXATTRIBI2IVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2iv")) == NULL) || r;
+  r = ((glVertexAttribI2ui = (PFNGLVERTEXATTRIBI2UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2ui")) == NULL) || r;
+  r = ((glVertexAttribI2uiv = (PFNGLVERTEXATTRIBI2UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2uiv")) == NULL) || r;
+  r = ((glVertexAttribI3i = (PFNGLVERTEXATTRIBI3IPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3i")) == NULL) || r;
+  r = ((glVertexAttribI3iv = (PFNGLVERTEXATTRIBI3IVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3iv")) == NULL) || r;
+  r = ((glVertexAttribI3ui = (PFNGLVERTEXATTRIBI3UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3ui")) == NULL) || r;
+  r = ((glVertexAttribI3uiv = (PFNGLVERTEXATTRIBI3UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3uiv")) == NULL) || r;
+  r = ((glVertexAttribI4bv = (PFNGLVERTEXATTRIBI4BVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4bv")) == NULL) || r;
+  r = ((glVertexAttribI4i = (PFNGLVERTEXATTRIBI4IPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4i")) == NULL) || r;
+  r = ((glVertexAttribI4iv = (PFNGLVERTEXATTRIBI4IVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4iv")) == NULL) || r;
+  r = ((glVertexAttribI4sv = (PFNGLVERTEXATTRIBI4SVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4sv")) == NULL) || r;
+  r = ((glVertexAttribI4ubv = (PFNGLVERTEXATTRIBI4UBVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4ubv")) == NULL) || r;
+  r = ((glVertexAttribI4ui = (PFNGLVERTEXATTRIBI4UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4ui")) == NULL) || r;
+  r = ((glVertexAttribI4uiv = (PFNGLVERTEXATTRIBI4UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4uiv")) == NULL) || r;
+  r = ((glVertexAttribI4usv = (PFNGLVERTEXATTRIBI4USVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4usv")) == NULL) || r;
+  r = ((glVertexAttribIPointer = (PFNGLVERTEXATTRIBIPOINTERPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribIPointer")) == NULL) || r;
 
   return r;
 }
@@ -9619,10 +9616,10 @@ static GLboolean _glewInit_GL_VERSION_3_1 ()
 
   r = _glewInit_GL_ARB_copy_buffer() || r;
 
-  r = ((glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstanced")) == NULL) || r;
-  r = ((glDrawElementsInstanced = (PFNGLDRAWELEMENTSINSTANCEDPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstanced")) == NULL) || r;
-  r = ((glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)glewGetProcSubtractress((const GLubyte*)"glPrimitiveRestartIndex")) == NULL) || r;
-  r = ((glTexBuffer = (PFNGLTEXBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glTexBuffer")) == NULL) || r;
+  r = ((glDrawArraysInstanced = (PFNGLDRAWARRAYSINSTANCEDPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstanced")) == NULL) || r;
+  r = ((glDrawElementsInstanced = (PFNGLDRAWELEMENTSINSTANCEDPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstanced")) == NULL) || r;
+  r = ((glPrimitiveRestartIndex = (PFNGLPRIMITIVERESTARTINDEXPROC)glewGetProcAddress((const GLubyte*)"glPrimitiveRestartIndex")) == NULL) || r;
+  r = ((glTexBuffer = (PFNGLTEXBUFFERPROC)glewGetProcAddress((const GLubyte*)"glTexBuffer")) == NULL) || r;
 
   return r;
 }
@@ -9640,9 +9637,9 @@ static GLboolean _glewInit_GL_VERSION_3_2 ()
   r = _glewInit_GL_ARB_sync() || r;
   r = _glewInit_GL_ARB_texture_multisample() || r;
 
-  r = ((glFramebufferTexture = (PFNGLFRAMEBUFFERTEXTUREPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture")) == NULL) || r;
-  r = ((glGetBufferParameteri64v = (PFNGLGETBUFFERPARAMETERI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferParameteri64v")) == NULL) || r;
-  r = ((glGetInteger64i_v = (PFNGLGETINTEGER64I_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetInteger64i_v")) == NULL) || r;
+  r = ((glFramebufferTexture = (PFNGLFRAMEBUFFERTEXTUREPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture")) == NULL) || r;
+  r = ((glGetBufferParameteri64v = (PFNGLGETBUFFERPARAMETERI64VPROC)glewGetProcAddress((const GLubyte*)"glGetBufferParameteri64v")) == NULL) || r;
+  r = ((glGetInteger64i_v = (PFNGLGETINTEGER64I_VPROC)glewGetProcAddress((const GLubyte*)"glGetInteger64i_v")) == NULL) || r;
 
   return r;
 }
@@ -9655,7 +9652,7 @@ static GLboolean _glewInit_GL_VERSION_3_3 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribDivisor")) == NULL) || r;
+  r = ((glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribDivisor")) == NULL) || r;
 
   return r;
 }
@@ -9668,11 +9665,11 @@ static GLboolean _glewInit_GL_VERSION_4_0 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquationSeparatei = (PFNGLBLENDEQUATIONSEPARATEIPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationSeparatei")) == NULL) || r;
-  r = ((glBlendEquationi = (PFNGLBLENDEQUATIONIPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationi")) == NULL) || r;
-  r = ((glBlendFuncSeparatei = (PFNGLBLENDFUNCSEPARATEIPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncSeparatei")) == NULL) || r;
-  r = ((glBlendFunci = (PFNGLBLENDFUNCIPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFunci")) == NULL) || r;
-  r = ((glMinSampleShading = (PFNGLMINSAMPLESHADINGPROC)glewGetProcSubtractress((const GLubyte*)"glMinSampleShading")) == NULL) || r;
+  r = ((glBlendEquationSeparatei = (PFNGLBLENDEQUATIONSEPARATEIPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparatei")) == NULL) || r;
+  r = ((glBlendEquationi = (PFNGLBLENDEQUATIONIPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationi")) == NULL) || r;
+  r = ((glBlendFuncSeparatei = (PFNGLBLENDFUNCSEPARATEIPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncSeparatei")) == NULL) || r;
+  r = ((glBlendFunci = (PFNGLBLENDFUNCIPROC)glewGetProcAddress((const GLubyte*)"glBlendFunci")) == NULL) || r;
+  r = ((glMinSampleShading = (PFNGLMINSAMPLESHADINGPROC)glewGetProcAddress((const GLubyte*)"glMinSampleShading")) == NULL) || r;
 
   return r;
 }
@@ -9685,10 +9682,10 @@ static GLboolean _glewInit_GL_VERSION_4_5 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetGraphicsResetStatus = (PFNGLGETGRAPHICSRESETSTATUSPROC)glewGetProcSubtractress((const GLubyte*)"glGetGraphicsResetStatus")) == NULL) || r;
-  r = ((glGetnCompressedTexImage = (PFNGLGETNCOMPRESSEDTEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetnCompressedTexImage")) == NULL) || r;
-  r = ((glGetnTexImage = (PFNGLGETNTEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetnTexImage")) == NULL) || r;
-  r = ((glGetnUniformdv = (PFNGLGETNUNIFORMDVPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformdv")) == NULL) || r;
+  r = ((glGetGraphicsResetStatus = (PFNGLGETGRAPHICSRESETSTATUSPROC)glewGetProcAddress((const GLubyte*)"glGetGraphicsResetStatus")) == NULL) || r;
+  r = ((glGetnCompressedTexImage = (PFNGLGETNCOMPRESSEDTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetnCompressedTexImage")) == NULL) || r;
+  r = ((glGetnTexImage = (PFNGLGETNTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetnTexImage")) == NULL) || r;
+  r = ((glGetnUniformdv = (PFNGLGETNUNIFORMDVPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformdv")) == NULL) || r;
 
   return r;
 }
@@ -9701,9 +9698,9 @@ static GLboolean _glewInit_GL_VERSION_4_6 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirectCount = (PFNGLMULTIDRAWARRAYSINDIRECTCOUNTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirectCount")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirectCount = (PFNGLMULTIDRAWELEMENTSINDIRECTCOUNTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirectCount")) == NULL) || r;
-  r = ((glSpecializeShader = (PFNGLSPECIALIZESHADERPROC)glewGetProcSubtractress((const GLubyte*)"glSpecializeShader")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirectCount = (PFNGLMULTIDRAWARRAYSINDIRECTCOUNTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirectCount")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirectCount = (PFNGLMULTIDRAWELEMENTSINDIRECTCOUNTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirectCount")) == NULL) || r;
+  r = ((glSpecializeShader = (PFNGLSPECIALIZESHADERPROC)glewGetProcAddress((const GLubyte*)"glSpecializeShader")) == NULL) || r;
 
   return r;
 }
@@ -9716,7 +9713,7 @@ static GLboolean _glewInit_GL_3DFX_tbuffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTbufferMask3DFX = (PFNGLTBUFFERMASK3DFXPROC)glewGetProcSubtractress((const GLubyte*)"glTbufferMask3DFX")) == NULL) || r;
+  r = ((glTbufferMask3DFX = (PFNGLTBUFFERMASK3DFXPROC)glewGetProcAddress((const GLubyte*)"glTbufferMask3DFX")) == NULL) || r;
 
   return r;
 }
@@ -9729,10 +9726,10 @@ static GLboolean _glewInit_GL_AMD_debug_output ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDebugMessageCallbackAMD = (PFNGLDEBUGMESSAGECALLBACKAMDPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageCallbackAMD")) == NULL) || r;
-  r = ((glDebugMessageEnableAMD = (PFNGLDEBUGMESSAGEENABLEAMDPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageEnableAMD")) == NULL) || r;
-  r = ((glDebugMessageInsertAMD = (PFNGLDEBUGMESSAGEINSERTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageInsertAMD")) == NULL) || r;
-  r = ((glGetDebugMessageLogAMD = (PFNGLGETDEBUGMESSAGELOGAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetDebugMessageLogAMD")) == NULL) || r;
+  r = ((glDebugMessageCallbackAMD = (PFNGLDEBUGMESSAGECALLBACKAMDPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageCallbackAMD")) == NULL) || r;
+  r = ((glDebugMessageEnableAMD = (PFNGLDEBUGMESSAGEENABLEAMDPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageEnableAMD")) == NULL) || r;
+  r = ((glDebugMessageInsertAMD = (PFNGLDEBUGMESSAGEINSERTAMDPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageInsertAMD")) == NULL) || r;
+  r = ((glGetDebugMessageLogAMD = (PFNGLGETDEBUGMESSAGELOGAMDPROC)glewGetProcAddress((const GLubyte*)"glGetDebugMessageLogAMD")) == NULL) || r;
 
   return r;
 }
@@ -9745,10 +9742,10 @@ static GLboolean _glewInit_GL_AMD_draw_buffers_blend ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquationIndexedAMD = (PFNGLBLENDEQUATIONINDEXEDAMDPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationIndexedAMD")) == NULL) || r;
-  r = ((glBlendEquationSeparateIndexedAMD = (PFNGLBLENDEQUATIONSEPARATEINDEXEDAMDPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationSeparateIndexedAMD")) == NULL) || r;
-  r = ((glBlendFuncIndexedAMD = (PFNGLBLENDFUNCINDEXEDAMDPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncIndexedAMD")) == NULL) || r;
-  r = ((glBlendFuncSeparateIndexedAMD = (PFNGLBLENDFUNCSEPARATEINDEXEDAMDPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncSeparateIndexedAMD")) == NULL) || r;
+  r = ((glBlendEquationIndexedAMD = (PFNGLBLENDEQUATIONINDEXEDAMDPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationIndexedAMD")) == NULL) || r;
+  r = ((glBlendEquationSeparateIndexedAMD = (PFNGLBLENDEQUATIONSEPARATEINDEXEDAMDPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparateIndexedAMD")) == NULL) || r;
+  r = ((glBlendFuncIndexedAMD = (PFNGLBLENDFUNCINDEXEDAMDPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncIndexedAMD")) == NULL) || r;
+  r = ((glBlendFuncSeparateIndexedAMD = (PFNGLBLENDFUNCSEPARATEINDEXEDAMDPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncSeparateIndexedAMD")) == NULL) || r;
 
   return r;
 }
@@ -9761,10 +9758,10 @@ static GLboolean _glewInit_GL_AMD_framebuffer_sample_positions ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferSamplePositionsfvAMD = (PFNGLFRAMEBUFFERSAMPLEPOSITIONSFVAMDPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferSamplePositionsfvAMD")) == NULL) || r;
-  r = ((glGetFramebufferParameterfvAMD = (PFNGLGETFRAMEBUFFERPARAMETERFVAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetFramebufferParameterfvAMD")) == NULL) || r;
-  r = ((glGetNamedFramebufferParameterfvAMD = (PFNGLGETNAMEDFRAMEBUFFERPARAMETERFVAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedFramebufferParameterfvAMD")) == NULL) || r;
-  r = ((glNamedFramebufferSamplePositionsfvAMD = (PFNGLNAMEDFRAMEBUFFERSAMPLEPOSITIONSFVAMDPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferSamplePositionsfvAMD")) == NULL) || r;
+  r = ((glFramebufferSamplePositionsfvAMD = (PFNGLFRAMEBUFFERSAMPLEPOSITIONSFVAMDPROC)glewGetProcAddress((const GLubyte*)"glFramebufferSamplePositionsfvAMD")) == NULL) || r;
+  r = ((glGetFramebufferParameterfvAMD = (PFNGLGETFRAMEBUFFERPARAMETERFVAMDPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferParameterfvAMD")) == NULL) || r;
+  r = ((glGetNamedFramebufferParameterfvAMD = (PFNGLGETNAMEDFRAMEBUFFERPARAMETERFVAMDPROC)glewGetProcAddress((const GLubyte*)"glGetNamedFramebufferParameterfvAMD")) == NULL) || r;
+  r = ((glNamedFramebufferSamplePositionsfvAMD = (PFNGLNAMEDFRAMEBUFFERSAMPLEPOSITIONSFVAMDPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferSamplePositionsfvAMD")) == NULL) || r;
 
   return r;
 }
@@ -9777,7 +9774,7 @@ static GLboolean _glewInit_GL_AMD_interleaved_elements ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVertexAttribParameteriAMD = (PFNGLVERTEXATTRIBPARAMETERIAMDPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribParameteriAMD")) == NULL) || r;
+  r = ((glVertexAttribParameteriAMD = (PFNGLVERTEXATTRIBPARAMETERIAMDPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribParameteriAMD")) == NULL) || r;
 
   return r;
 }
@@ -9790,8 +9787,8 @@ static GLboolean _glewInit_GL_AMD_multi_draw_indirect ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirectAMD = (PFNGLMULTIDRAWARRAYSINDIRECTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirectAMD")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirectAMD = (PFNGLMULTIDRAWELEMENTSINDIRECTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirectAMD")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirectAMD = (PFNGLMULTIDRAWARRAYSINDIRECTAMDPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirectAMD")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirectAMD = (PFNGLMULTIDRAWELEMENTSINDIRECTAMDPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirectAMD")) == NULL) || r;
 
   return r;
 }
@@ -9804,9 +9801,9 @@ static GLboolean _glewInit_GL_AMD_name_gen_delete ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDeleteNamesAMD = (PFNGLDELETENAMESAMDPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteNamesAMD")) == NULL) || r;
-  r = ((glGenNamesAMD = (PFNGLGENNAMESAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGenNamesAMD")) == NULL) || r;
-  r = ((glIsNameAMD = (PFNGLISNAMEAMDPROC)glewGetProcSubtractress((const GLubyte*)"glIsNameAMD")) == NULL) || r;
+  r = ((glDeleteNamesAMD = (PFNGLDELETENAMESAMDPROC)glewGetProcAddress((const GLubyte*)"glDeleteNamesAMD")) == NULL) || r;
+  r = ((glGenNamesAMD = (PFNGLGENNAMESAMDPROC)glewGetProcAddress((const GLubyte*)"glGenNamesAMD")) == NULL) || r;
+  r = ((glIsNameAMD = (PFNGLISNAMEAMDPROC)glewGetProcAddress((const GLubyte*)"glIsNameAMD")) == NULL) || r;
 
   return r;
 }
@@ -9819,7 +9816,7 @@ static GLboolean _glewInit_GL_AMD_occlusion_query_event ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glQueryObjectParameteruiAMD = (PFNGLQUERYOBJECTPARAMETERUIAMDPROC)glewGetProcSubtractress((const GLubyte*)"glQueryObjectParameteruiAMD")) == NULL) || r;
+  r = ((glQueryObjectParameteruiAMD = (PFNGLQUERYOBJECTPARAMETERUIAMDPROC)glewGetProcAddress((const GLubyte*)"glQueryObjectParameteruiAMD")) == NULL) || r;
 
   return r;
 }
@@ -9832,17 +9829,17 @@ static GLboolean _glewInit_GL_AMD_performance_monitor ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginPerfMonitorAMD = (PFNGLBEGINPERFMONITORAMDPROC)glewGetProcSubtractress((const GLubyte*)"glBeginPerfMonitorAMD")) == NULL) || r;
-  r = ((glDeletePerfMonitorsAMD = (PFNGLDELETEPERFMONITORSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glDeletePerfMonitorsAMD")) == NULL) || r;
-  r = ((glEndPerfMonitorAMD = (PFNGLENDPERFMONITORAMDPROC)glewGetProcSubtractress((const GLubyte*)"glEndPerfMonitorAMD")) == NULL) || r;
-  r = ((glGenPerfMonitorsAMD = (PFNGLGENPERFMONITORSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGenPerfMonitorsAMD")) == NULL) || r;
-  r = ((glGetPerfMonitorCounterDataAMD = (PFNGLGETPERFMONITORCOUNTERDATAAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfMonitorCounterDataAMD")) == NULL) || r;
-  r = ((glGetPerfMonitorCounterInfoAMD = (PFNGLGETPERFMONITORCOUNTERINFOAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfMonitorCounterInfoAMD")) == NULL) || r;
-  r = ((glGetPerfMonitorCounterStringAMD = (PFNGLGETPERFMONITORCOUNTERSTRINGAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfMonitorCounterStringAMD")) == NULL) || r;
-  r = ((glGetPerfMonitorCountersAMD = (PFNGLGETPERFMONITORCOUNTERSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfMonitorCountersAMD")) == NULL) || r;
-  r = ((glGetPerfMonitorGroupStringAMD = (PFNGLGETPERFMONITORGROUPSTRINGAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfMonitorGroupStringAMD")) == NULL) || r;
-  r = ((glGetPerfMonitorGroupsAMD = (PFNGLGETPERFMONITORGROUPSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfMonitorGroupsAMD")) == NULL) || r;
-  r = ((glSelectPerfMonitorCountersAMD = (PFNGLSELECTPERFMONITORCOUNTERSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glSelectPerfMonitorCountersAMD")) == NULL) || r;
+  r = ((glBeginPerfMonitorAMD = (PFNGLBEGINPERFMONITORAMDPROC)glewGetProcAddress((const GLubyte*)"glBeginPerfMonitorAMD")) == NULL) || r;
+  r = ((glDeletePerfMonitorsAMD = (PFNGLDELETEPERFMONITORSAMDPROC)glewGetProcAddress((const GLubyte*)"glDeletePerfMonitorsAMD")) == NULL) || r;
+  r = ((glEndPerfMonitorAMD = (PFNGLENDPERFMONITORAMDPROC)glewGetProcAddress((const GLubyte*)"glEndPerfMonitorAMD")) == NULL) || r;
+  r = ((glGenPerfMonitorsAMD = (PFNGLGENPERFMONITORSAMDPROC)glewGetProcAddress((const GLubyte*)"glGenPerfMonitorsAMD")) == NULL) || r;
+  r = ((glGetPerfMonitorCounterDataAMD = (PFNGLGETPERFMONITORCOUNTERDATAAMDPROC)glewGetProcAddress((const GLubyte*)"glGetPerfMonitorCounterDataAMD")) == NULL) || r;
+  r = ((glGetPerfMonitorCounterInfoAMD = (PFNGLGETPERFMONITORCOUNTERINFOAMDPROC)glewGetProcAddress((const GLubyte*)"glGetPerfMonitorCounterInfoAMD")) == NULL) || r;
+  r = ((glGetPerfMonitorCounterStringAMD = (PFNGLGETPERFMONITORCOUNTERSTRINGAMDPROC)glewGetProcAddress((const GLubyte*)"glGetPerfMonitorCounterStringAMD")) == NULL) || r;
+  r = ((glGetPerfMonitorCountersAMD = (PFNGLGETPERFMONITORCOUNTERSAMDPROC)glewGetProcAddress((const GLubyte*)"glGetPerfMonitorCountersAMD")) == NULL) || r;
+  r = ((glGetPerfMonitorGroupStringAMD = (PFNGLGETPERFMONITORGROUPSTRINGAMDPROC)glewGetProcAddress((const GLubyte*)"glGetPerfMonitorGroupStringAMD")) == NULL) || r;
+  r = ((glGetPerfMonitorGroupsAMD = (PFNGLGETPERFMONITORGROUPSAMDPROC)glewGetProcAddress((const GLubyte*)"glGetPerfMonitorGroupsAMD")) == NULL) || r;
+  r = ((glSelectPerfMonitorCountersAMD = (PFNGLSELECTPERFMONITORCOUNTERSAMDPROC)glewGetProcAddress((const GLubyte*)"glSelectPerfMonitorCountersAMD")) == NULL) || r;
 
   return r;
 }
@@ -9855,7 +9852,7 @@ static GLboolean _glewInit_GL_AMD_sample_positions ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSetMultisamplefvAMD = (PFNGLSETMULTISAMPLEFVAMDPROC)glewGetProcSubtractress((const GLubyte*)"glSetMultisamplefvAMD")) == NULL) || r;
+  r = ((glSetMultisamplefvAMD = (PFNGLSETMULTISAMPLEFVAMDPROC)glewGetProcAddress((const GLubyte*)"glSetMultisamplefvAMD")) == NULL) || r;
 
   return r;
 }
@@ -9868,8 +9865,8 @@ static GLboolean _glewInit_GL_AMD_sparse_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexStorageSparseAMD = (PFNGLTEXSTORAGESPARSEAMDPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorageSparseAMD")) == NULL) || r;
-  r = ((glTextureStorageSparseAMD = (PFNGLTEXTURESTORAGESPARSEAMDPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorageSparseAMD")) == NULL) || r;
+  r = ((glTexStorageSparseAMD = (PFNGLTEXSTORAGESPARSEAMDPROC)glewGetProcAddress((const GLubyte*)"glTexStorageSparseAMD")) == NULL) || r;
+  r = ((glTextureStorageSparseAMD = (PFNGLTEXTURESTORAGESPARSEAMDPROC)glewGetProcAddress((const GLubyte*)"glTextureStorageSparseAMD")) == NULL) || r;
 
   return r;
 }
@@ -9882,7 +9879,7 @@ static GLboolean _glewInit_GL_AMD_stencil_operation_extended ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glStencilOpValueAMD = (PFNGLSTENCILOPVALUEAMDPROC)glewGetProcSubtractress((const GLubyte*)"glStencilOpValueAMD")) == NULL) || r;
+  r = ((glStencilOpValueAMD = (PFNGLSTENCILOPVALUEAMDPROC)glewGetProcAddress((const GLubyte*)"glStencilOpValueAMD")) == NULL) || r;
 
   return r;
 }
@@ -9895,8 +9892,8 @@ static GLboolean _glewInit_GL_AMD_vertex_shader_tessellator ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTessellationFactorAMD = (PFNGLTESSELLATIONFACTORAMDPROC)glewGetProcSubtractress((const GLubyte*)"glTessellationFactorAMD")) == NULL) || r;
-  r = ((glTessellationModeAMD = (PFNGLTESSELLATIONMODEAMDPROC)glewGetProcSubtractress((const GLubyte*)"glTessellationModeAMD")) == NULL) || r;
+  r = ((glTessellationFactorAMD = (PFNGLTESSELLATIONFACTORAMDPROC)glewGetProcAddress((const GLubyte*)"glTessellationFactorAMD")) == NULL) || r;
+  r = ((glTessellationModeAMD = (PFNGLTESSELLATIONMODEAMDPROC)glewGetProcAddress((const GLubyte*)"glTessellationModeAMD")) == NULL) || r;
 
   return r;
 }
@@ -9909,7 +9906,7 @@ static GLboolean _glewInit_GL_ANGLE_framebuffer_blit ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlitFramebufferANGLE = (PFNGLBLITFRAMEBUFFERANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glBlitFramebufferANGLE")) == NULL) || r;
+  r = ((glBlitFramebufferANGLE = (PFNGLBLITFRAMEBUFFERANGLEPROC)glewGetProcAddress((const GLubyte*)"glBlitFramebufferANGLE")) == NULL) || r;
 
   return r;
 }
@@ -9922,7 +9919,7 @@ static GLboolean _glewInit_GL_ANGLE_framebuffer_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glRenderbufferStorageMultisampleANGLE = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageMultisampleANGLE")) == NULL) || r;
+  r = ((glRenderbufferStorageMultisampleANGLE = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEANGLEPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageMultisampleANGLE")) == NULL) || r;
 
   return r;
 }
@@ -9935,9 +9932,9 @@ static GLboolean _glewInit_GL_ANGLE_instanced_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysInstancedANGLE = (PFNGLDRAWARRAYSINSTANCEDANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstancedANGLE")) == NULL) || r;
-  r = ((glDrawElementsInstancedANGLE = (PFNGLDRAWELEMENTSINSTANCEDANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedANGLE")) == NULL) || r;
-  r = ((glVertexAttribDivisorANGLE = (PFNGLVERTEXATTRIBDIVISORANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribDivisorANGLE")) == NULL) || r;
+  r = ((glDrawArraysInstancedANGLE = (PFNGLDRAWARRAYSINSTANCEDANGLEPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstancedANGLE")) == NULL) || r;
+  r = ((glDrawElementsInstancedANGLE = (PFNGLDRAWELEMENTSINSTANCEDANGLEPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedANGLE")) == NULL) || r;
+  r = ((glVertexAttribDivisorANGLE = (PFNGLVERTEXATTRIBDIVISORANGLEPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribDivisorANGLE")) == NULL) || r;
 
   return r;
 }
@@ -9950,17 +9947,17 @@ static GLboolean _glewInit_GL_ANGLE_timer_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginQueryANGLE = (PFNGLBEGINQUERYANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glBeginQueryANGLE")) == NULL) || r;
-  r = ((glDeleteQueriesANGLE = (PFNGLDELETEQUERIESANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteQueriesANGLE")) == NULL) || r;
-  r = ((glEndQueryANGLE = (PFNGLENDQUERYANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glEndQueryANGLE")) == NULL) || r;
-  r = ((glGenQueriesANGLE = (PFNGLGENQUERIESANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGenQueriesANGLE")) == NULL) || r;
-  r = ((glGetQueryObjecti64vANGLE = (PFNGLGETQUERYOBJECTI64VANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjecti64vANGLE")) == NULL) || r;
-  r = ((glGetQueryObjectivANGLE = (PFNGLGETQUERYOBJECTIVANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectivANGLE")) == NULL) || r;
-  r = ((glGetQueryObjectui64vANGLE = (PFNGLGETQUERYOBJECTUI64VANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectui64vANGLE")) == NULL) || r;
-  r = ((glGetQueryObjectuivANGLE = (PFNGLGETQUERYOBJECTUIVANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectuivANGLE")) == NULL) || r;
-  r = ((glGetQueryivANGLE = (PFNGLGETQUERYIVANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryivANGLE")) == NULL) || r;
-  r = ((glIsQueryANGLE = (PFNGLISQUERYANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glIsQueryANGLE")) == NULL) || r;
-  r = ((glQueryCounterANGLE = (PFNGLQUERYCOUNTERANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glQueryCounterANGLE")) == NULL) || r;
+  r = ((glBeginQueryANGLE = (PFNGLBEGINQUERYANGLEPROC)glewGetProcAddress((const GLubyte*)"glBeginQueryANGLE")) == NULL) || r;
+  r = ((glDeleteQueriesANGLE = (PFNGLDELETEQUERIESANGLEPROC)glewGetProcAddress((const GLubyte*)"glDeleteQueriesANGLE")) == NULL) || r;
+  r = ((glEndQueryANGLE = (PFNGLENDQUERYANGLEPROC)glewGetProcAddress((const GLubyte*)"glEndQueryANGLE")) == NULL) || r;
+  r = ((glGenQueriesANGLE = (PFNGLGENQUERIESANGLEPROC)glewGetProcAddress((const GLubyte*)"glGenQueriesANGLE")) == NULL) || r;
+  r = ((glGetQueryObjecti64vANGLE = (PFNGLGETQUERYOBJECTI64VANGLEPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjecti64vANGLE")) == NULL) || r;
+  r = ((glGetQueryObjectivANGLE = (PFNGLGETQUERYOBJECTIVANGLEPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectivANGLE")) == NULL) || r;
+  r = ((glGetQueryObjectui64vANGLE = (PFNGLGETQUERYOBJECTUI64VANGLEPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectui64vANGLE")) == NULL) || r;
+  r = ((glGetQueryObjectuivANGLE = (PFNGLGETQUERYOBJECTUIVANGLEPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectuivANGLE")) == NULL) || r;
+  r = ((glGetQueryivANGLE = (PFNGLGETQUERYIVANGLEPROC)glewGetProcAddress((const GLubyte*)"glGetQueryivANGLE")) == NULL) || r;
+  r = ((glIsQueryANGLE = (PFNGLISQUERYANGLEPROC)glewGetProcAddress((const GLubyte*)"glIsQueryANGLE")) == NULL) || r;
+  r = ((glQueryCounterANGLE = (PFNGLQUERYCOUNTERANGLEPROC)glewGetProcAddress((const GLubyte*)"glQueryCounterANGLE")) == NULL) || r;
 
   return r;
 }
@@ -9973,7 +9970,7 @@ static GLboolean _glewInit_GL_ANGLE_translated_shader_source ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetTranslatedShaderSourceANGLE = (PFNGLGETTRANSLATEDSHADERSOURCEANGLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetTranslatedShaderSourceANGLE")) == NULL) || r;
+  r = ((glGetTranslatedShaderSourceANGLE = (PFNGLGETTRANSLATEDSHADERSOURCEANGLEPROC)glewGetProcAddress((const GLubyte*)"glGetTranslatedShaderSourceANGLE")) == NULL) || r;
 
   return r;
 }
@@ -9986,7 +9983,7 @@ static GLboolean _glewInit_GL_APPLE_copy_texture_levels ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyTextureLevelsAPPLE = (PFNGLCOPYTEXTURELEVELSAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureLevelsAPPLE")) == NULL) || r;
+  r = ((glCopyTextureLevelsAPPLE = (PFNGLCOPYTEXTURELEVELSAPPLEPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureLevelsAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -9999,11 +9996,11 @@ static GLboolean _glewInit_GL_APPLE_element_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawElementArrayAPPLE = (PFNGLDRAWELEMENTARRAYAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementArrayAPPLE")) == NULL) || r;
-  r = ((glDrawRangeElementArrayAPPLE = (PFNGLDRAWRANGEELEMENTARRAYAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawRangeElementArrayAPPLE")) == NULL) || r;
-  r = ((glElementPointerAPPLE = (PFNGLELEMENTPOINTERAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glElementPointerAPPLE")) == NULL) || r;
-  r = ((glMultiDrawElementArrayAPPLE = (PFNGLMULTIDRAWELEMENTARRAYAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementArrayAPPLE")) == NULL) || r;
-  r = ((glMultiDrawRangeElementArrayAPPLE = (PFNGLMULTIDRAWRANGEELEMENTARRAYAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawRangeElementArrayAPPLE")) == NULL) || r;
+  r = ((glDrawElementArrayAPPLE = (PFNGLDRAWELEMENTARRAYAPPLEPROC)glewGetProcAddress((const GLubyte*)"glDrawElementArrayAPPLE")) == NULL) || r;
+  r = ((glDrawRangeElementArrayAPPLE = (PFNGLDRAWRANGEELEMENTARRAYAPPLEPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElementArrayAPPLE")) == NULL) || r;
+  r = ((glElementPointerAPPLE = (PFNGLELEMENTPOINTERAPPLEPROC)glewGetProcAddress((const GLubyte*)"glElementPointerAPPLE")) == NULL) || r;
+  r = ((glMultiDrawElementArrayAPPLE = (PFNGLMULTIDRAWELEMENTARRAYAPPLEPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementArrayAPPLE")) == NULL) || r;
+  r = ((glMultiDrawRangeElementArrayAPPLE = (PFNGLMULTIDRAWRANGEELEMENTARRAYAPPLEPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawRangeElementArrayAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10016,14 +10013,14 @@ static GLboolean _glewInit_GL_APPLE_fence ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDeleteFencesAPPLE = (PFNGLDELETEFENCESAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteFencesAPPLE")) == NULL) || r;
-  r = ((glFinishFenceAPPLE = (PFNGLFINISHFENCEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glFinishFenceAPPLE")) == NULL) || r;
-  r = ((glFinishObjectAPPLE = (PFNGLFINISHOBJECTAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glFinishObjectAPPLE")) == NULL) || r;
-  r = ((glGenFencesAPPLE = (PFNGLGENFENCESAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glGenFencesAPPLE")) == NULL) || r;
-  r = ((glIsFenceAPPLE = (PFNGLISFENCEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glIsFenceAPPLE")) == NULL) || r;
-  r = ((glSetFenceAPPLE = (PFNGLSETFENCEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glSetFenceAPPLE")) == NULL) || r;
-  r = ((glTestFenceAPPLE = (PFNGLTESTFENCEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTestFenceAPPLE")) == NULL) || r;
-  r = ((glTestObjectAPPLE = (PFNGLTESTOBJECTAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTestObjectAPPLE")) == NULL) || r;
+  r = ((glDeleteFencesAPPLE = (PFNGLDELETEFENCESAPPLEPROC)glewGetProcAddress((const GLubyte*)"glDeleteFencesAPPLE")) == NULL) || r;
+  r = ((glFinishFenceAPPLE = (PFNGLFINISHFENCEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glFinishFenceAPPLE")) == NULL) || r;
+  r = ((glFinishObjectAPPLE = (PFNGLFINISHOBJECTAPPLEPROC)glewGetProcAddress((const GLubyte*)"glFinishObjectAPPLE")) == NULL) || r;
+  r = ((glGenFencesAPPLE = (PFNGLGENFENCESAPPLEPROC)glewGetProcAddress((const GLubyte*)"glGenFencesAPPLE")) == NULL) || r;
+  r = ((glIsFenceAPPLE = (PFNGLISFENCEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glIsFenceAPPLE")) == NULL) || r;
+  r = ((glSetFenceAPPLE = (PFNGLSETFENCEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glSetFenceAPPLE")) == NULL) || r;
+  r = ((glTestFenceAPPLE = (PFNGLTESTFENCEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glTestFenceAPPLE")) == NULL) || r;
+  r = ((glTestObjectAPPLE = (PFNGLTESTOBJECTAPPLEPROC)glewGetProcAddress((const GLubyte*)"glTestObjectAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10036,8 +10033,8 @@ static GLboolean _glewInit_GL_APPLE_flush_buffer_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferParameteriAPPLE = (PFNGLBUFFERPARAMETERIAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glBufferParameteriAPPLE")) == NULL) || r;
-  r = ((glFlushMappedBufferRangeAPPLE = (PFNGLFLUSHMAPPEDBUFFERRANGEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glFlushMappedBufferRangeAPPLE")) == NULL) || r;
+  r = ((glBufferParameteriAPPLE = (PFNGLBUFFERPARAMETERIAPPLEPROC)glewGetProcAddress((const GLubyte*)"glBufferParameteriAPPLE")) == NULL) || r;
+  r = ((glFlushMappedBufferRangeAPPLE = (PFNGLFLUSHMAPPEDBUFFERRANGEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glFlushMappedBufferRangeAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10050,8 +10047,8 @@ static GLboolean _glewInit_GL_APPLE_framebuffer_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glRenderbufferStorageMultisampleAPPLE = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageMultisampleAPPLE")) == NULL) || r;
-  r = ((glResolveMultisampleFramebufferAPPLE = (PFNGLRESOLVEMULTISAMPLEFRAMEBUFFERAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glResolveMultisampleFramebufferAPPLE")) == NULL) || r;
+  r = ((glRenderbufferStorageMultisampleAPPLE = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageMultisampleAPPLE")) == NULL) || r;
+  r = ((glResolveMultisampleFramebufferAPPLE = (PFNGLRESOLVEMULTISAMPLEFRAMEBUFFERAPPLEPROC)glewGetProcAddress((const GLubyte*)"glResolveMultisampleFramebufferAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10064,9 +10061,9 @@ static GLboolean _glewInit_GL_APPLE_object_purgeable ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetObjectParameterivAPPLE = (PFNGLGETOBJECTPARAMETERIVAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectParameterivAPPLE")) == NULL) || r;
-  r = ((glObjectPurgeableAPPLE = (PFNGLOBJECTPURGEABLEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glObjectPurgeableAPPLE")) == NULL) || r;
-  r = ((glObjectUnpurgeableAPPLE = (PFNGLOBJECTUNPURGEABLEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glObjectUnpurgeableAPPLE")) == NULL) || r;
+  r = ((glGetObjectParameterivAPPLE = (PFNGLGETOBJECTPARAMETERIVAPPLEPROC)glewGetProcAddress((const GLubyte*)"glGetObjectParameterivAPPLE")) == NULL) || r;
+  r = ((glObjectPurgeableAPPLE = (PFNGLOBJECTPURGEABLEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glObjectPurgeableAPPLE")) == NULL) || r;
+  r = ((glObjectUnpurgeableAPPLE = (PFNGLOBJECTUNPURGEABLEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glObjectUnpurgeableAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10079,13 +10076,13 @@ static GLboolean _glewInit_GL_APPLE_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClientWaitSyncAPPLE = (PFNGLCLIENTWAITSYNCAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glClientWaitSyncAPPLE")) == NULL) || r;
-  r = ((glDeleteSyncAPPLE = (PFNGLDELETESYNCAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteSyncAPPLE")) == NULL) || r;
-  r = ((glFenceSyncAPPLE = (PFNGLFENCESYNCAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glFenceSyncAPPLE")) == NULL) || r;
-  r = ((glGetInteger64vAPPLE = (PFNGLGETINTEGER64VAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetInteger64vAPPLE")) == NULL) || r;
-  r = ((glGetSyncivAPPLE = (PFNGLGETSYNCIVAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetSyncivAPPLE")) == NULL) || r;
-  r = ((glIsSyncAPPLE = (PFNGLISSYNCAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glIsSyncAPPLE")) == NULL) || r;
-  r = ((glWaitSyncAPPLE = (PFNGLWAITSYNCAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glWaitSyncAPPLE")) == NULL) || r;
+  r = ((glClientWaitSyncAPPLE = (PFNGLCLIENTWAITSYNCAPPLEPROC)glewGetProcAddress((const GLubyte*)"glClientWaitSyncAPPLE")) == NULL) || r;
+  r = ((glDeleteSyncAPPLE = (PFNGLDELETESYNCAPPLEPROC)glewGetProcAddress((const GLubyte*)"glDeleteSyncAPPLE")) == NULL) || r;
+  r = ((glFenceSyncAPPLE = (PFNGLFENCESYNCAPPLEPROC)glewGetProcAddress((const GLubyte*)"glFenceSyncAPPLE")) == NULL) || r;
+  r = ((glGetInteger64vAPPLE = (PFNGLGETINTEGER64VAPPLEPROC)glewGetProcAddress((const GLubyte*)"glGetInteger64vAPPLE")) == NULL) || r;
+  r = ((glGetSyncivAPPLE = (PFNGLGETSYNCIVAPPLEPROC)glewGetProcAddress((const GLubyte*)"glGetSyncivAPPLE")) == NULL) || r;
+  r = ((glIsSyncAPPLE = (PFNGLISSYNCAPPLEPROC)glewGetProcAddress((const GLubyte*)"glIsSyncAPPLE")) == NULL) || r;
+  r = ((glWaitSyncAPPLE = (PFNGLWAITSYNCAPPLEPROC)glewGetProcAddress((const GLubyte*)"glWaitSyncAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10098,8 +10095,8 @@ static GLboolean _glewInit_GL_APPLE_texture_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetTexParameterPointervAPPLE = (PFNGLGETTEXPARAMETERPOINTERVAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexParameterPointervAPPLE")) == NULL) || r;
-  r = ((glTextureRangeAPPLE = (PFNGLTEXTURERANGEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTextureRangeAPPLE")) == NULL) || r;
+  r = ((glGetTexParameterPointervAPPLE = (PFNGLGETTEXPARAMETERPOINTERVAPPLEPROC)glewGetProcAddress((const GLubyte*)"glGetTexParameterPointervAPPLE")) == NULL) || r;
+  r = ((glTextureRangeAPPLE = (PFNGLTEXTURERANGEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glTextureRangeAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10112,10 +10109,10 @@ static GLboolean _glewInit_GL_APPLE_vertex_array_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindVertexArrayAPPLE = (PFNGLBINDVERTEXARRAYAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glBindVertexArrayAPPLE")) == NULL) || r;
-  r = ((glDeleteVertexArraysAPPLE = (PFNGLDELETEVERTEXARRAYSAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteVertexArraysAPPLE")) == NULL) || r;
-  r = ((glGenVertexArraysAPPLE = (PFNGLGENVERTEXARRAYSAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glGenVertexArraysAPPLE")) == NULL) || r;
-  r = ((glIsVertexArrayAPPLE = (PFNGLISVERTEXARRAYAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glIsVertexArrayAPPLE")) == NULL) || r;
+  r = ((glBindVertexArrayAPPLE = (PFNGLBINDVERTEXARRAYAPPLEPROC)glewGetProcAddress((const GLubyte*)"glBindVertexArrayAPPLE")) == NULL) || r;
+  r = ((glDeleteVertexArraysAPPLE = (PFNGLDELETEVERTEXARRAYSAPPLEPROC)glewGetProcAddress((const GLubyte*)"glDeleteVertexArraysAPPLE")) == NULL) || r;
+  r = ((glGenVertexArraysAPPLE = (PFNGLGENVERTEXARRAYSAPPLEPROC)glewGetProcAddress((const GLubyte*)"glGenVertexArraysAPPLE")) == NULL) || r;
+  r = ((glIsVertexArrayAPPLE = (PFNGLISVERTEXARRAYAPPLEPROC)glewGetProcAddress((const GLubyte*)"glIsVertexArrayAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10128,9 +10125,9 @@ static GLboolean _glewInit_GL_APPLE_vertex_array_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFlushVertexArrayRangeAPPLE = (PFNGLFLUSHVERTEXARRAYRANGEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glFlushVertexArrayRangeAPPLE")) == NULL) || r;
-  r = ((glVertexArrayParameteriAPPLE = (PFNGLVERTEXARRAYPARAMETERIAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayParameteriAPPLE")) == NULL) || r;
-  r = ((glVertexArrayRangeAPPLE = (PFNGLVERTEXARRAYRANGEAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayRangeAPPLE")) == NULL) || r;
+  r = ((glFlushVertexArrayRangeAPPLE = (PFNGLFLUSHVERTEXARRAYRANGEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glFlushVertexArrayRangeAPPLE")) == NULL) || r;
+  r = ((glVertexArrayParameteriAPPLE = (PFNGLVERTEXARRAYPARAMETERIAPPLEPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayParameteriAPPLE")) == NULL) || r;
+  r = ((glVertexArrayRangeAPPLE = (PFNGLVERTEXARRAYRANGEAPPLEPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayRangeAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10143,13 +10140,13 @@ static GLboolean _glewInit_GL_APPLE_vertex_program_evaluators ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDisableVertexAttribAPPLE = (PFNGLDISABLEVERTEXATTRIBAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVertexAttribAPPLE")) == NULL) || r;
-  r = ((glEnableVertexAttribAPPLE = (PFNGLENABLEVERTEXATTRIBAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVertexAttribAPPLE")) == NULL) || r;
-  r = ((glIsVertexAttribEnabledAPPLE = (PFNGLISVERTEXATTRIBENABLEDAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glIsVertexAttribEnabledAPPLE")) == NULL) || r;
-  r = ((glMapVertexAttrib1dAPPLE = (PFNGLMAPVERTEXATTRIB1DAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glMapVertexAttrib1dAPPLE")) == NULL) || r;
-  r = ((glMapVertexAttrib1fAPPLE = (PFNGLMAPVERTEXATTRIB1FAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glMapVertexAttrib1fAPPLE")) == NULL) || r;
-  r = ((glMapVertexAttrib2dAPPLE = (PFNGLMAPVERTEXATTRIB2DAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glMapVertexAttrib2dAPPLE")) == NULL) || r;
-  r = ((glMapVertexAttrib2fAPPLE = (PFNGLMAPVERTEXATTRIB2FAPPLEPROC)glewGetProcSubtractress((const GLubyte*)"glMapVertexAttrib2fAPPLE")) == NULL) || r;
+  r = ((glDisableVertexAttribAPPLE = (PFNGLDISABLEVERTEXATTRIBAPPLEPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexAttribAPPLE")) == NULL) || r;
+  r = ((glEnableVertexAttribAPPLE = (PFNGLENABLEVERTEXATTRIBAPPLEPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexAttribAPPLE")) == NULL) || r;
+  r = ((glIsVertexAttribEnabledAPPLE = (PFNGLISVERTEXATTRIBENABLEDAPPLEPROC)glewGetProcAddress((const GLubyte*)"glIsVertexAttribEnabledAPPLE")) == NULL) || r;
+  r = ((glMapVertexAttrib1dAPPLE = (PFNGLMAPVERTEXATTRIB1DAPPLEPROC)glewGetProcAddress((const GLubyte*)"glMapVertexAttrib1dAPPLE")) == NULL) || r;
+  r = ((glMapVertexAttrib1fAPPLE = (PFNGLMAPVERTEXATTRIB1FAPPLEPROC)glewGetProcAddress((const GLubyte*)"glMapVertexAttrib1fAPPLE")) == NULL) || r;
+  r = ((glMapVertexAttrib2dAPPLE = (PFNGLMAPVERTEXATTRIB2DAPPLEPROC)glewGetProcAddress((const GLubyte*)"glMapVertexAttrib2dAPPLE")) == NULL) || r;
+  r = ((glMapVertexAttrib2fAPPLE = (PFNGLMAPVERTEXATTRIB2FAPPLEPROC)glewGetProcAddress((const GLubyte*)"glMapVertexAttrib2fAPPLE")) == NULL) || r;
 
   return r;
 }
@@ -10162,11 +10159,11 @@ static GLboolean _glewInit_GL_ARB_ES2_compatibility ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearDepthf = (PFNGLCLEARDEPTHFPROC)glewGetProcSubtractress((const GLubyte*)"glClearDepthf")) == NULL) || r;
-  r = ((glDepthRangef = (PFNGLDEPTHRANGEFPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangef")) == NULL) || r;
-  r = ((glGetShaderPrecisionFormat = (PFNGLGETSHADERPRECISIONFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glGetShaderPrecisionFormat")) == NULL) || r;
-  r = ((glReleaseShaderCompiler = (PFNGLRELEASESHADERCOMPILERPROC)glewGetProcSubtractress((const GLubyte*)"glReleaseShaderCompiler")) == NULL) || r;
-  r = ((glShaderBinary = (PFNGLSHADERBINARYPROC)glewGetProcSubtractress((const GLubyte*)"glShaderBinary")) == NULL) || r;
+  r = ((glClearDepthf = (PFNGLCLEARDEPTHFPROC)glewGetProcAddress((const GLubyte*)"glClearDepthf")) == NULL) || r;
+  r = ((glDepthRangef = (PFNGLDEPTHRANGEFPROC)glewGetProcAddress((const GLubyte*)"glDepthRangef")) == NULL) || r;
+  r = ((glGetShaderPrecisionFormat = (PFNGLGETSHADERPRECISIONFORMATPROC)glewGetProcAddress((const GLubyte*)"glGetShaderPrecisionFormat")) == NULL) || r;
+  r = ((glReleaseShaderCompiler = (PFNGLRELEASESHADERCOMPILERPROC)glewGetProcAddress((const GLubyte*)"glReleaseShaderCompiler")) == NULL) || r;
+  r = ((glShaderBinary = (PFNGLSHADERBINARYPROC)glewGetProcAddress((const GLubyte*)"glShaderBinary")) == NULL) || r;
 
   return r;
 }
@@ -10179,7 +10176,7 @@ static GLboolean _glewInit_GL_ARB_ES3_1_compatibility ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMemoryBarrierByRegion = (PFNGLMEMORYBARRIERBYREGIONPROC)glewGetProcSubtractress((const GLubyte*)"glMemoryBarrierByRegion")) == NULL) || r;
+  r = ((glMemoryBarrierByRegion = (PFNGLMEMORYBARRIERBYREGIONPROC)glewGetProcAddress((const GLubyte*)"glMemoryBarrierByRegion")) == NULL) || r;
 
   return r;
 }
@@ -10192,7 +10189,7 @@ static GLboolean _glewInit_GL_ARB_ES3_2_compatibility ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPrimitiveBoundingBoxARB = (PFNGLPRIMITIVEBOUNDINGBOXARBPROC)glewGetProcSubtractress((const GLubyte*)"glPrimitiveBoundingBoxARB")) == NULL) || r;
+  r = ((glPrimitiveBoundingBoxARB = (PFNGLPRIMITIVEBOUNDINGBOXARBPROC)glewGetProcAddress((const GLubyte*)"glPrimitiveBoundingBoxARB")) == NULL) || r;
 
   return r;
 }
@@ -10205,9 +10202,9 @@ static GLboolean _glewInit_GL_ARB_base_instance ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstancedBaseInstance")) == NULL) || r;
-  r = ((glDrawElementsInstancedBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedBaseInstance")) == NULL) || r;
-  r = ((glDrawElementsInstancedBaseVertexBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedBaseVertexBaseInstance")) == NULL) || r;
+  r = ((glDrawArraysInstancedBaseInstance = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstancedBaseInstance")) == NULL) || r;
+  r = ((glDrawElementsInstancedBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedBaseInstance")) == NULL) || r;
+  r = ((glDrawElementsInstancedBaseVertexBaseInstance = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedBaseVertexBaseInstance")) == NULL) || r;
 
   return r;
 }
@@ -10220,22 +10217,22 @@ static GLboolean _glewInit_GL_ARB_bindless_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetImageHandleARB = (PFNGLGETIMAGEHANDLEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetImageHandleARB")) == NULL) || r;
-  r = ((glGetTextureHandleARB = (PFNGLGETTEXTUREHANDLEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureHandleARB")) == NULL) || r;
-  r = ((glGetTextureSamplerHandleARB = (PFNGLGETTEXTURESAMPLERHANDLEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureSamplerHandleARB")) == NULL) || r;
-  r = ((glGetVertexAttribLui64vARB = (PFNGLGETVERTEXATTRIBLUI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribLui64vARB")) == NULL) || r;
-  r = ((glIsImageHandleResidentARB = (PFNGLISIMAGEHANDLERESIDENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glIsImageHandleResidentARB")) == NULL) || r;
-  r = ((glIsTextureHandleResidentARB = (PFNGLISTEXTUREHANDLERESIDENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glIsTextureHandleResidentARB")) == NULL) || r;
-  r = ((glMakeImageHandleNonResidentARB = (PFNGLMAKEIMAGEHANDLENONRESIDENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glMakeImageHandleNonResidentARB")) == NULL) || r;
-  r = ((glMakeImageHandleResidentARB = (PFNGLMAKEIMAGEHANDLERESIDENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glMakeImageHandleResidentARB")) == NULL) || r;
-  r = ((glMakeTextureHandleNonResidentARB = (PFNGLMAKETEXTUREHANDLENONRESIDENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glMakeTextureHandleNonResidentARB")) == NULL) || r;
-  r = ((glMakeTextureHandleResidentARB = (PFNGLMAKETEXTUREHANDLERESIDENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glMakeTextureHandleResidentARB")) == NULL) || r;
-  r = ((glProgramUniformHandleui64ARB = (PFNGLPROGRAMUNIFORMHANDLEUI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformHandleui64ARB")) == NULL) || r;
-  r = ((glProgramUniformHandleui64vARB = (PFNGLPROGRAMUNIFORMHANDLEUI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformHandleui64vARB")) == NULL) || r;
-  r = ((glUniformHandleui64ARB = (PFNGLUNIFORMHANDLEUI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniformHandleui64ARB")) == NULL) || r;
-  r = ((glUniformHandleui64vARB = (PFNGLUNIFORMHANDLEUI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniformHandleui64vARB")) == NULL) || r;
-  r = ((glVertexAttribL1ui64ARB = (PFNGLVERTEXATTRIBL1UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1ui64ARB")) == NULL) || r;
-  r = ((glVertexAttribL1ui64vARB = (PFNGLVERTEXATTRIBL1UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1ui64vARB")) == NULL) || r;
+  r = ((glGetImageHandleARB = (PFNGLGETIMAGEHANDLEARBPROC)glewGetProcAddress((const GLubyte*)"glGetImageHandleARB")) == NULL) || r;
+  r = ((glGetTextureHandleARB = (PFNGLGETTEXTUREHANDLEARBPROC)glewGetProcAddress((const GLubyte*)"glGetTextureHandleARB")) == NULL) || r;
+  r = ((glGetTextureSamplerHandleARB = (PFNGLGETTEXTURESAMPLERHANDLEARBPROC)glewGetProcAddress((const GLubyte*)"glGetTextureSamplerHandleARB")) == NULL) || r;
+  r = ((glGetVertexAttribLui64vARB = (PFNGLGETVERTEXATTRIBLUI64VARBPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribLui64vARB")) == NULL) || r;
+  r = ((glIsImageHandleResidentARB = (PFNGLISIMAGEHANDLERESIDENTARBPROC)glewGetProcAddress((const GLubyte*)"glIsImageHandleResidentARB")) == NULL) || r;
+  r = ((glIsTextureHandleResidentARB = (PFNGLISTEXTUREHANDLERESIDENTARBPROC)glewGetProcAddress((const GLubyte*)"glIsTextureHandleResidentARB")) == NULL) || r;
+  r = ((glMakeImageHandleNonResidentARB = (PFNGLMAKEIMAGEHANDLENONRESIDENTARBPROC)glewGetProcAddress((const GLubyte*)"glMakeImageHandleNonResidentARB")) == NULL) || r;
+  r = ((glMakeImageHandleResidentARB = (PFNGLMAKEIMAGEHANDLERESIDENTARBPROC)glewGetProcAddress((const GLubyte*)"glMakeImageHandleResidentARB")) == NULL) || r;
+  r = ((glMakeTextureHandleNonResidentARB = (PFNGLMAKETEXTUREHANDLENONRESIDENTARBPROC)glewGetProcAddress((const GLubyte*)"glMakeTextureHandleNonResidentARB")) == NULL) || r;
+  r = ((glMakeTextureHandleResidentARB = (PFNGLMAKETEXTUREHANDLERESIDENTARBPROC)glewGetProcAddress((const GLubyte*)"glMakeTextureHandleResidentARB")) == NULL) || r;
+  r = ((glProgramUniformHandleui64ARB = (PFNGLPROGRAMUNIFORMHANDLEUI64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformHandleui64ARB")) == NULL) || r;
+  r = ((glProgramUniformHandleui64vARB = (PFNGLPROGRAMUNIFORMHANDLEUI64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformHandleui64vARB")) == NULL) || r;
+  r = ((glUniformHandleui64ARB = (PFNGLUNIFORMHANDLEUI64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniformHandleui64ARB")) == NULL) || r;
+  r = ((glUniformHandleui64vARB = (PFNGLUNIFORMHANDLEUI64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniformHandleui64vARB")) == NULL) || r;
+  r = ((glVertexAttribL1ui64ARB = (PFNGLVERTEXATTRIBL1UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1ui64ARB")) == NULL) || r;
+  r = ((glVertexAttribL1ui64vARB = (PFNGLVERTEXATTRIBL1UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1ui64vARB")) == NULL) || r;
 
   return r;
 }
@@ -10248,8 +10245,8 @@ static GLboolean _glewInit_GL_ARB_blend_func_extended ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindFragDataLocationIndexed = (PFNGLBINDFRAGDATALOCATIONINDEXEDPROC)glewGetProcSubtractress((const GLubyte*)"glBindFragDataLocationIndexed")) == NULL) || r;
-  r = ((glGetFragDataIndex = (PFNGLGETFRAGDATAINDEXPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragDataIndex")) == NULL) || r;
+  r = ((glBindFragDataLocationIndexed = (PFNGLBINDFRAGDATALOCATIONINDEXEDPROC)glewGetProcAddress((const GLubyte*)"glBindFragDataLocationIndexed")) == NULL) || r;
+  r = ((glGetFragDataIndex = (PFNGLGETFRAGDATAINDEXPROC)glewGetProcAddress((const GLubyte*)"glGetFragDataIndex")) == NULL) || r;
 
   return r;
 }
@@ -10262,7 +10259,7 @@ static GLboolean _glewInit_GL_ARB_buffer_storage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferStorage = (PFNGLBUFFERSTORAGEPROC)glewGetProcSubtractress((const GLubyte*)"glBufferStorage")) == NULL) || r;
+  r = ((glBufferStorage = (PFNGLBUFFERSTORAGEPROC)glewGetProcAddress((const GLubyte*)"glBufferStorage")) == NULL) || r;
 
   return r;
 }
@@ -10275,7 +10272,7 @@ static GLboolean _glewInit_GL_ARB_cl_event ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCreateSyncFromCLeventARB = (PFNGLCREATESYNCFROMCLEVENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glCreateSyncFromCLeventARB")) == NULL) || r;
+  r = ((glCreateSyncFromCLeventARB = (PFNGLCREATESYNCFROMCLEVENTARBPROC)glewGetProcAddress((const GLubyte*)"glCreateSyncFromCLeventARB")) == NULL) || r;
 
   return r;
 }
@@ -10288,10 +10285,10 @@ static GLboolean _glewInit_GL_ARB_clear_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)glewGetProcSubtractress((const GLubyte*)"glClearBufferData")) == NULL) || r;
-  r = ((glClearBufferSubData = (PFNGLCLEARBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glClearBufferSubData")) == NULL) || r;
-  r = ((glClearNamedBufferDataEXT = (PFNGLCLEARNAMEDBUFFERDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedBufferDataEXT")) == NULL) || r;
-  r = ((glClearNamedBufferSubDataEXT = (PFNGLCLEARNAMEDBUFFERSUBDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedBufferSubDataEXT")) == NULL) || r;
+  r = ((glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)glewGetProcAddress((const GLubyte*)"glClearBufferData")) == NULL) || r;
+  r = ((glClearBufferSubData = (PFNGLCLEARBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glClearBufferSubData")) == NULL) || r;
+  r = ((glClearNamedBufferDataEXT = (PFNGLCLEARNAMEDBUFFERDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glClearNamedBufferDataEXT")) == NULL) || r;
+  r = ((glClearNamedBufferSubDataEXT = (PFNGLCLEARNAMEDBUFFERSUBDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glClearNamedBufferSubDataEXT")) == NULL) || r;
 
   return r;
 }
@@ -10304,8 +10301,8 @@ static GLboolean _glewInit_GL_ARB_clear_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearTexImage = (PFNGLCLEARTEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glClearTexImage")) == NULL) || r;
-  r = ((glClearTexSubImage = (PFNGLCLEARTEXSUBIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glClearTexSubImage")) == NULL) || r;
+  r = ((glClearTexImage = (PFNGLCLEARTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glClearTexImage")) == NULL) || r;
+  r = ((glClearTexSubImage = (PFNGLCLEARTEXSUBIMAGEPROC)glewGetProcAddress((const GLubyte*)"glClearTexSubImage")) == NULL) || r;
 
   return r;
 }
@@ -10318,7 +10315,7 @@ static GLboolean _glewInit_GL_ARB_clip_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClipControl = (PFNGLCLIPCONTROLPROC)glewGetProcSubtractress((const GLubyte*)"glClipControl")) == NULL) || r;
+  r = ((glClipControl = (PFNGLCLIPCONTROLPROC)glewGetProcAddress((const GLubyte*)"glClipControl")) == NULL) || r;
 
   return r;
 }
@@ -10331,7 +10328,7 @@ static GLboolean _glewInit_GL_ARB_color_buffer_float ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClampColorARB = (PFNGLCLAMPCOLORARBPROC)glewGetProcSubtractress((const GLubyte*)"glClampColorARB")) == NULL) || r;
+  r = ((glClampColorARB = (PFNGLCLAMPCOLORARBPROC)glewGetProcAddress((const GLubyte*)"glClampColorARB")) == NULL) || r;
 
   return r;
 }
@@ -10344,8 +10341,8 @@ static GLboolean _glewInit_GL_ARB_compute_shader ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDispatchCompute = (PFNGLDISPATCHCOMPUTEPROC)glewGetProcSubtractress((const GLubyte*)"glDispatchCompute")) == NULL) || r;
-  r = ((glDispatchComputeIndirect = (PFNGLDISPATCHCOMPUTEINDIRECTPROC)glewGetProcSubtractress((const GLubyte*)"glDispatchComputeIndirect")) == NULL) || r;
+  r = ((glDispatchCompute = (PFNGLDISPATCHCOMPUTEPROC)glewGetProcAddress((const GLubyte*)"glDispatchCompute")) == NULL) || r;
+  r = ((glDispatchComputeIndirect = (PFNGLDISPATCHCOMPUTEINDIRECTPROC)glewGetProcAddress((const GLubyte*)"glDispatchComputeIndirect")) == NULL) || r;
 
   return r;
 }
@@ -10358,7 +10355,7 @@ static GLboolean _glewInit_GL_ARB_compute_variable_group_size ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDispatchComputeGroupSizeARB = (PFNGLDISPATCHCOMPUTEGROUPSIZEARBPROC)glewGetProcSubtractress((const GLubyte*)"glDispatchComputeGroupSizeARB")) == NULL) || r;
+  r = ((glDispatchComputeGroupSizeARB = (PFNGLDISPATCHCOMPUTEGROUPSIZEARBPROC)glewGetProcAddress((const GLubyte*)"glDispatchComputeGroupSizeARB")) == NULL) || r;
 
   return r;
 }
@@ -10371,7 +10368,7 @@ static GLboolean _glewInit_GL_ARB_copy_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glCopyBufferSubData")) == NULL) || r;
+  r = ((glCopyBufferSubData = (PFNGLCOPYBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glCopyBufferSubData")) == NULL) || r;
 
   return r;
 }
@@ -10384,7 +10381,7 @@ static GLboolean _glewInit_GL_ARB_copy_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyImageSubData = (PFNGLCOPYIMAGESUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glCopyImageSubData")) == NULL) || r;
+  r = ((glCopyImageSubData = (PFNGLCOPYIMAGESUBDATAPROC)glewGetProcAddress((const GLubyte*)"glCopyImageSubData")) == NULL) || r;
 
   return r;
 }
@@ -10397,10 +10394,10 @@ static GLboolean _glewInit_GL_ARB_debug_output ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageCallbackARB")) == NULL) || r;
-  r = ((glDebugMessageControlARB = (PFNGLDEBUGMESSAGECONTROLARBPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageControlARB")) == NULL) || r;
-  r = ((glDebugMessageInsertARB = (PFNGLDEBUGMESSAGEINSERTARBPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageInsertARB")) == NULL) || r;
-  r = ((glGetDebugMessageLogARB = (PFNGLGETDEBUGMESSAGELOGARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetDebugMessageLogARB")) == NULL) || r;
+  r = ((glDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageCallbackARB")) == NULL) || r;
+  r = ((glDebugMessageControlARB = (PFNGLDEBUGMESSAGECONTROLARBPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageControlARB")) == NULL) || r;
+  r = ((glDebugMessageInsertARB = (PFNGLDEBUGMESSAGEINSERTARBPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageInsertARB")) == NULL) || r;
+  r = ((glGetDebugMessageLogARB = (PFNGLGETDEBUGMESSAGELOGARBPROC)glewGetProcAddress((const GLubyte*)"glGetDebugMessageLogARB")) == NULL) || r;
 
   return r;
 }
@@ -10413,103 +10410,103 @@ static GLboolean _glewInit_GL_ARB_direct_state_access ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindTextureUnit = (PFNGLBINDTEXTUREUNITPROC)glewGetProcSubtractress((const GLubyte*)"glBindTextureUnit")) == NULL) || r;
-  r = ((glBlitNamedFramebuffer = (PFNGLBLITNAMEDFRAMEBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glBlitNamedFramebuffer")) == NULL) || r;
-  r = ((glCheckNamedFramebufferStatus = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC)glewGetProcSubtractress((const GLubyte*)"glCheckNamedFramebufferStatus")) == NULL) || r;
-  r = ((glClearNamedBufferData = (PFNGLCLEARNAMEDBUFFERDATAPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedBufferData")) == NULL) || r;
-  r = ((glClearNamedBufferSubData = (PFNGLCLEARNAMEDBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedBufferSubData")) == NULL) || r;
-  r = ((glClearNamedFramebufferfi = (PFNGLCLEARNAMEDFRAMEBUFFERFIPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedFramebufferfi")) == NULL) || r;
-  r = ((glClearNamedFramebufferfv = (PFNGLCLEARNAMEDFRAMEBUFFERFVPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedFramebufferfv")) == NULL) || r;
-  r = ((glClearNamedFramebufferiv = (PFNGLCLEARNAMEDFRAMEBUFFERIVPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedFramebufferiv")) == NULL) || r;
-  r = ((glClearNamedFramebufferuiv = (PFNGLCLEARNAMEDFRAMEBUFFERUIVPROC)glewGetProcSubtractress((const GLubyte*)"glClearNamedFramebufferuiv")) == NULL) || r;
-  r = ((glCompressedTextureSubImage1D = (PFNGLCOMPRESSEDTEXTURESUBIMAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureSubImage1D")) == NULL) || r;
-  r = ((glCompressedTextureSubImage2D = (PFNGLCOMPRESSEDTEXTURESUBIMAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureSubImage2D")) == NULL) || r;
-  r = ((glCompressedTextureSubImage3D = (PFNGLCOMPRESSEDTEXTURESUBIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureSubImage3D")) == NULL) || r;
-  r = ((glCopyNamedBufferSubData = (PFNGLCOPYNAMEDBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glCopyNamedBufferSubData")) == NULL) || r;
-  r = ((glCopyTextureSubImage1D = (PFNGLCOPYTEXTURESUBIMAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureSubImage1D")) == NULL) || r;
-  r = ((glCopyTextureSubImage2D = (PFNGLCOPYTEXTURESUBIMAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureSubImage2D")) == NULL) || r;
-  r = ((glCopyTextureSubImage3D = (PFNGLCOPYTEXTURESUBIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureSubImage3D")) == NULL) || r;
-  r = ((glCreateBuffers = (PFNGLCREATEBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glCreateBuffers")) == NULL) || r;
-  r = ((glCreateFramebuffers = (PFNGLCREATEFRAMEBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glCreateFramebuffers")) == NULL) || r;
-  r = ((glCreateProgramPipelines = (PFNGLCREATEPROGRAMPIPELINESPROC)glewGetProcSubtractress((const GLubyte*)"glCreateProgramPipelines")) == NULL) || r;
-  r = ((glCreateQueries = (PFNGLCREATEQUERIESPROC)glewGetProcSubtractress((const GLubyte*)"glCreateQueries")) == NULL) || r;
-  r = ((glCreateRenderbuffers = (PFNGLCREATERENDERBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glCreateRenderbuffers")) == NULL) || r;
-  r = ((glCreateSamplers = (PFNGLCREATESAMPLERSPROC)glewGetProcSubtractress((const GLubyte*)"glCreateSamplers")) == NULL) || r;
-  r = ((glCreateTextures = (PFNGLCREATETEXTURESPROC)glewGetProcSubtractress((const GLubyte*)"glCreateTextures")) == NULL) || r;
-  r = ((glCreateTransformFeedbacks = (PFNGLCREATETRANSFORMFEEDBACKSPROC)glewGetProcSubtractress((const GLubyte*)"glCreateTransformFeedbacks")) == NULL) || r;
-  r = ((glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)glewGetProcSubtractress((const GLubyte*)"glCreateVertexArrays")) == NULL) || r;
-  r = ((glDisableVertexArrayAttrib = (PFNGLDISABLEVERTEXARRAYATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVertexArrayAttrib")) == NULL) || r;
-  r = ((glEnableVertexArrayAttrib = (PFNGLENABLEVERTEXARRAYATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVertexArrayAttrib")) == NULL) || r;
-  r = ((glFlushMappedNamedBufferRange = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glFlushMappedNamedBufferRange")) == NULL) || r;
-  r = ((glGenerateTextureMipmap = (PFNGLGENERATETEXTUREMIPMAPPROC)glewGetProcSubtractress((const GLubyte*)"glGenerateTextureMipmap")) == NULL) || r;
-  r = ((glGetCompressedTextureImage = (PFNGLGETCOMPRESSEDTEXTUREIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetCompressedTextureImage")) == NULL) || r;
-  r = ((glGetNamedBufferParameteri64v = (PFNGLGETNAMEDBUFFERPARAMETERI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferParameteri64v")) == NULL) || r;
-  r = ((glGetNamedBufferParameteriv = (PFNGLGETNAMEDBUFFERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferParameteriv")) == NULL) || r;
-  r = ((glGetNamedBufferPointerv = (PFNGLGETNAMEDBUFFERPOINTERVPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferPointerv")) == NULL) || r;
-  r = ((glGetNamedBufferSubData = (PFNGLGETNAMEDBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferSubData")) == NULL) || r;
-  r = ((glGetNamedFramebufferAttachmentParameteriv = (PFNGLGETNAMEDFRAMEBUFFERATTACHMENTPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedFramebufferAttachmentParameteriv")) == NULL) || r;
-  r = ((glGetNamedFramebufferParameteriv = (PFNGLGETNAMEDFRAMEBUFFERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedFramebufferParameteriv")) == NULL) || r;
-  r = ((glGetNamedRenderbufferParameteriv = (PFNGLGETNAMEDRENDERBUFFERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedRenderbufferParameteriv")) == NULL) || r;
-  r = ((glGetQueryBufferObjecti64v = (PFNGLGETQUERYBUFFEROBJECTI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryBufferObjecti64v")) == NULL) || r;
-  r = ((glGetQueryBufferObjectiv = (PFNGLGETQUERYBUFFEROBJECTIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryBufferObjectiv")) == NULL) || r;
-  r = ((glGetQueryBufferObjectui64v = (PFNGLGETQUERYBUFFEROBJECTUI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryBufferObjectui64v")) == NULL) || r;
-  r = ((glGetQueryBufferObjectuiv = (PFNGLGETQUERYBUFFEROBJECTUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryBufferObjectuiv")) == NULL) || r;
-  r = ((glGetTextureImage = (PFNGLGETTEXTUREIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureImage")) == NULL) || r;
-  r = ((glGetTextureLevelParameterfv = (PFNGLGETTEXTURELEVELPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureLevelParameterfv")) == NULL) || r;
-  r = ((glGetTextureLevelParameteriv = (PFNGLGETTEXTURELEVELPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureLevelParameteriv")) == NULL) || r;
-  r = ((glGetTextureParameterIiv = (PFNGLGETTEXTUREPARAMETERIIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterIiv")) == NULL) || r;
-  r = ((glGetTextureParameterIuiv = (PFNGLGETTEXTUREPARAMETERIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterIuiv")) == NULL) || r;
-  r = ((glGetTextureParameterfv = (PFNGLGETTEXTUREPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterfv")) == NULL) || r;
-  r = ((glGetTextureParameteriv = (PFNGLGETTEXTUREPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameteriv")) == NULL) || r;
-  r = ((glGetTransformFeedbacki64_v = (PFNGLGETTRANSFORMFEEDBACKI64_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetTransformFeedbacki64_v")) == NULL) || r;
-  r = ((glGetTransformFeedbacki_v = (PFNGLGETTRANSFORMFEEDBACKI_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetTransformFeedbacki_v")) == NULL) || r;
-  r = ((glGetTransformFeedbackiv = (PFNGLGETTRANSFORMFEEDBACKIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTransformFeedbackiv")) == NULL) || r;
-  r = ((glGetVertexArrayIndexed64iv = (PFNGLGETVERTEXARRAYINDEXED64IVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayIndexed64iv")) == NULL) || r;
-  r = ((glGetVertexArrayIndexediv = (PFNGLGETVERTEXARRAYINDEXEDIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayIndexediv")) == NULL) || r;
-  r = ((glGetVertexArrayiv = (PFNGLGETVERTEXARRAYIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayiv")) == NULL) || r;
-  r = ((glInvalidateNamedFramebufferData = (PFNGLINVALIDATENAMEDFRAMEBUFFERDATAPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateNamedFramebufferData")) == NULL) || r;
-  r = ((glInvalidateNamedFramebufferSubData = (PFNGLINVALIDATENAMEDFRAMEBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateNamedFramebufferSubData")) == NULL) || r;
-  r = ((glMapNamedBuffer = (PFNGLMAPNAMEDBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glMapNamedBuffer")) == NULL) || r;
-  r = ((glMapNamedBufferRange = (PFNGLMAPNAMEDBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glMapNamedBufferRange")) == NULL) || r;
-  r = ((glNamedBufferData = (PFNGLNAMEDBUFFERDATAPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferData")) == NULL) || r;
-  r = ((glNamedBufferStorage = (PFNGLNAMEDBUFFERSTORAGEPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferStorage")) == NULL) || r;
-  r = ((glNamedBufferSubData = (PFNGLNAMEDBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferSubData")) == NULL) || r;
-  r = ((glNamedFramebufferDrawBuffer = (PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferDrawBuffer")) == NULL) || r;
-  r = ((glNamedFramebufferDrawBuffers = (PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferDrawBuffers")) == NULL) || r;
-  r = ((glNamedFramebufferParameteri = (PFNGLNAMEDFRAMEBUFFERPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferParameteri")) == NULL) || r;
-  r = ((glNamedFramebufferReadBuffer = (PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferReadBuffer")) == NULL) || r;
-  r = ((glNamedFramebufferRenderbuffer = (PFNGLNAMEDFRAMEBUFFERRENDERBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferRenderbuffer")) == NULL) || r;
-  r = ((glNamedFramebufferTexture = (PFNGLNAMEDFRAMEBUFFERTEXTUREPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTexture")) == NULL) || r;
-  r = ((glNamedFramebufferTextureLayer = (PFNGLNAMEDFRAMEBUFFERTEXTURELAYERPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTextureLayer")) == NULL) || r;
-  r = ((glNamedRenderbufferStorage = (PFNGLNAMEDRENDERBUFFERSTORAGEPROC)glewGetProcSubtractress((const GLubyte*)"glNamedRenderbufferStorage")) == NULL) || r;
-  r = ((glNamedRenderbufferStorageMultisample = (PFNGLNAMEDRENDERBUFFERSTORAGEMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glNamedRenderbufferStorageMultisample")) == NULL) || r;
-  r = ((glTextureBuffer = (PFNGLTEXTUREBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glTextureBuffer")) == NULL) || r;
-  r = ((glTextureBufferRange = (PFNGLTEXTUREBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glTextureBufferRange")) == NULL) || r;
-  r = ((glTextureParameterIiv = (PFNGLTEXTUREPARAMETERIIVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterIiv")) == NULL) || r;
-  r = ((glTextureParameterIuiv = (PFNGLTEXTUREPARAMETERIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterIuiv")) == NULL) || r;
-  r = ((glTextureParameterf = (PFNGLTEXTUREPARAMETERFPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterf")) == NULL) || r;
-  r = ((glTextureParameterfv = (PFNGLTEXTUREPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterfv")) == NULL) || r;
-  r = ((glTextureParameteri = (PFNGLTEXTUREPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameteri")) == NULL) || r;
-  r = ((glTextureParameteriv = (PFNGLTEXTUREPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameteriv")) == NULL) || r;
-  r = ((glTextureStorage1D = (PFNGLTEXTURESTORAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage1D")) == NULL) || r;
-  r = ((glTextureStorage2D = (PFNGLTEXTURESTORAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage2D")) == NULL) || r;
-  r = ((glTextureStorage2DMultisample = (PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage2DMultisample")) == NULL) || r;
-  r = ((glTextureStorage3D = (PFNGLTEXTURESTORAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage3D")) == NULL) || r;
-  r = ((glTextureStorage3DMultisample = (PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage3DMultisample")) == NULL) || r;
-  r = ((glTextureSubImage1D = (PFNGLTEXTURESUBIMAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glTextureSubImage1D")) == NULL) || r;
-  r = ((glTextureSubImage2D = (PFNGLTEXTURESUBIMAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glTextureSubImage2D")) == NULL) || r;
-  r = ((glTextureSubImage3D = (PFNGLTEXTURESUBIMAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glTextureSubImage3D")) == NULL) || r;
-  r = ((glTransformFeedbackBufferBase = (PFNGLTRANSFORMFEEDBACKBUFFERBASEPROC)glewGetProcSubtractress((const GLubyte*)"glTransformFeedbackBufferBase")) == NULL) || r;
-  r = ((glTransformFeedbackBufferRange = (PFNGLTRANSFORMFEEDBACKBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glTransformFeedbackBufferRange")) == NULL) || r;
-  r = ((glUnmapNamedBuffer = (PFNGLUNMAPNAMEDBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glUnmapNamedBuffer")) == NULL) || r;
-  r = ((glVertexArrayAttribBinding = (PFNGLVERTEXARRAYATTRIBBINDINGPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayAttribBinding")) == NULL) || r;
-  r = ((glVertexArrayAttribFormat = (PFNGLVERTEXARRAYATTRIBFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayAttribFormat")) == NULL) || r;
-  r = ((glVertexArrayAttribIFormat = (PFNGLVERTEXARRAYATTRIBIFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayAttribIFormat")) == NULL) || r;
-  r = ((glVertexArrayAttribLFormat = (PFNGLVERTEXARRAYATTRIBLFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayAttribLFormat")) == NULL) || r;
-  r = ((glVertexArrayBindingDivisor = (PFNGLVERTEXARRAYBINDINGDIVISORPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayBindingDivisor")) == NULL) || r;
-  r = ((glVertexArrayElementBuffer = (PFNGLVERTEXARRAYELEMENTBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayElementBuffer")) == NULL) || r;
-  r = ((glVertexArrayVertexBuffer = (PFNGLVERTEXARRAYVERTEXBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexBuffer")) == NULL) || r;
-  r = ((glVertexArrayVertexBuffers = (PFNGLVERTEXARRAYVERTEXBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexBuffers")) == NULL) || r;
+  r = ((glBindTextureUnit = (PFNGLBINDTEXTUREUNITPROC)glewGetProcAddress((const GLubyte*)"glBindTextureUnit")) == NULL) || r;
+  r = ((glBlitNamedFramebuffer = (PFNGLBLITNAMEDFRAMEBUFFERPROC)glewGetProcAddress((const GLubyte*)"glBlitNamedFramebuffer")) == NULL) || r;
+  r = ((glCheckNamedFramebufferStatus = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC)glewGetProcAddress((const GLubyte*)"glCheckNamedFramebufferStatus")) == NULL) || r;
+  r = ((glClearNamedBufferData = (PFNGLCLEARNAMEDBUFFERDATAPROC)glewGetProcAddress((const GLubyte*)"glClearNamedBufferData")) == NULL) || r;
+  r = ((glClearNamedBufferSubData = (PFNGLCLEARNAMEDBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glClearNamedBufferSubData")) == NULL) || r;
+  r = ((glClearNamedFramebufferfi = (PFNGLCLEARNAMEDFRAMEBUFFERFIPROC)glewGetProcAddress((const GLubyte*)"glClearNamedFramebufferfi")) == NULL) || r;
+  r = ((glClearNamedFramebufferfv = (PFNGLCLEARNAMEDFRAMEBUFFERFVPROC)glewGetProcAddress((const GLubyte*)"glClearNamedFramebufferfv")) == NULL) || r;
+  r = ((glClearNamedFramebufferiv = (PFNGLCLEARNAMEDFRAMEBUFFERIVPROC)glewGetProcAddress((const GLubyte*)"glClearNamedFramebufferiv")) == NULL) || r;
+  r = ((glClearNamedFramebufferuiv = (PFNGLCLEARNAMEDFRAMEBUFFERUIVPROC)glewGetProcAddress((const GLubyte*)"glClearNamedFramebufferuiv")) == NULL) || r;
+  r = ((glCompressedTextureSubImage1D = (PFNGLCOMPRESSEDTEXTURESUBIMAGE1DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureSubImage1D")) == NULL) || r;
+  r = ((glCompressedTextureSubImage2D = (PFNGLCOMPRESSEDTEXTURESUBIMAGE2DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureSubImage2D")) == NULL) || r;
+  r = ((glCompressedTextureSubImage3D = (PFNGLCOMPRESSEDTEXTURESUBIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureSubImage3D")) == NULL) || r;
+  r = ((glCopyNamedBufferSubData = (PFNGLCOPYNAMEDBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glCopyNamedBufferSubData")) == NULL) || r;
+  r = ((glCopyTextureSubImage1D = (PFNGLCOPYTEXTURESUBIMAGE1DPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureSubImage1D")) == NULL) || r;
+  r = ((glCopyTextureSubImage2D = (PFNGLCOPYTEXTURESUBIMAGE2DPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureSubImage2D")) == NULL) || r;
+  r = ((glCopyTextureSubImage3D = (PFNGLCOPYTEXTURESUBIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureSubImage3D")) == NULL) || r;
+  r = ((glCreateBuffers = (PFNGLCREATEBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glCreateBuffers")) == NULL) || r;
+  r = ((glCreateFramebuffers = (PFNGLCREATEFRAMEBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glCreateFramebuffers")) == NULL) || r;
+  r = ((glCreateProgramPipelines = (PFNGLCREATEPROGRAMPIPELINESPROC)glewGetProcAddress((const GLubyte*)"glCreateProgramPipelines")) == NULL) || r;
+  r = ((glCreateQueries = (PFNGLCREATEQUERIESPROC)glewGetProcAddress((const GLubyte*)"glCreateQueries")) == NULL) || r;
+  r = ((glCreateRenderbuffers = (PFNGLCREATERENDERBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glCreateRenderbuffers")) == NULL) || r;
+  r = ((glCreateSamplers = (PFNGLCREATESAMPLERSPROC)glewGetProcAddress((const GLubyte*)"glCreateSamplers")) == NULL) || r;
+  r = ((glCreateTextures = (PFNGLCREATETEXTURESPROC)glewGetProcAddress((const GLubyte*)"glCreateTextures")) == NULL) || r;
+  r = ((glCreateTransformFeedbacks = (PFNGLCREATETRANSFORMFEEDBACKSPROC)glewGetProcAddress((const GLubyte*)"glCreateTransformFeedbacks")) == NULL) || r;
+  r = ((glCreateVertexArrays = (PFNGLCREATEVERTEXARRAYSPROC)glewGetProcAddress((const GLubyte*)"glCreateVertexArrays")) == NULL) || r;
+  r = ((glDisableVertexArrayAttrib = (PFNGLDISABLEVERTEXARRAYATTRIBPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexArrayAttrib")) == NULL) || r;
+  r = ((glEnableVertexArrayAttrib = (PFNGLENABLEVERTEXARRAYATTRIBPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexArrayAttrib")) == NULL) || r;
+  r = ((glFlushMappedNamedBufferRange = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glFlushMappedNamedBufferRange")) == NULL) || r;
+  r = ((glGenerateTextureMipmap = (PFNGLGENERATETEXTUREMIPMAPPROC)glewGetProcAddress((const GLubyte*)"glGenerateTextureMipmap")) == NULL) || r;
+  r = ((glGetCompressedTextureImage = (PFNGLGETCOMPRESSEDTEXTUREIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetCompressedTextureImage")) == NULL) || r;
+  r = ((glGetNamedBufferParameteri64v = (PFNGLGETNAMEDBUFFERPARAMETERI64VPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferParameteri64v")) == NULL) || r;
+  r = ((glGetNamedBufferParameteriv = (PFNGLGETNAMEDBUFFERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferParameteriv")) == NULL) || r;
+  r = ((glGetNamedBufferPointerv = (PFNGLGETNAMEDBUFFERPOINTERVPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferPointerv")) == NULL) || r;
+  r = ((glGetNamedBufferSubData = (PFNGLGETNAMEDBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferSubData")) == NULL) || r;
+  r = ((glGetNamedFramebufferAttachmentParameteriv = (PFNGLGETNAMEDFRAMEBUFFERATTACHMENTPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetNamedFramebufferAttachmentParameteriv")) == NULL) || r;
+  r = ((glGetNamedFramebufferParameteriv = (PFNGLGETNAMEDFRAMEBUFFERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetNamedFramebufferParameteriv")) == NULL) || r;
+  r = ((glGetNamedRenderbufferParameteriv = (PFNGLGETNAMEDRENDERBUFFERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetNamedRenderbufferParameteriv")) == NULL) || r;
+  r = ((glGetQueryBufferObjecti64v = (PFNGLGETQUERYBUFFEROBJECTI64VPROC)glewGetProcAddress((const GLubyte*)"glGetQueryBufferObjecti64v")) == NULL) || r;
+  r = ((glGetQueryBufferObjectiv = (PFNGLGETQUERYBUFFEROBJECTIVPROC)glewGetProcAddress((const GLubyte*)"glGetQueryBufferObjectiv")) == NULL) || r;
+  r = ((glGetQueryBufferObjectui64v = (PFNGLGETQUERYBUFFEROBJECTUI64VPROC)glewGetProcAddress((const GLubyte*)"glGetQueryBufferObjectui64v")) == NULL) || r;
+  r = ((glGetQueryBufferObjectuiv = (PFNGLGETQUERYBUFFEROBJECTUIVPROC)glewGetProcAddress((const GLubyte*)"glGetQueryBufferObjectuiv")) == NULL) || r;
+  r = ((glGetTextureImage = (PFNGLGETTEXTUREIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetTextureImage")) == NULL) || r;
+  r = ((glGetTextureLevelParameterfv = (PFNGLGETTEXTURELEVELPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureLevelParameterfv")) == NULL) || r;
+  r = ((glGetTextureLevelParameteriv = (PFNGLGETTEXTURELEVELPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureLevelParameteriv")) == NULL) || r;
+  r = ((glGetTextureParameterIiv = (PFNGLGETTEXTUREPARAMETERIIVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterIiv")) == NULL) || r;
+  r = ((glGetTextureParameterIuiv = (PFNGLGETTEXTUREPARAMETERIUIVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterIuiv")) == NULL) || r;
+  r = ((glGetTextureParameterfv = (PFNGLGETTEXTUREPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterfv")) == NULL) || r;
+  r = ((glGetTextureParameteriv = (PFNGLGETTEXTUREPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameteriv")) == NULL) || r;
+  r = ((glGetTransformFeedbacki64_v = (PFNGLGETTRANSFORMFEEDBACKI64_VPROC)glewGetProcAddress((const GLubyte*)"glGetTransformFeedbacki64_v")) == NULL) || r;
+  r = ((glGetTransformFeedbacki_v = (PFNGLGETTRANSFORMFEEDBACKI_VPROC)glewGetProcAddress((const GLubyte*)"glGetTransformFeedbacki_v")) == NULL) || r;
+  r = ((glGetTransformFeedbackiv = (PFNGLGETTRANSFORMFEEDBACKIVPROC)glewGetProcAddress((const GLubyte*)"glGetTransformFeedbackiv")) == NULL) || r;
+  r = ((glGetVertexArrayIndexed64iv = (PFNGLGETVERTEXARRAYINDEXED64IVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayIndexed64iv")) == NULL) || r;
+  r = ((glGetVertexArrayIndexediv = (PFNGLGETVERTEXARRAYINDEXEDIVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayIndexediv")) == NULL) || r;
+  r = ((glGetVertexArrayiv = (PFNGLGETVERTEXARRAYIVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayiv")) == NULL) || r;
+  r = ((glInvalidateNamedFramebufferData = (PFNGLINVALIDATENAMEDFRAMEBUFFERDATAPROC)glewGetProcAddress((const GLubyte*)"glInvalidateNamedFramebufferData")) == NULL) || r;
+  r = ((glInvalidateNamedFramebufferSubData = (PFNGLINVALIDATENAMEDFRAMEBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glInvalidateNamedFramebufferSubData")) == NULL) || r;
+  r = ((glMapNamedBuffer = (PFNGLMAPNAMEDBUFFERPROC)glewGetProcAddress((const GLubyte*)"glMapNamedBuffer")) == NULL) || r;
+  r = ((glMapNamedBufferRange = (PFNGLMAPNAMEDBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glMapNamedBufferRange")) == NULL) || r;
+  r = ((glNamedBufferData = (PFNGLNAMEDBUFFERDATAPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferData")) == NULL) || r;
+  r = ((glNamedBufferStorage = (PFNGLNAMEDBUFFERSTORAGEPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferStorage")) == NULL) || r;
+  r = ((glNamedBufferSubData = (PFNGLNAMEDBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferSubData")) == NULL) || r;
+  r = ((glNamedFramebufferDrawBuffer = (PFNGLNAMEDFRAMEBUFFERDRAWBUFFERPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferDrawBuffer")) == NULL) || r;
+  r = ((glNamedFramebufferDrawBuffers = (PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferDrawBuffers")) == NULL) || r;
+  r = ((glNamedFramebufferParameteri = (PFNGLNAMEDFRAMEBUFFERPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferParameteri")) == NULL) || r;
+  r = ((glNamedFramebufferReadBuffer = (PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferReadBuffer")) == NULL) || r;
+  r = ((glNamedFramebufferRenderbuffer = (PFNGLNAMEDFRAMEBUFFERRENDERBUFFERPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferRenderbuffer")) == NULL) || r;
+  r = ((glNamedFramebufferTexture = (PFNGLNAMEDFRAMEBUFFERTEXTUREPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTexture")) == NULL) || r;
+  r = ((glNamedFramebufferTextureLayer = (PFNGLNAMEDFRAMEBUFFERTEXTURELAYERPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTextureLayer")) == NULL) || r;
+  r = ((glNamedRenderbufferStorage = (PFNGLNAMEDRENDERBUFFERSTORAGEPROC)glewGetProcAddress((const GLubyte*)"glNamedRenderbufferStorage")) == NULL) || r;
+  r = ((glNamedRenderbufferStorageMultisample = (PFNGLNAMEDRENDERBUFFERSTORAGEMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glNamedRenderbufferStorageMultisample")) == NULL) || r;
+  r = ((glTextureBuffer = (PFNGLTEXTUREBUFFERPROC)glewGetProcAddress((const GLubyte*)"glTextureBuffer")) == NULL) || r;
+  r = ((glTextureBufferRange = (PFNGLTEXTUREBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glTextureBufferRange")) == NULL) || r;
+  r = ((glTextureParameterIiv = (PFNGLTEXTUREPARAMETERIIVPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterIiv")) == NULL) || r;
+  r = ((glTextureParameterIuiv = (PFNGLTEXTUREPARAMETERIUIVPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterIuiv")) == NULL) || r;
+  r = ((glTextureParameterf = (PFNGLTEXTUREPARAMETERFPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterf")) == NULL) || r;
+  r = ((glTextureParameterfv = (PFNGLTEXTUREPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterfv")) == NULL) || r;
+  r = ((glTextureParameteri = (PFNGLTEXTUREPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glTextureParameteri")) == NULL) || r;
+  r = ((glTextureParameteriv = (PFNGLTEXTUREPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glTextureParameteriv")) == NULL) || r;
+  r = ((glTextureStorage1D = (PFNGLTEXTURESTORAGE1DPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage1D")) == NULL) || r;
+  r = ((glTextureStorage2D = (PFNGLTEXTURESTORAGE2DPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage2D")) == NULL) || r;
+  r = ((glTextureStorage2DMultisample = (PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage2DMultisample")) == NULL) || r;
+  r = ((glTextureStorage3D = (PFNGLTEXTURESTORAGE3DPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage3D")) == NULL) || r;
+  r = ((glTextureStorage3DMultisample = (PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage3DMultisample")) == NULL) || r;
+  r = ((glTextureSubImage1D = (PFNGLTEXTURESUBIMAGE1DPROC)glewGetProcAddress((const GLubyte*)"glTextureSubImage1D")) == NULL) || r;
+  r = ((glTextureSubImage2D = (PFNGLTEXTURESUBIMAGE2DPROC)glewGetProcAddress((const GLubyte*)"glTextureSubImage2D")) == NULL) || r;
+  r = ((glTextureSubImage3D = (PFNGLTEXTURESUBIMAGE3DPROC)glewGetProcAddress((const GLubyte*)"glTextureSubImage3D")) == NULL) || r;
+  r = ((glTransformFeedbackBufferBase = (PFNGLTRANSFORMFEEDBACKBUFFERBASEPROC)glewGetProcAddress((const GLubyte*)"glTransformFeedbackBufferBase")) == NULL) || r;
+  r = ((glTransformFeedbackBufferRange = (PFNGLTRANSFORMFEEDBACKBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glTransformFeedbackBufferRange")) == NULL) || r;
+  r = ((glUnmapNamedBuffer = (PFNGLUNMAPNAMEDBUFFERPROC)glewGetProcAddress((const GLubyte*)"glUnmapNamedBuffer")) == NULL) || r;
+  r = ((glVertexArrayAttribBinding = (PFNGLVERTEXARRAYATTRIBBINDINGPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayAttribBinding")) == NULL) || r;
+  r = ((glVertexArrayAttribFormat = (PFNGLVERTEXARRAYATTRIBFORMATPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayAttribFormat")) == NULL) || r;
+  r = ((glVertexArrayAttribIFormat = (PFNGLVERTEXARRAYATTRIBIFORMATPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayAttribIFormat")) == NULL) || r;
+  r = ((glVertexArrayAttribLFormat = (PFNGLVERTEXARRAYATTRIBLFORMATPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayAttribLFormat")) == NULL) || r;
+  r = ((glVertexArrayBindingDivisor = (PFNGLVERTEXARRAYBINDINGDIVISORPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayBindingDivisor")) == NULL) || r;
+  r = ((glVertexArrayElementBuffer = (PFNGLVERTEXARRAYELEMENTBUFFERPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayElementBuffer")) == NULL) || r;
+  r = ((glVertexArrayVertexBuffer = (PFNGLVERTEXARRAYVERTEXBUFFERPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexBuffer")) == NULL) || r;
+  r = ((glVertexArrayVertexBuffers = (PFNGLVERTEXARRAYVERTEXBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexBuffers")) == NULL) || r;
 
   return r;
 }
@@ -10522,7 +10519,7 @@ static GLboolean _glewInit_GL_ARB_draw_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawBuffersARB = (PFNGLDRAWBUFFERSARBPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBuffersARB")) == NULL) || r;
+  r = ((glDrawBuffersARB = (PFNGLDRAWBUFFERSARBPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffersARB")) == NULL) || r;
 
   return r;
 }
@@ -10535,10 +10532,10 @@ static GLboolean _glewInit_GL_ARB_draw_buffers_blend ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquationSeparateiARB = (PFNGLBLENDEQUATIONSEPARATEIARBPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationSeparateiARB")) == NULL) || r;
-  r = ((glBlendEquationiARB = (PFNGLBLENDEQUATIONIARBPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationiARB")) == NULL) || r;
-  r = ((glBlendFuncSeparateiARB = (PFNGLBLENDFUNCSEPARATEIARBPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncSeparateiARB")) == NULL) || r;
-  r = ((glBlendFunciARB = (PFNGLBLENDFUNCIARBPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFunciARB")) == NULL) || r;
+  r = ((glBlendEquationSeparateiARB = (PFNGLBLENDEQUATIONSEPARATEIARBPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparateiARB")) == NULL) || r;
+  r = ((glBlendEquationiARB = (PFNGLBLENDEQUATIONIARBPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationiARB")) == NULL) || r;
+  r = ((glBlendFuncSeparateiARB = (PFNGLBLENDFUNCSEPARATEIARBPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncSeparateiARB")) == NULL) || r;
+  r = ((glBlendFunciARB = (PFNGLBLENDFUNCIARBPROC)glewGetProcAddress((const GLubyte*)"glBlendFunciARB")) == NULL) || r;
 
   return r;
 }
@@ -10551,10 +10548,10 @@ static GLboolean _glewInit_GL_ARB_draw_elements_base_vertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsBaseVertex")) == NULL) || r;
-  r = ((glDrawElementsInstancedBaseVertex = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedBaseVertex")) == NULL) || r;
-  r = ((glDrawRangeElementsBaseVertex = (PFNGLDRAWRANGEELEMENTSBASEVERTEXPROC)glewGetProcSubtractress((const GLubyte*)"glDrawRangeElementsBaseVertex")) == NULL) || r;
-  r = ((glMultiDrawElementsBaseVertex = (PFNGLMULTIDRAWELEMENTSBASEVERTEXPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsBaseVertex")) == NULL) || r;
+  r = ((glDrawElementsBaseVertex = (PFNGLDRAWELEMENTSBASEVERTEXPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsBaseVertex")) == NULL) || r;
+  r = ((glDrawElementsInstancedBaseVertex = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedBaseVertex")) == NULL) || r;
+  r = ((glDrawRangeElementsBaseVertex = (PFNGLDRAWRANGEELEMENTSBASEVERTEXPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElementsBaseVertex")) == NULL) || r;
+  r = ((glMultiDrawElementsBaseVertex = (PFNGLMULTIDRAWELEMENTSBASEVERTEXPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsBaseVertex")) == NULL) || r;
 
   return r;
 }
@@ -10567,8 +10564,8 @@ static GLboolean _glewInit_GL_ARB_draw_indirect ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysIndirect = (PFNGLDRAWARRAYSINDIRECTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysIndirect")) == NULL) || r;
-  r = ((glDrawElementsIndirect = (PFNGLDRAWELEMENTSINDIRECTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsIndirect")) == NULL) || r;
+  r = ((glDrawArraysIndirect = (PFNGLDRAWARRAYSINDIRECTPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysIndirect")) == NULL) || r;
+  r = ((glDrawElementsIndirect = (PFNGLDRAWELEMENTSINDIRECTPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsIndirect")) == NULL) || r;
 
   return r;
 }
@@ -10581,10 +10578,10 @@ static GLboolean _glewInit_GL_ARB_framebuffer_no_attachments ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferParameteri = (PFNGLFRAMEBUFFERPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferParameteri")) == NULL) || r;
-  r = ((glGetFramebufferParameteriv = (PFNGLGETFRAMEBUFFERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFramebufferParameteriv")) == NULL) || r;
-  r = ((glGetNamedFramebufferParameterivEXT = (PFNGLGETNAMEDFRAMEBUFFERPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedFramebufferParameterivEXT")) == NULL) || r;
-  r = ((glNamedFramebufferParameteriEXT = (PFNGLNAMEDFRAMEBUFFERPARAMETERIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferParameteriEXT")) == NULL) || r;
+  r = ((glFramebufferParameteri = (PFNGLFRAMEBUFFERPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glFramebufferParameteri")) == NULL) || r;
+  r = ((glGetFramebufferParameteriv = (PFNGLGETFRAMEBUFFERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferParameteriv")) == NULL) || r;
+  r = ((glGetNamedFramebufferParameterivEXT = (PFNGLGETNAMEDFRAMEBUFFERPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedFramebufferParameterivEXT")) == NULL) || r;
+  r = ((glNamedFramebufferParameteriEXT = (PFNGLNAMEDFRAMEBUFFERPARAMETERIEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferParameteriEXT")) == NULL) || r;
 
   return r;
 }
@@ -10597,26 +10594,26 @@ static GLboolean _glewInit_GL_ARB_framebuffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glBindFramebuffer")) == NULL) || r;
-  r = ((glBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glBindRenderbuffer")) == NULL) || r;
-  r = ((glBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glBlitFramebuffer")) == NULL) || r;
-  r = ((glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glewGetProcSubtractress((const GLubyte*)"glCheckFramebufferStatus")) == NULL) || r;
-  r = ((glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteFramebuffers")) == NULL) || r;
-  r = ((glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteRenderbuffers")) == NULL) || r;
-  r = ((glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferRenderbuffer")) == NULL) || r;
-  r = ((glFramebufferTexture1D = (PFNGLFRAMEBUFFERTEXTURE1DPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture1D")) == NULL) || r;
-  r = ((glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture2D")) == NULL) || r;
-  r = ((glFramebufferTexture3D = (PFNGLFRAMEBUFFERTEXTURE3DPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture3D")) == NULL) || r;
-  r = ((glFramebufferTextureLayer = (PFNGLFRAMEBUFFERTEXTURELAYERPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureLayer")) == NULL) || r;
-  r = ((glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glGenFramebuffers")) == NULL) || r;
-  r = ((glGenRenderbuffers = (PFNGLGENRENDERBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glGenRenderbuffers")) == NULL) || r;
-  r = ((glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)glewGetProcSubtractress((const GLubyte*)"glGenerateMipmap")) == NULL) || r;
-  r = ((glGetFramebufferAttachmentParameteriv = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFramebufferAttachmentParameteriv")) == NULL) || r;
-  r = ((glGetRenderbufferParameteriv = (PFNGLGETRENDERBUFFERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetRenderbufferParameteriv")) == NULL) || r;
-  r = ((glIsFramebuffer = (PFNGLISFRAMEBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glIsFramebuffer")) == NULL) || r;
-  r = ((glIsRenderbuffer = (PFNGLISRENDERBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glIsRenderbuffer")) == NULL) || r;
-  r = ((glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorage")) == NULL) || r;
-  r = ((glRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageMultisample")) == NULL) || r;
+  r = ((glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)glewGetProcAddress((const GLubyte*)"glBindFramebuffer")) == NULL) || r;
+  r = ((glBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)glewGetProcAddress((const GLubyte*)"glBindRenderbuffer")) == NULL) || r;
+  r = ((glBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)glewGetProcAddress((const GLubyte*)"glBlitFramebuffer")) == NULL) || r;
+  r = ((glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)glewGetProcAddress((const GLubyte*)"glCheckFramebufferStatus")) == NULL) || r;
+  r = ((glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glDeleteFramebuffers")) == NULL) || r;
+  r = ((glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glDeleteRenderbuffers")) == NULL) || r;
+  r = ((glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFERPROC)glewGetProcAddress((const GLubyte*)"glFramebufferRenderbuffer")) == NULL) || r;
+  r = ((glFramebufferTexture1D = (PFNGLFRAMEBUFFERTEXTURE1DPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture1D")) == NULL) || r;
+  r = ((glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture2D")) == NULL) || r;
+  r = ((glFramebufferTexture3D = (PFNGLFRAMEBUFFERTEXTURE3DPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture3D")) == NULL) || r;
+  r = ((glFramebufferTextureLayer = (PFNGLFRAMEBUFFERTEXTURELAYERPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureLayer")) == NULL) || r;
+  r = ((glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glGenFramebuffers")) == NULL) || r;
+  r = ((glGenRenderbuffers = (PFNGLGENRENDERBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glGenRenderbuffers")) == NULL) || r;
+  r = ((glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)glewGetProcAddress((const GLubyte*)"glGenerateMipmap")) == NULL) || r;
+  r = ((glGetFramebufferAttachmentParameteriv = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferAttachmentParameteriv")) == NULL) || r;
+  r = ((glGetRenderbufferParameteriv = (PFNGLGETRENDERBUFFERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetRenderbufferParameteriv")) == NULL) || r;
+  r = ((glIsFramebuffer = (PFNGLISFRAMEBUFFERPROC)glewGetProcAddress((const GLubyte*)"glIsFramebuffer")) == NULL) || r;
+  r = ((glIsRenderbuffer = (PFNGLISRENDERBUFFERPROC)glewGetProcAddress((const GLubyte*)"glIsRenderbuffer")) == NULL) || r;
+  r = ((glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorage")) == NULL) || r;
+  r = ((glRenderbufferStorageMultisample = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageMultisample")) == NULL) || r;
 
   return r;
 }
@@ -10629,10 +10626,10 @@ static GLboolean _glewInit_GL_ARB_geometry_shader4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferTextureARB = (PFNGLFRAMEBUFFERTEXTUREARBPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureARB")) == NULL) || r;
-  r = ((glFramebufferTextureFaceARB = (PFNGLFRAMEBUFFERTEXTUREFACEARBPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureFaceARB")) == NULL) || r;
-  r = ((glFramebufferTextureLayerARB = (PFNGLFRAMEBUFFERTEXTURELAYERARBPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureLayerARB")) == NULL) || r;
-  r = ((glProgramParameteriARB = (PFNGLPROGRAMPARAMETERIARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameteriARB")) == NULL) || r;
+  r = ((glFramebufferTextureARB = (PFNGLFRAMEBUFFERTEXTUREARBPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureARB")) == NULL) || r;
+  r = ((glFramebufferTextureFaceARB = (PFNGLFRAMEBUFFERTEXTUREFACEARBPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureFaceARB")) == NULL) || r;
+  r = ((glFramebufferTextureLayerARB = (PFNGLFRAMEBUFFERTEXTURELAYERARBPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureLayerARB")) == NULL) || r;
+  r = ((glProgramParameteriARB = (PFNGLPROGRAMPARAMETERIARBPROC)glewGetProcAddress((const GLubyte*)"glProgramParameteriARB")) == NULL) || r;
 
   return r;
 }
@@ -10645,9 +10642,9 @@ static GLboolean _glewInit_GL_ARB_get_program_binary ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetProgramBinary = (PFNGLGETPROGRAMBINARYPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramBinary")) == NULL) || r;
-  r = ((glProgramBinary = (PFNGLPROGRAMBINARYPROC)glewGetProcSubtractress((const GLubyte*)"glProgramBinary")) == NULL) || r;
-  r = ((glProgramParameteri = (PFNGLPROGRAMPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameteri")) == NULL) || r;
+  r = ((glGetProgramBinary = (PFNGLGETPROGRAMBINARYPROC)glewGetProcAddress((const GLubyte*)"glGetProgramBinary")) == NULL) || r;
+  r = ((glProgramBinary = (PFNGLPROGRAMBINARYPROC)glewGetProcAddress((const GLubyte*)"glProgramBinary")) == NULL) || r;
+  r = ((glProgramParameteri = (PFNGLPROGRAMPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glProgramParameteri")) == NULL) || r;
 
   return r;
 }
@@ -10660,8 +10657,8 @@ static GLboolean _glewInit_GL_ARB_get_texture_sub_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetCompressedTextureSubImage = (PFNGLGETCOMPRESSEDTEXTURESUBIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetCompressedTextureSubImage")) == NULL) || r;
-  r = ((glGetTextureSubImage = (PFNGLGETTEXTURESUBIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureSubImage")) == NULL) || r;
+  r = ((glGetCompressedTextureSubImage = (PFNGLGETCOMPRESSEDTEXTURESUBIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetCompressedTextureSubImage")) == NULL) || r;
+  r = ((glGetTextureSubImage = (PFNGLGETTEXTURESUBIMAGEPROC)glewGetProcAddress((const GLubyte*)"glGetTextureSubImage")) == NULL) || r;
 
   return r;
 }
@@ -10674,7 +10671,7 @@ static GLboolean _glewInit_GL_ARB_gl_spirv ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSpecializeShaderARB = (PFNGLSPECIALIZESHADERARBPROC)glewGetProcSubtractress((const GLubyte*)"glSpecializeShaderARB")) == NULL) || r;
+  r = ((glSpecializeShaderARB = (PFNGLSPECIALIZESHADERARBPROC)glewGetProcAddress((const GLubyte*)"glSpecializeShaderARB")) == NULL) || r;
 
   return r;
 }
@@ -10687,24 +10684,24 @@ static GLboolean _glewInit_GL_ARB_gpu_shader_fp64 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetUniformdv = (PFNGLGETUNIFORMDVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformdv")) == NULL) || r;
-  r = ((glUniform1d = (PFNGLUNIFORM1DPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1d")) == NULL) || r;
-  r = ((glUniform1dv = (PFNGLUNIFORM1DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1dv")) == NULL) || r;
-  r = ((glUniform2d = (PFNGLUNIFORM2DPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2d")) == NULL) || r;
-  r = ((glUniform2dv = (PFNGLUNIFORM2DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2dv")) == NULL) || r;
-  r = ((glUniform3d = (PFNGLUNIFORM3DPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3d")) == NULL) || r;
-  r = ((glUniform3dv = (PFNGLUNIFORM3DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3dv")) == NULL) || r;
-  r = ((glUniform4d = (PFNGLUNIFORM4DPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4d")) == NULL) || r;
-  r = ((glUniform4dv = (PFNGLUNIFORM4DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4dv")) == NULL) || r;
-  r = ((glUniformMatrix2dv = (PFNGLUNIFORMMATRIX2DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2dv")) == NULL) || r;
-  r = ((glUniformMatrix2x3dv = (PFNGLUNIFORMMATRIX2X3DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2x3dv")) == NULL) || r;
-  r = ((glUniformMatrix2x4dv = (PFNGLUNIFORMMATRIX2X4DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2x4dv")) == NULL) || r;
-  r = ((glUniformMatrix3dv = (PFNGLUNIFORMMATRIX3DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3dv")) == NULL) || r;
-  r = ((glUniformMatrix3x2dv = (PFNGLUNIFORMMATRIX3X2DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3x2dv")) == NULL) || r;
-  r = ((glUniformMatrix3x4dv = (PFNGLUNIFORMMATRIX3X4DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3x4dv")) == NULL) || r;
-  r = ((glUniformMatrix4dv = (PFNGLUNIFORMMATRIX4DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4dv")) == NULL) || r;
-  r = ((glUniformMatrix4x2dv = (PFNGLUNIFORMMATRIX4X2DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4x2dv")) == NULL) || r;
-  r = ((glUniformMatrix4x3dv = (PFNGLUNIFORMMATRIX4X3DVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4x3dv")) == NULL) || r;
+  r = ((glGetUniformdv = (PFNGLGETUNIFORMDVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformdv")) == NULL) || r;
+  r = ((glUniform1d = (PFNGLUNIFORM1DPROC)glewGetProcAddress((const GLubyte*)"glUniform1d")) == NULL) || r;
+  r = ((glUniform1dv = (PFNGLUNIFORM1DVPROC)glewGetProcAddress((const GLubyte*)"glUniform1dv")) == NULL) || r;
+  r = ((glUniform2d = (PFNGLUNIFORM2DPROC)glewGetProcAddress((const GLubyte*)"glUniform2d")) == NULL) || r;
+  r = ((glUniform2dv = (PFNGLUNIFORM2DVPROC)glewGetProcAddress((const GLubyte*)"glUniform2dv")) == NULL) || r;
+  r = ((glUniform3d = (PFNGLUNIFORM3DPROC)glewGetProcAddress((const GLubyte*)"glUniform3d")) == NULL) || r;
+  r = ((glUniform3dv = (PFNGLUNIFORM3DVPROC)glewGetProcAddress((const GLubyte*)"glUniform3dv")) == NULL) || r;
+  r = ((glUniform4d = (PFNGLUNIFORM4DPROC)glewGetProcAddress((const GLubyte*)"glUniform4d")) == NULL) || r;
+  r = ((glUniform4dv = (PFNGLUNIFORM4DVPROC)glewGetProcAddress((const GLubyte*)"glUniform4dv")) == NULL) || r;
+  r = ((glUniformMatrix2dv = (PFNGLUNIFORMMATRIX2DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2dv")) == NULL) || r;
+  r = ((glUniformMatrix2x3dv = (PFNGLUNIFORMMATRIX2X3DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2x3dv")) == NULL) || r;
+  r = ((glUniformMatrix2x4dv = (PFNGLUNIFORMMATRIX2X4DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2x4dv")) == NULL) || r;
+  r = ((glUniformMatrix3dv = (PFNGLUNIFORMMATRIX3DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3dv")) == NULL) || r;
+  r = ((glUniformMatrix3x2dv = (PFNGLUNIFORMMATRIX3X2DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3x2dv")) == NULL) || r;
+  r = ((glUniformMatrix3x4dv = (PFNGLUNIFORMMATRIX3X4DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3x4dv")) == NULL) || r;
+  r = ((glUniformMatrix4dv = (PFNGLUNIFORMMATRIX4DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4dv")) == NULL) || r;
+  r = ((glUniformMatrix4x2dv = (PFNGLUNIFORMMATRIX4X2DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4x2dv")) == NULL) || r;
+  r = ((glUniformMatrix4x3dv = (PFNGLUNIFORMMATRIX4X3DVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4x3dv")) == NULL) || r;
 
   return r;
 }
@@ -10717,42 +10714,42 @@ static GLboolean _glewInit_GL_ARB_gpu_shader_int64 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetUniformi64vARB = (PFNGLGETUNIFORMI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformi64vARB")) == NULL) || r;
-  r = ((glGetUniformui64vARB = (PFNGLGETUNIFORMUI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformui64vARB")) == NULL) || r;
-  r = ((glGetnUniformi64vARB = (PFNGLGETNUNIFORMI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformi64vARB")) == NULL) || r;
-  r = ((glGetnUniformui64vARB = (PFNGLGETNUNIFORMUI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformui64vARB")) == NULL) || r;
-  r = ((glProgramUniform1i64ARB = (PFNGLPROGRAMUNIFORM1I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1i64ARB")) == NULL) || r;
-  r = ((glProgramUniform1i64vARB = (PFNGLPROGRAMUNIFORM1I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1i64vARB")) == NULL) || r;
-  r = ((glProgramUniform1ui64ARB = (PFNGLPROGRAMUNIFORM1UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1ui64ARB")) == NULL) || r;
-  r = ((glProgramUniform1ui64vARB = (PFNGLPROGRAMUNIFORM1UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1ui64vARB")) == NULL) || r;
-  r = ((glProgramUniform2i64ARB = (PFNGLPROGRAMUNIFORM2I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2i64ARB")) == NULL) || r;
-  r = ((glProgramUniform2i64vARB = (PFNGLPROGRAMUNIFORM2I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2i64vARB")) == NULL) || r;
-  r = ((glProgramUniform2ui64ARB = (PFNGLPROGRAMUNIFORM2UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2ui64ARB")) == NULL) || r;
-  r = ((glProgramUniform2ui64vARB = (PFNGLPROGRAMUNIFORM2UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2ui64vARB")) == NULL) || r;
-  r = ((glProgramUniform3i64ARB = (PFNGLPROGRAMUNIFORM3I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3i64ARB")) == NULL) || r;
-  r = ((glProgramUniform3i64vARB = (PFNGLPROGRAMUNIFORM3I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3i64vARB")) == NULL) || r;
-  r = ((glProgramUniform3ui64ARB = (PFNGLPROGRAMUNIFORM3UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3ui64ARB")) == NULL) || r;
-  r = ((glProgramUniform3ui64vARB = (PFNGLPROGRAMUNIFORM3UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3ui64vARB")) == NULL) || r;
-  r = ((glProgramUniform4i64ARB = (PFNGLPROGRAMUNIFORM4I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4i64ARB")) == NULL) || r;
-  r = ((glProgramUniform4i64vARB = (PFNGLPROGRAMUNIFORM4I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4i64vARB")) == NULL) || r;
-  r = ((glProgramUniform4ui64ARB = (PFNGLPROGRAMUNIFORM4UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4ui64ARB")) == NULL) || r;
-  r = ((glProgramUniform4ui64vARB = (PFNGLPROGRAMUNIFORM4UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4ui64vARB")) == NULL) || r;
-  r = ((glUniform1i64ARB = (PFNGLUNIFORM1I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1i64ARB")) == NULL) || r;
-  r = ((glUniform1i64vARB = (PFNGLUNIFORM1I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1i64vARB")) == NULL) || r;
-  r = ((glUniform1ui64ARB = (PFNGLUNIFORM1UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1ui64ARB")) == NULL) || r;
-  r = ((glUniform1ui64vARB = (PFNGLUNIFORM1UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1ui64vARB")) == NULL) || r;
-  r = ((glUniform2i64ARB = (PFNGLUNIFORM2I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2i64ARB")) == NULL) || r;
-  r = ((glUniform2i64vARB = (PFNGLUNIFORM2I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2i64vARB")) == NULL) || r;
-  r = ((glUniform2ui64ARB = (PFNGLUNIFORM2UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2ui64ARB")) == NULL) || r;
-  r = ((glUniform2ui64vARB = (PFNGLUNIFORM2UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2ui64vARB")) == NULL) || r;
-  r = ((glUniform3i64ARB = (PFNGLUNIFORM3I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3i64ARB")) == NULL) || r;
-  r = ((glUniform3i64vARB = (PFNGLUNIFORM3I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3i64vARB")) == NULL) || r;
-  r = ((glUniform3ui64ARB = (PFNGLUNIFORM3UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3ui64ARB")) == NULL) || r;
-  r = ((glUniform3ui64vARB = (PFNGLUNIFORM3UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3ui64vARB")) == NULL) || r;
-  r = ((glUniform4i64ARB = (PFNGLUNIFORM4I64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4i64ARB")) == NULL) || r;
-  r = ((glUniform4i64vARB = (PFNGLUNIFORM4I64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4i64vARB")) == NULL) || r;
-  r = ((glUniform4ui64ARB = (PFNGLUNIFORM4UI64ARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4ui64ARB")) == NULL) || r;
-  r = ((glUniform4ui64vARB = (PFNGLUNIFORM4UI64VARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4ui64vARB")) == NULL) || r;
+  r = ((glGetUniformi64vARB = (PFNGLGETUNIFORMI64VARBPROC)glewGetProcAddress((const GLubyte*)"glGetUniformi64vARB")) == NULL) || r;
+  r = ((glGetUniformui64vARB = (PFNGLGETUNIFORMUI64VARBPROC)glewGetProcAddress((const GLubyte*)"glGetUniformui64vARB")) == NULL) || r;
+  r = ((glGetnUniformi64vARB = (PFNGLGETNUNIFORMI64VARBPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformi64vARB")) == NULL) || r;
+  r = ((glGetnUniformui64vARB = (PFNGLGETNUNIFORMUI64VARBPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformui64vARB")) == NULL) || r;
+  r = ((glProgramUniform1i64ARB = (PFNGLPROGRAMUNIFORM1I64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1i64ARB")) == NULL) || r;
+  r = ((glProgramUniform1i64vARB = (PFNGLPROGRAMUNIFORM1I64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1i64vARB")) == NULL) || r;
+  r = ((glProgramUniform1ui64ARB = (PFNGLPROGRAMUNIFORM1UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1ui64ARB")) == NULL) || r;
+  r = ((glProgramUniform1ui64vARB = (PFNGLPROGRAMUNIFORM1UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1ui64vARB")) == NULL) || r;
+  r = ((glProgramUniform2i64ARB = (PFNGLPROGRAMUNIFORM2I64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2i64ARB")) == NULL) || r;
+  r = ((glProgramUniform2i64vARB = (PFNGLPROGRAMUNIFORM2I64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2i64vARB")) == NULL) || r;
+  r = ((glProgramUniform2ui64ARB = (PFNGLPROGRAMUNIFORM2UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2ui64ARB")) == NULL) || r;
+  r = ((glProgramUniform2ui64vARB = (PFNGLPROGRAMUNIFORM2UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2ui64vARB")) == NULL) || r;
+  r = ((glProgramUniform3i64ARB = (PFNGLPROGRAMUNIFORM3I64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3i64ARB")) == NULL) || r;
+  r = ((glProgramUniform3i64vARB = (PFNGLPROGRAMUNIFORM3I64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3i64vARB")) == NULL) || r;
+  r = ((glProgramUniform3ui64ARB = (PFNGLPROGRAMUNIFORM3UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3ui64ARB")) == NULL) || r;
+  r = ((glProgramUniform3ui64vARB = (PFNGLPROGRAMUNIFORM3UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3ui64vARB")) == NULL) || r;
+  r = ((glProgramUniform4i64ARB = (PFNGLPROGRAMUNIFORM4I64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4i64ARB")) == NULL) || r;
+  r = ((glProgramUniform4i64vARB = (PFNGLPROGRAMUNIFORM4I64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4i64vARB")) == NULL) || r;
+  r = ((glProgramUniform4ui64ARB = (PFNGLPROGRAMUNIFORM4UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4ui64ARB")) == NULL) || r;
+  r = ((glProgramUniform4ui64vARB = (PFNGLPROGRAMUNIFORM4UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4ui64vARB")) == NULL) || r;
+  r = ((glUniform1i64ARB = (PFNGLUNIFORM1I64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1i64ARB")) == NULL) || r;
+  r = ((glUniform1i64vARB = (PFNGLUNIFORM1I64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1i64vARB")) == NULL) || r;
+  r = ((glUniform1ui64ARB = (PFNGLUNIFORM1UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1ui64ARB")) == NULL) || r;
+  r = ((glUniform1ui64vARB = (PFNGLUNIFORM1UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1ui64vARB")) == NULL) || r;
+  r = ((glUniform2i64ARB = (PFNGLUNIFORM2I64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2i64ARB")) == NULL) || r;
+  r = ((glUniform2i64vARB = (PFNGLUNIFORM2I64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2i64vARB")) == NULL) || r;
+  r = ((glUniform2ui64ARB = (PFNGLUNIFORM2UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2ui64ARB")) == NULL) || r;
+  r = ((glUniform2ui64vARB = (PFNGLUNIFORM2UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2ui64vARB")) == NULL) || r;
+  r = ((glUniform3i64ARB = (PFNGLUNIFORM3I64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3i64ARB")) == NULL) || r;
+  r = ((glUniform3i64vARB = (PFNGLUNIFORM3I64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3i64vARB")) == NULL) || r;
+  r = ((glUniform3ui64ARB = (PFNGLUNIFORM3UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3ui64ARB")) == NULL) || r;
+  r = ((glUniform3ui64vARB = (PFNGLUNIFORM3UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3ui64vARB")) == NULL) || r;
+  r = ((glUniform4i64ARB = (PFNGLUNIFORM4I64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4i64ARB")) == NULL) || r;
+  r = ((glUniform4i64vARB = (PFNGLUNIFORM4I64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4i64vARB")) == NULL) || r;
+  r = ((glUniform4ui64ARB = (PFNGLUNIFORM4UI64ARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4ui64ARB")) == NULL) || r;
+  r = ((glUniform4ui64vARB = (PFNGLUNIFORM4UI64VARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4ui64vARB")) == NULL) || r;
 
   return r;
 }
@@ -10765,39 +10762,39 @@ static GLboolean _glewInit_GL_ARB_imaging ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquation = (PFNGLBLENDEQUATIONPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquation")) == NULL) || r;
-  r = ((glColorSubTable = (PFNGLCOLORSUBTABLEPROC)glewGetProcSubtractress((const GLubyte*)"glColorSubTable")) == NULL) || r;
-  r = ((glColorTable = (PFNGLCOLORTABLEPROC)glewGetProcSubtractress((const GLubyte*)"glColorTable")) == NULL) || r;
-  r = ((glColorTableParameterfv = (PFNGLCOLORTABLEPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glColorTableParameterfv")) == NULL) || r;
-  r = ((glColorTableParameteriv = (PFNGLCOLORTABLEPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glColorTableParameteriv")) == NULL) || r;
-  r = ((glConvolutionFilter1D = (PFNGLCONVOLUTIONFILTER1DPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionFilter1D")) == NULL) || r;
-  r = ((glConvolutionFilter2D = (PFNGLCONVOLUTIONFILTER2DPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionFilter2D")) == NULL) || r;
-  r = ((glConvolutionParameterf = (PFNGLCONVOLUTIONPARAMETERFPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameterf")) == NULL) || r;
-  r = ((glConvolutionParameterfv = (PFNGLCONVOLUTIONPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameterfv")) == NULL) || r;
-  r = ((glConvolutionParameteri = (PFNGLCONVOLUTIONPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameteri")) == NULL) || r;
-  r = ((glConvolutionParameteriv = (PFNGLCONVOLUTIONPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameteriv")) == NULL) || r;
-  r = ((glCopyColorSubTable = (PFNGLCOPYCOLORSUBTABLEPROC)glewGetProcSubtractress((const GLubyte*)"glCopyColorSubTable")) == NULL) || r;
-  r = ((glCopyColorTable = (PFNGLCOPYCOLORTABLEPROC)glewGetProcSubtractress((const GLubyte*)"glCopyColorTable")) == NULL) || r;
-  r = ((glCopyConvolutionFilter1D = (PFNGLCOPYCONVOLUTIONFILTER1DPROC)glewGetProcSubtractress((const GLubyte*)"glCopyConvolutionFilter1D")) == NULL) || r;
-  r = ((glCopyConvolutionFilter2D = (PFNGLCOPYCONVOLUTIONFILTER2DPROC)glewGetProcSubtractress((const GLubyte*)"glCopyConvolutionFilter2D")) == NULL) || r;
-  r = ((glGetColorTable = (PFNGLGETCOLORTABLEPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTable")) == NULL) || r;
-  r = ((glGetColorTableParameterfv = (PFNGLGETCOLORTABLEPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableParameterfv")) == NULL) || r;
-  r = ((glGetColorTableParameteriv = (PFNGLGETCOLORTABLEPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableParameteriv")) == NULL) || r;
-  r = ((glGetConvolutionFilter = (PFNGLGETCONVOLUTIONFILTERPROC)glewGetProcSubtractress((const GLubyte*)"glGetConvolutionFilter")) == NULL) || r;
-  r = ((glGetConvolutionParameterfv = (PFNGLGETCONVOLUTIONPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetConvolutionParameterfv")) == NULL) || r;
-  r = ((glGetConvolutionParameteriv = (PFNGLGETCONVOLUTIONPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetConvolutionParameteriv")) == NULL) || r;
-  r = ((glGetHistogram = (PFNGLGETHISTOGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glGetHistogram")) == NULL) || r;
-  r = ((glGetHistogramParameterfv = (PFNGLGETHISTOGRAMPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetHistogramParameterfv")) == NULL) || r;
-  r = ((glGetHistogramParameteriv = (PFNGLGETHISTOGRAMPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetHistogramParameteriv")) == NULL) || r;
-  r = ((glGetMinmax = (PFNGLGETMINMAXPROC)glewGetProcSubtractress((const GLubyte*)"glGetMinmax")) == NULL) || r;
-  r = ((glGetMinmaxParameterfv = (PFNGLGETMINMAXPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMinmaxParameterfv")) == NULL) || r;
-  r = ((glGetMinmaxParameteriv = (PFNGLGETMINMAXPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMinmaxParameteriv")) == NULL) || r;
-  r = ((glGetSeparableFilter = (PFNGLGETSEPARABLEFILTERPROC)glewGetProcSubtractress((const GLubyte*)"glGetSeparableFilter")) == NULL) || r;
-  r = ((glHistogram = (PFNGLHISTOGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glHistogram")) == NULL) || r;
-  r = ((glMinmax = (PFNGLMINMAXPROC)glewGetProcSubtractress((const GLubyte*)"glMinmax")) == NULL) || r;
-  r = ((glResetHistogram = (PFNGLRESETHISTOGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glResetHistogram")) == NULL) || r;
-  r = ((glResetMinmax = (PFNGLRESETMINMAXPROC)glewGetProcSubtractress((const GLubyte*)"glResetMinmax")) == NULL) || r;
-  r = ((glSeparableFilter2D = (PFNGLSEPARABLEFILTER2DPROC)glewGetProcSubtractress((const GLubyte*)"glSeparableFilter2D")) == NULL) || r;
+  r = ((glBlendEquation = (PFNGLBLENDEQUATIONPROC)glewGetProcAddress((const GLubyte*)"glBlendEquation")) == NULL) || r;
+  r = ((glColorSubTable = (PFNGLCOLORSUBTABLEPROC)glewGetProcAddress((const GLubyte*)"glColorSubTable")) == NULL) || r;
+  r = ((glColorTable = (PFNGLCOLORTABLEPROC)glewGetProcAddress((const GLubyte*)"glColorTable")) == NULL) || r;
+  r = ((glColorTableParameterfv = (PFNGLCOLORTABLEPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glColorTableParameterfv")) == NULL) || r;
+  r = ((glColorTableParameteriv = (PFNGLCOLORTABLEPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glColorTableParameteriv")) == NULL) || r;
+  r = ((glConvolutionFilter1D = (PFNGLCONVOLUTIONFILTER1DPROC)glewGetProcAddress((const GLubyte*)"glConvolutionFilter1D")) == NULL) || r;
+  r = ((glConvolutionFilter2D = (PFNGLCONVOLUTIONFILTER2DPROC)glewGetProcAddress((const GLubyte*)"glConvolutionFilter2D")) == NULL) || r;
+  r = ((glConvolutionParameterf = (PFNGLCONVOLUTIONPARAMETERFPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameterf")) == NULL) || r;
+  r = ((glConvolutionParameterfv = (PFNGLCONVOLUTIONPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameterfv")) == NULL) || r;
+  r = ((glConvolutionParameteri = (PFNGLCONVOLUTIONPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameteri")) == NULL) || r;
+  r = ((glConvolutionParameteriv = (PFNGLCONVOLUTIONPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameteriv")) == NULL) || r;
+  r = ((glCopyColorSubTable = (PFNGLCOPYCOLORSUBTABLEPROC)glewGetProcAddress((const GLubyte*)"glCopyColorSubTable")) == NULL) || r;
+  r = ((glCopyColorTable = (PFNGLCOPYCOLORTABLEPROC)glewGetProcAddress((const GLubyte*)"glCopyColorTable")) == NULL) || r;
+  r = ((glCopyConvolutionFilter1D = (PFNGLCOPYCONVOLUTIONFILTER1DPROC)glewGetProcAddress((const GLubyte*)"glCopyConvolutionFilter1D")) == NULL) || r;
+  r = ((glCopyConvolutionFilter2D = (PFNGLCOPYCONVOLUTIONFILTER2DPROC)glewGetProcAddress((const GLubyte*)"glCopyConvolutionFilter2D")) == NULL) || r;
+  r = ((glGetColorTable = (PFNGLGETCOLORTABLEPROC)glewGetProcAddress((const GLubyte*)"glGetColorTable")) == NULL) || r;
+  r = ((glGetColorTableParameterfv = (PFNGLGETCOLORTABLEPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableParameterfv")) == NULL) || r;
+  r = ((glGetColorTableParameteriv = (PFNGLGETCOLORTABLEPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableParameteriv")) == NULL) || r;
+  r = ((glGetConvolutionFilter = (PFNGLGETCONVOLUTIONFILTERPROC)glewGetProcAddress((const GLubyte*)"glGetConvolutionFilter")) == NULL) || r;
+  r = ((glGetConvolutionParameterfv = (PFNGLGETCONVOLUTIONPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetConvolutionParameterfv")) == NULL) || r;
+  r = ((glGetConvolutionParameteriv = (PFNGLGETCONVOLUTIONPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetConvolutionParameteriv")) == NULL) || r;
+  r = ((glGetHistogram = (PFNGLGETHISTOGRAMPROC)glewGetProcAddress((const GLubyte*)"glGetHistogram")) == NULL) || r;
+  r = ((glGetHistogramParameterfv = (PFNGLGETHISTOGRAMPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetHistogramParameterfv")) == NULL) || r;
+  r = ((glGetHistogramParameteriv = (PFNGLGETHISTOGRAMPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetHistogramParameteriv")) == NULL) || r;
+  r = ((glGetMinmax = (PFNGLGETMINMAXPROC)glewGetProcAddress((const GLubyte*)"glGetMinmax")) == NULL) || r;
+  r = ((glGetMinmaxParameterfv = (PFNGLGETMINMAXPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetMinmaxParameterfv")) == NULL) || r;
+  r = ((glGetMinmaxParameteriv = (PFNGLGETMINMAXPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetMinmaxParameteriv")) == NULL) || r;
+  r = ((glGetSeparableFilter = (PFNGLGETSEPARABLEFILTERPROC)glewGetProcAddress((const GLubyte*)"glGetSeparableFilter")) == NULL) || r;
+  r = ((glHistogram = (PFNGLHISTOGRAMPROC)glewGetProcAddress((const GLubyte*)"glHistogram")) == NULL) || r;
+  r = ((glMinmax = (PFNGLMINMAXPROC)glewGetProcAddress((const GLubyte*)"glMinmax")) == NULL) || r;
+  r = ((glResetHistogram = (PFNGLRESETHISTOGRAMPROC)glewGetProcAddress((const GLubyte*)"glResetHistogram")) == NULL) || r;
+  r = ((glResetMinmax = (PFNGLRESETMINMAXPROC)glewGetProcAddress((const GLubyte*)"glResetMinmax")) == NULL) || r;
+  r = ((glSeparableFilter2D = (PFNGLSEPARABLEFILTER2DPROC)glewGetProcAddress((const GLubyte*)"glSeparableFilter2D")) == NULL) || r;
 
   return r;
 }
@@ -10810,8 +10807,8 @@ static GLboolean _glewInit_GL_ARB_indirect_parameters ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirectCountARB = (PFNGLMULTIDRAWARRAYSINDIRECTCOUNTARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirectCountARB")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirectCountARB = (PFNGLMULTIDRAWELEMENTSINDIRECTCOUNTARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirectCountARB")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirectCountARB = (PFNGLMULTIDRAWARRAYSINDIRECTCOUNTARBPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirectCountARB")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirectCountARB = (PFNGLMULTIDRAWELEMENTSINDIRECTCOUNTARBPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirectCountARB")) == NULL) || r;
 
   return r;
 }
@@ -10824,9 +10821,9 @@ static GLboolean _glewInit_GL_ARB_instanced_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysInstancedARB = (PFNGLDRAWARRAYSINSTANCEDARBPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstancedARB")) == NULL) || r;
-  r = ((glDrawElementsInstancedARB = (PFNGLDRAWELEMENTSINSTANCEDARBPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedARB")) == NULL) || r;
-  r = ((glVertexAttribDivisorARB = (PFNGLVERTEXATTRIBDIVISORARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribDivisorARB")) == NULL) || r;
+  r = ((glDrawArraysInstancedARB = (PFNGLDRAWARRAYSINSTANCEDARBPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstancedARB")) == NULL) || r;
+  r = ((glDrawElementsInstancedARB = (PFNGLDRAWELEMENTSINSTANCEDARBPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedARB")) == NULL) || r;
+  r = ((glVertexAttribDivisorARB = (PFNGLVERTEXATTRIBDIVISORARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribDivisorARB")) == NULL) || r;
 
   return r;
 }
@@ -10839,7 +10836,7 @@ static GLboolean _glewInit_GL_ARB_internalformat_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetInternalformativ = (PFNGLGETINTERNALFORMATIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetInternalformativ")) == NULL) || r;
+  r = ((glGetInternalformativ = (PFNGLGETINTERNALFORMATIVPROC)glewGetProcAddress((const GLubyte*)"glGetInternalformativ")) == NULL) || r;
 
   return r;
 }
@@ -10852,7 +10849,7 @@ static GLboolean _glewInit_GL_ARB_internalformat_query2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetInternalformati64v = (PFNGLGETINTERNALFORMATI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetInternalformati64v")) == NULL) || r;
+  r = ((glGetInternalformati64v = (PFNGLGETINTERNALFORMATI64VPROC)glewGetProcAddress((const GLubyte*)"glGetInternalformati64v")) == NULL) || r;
 
   return r;
 }
@@ -10865,12 +10862,12 @@ static GLboolean _glewInit_GL_ARB_invalidate_subdata ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glInvalidateBufferData = (PFNGLINVALIDATEBUFFERDATAPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateBufferData")) == NULL) || r;
-  r = ((glInvalidateBufferSubData = (PFNGLINVALIDATEBUFFERSUBDATAPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateBufferSubData")) == NULL) || r;
-  r = ((glInvalidateFramebuffer = (PFNGLINVALIDATEFRAMEBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateFramebuffer")) == NULL) || r;
-  r = ((glInvalidateSubFramebuffer = (PFNGLINVALIDATESUBFRAMEBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateSubFramebuffer")) == NULL) || r;
-  r = ((glInvalidateTexImage = (PFNGLINVALIDATETEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateTexImage")) == NULL) || r;
-  r = ((glInvalidateTexSubImage = (PFNGLINVALIDATETEXSUBIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"glInvalidateTexSubImage")) == NULL) || r;
+  r = ((glInvalidateBufferData = (PFNGLINVALIDATEBUFFERDATAPROC)glewGetProcAddress((const GLubyte*)"glInvalidateBufferData")) == NULL) || r;
+  r = ((glInvalidateBufferSubData = (PFNGLINVALIDATEBUFFERSUBDATAPROC)glewGetProcAddress((const GLubyte*)"glInvalidateBufferSubData")) == NULL) || r;
+  r = ((glInvalidateFramebuffer = (PFNGLINVALIDATEFRAMEBUFFERPROC)glewGetProcAddress((const GLubyte*)"glInvalidateFramebuffer")) == NULL) || r;
+  r = ((glInvalidateSubFramebuffer = (PFNGLINVALIDATESUBFRAMEBUFFERPROC)glewGetProcAddress((const GLubyte*)"glInvalidateSubFramebuffer")) == NULL) || r;
+  r = ((glInvalidateTexImage = (PFNGLINVALIDATETEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"glInvalidateTexImage")) == NULL) || r;
+  r = ((glInvalidateTexSubImage = (PFNGLINVALIDATETEXSUBIMAGEPROC)glewGetProcAddress((const GLubyte*)"glInvalidateTexSubImage")) == NULL) || r;
 
   return r;
 }
@@ -10883,8 +10880,8 @@ static GLboolean _glewInit_GL_ARB_map_buffer_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glFlushMappedBufferRange")) == NULL) || r;
-  r = ((glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glMapBufferRange")) == NULL) || r;
+  r = ((glFlushMappedBufferRange = (PFNGLFLUSHMAPPEDBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glFlushMappedBufferRange")) == NULL) || r;
+  r = ((glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glMapBufferRange")) == NULL) || r;
 
   return r;
 }
@@ -10897,11 +10894,11 @@ static GLboolean _glewInit_GL_ARB_matrix_palette ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCurrentPaletteMatrixARB = (PFNGLCURRENTPALETTEMATRIXARBPROC)glewGetProcSubtractress((const GLubyte*)"glCurrentPaletteMatrixARB")) == NULL) || r;
-  r = ((glMatrixIndexPointerARB = (PFNGLMATRIXINDEXPOINTERARBPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixIndexPointerARB")) == NULL) || r;
-  r = ((glMatrixIndexubvARB = (PFNGLMATRIXINDEXUBVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixIndexubvARB")) == NULL) || r;
-  r = ((glMatrixIndexuivARB = (PFNGLMATRIXINDEXUIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixIndexuivARB")) == NULL) || r;
-  r = ((glMatrixIndexusvARB = (PFNGLMATRIXINDEXUSVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixIndexusvARB")) == NULL) || r;
+  r = ((glCurrentPaletteMatrixARB = (PFNGLCURRENTPALETTEMATRIXARBPROC)glewGetProcAddress((const GLubyte*)"glCurrentPaletteMatrixARB")) == NULL) || r;
+  r = ((glMatrixIndexPointerARB = (PFNGLMATRIXINDEXPOINTERARBPROC)glewGetProcAddress((const GLubyte*)"glMatrixIndexPointerARB")) == NULL) || r;
+  r = ((glMatrixIndexubvARB = (PFNGLMATRIXINDEXUBVARBPROC)glewGetProcAddress((const GLubyte*)"glMatrixIndexubvARB")) == NULL) || r;
+  r = ((glMatrixIndexuivARB = (PFNGLMATRIXINDEXUIVARBPROC)glewGetProcAddress((const GLubyte*)"glMatrixIndexuivARB")) == NULL) || r;
+  r = ((glMatrixIndexusvARB = (PFNGLMATRIXINDEXUSVARBPROC)glewGetProcAddress((const GLubyte*)"glMatrixIndexusvARB")) == NULL) || r;
 
   return r;
 }
@@ -10914,12 +10911,12 @@ static GLboolean _glewInit_GL_ARB_multi_bind ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindBuffersBase = (PFNGLBINDBUFFERSBASEPROC)glewGetProcSubtractress((const GLubyte*)"glBindBuffersBase")) == NULL) || r;
-  r = ((glBindBuffersRange = (PFNGLBINDBUFFERSRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glBindBuffersRange")) == NULL) || r;
-  r = ((glBindImageTextures = (PFNGLBINDIMAGETEXTURESPROC)glewGetProcSubtractress((const GLubyte*)"glBindImageTextures")) == NULL) || r;
-  r = ((glBindSamplers = (PFNGLBINDSAMPLERSPROC)glewGetProcSubtractress((const GLubyte*)"glBindSamplers")) == NULL) || r;
-  r = ((glBindTextures = (PFNGLBINDTEXTURESPROC)glewGetProcSubtractress((const GLubyte*)"glBindTextures")) == NULL) || r;
-  r = ((glBindVertexBuffers = (PFNGLBINDVERTEXBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"glBindVertexBuffers")) == NULL) || r;
+  r = ((glBindBuffersBase = (PFNGLBINDBUFFERSBASEPROC)glewGetProcAddress((const GLubyte*)"glBindBuffersBase")) == NULL) || r;
+  r = ((glBindBuffersRange = (PFNGLBINDBUFFERSRANGEPROC)glewGetProcAddress((const GLubyte*)"glBindBuffersRange")) == NULL) || r;
+  r = ((glBindImageTextures = (PFNGLBINDIMAGETEXTURESPROC)glewGetProcAddress((const GLubyte*)"glBindImageTextures")) == NULL) || r;
+  r = ((glBindSamplers = (PFNGLBINDSAMPLERSPROC)glewGetProcAddress((const GLubyte*)"glBindSamplers")) == NULL) || r;
+  r = ((glBindTextures = (PFNGLBINDTEXTURESPROC)glewGetProcAddress((const GLubyte*)"glBindTextures")) == NULL) || r;
+  r = ((glBindVertexBuffers = (PFNGLBINDVERTEXBUFFERSPROC)glewGetProcAddress((const GLubyte*)"glBindVertexBuffers")) == NULL) || r;
 
   return r;
 }
@@ -10932,8 +10929,8 @@ static GLboolean _glewInit_GL_ARB_multi_draw_indirect ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirect = (PFNGLMULTIDRAWARRAYSINDIRECTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirect")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirect = (PFNGLMULTIDRAWELEMENTSINDIRECTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirect")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirect = (PFNGLMULTIDRAWARRAYSINDIRECTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirect")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirect = (PFNGLMULTIDRAWELEMENTSINDIRECTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirect")) == NULL) || r;
 
   return r;
 }
@@ -10946,7 +10943,7 @@ static GLboolean _glewInit_GL_ARB_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSampleCoverageARB = (PFNGLSAMPLECOVERAGEARBPROC)glewGetProcSubtractress((const GLubyte*)"glSampleCoverageARB")) == NULL) || r;
+  r = ((glSampleCoverageARB = (PFNGLSAMPLECOVERAGEARBPROC)glewGetProcAddress((const GLubyte*)"glSampleCoverageARB")) == NULL) || r;
 
   return r;
 }
@@ -10959,40 +10956,40 @@ static GLboolean _glewInit_GL_ARB_multitexture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)glewGetProcSubtractress((const GLubyte*)"glActiveTextureARB")) == NULL) || r;
-  r = ((glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)glewGetProcSubtractress((const GLubyte*)"glClientActiveTextureARB")) == NULL) || r;
-  r = ((glMultiTexCoord1dARB = (PFNGLMULTITEXCOORD1DARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1dARB")) == NULL) || r;
-  r = ((glMultiTexCoord1dvARB = (PFNGLMULTITEXCOORD1DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1dvARB")) == NULL) || r;
-  r = ((glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1fARB")) == NULL) || r;
-  r = ((glMultiTexCoord1fvARB = (PFNGLMULTITEXCOORD1FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1fvARB")) == NULL) || r;
-  r = ((glMultiTexCoord1iARB = (PFNGLMULTITEXCOORD1IARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1iARB")) == NULL) || r;
-  r = ((glMultiTexCoord1ivARB = (PFNGLMULTITEXCOORD1IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1ivARB")) == NULL) || r;
-  r = ((glMultiTexCoord1sARB = (PFNGLMULTITEXCOORD1SARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1sARB")) == NULL) || r;
-  r = ((glMultiTexCoord1svARB = (PFNGLMULTITEXCOORD1SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1svARB")) == NULL) || r;
-  r = ((glMultiTexCoord2dARB = (PFNGLMULTITEXCOORD2DARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2dARB")) == NULL) || r;
-  r = ((glMultiTexCoord2dvARB = (PFNGLMULTITEXCOORD2DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2dvARB")) == NULL) || r;
-  r = ((glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2fARB")) == NULL) || r;
-  r = ((glMultiTexCoord2fvARB = (PFNGLMULTITEXCOORD2FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2fvARB")) == NULL) || r;
-  r = ((glMultiTexCoord2iARB = (PFNGLMULTITEXCOORD2IARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2iARB")) == NULL) || r;
-  r = ((glMultiTexCoord2ivARB = (PFNGLMULTITEXCOORD2IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2ivARB")) == NULL) || r;
-  r = ((glMultiTexCoord2sARB = (PFNGLMULTITEXCOORD2SARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2sARB")) == NULL) || r;
-  r = ((glMultiTexCoord2svARB = (PFNGLMULTITEXCOORD2SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2svARB")) == NULL) || r;
-  r = ((glMultiTexCoord3dARB = (PFNGLMULTITEXCOORD3DARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3dARB")) == NULL) || r;
-  r = ((glMultiTexCoord3dvARB = (PFNGLMULTITEXCOORD3DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3dvARB")) == NULL) || r;
-  r = ((glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3fARB")) == NULL) || r;
-  r = ((glMultiTexCoord3fvARB = (PFNGLMULTITEXCOORD3FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3fvARB")) == NULL) || r;
-  r = ((glMultiTexCoord3iARB = (PFNGLMULTITEXCOORD3IARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3iARB")) == NULL) || r;
-  r = ((glMultiTexCoord3ivARB = (PFNGLMULTITEXCOORD3IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3ivARB")) == NULL) || r;
-  r = ((glMultiTexCoord3sARB = (PFNGLMULTITEXCOORD3SARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3sARB")) == NULL) || r;
-  r = ((glMultiTexCoord3svARB = (PFNGLMULTITEXCOORD3SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3svARB")) == NULL) || r;
-  r = ((glMultiTexCoord4dARB = (PFNGLMULTITEXCOORD4DARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4dARB")) == NULL) || r;
-  r = ((glMultiTexCoord4dvARB = (PFNGLMULTITEXCOORD4DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4dvARB")) == NULL) || r;
-  r = ((glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4fARB")) == NULL) || r;
-  r = ((glMultiTexCoord4fvARB = (PFNGLMULTITEXCOORD4FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4fvARB")) == NULL) || r;
-  r = ((glMultiTexCoord4iARB = (PFNGLMULTITEXCOORD4IARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4iARB")) == NULL) || r;
-  r = ((glMultiTexCoord4ivARB = (PFNGLMULTITEXCOORD4IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4ivARB")) == NULL) || r;
-  r = ((glMultiTexCoord4sARB = (PFNGLMULTITEXCOORD4SARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4sARB")) == NULL) || r;
-  r = ((glMultiTexCoord4svARB = (PFNGLMULTITEXCOORD4SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4svARB")) == NULL) || r;
+  r = ((glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)glewGetProcAddress((const GLubyte*)"glActiveTextureARB")) == NULL) || r;
+  r = ((glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC)glewGetProcAddress((const GLubyte*)"glClientActiveTextureARB")) == NULL) || r;
+  r = ((glMultiTexCoord1dARB = (PFNGLMULTITEXCOORD1DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1dARB")) == NULL) || r;
+  r = ((glMultiTexCoord1dvARB = (PFNGLMULTITEXCOORD1DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1fARB")) == NULL) || r;
+  r = ((glMultiTexCoord1fvARB = (PFNGLMULTITEXCOORD1FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord1iARB = (PFNGLMULTITEXCOORD1IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1iARB")) == NULL) || r;
+  r = ((glMultiTexCoord1ivARB = (PFNGLMULTITEXCOORD1IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord1sARB = (PFNGLMULTITEXCOORD1SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1sARB")) == NULL) || r;
+  r = ((glMultiTexCoord1svARB = (PFNGLMULTITEXCOORD1SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1svARB")) == NULL) || r;
+  r = ((glMultiTexCoord2dARB = (PFNGLMULTITEXCOORD2DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2dARB")) == NULL) || r;
+  r = ((glMultiTexCoord2dvARB = (PFNGLMULTITEXCOORD2DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2fARB")) == NULL) || r;
+  r = ((glMultiTexCoord2fvARB = (PFNGLMULTITEXCOORD2FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord2iARB = (PFNGLMULTITEXCOORD2IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2iARB")) == NULL) || r;
+  r = ((glMultiTexCoord2ivARB = (PFNGLMULTITEXCOORD2IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord2sARB = (PFNGLMULTITEXCOORD2SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2sARB")) == NULL) || r;
+  r = ((glMultiTexCoord2svARB = (PFNGLMULTITEXCOORD2SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2svARB")) == NULL) || r;
+  r = ((glMultiTexCoord3dARB = (PFNGLMULTITEXCOORD3DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3dARB")) == NULL) || r;
+  r = ((glMultiTexCoord3dvARB = (PFNGLMULTITEXCOORD3DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3fARB")) == NULL) || r;
+  r = ((glMultiTexCoord3fvARB = (PFNGLMULTITEXCOORD3FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord3iARB = (PFNGLMULTITEXCOORD3IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3iARB")) == NULL) || r;
+  r = ((glMultiTexCoord3ivARB = (PFNGLMULTITEXCOORD3IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord3sARB = (PFNGLMULTITEXCOORD3SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3sARB")) == NULL) || r;
+  r = ((glMultiTexCoord3svARB = (PFNGLMULTITEXCOORD3SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3svARB")) == NULL) || r;
+  r = ((glMultiTexCoord4dARB = (PFNGLMULTITEXCOORD4DARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4dARB")) == NULL) || r;
+  r = ((glMultiTexCoord4dvARB = (PFNGLMULTITEXCOORD4DVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4dvARB")) == NULL) || r;
+  r = ((glMultiTexCoord4fARB = (PFNGLMULTITEXCOORD4FARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4fARB")) == NULL) || r;
+  r = ((glMultiTexCoord4fvARB = (PFNGLMULTITEXCOORD4FVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4fvARB")) == NULL) || r;
+  r = ((glMultiTexCoord4iARB = (PFNGLMULTITEXCOORD4IARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4iARB")) == NULL) || r;
+  r = ((glMultiTexCoord4ivARB = (PFNGLMULTITEXCOORD4IVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4ivARB")) == NULL) || r;
+  r = ((glMultiTexCoord4sARB = (PFNGLMULTITEXCOORD4SARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4sARB")) == NULL) || r;
+  r = ((glMultiTexCoord4svARB = (PFNGLMULTITEXCOORD4SVARBPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4svARB")) == NULL) || r;
 
   return r;
 }
@@ -11005,14 +11002,14 @@ static GLboolean _glewInit_GL_ARB_occlusion_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginQueryARB = (PFNGLBEGINQUERYARBPROC)glewGetProcSubtractress((const GLubyte*)"glBeginQueryARB")) == NULL) || r;
-  r = ((glDeleteQueriesARB = (PFNGLDELETEQUERIESARBPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteQueriesARB")) == NULL) || r;
-  r = ((glEndQueryARB = (PFNGLENDQUERYARBPROC)glewGetProcSubtractress((const GLubyte*)"glEndQueryARB")) == NULL) || r;
-  r = ((glGenQueriesARB = (PFNGLGENQUERIESARBPROC)glewGetProcSubtractress((const GLubyte*)"glGenQueriesARB")) == NULL) || r;
-  r = ((glGetQueryObjectivARB = (PFNGLGETQUERYOBJECTIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectivARB")) == NULL) || r;
-  r = ((glGetQueryObjectuivARB = (PFNGLGETQUERYOBJECTUIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectuivARB")) == NULL) || r;
-  r = ((glGetQueryivARB = (PFNGLGETQUERYIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryivARB")) == NULL) || r;
-  r = ((glIsQueryARB = (PFNGLISQUERYARBPROC)glewGetProcSubtractress((const GLubyte*)"glIsQueryARB")) == NULL) || r;
+  r = ((glBeginQueryARB = (PFNGLBEGINQUERYARBPROC)glewGetProcAddress((const GLubyte*)"glBeginQueryARB")) == NULL) || r;
+  r = ((glDeleteQueriesARB = (PFNGLDELETEQUERIESARBPROC)glewGetProcAddress((const GLubyte*)"glDeleteQueriesARB")) == NULL) || r;
+  r = ((glEndQueryARB = (PFNGLENDQUERYARBPROC)glewGetProcAddress((const GLubyte*)"glEndQueryARB")) == NULL) || r;
+  r = ((glGenQueriesARB = (PFNGLGENQUERIESARBPROC)glewGetProcAddress((const GLubyte*)"glGenQueriesARB")) == NULL) || r;
+  r = ((glGetQueryObjectivARB = (PFNGLGETQUERYOBJECTIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectivARB")) == NULL) || r;
+  r = ((glGetQueryObjectuivARB = (PFNGLGETQUERYOBJECTUIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectuivARB")) == NULL) || r;
+  r = ((glGetQueryivARB = (PFNGLGETQUERYIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetQueryivARB")) == NULL) || r;
+  r = ((glIsQueryARB = (PFNGLISQUERYARBPROC)glewGetProcAddress((const GLubyte*)"glIsQueryARB")) == NULL) || r;
 
   return r;
 }
@@ -11025,7 +11022,7 @@ static GLboolean _glewInit_GL_ARB_parallel_shader_compile ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMaxShaderCompilerThreadsARB = (PFNGLMAXSHADERCOMPILERTHREADSARBPROC)glewGetProcSubtractress((const GLubyte*)"glMaxShaderCompilerThreadsARB")) == NULL) || r;
+  r = ((glMaxShaderCompilerThreadsARB = (PFNGLMAXSHADERCOMPILERTHREADSARBPROC)glewGetProcAddress((const GLubyte*)"glMaxShaderCompilerThreadsARB")) == NULL) || r;
 
   return r;
 }
@@ -11038,8 +11035,8 @@ static GLboolean _glewInit_GL_ARB_point_parameters ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPointParameterfARB = (PFNGLPOINTPARAMETERFARBPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterfARB")) == NULL) || r;
-  r = ((glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterfvARB")) == NULL) || r;
+  r = ((glPointParameterfARB = (PFNGLPOINTPARAMETERFARBPROC)glewGetProcAddress((const GLubyte*)"glPointParameterfARB")) == NULL) || r;
+  r = ((glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC)glewGetProcAddress((const GLubyte*)"glPointParameterfvARB")) == NULL) || r;
 
   return r;
 }
@@ -11052,7 +11049,7 @@ static GLboolean _glewInit_GL_ARB_polygon_offset_clamp ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPolygonOffsetClamp = (PFNGLPOLYGONOFFSETCLAMPPROC)glewGetProcSubtractress((const GLubyte*)"glPolygonOffsetClamp")) == NULL) || r;
+  r = ((glPolygonOffsetClamp = (PFNGLPOLYGONOFFSETCLAMPPROC)glewGetProcAddress((const GLubyte*)"glPolygonOffsetClamp")) == NULL) || r;
 
   return r;
 }
@@ -11065,12 +11062,12 @@ static GLboolean _glewInit_GL_ARB_program_interface_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetProgramInterfaceiv = (PFNGLGETPROGRAMINTERFACEIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramInterfaceiv")) == NULL) || r;
-  r = ((glGetProgramResourceIndex = (PFNGLGETPROGRAMRESOURCEINDEXPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourceIndex")) == NULL) || r;
-  r = ((glGetProgramResourceLocation = (PFNGLGETPROGRAMRESOURCELOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourceLocation")) == NULL) || r;
-  r = ((glGetProgramResourceLocationIndex = (PFNGLGETPROGRAMRESOURCELOCATIONINDEXPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourceLocationIndex")) == NULL) || r;
-  r = ((glGetProgramResourceName = (PFNGLGETPROGRAMRESOURCENAMEPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourceName")) == NULL) || r;
-  r = ((glGetProgramResourceiv = (PFNGLGETPROGRAMRESOURCEIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourceiv")) == NULL) || r;
+  r = ((glGetProgramInterfaceiv = (PFNGLGETPROGRAMINTERFACEIVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramInterfaceiv")) == NULL) || r;
+  r = ((glGetProgramResourceIndex = (PFNGLGETPROGRAMRESOURCEINDEXPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourceIndex")) == NULL) || r;
+  r = ((glGetProgramResourceLocation = (PFNGLGETPROGRAMRESOURCELOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourceLocation")) == NULL) || r;
+  r = ((glGetProgramResourceLocationIndex = (PFNGLGETPROGRAMRESOURCELOCATIONINDEXPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourceLocationIndex")) == NULL) || r;
+  r = ((glGetProgramResourceName = (PFNGLGETPROGRAMRESOURCENAMEPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourceName")) == NULL) || r;
+  r = ((glGetProgramResourceiv = (PFNGLGETPROGRAMRESOURCEIVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourceiv")) == NULL) || r;
 
   return r;
 }
@@ -11083,7 +11080,7 @@ static GLboolean _glewInit_GL_ARB_provoking_vertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glProvokingVertex = (PFNGLPROVOKINGVERTEXPROC)glewGetProcSubtractress((const GLubyte*)"glProvokingVertex")) == NULL) || r;
+  r = ((glProvokingVertex = (PFNGLPROVOKINGVERTEXPROC)glewGetProcAddress((const GLubyte*)"glProvokingVertex")) == NULL) || r;
 
   return r;
 }
@@ -11096,26 +11093,26 @@ static GLboolean _glewInit_GL_ARB_robustness ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetGraphicsResetStatusARB = (PFNGLGETGRAPHICSRESETSTATUSARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetGraphicsResetStatusARB")) == NULL) || r;
-  r = ((glGetnColorTableARB = (PFNGLGETNCOLORTABLEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnColorTableARB")) == NULL) || r;
-  r = ((glGetnCompressedTexImageARB = (PFNGLGETNCOMPRESSEDTEXIMAGEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnCompressedTexImageARB")) == NULL) || r;
-  r = ((glGetnConvolutionFilterARB = (PFNGLGETNCONVOLUTIONFILTERARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnConvolutionFilterARB")) == NULL) || r;
-  r = ((glGetnHistogramARB = (PFNGLGETNHISTOGRAMARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnHistogramARB")) == NULL) || r;
-  r = ((glGetnMapdvARB = (PFNGLGETNMAPDVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnMapdvARB")) == NULL) || r;
-  r = ((glGetnMapfvARB = (PFNGLGETNMAPFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnMapfvARB")) == NULL) || r;
-  r = ((glGetnMapivARB = (PFNGLGETNMAPIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnMapivARB")) == NULL) || r;
-  r = ((glGetnMinmaxARB = (PFNGLGETNMINMAXARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnMinmaxARB")) == NULL) || r;
-  r = ((glGetnPixelMapfvARB = (PFNGLGETNPIXELMAPFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnPixelMapfvARB")) == NULL) || r;
-  r = ((glGetnPixelMapuivARB = (PFNGLGETNPIXELMAPUIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnPixelMapuivARB")) == NULL) || r;
-  r = ((glGetnPixelMapusvARB = (PFNGLGETNPIXELMAPUSVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnPixelMapusvARB")) == NULL) || r;
-  r = ((glGetnPolygonStippleARB = (PFNGLGETNPOLYGONSTIPPLEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnPolygonStippleARB")) == NULL) || r;
-  r = ((glGetnSeparableFilterARB = (PFNGLGETNSEPARABLEFILTERARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnSeparableFilterARB")) == NULL) || r;
-  r = ((glGetnTexImageARB = (PFNGLGETNTEXIMAGEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnTexImageARB")) == NULL) || r;
-  r = ((glGetnUniformdvARB = (PFNGLGETNUNIFORMDVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformdvARB")) == NULL) || r;
-  r = ((glGetnUniformfvARB = (PFNGLGETNUNIFORMFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformfvARB")) == NULL) || r;
-  r = ((glGetnUniformivARB = (PFNGLGETNUNIFORMIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformivARB")) == NULL) || r;
-  r = ((glGetnUniformuivARB = (PFNGLGETNUNIFORMUIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformuivARB")) == NULL) || r;
-  r = ((glReadnPixelsARB = (PFNGLREADNPIXELSARBPROC)glewGetProcSubtractress((const GLubyte*)"glReadnPixelsARB")) == NULL) || r;
+  r = ((glGetGraphicsResetStatusARB = (PFNGLGETGRAPHICSRESETSTATUSARBPROC)glewGetProcAddress((const GLubyte*)"glGetGraphicsResetStatusARB")) == NULL) || r;
+  r = ((glGetnColorTableARB = (PFNGLGETNCOLORTABLEARBPROC)glewGetProcAddress((const GLubyte*)"glGetnColorTableARB")) == NULL) || r;
+  r = ((glGetnCompressedTexImageARB = (PFNGLGETNCOMPRESSEDTEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"glGetnCompressedTexImageARB")) == NULL) || r;
+  r = ((glGetnConvolutionFilterARB = (PFNGLGETNCONVOLUTIONFILTERARBPROC)glewGetProcAddress((const GLubyte*)"glGetnConvolutionFilterARB")) == NULL) || r;
+  r = ((glGetnHistogramARB = (PFNGLGETNHISTOGRAMARBPROC)glewGetProcAddress((const GLubyte*)"glGetnHistogramARB")) == NULL) || r;
+  r = ((glGetnMapdvARB = (PFNGLGETNMAPDVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnMapdvARB")) == NULL) || r;
+  r = ((glGetnMapfvARB = (PFNGLGETNMAPFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnMapfvARB")) == NULL) || r;
+  r = ((glGetnMapivARB = (PFNGLGETNMAPIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnMapivARB")) == NULL) || r;
+  r = ((glGetnMinmaxARB = (PFNGLGETNMINMAXARBPROC)glewGetProcAddress((const GLubyte*)"glGetnMinmaxARB")) == NULL) || r;
+  r = ((glGetnPixelMapfvARB = (PFNGLGETNPIXELMAPFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnPixelMapfvARB")) == NULL) || r;
+  r = ((glGetnPixelMapuivARB = (PFNGLGETNPIXELMAPUIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnPixelMapuivARB")) == NULL) || r;
+  r = ((glGetnPixelMapusvARB = (PFNGLGETNPIXELMAPUSVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnPixelMapusvARB")) == NULL) || r;
+  r = ((glGetnPolygonStippleARB = (PFNGLGETNPOLYGONSTIPPLEARBPROC)glewGetProcAddress((const GLubyte*)"glGetnPolygonStippleARB")) == NULL) || r;
+  r = ((glGetnSeparableFilterARB = (PFNGLGETNSEPARABLEFILTERARBPROC)glewGetProcAddress((const GLubyte*)"glGetnSeparableFilterARB")) == NULL) || r;
+  r = ((glGetnTexImageARB = (PFNGLGETNTEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"glGetnTexImageARB")) == NULL) || r;
+  r = ((glGetnUniformdvARB = (PFNGLGETNUNIFORMDVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformdvARB")) == NULL) || r;
+  r = ((glGetnUniformfvARB = (PFNGLGETNUNIFORMFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformfvARB")) == NULL) || r;
+  r = ((glGetnUniformivARB = (PFNGLGETNUNIFORMIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformivARB")) == NULL) || r;
+  r = ((glGetnUniformuivARB = (PFNGLGETNUNIFORMUIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformuivARB")) == NULL) || r;
+  r = ((glReadnPixelsARB = (PFNGLREADNPIXELSARBPROC)glewGetProcAddress((const GLubyte*)"glReadnPixelsARB")) == NULL) || r;
 
   return r;
 }
@@ -11128,8 +11125,8 @@ static GLboolean _glewInit_GL_ARB_sample_locations ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferSampleLocationsfvARB = (PFNGLFRAMEBUFFERSAMPLELOCATIONSFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferSampleLocationsfvARB")) == NULL) || r;
-  r = ((glNamedFramebufferSampleLocationsfvARB = (PFNGLNAMEDFRAMEBUFFERSAMPLELOCATIONSFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferSampleLocationsfvARB")) == NULL) || r;
+  r = ((glFramebufferSampleLocationsfvARB = (PFNGLFRAMEBUFFERSAMPLELOCATIONSFVARBPROC)glewGetProcAddress((const GLubyte*)"glFramebufferSampleLocationsfvARB")) == NULL) || r;
+  r = ((glNamedFramebufferSampleLocationsfvARB = (PFNGLNAMEDFRAMEBUFFERSAMPLELOCATIONSFVARBPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferSampleLocationsfvARB")) == NULL) || r;
 
   return r;
 }
@@ -11142,7 +11139,7 @@ static GLboolean _glewInit_GL_ARB_sample_shading ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMinSampleShadingARB = (PFNGLMINSAMPLESHADINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glMinSampleShadingARB")) == NULL) || r;
+  r = ((glMinSampleShadingARB = (PFNGLMINSAMPLESHADINGARBPROC)glewGetProcAddress((const GLubyte*)"glMinSampleShadingARB")) == NULL) || r;
 
   return r;
 }
@@ -11155,20 +11152,20 @@ static GLboolean _glewInit_GL_ARB_sampler_objects ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindSampler = (PFNGLBINDSAMPLERPROC)glewGetProcSubtractress((const GLubyte*)"glBindSampler")) == NULL) || r;
-  r = ((glDeleteSamplers = (PFNGLDELETESAMPLERSPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteSamplers")) == NULL) || r;
-  r = ((glGenSamplers = (PFNGLGENSAMPLERSPROC)glewGetProcSubtractress((const GLubyte*)"glGenSamplers")) == NULL) || r;
-  r = ((glGetSamplerParameterIiv = (PFNGLGETSAMPLERPARAMETERIIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetSamplerParameterIiv")) == NULL) || r;
-  r = ((glGetSamplerParameterIuiv = (PFNGLGETSAMPLERPARAMETERIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetSamplerParameterIuiv")) == NULL) || r;
-  r = ((glGetSamplerParameterfv = (PFNGLGETSAMPLERPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetSamplerParameterfv")) == NULL) || r;
-  r = ((glGetSamplerParameteriv = (PFNGLGETSAMPLERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetSamplerParameteriv")) == NULL) || r;
-  r = ((glIsSampler = (PFNGLISSAMPLERPROC)glewGetProcSubtractress((const GLubyte*)"glIsSampler")) == NULL) || r;
-  r = ((glSamplerParameterIiv = (PFNGLSAMPLERPARAMETERIIVPROC)glewGetProcSubtractress((const GLubyte*)"glSamplerParameterIiv")) == NULL) || r;
-  r = ((glSamplerParameterIuiv = (PFNGLSAMPLERPARAMETERIUIVPROC)glewGetProcSubtractress((const GLubyte*)"glSamplerParameterIuiv")) == NULL) || r;
-  r = ((glSamplerParameterf = (PFNGLSAMPLERPARAMETERFPROC)glewGetProcSubtractress((const GLubyte*)"glSamplerParameterf")) == NULL) || r;
-  r = ((glSamplerParameterfv = (PFNGLSAMPLERPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glSamplerParameterfv")) == NULL) || r;
-  r = ((glSamplerParameteri = (PFNGLSAMPLERPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glSamplerParameteri")) == NULL) || r;
-  r = ((glSamplerParameteriv = (PFNGLSAMPLERPARAMETERIVPROC)glewGetProcSubtractress((const GLubyte*)"glSamplerParameteriv")) == NULL) || r;
+  r = ((glBindSampler = (PFNGLBINDSAMPLERPROC)glewGetProcAddress((const GLubyte*)"glBindSampler")) == NULL) || r;
+  r = ((glDeleteSamplers = (PFNGLDELETESAMPLERSPROC)glewGetProcAddress((const GLubyte*)"glDeleteSamplers")) == NULL) || r;
+  r = ((glGenSamplers = (PFNGLGENSAMPLERSPROC)glewGetProcAddress((const GLubyte*)"glGenSamplers")) == NULL) || r;
+  r = ((glGetSamplerParameterIiv = (PFNGLGETSAMPLERPARAMETERIIVPROC)glewGetProcAddress((const GLubyte*)"glGetSamplerParameterIiv")) == NULL) || r;
+  r = ((glGetSamplerParameterIuiv = (PFNGLGETSAMPLERPARAMETERIUIVPROC)glewGetProcAddress((const GLubyte*)"glGetSamplerParameterIuiv")) == NULL) || r;
+  r = ((glGetSamplerParameterfv = (PFNGLGETSAMPLERPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glGetSamplerParameterfv")) == NULL) || r;
+  r = ((glGetSamplerParameteriv = (PFNGLGETSAMPLERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glGetSamplerParameteriv")) == NULL) || r;
+  r = ((glIsSampler = (PFNGLISSAMPLERPROC)glewGetProcAddress((const GLubyte*)"glIsSampler")) == NULL) || r;
+  r = ((glSamplerParameterIiv = (PFNGLSAMPLERPARAMETERIIVPROC)glewGetProcAddress((const GLubyte*)"glSamplerParameterIiv")) == NULL) || r;
+  r = ((glSamplerParameterIuiv = (PFNGLSAMPLERPARAMETERIUIVPROC)glewGetProcAddress((const GLubyte*)"glSamplerParameterIuiv")) == NULL) || r;
+  r = ((glSamplerParameterf = (PFNGLSAMPLERPARAMETERFPROC)glewGetProcAddress((const GLubyte*)"glSamplerParameterf")) == NULL) || r;
+  r = ((glSamplerParameterfv = (PFNGLSAMPLERPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glSamplerParameterfv")) == NULL) || r;
+  r = ((glSamplerParameteri = (PFNGLSAMPLERPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glSamplerParameteri")) == NULL) || r;
+  r = ((glSamplerParameteriv = (PFNGLSAMPLERPARAMETERIVPROC)glewGetProcAddress((const GLubyte*)"glSamplerParameteriv")) == NULL) || r;
 
   return r;
 }
@@ -11181,66 +11178,66 @@ static GLboolean _glewInit_GL_ARB_separate_shader_objects ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glActiveShaderProgram = (PFNGLACTIVESHADERPROGRAMPROC)glewGetProcSubtractress((const GLubyte*)"glActiveShaderProgram")) == NULL) || r;
-  r = ((glBindProgramPipeline = (PFNGLBINDPROGRAMPIPELINEPROC)glewGetProcSubtractress((const GLubyte*)"glBindProgramPipeline")) == NULL) || r;
-  r = ((glCreateShaderProgramv = (PFNGLCREATESHADERPROGRAMVPROC)glewGetProcSubtractress((const GLubyte*)"glCreateShaderProgramv")) == NULL) || r;
-  r = ((glDeleteProgramPipelines = (PFNGLDELETEPROGRAMPIPELINESPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteProgramPipelines")) == NULL) || r;
-  r = ((glGenProgramPipelines = (PFNGLGENPROGRAMPIPELINESPROC)glewGetProcSubtractress((const GLubyte*)"glGenProgramPipelines")) == NULL) || r;
-  r = ((glGetProgramPipelineInfoLog = (PFNGLGETPROGRAMPIPELINEINFOLOGPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramPipelineInfoLog")) == NULL) || r;
-  r = ((glGetProgramPipelineiv = (PFNGLGETPROGRAMPIPELINEIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramPipelineiv")) == NULL) || r;
-  r = ((glIsProgramPipeline = (PFNGLISPROGRAMPIPELINEPROC)glewGetProcSubtractress((const GLubyte*)"glIsProgramPipeline")) == NULL) || r;
-  r = ((glProgramUniform1d = (PFNGLPROGRAMUNIFORM1DPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1d")) == NULL) || r;
-  r = ((glProgramUniform1dv = (PFNGLPROGRAMUNIFORM1DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1dv")) == NULL) || r;
-  r = ((glProgramUniform1f = (PFNGLPROGRAMUNIFORM1FPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1f")) == NULL) || r;
-  r = ((glProgramUniform1fv = (PFNGLPROGRAMUNIFORM1FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1fv")) == NULL) || r;
-  r = ((glProgramUniform1i = (PFNGLPROGRAMUNIFORM1IPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1i")) == NULL) || r;
-  r = ((glProgramUniform1iv = (PFNGLPROGRAMUNIFORM1IVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1iv")) == NULL) || r;
-  r = ((glProgramUniform1ui = (PFNGLPROGRAMUNIFORM1UIPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1ui")) == NULL) || r;
-  r = ((glProgramUniform1uiv = (PFNGLPROGRAMUNIFORM1UIVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1uiv")) == NULL) || r;
-  r = ((glProgramUniform2d = (PFNGLPROGRAMUNIFORM2DPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2d")) == NULL) || r;
-  r = ((glProgramUniform2dv = (PFNGLPROGRAMUNIFORM2DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2dv")) == NULL) || r;
-  r = ((glProgramUniform2f = (PFNGLPROGRAMUNIFORM2FPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2f")) == NULL) || r;
-  r = ((glProgramUniform2fv = (PFNGLPROGRAMUNIFORM2FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2fv")) == NULL) || r;
-  r = ((glProgramUniform2i = (PFNGLPROGRAMUNIFORM2IPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2i")) == NULL) || r;
-  r = ((glProgramUniform2iv = (PFNGLPROGRAMUNIFORM2IVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2iv")) == NULL) || r;
-  r = ((glProgramUniform2ui = (PFNGLPROGRAMUNIFORM2UIPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2ui")) == NULL) || r;
-  r = ((glProgramUniform2uiv = (PFNGLPROGRAMUNIFORM2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2uiv")) == NULL) || r;
-  r = ((glProgramUniform3d = (PFNGLPROGRAMUNIFORM3DPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3d")) == NULL) || r;
-  r = ((glProgramUniform3dv = (PFNGLPROGRAMUNIFORM3DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3dv")) == NULL) || r;
-  r = ((glProgramUniform3f = (PFNGLPROGRAMUNIFORM3FPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3f")) == NULL) || r;
-  r = ((glProgramUniform3fv = (PFNGLPROGRAMUNIFORM3FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3fv")) == NULL) || r;
-  r = ((glProgramUniform3i = (PFNGLPROGRAMUNIFORM3IPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3i")) == NULL) || r;
-  r = ((glProgramUniform3iv = (PFNGLPROGRAMUNIFORM3IVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3iv")) == NULL) || r;
-  r = ((glProgramUniform3ui = (PFNGLPROGRAMUNIFORM3UIPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3ui")) == NULL) || r;
-  r = ((glProgramUniform3uiv = (PFNGLPROGRAMUNIFORM3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3uiv")) == NULL) || r;
-  r = ((glProgramUniform4d = (PFNGLPROGRAMUNIFORM4DPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4d")) == NULL) || r;
-  r = ((glProgramUniform4dv = (PFNGLPROGRAMUNIFORM4DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4dv")) == NULL) || r;
-  r = ((glProgramUniform4f = (PFNGLPROGRAMUNIFORM4FPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4f")) == NULL) || r;
-  r = ((glProgramUniform4fv = (PFNGLPROGRAMUNIFORM4FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4fv")) == NULL) || r;
-  r = ((glProgramUniform4i = (PFNGLPROGRAMUNIFORM4IPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4i")) == NULL) || r;
-  r = ((glProgramUniform4iv = (PFNGLPROGRAMUNIFORM4IVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4iv")) == NULL) || r;
-  r = ((glProgramUniform4ui = (PFNGLPROGRAMUNIFORM4UIPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4ui")) == NULL) || r;
-  r = ((glProgramUniform4uiv = (PFNGLPROGRAMUNIFORM4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4uiv")) == NULL) || r;
-  r = ((glProgramUniformMatrix2dv = (PFNGLPROGRAMUNIFORMMATRIX2DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix2fv = (PFNGLPROGRAMUNIFORMMATRIX2FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix2x3dv = (PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2x3dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix2x3fv = (PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2x3fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix2x4dv = (PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2x4dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix2x4fv = (PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2x4fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix3dv = (PFNGLPROGRAMUNIFORMMATRIX3DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix3fv = (PFNGLPROGRAMUNIFORMMATRIX3FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix3x2dv = (PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3x2dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix3x2fv = (PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3x2fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix3x4dv = (PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3x4dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix3x4fv = (PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3x4fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix4dv = (PFNGLPROGRAMUNIFORMMATRIX4DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix4fv = (PFNGLPROGRAMUNIFORMMATRIX4FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix4x2dv = (PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4x2dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix4x2fv = (PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4x2fv")) == NULL) || r;
-  r = ((glProgramUniformMatrix4x3dv = (PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4x3dv")) == NULL) || r;
-  r = ((glProgramUniformMatrix4x3fv = (PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4x3fv")) == NULL) || r;
-  r = ((glUseProgramStages = (PFNGLUSEPROGRAMSTAGESPROC)glewGetProcSubtractress((const GLubyte*)"glUseProgramStages")) == NULL) || r;
-  r = ((glValidateProgramPipeline = (PFNGLVALIDATEPROGRAMPIPELINEPROC)glewGetProcSubtractress((const GLubyte*)"glValidateProgramPipeline")) == NULL) || r;
+  r = ((glActiveShaderProgram = (PFNGLACTIVESHADERPROGRAMPROC)glewGetProcAddress((const GLubyte*)"glActiveShaderProgram")) == NULL) || r;
+  r = ((glBindProgramPipeline = (PFNGLBINDPROGRAMPIPELINEPROC)glewGetProcAddress((const GLubyte*)"glBindProgramPipeline")) == NULL) || r;
+  r = ((glCreateShaderProgramv = (PFNGLCREATESHADERPROGRAMVPROC)glewGetProcAddress((const GLubyte*)"glCreateShaderProgramv")) == NULL) || r;
+  r = ((glDeleteProgramPipelines = (PFNGLDELETEPROGRAMPIPELINESPROC)glewGetProcAddress((const GLubyte*)"glDeleteProgramPipelines")) == NULL) || r;
+  r = ((glGenProgramPipelines = (PFNGLGENPROGRAMPIPELINESPROC)glewGetProcAddress((const GLubyte*)"glGenProgramPipelines")) == NULL) || r;
+  r = ((glGetProgramPipelineInfoLog = (PFNGLGETPROGRAMPIPELINEINFOLOGPROC)glewGetProcAddress((const GLubyte*)"glGetProgramPipelineInfoLog")) == NULL) || r;
+  r = ((glGetProgramPipelineiv = (PFNGLGETPROGRAMPIPELINEIVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramPipelineiv")) == NULL) || r;
+  r = ((glIsProgramPipeline = (PFNGLISPROGRAMPIPELINEPROC)glewGetProcAddress((const GLubyte*)"glIsProgramPipeline")) == NULL) || r;
+  r = ((glProgramUniform1d = (PFNGLPROGRAMUNIFORM1DPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1d")) == NULL) || r;
+  r = ((glProgramUniform1dv = (PFNGLPROGRAMUNIFORM1DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1dv")) == NULL) || r;
+  r = ((glProgramUniform1f = (PFNGLPROGRAMUNIFORM1FPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1f")) == NULL) || r;
+  r = ((glProgramUniform1fv = (PFNGLPROGRAMUNIFORM1FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1fv")) == NULL) || r;
+  r = ((glProgramUniform1i = (PFNGLPROGRAMUNIFORM1IPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1i")) == NULL) || r;
+  r = ((glProgramUniform1iv = (PFNGLPROGRAMUNIFORM1IVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1iv")) == NULL) || r;
+  r = ((glProgramUniform1ui = (PFNGLPROGRAMUNIFORM1UIPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1ui")) == NULL) || r;
+  r = ((glProgramUniform1uiv = (PFNGLPROGRAMUNIFORM1UIVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1uiv")) == NULL) || r;
+  r = ((glProgramUniform2d = (PFNGLPROGRAMUNIFORM2DPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2d")) == NULL) || r;
+  r = ((glProgramUniform2dv = (PFNGLPROGRAMUNIFORM2DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2dv")) == NULL) || r;
+  r = ((glProgramUniform2f = (PFNGLPROGRAMUNIFORM2FPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2f")) == NULL) || r;
+  r = ((glProgramUniform2fv = (PFNGLPROGRAMUNIFORM2FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2fv")) == NULL) || r;
+  r = ((glProgramUniform2i = (PFNGLPROGRAMUNIFORM2IPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2i")) == NULL) || r;
+  r = ((glProgramUniform2iv = (PFNGLPROGRAMUNIFORM2IVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2iv")) == NULL) || r;
+  r = ((glProgramUniform2ui = (PFNGLPROGRAMUNIFORM2UIPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2ui")) == NULL) || r;
+  r = ((glProgramUniform2uiv = (PFNGLPROGRAMUNIFORM2UIVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2uiv")) == NULL) || r;
+  r = ((glProgramUniform3d = (PFNGLPROGRAMUNIFORM3DPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3d")) == NULL) || r;
+  r = ((glProgramUniform3dv = (PFNGLPROGRAMUNIFORM3DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3dv")) == NULL) || r;
+  r = ((glProgramUniform3f = (PFNGLPROGRAMUNIFORM3FPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3f")) == NULL) || r;
+  r = ((glProgramUniform3fv = (PFNGLPROGRAMUNIFORM3FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3fv")) == NULL) || r;
+  r = ((glProgramUniform3i = (PFNGLPROGRAMUNIFORM3IPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3i")) == NULL) || r;
+  r = ((glProgramUniform3iv = (PFNGLPROGRAMUNIFORM3IVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3iv")) == NULL) || r;
+  r = ((glProgramUniform3ui = (PFNGLPROGRAMUNIFORM3UIPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3ui")) == NULL) || r;
+  r = ((glProgramUniform3uiv = (PFNGLPROGRAMUNIFORM3UIVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3uiv")) == NULL) || r;
+  r = ((glProgramUniform4d = (PFNGLPROGRAMUNIFORM4DPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4d")) == NULL) || r;
+  r = ((glProgramUniform4dv = (PFNGLPROGRAMUNIFORM4DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4dv")) == NULL) || r;
+  r = ((glProgramUniform4f = (PFNGLPROGRAMUNIFORM4FPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4f")) == NULL) || r;
+  r = ((glProgramUniform4fv = (PFNGLPROGRAMUNIFORM4FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4fv")) == NULL) || r;
+  r = ((glProgramUniform4i = (PFNGLPROGRAMUNIFORM4IPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4i")) == NULL) || r;
+  r = ((glProgramUniform4iv = (PFNGLPROGRAMUNIFORM4IVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4iv")) == NULL) || r;
+  r = ((glProgramUniform4ui = (PFNGLPROGRAMUNIFORM4UIPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4ui")) == NULL) || r;
+  r = ((glProgramUniform4uiv = (PFNGLPROGRAMUNIFORM4UIVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4uiv")) == NULL) || r;
+  r = ((glProgramUniformMatrix2dv = (PFNGLPROGRAMUNIFORMMATRIX2DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix2fv = (PFNGLPROGRAMUNIFORMMATRIX2FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix2x3dv = (PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2x3dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix2x3fv = (PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2x3fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix2x4dv = (PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2x4dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix2x4fv = (PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2x4fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix3dv = (PFNGLPROGRAMUNIFORMMATRIX3DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix3fv = (PFNGLPROGRAMUNIFORMMATRIX3FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix3x2dv = (PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3x2dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix3x2fv = (PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3x2fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix3x4dv = (PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3x4dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix3x4fv = (PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3x4fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix4dv = (PFNGLPROGRAMUNIFORMMATRIX4DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix4fv = (PFNGLPROGRAMUNIFORMMATRIX4FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix4x2dv = (PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4x2dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix4x2fv = (PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4x2fv")) == NULL) || r;
+  r = ((glProgramUniformMatrix4x3dv = (PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4x3dv")) == NULL) || r;
+  r = ((glProgramUniformMatrix4x3fv = (PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4x3fv")) == NULL) || r;
+  r = ((glUseProgramStages = (PFNGLUSEPROGRAMSTAGESPROC)glewGetProcAddress((const GLubyte*)"glUseProgramStages")) == NULL) || r;
+  r = ((glValidateProgramPipeline = (PFNGLVALIDATEPROGRAMPIPELINEPROC)glewGetProcAddress((const GLubyte*)"glValidateProgramPipeline")) == NULL) || r;
 
   return r;
 }
@@ -11253,7 +11250,7 @@ static GLboolean _glewInit_GL_ARB_shader_atomic_counters ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetActiveAtomicCounterBufferiv = (PFNGLGETACTIVEATOMICCOUNTERBUFFERIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveAtomicCounterBufferiv")) == NULL) || r;
+  r = ((glGetActiveAtomicCounterBufferiv = (PFNGLGETACTIVEATOMICCOUNTERBUFFERIVPROC)glewGetProcAddress((const GLubyte*)"glGetActiveAtomicCounterBufferiv")) == NULL) || r;
 
   return r;
 }
@@ -11266,8 +11263,8 @@ static GLboolean _glewInit_GL_ARB_shader_image_load_store ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindImageTexture = (PFNGLBINDIMAGETEXTUREPROC)glewGetProcSubtractress((const GLubyte*)"glBindImageTexture")) == NULL) || r;
-  r = ((glMemoryBarrier = (PFNGLMEMORYBARRIERPROC)glewGetProcSubtractress((const GLubyte*)"glMemoryBarrier")) == NULL) || r;
+  r = ((glBindImageTexture = (PFNGLBINDIMAGETEXTUREPROC)glewGetProcAddress((const GLubyte*)"glBindImageTexture")) == NULL) || r;
+  r = ((glMemoryBarrier = (PFNGLMEMORYBARRIERPROC)glewGetProcAddress((const GLubyte*)"glMemoryBarrier")) == NULL) || r;
 
   return r;
 }
@@ -11280,45 +11277,45 @@ static GLboolean _glewInit_GL_ARB_shader_objects ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)glewGetProcSubtractress((const GLubyte*)"glAttachObjectARB")) == NULL) || r;
-  r = ((glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompileShaderARB")) == NULL) || r;
-  r = ((glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)glewGetProcSubtractress((const GLubyte*)"glCreateProgramObjectARB")) == NULL) || r;
-  r = ((glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)glewGetProcSubtractress((const GLubyte*)"glCreateShaderObjectARB")) == NULL) || r;
-  r = ((glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteObjectARB")) == NULL) || r;
-  r = ((glDetachObjectARB = (PFNGLDETACHOBJECTARBPROC)glewGetProcSubtractress((const GLubyte*)"glDetachObjectARB")) == NULL) || r;
-  r = ((glGetActiveUniformARB = (PFNGLGETACTIVEUNIFORMARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveUniformARB")) == NULL) || r;
-  r = ((glGetAttachedObjectsARB = (PFNGLGETATTACHEDOBJECTSARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetAttachedObjectsARB")) == NULL) || r;
-  r = ((glGetHandleARB = (PFNGLGETHANDLEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetHandleARB")) == NULL) || r;
-  r = ((glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetInfoLogARB")) == NULL) || r;
-  r = ((glGetObjectParameterfvARB = (PFNGLGETOBJECTPARAMETERFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectParameterfvARB")) == NULL) || r;
-  r = ((glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectParameterivARB")) == NULL) || r;
-  r = ((glGetShaderSourceARB = (PFNGLGETSHADERSOURCEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetShaderSourceARB")) == NULL) || r;
-  r = ((glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformLocationARB")) == NULL) || r;
-  r = ((glGetUniformfvARB = (PFNGLGETUNIFORMFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformfvARB")) == NULL) || r;
-  r = ((glGetUniformivARB = (PFNGLGETUNIFORMIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformivARB")) == NULL) || r;
-  r = ((glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)glewGetProcSubtractress((const GLubyte*)"glLinkProgramARB")) == NULL) || r;
-  r = ((glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)glewGetProcSubtractress((const GLubyte*)"glShaderSourceARB")) == NULL) || r;
-  r = ((glUniform1fARB = (PFNGLUNIFORM1FARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1fARB")) == NULL) || r;
-  r = ((glUniform1fvARB = (PFNGLUNIFORM1FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1fvARB")) == NULL) || r;
-  r = ((glUniform1iARB = (PFNGLUNIFORM1IARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1iARB")) == NULL) || r;
-  r = ((glUniform1ivARB = (PFNGLUNIFORM1IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1ivARB")) == NULL) || r;
-  r = ((glUniform2fARB = (PFNGLUNIFORM2FARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2fARB")) == NULL) || r;
-  r = ((glUniform2fvARB = (PFNGLUNIFORM2FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2fvARB")) == NULL) || r;
-  r = ((glUniform2iARB = (PFNGLUNIFORM2IARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2iARB")) == NULL) || r;
-  r = ((glUniform2ivARB = (PFNGLUNIFORM2IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2ivARB")) == NULL) || r;
-  r = ((glUniform3fARB = (PFNGLUNIFORM3FARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3fARB")) == NULL) || r;
-  r = ((glUniform3fvARB = (PFNGLUNIFORM3FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3fvARB")) == NULL) || r;
-  r = ((glUniform3iARB = (PFNGLUNIFORM3IARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3iARB")) == NULL) || r;
-  r = ((glUniform3ivARB = (PFNGLUNIFORM3IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3ivARB")) == NULL) || r;
-  r = ((glUniform4fARB = (PFNGLUNIFORM4FARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4fARB")) == NULL) || r;
-  r = ((glUniform4fvARB = (PFNGLUNIFORM4FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4fvARB")) == NULL) || r;
-  r = ((glUniform4iARB = (PFNGLUNIFORM4IARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4iARB")) == NULL) || r;
-  r = ((glUniform4ivARB = (PFNGLUNIFORM4IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4ivARB")) == NULL) || r;
-  r = ((glUniformMatrix2fvARB = (PFNGLUNIFORMMATRIX2FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2fvARB")) == NULL) || r;
-  r = ((glUniformMatrix3fvARB = (PFNGLUNIFORMMATRIX3FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3fvARB")) == NULL) || r;
-  r = ((glUniformMatrix4fvARB = (PFNGLUNIFORMMATRIX4FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4fvARB")) == NULL) || r;
-  r = ((glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)glewGetProcSubtractress((const GLubyte*)"glUseProgramObjectARB")) == NULL) || r;
-  r = ((glValidateProgramARB = (PFNGLVALIDATEPROGRAMARBPROC)glewGetProcSubtractress((const GLubyte*)"glValidateProgramARB")) == NULL) || r;
+  r = ((glAttachObjectARB = (PFNGLATTACHOBJECTARBPROC)glewGetProcAddress((const GLubyte*)"glAttachObjectARB")) == NULL) || r;
+  r = ((glCompileShaderARB = (PFNGLCOMPILESHADERARBPROC)glewGetProcAddress((const GLubyte*)"glCompileShaderARB")) == NULL) || r;
+  r = ((glCreateProgramObjectARB = (PFNGLCREATEPROGRAMOBJECTARBPROC)glewGetProcAddress((const GLubyte*)"glCreateProgramObjectARB")) == NULL) || r;
+  r = ((glCreateShaderObjectARB = (PFNGLCREATESHADEROBJECTARBPROC)glewGetProcAddress((const GLubyte*)"glCreateShaderObjectARB")) == NULL) || r;
+  r = ((glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)glewGetProcAddress((const GLubyte*)"glDeleteObjectARB")) == NULL) || r;
+  r = ((glDetachObjectARB = (PFNGLDETACHOBJECTARBPROC)glewGetProcAddress((const GLubyte*)"glDetachObjectARB")) == NULL) || r;
+  r = ((glGetActiveUniformARB = (PFNGLGETACTIVEUNIFORMARBPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniformARB")) == NULL) || r;
+  r = ((glGetAttachedObjectsARB = (PFNGLGETATTACHEDOBJECTSARBPROC)glewGetProcAddress((const GLubyte*)"glGetAttachedObjectsARB")) == NULL) || r;
+  r = ((glGetHandleARB = (PFNGLGETHANDLEARBPROC)glewGetProcAddress((const GLubyte*)"glGetHandleARB")) == NULL) || r;
+  r = ((glGetInfoLogARB = (PFNGLGETINFOLOGARBPROC)glewGetProcAddress((const GLubyte*)"glGetInfoLogARB")) == NULL) || r;
+  r = ((glGetObjectParameterfvARB = (PFNGLGETOBJECTPARAMETERFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetObjectParameterfvARB")) == NULL) || r;
+  r = ((glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetObjectParameterivARB")) == NULL) || r;
+  r = ((glGetShaderSourceARB = (PFNGLGETSHADERSOURCEARBPROC)glewGetProcAddress((const GLubyte*)"glGetShaderSourceARB")) == NULL) || r;
+  r = ((glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)glewGetProcAddress((const GLubyte*)"glGetUniformLocationARB")) == NULL) || r;
+  r = ((glGetUniformfvARB = (PFNGLGETUNIFORMFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetUniformfvARB")) == NULL) || r;
+  r = ((glGetUniformivARB = (PFNGLGETUNIFORMIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetUniformivARB")) == NULL) || r;
+  r = ((glLinkProgramARB = (PFNGLLINKPROGRAMARBPROC)glewGetProcAddress((const GLubyte*)"glLinkProgramARB")) == NULL) || r;
+  r = ((glShaderSourceARB = (PFNGLSHADERSOURCEARBPROC)glewGetProcAddress((const GLubyte*)"glShaderSourceARB")) == NULL) || r;
+  r = ((glUniform1fARB = (PFNGLUNIFORM1FARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1fARB")) == NULL) || r;
+  r = ((glUniform1fvARB = (PFNGLUNIFORM1FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1fvARB")) == NULL) || r;
+  r = ((glUniform1iARB = (PFNGLUNIFORM1IARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1iARB")) == NULL) || r;
+  r = ((glUniform1ivARB = (PFNGLUNIFORM1IVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform1ivARB")) == NULL) || r;
+  r = ((glUniform2fARB = (PFNGLUNIFORM2FARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2fARB")) == NULL) || r;
+  r = ((glUniform2fvARB = (PFNGLUNIFORM2FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2fvARB")) == NULL) || r;
+  r = ((glUniform2iARB = (PFNGLUNIFORM2IARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2iARB")) == NULL) || r;
+  r = ((glUniform2ivARB = (PFNGLUNIFORM2IVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform2ivARB")) == NULL) || r;
+  r = ((glUniform3fARB = (PFNGLUNIFORM3FARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3fARB")) == NULL) || r;
+  r = ((glUniform3fvARB = (PFNGLUNIFORM3FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3fvARB")) == NULL) || r;
+  r = ((glUniform3iARB = (PFNGLUNIFORM3IARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3iARB")) == NULL) || r;
+  r = ((glUniform3ivARB = (PFNGLUNIFORM3IVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform3ivARB")) == NULL) || r;
+  r = ((glUniform4fARB = (PFNGLUNIFORM4FARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4fARB")) == NULL) || r;
+  r = ((glUniform4fvARB = (PFNGLUNIFORM4FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4fvARB")) == NULL) || r;
+  r = ((glUniform4iARB = (PFNGLUNIFORM4IARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4iARB")) == NULL) || r;
+  r = ((glUniform4ivARB = (PFNGLUNIFORM4IVARBPROC)glewGetProcAddress((const GLubyte*)"glUniform4ivARB")) == NULL) || r;
+  r = ((glUniformMatrix2fvARB = (PFNGLUNIFORMMATRIX2FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2fvARB")) == NULL) || r;
+  r = ((glUniformMatrix3fvARB = (PFNGLUNIFORMMATRIX3FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3fvARB")) == NULL) || r;
+  r = ((glUniformMatrix4fvARB = (PFNGLUNIFORMMATRIX4FVARBPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4fvARB")) == NULL) || r;
+  r = ((glUseProgramObjectARB = (PFNGLUSEPROGRAMOBJECTARBPROC)glewGetProcAddress((const GLubyte*)"glUseProgramObjectARB")) == NULL) || r;
+  r = ((glValidateProgramARB = (PFNGLVALIDATEPROGRAMARBPROC)glewGetProcAddress((const GLubyte*)"glValidateProgramARB")) == NULL) || r;
 
   return r;
 }
@@ -11331,7 +11328,7 @@ static GLboolean _glewInit_GL_ARB_shader_storage_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glShaderStorageBlockBinding = (PFNGLSHADERSTORAGEBLOCKBINDINGPROC)glewGetProcSubtractress((const GLubyte*)"glShaderStorageBlockBinding")) == NULL) || r;
+  r = ((glShaderStorageBlockBinding = (PFNGLSHADERSTORAGEBLOCKBINDINGPROC)glewGetProcAddress((const GLubyte*)"glShaderStorageBlockBinding")) == NULL) || r;
 
   return r;
 }
@@ -11344,14 +11341,14 @@ static GLboolean _glewInit_GL_ARB_shader_subroutine ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetActiveSubroutineName = (PFNGLGETACTIVESUBROUTINENAMEPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveSubroutineName")) == NULL) || r;
-  r = ((glGetActiveSubroutineUniformName = (PFNGLGETACTIVESUBROUTINEUNIFORMNAMEPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveSubroutineUniformName")) == NULL) || r;
-  r = ((glGetActiveSubroutineUniformiv = (PFNGLGETACTIVESUBROUTINEUNIFORMIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveSubroutineUniformiv")) == NULL) || r;
-  r = ((glGetProgramStageiv = (PFNGLGETPROGRAMSTAGEIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramStageiv")) == NULL) || r;
-  r = ((glGetSubroutineIndex = (PFNGLGETSUBROUTINEINDEXPROC)glewGetProcSubtractress((const GLubyte*)"glGetSubroutineIndex")) == NULL) || r;
-  r = ((glGetSubroutineUniformLocation = (PFNGLGETSUBROUTINEUNIFORMLOCATIONPROC)glewGetProcSubtractress((const GLubyte*)"glGetSubroutineUniformLocation")) == NULL) || r;
-  r = ((glGetUniformSubroutineuiv = (PFNGLGETUNIFORMSUBROUTINEUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformSubroutineuiv")) == NULL) || r;
-  r = ((glUniformSubroutinesuiv = (PFNGLUNIFORMSUBROUTINESUIVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformSubroutinesuiv")) == NULL) || r;
+  r = ((glGetActiveSubroutineName = (PFNGLGETACTIVESUBROUTINENAMEPROC)glewGetProcAddress((const GLubyte*)"glGetActiveSubroutineName")) == NULL) || r;
+  r = ((glGetActiveSubroutineUniformName = (PFNGLGETACTIVESUBROUTINEUNIFORMNAMEPROC)glewGetProcAddress((const GLubyte*)"glGetActiveSubroutineUniformName")) == NULL) || r;
+  r = ((glGetActiveSubroutineUniformiv = (PFNGLGETACTIVESUBROUTINEUNIFORMIVPROC)glewGetProcAddress((const GLubyte*)"glGetActiveSubroutineUniformiv")) == NULL) || r;
+  r = ((glGetProgramStageiv = (PFNGLGETPROGRAMSTAGEIVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramStageiv")) == NULL) || r;
+  r = ((glGetSubroutineIndex = (PFNGLGETSUBROUTINEINDEXPROC)glewGetProcAddress((const GLubyte*)"glGetSubroutineIndex")) == NULL) || r;
+  r = ((glGetSubroutineUniformLocation = (PFNGLGETSUBROUTINEUNIFORMLOCATIONPROC)glewGetProcAddress((const GLubyte*)"glGetSubroutineUniformLocation")) == NULL) || r;
+  r = ((glGetUniformSubroutineuiv = (PFNGLGETUNIFORMSUBROUTINEUIVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformSubroutineuiv")) == NULL) || r;
+  r = ((glUniformSubroutinesuiv = (PFNGLUNIFORMSUBROUTINESUIVPROC)glewGetProcAddress((const GLubyte*)"glUniformSubroutinesuiv")) == NULL) || r;
 
   return r;
 }
@@ -11364,12 +11361,12 @@ static GLboolean _glewInit_GL_ARB_shading_language_include ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCompileShaderIncludeARB = (PFNGLCOMPILESHADERINCLUDEARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompileShaderIncludeARB")) == NULL) || r;
-  r = ((glDeleteNamedStringARB = (PFNGLDELETENAMEDSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteNamedStringARB")) == NULL) || r;
-  r = ((glGetNamedStringARB = (PFNGLGETNAMEDSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedStringARB")) == NULL) || r;
-  r = ((glGetNamedStringivARB = (PFNGLGETNAMEDSTRINGIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedStringivARB")) == NULL) || r;
-  r = ((glIsNamedStringARB = (PFNGLISNAMEDSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glIsNamedStringARB")) == NULL) || r;
-  r = ((glNamedStringARB = (PFNGLNAMEDSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glNamedStringARB")) == NULL) || r;
+  r = ((glCompileShaderIncludeARB = (PFNGLCOMPILESHADERINCLUDEARBPROC)glewGetProcAddress((const GLubyte*)"glCompileShaderIncludeARB")) == NULL) || r;
+  r = ((glDeleteNamedStringARB = (PFNGLDELETENAMEDSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"glDeleteNamedStringARB")) == NULL) || r;
+  r = ((glGetNamedStringARB = (PFNGLGETNAMEDSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"glGetNamedStringARB")) == NULL) || r;
+  r = ((glGetNamedStringivARB = (PFNGLGETNAMEDSTRINGIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetNamedStringivARB")) == NULL) || r;
+  r = ((glIsNamedStringARB = (PFNGLISNAMEDSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"glIsNamedStringARB")) == NULL) || r;
+  r = ((glNamedStringARB = (PFNGLNAMEDSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"glNamedStringARB")) == NULL) || r;
 
   return r;
 }
@@ -11382,7 +11379,7 @@ static GLboolean _glewInit_GL_ARB_sparse_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferPageCommitmentARB = (PFNGLBUFFERPAGECOMMITMENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glBufferPageCommitmentARB")) == NULL) || r;
+  r = ((glBufferPageCommitmentARB = (PFNGLBUFFERPAGECOMMITMENTARBPROC)glewGetProcAddress((const GLubyte*)"glBufferPageCommitmentARB")) == NULL) || r;
 
   return r;
 }
@@ -11395,7 +11392,7 @@ static GLboolean _glewInit_GL_ARB_sparse_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexPageCommitmentARB = (PFNGLTEXPAGECOMMITMENTARBPROC)glewGetProcSubtractress((const GLubyte*)"glTexPageCommitmentARB")) == NULL) || r;
+  r = ((glTexPageCommitmentARB = (PFNGLTEXPAGECOMMITMENTARBPROC)glewGetProcAddress((const GLubyte*)"glTexPageCommitmentARB")) == NULL) || r;
 
   return r;
 }
@@ -11408,13 +11405,13 @@ static GLboolean _glewInit_GL_ARB_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClientWaitSync = (PFNGLCLIENTWAITSYNCPROC)glewGetProcSubtractress((const GLubyte*)"glClientWaitSync")) == NULL) || r;
-  r = ((glDeleteSync = (PFNGLDELETESYNCPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteSync")) == NULL) || r;
-  r = ((glFenceSync = (PFNGLFENCESYNCPROC)glewGetProcSubtractress((const GLubyte*)"glFenceSync")) == NULL) || r;
-  r = ((glGetInteger64v = (PFNGLGETINTEGER64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetInteger64v")) == NULL) || r;
-  r = ((glGetSynciv = (PFNGLGETSYNCIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetSynciv")) == NULL) || r;
-  r = ((glIsSync = (PFNGLISSYNCPROC)glewGetProcSubtractress((const GLubyte*)"glIsSync")) == NULL) || r;
-  r = ((glWaitSync = (PFNGLWAITSYNCPROC)glewGetProcSubtractress((const GLubyte*)"glWaitSync")) == NULL) || r;
+  r = ((glClientWaitSync = (PFNGLCLIENTWAITSYNCPROC)glewGetProcAddress((const GLubyte*)"glClientWaitSync")) == NULL) || r;
+  r = ((glDeleteSync = (PFNGLDELETESYNCPROC)glewGetProcAddress((const GLubyte*)"glDeleteSync")) == NULL) || r;
+  r = ((glFenceSync = (PFNGLFENCESYNCPROC)glewGetProcAddress((const GLubyte*)"glFenceSync")) == NULL) || r;
+  r = ((glGetInteger64v = (PFNGLGETINTEGER64VPROC)glewGetProcAddress((const GLubyte*)"glGetInteger64v")) == NULL) || r;
+  r = ((glGetSynciv = (PFNGLGETSYNCIVPROC)glewGetProcAddress((const GLubyte*)"glGetSynciv")) == NULL) || r;
+  r = ((glIsSync = (PFNGLISSYNCPROC)glewGetProcAddress((const GLubyte*)"glIsSync")) == NULL) || r;
+  r = ((glWaitSync = (PFNGLWAITSYNCPROC)glewGetProcAddress((const GLubyte*)"glWaitSync")) == NULL) || r;
 
   return r;
 }
@@ -11427,8 +11424,8 @@ static GLboolean _glewInit_GL_ARB_tessellation_shader ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPatchParameterfv = (PFNGLPATCHPARAMETERFVPROC)glewGetProcSubtractress((const GLubyte*)"glPatchParameterfv")) == NULL) || r;
-  r = ((glPatchParameteri = (PFNGLPATCHPARAMETERIPROC)glewGetProcSubtractress((const GLubyte*)"glPatchParameteri")) == NULL) || r;
+  r = ((glPatchParameterfv = (PFNGLPATCHPARAMETERFVPROC)glewGetProcAddress((const GLubyte*)"glPatchParameterfv")) == NULL) || r;
+  r = ((glPatchParameteri = (PFNGLPATCHPARAMETERIPROC)glewGetProcAddress((const GLubyte*)"glPatchParameteri")) == NULL) || r;
 
   return r;
 }
@@ -11441,7 +11438,7 @@ static GLboolean _glewInit_GL_ARB_texture_barrier ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTextureBarrier = (PFNGLTEXTUREBARRIERPROC)glewGetProcSubtractress((const GLubyte*)"glTextureBarrier")) == NULL) || r;
+  r = ((glTextureBarrier = (PFNGLTEXTUREBARRIERPROC)glewGetProcAddress((const GLubyte*)"glTextureBarrier")) == NULL) || r;
 
   return r;
 }
@@ -11454,7 +11451,7 @@ static GLboolean _glewInit_GL_ARB_texture_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexBufferARB = (PFNGLTEXBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"glTexBufferARB")) == NULL) || r;
+  r = ((glTexBufferARB = (PFNGLTEXBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"glTexBufferARB")) == NULL) || r;
 
   return r;
 }
@@ -11467,8 +11464,8 @@ static GLboolean _glewInit_GL_ARB_texture_buffer_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexBufferRange = (PFNGLTEXBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glTexBufferRange")) == NULL) || r;
-  r = ((glTextureBufferRangeEXT = (PFNGLTEXTUREBUFFERRANGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureBufferRangeEXT")) == NULL) || r;
+  r = ((glTexBufferRange = (PFNGLTEXBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glTexBufferRange")) == NULL) || r;
+  r = ((glTextureBufferRangeEXT = (PFNGLTEXTUREBUFFERRANGEEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureBufferRangeEXT")) == NULL) || r;
 
   return r;
 }
@@ -11481,13 +11478,13 @@ static GLboolean _glewInit_GL_ARB_texture_compression ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCompressedTexImage1DARB = (PFNGLCOMPRESSEDTEXIMAGE1DARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage1DARB")) == NULL) || r;
-  r = ((glCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage2DARB")) == NULL) || r;
-  r = ((glCompressedTexImage3DARB = (PFNGLCOMPRESSEDTEXIMAGE3DARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage3DARB")) == NULL) || r;
-  r = ((glCompressedTexSubImage1DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage1DARB")) == NULL) || r;
-  r = ((glCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage2DARB")) == NULL) || r;
-  r = ((glCompressedTexSubImage3DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE3DARBPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage3DARB")) == NULL) || r;
-  r = ((glGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetCompressedTexImageARB")) == NULL) || r;
+  r = ((glCompressedTexImage1DARB = (PFNGLCOMPRESSEDTEXIMAGE1DARBPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage1DARB")) == NULL) || r;
+  r = ((glCompressedTexImage2DARB = (PFNGLCOMPRESSEDTEXIMAGE2DARBPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage2DARB")) == NULL) || r;
+  r = ((glCompressedTexImage3DARB = (PFNGLCOMPRESSEDTEXIMAGE3DARBPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage3DARB")) == NULL) || r;
+  r = ((glCompressedTexSubImage1DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage1DARB")) == NULL) || r;
+  r = ((glCompressedTexSubImage2DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage2DARB")) == NULL) || r;
+  r = ((glCompressedTexSubImage3DARB = (PFNGLCOMPRESSEDTEXSUBIMAGE3DARBPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage3DARB")) == NULL) || r;
+  r = ((glGetCompressedTexImageARB = (PFNGLGETCOMPRESSEDTEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"glGetCompressedTexImageARB")) == NULL) || r;
 
   return r;
 }
@@ -11500,10 +11497,10 @@ static GLboolean _glewInit_GL_ARB_texture_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetMultisamplefv = (PFNGLGETMULTISAMPLEFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultisamplefv")) == NULL) || r;
-  r = ((glSampleMaski = (PFNGLSAMPLEMASKIPROC)glewGetProcSubtractress((const GLubyte*)"glSampleMaski")) == NULL) || r;
-  r = ((glTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage2DMultisample")) == NULL) || r;
-  r = ((glTexImage3DMultisample = (PFNGLTEXIMAGE3DMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage3DMultisample")) == NULL) || r;
+  r = ((glGetMultisamplefv = (PFNGLGETMULTISAMPLEFVPROC)glewGetProcAddress((const GLubyte*)"glGetMultisamplefv")) == NULL) || r;
+  r = ((glSampleMaski = (PFNGLSAMPLEMASKIPROC)glewGetProcAddress((const GLubyte*)"glSampleMaski")) == NULL) || r;
+  r = ((glTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glTexImage2DMultisample")) == NULL) || r;
+  r = ((glTexImage3DMultisample = (PFNGLTEXIMAGE3DMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glTexImage3DMultisample")) == NULL) || r;
 
   return r;
 }
@@ -11516,9 +11513,9 @@ static GLboolean _glewInit_GL_ARB_texture_storage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexStorage1D = (PFNGLTEXSTORAGE1DPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage1D")) == NULL) || r;
-  r = ((glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage2D")) == NULL) || r;
-  r = ((glTexStorage3D = (PFNGLTEXSTORAGE3DPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage3D")) == NULL) || r;
+  r = ((glTexStorage1D = (PFNGLTEXSTORAGE1DPROC)glewGetProcAddress((const GLubyte*)"glTexStorage1D")) == NULL) || r;
+  r = ((glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)glewGetProcAddress((const GLubyte*)"glTexStorage2D")) == NULL) || r;
+  r = ((glTexStorage3D = (PFNGLTEXSTORAGE3DPROC)glewGetProcAddress((const GLubyte*)"glTexStorage3D")) == NULL) || r;
 
   return r;
 }
@@ -11531,10 +11528,10 @@ static GLboolean _glewInit_GL_ARB_texture_storage_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexStorage2DMultisample = (PFNGLTEXSTORAGE2DMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage2DMultisample")) == NULL) || r;
-  r = ((glTexStorage3DMultisample = (PFNGLTEXSTORAGE3DMULTISAMPLEPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage3DMultisample")) == NULL) || r;
-  r = ((glTextureStorage2DMultisampleEXT = (PFNGLTEXTURESTORAGE2DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage2DMultisampleEXT")) == NULL) || r;
-  r = ((glTextureStorage3DMultisampleEXT = (PFNGLTEXTURESTORAGE3DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage3DMultisampleEXT")) == NULL) || r;
+  r = ((glTexStorage2DMultisample = (PFNGLTEXSTORAGE2DMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glTexStorage2DMultisample")) == NULL) || r;
+  r = ((glTexStorage3DMultisample = (PFNGLTEXSTORAGE3DMULTISAMPLEPROC)glewGetProcAddress((const GLubyte*)"glTexStorage3DMultisample")) == NULL) || r;
+  r = ((glTextureStorage2DMultisampleEXT = (PFNGLTEXTURESTORAGE2DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage2DMultisampleEXT")) == NULL) || r;
+  r = ((glTextureStorage3DMultisampleEXT = (PFNGLTEXTURESTORAGE3DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage3DMultisampleEXT")) == NULL) || r;
 
   return r;
 }
@@ -11547,7 +11544,7 @@ static GLboolean _glewInit_GL_ARB_texture_view ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTextureView = (PFNGLTEXTUREVIEWPROC)glewGetProcSubtractress((const GLubyte*)"glTextureView")) == NULL) || r;
+  r = ((glTextureView = (PFNGLTEXTUREVIEWPROC)glewGetProcAddress((const GLubyte*)"glTextureView")) == NULL) || r;
 
   return r;
 }
@@ -11560,9 +11557,9 @@ static GLboolean _glewInit_GL_ARB_timer_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetQueryObjecti64v = (PFNGLGETQUERYOBJECTI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjecti64v")) == NULL) || r;
-  r = ((glGetQueryObjectui64v = (PFNGLGETQUERYOBJECTUI64VPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectui64v")) == NULL) || r;
-  r = ((glQueryCounter = (PFNGLQUERYCOUNTERPROC)glewGetProcSubtractress((const GLubyte*)"glQueryCounter")) == NULL) || r;
+  r = ((glGetQueryObjecti64v = (PFNGLGETQUERYOBJECTI64VPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjecti64v")) == NULL) || r;
+  r = ((glGetQueryObjectui64v = (PFNGLGETQUERYOBJECTUI64VPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectui64v")) == NULL) || r;
+  r = ((glQueryCounter = (PFNGLQUERYCOUNTERPROC)glewGetProcAddress((const GLubyte*)"glQueryCounter")) == NULL) || r;
 
   return r;
 }
@@ -11575,13 +11572,13 @@ static GLboolean _glewInit_GL_ARB_transform_feedback2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindTransformFeedback = (PFNGLBINDTRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glBindTransformFeedback")) == NULL) || r;
-  r = ((glDeleteTransformFeedbacks = (PFNGLDELETETRANSFORMFEEDBACKSPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteTransformFeedbacks")) == NULL) || r;
-  r = ((glDrawTransformFeedback = (PFNGLDRAWTRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glDrawTransformFeedback")) == NULL) || r;
-  r = ((glGenTransformFeedbacks = (PFNGLGENTRANSFORMFEEDBACKSPROC)glewGetProcSubtractress((const GLubyte*)"glGenTransformFeedbacks")) == NULL) || r;
-  r = ((glIsTransformFeedback = (PFNGLISTRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glIsTransformFeedback")) == NULL) || r;
-  r = ((glPauseTransformFeedback = (PFNGLPAUSETRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glPauseTransformFeedback")) == NULL) || r;
-  r = ((glResumeTransformFeedback = (PFNGLRESUMETRANSFORMFEEDBACKPROC)glewGetProcSubtractress((const GLubyte*)"glResumeTransformFeedback")) == NULL) || r;
+  r = ((glBindTransformFeedback = (PFNGLBINDTRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glBindTransformFeedback")) == NULL) || r;
+  r = ((glDeleteTransformFeedbacks = (PFNGLDELETETRANSFORMFEEDBACKSPROC)glewGetProcAddress((const GLubyte*)"glDeleteTransformFeedbacks")) == NULL) || r;
+  r = ((glDrawTransformFeedback = (PFNGLDRAWTRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glDrawTransformFeedback")) == NULL) || r;
+  r = ((glGenTransformFeedbacks = (PFNGLGENTRANSFORMFEEDBACKSPROC)glewGetProcAddress((const GLubyte*)"glGenTransformFeedbacks")) == NULL) || r;
+  r = ((glIsTransformFeedback = (PFNGLISTRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glIsTransformFeedback")) == NULL) || r;
+  r = ((glPauseTransformFeedback = (PFNGLPAUSETRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glPauseTransformFeedback")) == NULL) || r;
+  r = ((glResumeTransformFeedback = (PFNGLRESUMETRANSFORMFEEDBACKPROC)glewGetProcAddress((const GLubyte*)"glResumeTransformFeedback")) == NULL) || r;
 
   return r;
 }
@@ -11594,10 +11591,10 @@ static GLboolean _glewInit_GL_ARB_transform_feedback3 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginQueryIndexed = (PFNGLBEGINQUERYINDEXEDPROC)glewGetProcSubtractress((const GLubyte*)"glBeginQueryIndexed")) == NULL) || r;
-  r = ((glDrawTransformFeedbackStream = (PFNGLDRAWTRANSFORMFEEDBACKSTREAMPROC)glewGetProcSubtractress((const GLubyte*)"glDrawTransformFeedbackStream")) == NULL) || r;
-  r = ((glEndQueryIndexed = (PFNGLENDQUERYINDEXEDPROC)glewGetProcSubtractress((const GLubyte*)"glEndQueryIndexed")) == NULL) || r;
-  r = ((glGetQueryIndexediv = (PFNGLGETQUERYINDEXEDIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryIndexediv")) == NULL) || r;
+  r = ((glBeginQueryIndexed = (PFNGLBEGINQUERYINDEXEDPROC)glewGetProcAddress((const GLubyte*)"glBeginQueryIndexed")) == NULL) || r;
+  r = ((glDrawTransformFeedbackStream = (PFNGLDRAWTRANSFORMFEEDBACKSTREAMPROC)glewGetProcAddress((const GLubyte*)"glDrawTransformFeedbackStream")) == NULL) || r;
+  r = ((glEndQueryIndexed = (PFNGLENDQUERYINDEXEDPROC)glewGetProcAddress((const GLubyte*)"glEndQueryIndexed")) == NULL) || r;
+  r = ((glGetQueryIndexediv = (PFNGLGETQUERYINDEXEDIVPROC)glewGetProcAddress((const GLubyte*)"glGetQueryIndexediv")) == NULL) || r;
 
   return r;
 }
@@ -11610,8 +11607,8 @@ static GLboolean _glewInit_GL_ARB_transform_feedback_instanced ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawTransformFeedbackInstanced = (PFNGLDRAWTRANSFORMFEEDBACKINSTANCEDPROC)glewGetProcSubtractress((const GLubyte*)"glDrawTransformFeedbackInstanced")) == NULL) || r;
-  r = ((glDrawTransformFeedbackStreamInstanced = (PFNGLDRAWTRANSFORMFEEDBACKSTREAMINSTANCEDPROC)glewGetProcSubtractress((const GLubyte*)"glDrawTransformFeedbackStreamInstanced")) == NULL) || r;
+  r = ((glDrawTransformFeedbackInstanced = (PFNGLDRAWTRANSFORMFEEDBACKINSTANCEDPROC)glewGetProcAddress((const GLubyte*)"glDrawTransformFeedbackInstanced")) == NULL) || r;
+  r = ((glDrawTransformFeedbackStreamInstanced = (PFNGLDRAWTRANSFORMFEEDBACKSTREAMINSTANCEDPROC)glewGetProcAddress((const GLubyte*)"glDrawTransformFeedbackStreamInstanced")) == NULL) || r;
 
   return r;
 }
@@ -11624,10 +11621,10 @@ static GLboolean _glewInit_GL_ARB_transpose_matrix ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glLoadTransposeMatrixdARB = (PFNGLLOADTRANSPOSEMATRIXDARBPROC)glewGetProcSubtractress((const GLubyte*)"glLoadTransposeMatrixdARB")) == NULL) || r;
-  r = ((glLoadTransposeMatrixfARB = (PFNGLLOADTRANSPOSEMATRIXFARBPROC)glewGetProcSubtractress((const GLubyte*)"glLoadTransposeMatrixfARB")) == NULL) || r;
-  r = ((glMultTransposeMatrixdARB = (PFNGLMULTTRANSPOSEMATRIXDARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultTransposeMatrixdARB")) == NULL) || r;
-  r = ((glMultTransposeMatrixfARB = (PFNGLMULTTRANSPOSEMATRIXFARBPROC)glewGetProcSubtractress((const GLubyte*)"glMultTransposeMatrixfARB")) == NULL) || r;
+  r = ((glLoadTransposeMatrixdARB = (PFNGLLOADTRANSPOSEMATRIXDARBPROC)glewGetProcAddress((const GLubyte*)"glLoadTransposeMatrixdARB")) == NULL) || r;
+  r = ((glLoadTransposeMatrixfARB = (PFNGLLOADTRANSPOSEMATRIXFARBPROC)glewGetProcAddress((const GLubyte*)"glLoadTransposeMatrixfARB")) == NULL) || r;
+  r = ((glMultTransposeMatrixdARB = (PFNGLMULTTRANSPOSEMATRIXDARBPROC)glewGetProcAddress((const GLubyte*)"glMultTransposeMatrixdARB")) == NULL) || r;
+  r = ((glMultTransposeMatrixfARB = (PFNGLMULTTRANSPOSEMATRIXFARBPROC)glewGetProcAddress((const GLubyte*)"glMultTransposeMatrixfARB")) == NULL) || r;
 
   return r;
 }
@@ -11640,16 +11637,16 @@ static GLboolean _glewInit_GL_ARB_uniform_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferBase")) == NULL) || r;
-  r = ((glBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferRange")) == NULL) || r;
-  r = ((glGetActiveUniformBlockName = (PFNGLGETACTIVEUNIFORMBLOCKNAMEPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveUniformBlockName")) == NULL) || r;
-  r = ((glGetActiveUniformBlockiv = (PFNGLGETACTIVEUNIFORMBLOCKIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveUniformBlockiv")) == NULL) || r;
-  r = ((glGetActiveUniformName = (PFNGLGETACTIVEUNIFORMNAMEPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveUniformName")) == NULL) || r;
-  r = ((glGetActiveUniformsiv = (PFNGLGETACTIVEUNIFORMSIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveUniformsiv")) == NULL) || r;
-  r = ((glGetIntegeri_v = (PFNGLGETINTEGERI_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetIntegeri_v")) == NULL) || r;
-  r = ((glGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformBlockIndex")) == NULL) || r;
-  r = ((glGetUniformIndices = (PFNGLGETUNIFORMINDICESPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformIndices")) == NULL) || r;
-  r = ((glUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)glewGetProcSubtractress((const GLubyte*)"glUniformBlockBinding")) == NULL) || r;
+  r = ((glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)glewGetProcAddress((const GLubyte*)"glBindBufferBase")) == NULL) || r;
+  r = ((glBindBufferRange = (PFNGLBINDBUFFERRANGEPROC)glewGetProcAddress((const GLubyte*)"glBindBufferRange")) == NULL) || r;
+  r = ((glGetActiveUniformBlockName = (PFNGLGETACTIVEUNIFORMBLOCKNAMEPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniformBlockName")) == NULL) || r;
+  r = ((glGetActiveUniformBlockiv = (PFNGLGETACTIVEUNIFORMBLOCKIVPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniformBlockiv")) == NULL) || r;
+  r = ((glGetActiveUniformName = (PFNGLGETACTIVEUNIFORMNAMEPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniformName")) == NULL) || r;
+  r = ((glGetActiveUniformsiv = (PFNGLGETACTIVEUNIFORMSIVPROC)glewGetProcAddress((const GLubyte*)"glGetActiveUniformsiv")) == NULL) || r;
+  r = ((glGetIntegeri_v = (PFNGLGETINTEGERI_VPROC)glewGetProcAddress((const GLubyte*)"glGetIntegeri_v")) == NULL) || r;
+  r = ((glGetUniformBlockIndex = (PFNGLGETUNIFORMBLOCKINDEXPROC)glewGetProcAddress((const GLubyte*)"glGetUniformBlockIndex")) == NULL) || r;
+  r = ((glGetUniformIndices = (PFNGLGETUNIFORMINDICESPROC)glewGetProcAddress((const GLubyte*)"glGetUniformIndices")) == NULL) || r;
+  r = ((glUniformBlockBinding = (PFNGLUNIFORMBLOCKBINDINGPROC)glewGetProcAddress((const GLubyte*)"glUniformBlockBinding")) == NULL) || r;
 
   return r;
 }
@@ -11662,10 +11659,10 @@ static GLboolean _glewInit_GL_ARB_vertex_array_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)glewGetProcSubtractress((const GLubyte*)"glBindVertexArray")) == NULL) || r;
-  r = ((glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteVertexArrays")) == NULL) || r;
-  r = ((glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)glewGetProcSubtractress((const GLubyte*)"glGenVertexArrays")) == NULL) || r;
-  r = ((glIsVertexArray = (PFNGLISVERTEXARRAYPROC)glewGetProcSubtractress((const GLubyte*)"glIsVertexArray")) == NULL) || r;
+  r = ((glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)glewGetProcAddress((const GLubyte*)"glBindVertexArray")) == NULL) || r;
+  r = ((glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)glewGetProcAddress((const GLubyte*)"glDeleteVertexArrays")) == NULL) || r;
+  r = ((glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)glewGetProcAddress((const GLubyte*)"glGenVertexArrays")) == NULL) || r;
+  r = ((glIsVertexArray = (PFNGLISVERTEXARRAYPROC)glewGetProcAddress((const GLubyte*)"glIsVertexArray")) == NULL) || r;
 
   return r;
 }
@@ -11678,16 +11675,16 @@ static GLboolean _glewInit_GL_ARB_vertex_attrib_64bit ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetVertexAttribLdv = (PFNGLGETVERTEXATTRIBLDVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribLdv")) == NULL) || r;
-  r = ((glVertexAttribL1d = (PFNGLVERTEXATTRIBL1DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1d")) == NULL) || r;
-  r = ((glVertexAttribL1dv = (PFNGLVERTEXATTRIBL1DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1dv")) == NULL) || r;
-  r = ((glVertexAttribL2d = (PFNGLVERTEXATTRIBL2DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2d")) == NULL) || r;
-  r = ((glVertexAttribL2dv = (PFNGLVERTEXATTRIBL2DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2dv")) == NULL) || r;
-  r = ((glVertexAttribL3d = (PFNGLVERTEXATTRIBL3DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3d")) == NULL) || r;
-  r = ((glVertexAttribL3dv = (PFNGLVERTEXATTRIBL3DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3dv")) == NULL) || r;
-  r = ((glVertexAttribL4d = (PFNGLVERTEXATTRIBL4DPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4d")) == NULL) || r;
-  r = ((glVertexAttribL4dv = (PFNGLVERTEXATTRIBL4DVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4dv")) == NULL) || r;
-  r = ((glVertexAttribLPointer = (PFNGLVERTEXATTRIBLPOINTERPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribLPointer")) == NULL) || r;
+  r = ((glGetVertexAttribLdv = (PFNGLGETVERTEXATTRIBLDVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribLdv")) == NULL) || r;
+  r = ((glVertexAttribL1d = (PFNGLVERTEXATTRIBL1DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1d")) == NULL) || r;
+  r = ((glVertexAttribL1dv = (PFNGLVERTEXATTRIBL1DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1dv")) == NULL) || r;
+  r = ((glVertexAttribL2d = (PFNGLVERTEXATTRIBL2DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2d")) == NULL) || r;
+  r = ((glVertexAttribL2dv = (PFNGLVERTEXATTRIBL2DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2dv")) == NULL) || r;
+  r = ((glVertexAttribL3d = (PFNGLVERTEXATTRIBL3DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3d")) == NULL) || r;
+  r = ((glVertexAttribL3dv = (PFNGLVERTEXATTRIBL3DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3dv")) == NULL) || r;
+  r = ((glVertexAttribL4d = (PFNGLVERTEXATTRIBL4DPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4d")) == NULL) || r;
+  r = ((glVertexAttribL4dv = (PFNGLVERTEXATTRIBL4DVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4dv")) == NULL) || r;
+  r = ((glVertexAttribLPointer = (PFNGLVERTEXATTRIBLPOINTERPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribLPointer")) == NULL) || r;
 
   return r;
 }
@@ -11700,18 +11697,18 @@ static GLboolean _glewInit_GL_ARB_vertex_attrib_binding ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindVertexBuffer = (PFNGLBINDVERTEXBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glBindVertexBuffer")) == NULL) || r;
-  r = ((glVertexArrayBindVertexBufferEXT = (PFNGLVERTEXARRAYBINDVERTEXBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayBindVertexBufferEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribBindingEXT = (PFNGLVERTEXARRAYVERTEXATTRIBBINDINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribBindingEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribFormatEXT = (PFNGLVERTEXARRAYVERTEXATTRIBFORMATEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribFormatEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribIFormatEXT = (PFNGLVERTEXARRAYVERTEXATTRIBIFORMATEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribIFormatEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribLFormatEXT = (PFNGLVERTEXARRAYVERTEXATTRIBLFORMATEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribLFormatEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexBindingDivisorEXT = (PFNGLVERTEXARRAYVERTEXBINDINGDIVISOREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexBindingDivisorEXT")) == NULL) || r;
-  r = ((glVertexAttribBinding = (PFNGLVERTEXATTRIBBINDINGPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribBinding")) == NULL) || r;
-  r = ((glVertexAttribFormat = (PFNGLVERTEXATTRIBFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribFormat")) == NULL) || r;
-  r = ((glVertexAttribIFormat = (PFNGLVERTEXATTRIBIFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribIFormat")) == NULL) || r;
-  r = ((glVertexAttribLFormat = (PFNGLVERTEXATTRIBLFORMATPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribLFormat")) == NULL) || r;
-  r = ((glVertexBindingDivisor = (PFNGLVERTEXBINDINGDIVISORPROC)glewGetProcSubtractress((const GLubyte*)"glVertexBindingDivisor")) == NULL) || r;
+  r = ((glBindVertexBuffer = (PFNGLBINDVERTEXBUFFERPROC)glewGetProcAddress((const GLubyte*)"glBindVertexBuffer")) == NULL) || r;
+  r = ((glVertexArrayBindVertexBufferEXT = (PFNGLVERTEXARRAYBINDVERTEXBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayBindVertexBufferEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribBindingEXT = (PFNGLVERTEXARRAYVERTEXATTRIBBINDINGEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribBindingEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribFormatEXT = (PFNGLVERTEXARRAYVERTEXATTRIBFORMATEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribFormatEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribIFormatEXT = (PFNGLVERTEXARRAYVERTEXATTRIBIFORMATEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribIFormatEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribLFormatEXT = (PFNGLVERTEXARRAYVERTEXATTRIBLFORMATEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribLFormatEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexBindingDivisorEXT = (PFNGLVERTEXARRAYVERTEXBINDINGDIVISOREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexBindingDivisorEXT")) == NULL) || r;
+  r = ((glVertexAttribBinding = (PFNGLVERTEXATTRIBBINDINGPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribBinding")) == NULL) || r;
+  r = ((glVertexAttribFormat = (PFNGLVERTEXATTRIBFORMATPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribFormat")) == NULL) || r;
+  r = ((glVertexAttribIFormat = (PFNGLVERTEXATTRIBIFORMATPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribIFormat")) == NULL) || r;
+  r = ((glVertexAttribLFormat = (PFNGLVERTEXATTRIBLFORMATPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribLFormat")) == NULL) || r;
+  r = ((glVertexBindingDivisor = (PFNGLVERTEXBINDINGDIVISORPROC)glewGetProcAddress((const GLubyte*)"glVertexBindingDivisor")) == NULL) || r;
 
   return r;
 }
@@ -11724,16 +11721,16 @@ static GLboolean _glewInit_GL_ARB_vertex_blend ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVertexBlendARB = (PFNGLVERTEXBLENDARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexBlendARB")) == NULL) || r;
-  r = ((glWeightPointerARB = (PFNGLWEIGHTPOINTERARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightPointerARB")) == NULL) || r;
-  r = ((glWeightbvARB = (PFNGLWEIGHTBVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightbvARB")) == NULL) || r;
-  r = ((glWeightdvARB = (PFNGLWEIGHTDVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightdvARB")) == NULL) || r;
-  r = ((glWeightfvARB = (PFNGLWEIGHTFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightfvARB")) == NULL) || r;
-  r = ((glWeightivARB = (PFNGLWEIGHTIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightivARB")) == NULL) || r;
-  r = ((glWeightsvARB = (PFNGLWEIGHTSVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightsvARB")) == NULL) || r;
-  r = ((glWeightubvARB = (PFNGLWEIGHTUBVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightubvARB")) == NULL) || r;
-  r = ((glWeightuivARB = (PFNGLWEIGHTUIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightuivARB")) == NULL) || r;
-  r = ((glWeightusvARB = (PFNGLWEIGHTUSVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWeightusvARB")) == NULL) || r;
+  r = ((glVertexBlendARB = (PFNGLVERTEXBLENDARBPROC)glewGetProcAddress((const GLubyte*)"glVertexBlendARB")) == NULL) || r;
+  r = ((glWeightPointerARB = (PFNGLWEIGHTPOINTERARBPROC)glewGetProcAddress((const GLubyte*)"glWeightPointerARB")) == NULL) || r;
+  r = ((glWeightbvARB = (PFNGLWEIGHTBVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightbvARB")) == NULL) || r;
+  r = ((glWeightdvARB = (PFNGLWEIGHTDVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightdvARB")) == NULL) || r;
+  r = ((glWeightfvARB = (PFNGLWEIGHTFVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightfvARB")) == NULL) || r;
+  r = ((glWeightivARB = (PFNGLWEIGHTIVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightivARB")) == NULL) || r;
+  r = ((glWeightsvARB = (PFNGLWEIGHTSVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightsvARB")) == NULL) || r;
+  r = ((glWeightubvARB = (PFNGLWEIGHTUBVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightubvARB")) == NULL) || r;
+  r = ((glWeightuivARB = (PFNGLWEIGHTUIVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightuivARB")) == NULL) || r;
+  r = ((glWeightusvARB = (PFNGLWEIGHTUSVARBPROC)glewGetProcAddress((const GLubyte*)"glWeightusvARB")) == NULL) || r;
 
   return r;
 }
@@ -11746,17 +11743,17 @@ static GLboolean _glewInit_GL_ARB_vertex_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindBufferARB = (PFNGLBINDBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferARB")) == NULL) || r;
-  r = ((glBufferDataARB = (PFNGLBUFFERDATAARBPROC)glewGetProcSubtractress((const GLubyte*)"glBufferDataARB")) == NULL) || r;
-  r = ((glBufferSubDataARB = (PFNGLBUFFERSUBDATAARBPROC)glewGetProcSubtractress((const GLubyte*)"glBufferSubDataARB")) == NULL) || r;
-  r = ((glDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteBuffersARB")) == NULL) || r;
-  r = ((glGenBuffersARB = (PFNGLGENBUFFERSARBPROC)glewGetProcSubtractress((const GLubyte*)"glGenBuffersARB")) == NULL) || r;
-  r = ((glGetBufferParameterivARB = (PFNGLGETBUFFERPARAMETERIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferParameterivARB")) == NULL) || r;
-  r = ((glGetBufferPointervARB = (PFNGLGETBUFFERPOINTERVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferPointervARB")) == NULL) || r;
-  r = ((glGetBufferSubDataARB = (PFNGLGETBUFFERSUBDATAARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferSubDataARB")) == NULL) || r;
-  r = ((glIsBufferARB = (PFNGLISBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"glIsBufferARB")) == NULL) || r;
-  r = ((glMapBufferARB = (PFNGLMAPBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"glMapBufferARB")) == NULL) || r;
-  r = ((glUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"glUnmapBufferARB")) == NULL) || r;
+  r = ((glBindBufferARB = (PFNGLBINDBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"glBindBufferARB")) == NULL) || r;
+  r = ((glBufferDataARB = (PFNGLBUFFERDATAARBPROC)glewGetProcAddress((const GLubyte*)"glBufferDataARB")) == NULL) || r;
+  r = ((glBufferSubDataARB = (PFNGLBUFFERSUBDATAARBPROC)glewGetProcAddress((const GLubyte*)"glBufferSubDataARB")) == NULL) || r;
+  r = ((glDeleteBuffersARB = (PFNGLDELETEBUFFERSARBPROC)glewGetProcAddress((const GLubyte*)"glDeleteBuffersARB")) == NULL) || r;
+  r = ((glGenBuffersARB = (PFNGLGENBUFFERSARBPROC)glewGetProcAddress((const GLubyte*)"glGenBuffersARB")) == NULL) || r;
+  r = ((glGetBufferParameterivARB = (PFNGLGETBUFFERPARAMETERIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetBufferParameterivARB")) == NULL) || r;
+  r = ((glGetBufferPointervARB = (PFNGLGETBUFFERPOINTERVARBPROC)glewGetProcAddress((const GLubyte*)"glGetBufferPointervARB")) == NULL) || r;
+  r = ((glGetBufferSubDataARB = (PFNGLGETBUFFERSUBDATAARBPROC)glewGetProcAddress((const GLubyte*)"glGetBufferSubDataARB")) == NULL) || r;
+  r = ((glIsBufferARB = (PFNGLISBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"glIsBufferARB")) == NULL) || r;
+  r = ((glMapBufferARB = (PFNGLMAPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"glMapBufferARB")) == NULL) || r;
+  r = ((glUnmapBufferARB = (PFNGLUNMAPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"glUnmapBufferARB")) == NULL) || r;
 
   return r;
 }
@@ -11769,68 +11766,68 @@ static GLboolean _glewInit_GL_ARB_vertex_program ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)glewGetProcSubtractress((const GLubyte*)"glBindProgramARB")) == NULL) || r;
-  r = ((glDeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteProgramsARB")) == NULL) || r;
-  r = ((glDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVertexAttribArrayARB")) == NULL) || r;
-  r = ((glEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVertexAttribArrayARB")) == NULL) || r;
-  r = ((glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)glewGetProcSubtractress((const GLubyte*)"glGenProgramsARB")) == NULL) || r;
-  r = ((glGetProgramEnvParameterdvARB = (PFNGLGETPROGRAMENVPARAMETERDVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramEnvParameterdvARB")) == NULL) || r;
-  r = ((glGetProgramEnvParameterfvARB = (PFNGLGETPROGRAMENVPARAMETERFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramEnvParameterfvARB")) == NULL) || r;
-  r = ((glGetProgramLocalParameterdvARB = (PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramLocalParameterdvARB")) == NULL) || r;
-  r = ((glGetProgramLocalParameterfvARB = (PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramLocalParameterfvARB")) == NULL) || r;
-  r = ((glGetProgramStringARB = (PFNGLGETPROGRAMSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramStringARB")) == NULL) || r;
-  r = ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramivARB")) == NULL) || r;
-  r = ((glGetVertexAttribPointervARB = (PFNGLGETVERTEXATTRIBPOINTERVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribPointervARB")) == NULL) || r;
-  r = ((glGetVertexAttribdvARB = (PFNGLGETVERTEXATTRIBDVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribdvARB")) == NULL) || r;
-  r = ((glGetVertexAttribfvARB = (PFNGLGETVERTEXATTRIBFVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribfvARB")) == NULL) || r;
-  r = ((glGetVertexAttribivARB = (PFNGLGETVERTEXATTRIBIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribivARB")) == NULL) || r;
-  r = ((glIsProgramARB = (PFNGLISPROGRAMARBPROC)glewGetProcSubtractress((const GLubyte*)"glIsProgramARB")) == NULL) || r;
-  r = ((glProgramEnvParameter4dARB = (PFNGLPROGRAMENVPARAMETER4DARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameter4dARB")) == NULL) || r;
-  r = ((glProgramEnvParameter4dvARB = (PFNGLPROGRAMENVPARAMETER4DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameter4dvARB")) == NULL) || r;
-  r = ((glProgramEnvParameter4fARB = (PFNGLPROGRAMENVPARAMETER4FARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameter4fARB")) == NULL) || r;
-  r = ((glProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameter4fvARB")) == NULL) || r;
-  r = ((glProgramLocalParameter4dARB = (PFNGLPROGRAMLOCALPARAMETER4DARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameter4dARB")) == NULL) || r;
-  r = ((glProgramLocalParameter4dvARB = (PFNGLPROGRAMLOCALPARAMETER4DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameter4dvARB")) == NULL) || r;
-  r = ((glProgramLocalParameter4fARB = (PFNGLPROGRAMLOCALPARAMETER4FARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameter4fARB")) == NULL) || r;
-  r = ((glProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameter4fvARB")) == NULL) || r;
-  r = ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"glProgramStringARB")) == NULL) || r;
-  r = ((glVertexAttrib1dARB = (PFNGLVERTEXATTRIB1DARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1dARB")) == NULL) || r;
-  r = ((glVertexAttrib1dvARB = (PFNGLVERTEXATTRIB1DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1dvARB")) == NULL) || r;
-  r = ((glVertexAttrib1fARB = (PFNGLVERTEXATTRIB1FARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1fARB")) == NULL) || r;
-  r = ((glVertexAttrib1fvARB = (PFNGLVERTEXATTRIB1FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1fvARB")) == NULL) || r;
-  r = ((glVertexAttrib1sARB = (PFNGLVERTEXATTRIB1SARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1sARB")) == NULL) || r;
-  r = ((glVertexAttrib1svARB = (PFNGLVERTEXATTRIB1SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1svARB")) == NULL) || r;
-  r = ((glVertexAttrib2dARB = (PFNGLVERTEXATTRIB2DARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2dARB")) == NULL) || r;
-  r = ((glVertexAttrib2dvARB = (PFNGLVERTEXATTRIB2DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2dvARB")) == NULL) || r;
-  r = ((glVertexAttrib2fARB = (PFNGLVERTEXATTRIB2FARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2fARB")) == NULL) || r;
-  r = ((glVertexAttrib2fvARB = (PFNGLVERTEXATTRIB2FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2fvARB")) == NULL) || r;
-  r = ((glVertexAttrib2sARB = (PFNGLVERTEXATTRIB2SARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2sARB")) == NULL) || r;
-  r = ((glVertexAttrib2svARB = (PFNGLVERTEXATTRIB2SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2svARB")) == NULL) || r;
-  r = ((glVertexAttrib3dARB = (PFNGLVERTEXATTRIB3DARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3dARB")) == NULL) || r;
-  r = ((glVertexAttrib3dvARB = (PFNGLVERTEXATTRIB3DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3dvARB")) == NULL) || r;
-  r = ((glVertexAttrib3fARB = (PFNGLVERTEXATTRIB3FARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3fARB")) == NULL) || r;
-  r = ((glVertexAttrib3fvARB = (PFNGLVERTEXATTRIB3FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3fvARB")) == NULL) || r;
-  r = ((glVertexAttrib3sARB = (PFNGLVERTEXATTRIB3SARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3sARB")) == NULL) || r;
-  r = ((glVertexAttrib3svARB = (PFNGLVERTEXATTRIB3SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3svARB")) == NULL) || r;
-  r = ((glVertexAttrib4NbvARB = (PFNGLVERTEXATTRIB4NBVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NbvARB")) == NULL) || r;
-  r = ((glVertexAttrib4NivARB = (PFNGLVERTEXATTRIB4NIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NivARB")) == NULL) || r;
-  r = ((glVertexAttrib4NsvARB = (PFNGLVERTEXATTRIB4NSVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NsvARB")) == NULL) || r;
-  r = ((glVertexAttrib4NubARB = (PFNGLVERTEXATTRIB4NUBARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NubARB")) == NULL) || r;
-  r = ((glVertexAttrib4NubvARB = (PFNGLVERTEXATTRIB4NUBVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NubvARB")) == NULL) || r;
-  r = ((glVertexAttrib4NuivARB = (PFNGLVERTEXATTRIB4NUIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NuivARB")) == NULL) || r;
-  r = ((glVertexAttrib4NusvARB = (PFNGLVERTEXATTRIB4NUSVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4NusvARB")) == NULL) || r;
-  r = ((glVertexAttrib4bvARB = (PFNGLVERTEXATTRIB4BVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4bvARB")) == NULL) || r;
-  r = ((glVertexAttrib4dARB = (PFNGLVERTEXATTRIB4DARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4dARB")) == NULL) || r;
-  r = ((glVertexAttrib4dvARB = (PFNGLVERTEXATTRIB4DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4dvARB")) == NULL) || r;
-  r = ((glVertexAttrib4fARB = (PFNGLVERTEXATTRIB4FARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4fARB")) == NULL) || r;
-  r = ((glVertexAttrib4fvARB = (PFNGLVERTEXATTRIB4FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4fvARB")) == NULL) || r;
-  r = ((glVertexAttrib4ivARB = (PFNGLVERTEXATTRIB4IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4ivARB")) == NULL) || r;
-  r = ((glVertexAttrib4sARB = (PFNGLVERTEXATTRIB4SARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4sARB")) == NULL) || r;
-  r = ((glVertexAttrib4svARB = (PFNGLVERTEXATTRIB4SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4svARB")) == NULL) || r;
-  r = ((glVertexAttrib4ubvARB = (PFNGLVERTEXATTRIB4UBVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4ubvARB")) == NULL) || r;
-  r = ((glVertexAttrib4uivARB = (PFNGLVERTEXATTRIB4UIVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4uivARB")) == NULL) || r;
-  r = ((glVertexAttrib4usvARB = (PFNGLVERTEXATTRIB4USVARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4usvARB")) == NULL) || r;
-  r = ((glVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribPointerARB")) == NULL) || r;
+  r = ((glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)glewGetProcAddress((const GLubyte*)"glBindProgramARB")) == NULL) || r;
+  r = ((glDeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)glewGetProcAddress((const GLubyte*)"glDeleteProgramsARB")) == NULL) || r;
+  r = ((glDisableVertexAttribArrayARB = (PFNGLDISABLEVERTEXATTRIBARRAYARBPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexAttribArrayARB")) == NULL) || r;
+  r = ((glEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexAttribArrayARB")) == NULL) || r;
+  r = ((glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)glewGetProcAddress((const GLubyte*)"glGenProgramsARB")) == NULL) || r;
+  r = ((glGetProgramEnvParameterdvARB = (PFNGLGETPROGRAMENVPARAMETERDVARBPROC)glewGetProcAddress((const GLubyte*)"glGetProgramEnvParameterdvARB")) == NULL) || r;
+  r = ((glGetProgramEnvParameterfvARB = (PFNGLGETPROGRAMENVPARAMETERFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetProgramEnvParameterfvARB")) == NULL) || r;
+  r = ((glGetProgramLocalParameterdvARB = (PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC)glewGetProcAddress((const GLubyte*)"glGetProgramLocalParameterdvARB")) == NULL) || r;
+  r = ((glGetProgramLocalParameterfvARB = (PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetProgramLocalParameterfvARB")) == NULL) || r;
+  r = ((glGetProgramStringARB = (PFNGLGETPROGRAMSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"glGetProgramStringARB")) == NULL) || r;
+  r = ((glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetProgramivARB")) == NULL) || r;
+  r = ((glGetVertexAttribPointervARB = (PFNGLGETVERTEXATTRIBPOINTERVARBPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribPointervARB")) == NULL) || r;
+  r = ((glGetVertexAttribdvARB = (PFNGLGETVERTEXATTRIBDVARBPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribdvARB")) == NULL) || r;
+  r = ((glGetVertexAttribfvARB = (PFNGLGETVERTEXATTRIBFVARBPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribfvARB")) == NULL) || r;
+  r = ((glGetVertexAttribivARB = (PFNGLGETVERTEXATTRIBIVARBPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribivARB")) == NULL) || r;
+  r = ((glIsProgramARB = (PFNGLISPROGRAMARBPROC)glewGetProcAddress((const GLubyte*)"glIsProgramARB")) == NULL) || r;
+  r = ((glProgramEnvParameter4dARB = (PFNGLPROGRAMENVPARAMETER4DARBPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameter4dARB")) == NULL) || r;
+  r = ((glProgramEnvParameter4dvARB = (PFNGLPROGRAMENVPARAMETER4DVARBPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameter4dvARB")) == NULL) || r;
+  r = ((glProgramEnvParameter4fARB = (PFNGLPROGRAMENVPARAMETER4FARBPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameter4fARB")) == NULL) || r;
+  r = ((glProgramEnvParameter4fvARB = (PFNGLPROGRAMENVPARAMETER4FVARBPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameter4fvARB")) == NULL) || r;
+  r = ((glProgramLocalParameter4dARB = (PFNGLPROGRAMLOCALPARAMETER4DARBPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameter4dARB")) == NULL) || r;
+  r = ((glProgramLocalParameter4dvARB = (PFNGLPROGRAMLOCALPARAMETER4DVARBPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameter4dvARB")) == NULL) || r;
+  r = ((glProgramLocalParameter4fARB = (PFNGLPROGRAMLOCALPARAMETER4FARBPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameter4fARB")) == NULL) || r;
+  r = ((glProgramLocalParameter4fvARB = (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameter4fvARB")) == NULL) || r;
+  r = ((glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"glProgramStringARB")) == NULL) || r;
+  r = ((glVertexAttrib1dARB = (PFNGLVERTEXATTRIB1DARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1dARB")) == NULL) || r;
+  r = ((glVertexAttrib1dvARB = (PFNGLVERTEXATTRIB1DVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1dvARB")) == NULL) || r;
+  r = ((glVertexAttrib1fARB = (PFNGLVERTEXATTRIB1FARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1fARB")) == NULL) || r;
+  r = ((glVertexAttrib1fvARB = (PFNGLVERTEXATTRIB1FVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1fvARB")) == NULL) || r;
+  r = ((glVertexAttrib1sARB = (PFNGLVERTEXATTRIB1SARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1sARB")) == NULL) || r;
+  r = ((glVertexAttrib1svARB = (PFNGLVERTEXATTRIB1SVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1svARB")) == NULL) || r;
+  r = ((glVertexAttrib2dARB = (PFNGLVERTEXATTRIB2DARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2dARB")) == NULL) || r;
+  r = ((glVertexAttrib2dvARB = (PFNGLVERTEXATTRIB2DVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2dvARB")) == NULL) || r;
+  r = ((glVertexAttrib2fARB = (PFNGLVERTEXATTRIB2FARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2fARB")) == NULL) || r;
+  r = ((glVertexAttrib2fvARB = (PFNGLVERTEXATTRIB2FVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2fvARB")) == NULL) || r;
+  r = ((glVertexAttrib2sARB = (PFNGLVERTEXATTRIB2SARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2sARB")) == NULL) || r;
+  r = ((glVertexAttrib2svARB = (PFNGLVERTEXATTRIB2SVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2svARB")) == NULL) || r;
+  r = ((glVertexAttrib3dARB = (PFNGLVERTEXATTRIB3DARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3dARB")) == NULL) || r;
+  r = ((glVertexAttrib3dvARB = (PFNGLVERTEXATTRIB3DVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3dvARB")) == NULL) || r;
+  r = ((glVertexAttrib3fARB = (PFNGLVERTEXATTRIB3FARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3fARB")) == NULL) || r;
+  r = ((glVertexAttrib3fvARB = (PFNGLVERTEXATTRIB3FVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3fvARB")) == NULL) || r;
+  r = ((glVertexAttrib3sARB = (PFNGLVERTEXATTRIB3SARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3sARB")) == NULL) || r;
+  r = ((glVertexAttrib3svARB = (PFNGLVERTEXATTRIB3SVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3svARB")) == NULL) || r;
+  r = ((glVertexAttrib4NbvARB = (PFNGLVERTEXATTRIB4NBVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NbvARB")) == NULL) || r;
+  r = ((glVertexAttrib4NivARB = (PFNGLVERTEXATTRIB4NIVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NivARB")) == NULL) || r;
+  r = ((glVertexAttrib4NsvARB = (PFNGLVERTEXATTRIB4NSVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NsvARB")) == NULL) || r;
+  r = ((glVertexAttrib4NubARB = (PFNGLVERTEXATTRIB4NUBARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NubARB")) == NULL) || r;
+  r = ((glVertexAttrib4NubvARB = (PFNGLVERTEXATTRIB4NUBVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NubvARB")) == NULL) || r;
+  r = ((glVertexAttrib4NuivARB = (PFNGLVERTEXATTRIB4NUIVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NuivARB")) == NULL) || r;
+  r = ((glVertexAttrib4NusvARB = (PFNGLVERTEXATTRIB4NUSVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4NusvARB")) == NULL) || r;
+  r = ((glVertexAttrib4bvARB = (PFNGLVERTEXATTRIB4BVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4bvARB")) == NULL) || r;
+  r = ((glVertexAttrib4dARB = (PFNGLVERTEXATTRIB4DARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4dARB")) == NULL) || r;
+  r = ((glVertexAttrib4dvARB = (PFNGLVERTEXATTRIB4DVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4dvARB")) == NULL) || r;
+  r = ((glVertexAttrib4fARB = (PFNGLVERTEXATTRIB4FARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4fARB")) == NULL) || r;
+  r = ((glVertexAttrib4fvARB = (PFNGLVERTEXATTRIB4FVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4fvARB")) == NULL) || r;
+  r = ((glVertexAttrib4ivARB = (PFNGLVERTEXATTRIB4IVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4ivARB")) == NULL) || r;
+  r = ((glVertexAttrib4sARB = (PFNGLVERTEXATTRIB4SARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4sARB")) == NULL) || r;
+  r = ((glVertexAttrib4svARB = (PFNGLVERTEXATTRIB4SVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4svARB")) == NULL) || r;
+  r = ((glVertexAttrib4ubvARB = (PFNGLVERTEXATTRIB4UBVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4ubvARB")) == NULL) || r;
+  r = ((glVertexAttrib4uivARB = (PFNGLVERTEXATTRIB4UIVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4uivARB")) == NULL) || r;
+  r = ((glVertexAttrib4usvARB = (PFNGLVERTEXATTRIB4USVARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4usvARB")) == NULL) || r;
+  r = ((glVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribPointerARB")) == NULL) || r;
 
   return r;
 }
@@ -11843,9 +11840,9 @@ static GLboolean _glewInit_GL_ARB_vertex_shader ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)glewGetProcSubtractress((const GLubyte*)"glBindAttribLocationARB")) == NULL) || r;
-  r = ((glGetActiveAttribARB = (PFNGLGETACTIVEATTRIBARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveAttribARB")) == NULL) || r;
-  r = ((glGetAttribLocationARB = (PFNGLGETATTRIBLOCATIONARBPROC)glewGetProcSubtractress((const GLubyte*)"glGetAttribLocationARB")) == NULL) || r;
+  r = ((glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)glewGetProcAddress((const GLubyte*)"glBindAttribLocationARB")) == NULL) || r;
+  r = ((glGetActiveAttribARB = (PFNGLGETACTIVEATTRIBARBPROC)glewGetProcAddress((const GLubyte*)"glGetActiveAttribARB")) == NULL) || r;
+  r = ((glGetAttribLocationARB = (PFNGLGETATTRIBLOCATIONARBPROC)glewGetProcAddress((const GLubyte*)"glGetAttribLocationARB")) == NULL) || r;
 
   return r;
 }
@@ -11858,44 +11855,44 @@ static GLboolean _glewInit_GL_ARB_vertex_type_2_10_10_10_rev ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorP3ui = (PFNGLCOLORP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glColorP3ui")) == NULL) || r;
-  r = ((glColorP3uiv = (PFNGLCOLORP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glColorP3uiv")) == NULL) || r;
-  r = ((glColorP4ui = (PFNGLCOLORP4UIPROC)glewGetProcSubtractress((const GLubyte*)"glColorP4ui")) == NULL) || r;
-  r = ((glColorP4uiv = (PFNGLCOLORP4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glColorP4uiv")) == NULL) || r;
-  r = ((glMultiTexCoordP1ui = (PFNGLMULTITEXCOORDP1UIPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP1ui")) == NULL) || r;
-  r = ((glMultiTexCoordP1uiv = (PFNGLMULTITEXCOORDP1UIVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP1uiv")) == NULL) || r;
-  r = ((glMultiTexCoordP2ui = (PFNGLMULTITEXCOORDP2UIPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP2ui")) == NULL) || r;
-  r = ((glMultiTexCoordP2uiv = (PFNGLMULTITEXCOORDP2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP2uiv")) == NULL) || r;
-  r = ((glMultiTexCoordP3ui = (PFNGLMULTITEXCOORDP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP3ui")) == NULL) || r;
-  r = ((glMultiTexCoordP3uiv = (PFNGLMULTITEXCOORDP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP3uiv")) == NULL) || r;
-  r = ((glMultiTexCoordP4ui = (PFNGLMULTITEXCOORDP4UIPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP4ui")) == NULL) || r;
-  r = ((glMultiTexCoordP4uiv = (PFNGLMULTITEXCOORDP4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordP4uiv")) == NULL) || r;
-  r = ((glNormalP3ui = (PFNGLNORMALP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalP3ui")) == NULL) || r;
-  r = ((glNormalP3uiv = (PFNGLNORMALP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glNormalP3uiv")) == NULL) || r;
-  r = ((glSecondaryColorP3ui = (PFNGLSECONDARYCOLORP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColorP3ui")) == NULL) || r;
-  r = ((glSecondaryColorP3uiv = (PFNGLSECONDARYCOLORP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColorP3uiv")) == NULL) || r;
-  r = ((glTexCoordP1ui = (PFNGLTEXCOORDP1UIPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP1ui")) == NULL) || r;
-  r = ((glTexCoordP1uiv = (PFNGLTEXCOORDP1UIVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP1uiv")) == NULL) || r;
-  r = ((glTexCoordP2ui = (PFNGLTEXCOORDP2UIPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP2ui")) == NULL) || r;
-  r = ((glTexCoordP2uiv = (PFNGLTEXCOORDP2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP2uiv")) == NULL) || r;
-  r = ((glTexCoordP3ui = (PFNGLTEXCOORDP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP3ui")) == NULL) || r;
-  r = ((glTexCoordP3uiv = (PFNGLTEXCOORDP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP3uiv")) == NULL) || r;
-  r = ((glTexCoordP4ui = (PFNGLTEXCOORDP4UIPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP4ui")) == NULL) || r;
-  r = ((glTexCoordP4uiv = (PFNGLTEXCOORDP4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordP4uiv")) == NULL) || r;
-  r = ((glVertexAttribP1ui = (PFNGLVERTEXATTRIBP1UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP1ui")) == NULL) || r;
-  r = ((glVertexAttribP1uiv = (PFNGLVERTEXATTRIBP1UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP1uiv")) == NULL) || r;
-  r = ((glVertexAttribP2ui = (PFNGLVERTEXATTRIBP2UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP2ui")) == NULL) || r;
-  r = ((glVertexAttribP2uiv = (PFNGLVERTEXATTRIBP2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP2uiv")) == NULL) || r;
-  r = ((glVertexAttribP3ui = (PFNGLVERTEXATTRIBP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP3ui")) == NULL) || r;
-  r = ((glVertexAttribP3uiv = (PFNGLVERTEXATTRIBP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP3uiv")) == NULL) || r;
-  r = ((glVertexAttribP4ui = (PFNGLVERTEXATTRIBP4UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP4ui")) == NULL) || r;
-  r = ((glVertexAttribP4uiv = (PFNGLVERTEXATTRIBP4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribP4uiv")) == NULL) || r;
-  r = ((glVertexP2ui = (PFNGLVERTEXP2UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexP2ui")) == NULL) || r;
-  r = ((glVertexP2uiv = (PFNGLVERTEXP2UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexP2uiv")) == NULL) || r;
-  r = ((glVertexP3ui = (PFNGLVERTEXP3UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexP3ui")) == NULL) || r;
-  r = ((glVertexP3uiv = (PFNGLVERTEXP3UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexP3uiv")) == NULL) || r;
-  r = ((glVertexP4ui = (PFNGLVERTEXP4UIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexP4ui")) == NULL) || r;
-  r = ((glVertexP4uiv = (PFNGLVERTEXP4UIVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexP4uiv")) == NULL) || r;
+  r = ((glColorP3ui = (PFNGLCOLORP3UIPROC)glewGetProcAddress((const GLubyte*)"glColorP3ui")) == NULL) || r;
+  r = ((glColorP3uiv = (PFNGLCOLORP3UIVPROC)glewGetProcAddress((const GLubyte*)"glColorP3uiv")) == NULL) || r;
+  r = ((glColorP4ui = (PFNGLCOLORP4UIPROC)glewGetProcAddress((const GLubyte*)"glColorP4ui")) == NULL) || r;
+  r = ((glColorP4uiv = (PFNGLCOLORP4UIVPROC)glewGetProcAddress((const GLubyte*)"glColorP4uiv")) == NULL) || r;
+  r = ((glMultiTexCoordP1ui = (PFNGLMULTITEXCOORDP1UIPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP1ui")) == NULL) || r;
+  r = ((glMultiTexCoordP1uiv = (PFNGLMULTITEXCOORDP1UIVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP1uiv")) == NULL) || r;
+  r = ((glMultiTexCoordP2ui = (PFNGLMULTITEXCOORDP2UIPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP2ui")) == NULL) || r;
+  r = ((glMultiTexCoordP2uiv = (PFNGLMULTITEXCOORDP2UIVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP2uiv")) == NULL) || r;
+  r = ((glMultiTexCoordP3ui = (PFNGLMULTITEXCOORDP3UIPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP3ui")) == NULL) || r;
+  r = ((glMultiTexCoordP3uiv = (PFNGLMULTITEXCOORDP3UIVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP3uiv")) == NULL) || r;
+  r = ((glMultiTexCoordP4ui = (PFNGLMULTITEXCOORDP4UIPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP4ui")) == NULL) || r;
+  r = ((glMultiTexCoordP4uiv = (PFNGLMULTITEXCOORDP4UIVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordP4uiv")) == NULL) || r;
+  r = ((glNormalP3ui = (PFNGLNORMALP3UIPROC)glewGetProcAddress((const GLubyte*)"glNormalP3ui")) == NULL) || r;
+  r = ((glNormalP3uiv = (PFNGLNORMALP3UIVPROC)glewGetProcAddress((const GLubyte*)"glNormalP3uiv")) == NULL) || r;
+  r = ((glSecondaryColorP3ui = (PFNGLSECONDARYCOLORP3UIPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColorP3ui")) == NULL) || r;
+  r = ((glSecondaryColorP3uiv = (PFNGLSECONDARYCOLORP3UIVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColorP3uiv")) == NULL) || r;
+  r = ((glTexCoordP1ui = (PFNGLTEXCOORDP1UIPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP1ui")) == NULL) || r;
+  r = ((glTexCoordP1uiv = (PFNGLTEXCOORDP1UIVPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP1uiv")) == NULL) || r;
+  r = ((glTexCoordP2ui = (PFNGLTEXCOORDP2UIPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP2ui")) == NULL) || r;
+  r = ((glTexCoordP2uiv = (PFNGLTEXCOORDP2UIVPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP2uiv")) == NULL) || r;
+  r = ((glTexCoordP3ui = (PFNGLTEXCOORDP3UIPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP3ui")) == NULL) || r;
+  r = ((glTexCoordP3uiv = (PFNGLTEXCOORDP3UIVPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP3uiv")) == NULL) || r;
+  r = ((glTexCoordP4ui = (PFNGLTEXCOORDP4UIPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP4ui")) == NULL) || r;
+  r = ((glTexCoordP4uiv = (PFNGLTEXCOORDP4UIVPROC)glewGetProcAddress((const GLubyte*)"glTexCoordP4uiv")) == NULL) || r;
+  r = ((glVertexAttribP1ui = (PFNGLVERTEXATTRIBP1UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP1ui")) == NULL) || r;
+  r = ((glVertexAttribP1uiv = (PFNGLVERTEXATTRIBP1UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP1uiv")) == NULL) || r;
+  r = ((glVertexAttribP2ui = (PFNGLVERTEXATTRIBP2UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP2ui")) == NULL) || r;
+  r = ((glVertexAttribP2uiv = (PFNGLVERTEXATTRIBP2UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP2uiv")) == NULL) || r;
+  r = ((glVertexAttribP3ui = (PFNGLVERTEXATTRIBP3UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP3ui")) == NULL) || r;
+  r = ((glVertexAttribP3uiv = (PFNGLVERTEXATTRIBP3UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP3uiv")) == NULL) || r;
+  r = ((glVertexAttribP4ui = (PFNGLVERTEXATTRIBP4UIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP4ui")) == NULL) || r;
+  r = ((glVertexAttribP4uiv = (PFNGLVERTEXATTRIBP4UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribP4uiv")) == NULL) || r;
+  r = ((glVertexP2ui = (PFNGLVERTEXP2UIPROC)glewGetProcAddress((const GLubyte*)"glVertexP2ui")) == NULL) || r;
+  r = ((glVertexP2uiv = (PFNGLVERTEXP2UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexP2uiv")) == NULL) || r;
+  r = ((glVertexP3ui = (PFNGLVERTEXP3UIPROC)glewGetProcAddress((const GLubyte*)"glVertexP3ui")) == NULL) || r;
+  r = ((glVertexP3uiv = (PFNGLVERTEXP3UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexP3uiv")) == NULL) || r;
+  r = ((glVertexP4ui = (PFNGLVERTEXP4UIPROC)glewGetProcAddress((const GLubyte*)"glVertexP4ui")) == NULL) || r;
+  r = ((glVertexP4uiv = (PFNGLVERTEXP4UIVPROC)glewGetProcAddress((const GLubyte*)"glVertexP4uiv")) == NULL) || r;
 
   return r;
 }
@@ -11908,16 +11905,16 @@ static GLboolean _glewInit_GL_ARB_viewport_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDepthRangeArrayv = (PFNGLDEPTHRANGEARRAYVPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangeArrayv")) == NULL) || r;
-  r = ((glDepthRangeIndexed = (PFNGLDEPTHRANGEINDEXEDPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangeIndexed")) == NULL) || r;
-  r = ((glGetDoublei_v = (PFNGLGETDOUBLEI_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetDoublei_v")) == NULL) || r;
-  r = ((glGetFloati_v = (PFNGLGETFLOATI_VPROC)glewGetProcSubtractress((const GLubyte*)"glGetFloati_v")) == NULL) || r;
-  r = ((glScissorArrayv = (PFNGLSCISSORARRAYVPROC)glewGetProcSubtractress((const GLubyte*)"glScissorArrayv")) == NULL) || r;
-  r = ((glScissorIndexed = (PFNGLSCISSORINDEXEDPROC)glewGetProcSubtractress((const GLubyte*)"glScissorIndexed")) == NULL) || r;
-  r = ((glScissorIndexedv = (PFNGLSCISSORINDEXEDVPROC)glewGetProcSubtractress((const GLubyte*)"glScissorIndexedv")) == NULL) || r;
-  r = ((glViewportArrayv = (PFNGLVIEWPORTARRAYVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportArrayv")) == NULL) || r;
-  r = ((glViewportIndexedf = (PFNGLVIEWPORTINDEXEDFPROC)glewGetProcSubtractress((const GLubyte*)"glViewportIndexedf")) == NULL) || r;
-  r = ((glViewportIndexedfv = (PFNGLVIEWPORTINDEXEDFVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportIndexedfv")) == NULL) || r;
+  r = ((glDepthRangeArrayv = (PFNGLDEPTHRANGEARRAYVPROC)glewGetProcAddress((const GLubyte*)"glDepthRangeArrayv")) == NULL) || r;
+  r = ((glDepthRangeIndexed = (PFNGLDEPTHRANGEINDEXEDPROC)glewGetProcAddress((const GLubyte*)"glDepthRangeIndexed")) == NULL) || r;
+  r = ((glGetDoublei_v = (PFNGLGETDOUBLEI_VPROC)glewGetProcAddress((const GLubyte*)"glGetDoublei_v")) == NULL) || r;
+  r = ((glGetFloati_v = (PFNGLGETFLOATI_VPROC)glewGetProcAddress((const GLubyte*)"glGetFloati_v")) == NULL) || r;
+  r = ((glScissorArrayv = (PFNGLSCISSORARRAYVPROC)glewGetProcAddress((const GLubyte*)"glScissorArrayv")) == NULL) || r;
+  r = ((glScissorIndexed = (PFNGLSCISSORINDEXEDPROC)glewGetProcAddress((const GLubyte*)"glScissorIndexed")) == NULL) || r;
+  r = ((glScissorIndexedv = (PFNGLSCISSORINDEXEDVPROC)glewGetProcAddress((const GLubyte*)"glScissorIndexedv")) == NULL) || r;
+  r = ((glViewportArrayv = (PFNGLVIEWPORTARRAYVPROC)glewGetProcAddress((const GLubyte*)"glViewportArrayv")) == NULL) || r;
+  r = ((glViewportIndexedf = (PFNGLVIEWPORTINDEXEDFPROC)glewGetProcAddress((const GLubyte*)"glViewportIndexedf")) == NULL) || r;
+  r = ((glViewportIndexedfv = (PFNGLVIEWPORTINDEXEDFVPROC)glewGetProcAddress((const GLubyte*)"glViewportIndexedfv")) == NULL) || r;
 
   return r;
 }
@@ -11930,22 +11927,22 @@ static GLboolean _glewInit_GL_ARB_window_pos ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glWindowPos2dARB = (PFNGLWINDOWPOS2DARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2dARB")) == NULL) || r;
-  r = ((glWindowPos2dvARB = (PFNGLWINDOWPOS2DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2dvARB")) == NULL) || r;
-  r = ((glWindowPos2fARB = (PFNGLWINDOWPOS2FARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2fARB")) == NULL) || r;
-  r = ((glWindowPos2fvARB = (PFNGLWINDOWPOS2FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2fvARB")) == NULL) || r;
-  r = ((glWindowPos2iARB = (PFNGLWINDOWPOS2IARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2iARB")) == NULL) || r;
-  r = ((glWindowPos2ivARB = (PFNGLWINDOWPOS2IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2ivARB")) == NULL) || r;
-  r = ((glWindowPos2sARB = (PFNGLWINDOWPOS2SARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2sARB")) == NULL) || r;
-  r = ((glWindowPos2svARB = (PFNGLWINDOWPOS2SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2svARB")) == NULL) || r;
-  r = ((glWindowPos3dARB = (PFNGLWINDOWPOS3DARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3dARB")) == NULL) || r;
-  r = ((glWindowPos3dvARB = (PFNGLWINDOWPOS3DVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3dvARB")) == NULL) || r;
-  r = ((glWindowPos3fARB = (PFNGLWINDOWPOS3FARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3fARB")) == NULL) || r;
-  r = ((glWindowPos3fvARB = (PFNGLWINDOWPOS3FVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3fvARB")) == NULL) || r;
-  r = ((glWindowPos3iARB = (PFNGLWINDOWPOS3IARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3iARB")) == NULL) || r;
-  r = ((glWindowPos3ivARB = (PFNGLWINDOWPOS3IVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3ivARB")) == NULL) || r;
-  r = ((glWindowPos3sARB = (PFNGLWINDOWPOS3SARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3sARB")) == NULL) || r;
-  r = ((glWindowPos3svARB = (PFNGLWINDOWPOS3SVARBPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3svARB")) == NULL) || r;
+  r = ((glWindowPos2dARB = (PFNGLWINDOWPOS2DARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2dARB")) == NULL) || r;
+  r = ((glWindowPos2dvARB = (PFNGLWINDOWPOS2DVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2dvARB")) == NULL) || r;
+  r = ((glWindowPos2fARB = (PFNGLWINDOWPOS2FARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2fARB")) == NULL) || r;
+  r = ((glWindowPos2fvARB = (PFNGLWINDOWPOS2FVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2fvARB")) == NULL) || r;
+  r = ((glWindowPos2iARB = (PFNGLWINDOWPOS2IARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2iARB")) == NULL) || r;
+  r = ((glWindowPos2ivARB = (PFNGLWINDOWPOS2IVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2ivARB")) == NULL) || r;
+  r = ((glWindowPos2sARB = (PFNGLWINDOWPOS2SARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2sARB")) == NULL) || r;
+  r = ((glWindowPos2svARB = (PFNGLWINDOWPOS2SVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2svARB")) == NULL) || r;
+  r = ((glWindowPos3dARB = (PFNGLWINDOWPOS3DARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3dARB")) == NULL) || r;
+  r = ((glWindowPos3dvARB = (PFNGLWINDOWPOS3DVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3dvARB")) == NULL) || r;
+  r = ((glWindowPos3fARB = (PFNGLWINDOWPOS3FARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3fARB")) == NULL) || r;
+  r = ((glWindowPos3fvARB = (PFNGLWINDOWPOS3FVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3fvARB")) == NULL) || r;
+  r = ((glWindowPos3iARB = (PFNGLWINDOWPOS3IARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3iARB")) == NULL) || r;
+  r = ((glWindowPos3ivARB = (PFNGLWINDOWPOS3IVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3ivARB")) == NULL) || r;
+  r = ((glWindowPos3sARB = (PFNGLWINDOWPOS3SARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3sARB")) == NULL) || r;
+  r = ((glWindowPos3svARB = (PFNGLWINDOWPOS3SVARBPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3svARB")) == NULL) || r;
 
   return r;
 }
@@ -11958,7 +11955,7 @@ static GLboolean _glewInit_GL_ATI_draw_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawBuffersATI = (PFNGLDRAWBUFFERSATIPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBuffersATI")) == NULL) || r;
+  r = ((glDrawBuffersATI = (PFNGLDRAWBUFFERSATIPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffersATI")) == NULL) || r;
 
   return r;
 }
@@ -11971,9 +11968,9 @@ static GLboolean _glewInit_GL_ATI_element_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawElementArrayATI = (PFNGLDRAWELEMENTARRAYATIPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementArrayATI")) == NULL) || r;
-  r = ((glDrawRangeElementArrayATI = (PFNGLDRAWRANGEELEMENTARRAYATIPROC)glewGetProcSubtractress((const GLubyte*)"glDrawRangeElementArrayATI")) == NULL) || r;
-  r = ((glElementPointerATI = (PFNGLELEMENTPOINTERATIPROC)glewGetProcSubtractress((const GLubyte*)"glElementPointerATI")) == NULL) || r;
+  r = ((glDrawElementArrayATI = (PFNGLDRAWELEMENTARRAYATIPROC)glewGetProcAddress((const GLubyte*)"glDrawElementArrayATI")) == NULL) || r;
+  r = ((glDrawRangeElementArrayATI = (PFNGLDRAWRANGEELEMENTARRAYATIPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElementArrayATI")) == NULL) || r;
+  r = ((glElementPointerATI = (PFNGLELEMENTPOINTERATIPROC)glewGetProcAddress((const GLubyte*)"glElementPointerATI")) == NULL) || r;
 
   return r;
 }
@@ -11986,10 +11983,10 @@ static GLboolean _glewInit_GL_ATI_envmap_bumpmap ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetTexBumpParameterfvATI = (PFNGLGETTEXBUMPPARAMETERFVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexBumpParameterfvATI")) == NULL) || r;
-  r = ((glGetTexBumpParameterivATI = (PFNGLGETTEXBUMPPARAMETERIVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexBumpParameterivATI")) == NULL) || r;
-  r = ((glTexBumpParameterfvATI = (PFNGLTEXBUMPPARAMETERFVATIPROC)glewGetProcSubtractress((const GLubyte*)"glTexBumpParameterfvATI")) == NULL) || r;
-  r = ((glTexBumpParameterivATI = (PFNGLTEXBUMPPARAMETERIVATIPROC)glewGetProcSubtractress((const GLubyte*)"glTexBumpParameterivATI")) == NULL) || r;
+  r = ((glGetTexBumpParameterfvATI = (PFNGLGETTEXBUMPPARAMETERFVATIPROC)glewGetProcAddress((const GLubyte*)"glGetTexBumpParameterfvATI")) == NULL) || r;
+  r = ((glGetTexBumpParameterivATI = (PFNGLGETTEXBUMPPARAMETERIVATIPROC)glewGetProcAddress((const GLubyte*)"glGetTexBumpParameterivATI")) == NULL) || r;
+  r = ((glTexBumpParameterfvATI = (PFNGLTEXBUMPPARAMETERFVATIPROC)glewGetProcAddress((const GLubyte*)"glTexBumpParameterfvATI")) == NULL) || r;
+  r = ((glTexBumpParameterivATI = (PFNGLTEXBUMPPARAMETERIVATIPROC)glewGetProcAddress((const GLubyte*)"glTexBumpParameterivATI")) == NULL) || r;
 
   return r;
 }
@@ -12002,20 +11999,20 @@ static GLboolean _glewInit_GL_ATI_fragment_shader ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAlphaFragmentOp1ATI = (PFNGLALPHAFRAGMENTOP1ATIPROC)glewGetProcSubtractress((const GLubyte*)"glAlphaFragmentOp1ATI")) == NULL) || r;
-  r = ((glAlphaFragmentOp2ATI = (PFNGLALPHAFRAGMENTOP2ATIPROC)glewGetProcSubtractress((const GLubyte*)"glAlphaFragmentOp2ATI")) == NULL) || r;
-  r = ((glAlphaFragmentOp3ATI = (PFNGLALPHAFRAGMENTOP3ATIPROC)glewGetProcSubtractress((const GLubyte*)"glAlphaFragmentOp3ATI")) == NULL) || r;
-  r = ((glBeginFragmentShaderATI = (PFNGLBEGINFRAGMENTSHADERATIPROC)glewGetProcSubtractress((const GLubyte*)"glBeginFragmentShaderATI")) == NULL) || r;
-  r = ((glBindFragmentShaderATI = (PFNGLBINDFRAGMENTSHADERATIPROC)glewGetProcSubtractress((const GLubyte*)"glBindFragmentShaderATI")) == NULL) || r;
-  r = ((glColorFragmentOp1ATI = (PFNGLCOLORFRAGMENTOP1ATIPROC)glewGetProcSubtractress((const GLubyte*)"glColorFragmentOp1ATI")) == NULL) || r;
-  r = ((glColorFragmentOp2ATI = (PFNGLCOLORFRAGMENTOP2ATIPROC)glewGetProcSubtractress((const GLubyte*)"glColorFragmentOp2ATI")) == NULL) || r;
-  r = ((glColorFragmentOp3ATI = (PFNGLCOLORFRAGMENTOP3ATIPROC)glewGetProcSubtractress((const GLubyte*)"glColorFragmentOp3ATI")) == NULL) || r;
-  r = ((glDeleteFragmentShaderATI = (PFNGLDELETEFRAGMENTSHADERATIPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteFragmentShaderATI")) == NULL) || r;
-  r = ((glEndFragmentShaderATI = (PFNGLENDFRAGMENTSHADERATIPROC)glewGetProcSubtractress((const GLubyte*)"glEndFragmentShaderATI")) == NULL) || r;
-  r = ((glGenFragmentShadersATI = (PFNGLGENFRAGMENTSHADERSATIPROC)glewGetProcSubtractress((const GLubyte*)"glGenFragmentShadersATI")) == NULL) || r;
-  r = ((glPassTexCoordATI = (PFNGLPASSTEXCOORDATIPROC)glewGetProcSubtractress((const GLubyte*)"glPassTexCoordATI")) == NULL) || r;
-  r = ((glSampleMapATI = (PFNGLSAMPLEMAPATIPROC)glewGetProcSubtractress((const GLubyte*)"glSampleMapATI")) == NULL) || r;
-  r = ((glSetFragmentShaderConstantATI = (PFNGLSETFRAGMENTSHADERCONSTANTATIPROC)glewGetProcSubtractress((const GLubyte*)"glSetFragmentShaderConstantATI")) == NULL) || r;
+  r = ((glAlphaFragmentOp1ATI = (PFNGLALPHAFRAGMENTOP1ATIPROC)glewGetProcAddress((const GLubyte*)"glAlphaFragmentOp1ATI")) == NULL) || r;
+  r = ((glAlphaFragmentOp2ATI = (PFNGLALPHAFRAGMENTOP2ATIPROC)glewGetProcAddress((const GLubyte*)"glAlphaFragmentOp2ATI")) == NULL) || r;
+  r = ((glAlphaFragmentOp3ATI = (PFNGLALPHAFRAGMENTOP3ATIPROC)glewGetProcAddress((const GLubyte*)"glAlphaFragmentOp3ATI")) == NULL) || r;
+  r = ((glBeginFragmentShaderATI = (PFNGLBEGINFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glBeginFragmentShaderATI")) == NULL) || r;
+  r = ((glBindFragmentShaderATI = (PFNGLBINDFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glBindFragmentShaderATI")) == NULL) || r;
+  r = ((glColorFragmentOp1ATI = (PFNGLCOLORFRAGMENTOP1ATIPROC)glewGetProcAddress((const GLubyte*)"glColorFragmentOp1ATI")) == NULL) || r;
+  r = ((glColorFragmentOp2ATI = (PFNGLCOLORFRAGMENTOP2ATIPROC)glewGetProcAddress((const GLubyte*)"glColorFragmentOp2ATI")) == NULL) || r;
+  r = ((glColorFragmentOp3ATI = (PFNGLCOLORFRAGMENTOP3ATIPROC)glewGetProcAddress((const GLubyte*)"glColorFragmentOp3ATI")) == NULL) || r;
+  r = ((glDeleteFragmentShaderATI = (PFNGLDELETEFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glDeleteFragmentShaderATI")) == NULL) || r;
+  r = ((glEndFragmentShaderATI = (PFNGLENDFRAGMENTSHADERATIPROC)glewGetProcAddress((const GLubyte*)"glEndFragmentShaderATI")) == NULL) || r;
+  r = ((glGenFragmentShadersATI = (PFNGLGENFRAGMENTSHADERSATIPROC)glewGetProcAddress((const GLubyte*)"glGenFragmentShadersATI")) == NULL) || r;
+  r = ((glPassTexCoordATI = (PFNGLPASSTEXCOORDATIPROC)glewGetProcAddress((const GLubyte*)"glPassTexCoordATI")) == NULL) || r;
+  r = ((glSampleMapATI = (PFNGLSAMPLEMAPATIPROC)glewGetProcAddress((const GLubyte*)"glSampleMapATI")) == NULL) || r;
+  r = ((glSetFragmentShaderConstantATI = (PFNGLSETFRAGMENTSHADERCONSTANTATIPROC)glewGetProcAddress((const GLubyte*)"glSetFragmentShaderConstantATI")) == NULL) || r;
 
   return r;
 }
@@ -12028,8 +12025,8 @@ static GLboolean _glewInit_GL_ATI_map_object_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMapObjectBufferATI = (PFNGLMAPOBJECTBUFFERATIPROC)glewGetProcSubtractress((const GLubyte*)"glMapObjectBufferATI")) == NULL) || r;
-  r = ((glUnmapObjectBufferATI = (PFNGLUNMAPOBJECTBUFFERATIPROC)glewGetProcSubtractress((const GLubyte*)"glUnmapObjectBufferATI")) == NULL) || r;
+  r = ((glMapObjectBufferATI = (PFNGLMAPOBJECTBUFFERATIPROC)glewGetProcAddress((const GLubyte*)"glMapObjectBufferATI")) == NULL) || r;
+  r = ((glUnmapObjectBufferATI = (PFNGLUNMAPOBJECTBUFFERATIPROC)glewGetProcAddress((const GLubyte*)"glUnmapObjectBufferATI")) == NULL) || r;
 
   return r;
 }
@@ -12042,8 +12039,8 @@ static GLboolean _glewInit_GL_ATI_pn_triangles ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPNTrianglesfATI = (PFNGLPNTRIANGLESFATIPROC)glewGetProcSubtractress((const GLubyte*)"glPNTrianglesfATI")) == NULL) || r;
-  r = ((glPNTrianglesiATI = (PFNGLPNTRIANGLESIATIPROC)glewGetProcSubtractress((const GLubyte*)"glPNTrianglesiATI")) == NULL) || r;
+  r = ((glPNTrianglesfATI = (PFNGLPNTRIANGLESFATIPROC)glewGetProcAddress((const GLubyte*)"glPNTrianglesfATI")) == NULL) || r;
+  r = ((glPNTrianglesiATI = (PFNGLPNTRIANGLESIATIPROC)glewGetProcAddress((const GLubyte*)"glPNTrianglesiATI")) == NULL) || r;
 
   return r;
 }
@@ -12056,8 +12053,8 @@ static GLboolean _glewInit_GL_ATI_separate_stencil ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glStencilFuncSeparateATI = (PFNGLSTENCILFUNCSEPARATEATIPROC)glewGetProcSubtractress((const GLubyte*)"glStencilFuncSeparateATI")) == NULL) || r;
-  r = ((glStencilOpSeparateATI = (PFNGLSTENCILOPSEPARATEATIPROC)glewGetProcSubtractress((const GLubyte*)"glStencilOpSeparateATI")) == NULL) || r;
+  r = ((glStencilFuncSeparateATI = (PFNGLSTENCILFUNCSEPARATEATIPROC)glewGetProcAddress((const GLubyte*)"glStencilFuncSeparateATI")) == NULL) || r;
+  r = ((glStencilOpSeparateATI = (PFNGLSTENCILOPSEPARATEATIPROC)glewGetProcAddress((const GLubyte*)"glStencilOpSeparateATI")) == NULL) || r;
 
   return r;
 }
@@ -12070,18 +12067,18 @@ static GLboolean _glewInit_GL_ATI_vertex_array_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glArrayObjectATI = (PFNGLARRAYOBJECTATIPROC)glewGetProcSubtractress((const GLubyte*)"glArrayObjectATI")) == NULL) || r;
-  r = ((glFreeObjectBufferATI = (PFNGLFREEOBJECTBUFFERATIPROC)glewGetProcSubtractress((const GLubyte*)"glFreeObjectBufferATI")) == NULL) || r;
-  r = ((glGetArrayObjectfvATI = (PFNGLGETARRAYOBJECTFVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetArrayObjectfvATI")) == NULL) || r;
-  r = ((glGetArrayObjectivATI = (PFNGLGETARRAYOBJECTIVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetArrayObjectivATI")) == NULL) || r;
-  r = ((glGetObjectBufferfvATI = (PFNGLGETOBJECTBUFFERFVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectBufferfvATI")) == NULL) || r;
-  r = ((glGetObjectBufferivATI = (PFNGLGETOBJECTBUFFERIVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectBufferivATI")) == NULL) || r;
-  r = ((glGetVariantArrayObjectfvATI = (PFNGLGETVARIANTARRAYOBJECTFVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetVariantArrayObjectfvATI")) == NULL) || r;
-  r = ((glGetVariantArrayObjectivATI = (PFNGLGETVARIANTARRAYOBJECTIVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetVariantArrayObjectivATI")) == NULL) || r;
-  r = ((glIsObjectBufferATI = (PFNGLISOBJECTBUFFERATIPROC)glewGetProcSubtractress((const GLubyte*)"glIsObjectBufferATI")) == NULL) || r;
-  r = ((glNewObjectBufferATI = (PFNGLNEWOBJECTBUFFERATIPROC)glewGetProcSubtractress((const GLubyte*)"glNewObjectBufferATI")) == NULL) || r;
-  r = ((glUpdateObjectBufferATI = (PFNGLUPDATEOBJECTBUFFERATIPROC)glewGetProcSubtractress((const GLubyte*)"glUpdateObjectBufferATI")) == NULL) || r;
-  r = ((glVariantArrayObjectATI = (PFNGLVARIANTARRAYOBJECTATIPROC)glewGetProcSubtractress((const GLubyte*)"glVariantArrayObjectATI")) == NULL) || r;
+  r = ((glArrayObjectATI = (PFNGLARRAYOBJECTATIPROC)glewGetProcAddress((const GLubyte*)"glArrayObjectATI")) == NULL) || r;
+  r = ((glFreeObjectBufferATI = (PFNGLFREEOBJECTBUFFERATIPROC)glewGetProcAddress((const GLubyte*)"glFreeObjectBufferATI")) == NULL) || r;
+  r = ((glGetArrayObjectfvATI = (PFNGLGETARRAYOBJECTFVATIPROC)glewGetProcAddress((const GLubyte*)"glGetArrayObjectfvATI")) == NULL) || r;
+  r = ((glGetArrayObjectivATI = (PFNGLGETARRAYOBJECTIVATIPROC)glewGetProcAddress((const GLubyte*)"glGetArrayObjectivATI")) == NULL) || r;
+  r = ((glGetObjectBufferfvATI = (PFNGLGETOBJECTBUFFERFVATIPROC)glewGetProcAddress((const GLubyte*)"glGetObjectBufferfvATI")) == NULL) || r;
+  r = ((glGetObjectBufferivATI = (PFNGLGETOBJECTBUFFERIVATIPROC)glewGetProcAddress((const GLubyte*)"glGetObjectBufferivATI")) == NULL) || r;
+  r = ((glGetVariantArrayObjectfvATI = (PFNGLGETVARIANTARRAYOBJECTFVATIPROC)glewGetProcAddress((const GLubyte*)"glGetVariantArrayObjectfvATI")) == NULL) || r;
+  r = ((glGetVariantArrayObjectivATI = (PFNGLGETVARIANTARRAYOBJECTIVATIPROC)glewGetProcAddress((const GLubyte*)"glGetVariantArrayObjectivATI")) == NULL) || r;
+  r = ((glIsObjectBufferATI = (PFNGLISOBJECTBUFFERATIPROC)glewGetProcAddress((const GLubyte*)"glIsObjectBufferATI")) == NULL) || r;
+  r = ((glNewObjectBufferATI = (PFNGLNEWOBJECTBUFFERATIPROC)glewGetProcAddress((const GLubyte*)"glNewObjectBufferATI")) == NULL) || r;
+  r = ((glUpdateObjectBufferATI = (PFNGLUPDATEOBJECTBUFFERATIPROC)glewGetProcAddress((const GLubyte*)"glUpdateObjectBufferATI")) == NULL) || r;
+  r = ((glVariantArrayObjectATI = (PFNGLVARIANTARRAYOBJECTATIPROC)glewGetProcAddress((const GLubyte*)"glVariantArrayObjectATI")) == NULL) || r;
 
   return r;
 }
@@ -12094,9 +12091,9 @@ static GLboolean _glewInit_GL_ATI_vertex_attrib_array_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetVertexAttribArrayObjectfvATI = (PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribArrayObjectfvATI")) == NULL) || r;
-  r = ((glGetVertexAttribArrayObjectivATI = (PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribArrayObjectivATI")) == NULL) || r;
-  r = ((glVertexAttribArrayObjectATI = (PFNGLVERTEXATTRIBARRAYOBJECTATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribArrayObjectATI")) == NULL) || r;
+  r = ((glGetVertexAttribArrayObjectfvATI = (PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribArrayObjectfvATI")) == NULL) || r;
+  r = ((glGetVertexAttribArrayObjectivATI = (PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribArrayObjectivATI")) == NULL) || r;
+  r = ((glVertexAttribArrayObjectATI = (PFNGLVERTEXATTRIBARRAYOBJECTATIPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribArrayObjectATI")) == NULL) || r;
 
   return r;
 }
@@ -12109,51 +12106,51 @@ static GLboolean _glewInit_GL_ATI_vertex_streams ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClientActiveVertexStreamATI = (PFNGLCLIENTACTIVEVERTEXSTREAMATIPROC)glewGetProcSubtractress((const GLubyte*)"glClientActiveVertexStreamATI")) == NULL) || r;
-  r = ((glNormalStream3bATI = (PFNGLNORMALSTREAM3BATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3bATI")) == NULL) || r;
-  r = ((glNormalStream3bvATI = (PFNGLNORMALSTREAM3BVATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3bvATI")) == NULL) || r;
-  r = ((glNormalStream3dATI = (PFNGLNORMALSTREAM3DATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3dATI")) == NULL) || r;
-  r = ((glNormalStream3dvATI = (PFNGLNORMALSTREAM3DVATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3dvATI")) == NULL) || r;
-  r = ((glNormalStream3fATI = (PFNGLNORMALSTREAM3FATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3fATI")) == NULL) || r;
-  r = ((glNormalStream3fvATI = (PFNGLNORMALSTREAM3FVATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3fvATI")) == NULL) || r;
-  r = ((glNormalStream3iATI = (PFNGLNORMALSTREAM3IATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3iATI")) == NULL) || r;
-  r = ((glNormalStream3ivATI = (PFNGLNORMALSTREAM3IVATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3ivATI")) == NULL) || r;
-  r = ((glNormalStream3sATI = (PFNGLNORMALSTREAM3SATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3sATI")) == NULL) || r;
-  r = ((glNormalStream3svATI = (PFNGLNORMALSTREAM3SVATIPROC)glewGetProcSubtractress((const GLubyte*)"glNormalStream3svATI")) == NULL) || r;
-  r = ((glVertexBlendEnvfATI = (PFNGLVERTEXBLENDENVFATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexBlendEnvfATI")) == NULL) || r;
-  r = ((glVertexBlendEnviATI = (PFNGLVERTEXBLENDENVIATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexBlendEnviATI")) == NULL) || r;
-  r = ((glVertexStream1dATI = (PFNGLVERTEXSTREAM1DATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1dATI")) == NULL) || r;
-  r = ((glVertexStream1dvATI = (PFNGLVERTEXSTREAM1DVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1dvATI")) == NULL) || r;
-  r = ((glVertexStream1fATI = (PFNGLVERTEXSTREAM1FATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1fATI")) == NULL) || r;
-  r = ((glVertexStream1fvATI = (PFNGLVERTEXSTREAM1FVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1fvATI")) == NULL) || r;
-  r = ((glVertexStream1iATI = (PFNGLVERTEXSTREAM1IATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1iATI")) == NULL) || r;
-  r = ((glVertexStream1ivATI = (PFNGLVERTEXSTREAM1IVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1ivATI")) == NULL) || r;
-  r = ((glVertexStream1sATI = (PFNGLVERTEXSTREAM1SATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1sATI")) == NULL) || r;
-  r = ((glVertexStream1svATI = (PFNGLVERTEXSTREAM1SVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream1svATI")) == NULL) || r;
-  r = ((glVertexStream2dATI = (PFNGLVERTEXSTREAM2DATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2dATI")) == NULL) || r;
-  r = ((glVertexStream2dvATI = (PFNGLVERTEXSTREAM2DVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2dvATI")) == NULL) || r;
-  r = ((glVertexStream2fATI = (PFNGLVERTEXSTREAM2FATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2fATI")) == NULL) || r;
-  r = ((glVertexStream2fvATI = (PFNGLVERTEXSTREAM2FVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2fvATI")) == NULL) || r;
-  r = ((glVertexStream2iATI = (PFNGLVERTEXSTREAM2IATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2iATI")) == NULL) || r;
-  r = ((glVertexStream2ivATI = (PFNGLVERTEXSTREAM2IVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2ivATI")) == NULL) || r;
-  r = ((glVertexStream2sATI = (PFNGLVERTEXSTREAM2SATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2sATI")) == NULL) || r;
-  r = ((glVertexStream2svATI = (PFNGLVERTEXSTREAM2SVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream2svATI")) == NULL) || r;
-  r = ((glVertexStream3dATI = (PFNGLVERTEXSTREAM3DATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3dATI")) == NULL) || r;
-  r = ((glVertexStream3dvATI = (PFNGLVERTEXSTREAM3DVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3dvATI")) == NULL) || r;
-  r = ((glVertexStream3fATI = (PFNGLVERTEXSTREAM3FATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3fATI")) == NULL) || r;
-  r = ((glVertexStream3fvATI = (PFNGLVERTEXSTREAM3FVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3fvATI")) == NULL) || r;
-  r = ((glVertexStream3iATI = (PFNGLVERTEXSTREAM3IATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3iATI")) == NULL) || r;
-  r = ((glVertexStream3ivATI = (PFNGLVERTEXSTREAM3IVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3ivATI")) == NULL) || r;
-  r = ((glVertexStream3sATI = (PFNGLVERTEXSTREAM3SATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3sATI")) == NULL) || r;
-  r = ((glVertexStream3svATI = (PFNGLVERTEXSTREAM3SVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream3svATI")) == NULL) || r;
-  r = ((glVertexStream4dATI = (PFNGLVERTEXSTREAM4DATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4dATI")) == NULL) || r;
-  r = ((glVertexStream4dvATI = (PFNGLVERTEXSTREAM4DVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4dvATI")) == NULL) || r;
-  r = ((glVertexStream4fATI = (PFNGLVERTEXSTREAM4FATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4fATI")) == NULL) || r;
-  r = ((glVertexStream4fvATI = (PFNGLVERTEXSTREAM4FVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4fvATI")) == NULL) || r;
-  r = ((glVertexStream4iATI = (PFNGLVERTEXSTREAM4IATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4iATI")) == NULL) || r;
-  r = ((glVertexStream4ivATI = (PFNGLVERTEXSTREAM4IVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4ivATI")) == NULL) || r;
-  r = ((glVertexStream4sATI = (PFNGLVERTEXSTREAM4SATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4sATI")) == NULL) || r;
-  r = ((glVertexStream4svATI = (PFNGLVERTEXSTREAM4SVATIPROC)glewGetProcSubtractress((const GLubyte*)"glVertexStream4svATI")) == NULL) || r;
+  r = ((glClientActiveVertexStreamATI = (PFNGLCLIENTACTIVEVERTEXSTREAMATIPROC)glewGetProcAddress((const GLubyte*)"glClientActiveVertexStreamATI")) == NULL) || r;
+  r = ((glNormalStream3bATI = (PFNGLNORMALSTREAM3BATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3bATI")) == NULL) || r;
+  r = ((glNormalStream3bvATI = (PFNGLNORMALSTREAM3BVATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3bvATI")) == NULL) || r;
+  r = ((glNormalStream3dATI = (PFNGLNORMALSTREAM3DATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3dATI")) == NULL) || r;
+  r = ((glNormalStream3dvATI = (PFNGLNORMALSTREAM3DVATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3dvATI")) == NULL) || r;
+  r = ((glNormalStream3fATI = (PFNGLNORMALSTREAM3FATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3fATI")) == NULL) || r;
+  r = ((glNormalStream3fvATI = (PFNGLNORMALSTREAM3FVATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3fvATI")) == NULL) || r;
+  r = ((glNormalStream3iATI = (PFNGLNORMALSTREAM3IATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3iATI")) == NULL) || r;
+  r = ((glNormalStream3ivATI = (PFNGLNORMALSTREAM3IVATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3ivATI")) == NULL) || r;
+  r = ((glNormalStream3sATI = (PFNGLNORMALSTREAM3SATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3sATI")) == NULL) || r;
+  r = ((glNormalStream3svATI = (PFNGLNORMALSTREAM3SVATIPROC)glewGetProcAddress((const GLubyte*)"glNormalStream3svATI")) == NULL) || r;
+  r = ((glVertexBlendEnvfATI = (PFNGLVERTEXBLENDENVFATIPROC)glewGetProcAddress((const GLubyte*)"glVertexBlendEnvfATI")) == NULL) || r;
+  r = ((glVertexBlendEnviATI = (PFNGLVERTEXBLENDENVIATIPROC)glewGetProcAddress((const GLubyte*)"glVertexBlendEnviATI")) == NULL) || r;
+  r = ((glVertexStream1dATI = (PFNGLVERTEXSTREAM1DATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1dATI")) == NULL) || r;
+  r = ((glVertexStream1dvATI = (PFNGLVERTEXSTREAM1DVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1dvATI")) == NULL) || r;
+  r = ((glVertexStream1fATI = (PFNGLVERTEXSTREAM1FATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1fATI")) == NULL) || r;
+  r = ((glVertexStream1fvATI = (PFNGLVERTEXSTREAM1FVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1fvATI")) == NULL) || r;
+  r = ((glVertexStream1iATI = (PFNGLVERTEXSTREAM1IATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1iATI")) == NULL) || r;
+  r = ((glVertexStream1ivATI = (PFNGLVERTEXSTREAM1IVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1ivATI")) == NULL) || r;
+  r = ((glVertexStream1sATI = (PFNGLVERTEXSTREAM1SATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1sATI")) == NULL) || r;
+  r = ((glVertexStream1svATI = (PFNGLVERTEXSTREAM1SVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream1svATI")) == NULL) || r;
+  r = ((glVertexStream2dATI = (PFNGLVERTEXSTREAM2DATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2dATI")) == NULL) || r;
+  r = ((glVertexStream2dvATI = (PFNGLVERTEXSTREAM2DVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2dvATI")) == NULL) || r;
+  r = ((glVertexStream2fATI = (PFNGLVERTEXSTREAM2FATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2fATI")) == NULL) || r;
+  r = ((glVertexStream2fvATI = (PFNGLVERTEXSTREAM2FVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2fvATI")) == NULL) || r;
+  r = ((glVertexStream2iATI = (PFNGLVERTEXSTREAM2IATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2iATI")) == NULL) || r;
+  r = ((glVertexStream2ivATI = (PFNGLVERTEXSTREAM2IVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2ivATI")) == NULL) || r;
+  r = ((glVertexStream2sATI = (PFNGLVERTEXSTREAM2SATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2sATI")) == NULL) || r;
+  r = ((glVertexStream2svATI = (PFNGLVERTEXSTREAM2SVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream2svATI")) == NULL) || r;
+  r = ((glVertexStream3dATI = (PFNGLVERTEXSTREAM3DATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3dATI")) == NULL) || r;
+  r = ((glVertexStream3dvATI = (PFNGLVERTEXSTREAM3DVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3dvATI")) == NULL) || r;
+  r = ((glVertexStream3fATI = (PFNGLVERTEXSTREAM3FATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3fATI")) == NULL) || r;
+  r = ((glVertexStream3fvATI = (PFNGLVERTEXSTREAM3FVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3fvATI")) == NULL) || r;
+  r = ((glVertexStream3iATI = (PFNGLVERTEXSTREAM3IATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3iATI")) == NULL) || r;
+  r = ((glVertexStream3ivATI = (PFNGLVERTEXSTREAM3IVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3ivATI")) == NULL) || r;
+  r = ((glVertexStream3sATI = (PFNGLVERTEXSTREAM3SATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3sATI")) == NULL) || r;
+  r = ((glVertexStream3svATI = (PFNGLVERTEXSTREAM3SVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream3svATI")) == NULL) || r;
+  r = ((glVertexStream4dATI = (PFNGLVERTEXSTREAM4DATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4dATI")) == NULL) || r;
+  r = ((glVertexStream4dvATI = (PFNGLVERTEXSTREAM4DVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4dvATI")) == NULL) || r;
+  r = ((glVertexStream4fATI = (PFNGLVERTEXSTREAM4FATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4fATI")) == NULL) || r;
+  r = ((glVertexStream4fvATI = (PFNGLVERTEXSTREAM4FVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4fvATI")) == NULL) || r;
+  r = ((glVertexStream4iATI = (PFNGLVERTEXSTREAM4IATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4iATI")) == NULL) || r;
+  r = ((glVertexStream4ivATI = (PFNGLVERTEXSTREAM4IVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4ivATI")) == NULL) || r;
+  r = ((glVertexStream4sATI = (PFNGLVERTEXSTREAM4SATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4sATI")) == NULL) || r;
+  r = ((glVertexStream4svATI = (PFNGLVERTEXSTREAM4SVATIPROC)glewGetProcAddress((const GLubyte*)"glVertexStream4svATI")) == NULL) || r;
 
   return r;
 }
@@ -12166,9 +12163,9 @@ static GLboolean _glewInit_GL_EXT_base_instance ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysInstancedBaseInstanceEXT = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstancedBaseInstanceEXT")) == NULL) || r;
-  r = ((glDrawElementsInstancedBaseInstanceEXT = (PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedBaseInstanceEXT")) == NULL) || r;
-  r = ((glDrawElementsInstancedBaseVertexBaseInstanceEXT = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedBaseVertexBaseInstanceEXT")) == NULL) || r;
+  r = ((glDrawArraysInstancedBaseInstanceEXT = (PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstancedBaseInstanceEXT")) == NULL) || r;
+  r = ((glDrawElementsInstancedBaseInstanceEXT = (PFNGLDRAWELEMENTSINSTANCEDBASEINSTANCEEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedBaseInstanceEXT")) == NULL) || r;
+  r = ((glDrawElementsInstancedBaseVertexBaseInstanceEXT = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedBaseVertexBaseInstanceEXT")) == NULL) || r;
 
   return r;
 }
@@ -12181,9 +12178,9 @@ static GLboolean _glewInit_GL_EXT_bindable_uniform ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetUniformBufferSizeEXT = (PFNGLGETUNIFORMBUFFERSIZEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformBufferSizeEXT")) == NULL) || r;
-  r = ((glGetUniformOffsetEXT = (PFNGLGETUNIFORMOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformOffsetEXT")) == NULL) || r;
-  r = ((glUniformBufferEXT = (PFNGLUNIFORMBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniformBufferEXT")) == NULL) || r;
+  r = ((glGetUniformBufferSizeEXT = (PFNGLGETUNIFORMBUFFERSIZEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetUniformBufferSizeEXT")) == NULL) || r;
+  r = ((glGetUniformOffsetEXT = (PFNGLGETUNIFORMOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glGetUniformOffsetEXT")) == NULL) || r;
+  r = ((glUniformBufferEXT = (PFNGLUNIFORMBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glUniformBufferEXT")) == NULL) || r;
 
   return r;
 }
@@ -12196,7 +12193,7 @@ static GLboolean _glewInit_GL_EXT_blend_color ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendColorEXT = (PFNGLBLENDCOLOREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendColorEXT")) == NULL) || r;
+  r = ((glBlendColorEXT = (PFNGLBLENDCOLOREXTPROC)glewGetProcAddress((const GLubyte*)"glBlendColorEXT")) == NULL) || r;
 
   return r;
 }
@@ -12209,7 +12206,7 @@ static GLboolean _glewInit_GL_EXT_blend_equation_separate ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquationSeparateEXT = (PFNGLBLENDEQUATIONSEPARATEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationSeparateEXT")) == NULL) || r;
+  r = ((glBlendEquationSeparateEXT = (PFNGLBLENDEQUATIONSEPARATEEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparateEXT")) == NULL) || r;
 
   return r;
 }
@@ -12222,9 +12219,9 @@ static GLboolean _glewInit_GL_EXT_blend_func_extended ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindFragDataLocationIndexedEXT = (PFNGLBINDFRAGDATALOCATIONINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindFragDataLocationIndexedEXT")) == NULL) || r;
-  r = ((glGetFragDataIndexEXT = (PFNGLGETFRAGDATAINDEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragDataIndexEXT")) == NULL) || r;
-  r = ((glGetProgramResourceLocationIndexEXT = (PFNGLGETPROGRAMRESOURCELOCATIONINDEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourceLocationIndexEXT")) == NULL) || r;
+  r = ((glBindFragDataLocationIndexedEXT = (PFNGLBINDFRAGDATALOCATIONINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glBindFragDataLocationIndexedEXT")) == NULL) || r;
+  r = ((glGetFragDataIndexEXT = (PFNGLGETFRAGDATAINDEXEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFragDataIndexEXT")) == NULL) || r;
+  r = ((glGetProgramResourceLocationIndexEXT = (PFNGLGETPROGRAMRESOURCELOCATIONINDEXEXTPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourceLocationIndexEXT")) == NULL) || r;
 
   return r;
 }
@@ -12237,7 +12234,7 @@ static GLboolean _glewInit_GL_EXT_blend_func_separate ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendFuncSeparateEXT = (PFNGLBLENDFUNCSEPARATEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncSeparateEXT")) == NULL) || r;
+  r = ((glBlendFuncSeparateEXT = (PFNGLBLENDFUNCSEPARATEEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncSeparateEXT")) == NULL) || r;
 
   return r;
 }
@@ -12250,7 +12247,7 @@ static GLboolean _glewInit_GL_EXT_blend_minmax ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquationEXT = (PFNGLBLENDEQUATIONEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationEXT")) == NULL) || r;
+  r = ((glBlendEquationEXT = (PFNGLBLENDEQUATIONEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationEXT")) == NULL) || r;
 
   return r;
 }
@@ -12263,8 +12260,8 @@ static GLboolean _glewInit_GL_EXT_buffer_storage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferStorageEXT = (PFNGLBUFFERSTORAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBufferStorageEXT")) == NULL) || r;
-  r = ((glNamedBufferStorageEXT = (PFNGLNAMEDBUFFERSTORAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferStorageEXT")) == NULL) || r;
+  r = ((glBufferStorageEXT = (PFNGLBUFFERSTORAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glBufferStorageEXT")) == NULL) || r;
+  r = ((glNamedBufferStorageEXT = (PFNGLNAMEDBUFFERSTORAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferStorageEXT")) == NULL) || r;
 
   return r;
 }
@@ -12277,8 +12274,8 @@ static GLboolean _glewInit_GL_EXT_clear_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearTexImageEXT = (PFNGLCLEARTEXIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearTexImageEXT")) == NULL) || r;
-  r = ((glClearTexSubImageEXT = (PFNGLCLEARTEXSUBIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearTexSubImageEXT")) == NULL) || r;
+  r = ((glClearTexImageEXT = (PFNGLCLEARTEXIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glClearTexImageEXT")) == NULL) || r;
+  r = ((glClearTexSubImageEXT = (PFNGLCLEARTEXSUBIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glClearTexSubImageEXT")) == NULL) || r;
 
   return r;
 }
@@ -12291,8 +12288,8 @@ static GLboolean _glewInit_GL_EXT_color_subtable ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorSubTableEXT = (PFNGLCOLORSUBTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glColorSubTableEXT")) == NULL) || r;
-  r = ((glCopyColorSubTableEXT = (PFNGLCOPYCOLORSUBTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyColorSubTableEXT")) == NULL) || r;
+  r = ((glColorSubTableEXT = (PFNGLCOLORSUBTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"glColorSubTableEXT")) == NULL) || r;
+  r = ((glCopyColorSubTableEXT = (PFNGLCOPYCOLORSUBTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyColorSubTableEXT")) == NULL) || r;
 
   return r;
 }
@@ -12305,8 +12302,8 @@ static GLboolean _glewInit_GL_EXT_compiled_vertex_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glLockArraysEXT = (PFNGLLOCKARRAYSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glLockArraysEXT")) == NULL) || r;
-  r = ((glUnlockArraysEXT = (PFNGLUNLOCKARRAYSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUnlockArraysEXT")) == NULL) || r;
+  r = ((glLockArraysEXT = (PFNGLLOCKARRAYSEXTPROC)glewGetProcAddress((const GLubyte*)"glLockArraysEXT")) == NULL) || r;
+  r = ((glUnlockArraysEXT = (PFNGLUNLOCKARRAYSEXTPROC)glewGetProcAddress((const GLubyte*)"glUnlockArraysEXT")) == NULL) || r;
 
   return r;
 }
@@ -12319,19 +12316,19 @@ static GLboolean _glewInit_GL_EXT_convolution ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glConvolutionFilter1DEXT = (PFNGLCONVOLUTIONFILTER1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionFilter1DEXT")) == NULL) || r;
-  r = ((glConvolutionFilter2DEXT = (PFNGLCONVOLUTIONFILTER2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionFilter2DEXT")) == NULL) || r;
-  r = ((glConvolutionParameterfEXT = (PFNGLCONVOLUTIONPARAMETERFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameterfEXT")) == NULL) || r;
-  r = ((glConvolutionParameterfvEXT = (PFNGLCONVOLUTIONPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameterfvEXT")) == NULL) || r;
-  r = ((glConvolutionParameteriEXT = (PFNGLCONVOLUTIONPARAMETERIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameteriEXT")) == NULL) || r;
-  r = ((glConvolutionParameterivEXT = (PFNGLCONVOLUTIONPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glConvolutionParameterivEXT")) == NULL) || r;
-  r = ((glCopyConvolutionFilter1DEXT = (PFNGLCOPYCONVOLUTIONFILTER1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyConvolutionFilter1DEXT")) == NULL) || r;
-  r = ((glCopyConvolutionFilter2DEXT = (PFNGLCOPYCONVOLUTIONFILTER2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyConvolutionFilter2DEXT")) == NULL) || r;
-  r = ((glGetConvolutionFilterEXT = (PFNGLGETCONVOLUTIONFILTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetConvolutionFilterEXT")) == NULL) || r;
-  r = ((glGetConvolutionParameterfvEXT = (PFNGLGETCONVOLUTIONPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetConvolutionParameterfvEXT")) == NULL) || r;
-  r = ((glGetConvolutionParameterivEXT = (PFNGLGETCONVOLUTIONPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetConvolutionParameterivEXT")) == NULL) || r;
-  r = ((glGetSeparableFilterEXT = (PFNGLGETSEPARABLEFILTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetSeparableFilterEXT")) == NULL) || r;
-  r = ((glSeparableFilter2DEXT = (PFNGLSEPARABLEFILTER2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSeparableFilter2DEXT")) == NULL) || r;
+  r = ((glConvolutionFilter1DEXT = (PFNGLCONVOLUTIONFILTER1DEXTPROC)glewGetProcAddress((const GLubyte*)"glConvolutionFilter1DEXT")) == NULL) || r;
+  r = ((glConvolutionFilter2DEXT = (PFNGLCONVOLUTIONFILTER2DEXTPROC)glewGetProcAddress((const GLubyte*)"glConvolutionFilter2DEXT")) == NULL) || r;
+  r = ((glConvolutionParameterfEXT = (PFNGLCONVOLUTIONPARAMETERFEXTPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameterfEXT")) == NULL) || r;
+  r = ((glConvolutionParameterfvEXT = (PFNGLCONVOLUTIONPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameterfvEXT")) == NULL) || r;
+  r = ((glConvolutionParameteriEXT = (PFNGLCONVOLUTIONPARAMETERIEXTPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameteriEXT")) == NULL) || r;
+  r = ((glConvolutionParameterivEXT = (PFNGLCONVOLUTIONPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glConvolutionParameterivEXT")) == NULL) || r;
+  r = ((glCopyConvolutionFilter1DEXT = (PFNGLCOPYCONVOLUTIONFILTER1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyConvolutionFilter1DEXT")) == NULL) || r;
+  r = ((glCopyConvolutionFilter2DEXT = (PFNGLCOPYCONVOLUTIONFILTER2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyConvolutionFilter2DEXT")) == NULL) || r;
+  r = ((glGetConvolutionFilterEXT = (PFNGLGETCONVOLUTIONFILTEREXTPROC)glewGetProcAddress((const GLubyte*)"glGetConvolutionFilterEXT")) == NULL) || r;
+  r = ((glGetConvolutionParameterfvEXT = (PFNGLGETCONVOLUTIONPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetConvolutionParameterfvEXT")) == NULL) || r;
+  r = ((glGetConvolutionParameterivEXT = (PFNGLGETCONVOLUTIONPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetConvolutionParameterivEXT")) == NULL) || r;
+  r = ((glGetSeparableFilterEXT = (PFNGLGETSEPARABLEFILTEREXTPROC)glewGetProcAddress((const GLubyte*)"glGetSeparableFilterEXT")) == NULL) || r;
+  r = ((glSeparableFilter2DEXT = (PFNGLSEPARABLEFILTER2DEXTPROC)glewGetProcAddress((const GLubyte*)"glSeparableFilter2DEXT")) == NULL) || r;
 
   return r;
 }
@@ -12344,8 +12341,8 @@ static GLboolean _glewInit_GL_EXT_coordinate_frame ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBinormalPointerEXT = (PFNGLBINORMALPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBinormalPointerEXT")) == NULL) || r;
-  r = ((glTangentPointerEXT = (PFNGLTANGENTPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glTangentPointerEXT")) == NULL) || r;
+  r = ((glBinormalPointerEXT = (PFNGLBINORMALPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glBinormalPointerEXT")) == NULL) || r;
+  r = ((glTangentPointerEXT = (PFNGLTANGENTPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glTangentPointerEXT")) == NULL) || r;
 
   return r;
 }
@@ -12358,7 +12355,7 @@ static GLboolean _glewInit_GL_EXT_copy_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyImageSubDataEXT = (PFNGLCOPYIMAGESUBDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyImageSubDataEXT")) == NULL) || r;
+  r = ((glCopyImageSubDataEXT = (PFNGLCOPYIMAGESUBDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyImageSubDataEXT")) == NULL) || r;
 
   return r;
 }
@@ -12371,11 +12368,11 @@ static GLboolean _glewInit_GL_EXT_copy_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyTexImage1DEXT = (PFNGLCOPYTEXIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexImage1DEXT")) == NULL) || r;
-  r = ((glCopyTexImage2DEXT = (PFNGLCOPYTEXIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexImage2DEXT")) == NULL) || r;
-  r = ((glCopyTexSubImage1DEXT = (PFNGLCOPYTEXSUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexSubImage1DEXT")) == NULL) || r;
-  r = ((glCopyTexSubImage2DEXT = (PFNGLCOPYTEXSUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexSubImage2DEXT")) == NULL) || r;
-  r = ((glCopyTexSubImage3DEXT = (PFNGLCOPYTEXSUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexSubImage3DEXT")) == NULL) || r;
+  r = ((glCopyTexImage1DEXT = (PFNGLCOPYTEXIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTexImage1DEXT")) == NULL) || r;
+  r = ((glCopyTexImage2DEXT = (PFNGLCOPYTEXIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTexImage2DEXT")) == NULL) || r;
+  r = ((glCopyTexSubImage1DEXT = (PFNGLCOPYTEXSUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTexSubImage1DEXT")) == NULL) || r;
+  r = ((glCopyTexSubImage2DEXT = (PFNGLCOPYTEXSUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTexSubImage2DEXT")) == NULL) || r;
+  r = ((glCopyTexSubImage3DEXT = (PFNGLCOPYTEXSUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTexSubImage3DEXT")) == NULL) || r;
 
   return r;
 }
@@ -12388,8 +12385,8 @@ static GLboolean _glewInit_GL_EXT_cull_vertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCullParameterdvEXT = (PFNGLCULLPARAMETERDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCullParameterdvEXT")) == NULL) || r;
-  r = ((glCullParameterfvEXT = (PFNGLCULLPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCullParameterfvEXT")) == NULL) || r;
+  r = ((glCullParameterdvEXT = (PFNGLCULLPARAMETERDVEXTPROC)glewGetProcAddress((const GLubyte*)"glCullParameterdvEXT")) == NULL) || r;
+  r = ((glCullParameterfvEXT = (PFNGLCULLPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glCullParameterfvEXT")) == NULL) || r;
 
   return r;
 }
@@ -12402,8 +12399,8 @@ static GLboolean _glewInit_GL_EXT_debug_label ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetObjectLabelEXT = (PFNGLGETOBJECTLABELEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectLabelEXT")) == NULL) || r;
-  r = ((glLabelObjectEXT = (PFNGLLABELOBJECTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glLabelObjectEXT")) == NULL) || r;
+  r = ((glGetObjectLabelEXT = (PFNGLGETOBJECTLABELEXTPROC)glewGetProcAddress((const GLubyte*)"glGetObjectLabelEXT")) == NULL) || r;
+  r = ((glLabelObjectEXT = (PFNGLLABELOBJECTEXTPROC)glewGetProcAddress((const GLubyte*)"glLabelObjectEXT")) == NULL) || r;
 
   return r;
 }
@@ -12416,9 +12413,9 @@ static GLboolean _glewInit_GL_EXT_debug_marker ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glInsertEventMarkerEXT = (PFNGLINSERTEVENTMARKEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glInsertEventMarkerEXT")) == NULL) || r;
-  r = ((glPopGroupMarkerEXT = (PFNGLPOPGROUPMARKEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glPopGroupMarkerEXT")) == NULL) || r;
-  r = ((glPushGroupMarkerEXT = (PFNGLPUSHGROUPMARKEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glPushGroupMarkerEXT")) == NULL) || r;
+  r = ((glInsertEventMarkerEXT = (PFNGLINSERTEVENTMARKEREXTPROC)glewGetProcAddress((const GLubyte*)"glInsertEventMarkerEXT")) == NULL) || r;
+  r = ((glPopGroupMarkerEXT = (PFNGLPOPGROUPMARKEREXTPROC)glewGetProcAddress((const GLubyte*)"glPopGroupMarkerEXT")) == NULL) || r;
+  r = ((glPushGroupMarkerEXT = (PFNGLPUSHGROUPMARKEREXTPROC)glewGetProcAddress((const GLubyte*)"glPushGroupMarkerEXT")) == NULL) || r;
 
   return r;
 }
@@ -12431,7 +12428,7 @@ static GLboolean _glewInit_GL_EXT_depth_bounds_test ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDepthBoundsEXT = (PFNGLDEPTHBOUNDSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDepthBoundsEXT")) == NULL) || r;
+  r = ((glDepthBoundsEXT = (PFNGLDEPTHBOUNDSEXTPROC)glewGetProcAddress((const GLubyte*)"glDepthBoundsEXT")) == NULL) || r;
 
   return r;
 }
@@ -12444,220 +12441,220 @@ static GLboolean _glewInit_GL_EXT_direct_state_access ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindMultiTextureEXT = (PFNGLBINDMULTITEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindMultiTextureEXT")) == NULL) || r;
-  r = ((glCheckNamedFramebufferStatusEXT = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCheckNamedFramebufferStatusEXT")) == NULL) || r;
-  r = ((glClientAttribDefaultEXT = (PFNGLCLIENTATTRIBDEFAULTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClientAttribDefaultEXT")) == NULL) || r;
-  r = ((glCompressedMultiTexImage1DEXT = (PFNGLCOMPRESSEDMULTITEXIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedMultiTexImage1DEXT")) == NULL) || r;
-  r = ((glCompressedMultiTexImage2DEXT = (PFNGLCOMPRESSEDMULTITEXIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedMultiTexImage2DEXT")) == NULL) || r;
-  r = ((glCompressedMultiTexImage3DEXT = (PFNGLCOMPRESSEDMULTITEXIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedMultiTexImage3DEXT")) == NULL) || r;
-  r = ((glCompressedMultiTexSubImage1DEXT = (PFNGLCOMPRESSEDMULTITEXSUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedMultiTexSubImage1DEXT")) == NULL) || r;
-  r = ((glCompressedMultiTexSubImage2DEXT = (PFNGLCOMPRESSEDMULTITEXSUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedMultiTexSubImage2DEXT")) == NULL) || r;
-  r = ((glCompressedMultiTexSubImage3DEXT = (PFNGLCOMPRESSEDMULTITEXSUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedMultiTexSubImage3DEXT")) == NULL) || r;
-  r = ((glCompressedTextureImage1DEXT = (PFNGLCOMPRESSEDTEXTUREIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureImage1DEXT")) == NULL) || r;
-  r = ((glCompressedTextureImage2DEXT = (PFNGLCOMPRESSEDTEXTUREIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureImage2DEXT")) == NULL) || r;
-  r = ((glCompressedTextureImage3DEXT = (PFNGLCOMPRESSEDTEXTUREIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureImage3DEXT")) == NULL) || r;
-  r = ((glCompressedTextureSubImage1DEXT = (PFNGLCOMPRESSEDTEXTURESUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureSubImage1DEXT")) == NULL) || r;
-  r = ((glCompressedTextureSubImage2DEXT = (PFNGLCOMPRESSEDTEXTURESUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureSubImage2DEXT")) == NULL) || r;
-  r = ((glCompressedTextureSubImage3DEXT = (PFNGLCOMPRESSEDTEXTURESUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTextureSubImage3DEXT")) == NULL) || r;
-  r = ((glCopyMultiTexImage1DEXT = (PFNGLCOPYMULTITEXIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyMultiTexImage1DEXT")) == NULL) || r;
-  r = ((glCopyMultiTexImage2DEXT = (PFNGLCOPYMULTITEXIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyMultiTexImage2DEXT")) == NULL) || r;
-  r = ((glCopyMultiTexSubImage1DEXT = (PFNGLCOPYMULTITEXSUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyMultiTexSubImage1DEXT")) == NULL) || r;
-  r = ((glCopyMultiTexSubImage2DEXT = (PFNGLCOPYMULTITEXSUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyMultiTexSubImage2DEXT")) == NULL) || r;
-  r = ((glCopyMultiTexSubImage3DEXT = (PFNGLCOPYMULTITEXSUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyMultiTexSubImage3DEXT")) == NULL) || r;
-  r = ((glCopyTextureImage1DEXT = (PFNGLCOPYTEXTUREIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureImage1DEXT")) == NULL) || r;
-  r = ((glCopyTextureImage2DEXT = (PFNGLCOPYTEXTUREIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureImage2DEXT")) == NULL) || r;
-  r = ((glCopyTextureSubImage1DEXT = (PFNGLCOPYTEXTURESUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureSubImage1DEXT")) == NULL) || r;
-  r = ((glCopyTextureSubImage2DEXT = (PFNGLCOPYTEXTURESUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureSubImage2DEXT")) == NULL) || r;
-  r = ((glCopyTextureSubImage3DEXT = (PFNGLCOPYTEXTURESUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTextureSubImage3DEXT")) == NULL) || r;
-  r = ((glDisableClientStateIndexedEXT = (PFNGLDISABLECLIENTSTATEINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableClientStateIndexedEXT")) == NULL) || r;
-  r = ((glDisableClientStateiEXT = (PFNGLDISABLECLIENTSTATEIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableClientStateiEXT")) == NULL) || r;
-  r = ((glDisableVertexArrayAttribEXT = (PFNGLDISABLEVERTEXARRAYATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVertexArrayAttribEXT")) == NULL) || r;
-  r = ((glDisableVertexArrayEXT = (PFNGLDISABLEVERTEXARRAYEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVertexArrayEXT")) == NULL) || r;
-  r = ((glEnableClientStateIndexedEXT = (PFNGLENABLECLIENTSTATEINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableClientStateIndexedEXT")) == NULL) || r;
-  r = ((glEnableClientStateiEXT = (PFNGLENABLECLIENTSTATEIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableClientStateiEXT")) == NULL) || r;
-  r = ((glEnableVertexArrayAttribEXT = (PFNGLENABLEVERTEXARRAYATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVertexArrayAttribEXT")) == NULL) || r;
-  r = ((glEnableVertexArrayEXT = (PFNGLENABLEVERTEXARRAYEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVertexArrayEXT")) == NULL) || r;
-  r = ((glFlushMappedNamedBufferRangeEXT = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFlushMappedNamedBufferRangeEXT")) == NULL) || r;
-  r = ((glFramebufferDrawBufferEXT = (PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferDrawBufferEXT")) == NULL) || r;
-  r = ((glFramebufferDrawBuffersEXT = (PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferDrawBuffersEXT")) == NULL) || r;
-  r = ((glFramebufferReadBufferEXT = (PFNGLFRAMEBUFFERREADBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferReadBufferEXT")) == NULL) || r;
-  r = ((glGenerateMultiTexMipmapEXT = (PFNGLGENERATEMULTITEXMIPMAPEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenerateMultiTexMipmapEXT")) == NULL) || r;
-  r = ((glGenerateTextureMipmapEXT = (PFNGLGENERATETEXTUREMIPMAPEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenerateTextureMipmapEXT")) == NULL) || r;
-  r = ((glGetCompressedMultiTexImageEXT = (PFNGLGETCOMPRESSEDMULTITEXIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetCompressedMultiTexImageEXT")) == NULL) || r;
-  r = ((glGetCompressedTextureImageEXT = (PFNGLGETCOMPRESSEDTEXTUREIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetCompressedTextureImageEXT")) == NULL) || r;
-  r = ((glGetDoubleIndexedvEXT = (PFNGLGETDOUBLEINDEXEDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetDoubleIndexedvEXT")) == NULL) || r;
-  r = ((glGetDoublei_vEXT = (PFNGLGETDOUBLEI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetDoublei_vEXT")) == NULL) || r;
-  r = ((glGetFloatIndexedvEXT = (PFNGLGETFLOATINDEXEDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFloatIndexedvEXT")) == NULL) || r;
-  r = ((glGetFloati_vEXT = (PFNGLGETFLOATI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFloati_vEXT")) == NULL) || r;
-  r = ((glGetFramebufferParameterivEXT = (PFNGLGETFRAMEBUFFERPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFramebufferParameterivEXT")) == NULL) || r;
-  r = ((glGetMultiTexEnvfvEXT = (PFNGLGETMULTITEXENVFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexEnvfvEXT")) == NULL) || r;
-  r = ((glGetMultiTexEnvivEXT = (PFNGLGETMULTITEXENVIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexEnvivEXT")) == NULL) || r;
-  r = ((glGetMultiTexGendvEXT = (PFNGLGETMULTITEXGENDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexGendvEXT")) == NULL) || r;
-  r = ((glGetMultiTexGenfvEXT = (PFNGLGETMULTITEXGENFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexGenfvEXT")) == NULL) || r;
-  r = ((glGetMultiTexGenivEXT = (PFNGLGETMULTITEXGENIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexGenivEXT")) == NULL) || r;
-  r = ((glGetMultiTexImageEXT = (PFNGLGETMULTITEXIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexImageEXT")) == NULL) || r;
-  r = ((glGetMultiTexLevelParameterfvEXT = (PFNGLGETMULTITEXLEVELPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexLevelParameterfvEXT")) == NULL) || r;
-  r = ((glGetMultiTexLevelParameterivEXT = (PFNGLGETMULTITEXLEVELPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexLevelParameterivEXT")) == NULL) || r;
-  r = ((glGetMultiTexParameterIivEXT = (PFNGLGETMULTITEXPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexParameterIivEXT")) == NULL) || r;
-  r = ((glGetMultiTexParameterIuivEXT = (PFNGLGETMULTITEXPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexParameterIuivEXT")) == NULL) || r;
-  r = ((glGetMultiTexParameterfvEXT = (PFNGLGETMULTITEXPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexParameterfvEXT")) == NULL) || r;
-  r = ((glGetMultiTexParameterivEXT = (PFNGLGETMULTITEXPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultiTexParameterivEXT")) == NULL) || r;
-  r = ((glGetNamedBufferParameterivEXT = (PFNGLGETNAMEDBUFFERPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferParameterivEXT")) == NULL) || r;
-  r = ((glGetNamedBufferPointervEXT = (PFNGLGETNAMEDBUFFERPOINTERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferPointervEXT")) == NULL) || r;
-  r = ((glGetNamedBufferSubDataEXT = (PFNGLGETNAMEDBUFFERSUBDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferSubDataEXT")) == NULL) || r;
-  r = ((glGetNamedFramebufferAttachmentParameterivEXT = (PFNGLGETNAMEDFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedFramebufferAttachmentParameterivEXT")) == NULL) || r;
-  r = ((glGetNamedProgramLocalParameterIivEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedProgramLocalParameterIivEXT")) == NULL) || r;
-  r = ((glGetNamedProgramLocalParameterIuivEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedProgramLocalParameterIuivEXT")) == NULL) || r;
-  r = ((glGetNamedProgramLocalParameterdvEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedProgramLocalParameterdvEXT")) == NULL) || r;
-  r = ((glGetNamedProgramLocalParameterfvEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedProgramLocalParameterfvEXT")) == NULL) || r;
-  r = ((glGetNamedProgramStringEXT = (PFNGLGETNAMEDPROGRAMSTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedProgramStringEXT")) == NULL) || r;
-  r = ((glGetNamedProgramivEXT = (PFNGLGETNAMEDPROGRAMIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedProgramivEXT")) == NULL) || r;
-  r = ((glGetNamedRenderbufferParameterivEXT = (PFNGLGETNAMEDRENDERBUFFERPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedRenderbufferParameterivEXT")) == NULL) || r;
-  r = ((glGetPointerIndexedvEXT = (PFNGLGETPOINTERINDEXEDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetPointerIndexedvEXT")) == NULL) || r;
-  r = ((glGetPointeri_vEXT = (PFNGLGETPOINTERI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetPointeri_vEXT")) == NULL) || r;
-  r = ((glGetTextureImageEXT = (PFNGLGETTEXTUREIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureImageEXT")) == NULL) || r;
-  r = ((glGetTextureLevelParameterfvEXT = (PFNGLGETTEXTURELEVELPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureLevelParameterfvEXT")) == NULL) || r;
-  r = ((glGetTextureLevelParameterivEXT = (PFNGLGETTEXTURELEVELPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureLevelParameterivEXT")) == NULL) || r;
-  r = ((glGetTextureParameterIivEXT = (PFNGLGETTEXTUREPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterIivEXT")) == NULL) || r;
-  r = ((glGetTextureParameterIuivEXT = (PFNGLGETTEXTUREPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterIuivEXT")) == NULL) || r;
-  r = ((glGetTextureParameterfvEXT = (PFNGLGETTEXTUREPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterfvEXT")) == NULL) || r;
-  r = ((glGetTextureParameterivEXT = (PFNGLGETTEXTUREPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureParameterivEXT")) == NULL) || r;
-  r = ((glGetVertexArrayIntegeri_vEXT = (PFNGLGETVERTEXARRAYINTEGERI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayIntegeri_vEXT")) == NULL) || r;
-  r = ((glGetVertexArrayIntegervEXT = (PFNGLGETVERTEXARRAYINTEGERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayIntegervEXT")) == NULL) || r;
-  r = ((glGetVertexArrayPointeri_vEXT = (PFNGLGETVERTEXARRAYPOINTERI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayPointeri_vEXT")) == NULL) || r;
-  r = ((glGetVertexArrayPointervEXT = (PFNGLGETVERTEXARRAYPOINTERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexArrayPointervEXT")) == NULL) || r;
-  r = ((glMapNamedBufferEXT = (PFNGLMAPNAMEDBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glMapNamedBufferEXT")) == NULL) || r;
-  r = ((glMapNamedBufferRangeEXT = (PFNGLMAPNAMEDBUFFERRANGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMapNamedBufferRangeEXT")) == NULL) || r;
-  r = ((glMatrixFrustumEXT = (PFNGLMATRIXFRUSTUMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixFrustumEXT")) == NULL) || r;
-  r = ((glMatrixLoadIdentityEXT = (PFNGLMATRIXLOADIDENTITYEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoadIdentityEXT")) == NULL) || r;
-  r = ((glMatrixLoadTransposedEXT = (PFNGLMATRIXLOADTRANSPOSEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoadTransposedEXT")) == NULL) || r;
-  r = ((glMatrixLoadTransposefEXT = (PFNGLMATRIXLOADTRANSPOSEFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoadTransposefEXT")) == NULL) || r;
-  r = ((glMatrixLoaddEXT = (PFNGLMATRIXLOADDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoaddEXT")) == NULL) || r;
-  r = ((glMatrixLoadfEXT = (PFNGLMATRIXLOADFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoadfEXT")) == NULL) || r;
-  r = ((glMatrixMultTransposedEXT = (PFNGLMATRIXMULTTRANSPOSEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMultTransposedEXT")) == NULL) || r;
-  r = ((glMatrixMultTransposefEXT = (PFNGLMATRIXMULTTRANSPOSEFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMultTransposefEXT")) == NULL) || r;
-  r = ((glMatrixMultdEXT = (PFNGLMATRIXMULTDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMultdEXT")) == NULL) || r;
-  r = ((glMatrixMultfEXT = (PFNGLMATRIXMULTFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMultfEXT")) == NULL) || r;
-  r = ((glMatrixOrthoEXT = (PFNGLMATRIXORTHOEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixOrthoEXT")) == NULL) || r;
-  r = ((glMatrixPopEXT = (PFNGLMATRIXPOPEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixPopEXT")) == NULL) || r;
-  r = ((glMatrixPushEXT = (PFNGLMATRIXPUSHEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixPushEXT")) == NULL) || r;
-  r = ((glMatrixRotatedEXT = (PFNGLMATRIXROTATEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixRotatedEXT")) == NULL) || r;
-  r = ((glMatrixRotatefEXT = (PFNGLMATRIXROTATEFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixRotatefEXT")) == NULL) || r;
-  r = ((glMatrixScaledEXT = (PFNGLMATRIXSCALEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixScaledEXT")) == NULL) || r;
-  r = ((glMatrixScalefEXT = (PFNGLMATRIXSCALEFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixScalefEXT")) == NULL) || r;
-  r = ((glMatrixTranslatedEXT = (PFNGLMATRIXTRANSLATEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixTranslatedEXT")) == NULL) || r;
-  r = ((glMatrixTranslatefEXT = (PFNGLMATRIXTRANSLATEFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixTranslatefEXT")) == NULL) || r;
-  r = ((glMultiTexBufferEXT = (PFNGLMULTITEXBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexBufferEXT")) == NULL) || r;
-  r = ((glMultiTexCoordPointerEXT = (PFNGLMULTITEXCOORDPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoordPointerEXT")) == NULL) || r;
-  r = ((glMultiTexEnvfEXT = (PFNGLMULTITEXENVFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexEnvfEXT")) == NULL) || r;
-  r = ((glMultiTexEnvfvEXT = (PFNGLMULTITEXENVFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexEnvfvEXT")) == NULL) || r;
-  r = ((glMultiTexEnviEXT = (PFNGLMULTITEXENVIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexEnviEXT")) == NULL) || r;
-  r = ((glMultiTexEnvivEXT = (PFNGLMULTITEXENVIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexEnvivEXT")) == NULL) || r;
-  r = ((glMultiTexGendEXT = (PFNGLMULTITEXGENDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexGendEXT")) == NULL) || r;
-  r = ((glMultiTexGendvEXT = (PFNGLMULTITEXGENDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexGendvEXT")) == NULL) || r;
-  r = ((glMultiTexGenfEXT = (PFNGLMULTITEXGENFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexGenfEXT")) == NULL) || r;
-  r = ((glMultiTexGenfvEXT = (PFNGLMULTITEXGENFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexGenfvEXT")) == NULL) || r;
-  r = ((glMultiTexGeniEXT = (PFNGLMULTITEXGENIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexGeniEXT")) == NULL) || r;
-  r = ((glMultiTexGenivEXT = (PFNGLMULTITEXGENIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexGenivEXT")) == NULL) || r;
-  r = ((glMultiTexImage1DEXT = (PFNGLMULTITEXIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexImage1DEXT")) == NULL) || r;
-  r = ((glMultiTexImage2DEXT = (PFNGLMULTITEXIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexImage2DEXT")) == NULL) || r;
-  r = ((glMultiTexImage3DEXT = (PFNGLMULTITEXIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexImage3DEXT")) == NULL) || r;
-  r = ((glMultiTexParameterIivEXT = (PFNGLMULTITEXPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexParameterIivEXT")) == NULL) || r;
-  r = ((glMultiTexParameterIuivEXT = (PFNGLMULTITEXPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexParameterIuivEXT")) == NULL) || r;
-  r = ((glMultiTexParameterfEXT = (PFNGLMULTITEXPARAMETERFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexParameterfEXT")) == NULL) || r;
-  r = ((glMultiTexParameterfvEXT = (PFNGLMULTITEXPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexParameterfvEXT")) == NULL) || r;
-  r = ((glMultiTexParameteriEXT = (PFNGLMULTITEXPARAMETERIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexParameteriEXT")) == NULL) || r;
-  r = ((glMultiTexParameterivEXT = (PFNGLMULTITEXPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexParameterivEXT")) == NULL) || r;
-  r = ((glMultiTexRenderbufferEXT = (PFNGLMULTITEXRENDERBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexRenderbufferEXT")) == NULL) || r;
-  r = ((glMultiTexSubImage1DEXT = (PFNGLMULTITEXSUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexSubImage1DEXT")) == NULL) || r;
-  r = ((glMultiTexSubImage2DEXT = (PFNGLMULTITEXSUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexSubImage2DEXT")) == NULL) || r;
-  r = ((glMultiTexSubImage3DEXT = (PFNGLMULTITEXSUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexSubImage3DEXT")) == NULL) || r;
-  r = ((glNamedBufferDataEXT = (PFNGLNAMEDBUFFERDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferDataEXT")) == NULL) || r;
-  r = ((glNamedBufferSubDataEXT = (PFNGLNAMEDBUFFERSUBDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferSubDataEXT")) == NULL) || r;
-  r = ((glNamedCopyBufferSubDataEXT = (PFNGLNAMEDCOPYBUFFERSUBDATAEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedCopyBufferSubDataEXT")) == NULL) || r;
-  r = ((glNamedFramebufferRenderbufferEXT = (PFNGLNAMEDFRAMEBUFFERRENDERBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferRenderbufferEXT")) == NULL) || r;
-  r = ((glNamedFramebufferTexture1DEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTexture1DEXT")) == NULL) || r;
-  r = ((glNamedFramebufferTexture2DEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTexture2DEXT")) == NULL) || r;
-  r = ((glNamedFramebufferTexture3DEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTexture3DEXT")) == NULL) || r;
-  r = ((glNamedFramebufferTextureEXT = (PFNGLNAMEDFRAMEBUFFERTEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTextureEXT")) == NULL) || r;
-  r = ((glNamedFramebufferTextureFaceEXT = (PFNGLNAMEDFRAMEBUFFERTEXTUREFACEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTextureFaceEXT")) == NULL) || r;
-  r = ((glNamedFramebufferTextureLayerEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURELAYEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferTextureLayerEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameter4dEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameter4dEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameter4dvEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4DVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameter4dvEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameter4fEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4FEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameter4fEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameter4fvEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameter4fvEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameterI4iEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameterI4iEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameterI4ivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameterI4ivEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameterI4uiEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameterI4uiEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameterI4uivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameterI4uivEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParameters4fvEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERS4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParameters4fvEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParametersI4ivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERSI4IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParametersI4ivEXT")) == NULL) || r;
-  r = ((glNamedProgramLocalParametersI4uivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERSI4UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramLocalParametersI4uivEXT")) == NULL) || r;
-  r = ((glNamedProgramStringEXT = (PFNGLNAMEDPROGRAMSTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedProgramStringEXT")) == NULL) || r;
-  r = ((glNamedRenderbufferStorageEXT = (PFNGLNAMEDRENDERBUFFERSTORAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedRenderbufferStorageEXT")) == NULL) || r;
-  r = ((glNamedRenderbufferStorageMultisampleCoverageEXT = (PFNGLNAMEDRENDERBUFFERSTORAGEMULTISAMPLECOVERAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedRenderbufferStorageMultisampleCoverageEXT")) == NULL) || r;
-  r = ((glNamedRenderbufferStorageMultisampleEXT = (PFNGLNAMEDRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedRenderbufferStorageMultisampleEXT")) == NULL) || r;
-  r = ((glProgramUniform1fEXT = (PFNGLPROGRAMUNIFORM1FEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1fEXT")) == NULL) || r;
-  r = ((glProgramUniform1fvEXT = (PFNGLPROGRAMUNIFORM1FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1fvEXT")) == NULL) || r;
-  r = ((glProgramUniform1iEXT = (PFNGLPROGRAMUNIFORM1IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1iEXT")) == NULL) || r;
-  r = ((glProgramUniform1ivEXT = (PFNGLPROGRAMUNIFORM1IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1ivEXT")) == NULL) || r;
-  r = ((glProgramUniform1uiEXT = (PFNGLPROGRAMUNIFORM1UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1uiEXT")) == NULL) || r;
-  r = ((glProgramUniform1uivEXT = (PFNGLPROGRAMUNIFORM1UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1uivEXT")) == NULL) || r;
-  r = ((glProgramUniform2fEXT = (PFNGLPROGRAMUNIFORM2FEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2fEXT")) == NULL) || r;
-  r = ((glProgramUniform2fvEXT = (PFNGLPROGRAMUNIFORM2FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2fvEXT")) == NULL) || r;
-  r = ((glProgramUniform2iEXT = (PFNGLPROGRAMUNIFORM2IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2iEXT")) == NULL) || r;
-  r = ((glProgramUniform2ivEXT = (PFNGLPROGRAMUNIFORM2IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2ivEXT")) == NULL) || r;
-  r = ((glProgramUniform2uiEXT = (PFNGLPROGRAMUNIFORM2UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2uiEXT")) == NULL) || r;
-  r = ((glProgramUniform2uivEXT = (PFNGLPROGRAMUNIFORM2UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2uivEXT")) == NULL) || r;
-  r = ((glProgramUniform3fEXT = (PFNGLPROGRAMUNIFORM3FEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3fEXT")) == NULL) || r;
-  r = ((glProgramUniform3fvEXT = (PFNGLPROGRAMUNIFORM3FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3fvEXT")) == NULL) || r;
-  r = ((glProgramUniform3iEXT = (PFNGLPROGRAMUNIFORM3IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3iEXT")) == NULL) || r;
-  r = ((glProgramUniform3ivEXT = (PFNGLPROGRAMUNIFORM3IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3ivEXT")) == NULL) || r;
-  r = ((glProgramUniform3uiEXT = (PFNGLPROGRAMUNIFORM3UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3uiEXT")) == NULL) || r;
-  r = ((glProgramUniform3uivEXT = (PFNGLPROGRAMUNIFORM3UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3uivEXT")) == NULL) || r;
-  r = ((glProgramUniform4fEXT = (PFNGLPROGRAMUNIFORM4FEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4fEXT")) == NULL) || r;
-  r = ((glProgramUniform4fvEXT = (PFNGLPROGRAMUNIFORM4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4fvEXT")) == NULL) || r;
-  r = ((glProgramUniform4iEXT = (PFNGLPROGRAMUNIFORM4IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4iEXT")) == NULL) || r;
-  r = ((glProgramUniform4ivEXT = (PFNGLPROGRAMUNIFORM4IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4ivEXT")) == NULL) || r;
-  r = ((glProgramUniform4uiEXT = (PFNGLPROGRAMUNIFORM4UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4uiEXT")) == NULL) || r;
-  r = ((glProgramUniform4uivEXT = (PFNGLPROGRAMUNIFORM4UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4uivEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix2fvEXT = (PFNGLPROGRAMUNIFORMMATRIX2FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix2x3fvEXT = (PFNGLPROGRAMUNIFORMMATRIX2X3FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2x3fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix2x4fvEXT = (PFNGLPROGRAMUNIFORMMATRIX2X4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix2x4fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix3fvEXT = (PFNGLPROGRAMUNIFORMMATRIX3FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix3x2fvEXT = (PFNGLPROGRAMUNIFORMMATRIX3X2FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3x2fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix3x4fvEXT = (PFNGLPROGRAMUNIFORMMATRIX3X4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix3x4fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix4fvEXT = (PFNGLPROGRAMUNIFORMMATRIX4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix4x2fvEXT = (PFNGLPROGRAMUNIFORMMATRIX4X2FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4x2fvEXT")) == NULL) || r;
-  r = ((glProgramUniformMatrix4x3fvEXT = (PFNGLPROGRAMUNIFORMMATRIX4X3FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformMatrix4x3fvEXT")) == NULL) || r;
-  r = ((glPushClientAttribDefaultEXT = (PFNGLPUSHCLIENTATTRIBDEFAULTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPushClientAttribDefaultEXT")) == NULL) || r;
-  r = ((glTextureBufferEXT = (PFNGLTEXTUREBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureBufferEXT")) == NULL) || r;
-  r = ((glTextureImage1DEXT = (PFNGLTEXTUREIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage1DEXT")) == NULL) || r;
-  r = ((glTextureImage2DEXT = (PFNGLTEXTUREIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage2DEXT")) == NULL) || r;
-  r = ((glTextureImage3DEXT = (PFNGLTEXTUREIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage3DEXT")) == NULL) || r;
-  r = ((glTextureParameterIivEXT = (PFNGLTEXTUREPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterIivEXT")) == NULL) || r;
-  r = ((glTextureParameterIuivEXT = (PFNGLTEXTUREPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterIuivEXT")) == NULL) || r;
-  r = ((glTextureParameterfEXT = (PFNGLTEXTUREPARAMETERFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterfEXT")) == NULL) || r;
-  r = ((glTextureParameterfvEXT = (PFNGLTEXTUREPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterfvEXT")) == NULL) || r;
-  r = ((glTextureParameteriEXT = (PFNGLTEXTUREPARAMETERIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameteriEXT")) == NULL) || r;
-  r = ((glTextureParameterivEXT = (PFNGLTEXTUREPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureParameterivEXT")) == NULL) || r;
-  r = ((glTextureRenderbufferEXT = (PFNGLTEXTURERENDERBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureRenderbufferEXT")) == NULL) || r;
-  r = ((glTextureSubImage1DEXT = (PFNGLTEXTURESUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureSubImage1DEXT")) == NULL) || r;
-  r = ((glTextureSubImage2DEXT = (PFNGLTEXTURESUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureSubImage2DEXT")) == NULL) || r;
-  r = ((glTextureSubImage3DEXT = (PFNGLTEXTURESUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureSubImage3DEXT")) == NULL) || r;
-  r = ((glUnmapNamedBufferEXT = (PFNGLUNMAPNAMEDBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glUnmapNamedBufferEXT")) == NULL) || r;
-  r = ((glVertexArrayColorOffsetEXT = (PFNGLVERTEXARRAYCOLOROFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayColorOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayEdgeFlagOffsetEXT = (PFNGLVERTEXARRAYEDGEFLAGOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayEdgeFlagOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayFogCoordOffsetEXT = (PFNGLVERTEXARRAYFOGCOORDOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayFogCoordOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayIndexOffsetEXT = (PFNGLVERTEXARRAYINDEXOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayIndexOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayMultiTexCoordOffsetEXT = (PFNGLVERTEXARRAYMULTITEXCOORDOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayMultiTexCoordOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayNormalOffsetEXT = (PFNGLVERTEXARRAYNORMALOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayNormalOffsetEXT")) == NULL) || r;
-  r = ((glVertexArraySecondaryColorOffsetEXT = (PFNGLVERTEXARRAYSECONDARYCOLOROFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArraySecondaryColorOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayTexCoordOffsetEXT = (PFNGLVERTEXARRAYTEXCOORDOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayTexCoordOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribDivisorEXT = (PFNGLVERTEXARRAYVERTEXATTRIBDIVISOREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribDivisorEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribIOffsetEXT = (PFNGLVERTEXARRAYVERTEXATTRIBIOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribIOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribOffsetEXT = (PFNGLVERTEXARRAYVERTEXATTRIBOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribOffsetEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexOffsetEXT = (PFNGLVERTEXARRAYVERTEXOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexOffsetEXT")) == NULL) || r;
+  r = ((glBindMultiTextureEXT = (PFNGLBINDMULTITEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glBindMultiTextureEXT")) == NULL) || r;
+  r = ((glCheckNamedFramebufferStatusEXT = (PFNGLCHECKNAMEDFRAMEBUFFERSTATUSEXTPROC)glewGetProcAddress((const GLubyte*)"glCheckNamedFramebufferStatusEXT")) == NULL) || r;
+  r = ((glClientAttribDefaultEXT = (PFNGLCLIENTATTRIBDEFAULTEXTPROC)glewGetProcAddress((const GLubyte*)"glClientAttribDefaultEXT")) == NULL) || r;
+  r = ((glCompressedMultiTexImage1DEXT = (PFNGLCOMPRESSEDMULTITEXIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedMultiTexImage1DEXT")) == NULL) || r;
+  r = ((glCompressedMultiTexImage2DEXT = (PFNGLCOMPRESSEDMULTITEXIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedMultiTexImage2DEXT")) == NULL) || r;
+  r = ((glCompressedMultiTexImage3DEXT = (PFNGLCOMPRESSEDMULTITEXIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedMultiTexImage3DEXT")) == NULL) || r;
+  r = ((glCompressedMultiTexSubImage1DEXT = (PFNGLCOMPRESSEDMULTITEXSUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedMultiTexSubImage1DEXT")) == NULL) || r;
+  r = ((glCompressedMultiTexSubImage2DEXT = (PFNGLCOMPRESSEDMULTITEXSUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedMultiTexSubImage2DEXT")) == NULL) || r;
+  r = ((glCompressedMultiTexSubImage3DEXT = (PFNGLCOMPRESSEDMULTITEXSUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedMultiTexSubImage3DEXT")) == NULL) || r;
+  r = ((glCompressedTextureImage1DEXT = (PFNGLCOMPRESSEDTEXTUREIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureImage1DEXT")) == NULL) || r;
+  r = ((glCompressedTextureImage2DEXT = (PFNGLCOMPRESSEDTEXTUREIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureImage2DEXT")) == NULL) || r;
+  r = ((glCompressedTextureImage3DEXT = (PFNGLCOMPRESSEDTEXTUREIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureImage3DEXT")) == NULL) || r;
+  r = ((glCompressedTextureSubImage1DEXT = (PFNGLCOMPRESSEDTEXTURESUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureSubImage1DEXT")) == NULL) || r;
+  r = ((glCompressedTextureSubImage2DEXT = (PFNGLCOMPRESSEDTEXTURESUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureSubImage2DEXT")) == NULL) || r;
+  r = ((glCompressedTextureSubImage3DEXT = (PFNGLCOMPRESSEDTEXTURESUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCompressedTextureSubImage3DEXT")) == NULL) || r;
+  r = ((glCopyMultiTexImage1DEXT = (PFNGLCOPYMULTITEXIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyMultiTexImage1DEXT")) == NULL) || r;
+  r = ((glCopyMultiTexImage2DEXT = (PFNGLCOPYMULTITEXIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyMultiTexImage2DEXT")) == NULL) || r;
+  r = ((glCopyMultiTexSubImage1DEXT = (PFNGLCOPYMULTITEXSUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyMultiTexSubImage1DEXT")) == NULL) || r;
+  r = ((glCopyMultiTexSubImage2DEXT = (PFNGLCOPYMULTITEXSUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyMultiTexSubImage2DEXT")) == NULL) || r;
+  r = ((glCopyMultiTexSubImage3DEXT = (PFNGLCOPYMULTITEXSUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyMultiTexSubImage3DEXT")) == NULL) || r;
+  r = ((glCopyTextureImage1DEXT = (PFNGLCOPYTEXTUREIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureImage1DEXT")) == NULL) || r;
+  r = ((glCopyTextureImage2DEXT = (PFNGLCOPYTEXTUREIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureImage2DEXT")) == NULL) || r;
+  r = ((glCopyTextureSubImage1DEXT = (PFNGLCOPYTEXTURESUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureSubImage1DEXT")) == NULL) || r;
+  r = ((glCopyTextureSubImage2DEXT = (PFNGLCOPYTEXTURESUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureSubImage2DEXT")) == NULL) || r;
+  r = ((glCopyTextureSubImage3DEXT = (PFNGLCOPYTEXTURESUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glCopyTextureSubImage3DEXT")) == NULL) || r;
+  r = ((glDisableClientStateIndexedEXT = (PFNGLDISABLECLIENTSTATEINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableClientStateIndexedEXT")) == NULL) || r;
+  r = ((glDisableClientStateiEXT = (PFNGLDISABLECLIENTSTATEIEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableClientStateiEXT")) == NULL) || r;
+  r = ((glDisableVertexArrayAttribEXT = (PFNGLDISABLEVERTEXARRAYATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexArrayAttribEXT")) == NULL) || r;
+  r = ((glDisableVertexArrayEXT = (PFNGLDISABLEVERTEXARRAYEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableVertexArrayEXT")) == NULL) || r;
+  r = ((glEnableClientStateIndexedEXT = (PFNGLENABLECLIENTSTATEINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableClientStateIndexedEXT")) == NULL) || r;
+  r = ((glEnableClientStateiEXT = (PFNGLENABLECLIENTSTATEIEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableClientStateiEXT")) == NULL) || r;
+  r = ((glEnableVertexArrayAttribEXT = (PFNGLENABLEVERTEXARRAYATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexArrayAttribEXT")) == NULL) || r;
+  r = ((glEnableVertexArrayEXT = (PFNGLENABLEVERTEXARRAYEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableVertexArrayEXT")) == NULL) || r;
+  r = ((glFlushMappedNamedBufferRangeEXT = (PFNGLFLUSHMAPPEDNAMEDBUFFERRANGEEXTPROC)glewGetProcAddress((const GLubyte*)"glFlushMappedNamedBufferRangeEXT")) == NULL) || r;
+  r = ((glFramebufferDrawBufferEXT = (PFNGLFRAMEBUFFERDRAWBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferDrawBufferEXT")) == NULL) || r;
+  r = ((glFramebufferDrawBuffersEXT = (PFNGLFRAMEBUFFERDRAWBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferDrawBuffersEXT")) == NULL) || r;
+  r = ((glFramebufferReadBufferEXT = (PFNGLFRAMEBUFFERREADBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferReadBufferEXT")) == NULL) || r;
+  r = ((glGenerateMultiTexMipmapEXT = (PFNGLGENERATEMULTITEXMIPMAPEXTPROC)glewGetProcAddress((const GLubyte*)"glGenerateMultiTexMipmapEXT")) == NULL) || r;
+  r = ((glGenerateTextureMipmapEXT = (PFNGLGENERATETEXTUREMIPMAPEXTPROC)glewGetProcAddress((const GLubyte*)"glGenerateTextureMipmapEXT")) == NULL) || r;
+  r = ((glGetCompressedMultiTexImageEXT = (PFNGLGETCOMPRESSEDMULTITEXIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetCompressedMultiTexImageEXT")) == NULL) || r;
+  r = ((glGetCompressedTextureImageEXT = (PFNGLGETCOMPRESSEDTEXTUREIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetCompressedTextureImageEXT")) == NULL) || r;
+  r = ((glGetDoubleIndexedvEXT = (PFNGLGETDOUBLEINDEXEDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetDoubleIndexedvEXT")) == NULL) || r;
+  r = ((glGetDoublei_vEXT = (PFNGLGETDOUBLEI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetDoublei_vEXT")) == NULL) || r;
+  r = ((glGetFloatIndexedvEXT = (PFNGLGETFLOATINDEXEDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFloatIndexedvEXT")) == NULL) || r;
+  r = ((glGetFloati_vEXT = (PFNGLGETFLOATI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFloati_vEXT")) == NULL) || r;
+  r = ((glGetFramebufferParameterivEXT = (PFNGLGETFRAMEBUFFERPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferParameterivEXT")) == NULL) || r;
+  r = ((glGetMultiTexEnvfvEXT = (PFNGLGETMULTITEXENVFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexEnvfvEXT")) == NULL) || r;
+  r = ((glGetMultiTexEnvivEXT = (PFNGLGETMULTITEXENVIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexEnvivEXT")) == NULL) || r;
+  r = ((glGetMultiTexGendvEXT = (PFNGLGETMULTITEXGENDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexGendvEXT")) == NULL) || r;
+  r = ((glGetMultiTexGenfvEXT = (PFNGLGETMULTITEXGENFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexGenfvEXT")) == NULL) || r;
+  r = ((glGetMultiTexGenivEXT = (PFNGLGETMULTITEXGENIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexGenivEXT")) == NULL) || r;
+  r = ((glGetMultiTexImageEXT = (PFNGLGETMULTITEXIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexImageEXT")) == NULL) || r;
+  r = ((glGetMultiTexLevelParameterfvEXT = (PFNGLGETMULTITEXLEVELPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexLevelParameterfvEXT")) == NULL) || r;
+  r = ((glGetMultiTexLevelParameterivEXT = (PFNGLGETMULTITEXLEVELPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexLevelParameterivEXT")) == NULL) || r;
+  r = ((glGetMultiTexParameterIivEXT = (PFNGLGETMULTITEXPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexParameterIivEXT")) == NULL) || r;
+  r = ((glGetMultiTexParameterIuivEXT = (PFNGLGETMULTITEXPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexParameterIuivEXT")) == NULL) || r;
+  r = ((glGetMultiTexParameterfvEXT = (PFNGLGETMULTITEXPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexParameterfvEXT")) == NULL) || r;
+  r = ((glGetMultiTexParameterivEXT = (PFNGLGETMULTITEXPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMultiTexParameterivEXT")) == NULL) || r;
+  r = ((glGetNamedBufferParameterivEXT = (PFNGLGETNAMEDBUFFERPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferParameterivEXT")) == NULL) || r;
+  r = ((glGetNamedBufferPointervEXT = (PFNGLGETNAMEDBUFFERPOINTERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferPointervEXT")) == NULL) || r;
+  r = ((glGetNamedBufferSubDataEXT = (PFNGLGETNAMEDBUFFERSUBDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferSubDataEXT")) == NULL) || r;
+  r = ((glGetNamedFramebufferAttachmentParameterivEXT = (PFNGLGETNAMEDFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedFramebufferAttachmentParameterivEXT")) == NULL) || r;
+  r = ((glGetNamedProgramLocalParameterIivEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedProgramLocalParameterIivEXT")) == NULL) || r;
+  r = ((glGetNamedProgramLocalParameterIuivEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedProgramLocalParameterIuivEXT")) == NULL) || r;
+  r = ((glGetNamedProgramLocalParameterdvEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedProgramLocalParameterdvEXT")) == NULL) || r;
+  r = ((glGetNamedProgramLocalParameterfvEXT = (PFNGLGETNAMEDPROGRAMLOCALPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedProgramLocalParameterfvEXT")) == NULL) || r;
+  r = ((glGetNamedProgramStringEXT = (PFNGLGETNAMEDPROGRAMSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedProgramStringEXT")) == NULL) || r;
+  r = ((glGetNamedProgramivEXT = (PFNGLGETNAMEDPROGRAMIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedProgramivEXT")) == NULL) || r;
+  r = ((glGetNamedRenderbufferParameterivEXT = (PFNGLGETNAMEDRENDERBUFFERPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetNamedRenderbufferParameterivEXT")) == NULL) || r;
+  r = ((glGetPointerIndexedvEXT = (PFNGLGETPOINTERINDEXEDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetPointerIndexedvEXT")) == NULL) || r;
+  r = ((glGetPointeri_vEXT = (PFNGLGETPOINTERI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetPointeri_vEXT")) == NULL) || r;
+  r = ((glGetTextureImageEXT = (PFNGLGETTEXTUREIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureImageEXT")) == NULL) || r;
+  r = ((glGetTextureLevelParameterfvEXT = (PFNGLGETTEXTURELEVELPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureLevelParameterfvEXT")) == NULL) || r;
+  r = ((glGetTextureLevelParameterivEXT = (PFNGLGETTEXTURELEVELPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureLevelParameterivEXT")) == NULL) || r;
+  r = ((glGetTextureParameterIivEXT = (PFNGLGETTEXTUREPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterIivEXT")) == NULL) || r;
+  r = ((glGetTextureParameterIuivEXT = (PFNGLGETTEXTUREPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterIuivEXT")) == NULL) || r;
+  r = ((glGetTextureParameterfvEXT = (PFNGLGETTEXTUREPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterfvEXT")) == NULL) || r;
+  r = ((glGetTextureParameterivEXT = (PFNGLGETTEXTUREPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTextureParameterivEXT")) == NULL) || r;
+  r = ((glGetVertexArrayIntegeri_vEXT = (PFNGLGETVERTEXARRAYINTEGERI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayIntegeri_vEXT")) == NULL) || r;
+  r = ((glGetVertexArrayIntegervEXT = (PFNGLGETVERTEXARRAYINTEGERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayIntegervEXT")) == NULL) || r;
+  r = ((glGetVertexArrayPointeri_vEXT = (PFNGLGETVERTEXARRAYPOINTERI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayPointeri_vEXT")) == NULL) || r;
+  r = ((glGetVertexArrayPointervEXT = (PFNGLGETVERTEXARRAYPOINTERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexArrayPointervEXT")) == NULL) || r;
+  r = ((glMapNamedBufferEXT = (PFNGLMAPNAMEDBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glMapNamedBufferEXT")) == NULL) || r;
+  r = ((glMapNamedBufferRangeEXT = (PFNGLMAPNAMEDBUFFERRANGEEXTPROC)glewGetProcAddress((const GLubyte*)"glMapNamedBufferRangeEXT")) == NULL) || r;
+  r = ((glMatrixFrustumEXT = (PFNGLMATRIXFRUSTUMEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixFrustumEXT")) == NULL) || r;
+  r = ((glMatrixLoadIdentityEXT = (PFNGLMATRIXLOADIDENTITYEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoadIdentityEXT")) == NULL) || r;
+  r = ((glMatrixLoadTransposedEXT = (PFNGLMATRIXLOADTRANSPOSEDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoadTransposedEXT")) == NULL) || r;
+  r = ((glMatrixLoadTransposefEXT = (PFNGLMATRIXLOADTRANSPOSEFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoadTransposefEXT")) == NULL) || r;
+  r = ((glMatrixLoaddEXT = (PFNGLMATRIXLOADDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoaddEXT")) == NULL) || r;
+  r = ((glMatrixLoadfEXT = (PFNGLMATRIXLOADFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoadfEXT")) == NULL) || r;
+  r = ((glMatrixMultTransposedEXT = (PFNGLMATRIXMULTTRANSPOSEDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixMultTransposedEXT")) == NULL) || r;
+  r = ((glMatrixMultTransposefEXT = (PFNGLMATRIXMULTTRANSPOSEFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixMultTransposefEXT")) == NULL) || r;
+  r = ((glMatrixMultdEXT = (PFNGLMATRIXMULTDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixMultdEXT")) == NULL) || r;
+  r = ((glMatrixMultfEXT = (PFNGLMATRIXMULTFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixMultfEXT")) == NULL) || r;
+  r = ((glMatrixOrthoEXT = (PFNGLMATRIXORTHOEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixOrthoEXT")) == NULL) || r;
+  r = ((glMatrixPopEXT = (PFNGLMATRIXPOPEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixPopEXT")) == NULL) || r;
+  r = ((glMatrixPushEXT = (PFNGLMATRIXPUSHEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixPushEXT")) == NULL) || r;
+  r = ((glMatrixRotatedEXT = (PFNGLMATRIXROTATEDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixRotatedEXT")) == NULL) || r;
+  r = ((glMatrixRotatefEXT = (PFNGLMATRIXROTATEFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixRotatefEXT")) == NULL) || r;
+  r = ((glMatrixScaledEXT = (PFNGLMATRIXSCALEDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixScaledEXT")) == NULL) || r;
+  r = ((glMatrixScalefEXT = (PFNGLMATRIXSCALEFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixScalefEXT")) == NULL) || r;
+  r = ((glMatrixTranslatedEXT = (PFNGLMATRIXTRANSLATEDEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixTranslatedEXT")) == NULL) || r;
+  r = ((glMatrixTranslatefEXT = (PFNGLMATRIXTRANSLATEFEXTPROC)glewGetProcAddress((const GLubyte*)"glMatrixTranslatefEXT")) == NULL) || r;
+  r = ((glMultiTexBufferEXT = (PFNGLMULTITEXBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexBufferEXT")) == NULL) || r;
+  r = ((glMultiTexCoordPointerEXT = (PFNGLMULTITEXCOORDPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoordPointerEXT")) == NULL) || r;
+  r = ((glMultiTexEnvfEXT = (PFNGLMULTITEXENVFEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexEnvfEXT")) == NULL) || r;
+  r = ((glMultiTexEnvfvEXT = (PFNGLMULTITEXENVFVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexEnvfvEXT")) == NULL) || r;
+  r = ((glMultiTexEnviEXT = (PFNGLMULTITEXENVIEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexEnviEXT")) == NULL) || r;
+  r = ((glMultiTexEnvivEXT = (PFNGLMULTITEXENVIVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexEnvivEXT")) == NULL) || r;
+  r = ((glMultiTexGendEXT = (PFNGLMULTITEXGENDEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexGendEXT")) == NULL) || r;
+  r = ((glMultiTexGendvEXT = (PFNGLMULTITEXGENDVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexGendvEXT")) == NULL) || r;
+  r = ((glMultiTexGenfEXT = (PFNGLMULTITEXGENFEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexGenfEXT")) == NULL) || r;
+  r = ((glMultiTexGenfvEXT = (PFNGLMULTITEXGENFVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexGenfvEXT")) == NULL) || r;
+  r = ((glMultiTexGeniEXT = (PFNGLMULTITEXGENIEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexGeniEXT")) == NULL) || r;
+  r = ((glMultiTexGenivEXT = (PFNGLMULTITEXGENIVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexGenivEXT")) == NULL) || r;
+  r = ((glMultiTexImage1DEXT = (PFNGLMULTITEXIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexImage1DEXT")) == NULL) || r;
+  r = ((glMultiTexImage2DEXT = (PFNGLMULTITEXIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexImage2DEXT")) == NULL) || r;
+  r = ((glMultiTexImage3DEXT = (PFNGLMULTITEXIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexImage3DEXT")) == NULL) || r;
+  r = ((glMultiTexParameterIivEXT = (PFNGLMULTITEXPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexParameterIivEXT")) == NULL) || r;
+  r = ((glMultiTexParameterIuivEXT = (PFNGLMULTITEXPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexParameterIuivEXT")) == NULL) || r;
+  r = ((glMultiTexParameterfEXT = (PFNGLMULTITEXPARAMETERFEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexParameterfEXT")) == NULL) || r;
+  r = ((glMultiTexParameterfvEXT = (PFNGLMULTITEXPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexParameterfvEXT")) == NULL) || r;
+  r = ((glMultiTexParameteriEXT = (PFNGLMULTITEXPARAMETERIEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexParameteriEXT")) == NULL) || r;
+  r = ((glMultiTexParameterivEXT = (PFNGLMULTITEXPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexParameterivEXT")) == NULL) || r;
+  r = ((glMultiTexRenderbufferEXT = (PFNGLMULTITEXRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexRenderbufferEXT")) == NULL) || r;
+  r = ((glMultiTexSubImage1DEXT = (PFNGLMULTITEXSUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexSubImage1DEXT")) == NULL) || r;
+  r = ((glMultiTexSubImage2DEXT = (PFNGLMULTITEXSUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexSubImage2DEXT")) == NULL) || r;
+  r = ((glMultiTexSubImage3DEXT = (PFNGLMULTITEXSUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiTexSubImage3DEXT")) == NULL) || r;
+  r = ((glNamedBufferDataEXT = (PFNGLNAMEDBUFFERDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferDataEXT")) == NULL) || r;
+  r = ((glNamedBufferSubDataEXT = (PFNGLNAMEDBUFFERSUBDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferSubDataEXT")) == NULL) || r;
+  r = ((glNamedCopyBufferSubDataEXT = (PFNGLNAMEDCOPYBUFFERSUBDATAEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedCopyBufferSubDataEXT")) == NULL) || r;
+  r = ((glNamedFramebufferRenderbufferEXT = (PFNGLNAMEDFRAMEBUFFERRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferRenderbufferEXT")) == NULL) || r;
+  r = ((glNamedFramebufferTexture1DEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTexture1DEXT")) == NULL) || r;
+  r = ((glNamedFramebufferTexture2DEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTexture2DEXT")) == NULL) || r;
+  r = ((glNamedFramebufferTexture3DEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTexture3DEXT")) == NULL) || r;
+  r = ((glNamedFramebufferTextureEXT = (PFNGLNAMEDFRAMEBUFFERTEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTextureEXT")) == NULL) || r;
+  r = ((glNamedFramebufferTextureFaceEXT = (PFNGLNAMEDFRAMEBUFFERTEXTUREFACEEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTextureFaceEXT")) == NULL) || r;
+  r = ((glNamedFramebufferTextureLayerEXT = (PFNGLNAMEDFRAMEBUFFERTEXTURELAYEREXTPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferTextureLayerEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameter4dEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4DEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameter4dEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameter4dvEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4DVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameter4dvEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameter4fEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4FEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameter4fEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameter4fvEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETER4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameter4fvEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameterI4iEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4IEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameterI4iEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameterI4ivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4IVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameterI4ivEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameterI4uiEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4UIEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameterI4uiEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameterI4uivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERI4UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameterI4uivEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParameters4fvEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERS4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParameters4fvEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParametersI4ivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERSI4IVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParametersI4ivEXT")) == NULL) || r;
+  r = ((glNamedProgramLocalParametersI4uivEXT = (PFNGLNAMEDPROGRAMLOCALPARAMETERSI4UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramLocalParametersI4uivEXT")) == NULL) || r;
+  r = ((glNamedProgramStringEXT = (PFNGLNAMEDPROGRAMSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedProgramStringEXT")) == NULL) || r;
+  r = ((glNamedRenderbufferStorageEXT = (PFNGLNAMEDRENDERBUFFERSTORAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedRenderbufferStorageEXT")) == NULL) || r;
+  r = ((glNamedRenderbufferStorageMultisampleCoverageEXT = (PFNGLNAMEDRENDERBUFFERSTORAGEMULTISAMPLECOVERAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedRenderbufferStorageMultisampleCoverageEXT")) == NULL) || r;
+  r = ((glNamedRenderbufferStorageMultisampleEXT = (PFNGLNAMEDRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedRenderbufferStorageMultisampleEXT")) == NULL) || r;
+  r = ((glProgramUniform1fEXT = (PFNGLPROGRAMUNIFORM1FEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1fEXT")) == NULL) || r;
+  r = ((glProgramUniform1fvEXT = (PFNGLPROGRAMUNIFORM1FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1fvEXT")) == NULL) || r;
+  r = ((glProgramUniform1iEXT = (PFNGLPROGRAMUNIFORM1IEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1iEXT")) == NULL) || r;
+  r = ((glProgramUniform1ivEXT = (PFNGLPROGRAMUNIFORM1IVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1ivEXT")) == NULL) || r;
+  r = ((glProgramUniform1uiEXT = (PFNGLPROGRAMUNIFORM1UIEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1uiEXT")) == NULL) || r;
+  r = ((glProgramUniform1uivEXT = (PFNGLPROGRAMUNIFORM1UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1uivEXT")) == NULL) || r;
+  r = ((glProgramUniform2fEXT = (PFNGLPROGRAMUNIFORM2FEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2fEXT")) == NULL) || r;
+  r = ((glProgramUniform2fvEXT = (PFNGLPROGRAMUNIFORM2FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2fvEXT")) == NULL) || r;
+  r = ((glProgramUniform2iEXT = (PFNGLPROGRAMUNIFORM2IEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2iEXT")) == NULL) || r;
+  r = ((glProgramUniform2ivEXT = (PFNGLPROGRAMUNIFORM2IVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2ivEXT")) == NULL) || r;
+  r = ((glProgramUniform2uiEXT = (PFNGLPROGRAMUNIFORM2UIEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2uiEXT")) == NULL) || r;
+  r = ((glProgramUniform2uivEXT = (PFNGLPROGRAMUNIFORM2UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2uivEXT")) == NULL) || r;
+  r = ((glProgramUniform3fEXT = (PFNGLPROGRAMUNIFORM3FEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3fEXT")) == NULL) || r;
+  r = ((glProgramUniform3fvEXT = (PFNGLPROGRAMUNIFORM3FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3fvEXT")) == NULL) || r;
+  r = ((glProgramUniform3iEXT = (PFNGLPROGRAMUNIFORM3IEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3iEXT")) == NULL) || r;
+  r = ((glProgramUniform3ivEXT = (PFNGLPROGRAMUNIFORM3IVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3ivEXT")) == NULL) || r;
+  r = ((glProgramUniform3uiEXT = (PFNGLPROGRAMUNIFORM3UIEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3uiEXT")) == NULL) || r;
+  r = ((glProgramUniform3uivEXT = (PFNGLPROGRAMUNIFORM3UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3uivEXT")) == NULL) || r;
+  r = ((glProgramUniform4fEXT = (PFNGLPROGRAMUNIFORM4FEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4fEXT")) == NULL) || r;
+  r = ((glProgramUniform4fvEXT = (PFNGLPROGRAMUNIFORM4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4fvEXT")) == NULL) || r;
+  r = ((glProgramUniform4iEXT = (PFNGLPROGRAMUNIFORM4IEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4iEXT")) == NULL) || r;
+  r = ((glProgramUniform4ivEXT = (PFNGLPROGRAMUNIFORM4IVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4ivEXT")) == NULL) || r;
+  r = ((glProgramUniform4uiEXT = (PFNGLPROGRAMUNIFORM4UIEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4uiEXT")) == NULL) || r;
+  r = ((glProgramUniform4uivEXT = (PFNGLPROGRAMUNIFORM4UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4uivEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix2fvEXT = (PFNGLPROGRAMUNIFORMMATRIX2FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix2x3fvEXT = (PFNGLPROGRAMUNIFORMMATRIX2X3FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2x3fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix2x4fvEXT = (PFNGLPROGRAMUNIFORMMATRIX2X4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix2x4fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix3fvEXT = (PFNGLPROGRAMUNIFORMMATRIX3FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix3x2fvEXT = (PFNGLPROGRAMUNIFORMMATRIX3X2FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3x2fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix3x4fvEXT = (PFNGLPROGRAMUNIFORMMATRIX3X4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix3x4fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix4fvEXT = (PFNGLPROGRAMUNIFORMMATRIX4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix4x2fvEXT = (PFNGLPROGRAMUNIFORMMATRIX4X2FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4x2fvEXT")) == NULL) || r;
+  r = ((glProgramUniformMatrix4x3fvEXT = (PFNGLPROGRAMUNIFORMMATRIX4X3FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformMatrix4x3fvEXT")) == NULL) || r;
+  r = ((glPushClientAttribDefaultEXT = (PFNGLPUSHCLIENTATTRIBDEFAULTEXTPROC)glewGetProcAddress((const GLubyte*)"glPushClientAttribDefaultEXT")) == NULL) || r;
+  r = ((glTextureBufferEXT = (PFNGLTEXTUREBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glTextureBufferEXT")) == NULL) || r;
+  r = ((glTextureImage1DEXT = (PFNGLTEXTUREIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureImage1DEXT")) == NULL) || r;
+  r = ((glTextureImage2DEXT = (PFNGLTEXTUREIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureImage2DEXT")) == NULL) || r;
+  r = ((glTextureImage3DEXT = (PFNGLTEXTUREIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureImage3DEXT")) == NULL) || r;
+  r = ((glTextureParameterIivEXT = (PFNGLTEXTUREPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterIivEXT")) == NULL) || r;
+  r = ((glTextureParameterIuivEXT = (PFNGLTEXTUREPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterIuivEXT")) == NULL) || r;
+  r = ((glTextureParameterfEXT = (PFNGLTEXTUREPARAMETERFEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterfEXT")) == NULL) || r;
+  r = ((glTextureParameterfvEXT = (PFNGLTEXTUREPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterfvEXT")) == NULL) || r;
+  r = ((glTextureParameteriEXT = (PFNGLTEXTUREPARAMETERIEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureParameteriEXT")) == NULL) || r;
+  r = ((glTextureParameterivEXT = (PFNGLTEXTUREPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureParameterivEXT")) == NULL) || r;
+  r = ((glTextureRenderbufferEXT = (PFNGLTEXTURERENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glTextureRenderbufferEXT")) == NULL) || r;
+  r = ((glTextureSubImage1DEXT = (PFNGLTEXTURESUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureSubImage1DEXT")) == NULL) || r;
+  r = ((glTextureSubImage2DEXT = (PFNGLTEXTURESUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureSubImage2DEXT")) == NULL) || r;
+  r = ((glTextureSubImage3DEXT = (PFNGLTEXTURESUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureSubImage3DEXT")) == NULL) || r;
+  r = ((glUnmapNamedBufferEXT = (PFNGLUNMAPNAMEDBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glUnmapNamedBufferEXT")) == NULL) || r;
+  r = ((glVertexArrayColorOffsetEXT = (PFNGLVERTEXARRAYCOLOROFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayColorOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayEdgeFlagOffsetEXT = (PFNGLVERTEXARRAYEDGEFLAGOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayEdgeFlagOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayFogCoordOffsetEXT = (PFNGLVERTEXARRAYFOGCOORDOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayFogCoordOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayIndexOffsetEXT = (PFNGLVERTEXARRAYINDEXOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayIndexOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayMultiTexCoordOffsetEXT = (PFNGLVERTEXARRAYMULTITEXCOORDOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayMultiTexCoordOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayNormalOffsetEXT = (PFNGLVERTEXARRAYNORMALOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayNormalOffsetEXT")) == NULL) || r;
+  r = ((glVertexArraySecondaryColorOffsetEXT = (PFNGLVERTEXARRAYSECONDARYCOLOROFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArraySecondaryColorOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayTexCoordOffsetEXT = (PFNGLVERTEXARRAYTEXCOORDOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayTexCoordOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribDivisorEXT = (PFNGLVERTEXARRAYVERTEXATTRIBDIVISOREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribDivisorEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribIOffsetEXT = (PFNGLVERTEXARRAYVERTEXATTRIBIOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribIOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribOffsetEXT = (PFNGLVERTEXARRAYVERTEXATTRIBOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribOffsetEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexOffsetEXT = (PFNGLVERTEXARRAYVERTEXOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexOffsetEXT")) == NULL) || r;
 
   return r;
 }
@@ -12670,7 +12667,7 @@ static GLboolean _glewInit_GL_EXT_discard_framebuffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDiscardFramebufferEXT = (PFNGLDISCARDFRAMEBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glDiscardFramebufferEXT")) == NULL) || r;
+  r = ((glDiscardFramebufferEXT = (PFNGLDISCARDFRAMEBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glDiscardFramebufferEXT")) == NULL) || r;
 
   return r;
 }
@@ -12683,7 +12680,7 @@ static GLboolean _glewInit_GL_EXT_draw_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawBuffersEXT = (PFNGLDRAWBUFFERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBuffersEXT")) == NULL) || r;
+  r = ((glDrawBuffersEXT = (PFNGLDRAWBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffersEXT")) == NULL) || r;
 
   return r;
 }
@@ -12696,12 +12693,12 @@ static GLboolean _glewInit_GL_EXT_draw_buffers2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorMaskIndexedEXT = (PFNGLCOLORMASKINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glColorMaskIndexedEXT")) == NULL) || r;
-  r = ((glDisableIndexedEXT = (PFNGLDISABLEINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableIndexedEXT")) == NULL) || r;
-  r = ((glEnableIndexedEXT = (PFNGLENABLEINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableIndexedEXT")) == NULL) || r;
-  r = ((glGetBooleanIndexedvEXT = (PFNGLGETBOOLEANINDEXEDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetBooleanIndexedvEXT")) == NULL) || r;
-  r = ((glGetIntegerIndexedvEXT = (PFNGLGETINTEGERINDEXEDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetIntegerIndexedvEXT")) == NULL) || r;
-  r = ((glIsEnabledIndexedEXT = (PFNGLISENABLEDINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsEnabledIndexedEXT")) == NULL) || r;
+  r = ((glColorMaskIndexedEXT = (PFNGLCOLORMASKINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glColorMaskIndexedEXT")) == NULL) || r;
+  r = ((glDisableIndexedEXT = (PFNGLDISABLEINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableIndexedEXT")) == NULL) || r;
+  r = ((glEnableIndexedEXT = (PFNGLENABLEINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableIndexedEXT")) == NULL) || r;
+  r = ((glGetBooleanIndexedvEXT = (PFNGLGETBOOLEANINDEXEDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetBooleanIndexedvEXT")) == NULL) || r;
+  r = ((glGetIntegerIndexedvEXT = (PFNGLGETINTEGERINDEXEDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetIntegerIndexedvEXT")) == NULL) || r;
+  r = ((glIsEnabledIndexedEXT = (PFNGLISENABLEDINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glIsEnabledIndexedEXT")) == NULL) || r;
 
   return r;
 }
@@ -12714,14 +12711,14 @@ static GLboolean _glewInit_GL_EXT_draw_buffers_indexed ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendEquationSeparateiEXT = (PFNGLBLENDEQUATIONSEPARATEIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationSeparateiEXT")) == NULL) || r;
-  r = ((glBlendEquationiEXT = (PFNGLBLENDEQUATIONIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendEquationiEXT")) == NULL) || r;
-  r = ((glBlendFuncSeparateiEXT = (PFNGLBLENDFUNCSEPARATEIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFuncSeparateiEXT")) == NULL) || r;
-  r = ((glBlendFunciEXT = (PFNGLBLENDFUNCIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlendFunciEXT")) == NULL) || r;
-  r = ((glColorMaskiEXT = (PFNGLCOLORMASKIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glColorMaskiEXT")) == NULL) || r;
-  r = ((glDisableiEXT = (PFNGLDISABLEIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableiEXT")) == NULL) || r;
-  r = ((glEnableiEXT = (PFNGLENABLEIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableiEXT")) == NULL) || r;
-  r = ((glIsEnablediEXT = (PFNGLISENABLEDIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsEnablediEXT")) == NULL) || r;
+  r = ((glBlendEquationSeparateiEXT = (PFNGLBLENDEQUATIONSEPARATEIEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationSeparateiEXT")) == NULL) || r;
+  r = ((glBlendEquationiEXT = (PFNGLBLENDEQUATIONIEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendEquationiEXT")) == NULL) || r;
+  r = ((glBlendFuncSeparateiEXT = (PFNGLBLENDFUNCSEPARATEIEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendFuncSeparateiEXT")) == NULL) || r;
+  r = ((glBlendFunciEXT = (PFNGLBLENDFUNCIEXTPROC)glewGetProcAddress((const GLubyte*)"glBlendFunciEXT")) == NULL) || r;
+  r = ((glColorMaskiEXT = (PFNGLCOLORMASKIEXTPROC)glewGetProcAddress((const GLubyte*)"glColorMaskiEXT")) == NULL) || r;
+  r = ((glDisableiEXT = (PFNGLDISABLEIEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableiEXT")) == NULL) || r;
+  r = ((glEnableiEXT = (PFNGLENABLEIEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableiEXT")) == NULL) || r;
+  r = ((glIsEnablediEXT = (PFNGLISENABLEDIEXTPROC)glewGetProcAddress((const GLubyte*)"glIsEnablediEXT")) == NULL) || r;
 
   return r;
 }
@@ -12734,10 +12731,10 @@ static GLboolean _glewInit_GL_EXT_draw_elements_base_vertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawElementsBaseVertexEXT = (PFNGLDRAWELEMENTSBASEVERTEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsBaseVertexEXT")) == NULL) || r;
-  r = ((glDrawElementsInstancedBaseVertexEXT = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedBaseVertexEXT")) == NULL) || r;
-  r = ((glDrawRangeElementsBaseVertexEXT = (PFNGLDRAWRANGEELEMENTSBASEVERTEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawRangeElementsBaseVertexEXT")) == NULL) || r;
-  r = ((glMultiDrawElementsBaseVertexEXT = (PFNGLMULTIDRAWELEMENTSBASEVERTEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsBaseVertexEXT")) == NULL) || r;
+  r = ((glDrawElementsBaseVertexEXT = (PFNGLDRAWELEMENTSBASEVERTEXEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsBaseVertexEXT")) == NULL) || r;
+  r = ((glDrawElementsInstancedBaseVertexEXT = (PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedBaseVertexEXT")) == NULL) || r;
+  r = ((glDrawRangeElementsBaseVertexEXT = (PFNGLDRAWRANGEELEMENTSBASEVERTEXEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElementsBaseVertexEXT")) == NULL) || r;
+  r = ((glMultiDrawElementsBaseVertexEXT = (PFNGLMULTIDRAWELEMENTSBASEVERTEXEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsBaseVertexEXT")) == NULL) || r;
 
   return r;
 }
@@ -12750,8 +12747,8 @@ static GLboolean _glewInit_GL_EXT_draw_instanced ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysInstancedEXT = (PFNGLDRAWARRAYSINSTANCEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstancedEXT")) == NULL) || r;
-  r = ((glDrawElementsInstancedEXT = (PFNGLDRAWELEMENTSINSTANCEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedEXT")) == NULL) || r;
+  r = ((glDrawArraysInstancedEXT = (PFNGLDRAWARRAYSINSTANCEDEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstancedEXT")) == NULL) || r;
+  r = ((glDrawElementsInstancedEXT = (PFNGLDRAWELEMENTSINSTANCEDEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedEXT")) == NULL) || r;
 
   return r;
 }
@@ -12764,7 +12761,7 @@ static GLboolean _glewInit_GL_EXT_draw_range_elements ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawRangeElementsEXT = (PFNGLDRAWRANGEELEMENTSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawRangeElementsEXT")) == NULL) || r;
+  r = ((glDrawRangeElementsEXT = (PFNGLDRAWRANGEELEMENTSEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawRangeElementsEXT")) == NULL) || r;
 
   return r;
 }
@@ -12777,8 +12774,8 @@ static GLboolean _glewInit_GL_EXT_external_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferStorageExternalEXT = (PFNGLBUFFERSTORAGEEXTERNALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBufferStorageExternalEXT")) == NULL) || r;
-  r = ((glNamedBufferStorageExternalEXT = (PFNGLNAMEDBUFFERSTORAGEEXTERNALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferStorageExternalEXT")) == NULL) || r;
+  r = ((glBufferStorageExternalEXT = (PFNGLBUFFERSTORAGEEXTERNALEXTPROC)glewGetProcAddress((const GLubyte*)"glBufferStorageExternalEXT")) == NULL) || r;
+  r = ((glNamedBufferStorageExternalEXT = (PFNGLNAMEDBUFFERSTORAGEEXTERNALEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferStorageExternalEXT")) == NULL) || r;
 
   return r;
 }
@@ -12791,11 +12788,11 @@ static GLboolean _glewInit_GL_EXT_fog_coord ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFogCoordPointerEXT = (PFNGLFOGCOORDPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordPointerEXT")) == NULL) || r;
-  r = ((glFogCoorddEXT = (PFNGLFOGCOORDDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoorddEXT")) == NULL) || r;
-  r = ((glFogCoorddvEXT = (PFNGLFOGCOORDDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoorddvEXT")) == NULL) || r;
-  r = ((glFogCoordfEXT = (PFNGLFOGCOORDFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordfEXT")) == NULL) || r;
-  r = ((glFogCoordfvEXT = (PFNGLFOGCOORDFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordfvEXT")) == NULL) || r;
+  r = ((glFogCoordPointerEXT = (PFNGLFOGCOORDPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glFogCoordPointerEXT")) == NULL) || r;
+  r = ((glFogCoorddEXT = (PFNGLFOGCOORDDEXTPROC)glewGetProcAddress((const GLubyte*)"glFogCoorddEXT")) == NULL) || r;
+  r = ((glFogCoorddvEXT = (PFNGLFOGCOORDDVEXTPROC)glewGetProcAddress((const GLubyte*)"glFogCoorddvEXT")) == NULL) || r;
+  r = ((glFogCoordfEXT = (PFNGLFOGCOORDFEXTPROC)glewGetProcAddress((const GLubyte*)"glFogCoordfEXT")) == NULL) || r;
+  r = ((glFogCoordfvEXT = (PFNGLFOGCOORDFVEXTPROC)glewGetProcAddress((const GLubyte*)"glFogCoordfvEXT")) == NULL) || r;
 
   return r;
 }
@@ -12808,24 +12805,24 @@ static GLboolean _glewInit_GL_EXT_fragment_lighting ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFragmentColorMaterialEXT = (PFNGLFRAGMENTCOLORMATERIALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentColorMaterialEXT")) == NULL) || r;
-  r = ((glFragmentLightModelfEXT = (PFNGLFRAGMENTLIGHTMODELFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModelfEXT")) == NULL) || r;
-  r = ((glFragmentLightModelfvEXT = (PFNGLFRAGMENTLIGHTMODELFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModelfvEXT")) == NULL) || r;
-  r = ((glFragmentLightModeliEXT = (PFNGLFRAGMENTLIGHTMODELIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModeliEXT")) == NULL) || r;
-  r = ((glFragmentLightModelivEXT = (PFNGLFRAGMENTLIGHTMODELIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModelivEXT")) == NULL) || r;
-  r = ((glFragmentLightfEXT = (PFNGLFRAGMENTLIGHTFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightfEXT")) == NULL) || r;
-  r = ((glFragmentLightfvEXT = (PFNGLFRAGMENTLIGHTFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightfvEXT")) == NULL) || r;
-  r = ((glFragmentLightiEXT = (PFNGLFRAGMENTLIGHTIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightiEXT")) == NULL) || r;
-  r = ((glFragmentLightivEXT = (PFNGLFRAGMENTLIGHTIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightivEXT")) == NULL) || r;
-  r = ((glFragmentMaterialfEXT = (PFNGLFRAGMENTMATERIALFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialfEXT")) == NULL) || r;
-  r = ((glFragmentMaterialfvEXT = (PFNGLFRAGMENTMATERIALFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialfvEXT")) == NULL) || r;
-  r = ((glFragmentMaterialiEXT = (PFNGLFRAGMENTMATERIALIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialiEXT")) == NULL) || r;
-  r = ((glFragmentMaterialivEXT = (PFNGLFRAGMENTMATERIALIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialivEXT")) == NULL) || r;
-  r = ((glGetFragmentLightfvEXT = (PFNGLGETFRAGMENTLIGHTFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentLightfvEXT")) == NULL) || r;
-  r = ((glGetFragmentLightivEXT = (PFNGLGETFRAGMENTLIGHTIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentLightivEXT")) == NULL) || r;
-  r = ((glGetFragmentMaterialfvEXT = (PFNGLGETFRAGMENTMATERIALFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentMaterialfvEXT")) == NULL) || r;
-  r = ((glGetFragmentMaterialivEXT = (PFNGLGETFRAGMENTMATERIALIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentMaterialivEXT")) == NULL) || r;
-  r = ((glLightEnviEXT = (PFNGLLIGHTENVIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glLightEnviEXT")) == NULL) || r;
+  r = ((glFragmentColorMaterialEXT = (PFNGLFRAGMENTCOLORMATERIALEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentColorMaterialEXT")) == NULL) || r;
+  r = ((glFragmentLightModelfEXT = (PFNGLFRAGMENTLIGHTMODELFEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModelfEXT")) == NULL) || r;
+  r = ((glFragmentLightModelfvEXT = (PFNGLFRAGMENTLIGHTMODELFVEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModelfvEXT")) == NULL) || r;
+  r = ((glFragmentLightModeliEXT = (PFNGLFRAGMENTLIGHTMODELIEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModeliEXT")) == NULL) || r;
+  r = ((glFragmentLightModelivEXT = (PFNGLFRAGMENTLIGHTMODELIVEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModelivEXT")) == NULL) || r;
+  r = ((glFragmentLightfEXT = (PFNGLFRAGMENTLIGHTFEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightfEXT")) == NULL) || r;
+  r = ((glFragmentLightfvEXT = (PFNGLFRAGMENTLIGHTFVEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightfvEXT")) == NULL) || r;
+  r = ((glFragmentLightiEXT = (PFNGLFRAGMENTLIGHTIEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightiEXT")) == NULL) || r;
+  r = ((glFragmentLightivEXT = (PFNGLFRAGMENTLIGHTIVEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightivEXT")) == NULL) || r;
+  r = ((glFragmentMaterialfEXT = (PFNGLFRAGMENTMATERIALFEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialfEXT")) == NULL) || r;
+  r = ((glFragmentMaterialfvEXT = (PFNGLFRAGMENTMATERIALFVEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialfvEXT")) == NULL) || r;
+  r = ((glFragmentMaterialiEXT = (PFNGLFRAGMENTMATERIALIEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialiEXT")) == NULL) || r;
+  r = ((glFragmentMaterialivEXT = (PFNGLFRAGMENTMATERIALIVEXTPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialivEXT")) == NULL) || r;
+  r = ((glGetFragmentLightfvEXT = (PFNGLGETFRAGMENTLIGHTFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentLightfvEXT")) == NULL) || r;
+  r = ((glGetFragmentLightivEXT = (PFNGLGETFRAGMENTLIGHTIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentLightivEXT")) == NULL) || r;
+  r = ((glGetFragmentMaterialfvEXT = (PFNGLGETFRAGMENTMATERIALFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentMaterialfvEXT")) == NULL) || r;
+  r = ((glGetFragmentMaterialivEXT = (PFNGLGETFRAGMENTMATERIALIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentMaterialivEXT")) == NULL) || r;
+  r = ((glLightEnviEXT = (PFNGLLIGHTENVIEXTPROC)glewGetProcAddress((const GLubyte*)"glLightEnviEXT")) == NULL) || r;
 
   return r;
 }
@@ -12838,7 +12835,7 @@ static GLboolean _glewInit_GL_EXT_framebuffer_blit ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlitFramebufferEXT = (PFNGLBLITFRAMEBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBlitFramebufferEXT")) == NULL) || r;
+  r = ((glBlitFramebufferEXT = (PFNGLBLITFRAMEBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glBlitFramebufferEXT")) == NULL) || r;
 
   return r;
 }
@@ -12851,7 +12848,7 @@ static GLboolean _glewInit_GL_EXT_framebuffer_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glRenderbufferStorageMultisampleEXT = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageMultisampleEXT")) == NULL) || r;
+  r = ((glRenderbufferStorageMultisampleEXT = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageMultisampleEXT")) == NULL) || r;
 
   return r;
 }
@@ -12864,23 +12861,23 @@ static GLboolean _glewInit_GL_EXT_framebuffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindFramebufferEXT")) == NULL) || r;
-  r = ((glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindRenderbufferEXT")) == NULL) || r;
-  r = ((glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCheckFramebufferStatusEXT")) == NULL) || r;
-  r = ((glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteFramebuffersEXT")) == NULL) || r;
-  r = ((glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteRenderbuffersEXT")) == NULL) || r;
-  r = ((glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferRenderbufferEXT")) == NULL) || r;
-  r = ((glFramebufferTexture1DEXT = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture1DEXT")) == NULL) || r;
-  r = ((glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture2DEXT")) == NULL) || r;
-  r = ((glFramebufferTexture3DEXT = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture3DEXT")) == NULL) || r;
-  r = ((glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenFramebuffersEXT")) == NULL) || r;
-  r = ((glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenRenderbuffersEXT")) == NULL) || r;
-  r = ((glGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenerateMipmapEXT")) == NULL) || r;
-  r = ((glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFramebufferAttachmentParameterivEXT")) == NULL) || r;
-  r = ((glGetRenderbufferParameterivEXT = (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetRenderbufferParameterivEXT")) == NULL) || r;
-  r = ((glIsFramebufferEXT = (PFNGLISFRAMEBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsFramebufferEXT")) == NULL) || r;
-  r = ((glIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsRenderbufferEXT")) == NULL) || r;
-  r = ((glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageEXT")) == NULL) || r;
+  r = ((glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindFramebufferEXT")) == NULL) || r;
+  r = ((glBindRenderbufferEXT = (PFNGLBINDRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindRenderbufferEXT")) == NULL) || r;
+  r = ((glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glewGetProcAddress((const GLubyte*)"glCheckFramebufferStatusEXT")) == NULL) || r;
+  r = ((glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteFramebuffersEXT")) == NULL) || r;
+  r = ((glDeleteRenderbuffersEXT = (PFNGLDELETERENDERBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteRenderbuffersEXT")) == NULL) || r;
+  r = ((glFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferRenderbufferEXT")) == NULL) || r;
+  r = ((glFramebufferTexture1DEXT = (PFNGLFRAMEBUFFERTEXTURE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture1DEXT")) == NULL) || r;
+  r = ((glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture2DEXT")) == NULL) || r;
+  r = ((glFramebufferTexture3DEXT = (PFNGLFRAMEBUFFERTEXTURE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture3DEXT")) == NULL) || r;
+  r = ((glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glGenFramebuffersEXT")) == NULL) || r;
+  r = ((glGenRenderbuffersEXT = (PFNGLGENRENDERBUFFERSEXTPROC)glewGetProcAddress((const GLubyte*)"glGenRenderbuffersEXT")) == NULL) || r;
+  r = ((glGenerateMipmapEXT = (PFNGLGENERATEMIPMAPEXTPROC)glewGetProcAddress((const GLubyte*)"glGenerateMipmapEXT")) == NULL) || r;
+  r = ((glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferAttachmentParameterivEXT")) == NULL) || r;
+  r = ((glGetRenderbufferParameterivEXT = (PFNGLGETRENDERBUFFERPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetRenderbufferParameterivEXT")) == NULL) || r;
+  r = ((glIsFramebufferEXT = (PFNGLISFRAMEBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glIsFramebufferEXT")) == NULL) || r;
+  r = ((glIsRenderbufferEXT = (PFNGLISRENDERBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glIsRenderbufferEXT")) == NULL) || r;
+  r = ((glRenderbufferStorageEXT = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageEXT")) == NULL) || r;
 
   return r;
 }
@@ -12893,9 +12890,9 @@ static GLboolean _glewInit_GL_EXT_geometry_shader4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferTextureEXT = (PFNGLFRAMEBUFFERTEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureEXT")) == NULL) || r;
-  r = ((glFramebufferTextureFaceEXT = (PFNGLFRAMEBUFFERTEXTUREFACEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureFaceEXT")) == NULL) || r;
-  r = ((glProgramParameteriEXT = (PFNGLPROGRAMPARAMETERIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameteriEXT")) == NULL) || r;
+  r = ((glFramebufferTextureEXT = (PFNGLFRAMEBUFFERTEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureEXT")) == NULL) || r;
+  r = ((glFramebufferTextureFaceEXT = (PFNGLFRAMEBUFFERTEXTUREFACEEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureFaceEXT")) == NULL) || r;
+  r = ((glProgramParameteriEXT = (PFNGLPROGRAMPARAMETERIEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramParameteriEXT")) == NULL) || r;
 
   return r;
 }
@@ -12908,8 +12905,8 @@ static GLboolean _glewInit_GL_EXT_gpu_program_parameters ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glProgramEnvParameters4fvEXT = (PFNGLPROGRAMENVPARAMETERS4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameters4fvEXT")) == NULL) || r;
-  r = ((glProgramLocalParameters4fvEXT = (PFNGLPROGRAMLOCALPARAMETERS4FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameters4fvEXT")) == NULL) || r;
+  r = ((glProgramEnvParameters4fvEXT = (PFNGLPROGRAMENVPARAMETERS4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameters4fvEXT")) == NULL) || r;
+  r = ((glProgramLocalParameters4fvEXT = (PFNGLPROGRAMLOCALPARAMETERS4FVEXTPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameters4fvEXT")) == NULL) || r;
 
   return r;
 }
@@ -12922,40 +12919,40 @@ static GLboolean _glewInit_GL_EXT_gpu_shader4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindFragDataLocationEXT = (PFNGLBINDFRAGDATALOCATIONEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindFragDataLocationEXT")) == NULL) || r;
-  r = ((glGetFragDataLocationEXT = (PFNGLGETFRAGDATALOCATIONEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragDataLocationEXT")) == NULL) || r;
-  r = ((glGetUniformuivEXT = (PFNGLGETUNIFORMUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformuivEXT")) == NULL) || r;
-  r = ((glGetVertexAttribIivEXT = (PFNGLGETVERTEXATTRIBIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribIivEXT")) == NULL) || r;
-  r = ((glGetVertexAttribIuivEXT = (PFNGLGETVERTEXATTRIBIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribIuivEXT")) == NULL) || r;
-  r = ((glUniform1uiEXT = (PFNGLUNIFORM1UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1uiEXT")) == NULL) || r;
-  r = ((glUniform1uivEXT = (PFNGLUNIFORM1UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1uivEXT")) == NULL) || r;
-  r = ((glUniform2uiEXT = (PFNGLUNIFORM2UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2uiEXT")) == NULL) || r;
-  r = ((glUniform2uivEXT = (PFNGLUNIFORM2UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2uivEXT")) == NULL) || r;
-  r = ((glUniform3uiEXT = (PFNGLUNIFORM3UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3uiEXT")) == NULL) || r;
-  r = ((glUniform3uivEXT = (PFNGLUNIFORM3UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3uivEXT")) == NULL) || r;
-  r = ((glUniform4uiEXT = (PFNGLUNIFORM4UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4uiEXT")) == NULL) || r;
-  r = ((glUniform4uivEXT = (PFNGLUNIFORM4UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4uivEXT")) == NULL) || r;
-  r = ((glVertexAttribI1iEXT = (PFNGLVERTEXATTRIBI1IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1iEXT")) == NULL) || r;
-  r = ((glVertexAttribI1ivEXT = (PFNGLVERTEXATTRIBI1IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1ivEXT")) == NULL) || r;
-  r = ((glVertexAttribI1uiEXT = (PFNGLVERTEXATTRIBI1UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1uiEXT")) == NULL) || r;
-  r = ((glVertexAttribI1uivEXT = (PFNGLVERTEXATTRIBI1UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI1uivEXT")) == NULL) || r;
-  r = ((glVertexAttribI2iEXT = (PFNGLVERTEXATTRIBI2IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2iEXT")) == NULL) || r;
-  r = ((glVertexAttribI2ivEXT = (PFNGLVERTEXATTRIBI2IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2ivEXT")) == NULL) || r;
-  r = ((glVertexAttribI2uiEXT = (PFNGLVERTEXATTRIBI2UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2uiEXT")) == NULL) || r;
-  r = ((glVertexAttribI2uivEXT = (PFNGLVERTEXATTRIBI2UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI2uivEXT")) == NULL) || r;
-  r = ((glVertexAttribI3iEXT = (PFNGLVERTEXATTRIBI3IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3iEXT")) == NULL) || r;
-  r = ((glVertexAttribI3ivEXT = (PFNGLVERTEXATTRIBI3IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3ivEXT")) == NULL) || r;
-  r = ((glVertexAttribI3uiEXT = (PFNGLVERTEXATTRIBI3UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3uiEXT")) == NULL) || r;
-  r = ((glVertexAttribI3uivEXT = (PFNGLVERTEXATTRIBI3UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI3uivEXT")) == NULL) || r;
-  r = ((glVertexAttribI4bvEXT = (PFNGLVERTEXATTRIBI4BVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4bvEXT")) == NULL) || r;
-  r = ((glVertexAttribI4iEXT = (PFNGLVERTEXATTRIBI4IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4iEXT")) == NULL) || r;
-  r = ((glVertexAttribI4ivEXT = (PFNGLVERTEXATTRIBI4IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4ivEXT")) == NULL) || r;
-  r = ((glVertexAttribI4svEXT = (PFNGLVERTEXATTRIBI4SVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4svEXT")) == NULL) || r;
-  r = ((glVertexAttribI4ubvEXT = (PFNGLVERTEXATTRIBI4UBVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4ubvEXT")) == NULL) || r;
-  r = ((glVertexAttribI4uiEXT = (PFNGLVERTEXATTRIBI4UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4uiEXT")) == NULL) || r;
-  r = ((glVertexAttribI4uivEXT = (PFNGLVERTEXATTRIBI4UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4uivEXT")) == NULL) || r;
-  r = ((glVertexAttribI4usvEXT = (PFNGLVERTEXATTRIBI4USVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribI4usvEXT")) == NULL) || r;
-  r = ((glVertexAttribIPointerEXT = (PFNGLVERTEXATTRIBIPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribIPointerEXT")) == NULL) || r;
+  r = ((glBindFragDataLocationEXT = (PFNGLBINDFRAGDATALOCATIONEXTPROC)glewGetProcAddress((const GLubyte*)"glBindFragDataLocationEXT")) == NULL) || r;
+  r = ((glGetFragDataLocationEXT = (PFNGLGETFRAGDATALOCATIONEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFragDataLocationEXT")) == NULL) || r;
+  r = ((glGetUniformuivEXT = (PFNGLGETUNIFORMUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetUniformuivEXT")) == NULL) || r;
+  r = ((glGetVertexAttribIivEXT = (PFNGLGETVERTEXATTRIBIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribIivEXT")) == NULL) || r;
+  r = ((glGetVertexAttribIuivEXT = (PFNGLGETVERTEXATTRIBIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribIuivEXT")) == NULL) || r;
+  r = ((glUniform1uiEXT = (PFNGLUNIFORM1UIEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform1uiEXT")) == NULL) || r;
+  r = ((glUniform1uivEXT = (PFNGLUNIFORM1UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform1uivEXT")) == NULL) || r;
+  r = ((glUniform2uiEXT = (PFNGLUNIFORM2UIEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform2uiEXT")) == NULL) || r;
+  r = ((glUniform2uivEXT = (PFNGLUNIFORM2UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform2uivEXT")) == NULL) || r;
+  r = ((glUniform3uiEXT = (PFNGLUNIFORM3UIEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform3uiEXT")) == NULL) || r;
+  r = ((glUniform3uivEXT = (PFNGLUNIFORM3UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform3uivEXT")) == NULL) || r;
+  r = ((glUniform4uiEXT = (PFNGLUNIFORM4UIEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform4uiEXT")) == NULL) || r;
+  r = ((glUniform4uivEXT = (PFNGLUNIFORM4UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glUniform4uivEXT")) == NULL) || r;
+  r = ((glVertexAttribI1iEXT = (PFNGLVERTEXATTRIBI1IEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1iEXT")) == NULL) || r;
+  r = ((glVertexAttribI1ivEXT = (PFNGLVERTEXATTRIBI1IVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1ivEXT")) == NULL) || r;
+  r = ((glVertexAttribI1uiEXT = (PFNGLVERTEXATTRIBI1UIEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1uiEXT")) == NULL) || r;
+  r = ((glVertexAttribI1uivEXT = (PFNGLVERTEXATTRIBI1UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI1uivEXT")) == NULL) || r;
+  r = ((glVertexAttribI2iEXT = (PFNGLVERTEXATTRIBI2IEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2iEXT")) == NULL) || r;
+  r = ((glVertexAttribI2ivEXT = (PFNGLVERTEXATTRIBI2IVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2ivEXT")) == NULL) || r;
+  r = ((glVertexAttribI2uiEXT = (PFNGLVERTEXATTRIBI2UIEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2uiEXT")) == NULL) || r;
+  r = ((glVertexAttribI2uivEXT = (PFNGLVERTEXATTRIBI2UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI2uivEXT")) == NULL) || r;
+  r = ((glVertexAttribI3iEXT = (PFNGLVERTEXATTRIBI3IEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3iEXT")) == NULL) || r;
+  r = ((glVertexAttribI3ivEXT = (PFNGLVERTEXATTRIBI3IVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3ivEXT")) == NULL) || r;
+  r = ((glVertexAttribI3uiEXT = (PFNGLVERTEXATTRIBI3UIEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3uiEXT")) == NULL) || r;
+  r = ((glVertexAttribI3uivEXT = (PFNGLVERTEXATTRIBI3UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI3uivEXT")) == NULL) || r;
+  r = ((glVertexAttribI4bvEXT = (PFNGLVERTEXATTRIBI4BVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4bvEXT")) == NULL) || r;
+  r = ((glVertexAttribI4iEXT = (PFNGLVERTEXATTRIBI4IEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4iEXT")) == NULL) || r;
+  r = ((glVertexAttribI4ivEXT = (PFNGLVERTEXATTRIBI4IVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4ivEXT")) == NULL) || r;
+  r = ((glVertexAttribI4svEXT = (PFNGLVERTEXATTRIBI4SVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4svEXT")) == NULL) || r;
+  r = ((glVertexAttribI4ubvEXT = (PFNGLVERTEXATTRIBI4UBVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4ubvEXT")) == NULL) || r;
+  r = ((glVertexAttribI4uiEXT = (PFNGLVERTEXATTRIBI4UIEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4uiEXT")) == NULL) || r;
+  r = ((glVertexAttribI4uivEXT = (PFNGLVERTEXATTRIBI4UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4uivEXT")) == NULL) || r;
+  r = ((glVertexAttribI4usvEXT = (PFNGLVERTEXATTRIBI4USVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribI4usvEXT")) == NULL) || r;
+  r = ((glVertexAttribIPointerEXT = (PFNGLVERTEXATTRIBIPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribIPointerEXT")) == NULL) || r;
 
   return r;
 }
@@ -12968,16 +12965,16 @@ static GLboolean _glewInit_GL_EXT_histogram ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetHistogramEXT = (PFNGLGETHISTOGRAMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetHistogramEXT")) == NULL) || r;
-  r = ((glGetHistogramParameterfvEXT = (PFNGLGETHISTOGRAMPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetHistogramParameterfvEXT")) == NULL) || r;
-  r = ((glGetHistogramParameterivEXT = (PFNGLGETHISTOGRAMPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetHistogramParameterivEXT")) == NULL) || r;
-  r = ((glGetMinmaxEXT = (PFNGLGETMINMAXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMinmaxEXT")) == NULL) || r;
-  r = ((glGetMinmaxParameterfvEXT = (PFNGLGETMINMAXPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMinmaxParameterfvEXT")) == NULL) || r;
-  r = ((glGetMinmaxParameterivEXT = (PFNGLGETMINMAXPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMinmaxParameterivEXT")) == NULL) || r;
-  r = ((glHistogramEXT = (PFNGLHISTOGRAMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glHistogramEXT")) == NULL) || r;
-  r = ((glMinmaxEXT = (PFNGLMINMAXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMinmaxEXT")) == NULL) || r;
-  r = ((glResetHistogramEXT = (PFNGLRESETHISTOGRAMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glResetHistogramEXT")) == NULL) || r;
-  r = ((glResetMinmaxEXT = (PFNGLRESETMINMAXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glResetMinmaxEXT")) == NULL) || r;
+  r = ((glGetHistogramEXT = (PFNGLGETHISTOGRAMEXTPROC)glewGetProcAddress((const GLubyte*)"glGetHistogramEXT")) == NULL) || r;
+  r = ((glGetHistogramParameterfvEXT = (PFNGLGETHISTOGRAMPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetHistogramParameterfvEXT")) == NULL) || r;
+  r = ((glGetHistogramParameterivEXT = (PFNGLGETHISTOGRAMPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetHistogramParameterivEXT")) == NULL) || r;
+  r = ((glGetMinmaxEXT = (PFNGLGETMINMAXEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMinmaxEXT")) == NULL) || r;
+  r = ((glGetMinmaxParameterfvEXT = (PFNGLGETMINMAXPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMinmaxParameterfvEXT")) == NULL) || r;
+  r = ((glGetMinmaxParameterivEXT = (PFNGLGETMINMAXPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMinmaxParameterivEXT")) == NULL) || r;
+  r = ((glHistogramEXT = (PFNGLHISTOGRAMEXTPROC)glewGetProcAddress((const GLubyte*)"glHistogramEXT")) == NULL) || r;
+  r = ((glMinmaxEXT = (PFNGLMINMAXEXTPROC)glewGetProcAddress((const GLubyte*)"glMinmaxEXT")) == NULL) || r;
+  r = ((glResetHistogramEXT = (PFNGLRESETHISTOGRAMEXTPROC)glewGetProcAddress((const GLubyte*)"glResetHistogramEXT")) == NULL) || r;
+  r = ((glResetMinmaxEXT = (PFNGLRESETMINMAXEXTPROC)glewGetProcAddress((const GLubyte*)"glResetMinmaxEXT")) == NULL) || r;
 
   return r;
 }
@@ -12990,7 +12987,7 @@ static GLboolean _glewInit_GL_EXT_index_func ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glIndexFuncEXT = (PFNGLINDEXFUNCEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIndexFuncEXT")) == NULL) || r;
+  r = ((glIndexFuncEXT = (PFNGLINDEXFUNCEXTPROC)glewGetProcAddress((const GLubyte*)"glIndexFuncEXT")) == NULL) || r;
 
   return r;
 }
@@ -13003,7 +13000,7 @@ static GLboolean _glewInit_GL_EXT_index_material ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glIndexMaterialEXT = (PFNGLINDEXMATERIALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIndexMaterialEXT")) == NULL) || r;
+  r = ((glIndexMaterialEXT = (PFNGLINDEXMATERIALEXTPROC)glewGetProcAddress((const GLubyte*)"glIndexMaterialEXT")) == NULL) || r;
 
   return r;
 }
@@ -13016,7 +13013,7 @@ static GLboolean _glewInit_GL_EXT_instanced_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVertexAttribDivisorEXT = (PFNGLVERTEXATTRIBDIVISOREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribDivisorEXT")) == NULL) || r;
+  r = ((glVertexAttribDivisorEXT = (PFNGLVERTEXATTRIBDIVISOREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribDivisorEXT")) == NULL) || r;
 
   return r;
 }
@@ -13029,9 +13026,9 @@ static GLboolean _glewInit_GL_EXT_light_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glApplyTextureEXT = (PFNGLAPPLYTEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glApplyTextureEXT")) == NULL) || r;
-  r = ((glTextureLightEXT = (PFNGLTEXTURELIGHTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureLightEXT")) == NULL) || r;
-  r = ((glTextureMaterialEXT = (PFNGLTEXTUREMATERIALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureMaterialEXT")) == NULL) || r;
+  r = ((glApplyTextureEXT = (PFNGLAPPLYTEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glApplyTextureEXT")) == NULL) || r;
+  r = ((glTextureLightEXT = (PFNGLTEXTURELIGHTEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureLightEXT")) == NULL) || r;
+  r = ((glTextureMaterialEXT = (PFNGLTEXTUREMATERIALEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureMaterialEXT")) == NULL) || r;
 
   return r;
 }
@@ -13044,8 +13041,8 @@ static GLboolean _glewInit_GL_EXT_map_buffer_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFlushMappedBufferRangeEXT = (PFNGLFLUSHMAPPEDBUFFERRANGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFlushMappedBufferRangeEXT")) == NULL) || r;
-  r = ((glMapBufferRangeEXT = (PFNGLMAPBUFFERRANGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMapBufferRangeEXT")) == NULL) || r;
+  r = ((glFlushMappedBufferRangeEXT = (PFNGLFLUSHMAPPEDBUFFERRANGEEXTPROC)glewGetProcAddress((const GLubyte*)"glFlushMappedBufferRangeEXT")) == NULL) || r;
+  r = ((glMapBufferRangeEXT = (PFNGLMAPBUFFERRANGEEXTPROC)glewGetProcAddress((const GLubyte*)"glMapBufferRangeEXT")) == NULL) || r;
 
   return r;
 }
@@ -13058,25 +13055,25 @@ static GLboolean _glewInit_GL_EXT_memory_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferStorageMemEXT = (PFNGLBUFFERSTORAGEMEMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBufferStorageMemEXT")) == NULL) || r;
-  r = ((glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCreateMemoryObjectsEXT")) == NULL) || r;
-  r = ((glDeleteMemoryObjectsEXT = (PFNGLDELETEMEMORYOBJECTSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteMemoryObjectsEXT")) == NULL) || r;
-  r = ((glGetMemoryObjectParameterivEXT = (PFNGLGETMEMORYOBJECTPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetMemoryObjectParameterivEXT")) == NULL) || r;
-  r = ((glGetUnsignedBytei_vEXT = (PFNGLGETUNSIGNEDBYTEI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetUnsignedBytei_vEXT")) == NULL) || r;
-  r = ((glGetUnsignedBytevEXT = (PFNGLGETUNSIGNEDBYTEVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetUnsignedBytevEXT")) == NULL) || r;
-  r = ((glIsMemoryObjectEXT = (PFNGLISMEMORYOBJECTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsMemoryObjectEXT")) == NULL) || r;
-  r = ((glMemoryObjectParameterivEXT = (PFNGLMEMORYOBJECTPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMemoryObjectParameterivEXT")) == NULL) || r;
-  r = ((glNamedBufferStorageMemEXT = (PFNGLNAMEDBUFFERSTORAGEMEMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glNamedBufferStorageMemEXT")) == NULL) || r;
-  r = ((glTexStorageMem1DEXT = (PFNGLTEXSTORAGEMEM1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorageMem1DEXT")) == NULL) || r;
-  r = ((glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorageMem2DEXT")) == NULL) || r;
-  r = ((glTexStorageMem2DMultisampleEXT = (PFNGLTEXSTORAGEMEM2DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorageMem2DMultisampleEXT")) == NULL) || r;
-  r = ((glTexStorageMem3DEXT = (PFNGLTEXSTORAGEMEM3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorageMem3DEXT")) == NULL) || r;
-  r = ((glTexStorageMem3DMultisampleEXT = (PFNGLTEXSTORAGEMEM3DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorageMem3DMultisampleEXT")) == NULL) || r;
-  r = ((glTextureStorageMem1DEXT = (PFNGLTEXTURESTORAGEMEM1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorageMem1DEXT")) == NULL) || r;
-  r = ((glTextureStorageMem2DEXT = (PFNGLTEXTURESTORAGEMEM2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorageMem2DEXT")) == NULL) || r;
-  r = ((glTextureStorageMem2DMultisampleEXT = (PFNGLTEXTURESTORAGEMEM2DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorageMem2DMultisampleEXT")) == NULL) || r;
-  r = ((glTextureStorageMem3DEXT = (PFNGLTEXTURESTORAGEMEM3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorageMem3DEXT")) == NULL) || r;
-  r = ((glTextureStorageMem3DMultisampleEXT = (PFNGLTEXTURESTORAGEMEM3DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorageMem3DMultisampleEXT")) == NULL) || r;
+  r = ((glBufferStorageMemEXT = (PFNGLBUFFERSTORAGEMEMEXTPROC)glewGetProcAddress((const GLubyte*)"glBufferStorageMemEXT")) == NULL) || r;
+  r = ((glCreateMemoryObjectsEXT = (PFNGLCREATEMEMORYOBJECTSEXTPROC)glewGetProcAddress((const GLubyte*)"glCreateMemoryObjectsEXT")) == NULL) || r;
+  r = ((glDeleteMemoryObjectsEXT = (PFNGLDELETEMEMORYOBJECTSEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteMemoryObjectsEXT")) == NULL) || r;
+  r = ((glGetMemoryObjectParameterivEXT = (PFNGLGETMEMORYOBJECTPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetMemoryObjectParameterivEXT")) == NULL) || r;
+  r = ((glGetUnsignedBytei_vEXT = (PFNGLGETUNSIGNEDBYTEI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetUnsignedBytei_vEXT")) == NULL) || r;
+  r = ((glGetUnsignedBytevEXT = (PFNGLGETUNSIGNEDBYTEVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetUnsignedBytevEXT")) == NULL) || r;
+  r = ((glIsMemoryObjectEXT = (PFNGLISMEMORYOBJECTEXTPROC)glewGetProcAddress((const GLubyte*)"glIsMemoryObjectEXT")) == NULL) || r;
+  r = ((glMemoryObjectParameterivEXT = (PFNGLMEMORYOBJECTPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glMemoryObjectParameterivEXT")) == NULL) || r;
+  r = ((glNamedBufferStorageMemEXT = (PFNGLNAMEDBUFFERSTORAGEMEMEXTPROC)glewGetProcAddress((const GLubyte*)"glNamedBufferStorageMemEXT")) == NULL) || r;
+  r = ((glTexStorageMem1DEXT = (PFNGLTEXSTORAGEMEM1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorageMem1DEXT")) == NULL) || r;
+  r = ((glTexStorageMem2DEXT = (PFNGLTEXSTORAGEMEM2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorageMem2DEXT")) == NULL) || r;
+  r = ((glTexStorageMem2DMultisampleEXT = (PFNGLTEXSTORAGEMEM2DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorageMem2DMultisampleEXT")) == NULL) || r;
+  r = ((glTexStorageMem3DEXT = (PFNGLTEXSTORAGEMEM3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorageMem3DEXT")) == NULL) || r;
+  r = ((glTexStorageMem3DMultisampleEXT = (PFNGLTEXSTORAGEMEM3DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorageMem3DMultisampleEXT")) == NULL) || r;
+  r = ((glTextureStorageMem1DEXT = (PFNGLTEXTURESTORAGEMEM1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorageMem1DEXT")) == NULL) || r;
+  r = ((glTextureStorageMem2DEXT = (PFNGLTEXTURESTORAGEMEM2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorageMem2DEXT")) == NULL) || r;
+  r = ((glTextureStorageMem2DMultisampleEXT = (PFNGLTEXTURESTORAGEMEM2DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorageMem2DMultisampleEXT")) == NULL) || r;
+  r = ((glTextureStorageMem3DEXT = (PFNGLTEXTURESTORAGEMEM3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorageMem3DEXT")) == NULL) || r;
+  r = ((glTextureStorageMem3DMultisampleEXT = (PFNGLTEXTURESTORAGEMEM3DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorageMem3DMultisampleEXT")) == NULL) || r;
 
   return r;
 }
@@ -13089,7 +13086,7 @@ static GLboolean _glewInit_GL_EXT_memory_object_fd ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportMemoryFdEXT")) == NULL) || r;
+  r = ((glImportMemoryFdEXT = (PFNGLIMPORTMEMORYFDEXTPROC)glewGetProcAddress((const GLubyte*)"glImportMemoryFdEXT")) == NULL) || r;
 
   return r;
 }
@@ -13102,8 +13099,8 @@ static GLboolean _glewInit_GL_EXT_memory_object_win32 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glImportMemoryWin32HandleEXT = (PFNGLIMPORTMEMORYWIN32HANDLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportMemoryWin32HandleEXT")) == NULL) || r;
-  r = ((glImportMemoryWin32NameEXT = (PFNGLIMPORTMEMORYWIN32NAMEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportMemoryWin32NameEXT")) == NULL) || r;
+  r = ((glImportMemoryWin32HandleEXT = (PFNGLIMPORTMEMORYWIN32HANDLEEXTPROC)glewGetProcAddress((const GLubyte*)"glImportMemoryWin32HandleEXT")) == NULL) || r;
+  r = ((glImportMemoryWin32NameEXT = (PFNGLIMPORTMEMORYWIN32NAMEEXTPROC)glewGetProcAddress((const GLubyte*)"glImportMemoryWin32NameEXT")) == NULL) || r;
 
   return r;
 }
@@ -13116,8 +13113,8 @@ static GLboolean _glewInit_GL_EXT_multi_draw_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysEXT = (PFNGLMULTIDRAWARRAYSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysEXT")) == NULL) || r;
-  r = ((glMultiDrawElementsEXT = (PFNGLMULTIDRAWELEMENTSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsEXT")) == NULL) || r;
+  r = ((glMultiDrawArraysEXT = (PFNGLMULTIDRAWARRAYSEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysEXT")) == NULL) || r;
+  r = ((glMultiDrawElementsEXT = (PFNGLMULTIDRAWELEMENTSEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsEXT")) == NULL) || r;
 
   return r;
 }
@@ -13130,8 +13127,8 @@ static GLboolean _glewInit_GL_EXT_multi_draw_indirect ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirectEXT = (PFNGLMULTIDRAWARRAYSINDIRECTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirectEXT")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirectEXT = (PFNGLMULTIDRAWELEMENTSINDIRECTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirectEXT")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirectEXT = (PFNGLMULTIDRAWARRAYSINDIRECTEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirectEXT")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirectEXT = (PFNGLMULTIDRAWELEMENTSINDIRECTEXTPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirectEXT")) == NULL) || r;
 
   return r;
 }
@@ -13144,8 +13141,8 @@ static GLboolean _glewInit_GL_EXT_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSampleMaskEXT = (PFNGLSAMPLEMASKEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSampleMaskEXT")) == NULL) || r;
-  r = ((glSamplePatternEXT = (PFNGLSAMPLEPATTERNEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSamplePatternEXT")) == NULL) || r;
+  r = ((glSampleMaskEXT = (PFNGLSAMPLEMASKEXTPROC)glewGetProcAddress((const GLubyte*)"glSampleMaskEXT")) == NULL) || r;
+  r = ((glSamplePatternEXT = (PFNGLSAMPLEPATTERNEXTPROC)glewGetProcAddress((const GLubyte*)"glSamplePatternEXT")) == NULL) || r;
 
   return r;
 }
@@ -13158,7 +13155,7 @@ static GLboolean _glewInit_GL_EXT_multisampled_render_to_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferTexture2DMultisampleEXT = (PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTexture2DMultisampleEXT")) == NULL) || r;
+  r = ((glFramebufferTexture2DMultisampleEXT = (PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTexture2DMultisampleEXT")) == NULL) || r;
 
   return r;
 }
@@ -13171,9 +13168,9 @@ static GLboolean _glewInit_GL_EXT_multiview_draw_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawBuffersIndexedEXT = (PFNGLDRAWBUFFERSINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBuffersIndexedEXT")) == NULL) || r;
-  r = ((glGetIntegeri_vEXT = (PFNGLGETINTEGERI_VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetIntegeri_vEXT")) == NULL) || r;
-  r = ((glReadBufferIndexedEXT = (PFNGLREADBUFFERINDEXEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glReadBufferIndexedEXT")) == NULL) || r;
+  r = ((glDrawBuffersIndexedEXT = (PFNGLDRAWBUFFERSINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffersIndexedEXT")) == NULL) || r;
+  r = ((glGetIntegeri_vEXT = (PFNGLGETINTEGERI_VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetIntegeri_vEXT")) == NULL) || r;
+  r = ((glReadBufferIndexedEXT = (PFNGLREADBUFFERINDEXEDEXTPROC)glewGetProcAddress((const GLubyte*)"glReadBufferIndexedEXT")) == NULL) || r;
 
   return r;
 }
@@ -13186,10 +13183,10 @@ static GLboolean _glewInit_GL_EXT_paletted_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorTableEXT = (PFNGLCOLORTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glColorTableEXT")) == NULL) || r;
-  r = ((glGetColorTableEXT = (PFNGLGETCOLORTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableEXT")) == NULL) || r;
-  r = ((glGetColorTableParameterfvEXT = (PFNGLGETCOLORTABLEPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableParameterfvEXT")) == NULL) || r;
-  r = ((glGetColorTableParameterivEXT = (PFNGLGETCOLORTABLEPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableParameterivEXT")) == NULL) || r;
+  r = ((glColorTableEXT = (PFNGLCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"glColorTableEXT")) == NULL) || r;
+  r = ((glGetColorTableEXT = (PFNGLGETCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableEXT")) == NULL) || r;
+  r = ((glGetColorTableParameterfvEXT = (PFNGLGETCOLORTABLEPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableParameterfvEXT")) == NULL) || r;
+  r = ((glGetColorTableParameterivEXT = (PFNGLGETCOLORTABLEPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableParameterivEXT")) == NULL) || r;
 
   return r;
 }
@@ -13202,12 +13199,12 @@ static GLboolean _glewInit_GL_EXT_pixel_transform ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetPixelTransformParameterfvEXT = (PFNGLGETPIXELTRANSFORMPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetPixelTransformParameterfvEXT")) == NULL) || r;
-  r = ((glGetPixelTransformParameterivEXT = (PFNGLGETPIXELTRANSFORMPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetPixelTransformParameterivEXT")) == NULL) || r;
-  r = ((glPixelTransformParameterfEXT = (PFNGLPIXELTRANSFORMPARAMETERFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameterfEXT")) == NULL) || r;
-  r = ((glPixelTransformParameterfvEXT = (PFNGLPIXELTRANSFORMPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameterfvEXT")) == NULL) || r;
-  r = ((glPixelTransformParameteriEXT = (PFNGLPIXELTRANSFORMPARAMETERIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameteriEXT")) == NULL) || r;
-  r = ((glPixelTransformParameterivEXT = (PFNGLPIXELTRANSFORMPARAMETERIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameterivEXT")) == NULL) || r;
+  r = ((glGetPixelTransformParameterfvEXT = (PFNGLGETPIXELTRANSFORMPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetPixelTransformParameterfvEXT")) == NULL) || r;
+  r = ((glGetPixelTransformParameterivEXT = (PFNGLGETPIXELTRANSFORMPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetPixelTransformParameterivEXT")) == NULL) || r;
+  r = ((glPixelTransformParameterfEXT = (PFNGLPIXELTRANSFORMPARAMETERFEXTPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameterfEXT")) == NULL) || r;
+  r = ((glPixelTransformParameterfvEXT = (PFNGLPIXELTRANSFORMPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameterfvEXT")) == NULL) || r;
+  r = ((glPixelTransformParameteriEXT = (PFNGLPIXELTRANSFORMPARAMETERIEXTPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameteriEXT")) == NULL) || r;
+  r = ((glPixelTransformParameterivEXT = (PFNGLPIXELTRANSFORMPARAMETERIVEXTPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameterivEXT")) == NULL) || r;
 
   return r;
 }
@@ -13220,8 +13217,8 @@ static GLboolean _glewInit_GL_EXT_point_parameters ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPointParameterfEXT = (PFNGLPOINTPARAMETERFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterfEXT")) == NULL) || r;
-  r = ((glPointParameterfvEXT = (PFNGLPOINTPARAMETERFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterfvEXT")) == NULL) || r;
+  r = ((glPointParameterfEXT = (PFNGLPOINTPARAMETERFEXTPROC)glewGetProcAddress((const GLubyte*)"glPointParameterfEXT")) == NULL) || r;
+  r = ((glPointParameterfvEXT = (PFNGLPOINTPARAMETERFVEXTPROC)glewGetProcAddress((const GLubyte*)"glPointParameterfvEXT")) == NULL) || r;
 
   return r;
 }
@@ -13234,7 +13231,7 @@ static GLboolean _glewInit_GL_EXT_polygon_offset ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPolygonOffsetEXT = (PFNGLPOLYGONOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPolygonOffsetEXT")) == NULL) || r;
+  r = ((glPolygonOffsetEXT = (PFNGLPOLYGONOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glPolygonOffsetEXT")) == NULL) || r;
 
   return r;
 }
@@ -13247,7 +13244,7 @@ static GLboolean _glewInit_GL_EXT_polygon_offset_clamp ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPolygonOffsetClampEXT = (PFNGLPOLYGONOFFSETCLAMPEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPolygonOffsetClampEXT")) == NULL) || r;
+  r = ((glPolygonOffsetClampEXT = (PFNGLPOLYGONOFFSETCLAMPEXTPROC)glewGetProcAddress((const GLubyte*)"glPolygonOffsetClampEXT")) == NULL) || r;
 
   return r;
 }
@@ -13260,7 +13257,7 @@ static GLboolean _glewInit_GL_EXT_provoking_vertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glProvokingVertexEXT = (PFNGLPROVOKINGVERTEXEXTPROC)glewGetProcSubtractress((const GLubyte*)"glProvokingVertexEXT")) == NULL) || r;
+  r = ((glProvokingVertexEXT = (PFNGLPROVOKINGVERTEXEXTPROC)glewGetProcAddress((const GLubyte*)"glProvokingVertexEXT")) == NULL) || r;
 
   return r;
 }
@@ -13273,10 +13270,10 @@ static GLboolean _glewInit_GL_EXT_raster_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCoverageModulationNV = (PFNGLCOVERAGEMODULATIONNVPROC)glewGetProcSubtractress((const GLubyte*)"glCoverageModulationNV")) == NULL) || r;
-  r = ((glCoverageModulationTableNV = (PFNGLCOVERAGEMODULATIONTABLENVPROC)glewGetProcSubtractress((const GLubyte*)"glCoverageModulationTableNV")) == NULL) || r;
-  r = ((glGetCoverageModulationTableNV = (PFNGLGETCOVERAGEMODULATIONTABLENVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCoverageModulationTableNV")) == NULL) || r;
-  r = ((glRasterSamplesEXT = (PFNGLRASTERSAMPLESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glRasterSamplesEXT")) == NULL) || r;
+  r = ((glCoverageModulationNV = (PFNGLCOVERAGEMODULATIONNVPROC)glewGetProcAddress((const GLubyte*)"glCoverageModulationNV")) == NULL) || r;
+  r = ((glCoverageModulationTableNV = (PFNGLCOVERAGEMODULATIONTABLENVPROC)glewGetProcAddress((const GLubyte*)"glCoverageModulationTableNV")) == NULL) || r;
+  r = ((glGetCoverageModulationTableNV = (PFNGLGETCOVERAGEMODULATIONTABLENVPROC)glewGetProcAddress((const GLubyte*)"glGetCoverageModulationTableNV")) == NULL) || r;
+  r = ((glRasterSamplesEXT = (PFNGLRASTERSAMPLESEXTPROC)glewGetProcAddress((const GLubyte*)"glRasterSamplesEXT")) == NULL) || r;
 
   return r;
 }
@@ -13289,8 +13286,8 @@ static GLboolean _glewInit_GL_EXT_scene_marker ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginSceneEXT = (PFNGLBEGINSCENEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBeginSceneEXT")) == NULL) || r;
-  r = ((glEndSceneEXT = (PFNGLENDSCENEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEndSceneEXT")) == NULL) || r;
+  r = ((glBeginSceneEXT = (PFNGLBEGINSCENEEXTPROC)glewGetProcAddress((const GLubyte*)"glBeginSceneEXT")) == NULL) || r;
+  r = ((glEndSceneEXT = (PFNGLENDSCENEEXTPROC)glewGetProcAddress((const GLubyte*)"glEndSceneEXT")) == NULL) || r;
 
   return r;
 }
@@ -13303,23 +13300,23 @@ static GLboolean _glewInit_GL_EXT_secondary_color ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSecondaryColor3bEXT = (PFNGLSECONDARYCOLOR3BEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3bEXT")) == NULL) || r;
-  r = ((glSecondaryColor3bvEXT = (PFNGLSECONDARYCOLOR3BVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3bvEXT")) == NULL) || r;
-  r = ((glSecondaryColor3dEXT = (PFNGLSECONDARYCOLOR3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3dEXT")) == NULL) || r;
-  r = ((glSecondaryColor3dvEXT = (PFNGLSECONDARYCOLOR3DVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3dvEXT")) == NULL) || r;
-  r = ((glSecondaryColor3fEXT = (PFNGLSECONDARYCOLOR3FEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3fEXT")) == NULL) || r;
-  r = ((glSecondaryColor3fvEXT = (PFNGLSECONDARYCOLOR3FVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3fvEXT")) == NULL) || r;
-  r = ((glSecondaryColor3iEXT = (PFNGLSECONDARYCOLOR3IEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3iEXT")) == NULL) || r;
-  r = ((glSecondaryColor3ivEXT = (PFNGLSECONDARYCOLOR3IVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3ivEXT")) == NULL) || r;
-  r = ((glSecondaryColor3sEXT = (PFNGLSECONDARYCOLOR3SEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3sEXT")) == NULL) || r;
-  r = ((glSecondaryColor3svEXT = (PFNGLSECONDARYCOLOR3SVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3svEXT")) == NULL) || r;
-  r = ((glSecondaryColor3ubEXT = (PFNGLSECONDARYCOLOR3UBEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3ubEXT")) == NULL) || r;
-  r = ((glSecondaryColor3ubvEXT = (PFNGLSECONDARYCOLOR3UBVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3ubvEXT")) == NULL) || r;
-  r = ((glSecondaryColor3uiEXT = (PFNGLSECONDARYCOLOR3UIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3uiEXT")) == NULL) || r;
-  r = ((glSecondaryColor3uivEXT = (PFNGLSECONDARYCOLOR3UIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3uivEXT")) == NULL) || r;
-  r = ((glSecondaryColor3usEXT = (PFNGLSECONDARYCOLOR3USEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3usEXT")) == NULL) || r;
-  r = ((glSecondaryColor3usvEXT = (PFNGLSECONDARYCOLOR3USVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3usvEXT")) == NULL) || r;
-  r = ((glSecondaryColorPointerEXT = (PFNGLSECONDARYCOLORPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColorPointerEXT")) == NULL) || r;
+  r = ((glSecondaryColor3bEXT = (PFNGLSECONDARYCOLOR3BEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3bEXT")) == NULL) || r;
+  r = ((glSecondaryColor3bvEXT = (PFNGLSECONDARYCOLOR3BVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3bvEXT")) == NULL) || r;
+  r = ((glSecondaryColor3dEXT = (PFNGLSECONDARYCOLOR3DEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3dEXT")) == NULL) || r;
+  r = ((glSecondaryColor3dvEXT = (PFNGLSECONDARYCOLOR3DVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3dvEXT")) == NULL) || r;
+  r = ((glSecondaryColor3fEXT = (PFNGLSECONDARYCOLOR3FEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3fEXT")) == NULL) || r;
+  r = ((glSecondaryColor3fvEXT = (PFNGLSECONDARYCOLOR3FVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3fvEXT")) == NULL) || r;
+  r = ((glSecondaryColor3iEXT = (PFNGLSECONDARYCOLOR3IEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3iEXT")) == NULL) || r;
+  r = ((glSecondaryColor3ivEXT = (PFNGLSECONDARYCOLOR3IVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3ivEXT")) == NULL) || r;
+  r = ((glSecondaryColor3sEXT = (PFNGLSECONDARYCOLOR3SEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3sEXT")) == NULL) || r;
+  r = ((glSecondaryColor3svEXT = (PFNGLSECONDARYCOLOR3SVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3svEXT")) == NULL) || r;
+  r = ((glSecondaryColor3ubEXT = (PFNGLSECONDARYCOLOR3UBEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3ubEXT")) == NULL) || r;
+  r = ((glSecondaryColor3ubvEXT = (PFNGLSECONDARYCOLOR3UBVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3ubvEXT")) == NULL) || r;
+  r = ((glSecondaryColor3uiEXT = (PFNGLSECONDARYCOLOR3UIEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3uiEXT")) == NULL) || r;
+  r = ((glSecondaryColor3uivEXT = (PFNGLSECONDARYCOLOR3UIVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3uivEXT")) == NULL) || r;
+  r = ((glSecondaryColor3usEXT = (PFNGLSECONDARYCOLOR3USEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3usEXT")) == NULL) || r;
+  r = ((glSecondaryColor3usvEXT = (PFNGLSECONDARYCOLOR3USVEXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3usvEXT")) == NULL) || r;
+  r = ((glSecondaryColorPointerEXT = (PFNGLSECONDARYCOLORPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColorPointerEXT")) == NULL) || r;
 
   return r;
 }
@@ -13332,13 +13329,13 @@ static GLboolean _glewInit_GL_EXT_semaphore ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDeleteSemaphoresEXT = (PFNGLDELETESEMAPHORESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteSemaphoresEXT")) == NULL) || r;
-  r = ((glGenSemaphoresEXT = (PFNGLGENSEMAPHORESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenSemaphoresEXT")) == NULL) || r;
-  r = ((glGetSemaphoreParameterui64vEXT = (PFNGLGETSEMAPHOREPARAMETERUI64VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetSemaphoreParameterui64vEXT")) == NULL) || r;
-  r = ((glIsSemaphoreEXT = (PFNGLISSEMAPHOREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsSemaphoreEXT")) == NULL) || r;
-  r = ((glSemaphoreParameterui64vEXT = (PFNGLSEMAPHOREPARAMETERUI64VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSemaphoreParameterui64vEXT")) == NULL) || r;
-  r = ((glSignalSemaphoreEXT = (PFNGLSIGNALSEMAPHOREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSignalSemaphoreEXT")) == NULL) || r;
-  r = ((glWaitSemaphoreEXT = (PFNGLWAITSEMAPHOREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glWaitSemaphoreEXT")) == NULL) || r;
+  r = ((glDeleteSemaphoresEXT = (PFNGLDELETESEMAPHORESEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteSemaphoresEXT")) == NULL) || r;
+  r = ((glGenSemaphoresEXT = (PFNGLGENSEMAPHORESEXTPROC)glewGetProcAddress((const GLubyte*)"glGenSemaphoresEXT")) == NULL) || r;
+  r = ((glGetSemaphoreParameterui64vEXT = (PFNGLGETSEMAPHOREPARAMETERUI64VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetSemaphoreParameterui64vEXT")) == NULL) || r;
+  r = ((glIsSemaphoreEXT = (PFNGLISSEMAPHOREEXTPROC)glewGetProcAddress((const GLubyte*)"glIsSemaphoreEXT")) == NULL) || r;
+  r = ((glSemaphoreParameterui64vEXT = (PFNGLSEMAPHOREPARAMETERUI64VEXTPROC)glewGetProcAddress((const GLubyte*)"glSemaphoreParameterui64vEXT")) == NULL) || r;
+  r = ((glSignalSemaphoreEXT = (PFNGLSIGNALSEMAPHOREEXTPROC)glewGetProcAddress((const GLubyte*)"glSignalSemaphoreEXT")) == NULL) || r;
+  r = ((glWaitSemaphoreEXT = (PFNGLWAITSEMAPHOREEXTPROC)glewGetProcAddress((const GLubyte*)"glWaitSemaphoreEXT")) == NULL) || r;
 
   return r;
 }
@@ -13351,7 +13348,7 @@ static GLboolean _glewInit_GL_EXT_semaphore_fd ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glImportSemaphoreFdEXT = (PFNGLIMPORTSEMAPHOREFDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportSemaphoreFdEXT")) == NULL) || r;
+  r = ((glImportSemaphoreFdEXT = (PFNGLIMPORTSEMAPHOREFDEXTPROC)glewGetProcAddress((const GLubyte*)"glImportSemaphoreFdEXT")) == NULL) || r;
 
   return r;
 }
@@ -13364,8 +13361,8 @@ static GLboolean _glewInit_GL_EXT_semaphore_win32 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glImportSemaphoreWin32HandleEXT = (PFNGLIMPORTSEMAPHOREWIN32HANDLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportSemaphoreWin32HandleEXT")) == NULL) || r;
-  r = ((glImportSemaphoreWin32NameEXT = (PFNGLIMPORTSEMAPHOREWIN32NAMEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportSemaphoreWin32NameEXT")) == NULL) || r;
+  r = ((glImportSemaphoreWin32HandleEXT = (PFNGLIMPORTSEMAPHOREWIN32HANDLEEXTPROC)glewGetProcAddress((const GLubyte*)"glImportSemaphoreWin32HandleEXT")) == NULL) || r;
+  r = ((glImportSemaphoreWin32NameEXT = (PFNGLIMPORTSEMAPHOREWIN32NAMEEXTPROC)glewGetProcAddress((const GLubyte*)"glImportSemaphoreWin32NameEXT")) == NULL) || r;
 
   return r;
 }
@@ -13378,9 +13375,9 @@ static GLboolean _glewInit_GL_EXT_separate_shader_objects ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glActiveProgramEXT = (PFNGLACTIVEPROGRAMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glActiveProgramEXT")) == NULL) || r;
-  r = ((glCreateShaderProgramEXT = (PFNGLCREATESHADERPROGRAMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCreateShaderProgramEXT")) == NULL) || r;
-  r = ((glUseShaderProgramEXT = (PFNGLUSESHADERPROGRAMEXTPROC)glewGetProcSubtractress((const GLubyte*)"glUseShaderProgramEXT")) == NULL) || r;
+  r = ((glActiveProgramEXT = (PFNGLACTIVEPROGRAMEXTPROC)glewGetProcAddress((const GLubyte*)"glActiveProgramEXT")) == NULL) || r;
+  r = ((glCreateShaderProgramEXT = (PFNGLCREATESHADERPROGRAMEXTPROC)glewGetProcAddress((const GLubyte*)"glCreateShaderProgramEXT")) == NULL) || r;
+  r = ((glUseShaderProgramEXT = (PFNGLUSESHADERPROGRAMEXTPROC)glewGetProcAddress((const GLubyte*)"glUseShaderProgramEXT")) == NULL) || r;
 
   return r;
 }
@@ -13393,8 +13390,8 @@ static GLboolean _glewInit_GL_EXT_shader_image_load_store ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindImageTextureEXT = (PFNGLBINDIMAGETEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindImageTextureEXT")) == NULL) || r;
-  r = ((glMemoryBarrierEXT = (PFNGLMEMORYBARRIEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glMemoryBarrierEXT")) == NULL) || r;
+  r = ((glBindImageTextureEXT = (PFNGLBINDIMAGETEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glBindImageTextureEXT")) == NULL) || r;
+  r = ((glMemoryBarrierEXT = (PFNGLMEMORYBARRIEREXTPROC)glewGetProcAddress((const GLubyte*)"glMemoryBarrierEXT")) == NULL) || r;
 
   return r;
 }
@@ -13407,9 +13404,9 @@ static GLboolean _glewInit_GL_EXT_shader_pixel_local_storage2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearPixelLocalStorageuiEXT = (PFNGLCLEARPIXELLOCALSTORAGEUIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearPixelLocalStorageuiEXT")) == NULL) || r;
-  r = ((glFramebufferPixelLocalStorageSizeEXT = (PFNGLFRAMEBUFFERPIXELLOCALSTORAGESIZEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferPixelLocalStorageSizeEXT")) == NULL) || r;
-  r = ((glGetFramebufferPixelLocalStorageSizeEXT = (PFNGLGETFRAMEBUFFERPIXELLOCALSTORAGESIZEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetFramebufferPixelLocalStorageSizeEXT")) == NULL) || r;
+  r = ((glClearPixelLocalStorageuiEXT = (PFNGLCLEARPIXELLOCALSTORAGEUIEXTPROC)glewGetProcAddress((const GLubyte*)"glClearPixelLocalStorageuiEXT")) == NULL) || r;
+  r = ((glFramebufferPixelLocalStorageSizeEXT = (PFNGLFRAMEBUFFERPIXELLOCALSTORAGESIZEEXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferPixelLocalStorageSizeEXT")) == NULL) || r;
+  r = ((glGetFramebufferPixelLocalStorageSizeEXT = (PFNGLGETFRAMEBUFFERPIXELLOCALSTORAGESIZEEXTPROC)glewGetProcAddress((const GLubyte*)"glGetFramebufferPixelLocalStorageSizeEXT")) == NULL) || r;
 
   return r;
 }
@@ -13422,8 +13419,8 @@ static GLboolean _glewInit_GL_EXT_sparse_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexPageCommitmentEXT = (PFNGLTEXPAGECOMMITMENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexPageCommitmentEXT")) == NULL) || r;
-  r = ((glTexturePageCommitmentEXT = (PFNGLTEXTUREPAGECOMMITMENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexturePageCommitmentEXT")) == NULL) || r;
+  r = ((glTexPageCommitmentEXT = (PFNGLTEXPAGECOMMITMENTEXTPROC)glewGetProcAddress((const GLubyte*)"glTexPageCommitmentEXT")) == NULL) || r;
+  r = ((glTexturePageCommitmentEXT = (PFNGLTEXTUREPAGECOMMITMENTEXTPROC)glewGetProcAddress((const GLubyte*)"glTexturePageCommitmentEXT")) == NULL) || r;
 
   return r;
 }
@@ -13436,7 +13433,7 @@ static GLboolean _glewInit_GL_EXT_stencil_two_side ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glActiveStencilFaceEXT")) == NULL) || r;
+  r = ((glActiveStencilFaceEXT = (PFNGLACTIVESTENCILFACEEXTPROC)glewGetProcAddress((const GLubyte*)"glActiveStencilFaceEXT")) == NULL) || r;
 
   return r;
 }
@@ -13449,9 +13446,9 @@ static GLboolean _glewInit_GL_EXT_subtexture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexSubImage1DEXT = (PFNGLTEXSUBIMAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexSubImage1DEXT")) == NULL) || r;
-  r = ((glTexSubImage2DEXT = (PFNGLTEXSUBIMAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexSubImage2DEXT")) == NULL) || r;
-  r = ((glTexSubImage3DEXT = (PFNGLTEXSUBIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexSubImage3DEXT")) == NULL) || r;
+  r = ((glTexSubImage1DEXT = (PFNGLTEXSUBIMAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexSubImage1DEXT")) == NULL) || r;
+  r = ((glTexSubImage2DEXT = (PFNGLTEXSUBIMAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexSubImage2DEXT")) == NULL) || r;
+  r = ((glTexSubImage3DEXT = (PFNGLTEXSUBIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexSubImage3DEXT")) == NULL) || r;
 
   return r;
 }
@@ -13464,7 +13461,7 @@ static GLboolean _glewInit_GL_EXT_texture3D ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexImage3DEXT = (PFNGLTEXIMAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage3DEXT")) == NULL) || r;
+  r = ((glTexImage3DEXT = (PFNGLTEXIMAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexImage3DEXT")) == NULL) || r;
 
   return r;
 }
@@ -13477,7 +13474,7 @@ static GLboolean _glewInit_GL_EXT_texture_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferTextureLayerEXT = (PFNGLFRAMEBUFFERTEXTURELAYEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureLayerEXT")) == NULL) || r;
+  r = ((glFramebufferTextureLayerEXT = (PFNGLFRAMEBUFFERTEXTURELAYEREXTPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureLayerEXT")) == NULL) || r;
 
   return r;
 }
@@ -13490,7 +13487,7 @@ static GLboolean _glewInit_GL_EXT_texture_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexBufferEXT = (PFNGLTEXBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexBufferEXT")) == NULL) || r;
+  r = ((glTexBufferEXT = (PFNGLTEXBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"glTexBufferEXT")) == NULL) || r;
 
   return r;
 }
@@ -13503,12 +13500,12 @@ static GLboolean _glewInit_GL_EXT_texture_integer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearColorIiEXT = (PFNGLCLEARCOLORIIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearColorIiEXT")) == NULL) || r;
-  r = ((glClearColorIuiEXT = (PFNGLCLEARCOLORIUIEXTPROC)glewGetProcSubtractress((const GLubyte*)"glClearColorIuiEXT")) == NULL) || r;
-  r = ((glGetTexParameterIivEXT = (PFNGLGETTEXPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexParameterIivEXT")) == NULL) || r;
-  r = ((glGetTexParameterIuivEXT = (PFNGLGETTEXPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexParameterIuivEXT")) == NULL) || r;
-  r = ((glTexParameterIivEXT = (PFNGLTEXPARAMETERIIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexParameterIivEXT")) == NULL) || r;
-  r = ((glTexParameterIuivEXT = (PFNGLTEXPARAMETERIUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexParameterIuivEXT")) == NULL) || r;
+  r = ((glClearColorIiEXT = (PFNGLCLEARCOLORIIEXTPROC)glewGetProcAddress((const GLubyte*)"glClearColorIiEXT")) == NULL) || r;
+  r = ((glClearColorIuiEXT = (PFNGLCLEARCOLORIUIEXTPROC)glewGetProcAddress((const GLubyte*)"glClearColorIuiEXT")) == NULL) || r;
+  r = ((glGetTexParameterIivEXT = (PFNGLGETTEXPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTexParameterIivEXT")) == NULL) || r;
+  r = ((glGetTexParameterIuivEXT = (PFNGLGETTEXPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTexParameterIuivEXT")) == NULL) || r;
+  r = ((glTexParameterIivEXT = (PFNGLTEXPARAMETERIIVEXTPROC)glewGetProcAddress((const GLubyte*)"glTexParameterIivEXT")) == NULL) || r;
+  r = ((glTexParameterIuivEXT = (PFNGLTEXPARAMETERIUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glTexParameterIuivEXT")) == NULL) || r;
 
   return r;
 }
@@ -13521,12 +13518,12 @@ static GLboolean _glewInit_GL_EXT_texture_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAreTexturesResidentEXT = (PFNGLARETEXTURESRESIDENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glAreTexturesResidentEXT")) == NULL) || r;
-  r = ((glBindTextureEXT = (PFNGLBINDTEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindTextureEXT")) == NULL) || r;
-  r = ((glDeleteTexturesEXT = (PFNGLDELETETEXTURESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteTexturesEXT")) == NULL) || r;
-  r = ((glGenTexturesEXT = (PFNGLGENTEXTURESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenTexturesEXT")) == NULL) || r;
-  r = ((glIsTextureEXT = (PFNGLISTEXTUREEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsTextureEXT")) == NULL) || r;
-  r = ((glPrioritizeTexturesEXT = (PFNGLPRIORITIZETEXTURESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glPrioritizeTexturesEXT")) == NULL) || r;
+  r = ((glAreTexturesResidentEXT = (PFNGLARETEXTURESRESIDENTEXTPROC)glewGetProcAddress((const GLubyte*)"glAreTexturesResidentEXT")) == NULL) || r;
+  r = ((glBindTextureEXT = (PFNGLBINDTEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glBindTextureEXT")) == NULL) || r;
+  r = ((glDeleteTexturesEXT = (PFNGLDELETETEXTURESEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteTexturesEXT")) == NULL) || r;
+  r = ((glGenTexturesEXT = (PFNGLGENTEXTURESEXTPROC)glewGetProcAddress((const GLubyte*)"glGenTexturesEXT")) == NULL) || r;
+  r = ((glIsTextureEXT = (PFNGLISTEXTUREEXTPROC)glewGetProcAddress((const GLubyte*)"glIsTextureEXT")) == NULL) || r;
+  r = ((glPrioritizeTexturesEXT = (PFNGLPRIORITIZETEXTURESEXTPROC)glewGetProcAddress((const GLubyte*)"glPrioritizeTexturesEXT")) == NULL) || r;
 
   return r;
 }
@@ -13539,7 +13536,7 @@ static GLboolean _glewInit_GL_EXT_texture_perturb_normal ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTextureNormalEXT = (PFNGLTEXTURENORMALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureNormalEXT")) == NULL) || r;
+  r = ((glTextureNormalEXT = (PFNGLTEXTURENORMALEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureNormalEXT")) == NULL) || r;
 
   return r;
 }
@@ -13552,12 +13549,12 @@ static GLboolean _glewInit_GL_EXT_texture_storage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexStorage1DEXT = (PFNGLTEXSTORAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage1DEXT")) == NULL) || r;
-  r = ((glTexStorage2DEXT = (PFNGLTEXSTORAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage2DEXT")) == NULL) || r;
-  r = ((glTexStorage3DEXT = (PFNGLTEXSTORAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexStorage3DEXT")) == NULL) || r;
-  r = ((glTextureStorage1DEXT = (PFNGLTEXTURESTORAGE1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage1DEXT")) == NULL) || r;
-  r = ((glTextureStorage2DEXT = (PFNGLTEXTURESTORAGE2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage2DEXT")) == NULL) || r;
-  r = ((glTextureStorage3DEXT = (PFNGLTEXTURESTORAGE3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureStorage3DEXT")) == NULL) || r;
+  r = ((glTexStorage1DEXT = (PFNGLTEXSTORAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorage1DEXT")) == NULL) || r;
+  r = ((glTexStorage2DEXT = (PFNGLTEXSTORAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorage2DEXT")) == NULL) || r;
+  r = ((glTexStorage3DEXT = (PFNGLTEXSTORAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTexStorage3DEXT")) == NULL) || r;
+  r = ((glTextureStorage1DEXT = (PFNGLTEXTURESTORAGE1DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage1DEXT")) == NULL) || r;
+  r = ((glTextureStorage2DEXT = (PFNGLTEXTURESTORAGE2DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage2DEXT")) == NULL) || r;
+  r = ((glTextureStorage3DEXT = (PFNGLTEXTURESTORAGE3DEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureStorage3DEXT")) == NULL) || r;
 
   return r;
 }
@@ -13570,7 +13567,7 @@ static GLboolean _glewInit_GL_EXT_texture_view ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTextureViewEXT = (PFNGLTEXTUREVIEWEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTextureViewEXT")) == NULL) || r;
+  r = ((glTextureViewEXT = (PFNGLTEXTUREVIEWEXTPROC)glewGetProcAddress((const GLubyte*)"glTextureViewEXT")) == NULL) || r;
 
   return r;
 }
@@ -13583,8 +13580,8 @@ static GLboolean _glewInit_GL_EXT_timer_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetQueryObjecti64vEXT = (PFNGLGETQUERYOBJECTI64VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjecti64vEXT")) == NULL) || r;
-  r = ((glGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetQueryObjectui64vEXT")) == NULL) || r;
+  r = ((glGetQueryObjecti64vEXT = (PFNGLGETQUERYOBJECTI64VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjecti64vEXT")) == NULL) || r;
+  r = ((glGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)glewGetProcAddress((const GLubyte*)"glGetQueryObjectui64vEXT")) == NULL) || r;
 
   return r;
 }
@@ -13597,13 +13594,13 @@ static GLboolean _glewInit_GL_EXT_transform_feedback ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginTransformFeedbackEXT = (PFNGLBEGINTRANSFORMFEEDBACKEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBeginTransformFeedbackEXT")) == NULL) || r;
-  r = ((glBindBufferBaseEXT = (PFNGLBINDBUFFERBASEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferBaseEXT")) == NULL) || r;
-  r = ((glBindBufferOffsetEXT = (PFNGLBINDBUFFEROFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferOffsetEXT")) == NULL) || r;
-  r = ((glBindBufferRangeEXT = (PFNGLBINDBUFFERRANGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferRangeEXT")) == NULL) || r;
-  r = ((glEndTransformFeedbackEXT = (PFNGLENDTRANSFORMFEEDBACKEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEndTransformFeedbackEXT")) == NULL) || r;
-  r = ((glGetTransformFeedbackVaryingEXT = (PFNGLGETTRANSFORMFEEDBACKVARYINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetTransformFeedbackVaryingEXT")) == NULL) || r;
-  r = ((glTransformFeedbackVaryingsEXT = (PFNGLTRANSFORMFEEDBACKVARYINGSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glTransformFeedbackVaryingsEXT")) == NULL) || r;
+  r = ((glBeginTransformFeedbackEXT = (PFNGLBEGINTRANSFORMFEEDBACKEXTPROC)glewGetProcAddress((const GLubyte*)"glBeginTransformFeedbackEXT")) == NULL) || r;
+  r = ((glBindBufferBaseEXT = (PFNGLBINDBUFFERBASEEXTPROC)glewGetProcAddress((const GLubyte*)"glBindBufferBaseEXT")) == NULL) || r;
+  r = ((glBindBufferOffsetEXT = (PFNGLBINDBUFFEROFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glBindBufferOffsetEXT")) == NULL) || r;
+  r = ((glBindBufferRangeEXT = (PFNGLBINDBUFFERRANGEEXTPROC)glewGetProcAddress((const GLubyte*)"glBindBufferRangeEXT")) == NULL) || r;
+  r = ((glEndTransformFeedbackEXT = (PFNGLENDTRANSFORMFEEDBACKEXTPROC)glewGetProcAddress((const GLubyte*)"glEndTransformFeedbackEXT")) == NULL) || r;
+  r = ((glGetTransformFeedbackVaryingEXT = (PFNGLGETTRANSFORMFEEDBACKVARYINGEXTPROC)glewGetProcAddress((const GLubyte*)"glGetTransformFeedbackVaryingEXT")) == NULL) || r;
+  r = ((glTransformFeedbackVaryingsEXT = (PFNGLTRANSFORMFEEDBACKVARYINGSEXTPROC)glewGetProcAddress((const GLubyte*)"glTransformFeedbackVaryingsEXT")) == NULL) || r;
 
   return r;
 }
@@ -13616,14 +13613,14 @@ static GLboolean _glewInit_GL_EXT_vertex_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glArrayElementEXT = (PFNGLARRAYELEMENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glArrayElementEXT")) == NULL) || r;
-  r = ((glColorPointerEXT = (PFNGLCOLORPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glColorPointerEXT")) == NULL) || r;
-  r = ((glDrawArraysEXT = (PFNGLDRAWARRAYSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysEXT")) == NULL) || r;
-  r = ((glEdgeFlagPointerEXT = (PFNGLEDGEFLAGPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glEdgeFlagPointerEXT")) == NULL) || r;
-  r = ((glIndexPointerEXT = (PFNGLINDEXPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glIndexPointerEXT")) == NULL) || r;
-  r = ((glNormalPointerEXT = (PFNGLNORMALPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glNormalPointerEXT")) == NULL) || r;
-  r = ((glTexCoordPointerEXT = (PFNGLTEXCOORDPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordPointerEXT")) == NULL) || r;
-  r = ((glVertexPointerEXT = (PFNGLVERTEXPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexPointerEXT")) == NULL) || r;
+  r = ((glArrayElementEXT = (PFNGLARRAYELEMENTEXTPROC)glewGetProcAddress((const GLubyte*)"glArrayElementEXT")) == NULL) || r;
+  r = ((glColorPointerEXT = (PFNGLCOLORPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glColorPointerEXT")) == NULL) || r;
+  r = ((glDrawArraysEXT = (PFNGLDRAWARRAYSEXTPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysEXT")) == NULL) || r;
+  r = ((glEdgeFlagPointerEXT = (PFNGLEDGEFLAGPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glEdgeFlagPointerEXT")) == NULL) || r;
+  r = ((glIndexPointerEXT = (PFNGLINDEXPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glIndexPointerEXT")) == NULL) || r;
+  r = ((glNormalPointerEXT = (PFNGLNORMALPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glNormalPointerEXT")) == NULL) || r;
+  r = ((glTexCoordPointerEXT = (PFNGLTEXCOORDPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glTexCoordPointerEXT")) == NULL) || r;
+  r = ((glVertexPointerEXT = (PFNGLVERTEXPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexPointerEXT")) == NULL) || r;
 
   return r;
 }
@@ -13636,9 +13633,9 @@ static GLboolean _glewInit_GL_EXT_vertex_array_setXXX ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindArraySetEXT = (PFNGLBINDARRAYSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindArraySetEXT")) == NULL) || r;
-  r = ((glCreateArraySetExt = (PFNGLCREATEARRAYSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glCreateArraySetExt")) == NULL) || r;
-  r = ((glDeleteArraySetsEXT = (PFNGLDELETEARRAYSETSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteArraySetsEXT")) == NULL) || r;
+  r = ((glBindArraySetEXT = (PFNGLBINDARRAYSETEXTPROC)glewGetProcAddress((const GLubyte*)"glBindArraySetEXT")) == NULL) || r;
+  r = ((glCreateArraySetExt = (PFNGLCREATEARRAYSETEXTPROC)glewGetProcAddress((const GLubyte*)"glCreateArraySetExt")) == NULL) || r;
+  r = ((glDeleteArraySetsEXT = (PFNGLDELETEARRAYSETSEXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteArraySetsEXT")) == NULL) || r;
 
   return r;
 }
@@ -13651,17 +13648,17 @@ static GLboolean _glewInit_GL_EXT_vertex_attrib_64bit ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetVertexAttribLdvEXT = (PFNGLGETVERTEXATTRIBLDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribLdvEXT")) == NULL) || r;
-  r = ((glVertexArrayVertexAttribLOffsetEXT = (PFNGLVERTEXARRAYVERTEXATTRIBLOFFSETEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayVertexAttribLOffsetEXT")) == NULL) || r;
-  r = ((glVertexAttribL1dEXT = (PFNGLVERTEXATTRIBL1DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1dEXT")) == NULL) || r;
-  r = ((glVertexAttribL1dvEXT = (PFNGLVERTEXATTRIBL1DVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1dvEXT")) == NULL) || r;
-  r = ((glVertexAttribL2dEXT = (PFNGLVERTEXATTRIBL2DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2dEXT")) == NULL) || r;
-  r = ((glVertexAttribL2dvEXT = (PFNGLVERTEXATTRIBL2DVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2dvEXT")) == NULL) || r;
-  r = ((glVertexAttribL3dEXT = (PFNGLVERTEXATTRIBL3DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3dEXT")) == NULL) || r;
-  r = ((glVertexAttribL3dvEXT = (PFNGLVERTEXATTRIBL3DVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3dvEXT")) == NULL) || r;
-  r = ((glVertexAttribL4dEXT = (PFNGLVERTEXATTRIBL4DEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4dEXT")) == NULL) || r;
-  r = ((glVertexAttribL4dvEXT = (PFNGLVERTEXATTRIBL4DVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4dvEXT")) == NULL) || r;
-  r = ((glVertexAttribLPointerEXT = (PFNGLVERTEXATTRIBLPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribLPointerEXT")) == NULL) || r;
+  r = ((glGetVertexAttribLdvEXT = (PFNGLGETVERTEXATTRIBLDVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribLdvEXT")) == NULL) || r;
+  r = ((glVertexArrayVertexAttribLOffsetEXT = (PFNGLVERTEXARRAYVERTEXATTRIBLOFFSETEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayVertexAttribLOffsetEXT")) == NULL) || r;
+  r = ((glVertexAttribL1dEXT = (PFNGLVERTEXATTRIBL1DEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1dEXT")) == NULL) || r;
+  r = ((glVertexAttribL1dvEXT = (PFNGLVERTEXATTRIBL1DVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1dvEXT")) == NULL) || r;
+  r = ((glVertexAttribL2dEXT = (PFNGLVERTEXATTRIBL2DEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2dEXT")) == NULL) || r;
+  r = ((glVertexAttribL2dvEXT = (PFNGLVERTEXATTRIBL2DVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2dvEXT")) == NULL) || r;
+  r = ((glVertexAttribL3dEXT = (PFNGLVERTEXATTRIBL3DEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3dEXT")) == NULL) || r;
+  r = ((glVertexAttribL3dvEXT = (PFNGLVERTEXATTRIBL3DVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3dvEXT")) == NULL) || r;
+  r = ((glVertexAttribL4dEXT = (PFNGLVERTEXATTRIBL4DEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4dEXT")) == NULL) || r;
+  r = ((glVertexAttribL4dvEXT = (PFNGLVERTEXATTRIBL4DVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4dvEXT")) == NULL) || r;
+  r = ((glVertexAttribLPointerEXT = (PFNGLVERTEXATTRIBLPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribLPointerEXT")) == NULL) || r;
 
   return r;
 }
@@ -13674,48 +13671,48 @@ static GLboolean _glewInit_GL_EXT_vertex_shader ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginVertexShaderEXT = (PFNGLBEGINVERTEXSHADEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBeginVertexShaderEXT")) == NULL) || r;
-  r = ((glBindLightParameterEXT = (PFNGLBINDLIGHTPARAMETEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindLightParameterEXT")) == NULL) || r;
-  r = ((glBindMaterialParameterEXT = (PFNGLBINDMATERIALPARAMETEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindMaterialParameterEXT")) == NULL) || r;
-  r = ((glBindParameterEXT = (PFNGLBINDPARAMETEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindParameterEXT")) == NULL) || r;
-  r = ((glBindTexGenParameterEXT = (PFNGLBINDTEXGENPARAMETEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindTexGenParameterEXT")) == NULL) || r;
-  r = ((glBindTextureUnitParameterEXT = (PFNGLBINDTEXTUREUNITPARAMETEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindTextureUnitParameterEXT")) == NULL) || r;
-  r = ((glBindVertexShaderEXT = (PFNGLBINDVERTEXSHADEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glBindVertexShaderEXT")) == NULL) || r;
-  r = ((glDeleteVertexShaderEXT = (PFNGLDELETEVERTEXSHADEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteVertexShaderEXT")) == NULL) || r;
-  r = ((glDisableVariantClientStateEXT = (PFNGLDISABLEVARIANTCLIENTSTATEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glDisableVariantClientStateEXT")) == NULL) || r;
-  r = ((glEnableVariantClientStateEXT = (PFNGLENABLEVARIANTCLIENTSTATEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glEnableVariantClientStateEXT")) == NULL) || r;
-  r = ((glEndVertexShaderEXT = (PFNGLENDVERTEXSHADEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glEndVertexShaderEXT")) == NULL) || r;
-  r = ((glExtractComponentEXT = (PFNGLEXTRACTCOMPONENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glExtractComponentEXT")) == NULL) || r;
-  r = ((glGenSymbolsEXT = (PFNGLGENSYMBOLSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenSymbolsEXT")) == NULL) || r;
-  r = ((glGenVertexShadersEXT = (PFNGLGENVERTEXSHADERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGenVertexShadersEXT")) == NULL) || r;
-  r = ((glGetInvariantBooleanvEXT = (PFNGLGETINVARIANTBOOLEANVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetInvariantBooleanvEXT")) == NULL) || r;
-  r = ((glGetInvariantFloatvEXT = (PFNGLGETINVARIANTFLOATVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetInvariantFloatvEXT")) == NULL) || r;
-  r = ((glGetInvariantIntegervEXT = (PFNGLGETINVARIANTINTEGERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetInvariantIntegervEXT")) == NULL) || r;
-  r = ((glGetLocalConstantBooleanvEXT = (PFNGLGETLOCALCONSTANTBOOLEANVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetLocalConstantBooleanvEXT")) == NULL) || r;
-  r = ((glGetLocalConstantFloatvEXT = (PFNGLGETLOCALCONSTANTFLOATVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetLocalConstantFloatvEXT")) == NULL) || r;
-  r = ((glGetLocalConstantIntegervEXT = (PFNGLGETLOCALCONSTANTINTEGERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetLocalConstantIntegervEXT")) == NULL) || r;
-  r = ((glGetVariantBooleanvEXT = (PFNGLGETVARIANTBOOLEANVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVariantBooleanvEXT")) == NULL) || r;
-  r = ((glGetVariantFloatvEXT = (PFNGLGETVARIANTFLOATVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVariantFloatvEXT")) == NULL) || r;
-  r = ((glGetVariantIntegervEXT = (PFNGLGETVARIANTINTEGERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVariantIntegervEXT")) == NULL) || r;
-  r = ((glGetVariantPointervEXT = (PFNGLGETVARIANTPOINTERVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glGetVariantPointervEXT")) == NULL) || r;
-  r = ((glInsertComponentEXT = (PFNGLINSERTCOMPONENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glInsertComponentEXT")) == NULL) || r;
-  r = ((glIsVariantEnabledEXT = (PFNGLISVARIANTENABLEDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glIsVariantEnabledEXT")) == NULL) || r;
-  r = ((glSetInvariantEXT = (PFNGLSETINVARIANTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSetInvariantEXT")) == NULL) || r;
-  r = ((glSetLocalConstantEXT = (PFNGLSETLOCALCONSTANTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSetLocalConstantEXT")) == NULL) || r;
-  r = ((glShaderOp1EXT = (PFNGLSHADEROP1EXTPROC)glewGetProcSubtractress((const GLubyte*)"glShaderOp1EXT")) == NULL) || r;
-  r = ((glShaderOp2EXT = (PFNGLSHADEROP2EXTPROC)glewGetProcSubtractress((const GLubyte*)"glShaderOp2EXT")) == NULL) || r;
-  r = ((glShaderOp3EXT = (PFNGLSHADEROP3EXTPROC)glewGetProcSubtractress((const GLubyte*)"glShaderOp3EXT")) == NULL) || r;
-  r = ((glSwizzleEXT = (PFNGLSWIZZLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glSwizzleEXT")) == NULL) || r;
-  r = ((glVariantPointerEXT = (PFNGLVARIANTPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantPointerEXT")) == NULL) || r;
-  r = ((glVariantbvEXT = (PFNGLVARIANTBVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantbvEXT")) == NULL) || r;
-  r = ((glVariantdvEXT = (PFNGLVARIANTDVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantdvEXT")) == NULL) || r;
-  r = ((glVariantfvEXT = (PFNGLVARIANTFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantfvEXT")) == NULL) || r;
-  r = ((glVariantivEXT = (PFNGLVARIANTIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantivEXT")) == NULL) || r;
-  r = ((glVariantsvEXT = (PFNGLVARIANTSVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantsvEXT")) == NULL) || r;
-  r = ((glVariantubvEXT = (PFNGLVARIANTUBVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantubvEXT")) == NULL) || r;
-  r = ((glVariantuivEXT = (PFNGLVARIANTUIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantuivEXT")) == NULL) || r;
-  r = ((glVariantusvEXT = (PFNGLVARIANTUSVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVariantusvEXT")) == NULL) || r;
-  r = ((glWriteMaskEXT = (PFNGLWRITEMASKEXTPROC)glewGetProcSubtractress((const GLubyte*)"glWriteMaskEXT")) == NULL) || r;
+  r = ((glBeginVertexShaderEXT = (PFNGLBEGINVERTEXSHADEREXTPROC)glewGetProcAddress((const GLubyte*)"glBeginVertexShaderEXT")) == NULL) || r;
+  r = ((glBindLightParameterEXT = (PFNGLBINDLIGHTPARAMETEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindLightParameterEXT")) == NULL) || r;
+  r = ((glBindMaterialParameterEXT = (PFNGLBINDMATERIALPARAMETEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindMaterialParameterEXT")) == NULL) || r;
+  r = ((glBindParameterEXT = (PFNGLBINDPARAMETEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindParameterEXT")) == NULL) || r;
+  r = ((glBindTexGenParameterEXT = (PFNGLBINDTEXGENPARAMETEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindTexGenParameterEXT")) == NULL) || r;
+  r = ((glBindTextureUnitParameterEXT = (PFNGLBINDTEXTUREUNITPARAMETEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindTextureUnitParameterEXT")) == NULL) || r;
+  r = ((glBindVertexShaderEXT = (PFNGLBINDVERTEXSHADEREXTPROC)glewGetProcAddress((const GLubyte*)"glBindVertexShaderEXT")) == NULL) || r;
+  r = ((glDeleteVertexShaderEXT = (PFNGLDELETEVERTEXSHADEREXTPROC)glewGetProcAddress((const GLubyte*)"glDeleteVertexShaderEXT")) == NULL) || r;
+  r = ((glDisableVariantClientStateEXT = (PFNGLDISABLEVARIANTCLIENTSTATEEXTPROC)glewGetProcAddress((const GLubyte*)"glDisableVariantClientStateEXT")) == NULL) || r;
+  r = ((glEnableVariantClientStateEXT = (PFNGLENABLEVARIANTCLIENTSTATEEXTPROC)glewGetProcAddress((const GLubyte*)"glEnableVariantClientStateEXT")) == NULL) || r;
+  r = ((glEndVertexShaderEXT = (PFNGLENDVERTEXSHADEREXTPROC)glewGetProcAddress((const GLubyte*)"glEndVertexShaderEXT")) == NULL) || r;
+  r = ((glExtractComponentEXT = (PFNGLEXTRACTCOMPONENTEXTPROC)glewGetProcAddress((const GLubyte*)"glExtractComponentEXT")) == NULL) || r;
+  r = ((glGenSymbolsEXT = (PFNGLGENSYMBOLSEXTPROC)glewGetProcAddress((const GLubyte*)"glGenSymbolsEXT")) == NULL) || r;
+  r = ((glGenVertexShadersEXT = (PFNGLGENVERTEXSHADERSEXTPROC)glewGetProcAddress((const GLubyte*)"glGenVertexShadersEXT")) == NULL) || r;
+  r = ((glGetInvariantBooleanvEXT = (PFNGLGETINVARIANTBOOLEANVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetInvariantBooleanvEXT")) == NULL) || r;
+  r = ((glGetInvariantFloatvEXT = (PFNGLGETINVARIANTFLOATVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetInvariantFloatvEXT")) == NULL) || r;
+  r = ((glGetInvariantIntegervEXT = (PFNGLGETINVARIANTINTEGERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetInvariantIntegervEXT")) == NULL) || r;
+  r = ((glGetLocalConstantBooleanvEXT = (PFNGLGETLOCALCONSTANTBOOLEANVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetLocalConstantBooleanvEXT")) == NULL) || r;
+  r = ((glGetLocalConstantFloatvEXT = (PFNGLGETLOCALCONSTANTFLOATVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetLocalConstantFloatvEXT")) == NULL) || r;
+  r = ((glGetLocalConstantIntegervEXT = (PFNGLGETLOCALCONSTANTINTEGERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetLocalConstantIntegervEXT")) == NULL) || r;
+  r = ((glGetVariantBooleanvEXT = (PFNGLGETVARIANTBOOLEANVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVariantBooleanvEXT")) == NULL) || r;
+  r = ((glGetVariantFloatvEXT = (PFNGLGETVARIANTFLOATVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVariantFloatvEXT")) == NULL) || r;
+  r = ((glGetVariantIntegervEXT = (PFNGLGETVARIANTINTEGERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVariantIntegervEXT")) == NULL) || r;
+  r = ((glGetVariantPointervEXT = (PFNGLGETVARIANTPOINTERVEXTPROC)glewGetProcAddress((const GLubyte*)"glGetVariantPointervEXT")) == NULL) || r;
+  r = ((glInsertComponentEXT = (PFNGLINSERTCOMPONENTEXTPROC)glewGetProcAddress((const GLubyte*)"glInsertComponentEXT")) == NULL) || r;
+  r = ((glIsVariantEnabledEXT = (PFNGLISVARIANTENABLEDEXTPROC)glewGetProcAddress((const GLubyte*)"glIsVariantEnabledEXT")) == NULL) || r;
+  r = ((glSetInvariantEXT = (PFNGLSETINVARIANTEXTPROC)glewGetProcAddress((const GLubyte*)"glSetInvariantEXT")) == NULL) || r;
+  r = ((glSetLocalConstantEXT = (PFNGLSETLOCALCONSTANTEXTPROC)glewGetProcAddress((const GLubyte*)"glSetLocalConstantEXT")) == NULL) || r;
+  r = ((glShaderOp1EXT = (PFNGLSHADEROP1EXTPROC)glewGetProcAddress((const GLubyte*)"glShaderOp1EXT")) == NULL) || r;
+  r = ((glShaderOp2EXT = (PFNGLSHADEROP2EXTPROC)glewGetProcAddress((const GLubyte*)"glShaderOp2EXT")) == NULL) || r;
+  r = ((glShaderOp3EXT = (PFNGLSHADEROP3EXTPROC)glewGetProcAddress((const GLubyte*)"glShaderOp3EXT")) == NULL) || r;
+  r = ((glSwizzleEXT = (PFNGLSWIZZLEEXTPROC)glewGetProcAddress((const GLubyte*)"glSwizzleEXT")) == NULL) || r;
+  r = ((glVariantPointerEXT = (PFNGLVARIANTPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glVariantPointerEXT")) == NULL) || r;
+  r = ((glVariantbvEXT = (PFNGLVARIANTBVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantbvEXT")) == NULL) || r;
+  r = ((glVariantdvEXT = (PFNGLVARIANTDVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantdvEXT")) == NULL) || r;
+  r = ((glVariantfvEXT = (PFNGLVARIANTFVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantfvEXT")) == NULL) || r;
+  r = ((glVariantivEXT = (PFNGLVARIANTIVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantivEXT")) == NULL) || r;
+  r = ((glVariantsvEXT = (PFNGLVARIANTSVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantsvEXT")) == NULL) || r;
+  r = ((glVariantubvEXT = (PFNGLVARIANTUBVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantubvEXT")) == NULL) || r;
+  r = ((glVariantuivEXT = (PFNGLVARIANTUIVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantuivEXT")) == NULL) || r;
+  r = ((glVariantusvEXT = (PFNGLVARIANTUSVEXTPROC)glewGetProcAddress((const GLubyte*)"glVariantusvEXT")) == NULL) || r;
+  r = ((glWriteMaskEXT = (PFNGLWRITEMASKEXTPROC)glewGetProcAddress((const GLubyte*)"glWriteMaskEXT")) == NULL) || r;
 
   return r;
 }
@@ -13728,9 +13725,9 @@ static GLboolean _glewInit_GL_EXT_vertex_weighting ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVertexWeightPointerEXT = (PFNGLVERTEXWEIGHTPOINTEREXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexWeightPointerEXT")) == NULL) || r;
-  r = ((glVertexWeightfEXT = (PFNGLVERTEXWEIGHTFEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexWeightfEXT")) == NULL) || r;
-  r = ((glVertexWeightfvEXT = (PFNGLVERTEXWEIGHTFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"glVertexWeightfvEXT")) == NULL) || r;
+  r = ((glVertexWeightPointerEXT = (PFNGLVERTEXWEIGHTPOINTEREXTPROC)glewGetProcAddress((const GLubyte*)"glVertexWeightPointerEXT")) == NULL) || r;
+  r = ((glVertexWeightfEXT = (PFNGLVERTEXWEIGHTFEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexWeightfEXT")) == NULL) || r;
+  r = ((glVertexWeightfvEXT = (PFNGLVERTEXWEIGHTFVEXTPROC)glewGetProcAddress((const GLubyte*)"glVertexWeightfvEXT")) == NULL) || r;
 
   return r;
 }
@@ -13743,8 +13740,8 @@ static GLboolean _glewInit_GL_EXT_win32_keyed_mutex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAcquireKeyedMutexWin32EXT = (PFNGLACQUIREKEYEDMUTEXWIN32EXTPROC)glewGetProcSubtractress((const GLubyte*)"glAcquireKeyedMutexWin32EXT")) == NULL) || r;
-  r = ((glReleaseKeyedMutexWin32EXT = (PFNGLRELEASEKEYEDMUTEXWIN32EXTPROC)glewGetProcSubtractress((const GLubyte*)"glReleaseKeyedMutexWin32EXT")) == NULL) || r;
+  r = ((glAcquireKeyedMutexWin32EXT = (PFNGLACQUIREKEYEDMUTEXWIN32EXTPROC)glewGetProcAddress((const GLubyte*)"glAcquireKeyedMutexWin32EXT")) == NULL) || r;
+  r = ((glReleaseKeyedMutexWin32EXT = (PFNGLRELEASEKEYEDMUTEXWIN32EXTPROC)glewGetProcAddress((const GLubyte*)"glReleaseKeyedMutexWin32EXT")) == NULL) || r;
 
   return r;
 }
@@ -13757,7 +13754,7 @@ static GLboolean _glewInit_GL_EXT_window_rectangles ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glWindowRectanglesEXT = (PFNGLWINDOWRECTANGLESEXTPROC)glewGetProcSubtractress((const GLubyte*)"glWindowRectanglesEXT")) == NULL) || r;
+  r = ((glWindowRectanglesEXT = (PFNGLWINDOWRECTANGLESEXTPROC)glewGetProcAddress((const GLubyte*)"glWindowRectanglesEXT")) == NULL) || r;
 
   return r;
 }
@@ -13770,7 +13767,7 @@ static GLboolean _glewInit_GL_EXT_x11_sync_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glImportSyncEXT = (PFNGLIMPORTSYNCEXTPROC)glewGetProcSubtractress((const GLubyte*)"glImportSyncEXT")) == NULL) || r;
+  r = ((glImportSyncEXT = (PFNGLIMPORTSYNCEXTPROC)glewGetProcAddress((const GLubyte*)"glImportSyncEXT")) == NULL) || r;
 
   return r;
 }
@@ -13783,7 +13780,7 @@ static GLboolean _glewInit_GL_GREMEDY_frame_terminator ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFrameTerminatorGREMEDY = (PFNGLFRAMETERMINATORGREMEDYPROC)glewGetProcSubtractress((const GLubyte*)"glFrameTerminatorGREMEDY")) == NULL) || r;
+  r = ((glFrameTerminatorGREMEDY = (PFNGLFRAMETERMINATORGREMEDYPROC)glewGetProcAddress((const GLubyte*)"glFrameTerminatorGREMEDY")) == NULL) || r;
 
   return r;
 }
@@ -13796,7 +13793,7 @@ static GLboolean _glewInit_GL_GREMEDY_string_marker ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glStringMarkerGREMEDY = (PFNGLSTRINGMARKERGREMEDYPROC)glewGetProcSubtractress((const GLubyte*)"glStringMarkerGREMEDY")) == NULL) || r;
+  r = ((glStringMarkerGREMEDY = (PFNGLSTRINGMARKERGREMEDYPROC)glewGetProcAddress((const GLubyte*)"glStringMarkerGREMEDY")) == NULL) || r;
 
   return r;
 }
@@ -13809,12 +13806,12 @@ static GLboolean _glewInit_GL_HP_image_transform ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetImageTransformParameterfvHP = (PFNGLGETIMAGETRANSFORMPARAMETERFVHPPROC)glewGetProcSubtractress((const GLubyte*)"glGetImageTransformParameterfvHP")) == NULL) || r;
-  r = ((glGetImageTransformParameterivHP = (PFNGLGETIMAGETRANSFORMPARAMETERIVHPPROC)glewGetProcSubtractress((const GLubyte*)"glGetImageTransformParameterivHP")) == NULL) || r;
-  r = ((glImageTransformParameterfHP = (PFNGLIMAGETRANSFORMPARAMETERFHPPROC)glewGetProcSubtractress((const GLubyte*)"glImageTransformParameterfHP")) == NULL) || r;
-  r = ((glImageTransformParameterfvHP = (PFNGLIMAGETRANSFORMPARAMETERFVHPPROC)glewGetProcSubtractress((const GLubyte*)"glImageTransformParameterfvHP")) == NULL) || r;
-  r = ((glImageTransformParameteriHP = (PFNGLIMAGETRANSFORMPARAMETERIHPPROC)glewGetProcSubtractress((const GLubyte*)"glImageTransformParameteriHP")) == NULL) || r;
-  r = ((glImageTransformParameterivHP = (PFNGLIMAGETRANSFORMPARAMETERIVHPPROC)glewGetProcSubtractress((const GLubyte*)"glImageTransformParameterivHP")) == NULL) || r;
+  r = ((glGetImageTransformParameterfvHP = (PFNGLGETIMAGETRANSFORMPARAMETERFVHPPROC)glewGetProcAddress((const GLubyte*)"glGetImageTransformParameterfvHP")) == NULL) || r;
+  r = ((glGetImageTransformParameterivHP = (PFNGLGETIMAGETRANSFORMPARAMETERIVHPPROC)glewGetProcAddress((const GLubyte*)"glGetImageTransformParameterivHP")) == NULL) || r;
+  r = ((glImageTransformParameterfHP = (PFNGLIMAGETRANSFORMPARAMETERFHPPROC)glewGetProcAddress((const GLubyte*)"glImageTransformParameterfHP")) == NULL) || r;
+  r = ((glImageTransformParameterfvHP = (PFNGLIMAGETRANSFORMPARAMETERFVHPPROC)glewGetProcAddress((const GLubyte*)"glImageTransformParameterfvHP")) == NULL) || r;
+  r = ((glImageTransformParameteriHP = (PFNGLIMAGETRANSFORMPARAMETERIHPPROC)glewGetProcAddress((const GLubyte*)"glImageTransformParameteriHP")) == NULL) || r;
+  r = ((glImageTransformParameterivHP = (PFNGLIMAGETRANSFORMPARAMETERIVHPPROC)glewGetProcAddress((const GLubyte*)"glImageTransformParameterivHP")) == NULL) || r;
 
   return r;
 }
@@ -13827,8 +13824,8 @@ static GLboolean _glewInit_GL_IBM_multimode_draw_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiModeDrawArraysIBM = (PFNGLMULTIMODEDRAWARRAYSIBMPROC)glewGetProcSubtractress((const GLubyte*)"glMultiModeDrawArraysIBM")) == NULL) || r;
-  r = ((glMultiModeDrawElementsIBM = (PFNGLMULTIMODEDRAWELEMENTSIBMPROC)glewGetProcSubtractress((const GLubyte*)"glMultiModeDrawElementsIBM")) == NULL) || r;
+  r = ((glMultiModeDrawArraysIBM = (PFNGLMULTIMODEDRAWARRAYSIBMPROC)glewGetProcAddress((const GLubyte*)"glMultiModeDrawArraysIBM")) == NULL) || r;
+  r = ((glMultiModeDrawElementsIBM = (PFNGLMULTIMODEDRAWELEMENTSIBMPROC)glewGetProcAddress((const GLubyte*)"glMultiModeDrawElementsIBM")) == NULL) || r;
 
   return r;
 }
@@ -13841,14 +13838,14 @@ static GLboolean _glewInit_GL_IBM_vertex_array_lists ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorPointerListIBM = (PFNGLCOLORPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glColorPointerListIBM")) == NULL) || r;
-  r = ((glEdgeFlagPointerListIBM = (PFNGLEDGEFLAGPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glEdgeFlagPointerListIBM")) == NULL) || r;
-  r = ((glFogCoordPointerListIBM = (PFNGLFOGCOORDPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordPointerListIBM")) == NULL) || r;
-  r = ((glIndexPointerListIBM = (PFNGLINDEXPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glIndexPointerListIBM")) == NULL) || r;
-  r = ((glNormalPointerListIBM = (PFNGLNORMALPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glNormalPointerListIBM")) == NULL) || r;
-  r = ((glSecondaryColorPointerListIBM = (PFNGLSECONDARYCOLORPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColorPointerListIBM")) == NULL) || r;
-  r = ((glTexCoordPointerListIBM = (PFNGLTEXCOORDPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordPointerListIBM")) == NULL) || r;
-  r = ((glVertexPointerListIBM = (PFNGLVERTEXPOINTERLISTIBMPROC)glewGetProcSubtractress((const GLubyte*)"glVertexPointerListIBM")) == NULL) || r;
+  r = ((glColorPointerListIBM = (PFNGLCOLORPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glColorPointerListIBM")) == NULL) || r;
+  r = ((glEdgeFlagPointerListIBM = (PFNGLEDGEFLAGPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glEdgeFlagPointerListIBM")) == NULL) || r;
+  r = ((glFogCoordPointerListIBM = (PFNGLFOGCOORDPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glFogCoordPointerListIBM")) == NULL) || r;
+  r = ((glIndexPointerListIBM = (PFNGLINDEXPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glIndexPointerListIBM")) == NULL) || r;
+  r = ((glNormalPointerListIBM = (PFNGLNORMALPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glNormalPointerListIBM")) == NULL) || r;
+  r = ((glSecondaryColorPointerListIBM = (PFNGLSECONDARYCOLORPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColorPointerListIBM")) == NULL) || r;
+  r = ((glTexCoordPointerListIBM = (PFNGLTEXCOORDPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glTexCoordPointerListIBM")) == NULL) || r;
+  r = ((glVertexPointerListIBM = (PFNGLVERTEXPOINTERLISTIBMPROC)glewGetProcAddress((const GLubyte*)"glVertexPointerListIBM")) == NULL) || r;
 
   return r;
 }
@@ -13861,9 +13858,9 @@ static GLboolean _glewInit_GL_INTEL_map_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMapTexture2DINTEL = (PFNGLMAPTEXTURE2DINTELPROC)glewGetProcSubtractress((const GLubyte*)"glMapTexture2DINTEL")) == NULL) || r;
-  r = ((glSyncTextureINTEL = (PFNGLSYNCTEXTUREINTELPROC)glewGetProcSubtractress((const GLubyte*)"glSyncTextureINTEL")) == NULL) || r;
-  r = ((glUnmapTexture2DINTEL = (PFNGLUNMAPTEXTURE2DINTELPROC)glewGetProcSubtractress((const GLubyte*)"glUnmapTexture2DINTEL")) == NULL) || r;
+  r = ((glMapTexture2DINTEL = (PFNGLMAPTEXTURE2DINTELPROC)glewGetProcAddress((const GLubyte*)"glMapTexture2DINTEL")) == NULL) || r;
+  r = ((glSyncTextureINTEL = (PFNGLSYNCTEXTUREINTELPROC)glewGetProcAddress((const GLubyte*)"glSyncTextureINTEL")) == NULL) || r;
+  r = ((glUnmapTexture2DINTEL = (PFNGLUNMAPTEXTURE2DINTELPROC)glewGetProcAddress((const GLubyte*)"glUnmapTexture2DINTEL")) == NULL) || r;
 
   return r;
 }
@@ -13876,10 +13873,10 @@ static GLboolean _glewInit_GL_INTEL_parallel_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorPointervINTEL = (PFNGLCOLORPOINTERVINTELPROC)glewGetProcSubtractress((const GLubyte*)"glColorPointervINTEL")) == NULL) || r;
-  r = ((glNormalPointervINTEL = (PFNGLNORMALPOINTERVINTELPROC)glewGetProcSubtractress((const GLubyte*)"glNormalPointervINTEL")) == NULL) || r;
-  r = ((glTexCoordPointervINTEL = (PFNGLTEXCOORDPOINTERVINTELPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordPointervINTEL")) == NULL) || r;
-  r = ((glVertexPointervINTEL = (PFNGLVERTEXPOINTERVINTELPROC)glewGetProcSubtractress((const GLubyte*)"glVertexPointervINTEL")) == NULL) || r;
+  r = ((glColorPointervINTEL = (PFNGLCOLORPOINTERVINTELPROC)glewGetProcAddress((const GLubyte*)"glColorPointervINTEL")) == NULL) || r;
+  r = ((glNormalPointervINTEL = (PFNGLNORMALPOINTERVINTELPROC)glewGetProcAddress((const GLubyte*)"glNormalPointervINTEL")) == NULL) || r;
+  r = ((glTexCoordPointervINTEL = (PFNGLTEXCOORDPOINTERVINTELPROC)glewGetProcAddress((const GLubyte*)"glTexCoordPointervINTEL")) == NULL) || r;
+  r = ((glVertexPointervINTEL = (PFNGLVERTEXPOINTERVINTELPROC)glewGetProcAddress((const GLubyte*)"glVertexPointervINTEL")) == NULL) || r;
 
   return r;
 }
@@ -13892,16 +13889,16 @@ static GLboolean _glewInit_GL_INTEL_performance_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginPerfQueryINTEL = (PFNGLBEGINPERFQUERYINTELPROC)glewGetProcSubtractress((const GLubyte*)"glBeginPerfQueryINTEL")) == NULL) || r;
-  r = ((glCreatePerfQueryINTEL = (PFNGLCREATEPERFQUERYINTELPROC)glewGetProcSubtractress((const GLubyte*)"glCreatePerfQueryINTEL")) == NULL) || r;
-  r = ((glDeletePerfQueryINTEL = (PFNGLDELETEPERFQUERYINTELPROC)glewGetProcSubtractress((const GLubyte*)"glDeletePerfQueryINTEL")) == NULL) || r;
-  r = ((glEndPerfQueryINTEL = (PFNGLENDPERFQUERYINTELPROC)glewGetProcSubtractress((const GLubyte*)"glEndPerfQueryINTEL")) == NULL) || r;
-  r = ((glGetFirstPerfQueryIdINTEL = (PFNGLGETFIRSTPERFQUERYIDINTELPROC)glewGetProcSubtractress((const GLubyte*)"glGetFirstPerfQueryIdINTEL")) == NULL) || r;
-  r = ((glGetNextPerfQueryIdINTEL = (PFNGLGETNEXTPERFQUERYIDINTELPROC)glewGetProcSubtractress((const GLubyte*)"glGetNextPerfQueryIdINTEL")) == NULL) || r;
-  r = ((glGetPerfCounterInfoINTEL = (PFNGLGETPERFCOUNTERINFOINTELPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfCounterInfoINTEL")) == NULL) || r;
-  r = ((glGetPerfQueryDataINTEL = (PFNGLGETPERFQUERYDATAINTELPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfQueryDataINTEL")) == NULL) || r;
-  r = ((glGetPerfQueryIdByNameINTEL = (PFNGLGETPERFQUERYIDBYNAMEINTELPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfQueryIdByNameINTEL")) == NULL) || r;
-  r = ((glGetPerfQueryInfoINTEL = (PFNGLGETPERFQUERYINFOINTELPROC)glewGetProcSubtractress((const GLubyte*)"glGetPerfQueryInfoINTEL")) == NULL) || r;
+  r = ((glBeginPerfQueryINTEL = (PFNGLBEGINPERFQUERYINTELPROC)glewGetProcAddress((const GLubyte*)"glBeginPerfQueryINTEL")) == NULL) || r;
+  r = ((glCreatePerfQueryINTEL = (PFNGLCREATEPERFQUERYINTELPROC)glewGetProcAddress((const GLubyte*)"glCreatePerfQueryINTEL")) == NULL) || r;
+  r = ((glDeletePerfQueryINTEL = (PFNGLDELETEPERFQUERYINTELPROC)glewGetProcAddress((const GLubyte*)"glDeletePerfQueryINTEL")) == NULL) || r;
+  r = ((glEndPerfQueryINTEL = (PFNGLENDPERFQUERYINTELPROC)glewGetProcAddress((const GLubyte*)"glEndPerfQueryINTEL")) == NULL) || r;
+  r = ((glGetFirstPerfQueryIdINTEL = (PFNGLGETFIRSTPERFQUERYIDINTELPROC)glewGetProcAddress((const GLubyte*)"glGetFirstPerfQueryIdINTEL")) == NULL) || r;
+  r = ((glGetNextPerfQueryIdINTEL = (PFNGLGETNEXTPERFQUERYIDINTELPROC)glewGetProcAddress((const GLubyte*)"glGetNextPerfQueryIdINTEL")) == NULL) || r;
+  r = ((glGetPerfCounterInfoINTEL = (PFNGLGETPERFCOUNTERINFOINTELPROC)glewGetProcAddress((const GLubyte*)"glGetPerfCounterInfoINTEL")) == NULL) || r;
+  r = ((glGetPerfQueryDataINTEL = (PFNGLGETPERFQUERYDATAINTELPROC)glewGetProcAddress((const GLubyte*)"glGetPerfQueryDataINTEL")) == NULL) || r;
+  r = ((glGetPerfQueryIdByNameINTEL = (PFNGLGETPERFQUERYIDBYNAMEINTELPROC)glewGetProcAddress((const GLubyte*)"glGetPerfQueryIdByNameINTEL")) == NULL) || r;
+  r = ((glGetPerfQueryInfoINTEL = (PFNGLGETPERFQUERYINFOINTELPROC)glewGetProcAddress((const GLubyte*)"glGetPerfQueryInfoINTEL")) == NULL) || r;
 
   return r;
 }
@@ -13914,8 +13911,8 @@ static GLboolean _glewInit_GL_INTEL_texture_scissor ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexScissorFuncINTEL = (PFNGLTEXSCISSORFUNCINTELPROC)glewGetProcSubtractress((const GLubyte*)"glTexScissorFuncINTEL")) == NULL) || r;
-  r = ((glTexScissorINTEL = (PFNGLTEXSCISSORINTELPROC)glewGetProcSubtractress((const GLubyte*)"glTexScissorINTEL")) == NULL) || r;
+  r = ((glTexScissorFuncINTEL = (PFNGLTEXSCISSORFUNCINTELPROC)glewGetProcAddress((const GLubyte*)"glTexScissorFuncINTEL")) == NULL) || r;
+  r = ((glTexScissorINTEL = (PFNGLTEXSCISSORINTELPROC)glewGetProcAddress((const GLubyte*)"glTexScissorINTEL")) == NULL) || r;
 
   return r;
 }
@@ -13928,7 +13925,7 @@ static GLboolean _glewInit_GL_KHR_blend_equation_advanced ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendBarrierKHR = (PFNGLBLENDBARRIERKHRPROC)glewGetProcSubtractress((const GLubyte*)"glBlendBarrierKHR")) == NULL) || r;
+  r = ((glBlendBarrierKHR = (PFNGLBLENDBARRIERKHRPROC)glewGetProcAddress((const GLubyte*)"glBlendBarrierKHR")) == NULL) || r;
 
   return r;
 }
@@ -13941,16 +13938,16 @@ static GLboolean _glewInit_GL_KHR_debug ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageCallback")) == NULL) || r;
-  r = ((glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageControl")) == NULL) || r;
-  r = ((glDebugMessageInsert = (PFNGLDEBUGMESSAGEINSERTPROC)glewGetProcSubtractress((const GLubyte*)"glDebugMessageInsert")) == NULL) || r;
-  r = ((glGetDebugMessageLog = (PFNGLGETDEBUGMESSAGELOGPROC)glewGetProcSubtractress((const GLubyte*)"glGetDebugMessageLog")) == NULL) || r;
-  r = ((glGetObjectLabel = (PFNGLGETOBJECTLABELPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectLabel")) == NULL) || r;
-  r = ((glGetObjectPtrLabel = (PFNGLGETOBJECTPTRLABELPROC)glewGetProcSubtractress((const GLubyte*)"glGetObjectPtrLabel")) == NULL) || r;
-  r = ((glObjectLabel = (PFNGLOBJECTLABELPROC)glewGetProcSubtractress((const GLubyte*)"glObjectLabel")) == NULL) || r;
-  r = ((glObjectPtrLabel = (PFNGLOBJECTPTRLABELPROC)glewGetProcSubtractress((const GLubyte*)"glObjectPtrLabel")) == NULL) || r;
-  r = ((glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)glewGetProcSubtractress((const GLubyte*)"glPopDebugGroup")) == NULL) || r;
-  r = ((glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)glewGetProcSubtractress((const GLubyte*)"glPushDebugGroup")) == NULL) || r;
+  r = ((glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageCallback")) == NULL) || r;
+  r = ((glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageControl")) == NULL) || r;
+  r = ((glDebugMessageInsert = (PFNGLDEBUGMESSAGEINSERTPROC)glewGetProcAddress((const GLubyte*)"glDebugMessageInsert")) == NULL) || r;
+  r = ((glGetDebugMessageLog = (PFNGLGETDEBUGMESSAGELOGPROC)glewGetProcAddress((const GLubyte*)"glGetDebugMessageLog")) == NULL) || r;
+  r = ((glGetObjectLabel = (PFNGLGETOBJECTLABELPROC)glewGetProcAddress((const GLubyte*)"glGetObjectLabel")) == NULL) || r;
+  r = ((glGetObjectPtrLabel = (PFNGLGETOBJECTPTRLABELPROC)glewGetProcAddress((const GLubyte*)"glGetObjectPtrLabel")) == NULL) || r;
+  r = ((glObjectLabel = (PFNGLOBJECTLABELPROC)glewGetProcAddress((const GLubyte*)"glObjectLabel")) == NULL) || r;
+  r = ((glObjectPtrLabel = (PFNGLOBJECTPTRLABELPROC)glewGetProcAddress((const GLubyte*)"glObjectPtrLabel")) == NULL) || r;
+  r = ((glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)glewGetProcAddress((const GLubyte*)"glPopDebugGroup")) == NULL) || r;
+  r = ((glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)glewGetProcAddress((const GLubyte*)"glPushDebugGroup")) == NULL) || r;
 
   return r;
 }
@@ -13963,7 +13960,7 @@ static GLboolean _glewInit_GL_KHR_parallel_shader_compile ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMaxShaderCompilerThreadsKHR = (PFNGLMAXSHADERCOMPILERTHREADSKHRPROC)glewGetProcSubtractress((const GLubyte*)"glMaxShaderCompilerThreadsKHR")) == NULL) || r;
+  r = ((glMaxShaderCompilerThreadsKHR = (PFNGLMAXSHADERCOMPILERTHREADSKHRPROC)glewGetProcAddress((const GLubyte*)"glMaxShaderCompilerThreadsKHR")) == NULL) || r;
 
   return r;
 }
@@ -13976,10 +13973,10 @@ static GLboolean _glewInit_GL_KHR_robustness ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetnUniformfv = (PFNGLGETNUNIFORMFVPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformfv")) == NULL) || r;
-  r = ((glGetnUniformiv = (PFNGLGETNUNIFORMIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformiv")) == NULL) || r;
-  r = ((glGetnUniformuiv = (PFNGLGETNUNIFORMUIVPROC)glewGetProcSubtractress((const GLubyte*)"glGetnUniformuiv")) == NULL) || r;
-  r = ((glReadnPixels = (PFNGLREADNPIXELSPROC)glewGetProcSubtractress((const GLubyte*)"glReadnPixels")) == NULL) || r;
+  r = ((glGetnUniformfv = (PFNGLGETNUNIFORMFVPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformfv")) == NULL) || r;
+  r = ((glGetnUniformiv = (PFNGLGETNUNIFORMIVPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformiv")) == NULL) || r;
+  r = ((glGetnUniformuiv = (PFNGLGETNUNIFORMUIVPROC)glewGetProcAddress((const GLubyte*)"glGetnUniformuiv")) == NULL) || r;
+  r = ((glReadnPixels = (PFNGLREADNPIXELSPROC)glewGetProcAddress((const GLubyte*)"glReadnPixels")) == NULL) || r;
 
   return r;
 }
@@ -13992,11 +13989,11 @@ static GLboolean _glewInit_GL_KTX_buffer_region ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferRegionEnabled = (PFNGLBUFFERREGIONENABLEDPROC)glewGetProcSubtractress((const GLubyte*)"glBufferRegionEnabled")) == NULL) || r;
-  r = ((glDeleteBufferRegion = (PFNGLDELETEBUFFERREGIONPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteBufferRegion")) == NULL) || r;
-  r = ((glDrawBufferRegion = (PFNGLDRAWBUFFERREGIONPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBufferRegion")) == NULL) || r;
-  r = ((glNewBufferRegion = (PFNGLNEWBUFFERREGIONPROC)glewGetProcSubtractress((const GLubyte*)"glNewBufferRegion")) == NULL) || r;
-  r = ((glReadBufferRegion = (PFNGLREADBUFFERREGIONPROC)glewGetProcSubtractress((const GLubyte*)"glReadBufferRegion")) == NULL) || r;
+  r = ((glBufferRegionEnabled = (PFNGLBUFFERREGIONENABLEDPROC)glewGetProcAddress((const GLubyte*)"glBufferRegionEnabled")) == NULL) || r;
+  r = ((glDeleteBufferRegion = (PFNGLDELETEBUFFERREGIONPROC)glewGetProcAddress((const GLubyte*)"glDeleteBufferRegion")) == NULL) || r;
+  r = ((glDrawBufferRegion = (PFNGLDRAWBUFFERREGIONPROC)glewGetProcAddress((const GLubyte*)"glDrawBufferRegion")) == NULL) || r;
+  r = ((glNewBufferRegion = (PFNGLNEWBUFFERREGIONPROC)glewGetProcAddress((const GLubyte*)"glNewBufferRegion")) == NULL) || r;
+  r = ((glReadBufferRegion = (PFNGLREADBUFFERREGIONPROC)glewGetProcAddress((const GLubyte*)"glReadBufferRegion")) == NULL) || r;
 
   return r;
 }
@@ -14009,7 +14006,7 @@ static GLboolean _glewInit_GL_MESA_resize_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glResizeBuffersMESA = (PFNGLRESIZEBUFFERSMESAPROC)glewGetProcSubtractress((const GLubyte*)"glResizeBuffersMESA")) == NULL) || r;
+  r = ((glResizeBuffersMESA = (PFNGLRESIZEBUFFERSMESAPROC)glewGetProcAddress((const GLubyte*)"glResizeBuffersMESA")) == NULL) || r;
 
   return r;
 }
@@ -14022,30 +14019,30 @@ static GLboolean _glewInit_GL_MESA_window_pos ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glWindowPos2dMESA = (PFNGLWINDOWPOS2DMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2dMESA")) == NULL) || r;
-  r = ((glWindowPos2dvMESA = (PFNGLWINDOWPOS2DVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2dvMESA")) == NULL) || r;
-  r = ((glWindowPos2fMESA = (PFNGLWINDOWPOS2FMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2fMESA")) == NULL) || r;
-  r = ((glWindowPos2fvMESA = (PFNGLWINDOWPOS2FVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2fvMESA")) == NULL) || r;
-  r = ((glWindowPos2iMESA = (PFNGLWINDOWPOS2IMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2iMESA")) == NULL) || r;
-  r = ((glWindowPos2ivMESA = (PFNGLWINDOWPOS2IVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2ivMESA")) == NULL) || r;
-  r = ((glWindowPos2sMESA = (PFNGLWINDOWPOS2SMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2sMESA")) == NULL) || r;
-  r = ((glWindowPos2svMESA = (PFNGLWINDOWPOS2SVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos2svMESA")) == NULL) || r;
-  r = ((glWindowPos3dMESA = (PFNGLWINDOWPOS3DMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3dMESA")) == NULL) || r;
-  r = ((glWindowPos3dvMESA = (PFNGLWINDOWPOS3DVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3dvMESA")) == NULL) || r;
-  r = ((glWindowPos3fMESA = (PFNGLWINDOWPOS3FMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3fMESA")) == NULL) || r;
-  r = ((glWindowPos3fvMESA = (PFNGLWINDOWPOS3FVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3fvMESA")) == NULL) || r;
-  r = ((glWindowPos3iMESA = (PFNGLWINDOWPOS3IMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3iMESA")) == NULL) || r;
-  r = ((glWindowPos3ivMESA = (PFNGLWINDOWPOS3IVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3ivMESA")) == NULL) || r;
-  r = ((glWindowPos3sMESA = (PFNGLWINDOWPOS3SMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3sMESA")) == NULL) || r;
-  r = ((glWindowPos3svMESA = (PFNGLWINDOWPOS3SVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos3svMESA")) == NULL) || r;
-  r = ((glWindowPos4dMESA = (PFNGLWINDOWPOS4DMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4dMESA")) == NULL) || r;
-  r = ((glWindowPos4dvMESA = (PFNGLWINDOWPOS4DVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4dvMESA")) == NULL) || r;
-  r = ((glWindowPos4fMESA = (PFNGLWINDOWPOS4FMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4fMESA")) == NULL) || r;
-  r = ((glWindowPos4fvMESA = (PFNGLWINDOWPOS4FVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4fvMESA")) == NULL) || r;
-  r = ((glWindowPos4iMESA = (PFNGLWINDOWPOS4IMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4iMESA")) == NULL) || r;
-  r = ((glWindowPos4ivMESA = (PFNGLWINDOWPOS4IVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4ivMESA")) == NULL) || r;
-  r = ((glWindowPos4sMESA = (PFNGLWINDOWPOS4SMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4sMESA")) == NULL) || r;
-  r = ((glWindowPos4svMESA = (PFNGLWINDOWPOS4SVMESAPROC)glewGetProcSubtractress((const GLubyte*)"glWindowPos4svMESA")) == NULL) || r;
+  r = ((glWindowPos2dMESA = (PFNGLWINDOWPOS2DMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2dMESA")) == NULL) || r;
+  r = ((glWindowPos2dvMESA = (PFNGLWINDOWPOS2DVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2dvMESA")) == NULL) || r;
+  r = ((glWindowPos2fMESA = (PFNGLWINDOWPOS2FMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2fMESA")) == NULL) || r;
+  r = ((glWindowPos2fvMESA = (PFNGLWINDOWPOS2FVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2fvMESA")) == NULL) || r;
+  r = ((glWindowPos2iMESA = (PFNGLWINDOWPOS2IMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2iMESA")) == NULL) || r;
+  r = ((glWindowPos2ivMESA = (PFNGLWINDOWPOS2IVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2ivMESA")) == NULL) || r;
+  r = ((glWindowPos2sMESA = (PFNGLWINDOWPOS2SMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2sMESA")) == NULL) || r;
+  r = ((glWindowPos2svMESA = (PFNGLWINDOWPOS2SVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos2svMESA")) == NULL) || r;
+  r = ((glWindowPos3dMESA = (PFNGLWINDOWPOS3DMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3dMESA")) == NULL) || r;
+  r = ((glWindowPos3dvMESA = (PFNGLWINDOWPOS3DVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3dvMESA")) == NULL) || r;
+  r = ((glWindowPos3fMESA = (PFNGLWINDOWPOS3FMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3fMESA")) == NULL) || r;
+  r = ((glWindowPos3fvMESA = (PFNGLWINDOWPOS3FVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3fvMESA")) == NULL) || r;
+  r = ((glWindowPos3iMESA = (PFNGLWINDOWPOS3IMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3iMESA")) == NULL) || r;
+  r = ((glWindowPos3ivMESA = (PFNGLWINDOWPOS3IVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3ivMESA")) == NULL) || r;
+  r = ((glWindowPos3sMESA = (PFNGLWINDOWPOS3SMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3sMESA")) == NULL) || r;
+  r = ((glWindowPos3svMESA = (PFNGLWINDOWPOS3SVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos3svMESA")) == NULL) || r;
+  r = ((glWindowPos4dMESA = (PFNGLWINDOWPOS4DMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4dMESA")) == NULL) || r;
+  r = ((glWindowPos4dvMESA = (PFNGLWINDOWPOS4DVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4dvMESA")) == NULL) || r;
+  r = ((glWindowPos4fMESA = (PFNGLWINDOWPOS4FMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4fMESA")) == NULL) || r;
+  r = ((glWindowPos4fvMESA = (PFNGLWINDOWPOS4FVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4fvMESA")) == NULL) || r;
+  r = ((glWindowPos4iMESA = (PFNGLWINDOWPOS4IMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4iMESA")) == NULL) || r;
+  r = ((glWindowPos4ivMESA = (PFNGLWINDOWPOS4IVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4ivMESA")) == NULL) || r;
+  r = ((glWindowPos4sMESA = (PFNGLWINDOWPOS4SMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4sMESA")) == NULL) || r;
+  r = ((glWindowPos4svMESA = (PFNGLWINDOWPOS4SVMESAPROC)glewGetProcAddress((const GLubyte*)"glWindowPos4svMESA")) == NULL) || r;
 
   return r;
 }
@@ -14058,8 +14055,8 @@ static GLboolean _glewInit_GL_NVX_conditional_render ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginConditionalRenderNVX = (PFNGLBEGINCONDITIONALRENDERNVXPROC)glewGetProcSubtractress((const GLubyte*)"glBeginConditionalRenderNVX")) == NULL) || r;
-  r = ((glEndConditionalRenderNVX = (PFNGLENDCONDITIONALRENDERNVXPROC)glewGetProcSubtractress((const GLubyte*)"glEndConditionalRenderNVX")) == NULL) || r;
+  r = ((glBeginConditionalRenderNVX = (PFNGLBEGINCONDITIONALRENDERNVXPROC)glewGetProcAddress((const GLubyte*)"glBeginConditionalRenderNVX")) == NULL) || r;
+  r = ((glEndConditionalRenderNVX = (PFNGLENDCONDITIONALRENDERNVXPROC)glewGetProcAddress((const GLubyte*)"glEndConditionalRenderNVX")) == NULL) || r;
 
   return r;
 }
@@ -14072,9 +14069,9 @@ static GLboolean _glewInit_GL_NVX_linked_gpu_multicast ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glLGPUCopyImageSubDataNVX = (PFNGLLGPUCOPYIMAGESUBDATANVXPROC)glewGetProcSubtractress((const GLubyte*)"glLGPUCopyImageSubDataNVX")) == NULL) || r;
-  r = ((glLGPUInterlockNVX = (PFNGLLGPUINTERLOCKNVXPROC)glewGetProcSubtractress((const GLubyte*)"glLGPUInterlockNVX")) == NULL) || r;
-  r = ((glLGPUNamedBufferSubDataNVX = (PFNGLLGPUNAMEDBUFFERSUBDATANVXPROC)glewGetProcSubtractress((const GLubyte*)"glLGPUNamedBufferSubDataNVX")) == NULL) || r;
+  r = ((glLGPUCopyImageSubDataNVX = (PFNGLLGPUCOPYIMAGESUBDATANVXPROC)glewGetProcAddress((const GLubyte*)"glLGPUCopyImageSubDataNVX")) == NULL) || r;
+  r = ((glLGPUInterlockNVX = (PFNGLLGPUINTERLOCKNVXPROC)glewGetProcAddress((const GLubyte*)"glLGPUInterlockNVX")) == NULL) || r;
+  r = ((glLGPUNamedBufferSubDataNVX = (PFNGLLGPUNAMEDBUFFERSUBDATANVXPROC)glewGetProcAddress((const GLubyte*)"glLGPUNamedBufferSubDataNVX")) == NULL) || r;
 
   return r;
 }
@@ -14087,8 +14084,8 @@ static GLboolean _glewInit_GL_NV_3dvision_settings ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glStereoParameterfNV = (PFNGLSTEREOPARAMETERFNVPROC)glewGetProcSubtractress((const GLubyte*)"glStereoParameterfNV")) == NULL) || r;
-  r = ((glStereoParameteriNV = (PFNGLSTEREOPARAMETERINVPROC)glewGetProcSubtractress((const GLubyte*)"glStereoParameteriNV")) == NULL) || r;
+  r = ((glStereoParameterfNV = (PFNGLSTEREOPARAMETERFNVPROC)glewGetProcAddress((const GLubyte*)"glStereoParameterfNV")) == NULL) || r;
+  r = ((glStereoParameteriNV = (PFNGLSTEREOPARAMETERINVPROC)glewGetProcAddress((const GLubyte*)"glStereoParameteriNV")) == NULL) || r;
 
   return r;
 }
@@ -14101,8 +14098,8 @@ static GLboolean _glewInit_GL_NV_bindless_multi_draw_indirect ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirectBindlessNV = (PFNGLMULTIDRAWARRAYSINDIRECTBINDLESSNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirectBindlessNV")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirectBindlessNV = (PFNGLMULTIDRAWELEMENTSINDIRECTBINDLESSNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirectBindlessNV")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirectBindlessNV = (PFNGLMULTIDRAWARRAYSINDIRECTBINDLESSNVPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirectBindlessNV")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirectBindlessNV = (PFNGLMULTIDRAWELEMENTSINDIRECTBINDLESSNVPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirectBindlessNV")) == NULL) || r;
 
   return r;
 }
@@ -14115,8 +14112,8 @@ static GLboolean _glewInit_GL_NV_bindless_multi_draw_indirect_count ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultiDrawArraysIndirectBindlessCountNV = (PFNGLMULTIDRAWARRAYSINDIRECTBINDLESSCOUNTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawArraysIndirectBindlessCountNV")) == NULL) || r;
-  r = ((glMultiDrawElementsIndirectBindlessCountNV = (PFNGLMULTIDRAWELEMENTSINDIRECTBINDLESSCOUNTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiDrawElementsIndirectBindlessCountNV")) == NULL) || r;
+  r = ((glMultiDrawArraysIndirectBindlessCountNV = (PFNGLMULTIDRAWARRAYSINDIRECTBINDLESSCOUNTNVPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawArraysIndirectBindlessCountNV")) == NULL) || r;
+  r = ((glMultiDrawElementsIndirectBindlessCountNV = (PFNGLMULTIDRAWELEMENTSINDIRECTBINDLESSCOUNTNVPROC)glewGetProcAddress((const GLubyte*)"glMultiDrawElementsIndirectBindlessCountNV")) == NULL) || r;
 
   return r;
 }
@@ -14129,19 +14126,19 @@ static GLboolean _glewInit_GL_NV_bindless_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetImageHandleNV = (PFNGLGETIMAGEHANDLENVPROC)glewGetProcSubtractress((const GLubyte*)"glGetImageHandleNV")) == NULL) || r;
-  r = ((glGetTextureHandleNV = (PFNGLGETTEXTUREHANDLENVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureHandleNV")) == NULL) || r;
-  r = ((glGetTextureSamplerHandleNV = (PFNGLGETTEXTURESAMPLERHANDLENVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTextureSamplerHandleNV")) == NULL) || r;
-  r = ((glIsImageHandleResidentNV = (PFNGLISIMAGEHANDLERESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsImageHandleResidentNV")) == NULL) || r;
-  r = ((glIsTextureHandleResidentNV = (PFNGLISTEXTUREHANDLERESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsTextureHandleResidentNV")) == NULL) || r;
-  r = ((glMakeImageHandleNonResidentNV = (PFNGLMAKEIMAGEHANDLENONRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeImageHandleNonResidentNV")) == NULL) || r;
-  r = ((glMakeImageHandleResidentNV = (PFNGLMAKEIMAGEHANDLERESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeImageHandleResidentNV")) == NULL) || r;
-  r = ((glMakeTextureHandleNonResidentNV = (PFNGLMAKETEXTUREHANDLENONRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeTextureHandleNonResidentNV")) == NULL) || r;
-  r = ((glMakeTextureHandleResidentNV = (PFNGLMAKETEXTUREHANDLERESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeTextureHandleResidentNV")) == NULL) || r;
-  r = ((glProgramUniformHandleui64NV = (PFNGLPROGRAMUNIFORMHANDLEUI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformHandleui64NV")) == NULL) || r;
-  r = ((glProgramUniformHandleui64vNV = (PFNGLPROGRAMUNIFORMHANDLEUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformHandleui64vNV")) == NULL) || r;
-  r = ((glUniformHandleui64NV = (PFNGLUNIFORMHANDLEUI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformHandleui64NV")) == NULL) || r;
-  r = ((glUniformHandleui64vNV = (PFNGLUNIFORMHANDLEUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformHandleui64vNV")) == NULL) || r;
+  r = ((glGetImageHandleNV = (PFNGLGETIMAGEHANDLENVPROC)glewGetProcAddress((const GLubyte*)"glGetImageHandleNV")) == NULL) || r;
+  r = ((glGetTextureHandleNV = (PFNGLGETTEXTUREHANDLENVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureHandleNV")) == NULL) || r;
+  r = ((glGetTextureSamplerHandleNV = (PFNGLGETTEXTURESAMPLERHANDLENVPROC)glewGetProcAddress((const GLubyte*)"glGetTextureSamplerHandleNV")) == NULL) || r;
+  r = ((glIsImageHandleResidentNV = (PFNGLISIMAGEHANDLERESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glIsImageHandleResidentNV")) == NULL) || r;
+  r = ((glIsTextureHandleResidentNV = (PFNGLISTEXTUREHANDLERESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glIsTextureHandleResidentNV")) == NULL) || r;
+  r = ((glMakeImageHandleNonResidentNV = (PFNGLMAKEIMAGEHANDLENONRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeImageHandleNonResidentNV")) == NULL) || r;
+  r = ((glMakeImageHandleResidentNV = (PFNGLMAKEIMAGEHANDLERESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeImageHandleResidentNV")) == NULL) || r;
+  r = ((glMakeTextureHandleNonResidentNV = (PFNGLMAKETEXTUREHANDLENONRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeTextureHandleNonResidentNV")) == NULL) || r;
+  r = ((glMakeTextureHandleResidentNV = (PFNGLMAKETEXTUREHANDLERESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeTextureHandleResidentNV")) == NULL) || r;
+  r = ((glProgramUniformHandleui64NV = (PFNGLPROGRAMUNIFORMHANDLEUI64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformHandleui64NV")) == NULL) || r;
+  r = ((glProgramUniformHandleui64vNV = (PFNGLPROGRAMUNIFORMHANDLEUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformHandleui64vNV")) == NULL) || r;
+  r = ((glUniformHandleui64NV = (PFNGLUNIFORMHANDLEUI64NVPROC)glewGetProcAddress((const GLubyte*)"glUniformHandleui64NV")) == NULL) || r;
+  r = ((glUniformHandleui64vNV = (PFNGLUNIFORMHANDLEUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniformHandleui64vNV")) == NULL) || r;
 
   return r;
 }
@@ -14154,8 +14151,8 @@ static GLboolean _glewInit_GL_NV_blend_equation_advanced ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlendBarrierNV = (PFNGLBLENDBARRIERNVPROC)glewGetProcSubtractress((const GLubyte*)"glBlendBarrierNV")) == NULL) || r;
-  r = ((glBlendParameteriNV = (PFNGLBLENDPARAMETERINVPROC)glewGetProcSubtractress((const GLubyte*)"glBlendParameteriNV")) == NULL) || r;
+  r = ((glBlendBarrierNV = (PFNGLBLENDBARRIERNVPROC)glewGetProcAddress((const GLubyte*)"glBlendBarrierNV")) == NULL) || r;
+  r = ((glBlendParameteriNV = (PFNGLBLENDPARAMETERINVPROC)glewGetProcAddress((const GLubyte*)"glBlendParameteriNV")) == NULL) || r;
 
   return r;
 }
@@ -14168,7 +14165,7 @@ static GLboolean _glewInit_GL_NV_clip_space_w_scaling ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glViewportPositionWScaleNV = (PFNGLVIEWPORTPOSITIONWSCALENVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportPositionWScaleNV")) == NULL) || r;
+  r = ((glViewportPositionWScaleNV = (PFNGLVIEWPORTPOSITIONWSCALENVPROC)glewGetProcAddress((const GLubyte*)"glViewportPositionWScaleNV")) == NULL) || r;
 
   return r;
 }
@@ -14181,23 +14178,23 @@ static GLboolean _glewInit_GL_NV_command_list ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCallCommandListNV = (PFNGLCALLCOMMANDLISTNVPROC)glewGetProcSubtractress((const GLubyte*)"glCallCommandListNV")) == NULL) || r;
-  r = ((glCommandListSegmentsNV = (PFNGLCOMMANDLISTSEGMENTSNVPROC)glewGetProcSubtractress((const GLubyte*)"glCommandListSegmentsNV")) == NULL) || r;
-  r = ((glCompileCommandListNV = (PFNGLCOMPILECOMMANDLISTNVPROC)glewGetProcSubtractress((const GLubyte*)"glCompileCommandListNV")) == NULL) || r;
-  r = ((glCreateCommandListsNV = (PFNGLCREATECOMMANDLISTSNVPROC)glewGetProcSubtractress((const GLubyte*)"glCreateCommandListsNV")) == NULL) || r;
-  r = ((glCreateStatesNV = (PFNGLCREATESTATESNVPROC)glewGetProcSubtractress((const GLubyte*)"glCreateStatesNV")) == NULL) || r;
-  r = ((glDeleteCommandListsNV = (PFNGLDELETECOMMANDLISTSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteCommandListsNV")) == NULL) || r;
-  r = ((glDeleteStatesNV = (PFNGLDELETESTATESNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteStatesNV")) == NULL) || r;
-  r = ((glDrawCommandsSubtractressNV = (PFNGLDRAWCOMMANDSADDRESSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawCommandsSubtractressNV")) == NULL) || r;
-  r = ((glDrawCommandsNV = (PFNGLDRAWCOMMANDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawCommandsNV")) == NULL) || r;
-  r = ((glDrawCommandsStatesSubtractressNV = (PFNGLDRAWCOMMANDSSTATESADDRESSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawCommandsStatesSubtractressNV")) == NULL) || r;
-  r = ((glDrawCommandsStatesNV = (PFNGLDRAWCOMMANDSSTATESNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawCommandsStatesNV")) == NULL) || r;
-  r = ((glGetCommandHeaderNV = (PFNGLGETCOMMANDHEADERNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCommandHeaderNV")) == NULL) || r;
-  r = ((glGetStageIndexNV = (PFNGLGETSTAGEINDEXNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetStageIndexNV")) == NULL) || r;
-  r = ((glIsCommandListNV = (PFNGLISCOMMANDLISTNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsCommandListNV")) == NULL) || r;
-  r = ((glIsStateNV = (PFNGLISSTATENVPROC)glewGetProcSubtractress((const GLubyte*)"glIsStateNV")) == NULL) || r;
-  r = ((glListDrawCommandsStatesClientNV = (PFNGLLISTDRAWCOMMANDSSTATESCLIENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glListDrawCommandsStatesClientNV")) == NULL) || r;
-  r = ((glStateCaptureNV = (PFNGLSTATECAPTURENVPROC)glewGetProcSubtractress((const GLubyte*)"glStateCaptureNV")) == NULL) || r;
+  r = ((glCallCommandListNV = (PFNGLCALLCOMMANDLISTNVPROC)glewGetProcAddress((const GLubyte*)"glCallCommandListNV")) == NULL) || r;
+  r = ((glCommandListSegmentsNV = (PFNGLCOMMANDLISTSEGMENTSNVPROC)glewGetProcAddress((const GLubyte*)"glCommandListSegmentsNV")) == NULL) || r;
+  r = ((glCompileCommandListNV = (PFNGLCOMPILECOMMANDLISTNVPROC)glewGetProcAddress((const GLubyte*)"glCompileCommandListNV")) == NULL) || r;
+  r = ((glCreateCommandListsNV = (PFNGLCREATECOMMANDLISTSNVPROC)glewGetProcAddress((const GLubyte*)"glCreateCommandListsNV")) == NULL) || r;
+  r = ((glCreateStatesNV = (PFNGLCREATESTATESNVPROC)glewGetProcAddress((const GLubyte*)"glCreateStatesNV")) == NULL) || r;
+  r = ((glDeleteCommandListsNV = (PFNGLDELETECOMMANDLISTSNVPROC)glewGetProcAddress((const GLubyte*)"glDeleteCommandListsNV")) == NULL) || r;
+  r = ((glDeleteStatesNV = (PFNGLDELETESTATESNVPROC)glewGetProcAddress((const GLubyte*)"glDeleteStatesNV")) == NULL) || r;
+  r = ((glDrawCommandsAddressNV = (PFNGLDRAWCOMMANDSADDRESSNVPROC)glewGetProcAddress((const GLubyte*)"glDrawCommandsAddressNV")) == NULL) || r;
+  r = ((glDrawCommandsNV = (PFNGLDRAWCOMMANDSNVPROC)glewGetProcAddress((const GLubyte*)"glDrawCommandsNV")) == NULL) || r;
+  r = ((glDrawCommandsStatesAddressNV = (PFNGLDRAWCOMMANDSSTATESADDRESSNVPROC)glewGetProcAddress((const GLubyte*)"glDrawCommandsStatesAddressNV")) == NULL) || r;
+  r = ((glDrawCommandsStatesNV = (PFNGLDRAWCOMMANDSSTATESNVPROC)glewGetProcAddress((const GLubyte*)"glDrawCommandsStatesNV")) == NULL) || r;
+  r = ((glGetCommandHeaderNV = (PFNGLGETCOMMANDHEADERNVPROC)glewGetProcAddress((const GLubyte*)"glGetCommandHeaderNV")) == NULL) || r;
+  r = ((glGetStageIndexNV = (PFNGLGETSTAGEINDEXNVPROC)glewGetProcAddress((const GLubyte*)"glGetStageIndexNV")) == NULL) || r;
+  r = ((glIsCommandListNV = (PFNGLISCOMMANDLISTNVPROC)glewGetProcAddress((const GLubyte*)"glIsCommandListNV")) == NULL) || r;
+  r = ((glIsStateNV = (PFNGLISSTATENVPROC)glewGetProcAddress((const GLubyte*)"glIsStateNV")) == NULL) || r;
+  r = ((glListDrawCommandsStatesClientNV = (PFNGLLISTDRAWCOMMANDSSTATESCLIENTNVPROC)glewGetProcAddress((const GLubyte*)"glListDrawCommandsStatesClientNV")) == NULL) || r;
+  r = ((glStateCaptureNV = (PFNGLSTATECAPTURENVPROC)glewGetProcAddress((const GLubyte*)"glStateCaptureNV")) == NULL) || r;
 
   return r;
 }
@@ -14210,8 +14207,8 @@ static GLboolean _glewInit_GL_NV_conditional_render ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginConditionalRenderNV = (PFNGLBEGINCONDITIONALRENDERNVPROC)glewGetProcSubtractress((const GLubyte*)"glBeginConditionalRenderNV")) == NULL) || r;
-  r = ((glEndConditionalRenderNV = (PFNGLENDCONDITIONALRENDERNVPROC)glewGetProcSubtractress((const GLubyte*)"glEndConditionalRenderNV")) == NULL) || r;
+  r = ((glBeginConditionalRenderNV = (PFNGLBEGINCONDITIONALRENDERNVPROC)glewGetProcAddress((const GLubyte*)"glBeginConditionalRenderNV")) == NULL) || r;
+  r = ((glEndConditionalRenderNV = (PFNGLENDCONDITIONALRENDERNVPROC)glewGetProcAddress((const GLubyte*)"glEndConditionalRenderNV")) == NULL) || r;
 
   return r;
 }
@@ -14224,7 +14221,7 @@ static GLboolean _glewInit_GL_NV_conservative_raster ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSubpixelPrecisionBiasNV = (PFNGLSUBPIXELPRECISIONBIASNVPROC)glewGetProcSubtractress((const GLubyte*)"glSubpixelPrecisionBiasNV")) == NULL) || r;
+  r = ((glSubpixelPrecisionBiasNV = (PFNGLSUBPIXELPRECISIONBIASNVPROC)glewGetProcAddress((const GLubyte*)"glSubpixelPrecisionBiasNV")) == NULL) || r;
 
   return r;
 }
@@ -14237,7 +14234,7 @@ static GLboolean _glewInit_GL_NV_conservative_raster_dilate ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glConservativeRasterParameterfNV = (PFNGLCONSERVATIVERASTERPARAMETERFNVPROC)glewGetProcSubtractress((const GLubyte*)"glConservativeRasterParameterfNV")) == NULL) || r;
+  r = ((glConservativeRasterParameterfNV = (PFNGLCONSERVATIVERASTERPARAMETERFNVPROC)glewGetProcAddress((const GLubyte*)"glConservativeRasterParameterfNV")) == NULL) || r;
 
   return r;
 }
@@ -14250,7 +14247,7 @@ static GLboolean _glewInit_GL_NV_conservative_raster_pre_snap_triangles ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glConservativeRasterParameteriNV = (PFNGLCONSERVATIVERASTERPARAMETERINVPROC)glewGetProcSubtractress((const GLubyte*)"glConservativeRasterParameteriNV")) == NULL) || r;
+  r = ((glConservativeRasterParameteriNV = (PFNGLCONSERVATIVERASTERPARAMETERINVPROC)glewGetProcAddress((const GLubyte*)"glConservativeRasterParameteriNV")) == NULL) || r;
 
   return r;
 }
@@ -14263,7 +14260,7 @@ static GLboolean _glewInit_GL_NV_copy_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyBufferSubDataNV = (PFNGLCOPYBUFFERSUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glCopyBufferSubDataNV")) == NULL) || r;
+  r = ((glCopyBufferSubDataNV = (PFNGLCOPYBUFFERSUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glCopyBufferSubDataNV")) == NULL) || r;
 
   return r;
 }
@@ -14276,7 +14273,7 @@ static GLboolean _glewInit_GL_NV_copy_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyImageSubDataNV = (PFNGLCOPYIMAGESUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glCopyImageSubDataNV")) == NULL) || r;
+  r = ((glCopyImageSubDataNV = (PFNGLCOPYIMAGESUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glCopyImageSubDataNV")) == NULL) || r;
 
   return r;
 }
@@ -14289,9 +14286,9 @@ static GLboolean _glewInit_GL_NV_depth_buffer_float ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClearDepthdNV = (PFNGLCLEARDEPTHDNVPROC)glewGetProcSubtractress((const GLubyte*)"glClearDepthdNV")) == NULL) || r;
-  r = ((glDepthBoundsdNV = (PFNGLDEPTHBOUNDSDNVPROC)glewGetProcSubtractress((const GLubyte*)"glDepthBoundsdNV")) == NULL) || r;
-  r = ((glDepthRangedNV = (PFNGLDEPTHRANGEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangedNV")) == NULL) || r;
+  r = ((glClearDepthdNV = (PFNGLCLEARDEPTHDNVPROC)glewGetProcAddress((const GLubyte*)"glClearDepthdNV")) == NULL) || r;
+  r = ((glDepthBoundsdNV = (PFNGLDEPTHBOUNDSDNVPROC)glewGetProcAddress((const GLubyte*)"glDepthBoundsdNV")) == NULL) || r;
+  r = ((glDepthRangedNV = (PFNGLDEPTHRANGEDNVPROC)glewGetProcAddress((const GLubyte*)"glDepthRangedNV")) == NULL) || r;
 
   return r;
 }
@@ -14304,7 +14301,7 @@ static GLboolean _glewInit_GL_NV_draw_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawBuffersNV = (PFNGLDRAWBUFFERSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawBuffersNV")) == NULL) || r;
+  r = ((glDrawBuffersNV = (PFNGLDRAWBUFFERSNVPROC)glewGetProcAddress((const GLubyte*)"glDrawBuffersNV")) == NULL) || r;
 
   return r;
 }
@@ -14317,8 +14314,8 @@ static GLboolean _glewInit_GL_NV_draw_instanced ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawArraysInstancedNV = (PFNGLDRAWARRAYSINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawArraysInstancedNV")) == NULL) || r;
-  r = ((glDrawElementsInstancedNV = (PFNGLDRAWELEMENTSINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawElementsInstancedNV")) == NULL) || r;
+  r = ((glDrawArraysInstancedNV = (PFNGLDRAWARRAYSINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glDrawArraysInstancedNV")) == NULL) || r;
+  r = ((glDrawElementsInstancedNV = (PFNGLDRAWELEMENTSINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glDrawElementsInstancedNV")) == NULL) || r;
 
   return r;
 }
@@ -14331,7 +14328,7 @@ static GLboolean _glewInit_GL_NV_draw_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawTextureNV = (PFNGLDRAWTEXTURENVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawTextureNV")) == NULL) || r;
+  r = ((glDrawTextureNV = (PFNGLDRAWTEXTURENVPROC)glewGetProcAddress((const GLubyte*)"glDrawTextureNV")) == NULL) || r;
 
   return r;
 }
@@ -14344,11 +14341,11 @@ static GLboolean _glewInit_GL_NV_draw_vulkan_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDrawVkImageNV = (PFNGLDRAWVKIMAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawVkImageNV")) == NULL) || r;
-  r = ((glGetVkProcSubtractrNV = (PFNGLGETVKPROCADDRNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVkProcSubtractrNV")) == NULL) || r;
-  r = ((glSignalVkFenceNV = (PFNGLSIGNALVKFENCENVPROC)glewGetProcSubtractress((const GLubyte*)"glSignalVkFenceNV")) == NULL) || r;
-  r = ((glSignalVkSemaphoreNV = (PFNGLSIGNALVKSEMAPHORENVPROC)glewGetProcSubtractress((const GLubyte*)"glSignalVkSemaphoreNV")) == NULL) || r;
-  r = ((glWaitVkSemaphoreNV = (PFNGLWAITVKSEMAPHORENVPROC)glewGetProcSubtractress((const GLubyte*)"glWaitVkSemaphoreNV")) == NULL) || r;
+  r = ((glDrawVkImageNV = (PFNGLDRAWVKIMAGENVPROC)glewGetProcAddress((const GLubyte*)"glDrawVkImageNV")) == NULL) || r;
+  r = ((glGetVkProcAddrNV = (PFNGLGETVKPROCADDRNVPROC)glewGetProcAddress((const GLubyte*)"glGetVkProcAddrNV")) == NULL) || r;
+  r = ((glSignalVkFenceNV = (PFNGLSIGNALVKFENCENVPROC)glewGetProcAddress((const GLubyte*)"glSignalVkFenceNV")) == NULL) || r;
+  r = ((glSignalVkSemaphoreNV = (PFNGLSIGNALVKSEMAPHORENVPROC)glewGetProcAddress((const GLubyte*)"glSignalVkSemaphoreNV")) == NULL) || r;
+  r = ((glWaitVkSemaphoreNV = (PFNGLWAITVKSEMAPHORENVPROC)glewGetProcAddress((const GLubyte*)"glWaitVkSemaphoreNV")) == NULL) || r;
 
   return r;
 }
@@ -14361,15 +14358,15 @@ static GLboolean _glewInit_GL_NV_evaluators ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glEvalMapsNV = (PFNGLEVALMAPSNVPROC)glewGetProcSubtractress((const GLubyte*)"glEvalMapsNV")) == NULL) || r;
-  r = ((glGetMapAttribParameterfvNV = (PFNGLGETMAPATTRIBPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMapAttribParameterfvNV")) == NULL) || r;
-  r = ((glGetMapAttribParameterivNV = (PFNGLGETMAPATTRIBPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMapAttribParameterivNV")) == NULL) || r;
-  r = ((glGetMapControlPointsNV = (PFNGLGETMAPCONTROLPOINTSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMapControlPointsNV")) == NULL) || r;
-  r = ((glGetMapParameterfvNV = (PFNGLGETMAPPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMapParameterfvNV")) == NULL) || r;
-  r = ((glGetMapParameterivNV = (PFNGLGETMAPPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMapParameterivNV")) == NULL) || r;
-  r = ((glMapControlPointsNV = (PFNGLMAPCONTROLPOINTSNVPROC)glewGetProcSubtractress((const GLubyte*)"glMapControlPointsNV")) == NULL) || r;
-  r = ((glMapParameterfvNV = (PFNGLMAPPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMapParameterfvNV")) == NULL) || r;
-  r = ((glMapParameterivNV = (PFNGLMAPPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMapParameterivNV")) == NULL) || r;
+  r = ((glEvalMapsNV = (PFNGLEVALMAPSNVPROC)glewGetProcAddress((const GLubyte*)"glEvalMapsNV")) == NULL) || r;
+  r = ((glGetMapAttribParameterfvNV = (PFNGLGETMAPATTRIBPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetMapAttribParameterfvNV")) == NULL) || r;
+  r = ((glGetMapAttribParameterivNV = (PFNGLGETMAPATTRIBPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetMapAttribParameterivNV")) == NULL) || r;
+  r = ((glGetMapControlPointsNV = (PFNGLGETMAPCONTROLPOINTSNVPROC)glewGetProcAddress((const GLubyte*)"glGetMapControlPointsNV")) == NULL) || r;
+  r = ((glGetMapParameterfvNV = (PFNGLGETMAPPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetMapParameterfvNV")) == NULL) || r;
+  r = ((glGetMapParameterivNV = (PFNGLGETMAPPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetMapParameterivNV")) == NULL) || r;
+  r = ((glMapControlPointsNV = (PFNGLMAPCONTROLPOINTSNVPROC)glewGetProcAddress((const GLubyte*)"glMapControlPointsNV")) == NULL) || r;
+  r = ((glMapParameterfvNV = (PFNGLMAPPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glMapParameterfvNV")) == NULL) || r;
+  r = ((glMapParameterivNV = (PFNGLMAPPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glMapParameterivNV")) == NULL) || r;
 
   return r;
 }
@@ -14382,9 +14379,9 @@ static GLboolean _glewInit_GL_NV_explicit_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetMultisamplefvNV = (PFNGLGETMULTISAMPLEFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMultisamplefvNV")) == NULL) || r;
-  r = ((glSampleMaskIndexedNV = (PFNGLSAMPLEMASKINDEXEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glSampleMaskIndexedNV")) == NULL) || r;
-  r = ((glTexRenderbufferNV = (PFNGLTEXRENDERBUFFERNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexRenderbufferNV")) == NULL) || r;
+  r = ((glGetMultisamplefvNV = (PFNGLGETMULTISAMPLEFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetMultisamplefvNV")) == NULL) || r;
+  r = ((glSampleMaskIndexedNV = (PFNGLSAMPLEMASKINDEXEDNVPROC)glewGetProcAddress((const GLubyte*)"glSampleMaskIndexedNV")) == NULL) || r;
+  r = ((glTexRenderbufferNV = (PFNGLTEXRENDERBUFFERNVPROC)glewGetProcAddress((const GLubyte*)"glTexRenderbufferNV")) == NULL) || r;
 
   return r;
 }
@@ -14397,13 +14394,13 @@ static GLboolean _glewInit_GL_NV_fence ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDeleteFencesNV = (PFNGLDELETEFENCESNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteFencesNV")) == NULL) || r;
-  r = ((glFinishFenceNV = (PFNGLFINISHFENCENVPROC)glewGetProcSubtractress((const GLubyte*)"glFinishFenceNV")) == NULL) || r;
-  r = ((glGenFencesNV = (PFNGLGENFENCESNVPROC)glewGetProcSubtractress((const GLubyte*)"glGenFencesNV")) == NULL) || r;
-  r = ((glGetFenceivNV = (PFNGLGETFENCEIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFenceivNV")) == NULL) || r;
-  r = ((glIsFenceNV = (PFNGLISFENCENVPROC)glewGetProcSubtractress((const GLubyte*)"glIsFenceNV")) == NULL) || r;
-  r = ((glSetFenceNV = (PFNGLSETFENCENVPROC)glewGetProcSubtractress((const GLubyte*)"glSetFenceNV")) == NULL) || r;
-  r = ((glTestFenceNV = (PFNGLTESTFENCENVPROC)glewGetProcSubtractress((const GLubyte*)"glTestFenceNV")) == NULL) || r;
+  r = ((glDeleteFencesNV = (PFNGLDELETEFENCESNVPROC)glewGetProcAddress((const GLubyte*)"glDeleteFencesNV")) == NULL) || r;
+  r = ((glFinishFenceNV = (PFNGLFINISHFENCENVPROC)glewGetProcAddress((const GLubyte*)"glFinishFenceNV")) == NULL) || r;
+  r = ((glGenFencesNV = (PFNGLGENFENCESNVPROC)glewGetProcAddress((const GLubyte*)"glGenFencesNV")) == NULL) || r;
+  r = ((glGetFenceivNV = (PFNGLGETFENCEIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetFenceivNV")) == NULL) || r;
+  r = ((glIsFenceNV = (PFNGLISFENCENVPROC)glewGetProcAddress((const GLubyte*)"glIsFenceNV")) == NULL) || r;
+  r = ((glSetFenceNV = (PFNGLSETFENCENVPROC)glewGetProcAddress((const GLubyte*)"glSetFenceNV")) == NULL) || r;
+  r = ((glTestFenceNV = (PFNGLTESTFENCENVPROC)glewGetProcAddress((const GLubyte*)"glTestFenceNV")) == NULL) || r;
 
   return r;
 }
@@ -14416,7 +14413,7 @@ static GLboolean _glewInit_GL_NV_fragment_coverage_to_color ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFragmentCoverageColorNV = (PFNGLFRAGMENTCOVERAGECOLORNVPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentCoverageColorNV")) == NULL) || r;
+  r = ((glFragmentCoverageColorNV = (PFNGLFRAGMENTCOVERAGECOLORNVPROC)glewGetProcAddress((const GLubyte*)"glFragmentCoverageColorNV")) == NULL) || r;
 
   return r;
 }
@@ -14429,12 +14426,12 @@ static GLboolean _glewInit_GL_NV_fragment_program ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetProgramNamedParameterdvNV = (PFNGLGETPROGRAMNAMEDPARAMETERDVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramNamedParameterdvNV")) == NULL) || r;
-  r = ((glGetProgramNamedParameterfvNV = (PFNGLGETPROGRAMNAMEDPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramNamedParameterfvNV")) == NULL) || r;
-  r = ((glProgramNamedParameter4dNV = (PFNGLPROGRAMNAMEDPARAMETER4DNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramNamedParameter4dNV")) == NULL) || r;
-  r = ((glProgramNamedParameter4dvNV = (PFNGLPROGRAMNAMEDPARAMETER4DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramNamedParameter4dvNV")) == NULL) || r;
-  r = ((glProgramNamedParameter4fNV = (PFNGLPROGRAMNAMEDPARAMETER4FNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramNamedParameter4fNV")) == NULL) || r;
-  r = ((glProgramNamedParameter4fvNV = (PFNGLPROGRAMNAMEDPARAMETER4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramNamedParameter4fvNV")) == NULL) || r;
+  r = ((glGetProgramNamedParameterdvNV = (PFNGLGETPROGRAMNAMEDPARAMETERDVNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramNamedParameterdvNV")) == NULL) || r;
+  r = ((glGetProgramNamedParameterfvNV = (PFNGLGETPROGRAMNAMEDPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramNamedParameterfvNV")) == NULL) || r;
+  r = ((glProgramNamedParameter4dNV = (PFNGLPROGRAMNAMEDPARAMETER4DNVPROC)glewGetProcAddress((const GLubyte*)"glProgramNamedParameter4dNV")) == NULL) || r;
+  r = ((glProgramNamedParameter4dvNV = (PFNGLPROGRAMNAMEDPARAMETER4DVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramNamedParameter4dvNV")) == NULL) || r;
+  r = ((glProgramNamedParameter4fNV = (PFNGLPROGRAMNAMEDPARAMETER4FNVPROC)glewGetProcAddress((const GLubyte*)"glProgramNamedParameter4fNV")) == NULL) || r;
+  r = ((glProgramNamedParameter4fvNV = (PFNGLPROGRAMNAMEDPARAMETER4FVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramNamedParameter4fvNV")) == NULL) || r;
 
   return r;
 }
@@ -14447,7 +14444,7 @@ static GLboolean _glewInit_GL_NV_framebuffer_blit ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBlitFramebufferNV = (PFNGLBLITFRAMEBUFFERNVPROC)glewGetProcSubtractress((const GLubyte*)"glBlitFramebufferNV")) == NULL) || r;
+  r = ((glBlitFramebufferNV = (PFNGLBLITFRAMEBUFFERNVPROC)glewGetProcAddress((const GLubyte*)"glBlitFramebufferNV")) == NULL) || r;
 
   return r;
 }
@@ -14460,7 +14457,7 @@ static GLboolean _glewInit_GL_NV_framebuffer_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glRenderbufferStorageMultisampleNV = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLENVPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageMultisampleNV")) == NULL) || r;
+  r = ((glRenderbufferStorageMultisampleNV = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLENVPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageMultisampleNV")) == NULL) || r;
 
   return r;
 }
@@ -14473,7 +14470,7 @@ static GLboolean _glewInit_GL_NV_framebuffer_multisample_coverage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glRenderbufferStorageMultisampleCoverageNV = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLECOVERAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glRenderbufferStorageMultisampleCoverageNV")) == NULL) || r;
+  r = ((glRenderbufferStorageMultisampleCoverageNV = (PFNGLRENDERBUFFERSTORAGEMULTISAMPLECOVERAGENVPROC)glewGetProcAddress((const GLubyte*)"glRenderbufferStorageMultisampleCoverageNV")) == NULL) || r;
 
   return r;
 }
@@ -14486,7 +14483,7 @@ static GLboolean _glewInit_GL_NV_geometry_program4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glProgramVertexLimitNV = (PFNGLPROGRAMVERTEXLIMITNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramVertexLimitNV")) == NULL) || r;
+  r = ((glProgramVertexLimitNV = (PFNGLPROGRAMVERTEXLIMITNVPROC)glewGetProcAddress((const GLubyte*)"glProgramVertexLimitNV")) == NULL) || r;
 
   return r;
 }
@@ -14499,18 +14496,18 @@ static GLboolean _glewInit_GL_NV_gpu_multicast ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMulticastBarrierNV = (PFNGLMULTICASTBARRIERNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastBarrierNV")) == NULL) || r;
-  r = ((glMulticastBlitFramebufferNV = (PFNGLMULTICASTBLITFRAMEBUFFERNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastBlitFramebufferNV")) == NULL) || r;
-  r = ((glMulticastBufferSubDataNV = (PFNGLMULTICASTBUFFERSUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastBufferSubDataNV")) == NULL) || r;
-  r = ((glMulticastCopyBufferSubDataNV = (PFNGLMULTICASTCOPYBUFFERSUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastCopyBufferSubDataNV")) == NULL) || r;
-  r = ((glMulticastCopyImageSubDataNV = (PFNGLMULTICASTCOPYIMAGESUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastCopyImageSubDataNV")) == NULL) || r;
-  r = ((glMulticastFramebufferSampleLocationsfvNV = (PFNGLMULTICASTFRAMEBUFFERSAMPLELOCATIONSFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastFramebufferSampleLocationsfvNV")) == NULL) || r;
-  r = ((glMulticastGetQueryObjecti64vNV = (PFNGLMULTICASTGETQUERYOBJECTI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastGetQueryObjecti64vNV")) == NULL) || r;
-  r = ((glMulticastGetQueryObjectivNV = (PFNGLMULTICASTGETQUERYOBJECTIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastGetQueryObjectivNV")) == NULL) || r;
-  r = ((glMulticastGetQueryObjectui64vNV = (PFNGLMULTICASTGETQUERYOBJECTUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastGetQueryObjectui64vNV")) == NULL) || r;
-  r = ((glMulticastGetQueryObjectuivNV = (PFNGLMULTICASTGETQUERYOBJECTUIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastGetQueryObjectuivNV")) == NULL) || r;
-  r = ((glMulticastWaitSyncNV = (PFNGLMULTICASTWAITSYNCNVPROC)glewGetProcSubtractress((const GLubyte*)"glMulticastWaitSyncNV")) == NULL) || r;
-  r = ((glRenderGpuMaskNV = (PFNGLRENDERGPUMASKNVPROC)glewGetProcSubtractress((const GLubyte*)"glRenderGpuMaskNV")) == NULL) || r;
+  r = ((glMulticastBarrierNV = (PFNGLMULTICASTBARRIERNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastBarrierNV")) == NULL) || r;
+  r = ((glMulticastBlitFramebufferNV = (PFNGLMULTICASTBLITFRAMEBUFFERNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastBlitFramebufferNV")) == NULL) || r;
+  r = ((glMulticastBufferSubDataNV = (PFNGLMULTICASTBUFFERSUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glMulticastBufferSubDataNV")) == NULL) || r;
+  r = ((glMulticastCopyBufferSubDataNV = (PFNGLMULTICASTCOPYBUFFERSUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glMulticastCopyBufferSubDataNV")) == NULL) || r;
+  r = ((glMulticastCopyImageSubDataNV = (PFNGLMULTICASTCOPYIMAGESUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glMulticastCopyImageSubDataNV")) == NULL) || r;
+  r = ((glMulticastFramebufferSampleLocationsfvNV = (PFNGLMULTICASTFRAMEBUFFERSAMPLELOCATIONSFVNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastFramebufferSampleLocationsfvNV")) == NULL) || r;
+  r = ((glMulticastGetQueryObjecti64vNV = (PFNGLMULTICASTGETQUERYOBJECTI64VNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastGetQueryObjecti64vNV")) == NULL) || r;
+  r = ((glMulticastGetQueryObjectivNV = (PFNGLMULTICASTGETQUERYOBJECTIVNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastGetQueryObjectivNV")) == NULL) || r;
+  r = ((glMulticastGetQueryObjectui64vNV = (PFNGLMULTICASTGETQUERYOBJECTUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastGetQueryObjectui64vNV")) == NULL) || r;
+  r = ((glMulticastGetQueryObjectuivNV = (PFNGLMULTICASTGETQUERYOBJECTUIVNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastGetQueryObjectuivNV")) == NULL) || r;
+  r = ((glMulticastWaitSyncNV = (PFNGLMULTICASTWAITSYNCNVPROC)glewGetProcAddress((const GLubyte*)"glMulticastWaitSyncNV")) == NULL) || r;
+  r = ((glRenderGpuMaskNV = (PFNGLRENDERGPUMASKNVPROC)glewGetProcAddress((const GLubyte*)"glRenderGpuMaskNV")) == NULL) || r;
 
   return r;
 }
@@ -14523,18 +14520,18 @@ static GLboolean _glewInit_GL_NV_gpu_program4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glProgramEnvParameterI4iNV = (PFNGLPROGRAMENVPARAMETERI4INVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameterI4iNV")) == NULL) || r;
-  r = ((glProgramEnvParameterI4ivNV = (PFNGLPROGRAMENVPARAMETERI4IVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameterI4ivNV")) == NULL) || r;
-  r = ((glProgramEnvParameterI4uiNV = (PFNGLPROGRAMENVPARAMETERI4UINVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameterI4uiNV")) == NULL) || r;
-  r = ((glProgramEnvParameterI4uivNV = (PFNGLPROGRAMENVPARAMETERI4UIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParameterI4uivNV")) == NULL) || r;
-  r = ((glProgramEnvParametersI4ivNV = (PFNGLPROGRAMENVPARAMETERSI4IVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParametersI4ivNV")) == NULL) || r;
-  r = ((glProgramEnvParametersI4uivNV = (PFNGLPROGRAMENVPARAMETERSI4UIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramEnvParametersI4uivNV")) == NULL) || r;
-  r = ((glProgramLocalParameterI4iNV = (PFNGLPROGRAMLOCALPARAMETERI4INVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameterI4iNV")) == NULL) || r;
-  r = ((glProgramLocalParameterI4ivNV = (PFNGLPROGRAMLOCALPARAMETERI4IVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameterI4ivNV")) == NULL) || r;
-  r = ((glProgramLocalParameterI4uiNV = (PFNGLPROGRAMLOCALPARAMETERI4UINVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameterI4uiNV")) == NULL) || r;
-  r = ((glProgramLocalParameterI4uivNV = (PFNGLPROGRAMLOCALPARAMETERI4UIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParameterI4uivNV")) == NULL) || r;
-  r = ((glProgramLocalParametersI4ivNV = (PFNGLPROGRAMLOCALPARAMETERSI4IVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParametersI4ivNV")) == NULL) || r;
-  r = ((glProgramLocalParametersI4uivNV = (PFNGLPROGRAMLOCALPARAMETERSI4UIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramLocalParametersI4uivNV")) == NULL) || r;
+  r = ((glProgramEnvParameterI4iNV = (PFNGLPROGRAMENVPARAMETERI4INVPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameterI4iNV")) == NULL) || r;
+  r = ((glProgramEnvParameterI4ivNV = (PFNGLPROGRAMENVPARAMETERI4IVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameterI4ivNV")) == NULL) || r;
+  r = ((glProgramEnvParameterI4uiNV = (PFNGLPROGRAMENVPARAMETERI4UINVPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameterI4uiNV")) == NULL) || r;
+  r = ((glProgramEnvParameterI4uivNV = (PFNGLPROGRAMENVPARAMETERI4UIVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParameterI4uivNV")) == NULL) || r;
+  r = ((glProgramEnvParametersI4ivNV = (PFNGLPROGRAMENVPARAMETERSI4IVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParametersI4ivNV")) == NULL) || r;
+  r = ((glProgramEnvParametersI4uivNV = (PFNGLPROGRAMENVPARAMETERSI4UIVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramEnvParametersI4uivNV")) == NULL) || r;
+  r = ((glProgramLocalParameterI4iNV = (PFNGLPROGRAMLOCALPARAMETERI4INVPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameterI4iNV")) == NULL) || r;
+  r = ((glProgramLocalParameterI4ivNV = (PFNGLPROGRAMLOCALPARAMETERI4IVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameterI4ivNV")) == NULL) || r;
+  r = ((glProgramLocalParameterI4uiNV = (PFNGLPROGRAMLOCALPARAMETERI4UINVPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameterI4uiNV")) == NULL) || r;
+  r = ((glProgramLocalParameterI4uivNV = (PFNGLPROGRAMLOCALPARAMETERI4UIVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParameterI4uivNV")) == NULL) || r;
+  r = ((glProgramLocalParametersI4ivNV = (PFNGLPROGRAMLOCALPARAMETERSI4IVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParametersI4ivNV")) == NULL) || r;
+  r = ((glProgramLocalParametersI4uivNV = (PFNGLPROGRAMLOCALPARAMETERSI4UIVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramLocalParametersI4uivNV")) == NULL) || r;
 
   return r;
 }
@@ -14547,40 +14544,40 @@ static GLboolean _glewInit_GL_NV_gpu_shader5 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetUniformi64vNV = (PFNGLGETUNIFORMI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformi64vNV")) == NULL) || r;
-  r = ((glGetUniformui64vNV = (PFNGLGETUNIFORMUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetUniformui64vNV")) == NULL) || r;
-  r = ((glProgramUniform1i64NV = (PFNGLPROGRAMUNIFORM1I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1i64NV")) == NULL) || r;
-  r = ((glProgramUniform1i64vNV = (PFNGLPROGRAMUNIFORM1I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1i64vNV")) == NULL) || r;
-  r = ((glProgramUniform1ui64NV = (PFNGLPROGRAMUNIFORM1UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1ui64NV")) == NULL) || r;
-  r = ((glProgramUniform1ui64vNV = (PFNGLPROGRAMUNIFORM1UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform1ui64vNV")) == NULL) || r;
-  r = ((glProgramUniform2i64NV = (PFNGLPROGRAMUNIFORM2I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2i64NV")) == NULL) || r;
-  r = ((glProgramUniform2i64vNV = (PFNGLPROGRAMUNIFORM2I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2i64vNV")) == NULL) || r;
-  r = ((glProgramUniform2ui64NV = (PFNGLPROGRAMUNIFORM2UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2ui64NV")) == NULL) || r;
-  r = ((glProgramUniform2ui64vNV = (PFNGLPROGRAMUNIFORM2UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform2ui64vNV")) == NULL) || r;
-  r = ((glProgramUniform3i64NV = (PFNGLPROGRAMUNIFORM3I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3i64NV")) == NULL) || r;
-  r = ((glProgramUniform3i64vNV = (PFNGLPROGRAMUNIFORM3I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3i64vNV")) == NULL) || r;
-  r = ((glProgramUniform3ui64NV = (PFNGLPROGRAMUNIFORM3UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3ui64NV")) == NULL) || r;
-  r = ((glProgramUniform3ui64vNV = (PFNGLPROGRAMUNIFORM3UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform3ui64vNV")) == NULL) || r;
-  r = ((glProgramUniform4i64NV = (PFNGLPROGRAMUNIFORM4I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4i64NV")) == NULL) || r;
-  r = ((glProgramUniform4i64vNV = (PFNGLPROGRAMUNIFORM4I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4i64vNV")) == NULL) || r;
-  r = ((glProgramUniform4ui64NV = (PFNGLPROGRAMUNIFORM4UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4ui64NV")) == NULL) || r;
-  r = ((glProgramUniform4ui64vNV = (PFNGLPROGRAMUNIFORM4UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniform4ui64vNV")) == NULL) || r;
-  r = ((glUniform1i64NV = (PFNGLUNIFORM1I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1i64NV")) == NULL) || r;
-  r = ((glUniform1i64vNV = (PFNGLUNIFORM1I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1i64vNV")) == NULL) || r;
-  r = ((glUniform1ui64NV = (PFNGLUNIFORM1UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1ui64NV")) == NULL) || r;
-  r = ((glUniform1ui64vNV = (PFNGLUNIFORM1UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform1ui64vNV")) == NULL) || r;
-  r = ((glUniform2i64NV = (PFNGLUNIFORM2I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2i64NV")) == NULL) || r;
-  r = ((glUniform2i64vNV = (PFNGLUNIFORM2I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2i64vNV")) == NULL) || r;
-  r = ((glUniform2ui64NV = (PFNGLUNIFORM2UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2ui64NV")) == NULL) || r;
-  r = ((glUniform2ui64vNV = (PFNGLUNIFORM2UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform2ui64vNV")) == NULL) || r;
-  r = ((glUniform3i64NV = (PFNGLUNIFORM3I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3i64NV")) == NULL) || r;
-  r = ((glUniform3i64vNV = (PFNGLUNIFORM3I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3i64vNV")) == NULL) || r;
-  r = ((glUniform3ui64NV = (PFNGLUNIFORM3UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3ui64NV")) == NULL) || r;
-  r = ((glUniform3ui64vNV = (PFNGLUNIFORM3UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform3ui64vNV")) == NULL) || r;
-  r = ((glUniform4i64NV = (PFNGLUNIFORM4I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4i64NV")) == NULL) || r;
-  r = ((glUniform4i64vNV = (PFNGLUNIFORM4I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4i64vNV")) == NULL) || r;
-  r = ((glUniform4ui64NV = (PFNGLUNIFORM4UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4ui64NV")) == NULL) || r;
-  r = ((glUniform4ui64vNV = (PFNGLUNIFORM4UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniform4ui64vNV")) == NULL) || r;
+  r = ((glGetUniformi64vNV = (PFNGLGETUNIFORMI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformi64vNV")) == NULL) || r;
+  r = ((glGetUniformui64vNV = (PFNGLGETUNIFORMUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetUniformui64vNV")) == NULL) || r;
+  r = ((glProgramUniform1i64NV = (PFNGLPROGRAMUNIFORM1I64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1i64NV")) == NULL) || r;
+  r = ((glProgramUniform1i64vNV = (PFNGLPROGRAMUNIFORM1I64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1i64vNV")) == NULL) || r;
+  r = ((glProgramUniform1ui64NV = (PFNGLPROGRAMUNIFORM1UI64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1ui64NV")) == NULL) || r;
+  r = ((glProgramUniform1ui64vNV = (PFNGLPROGRAMUNIFORM1UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform1ui64vNV")) == NULL) || r;
+  r = ((glProgramUniform2i64NV = (PFNGLPROGRAMUNIFORM2I64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2i64NV")) == NULL) || r;
+  r = ((glProgramUniform2i64vNV = (PFNGLPROGRAMUNIFORM2I64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2i64vNV")) == NULL) || r;
+  r = ((glProgramUniform2ui64NV = (PFNGLPROGRAMUNIFORM2UI64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2ui64NV")) == NULL) || r;
+  r = ((glProgramUniform2ui64vNV = (PFNGLPROGRAMUNIFORM2UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform2ui64vNV")) == NULL) || r;
+  r = ((glProgramUniform3i64NV = (PFNGLPROGRAMUNIFORM3I64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3i64NV")) == NULL) || r;
+  r = ((glProgramUniform3i64vNV = (PFNGLPROGRAMUNIFORM3I64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3i64vNV")) == NULL) || r;
+  r = ((glProgramUniform3ui64NV = (PFNGLPROGRAMUNIFORM3UI64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3ui64NV")) == NULL) || r;
+  r = ((glProgramUniform3ui64vNV = (PFNGLPROGRAMUNIFORM3UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform3ui64vNV")) == NULL) || r;
+  r = ((glProgramUniform4i64NV = (PFNGLPROGRAMUNIFORM4I64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4i64NV")) == NULL) || r;
+  r = ((glProgramUniform4i64vNV = (PFNGLPROGRAMUNIFORM4I64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4i64vNV")) == NULL) || r;
+  r = ((glProgramUniform4ui64NV = (PFNGLPROGRAMUNIFORM4UI64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4ui64NV")) == NULL) || r;
+  r = ((glProgramUniform4ui64vNV = (PFNGLPROGRAMUNIFORM4UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniform4ui64vNV")) == NULL) || r;
+  r = ((glUniform1i64NV = (PFNGLUNIFORM1I64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform1i64NV")) == NULL) || r;
+  r = ((glUniform1i64vNV = (PFNGLUNIFORM1I64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform1i64vNV")) == NULL) || r;
+  r = ((glUniform1ui64NV = (PFNGLUNIFORM1UI64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform1ui64NV")) == NULL) || r;
+  r = ((glUniform1ui64vNV = (PFNGLUNIFORM1UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform1ui64vNV")) == NULL) || r;
+  r = ((glUniform2i64NV = (PFNGLUNIFORM2I64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform2i64NV")) == NULL) || r;
+  r = ((glUniform2i64vNV = (PFNGLUNIFORM2I64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform2i64vNV")) == NULL) || r;
+  r = ((glUniform2ui64NV = (PFNGLUNIFORM2UI64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform2ui64NV")) == NULL) || r;
+  r = ((glUniform2ui64vNV = (PFNGLUNIFORM2UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform2ui64vNV")) == NULL) || r;
+  r = ((glUniform3i64NV = (PFNGLUNIFORM3I64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform3i64NV")) == NULL) || r;
+  r = ((glUniform3i64vNV = (PFNGLUNIFORM3I64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform3i64vNV")) == NULL) || r;
+  r = ((glUniform3ui64NV = (PFNGLUNIFORM3UI64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform3ui64NV")) == NULL) || r;
+  r = ((glUniform3ui64vNV = (PFNGLUNIFORM3UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform3ui64vNV")) == NULL) || r;
+  r = ((glUniform4i64NV = (PFNGLUNIFORM4I64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform4i64NV")) == NULL) || r;
+  r = ((glUniform4i64vNV = (PFNGLUNIFORM4I64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform4i64vNV")) == NULL) || r;
+  r = ((glUniform4ui64NV = (PFNGLUNIFORM4UI64NVPROC)glewGetProcAddress((const GLubyte*)"glUniform4ui64NV")) == NULL) || r;
+  r = ((glUniform4ui64vNV = (PFNGLUNIFORM4UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniform4ui64vNV")) == NULL) || r;
 
   return r;
 }
@@ -14593,52 +14590,52 @@ static GLboolean _glewInit_GL_NV_half_float ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColor3hNV = (PFNGLCOLOR3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glColor3hNV")) == NULL) || r;
-  r = ((glColor3hvNV = (PFNGLCOLOR3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glColor3hvNV")) == NULL) || r;
-  r = ((glColor4hNV = (PFNGLCOLOR4HNVPROC)glewGetProcSubtractress((const GLubyte*)"glColor4hNV")) == NULL) || r;
-  r = ((glColor4hvNV = (PFNGLCOLOR4HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glColor4hvNV")) == NULL) || r;
-  r = ((glFogCoordhNV = (PFNGLFOGCOORDHNVPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordhNV")) == NULL) || r;
-  r = ((glFogCoordhvNV = (PFNGLFOGCOORDHVNVPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordhvNV")) == NULL) || r;
-  r = ((glMultiTexCoord1hNV = (PFNGLMULTITEXCOORD1HNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1hNV")) == NULL) || r;
-  r = ((glMultiTexCoord1hvNV = (PFNGLMULTITEXCOORD1HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord1hvNV")) == NULL) || r;
-  r = ((glMultiTexCoord2hNV = (PFNGLMULTITEXCOORD2HNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2hNV")) == NULL) || r;
-  r = ((glMultiTexCoord2hvNV = (PFNGLMULTITEXCOORD2HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord2hvNV")) == NULL) || r;
-  r = ((glMultiTexCoord3hNV = (PFNGLMULTITEXCOORD3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3hNV")) == NULL) || r;
-  r = ((glMultiTexCoord3hvNV = (PFNGLMULTITEXCOORD3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord3hvNV")) == NULL) || r;
-  r = ((glMultiTexCoord4hNV = (PFNGLMULTITEXCOORD4HNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4hNV")) == NULL) || r;
-  r = ((glMultiTexCoord4hvNV = (PFNGLMULTITEXCOORD4HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4hvNV")) == NULL) || r;
-  r = ((glNormal3hNV = (PFNGLNORMAL3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glNormal3hNV")) == NULL) || r;
-  r = ((glNormal3hvNV = (PFNGLNORMAL3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glNormal3hvNV")) == NULL) || r;
-  r = ((glSecondaryColor3hNV = (PFNGLSECONDARYCOLOR3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3hNV")) == NULL) || r;
-  r = ((glSecondaryColor3hvNV = (PFNGLSECONDARYCOLOR3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColor3hvNV")) == NULL) || r;
-  r = ((glTexCoord1hNV = (PFNGLTEXCOORD1HNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord1hNV")) == NULL) || r;
-  r = ((glTexCoord1hvNV = (PFNGLTEXCOORD1HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord1hvNV")) == NULL) || r;
-  r = ((glTexCoord2hNV = (PFNGLTEXCOORD2HNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2hNV")) == NULL) || r;
-  r = ((glTexCoord2hvNV = (PFNGLTEXCOORD2HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2hvNV")) == NULL) || r;
-  r = ((glTexCoord3hNV = (PFNGLTEXCOORD3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord3hNV")) == NULL) || r;
-  r = ((glTexCoord3hvNV = (PFNGLTEXCOORD3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord3hvNV")) == NULL) || r;
-  r = ((glTexCoord4hNV = (PFNGLTEXCOORD4HNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord4hNV")) == NULL) || r;
-  r = ((glTexCoord4hvNV = (PFNGLTEXCOORD4HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord4hvNV")) == NULL) || r;
-  r = ((glVertex2hNV = (PFNGLVERTEX2HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertex2hNV")) == NULL) || r;
-  r = ((glVertex2hvNV = (PFNGLVERTEX2HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertex2hvNV")) == NULL) || r;
-  r = ((glVertex3hNV = (PFNGLVERTEX3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertex3hNV")) == NULL) || r;
-  r = ((glVertex3hvNV = (PFNGLVERTEX3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertex3hvNV")) == NULL) || r;
-  r = ((glVertex4hNV = (PFNGLVERTEX4HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertex4hNV")) == NULL) || r;
-  r = ((glVertex4hvNV = (PFNGLVERTEX4HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertex4hvNV")) == NULL) || r;
-  r = ((glVertexAttrib1hNV = (PFNGLVERTEXATTRIB1HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1hNV")) == NULL) || r;
-  r = ((glVertexAttrib1hvNV = (PFNGLVERTEXATTRIB1HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1hvNV")) == NULL) || r;
-  r = ((glVertexAttrib2hNV = (PFNGLVERTEXATTRIB2HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2hNV")) == NULL) || r;
-  r = ((glVertexAttrib2hvNV = (PFNGLVERTEXATTRIB2HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2hvNV")) == NULL) || r;
-  r = ((glVertexAttrib3hNV = (PFNGLVERTEXATTRIB3HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3hNV")) == NULL) || r;
-  r = ((glVertexAttrib3hvNV = (PFNGLVERTEXATTRIB3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3hvNV")) == NULL) || r;
-  r = ((glVertexAttrib4hNV = (PFNGLVERTEXATTRIB4HNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4hNV")) == NULL) || r;
-  r = ((glVertexAttrib4hvNV = (PFNGLVERTEXATTRIB4HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4hvNV")) == NULL) || r;
-  r = ((glVertexAttribs1hvNV = (PFNGLVERTEXATTRIBS1HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs1hvNV")) == NULL) || r;
-  r = ((glVertexAttribs2hvNV = (PFNGLVERTEXATTRIBS2HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs2hvNV")) == NULL) || r;
-  r = ((glVertexAttribs3hvNV = (PFNGLVERTEXATTRIBS3HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs3hvNV")) == NULL) || r;
-  r = ((glVertexAttribs4hvNV = (PFNGLVERTEXATTRIBS4HVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs4hvNV")) == NULL) || r;
-  r = ((glVertexWeighthNV = (PFNGLVERTEXWEIGHTHNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexWeighthNV")) == NULL) || r;
-  r = ((glVertexWeighthvNV = (PFNGLVERTEXWEIGHTHVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexWeighthvNV")) == NULL) || r;
+  r = ((glColor3hNV = (PFNGLCOLOR3HNVPROC)glewGetProcAddress((const GLubyte*)"glColor3hNV")) == NULL) || r;
+  r = ((glColor3hvNV = (PFNGLCOLOR3HVNVPROC)glewGetProcAddress((const GLubyte*)"glColor3hvNV")) == NULL) || r;
+  r = ((glColor4hNV = (PFNGLCOLOR4HNVPROC)glewGetProcAddress((const GLubyte*)"glColor4hNV")) == NULL) || r;
+  r = ((glColor4hvNV = (PFNGLCOLOR4HVNVPROC)glewGetProcAddress((const GLubyte*)"glColor4hvNV")) == NULL) || r;
+  r = ((glFogCoordhNV = (PFNGLFOGCOORDHNVPROC)glewGetProcAddress((const GLubyte*)"glFogCoordhNV")) == NULL) || r;
+  r = ((glFogCoordhvNV = (PFNGLFOGCOORDHVNVPROC)glewGetProcAddress((const GLubyte*)"glFogCoordhvNV")) == NULL) || r;
+  r = ((glMultiTexCoord1hNV = (PFNGLMULTITEXCOORD1HNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1hNV")) == NULL) || r;
+  r = ((glMultiTexCoord1hvNV = (PFNGLMULTITEXCOORD1HVNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord1hvNV")) == NULL) || r;
+  r = ((glMultiTexCoord2hNV = (PFNGLMULTITEXCOORD2HNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2hNV")) == NULL) || r;
+  r = ((glMultiTexCoord2hvNV = (PFNGLMULTITEXCOORD2HVNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord2hvNV")) == NULL) || r;
+  r = ((glMultiTexCoord3hNV = (PFNGLMULTITEXCOORD3HNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3hNV")) == NULL) || r;
+  r = ((glMultiTexCoord3hvNV = (PFNGLMULTITEXCOORD3HVNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord3hvNV")) == NULL) || r;
+  r = ((glMultiTexCoord4hNV = (PFNGLMULTITEXCOORD4HNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4hNV")) == NULL) || r;
+  r = ((glMultiTexCoord4hvNV = (PFNGLMULTITEXCOORD4HVNVPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4hvNV")) == NULL) || r;
+  r = ((glNormal3hNV = (PFNGLNORMAL3HNVPROC)glewGetProcAddress((const GLubyte*)"glNormal3hNV")) == NULL) || r;
+  r = ((glNormal3hvNV = (PFNGLNORMAL3HVNVPROC)glewGetProcAddress((const GLubyte*)"glNormal3hvNV")) == NULL) || r;
+  r = ((glSecondaryColor3hNV = (PFNGLSECONDARYCOLOR3HNVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3hNV")) == NULL) || r;
+  r = ((glSecondaryColor3hvNV = (PFNGLSECONDARYCOLOR3HVNVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColor3hvNV")) == NULL) || r;
+  r = ((glTexCoord1hNV = (PFNGLTEXCOORD1HNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord1hNV")) == NULL) || r;
+  r = ((glTexCoord1hvNV = (PFNGLTEXCOORD1HVNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord1hvNV")) == NULL) || r;
+  r = ((glTexCoord2hNV = (PFNGLTEXCOORD2HNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2hNV")) == NULL) || r;
+  r = ((glTexCoord2hvNV = (PFNGLTEXCOORD2HVNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2hvNV")) == NULL) || r;
+  r = ((glTexCoord3hNV = (PFNGLTEXCOORD3HNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord3hNV")) == NULL) || r;
+  r = ((glTexCoord3hvNV = (PFNGLTEXCOORD3HVNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord3hvNV")) == NULL) || r;
+  r = ((glTexCoord4hNV = (PFNGLTEXCOORD4HNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord4hNV")) == NULL) || r;
+  r = ((glTexCoord4hvNV = (PFNGLTEXCOORD4HVNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoord4hvNV")) == NULL) || r;
+  r = ((glVertex2hNV = (PFNGLVERTEX2HNVPROC)glewGetProcAddress((const GLubyte*)"glVertex2hNV")) == NULL) || r;
+  r = ((glVertex2hvNV = (PFNGLVERTEX2HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertex2hvNV")) == NULL) || r;
+  r = ((glVertex3hNV = (PFNGLVERTEX3HNVPROC)glewGetProcAddress((const GLubyte*)"glVertex3hNV")) == NULL) || r;
+  r = ((glVertex3hvNV = (PFNGLVERTEX3HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertex3hvNV")) == NULL) || r;
+  r = ((glVertex4hNV = (PFNGLVERTEX4HNVPROC)glewGetProcAddress((const GLubyte*)"glVertex4hNV")) == NULL) || r;
+  r = ((glVertex4hvNV = (PFNGLVERTEX4HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertex4hvNV")) == NULL) || r;
+  r = ((glVertexAttrib1hNV = (PFNGLVERTEXATTRIB1HNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1hNV")) == NULL) || r;
+  r = ((glVertexAttrib1hvNV = (PFNGLVERTEXATTRIB1HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1hvNV")) == NULL) || r;
+  r = ((glVertexAttrib2hNV = (PFNGLVERTEXATTRIB2HNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2hNV")) == NULL) || r;
+  r = ((glVertexAttrib2hvNV = (PFNGLVERTEXATTRIB2HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2hvNV")) == NULL) || r;
+  r = ((glVertexAttrib3hNV = (PFNGLVERTEXATTRIB3HNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3hNV")) == NULL) || r;
+  r = ((glVertexAttrib3hvNV = (PFNGLVERTEXATTRIB3HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3hvNV")) == NULL) || r;
+  r = ((glVertexAttrib4hNV = (PFNGLVERTEXATTRIB4HNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4hNV")) == NULL) || r;
+  r = ((glVertexAttrib4hvNV = (PFNGLVERTEXATTRIB4HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4hvNV")) == NULL) || r;
+  r = ((glVertexAttribs1hvNV = (PFNGLVERTEXATTRIBS1HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs1hvNV")) == NULL) || r;
+  r = ((glVertexAttribs2hvNV = (PFNGLVERTEXATTRIBS2HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs2hvNV")) == NULL) || r;
+  r = ((glVertexAttribs3hvNV = (PFNGLVERTEXATTRIBS3HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs3hvNV")) == NULL) || r;
+  r = ((glVertexAttribs4hvNV = (PFNGLVERTEXATTRIBS4HVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs4hvNV")) == NULL) || r;
+  r = ((glVertexWeighthNV = (PFNGLVERTEXWEIGHTHNVPROC)glewGetProcAddress((const GLubyte*)"glVertexWeighthNV")) == NULL) || r;
+  r = ((glVertexWeighthvNV = (PFNGLVERTEXWEIGHTHVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexWeighthvNV")) == NULL) || r;
 
   return r;
 }
@@ -14651,7 +14648,7 @@ static GLboolean _glewInit_GL_NV_instanced_arrays ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVertexAttribDivisorNV = (PFNGLVERTEXATTRIBDIVISORNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribDivisorNV")) == NULL) || r;
+  r = ((glVertexAttribDivisorNV = (PFNGLVERTEXATTRIBDIVISORNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribDivisorNV")) == NULL) || r;
 
   return r;
 }
@@ -14664,7 +14661,7 @@ static GLboolean _glewInit_GL_NV_internalformat_sample_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetInternalformatSampleivNV = (PFNGLGETINTERNALFORMATSAMPLEIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetInternalformatSampleivNV")) == NULL) || r;
+  r = ((glGetInternalformatSampleivNV = (PFNGLGETINTERNALFORMATSAMPLEIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetInternalformatSampleivNV")) == NULL) || r;
 
   return r;
 }
@@ -14677,12 +14674,12 @@ static GLboolean _glewInit_GL_NV_non_square_matrices ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glUniformMatrix2x3fvNV = (PFNGLUNIFORMMATRIX2X3FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2x3fvNV")) == NULL) || r;
-  r = ((glUniformMatrix2x4fvNV = (PFNGLUNIFORMMATRIX2X4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix2x4fvNV")) == NULL) || r;
-  r = ((glUniformMatrix3x2fvNV = (PFNGLUNIFORMMATRIX3X2FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3x2fvNV")) == NULL) || r;
-  r = ((glUniformMatrix3x4fvNV = (PFNGLUNIFORMMATRIX3X4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix3x4fvNV")) == NULL) || r;
-  r = ((glUniformMatrix4x2fvNV = (PFNGLUNIFORMMATRIX4X2FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4x2fvNV")) == NULL) || r;
-  r = ((glUniformMatrix4x3fvNV = (PFNGLUNIFORMMATRIX4X3FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformMatrix4x3fvNV")) == NULL) || r;
+  r = ((glUniformMatrix2x3fvNV = (PFNGLUNIFORMMATRIX2X3FVNVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2x3fvNV")) == NULL) || r;
+  r = ((glUniformMatrix2x4fvNV = (PFNGLUNIFORMMATRIX2X4FVNVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix2x4fvNV")) == NULL) || r;
+  r = ((glUniformMatrix3x2fvNV = (PFNGLUNIFORMMATRIX3X2FVNVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3x2fvNV")) == NULL) || r;
+  r = ((glUniformMatrix3x4fvNV = (PFNGLUNIFORMMATRIX3X4FVNVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix3x4fvNV")) == NULL) || r;
+  r = ((glUniformMatrix4x2fvNV = (PFNGLUNIFORMMATRIX4X2FVNVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4x2fvNV")) == NULL) || r;
+  r = ((glUniformMatrix4x3fvNV = (PFNGLUNIFORMMATRIX4X3FVNVPROC)glewGetProcAddress((const GLubyte*)"glUniformMatrix4x3fvNV")) == NULL) || r;
 
   return r;
 }
@@ -14695,13 +14692,13 @@ static GLboolean _glewInit_GL_NV_occlusion_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginOcclusionQueryNV = (PFNGLBEGINOCCLUSIONQUERYNVPROC)glewGetProcSubtractress((const GLubyte*)"glBeginOcclusionQueryNV")) == NULL) || r;
-  r = ((glDeleteOcclusionQueriesNV = (PFNGLDELETEOCCLUSIONQUERIESNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteOcclusionQueriesNV")) == NULL) || r;
-  r = ((glEndOcclusionQueryNV = (PFNGLENDOCCLUSIONQUERYNVPROC)glewGetProcSubtractress((const GLubyte*)"glEndOcclusionQueryNV")) == NULL) || r;
-  r = ((glGenOcclusionQueriesNV = (PFNGLGENOCCLUSIONQUERIESNVPROC)glewGetProcSubtractress((const GLubyte*)"glGenOcclusionQueriesNV")) == NULL) || r;
-  r = ((glGetOcclusionQueryivNV = (PFNGLGETOCCLUSIONQUERYIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetOcclusionQueryivNV")) == NULL) || r;
-  r = ((glGetOcclusionQueryuivNV = (PFNGLGETOCCLUSIONQUERYUIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetOcclusionQueryuivNV")) == NULL) || r;
-  r = ((glIsOcclusionQueryNV = (PFNGLISOCCLUSIONQUERYNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsOcclusionQueryNV")) == NULL) || r;
+  r = ((glBeginOcclusionQueryNV = (PFNGLBEGINOCCLUSIONQUERYNVPROC)glewGetProcAddress((const GLubyte*)"glBeginOcclusionQueryNV")) == NULL) || r;
+  r = ((glDeleteOcclusionQueriesNV = (PFNGLDELETEOCCLUSIONQUERIESNVPROC)glewGetProcAddress((const GLubyte*)"glDeleteOcclusionQueriesNV")) == NULL) || r;
+  r = ((glEndOcclusionQueryNV = (PFNGLENDOCCLUSIONQUERYNVPROC)glewGetProcAddress((const GLubyte*)"glEndOcclusionQueryNV")) == NULL) || r;
+  r = ((glGenOcclusionQueriesNV = (PFNGLGENOCCLUSIONQUERIESNVPROC)glewGetProcAddress((const GLubyte*)"glGenOcclusionQueriesNV")) == NULL) || r;
+  r = ((glGetOcclusionQueryivNV = (PFNGLGETOCCLUSIONQUERYIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetOcclusionQueryivNV")) == NULL) || r;
+  r = ((glGetOcclusionQueryuivNV = (PFNGLGETOCCLUSIONQUERYUIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetOcclusionQueryuivNV")) == NULL) || r;
+  r = ((glIsOcclusionQueryNV = (PFNGLISOCCLUSIONQUERYNVPROC)glewGetProcAddress((const GLubyte*)"glIsOcclusionQueryNV")) == NULL) || r;
 
   return r;
 }
@@ -14714,9 +14711,9 @@ static GLboolean _glewInit_GL_NV_parameter_buffer_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glProgramBufferParametersIivNV = (PFNGLPROGRAMBUFFERPARAMETERSIIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramBufferParametersIivNV")) == NULL) || r;
-  r = ((glProgramBufferParametersIuivNV = (PFNGLPROGRAMBUFFERPARAMETERSIUIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramBufferParametersIuivNV")) == NULL) || r;
-  r = ((glProgramBufferParametersfvNV = (PFNGLPROGRAMBUFFERPARAMETERSFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramBufferParametersfvNV")) == NULL) || r;
+  r = ((glProgramBufferParametersIivNV = (PFNGLPROGRAMBUFFERPARAMETERSIIVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramBufferParametersIivNV")) == NULL) || r;
+  r = ((glProgramBufferParametersIuivNV = (PFNGLPROGRAMBUFFERPARAMETERSIUIVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramBufferParametersIuivNV")) == NULL) || r;
+  r = ((glProgramBufferParametersfvNV = (PFNGLPROGRAMBUFFERPARAMETERSFVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramBufferParametersfvNV")) == NULL) || r;
 
   return r;
 }
@@ -14729,70 +14726,70 @@ static GLboolean _glewInit_GL_NV_path_rendering ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCopyPathNV = (PFNGLCOPYPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glCopyPathNV")) == NULL) || r;
-  r = ((glCoverFillPathInstancedNV = (PFNGLCOVERFILLPATHINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glCoverFillPathInstancedNV")) == NULL) || r;
-  r = ((glCoverFillPathNV = (PFNGLCOVERFILLPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glCoverFillPathNV")) == NULL) || r;
-  r = ((glCoverStrokePathInstancedNV = (PFNGLCOVERSTROKEPATHINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glCoverStrokePathInstancedNV")) == NULL) || r;
-  r = ((glCoverStrokePathNV = (PFNGLCOVERSTROKEPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glCoverStrokePathNV")) == NULL) || r;
-  r = ((glDeletePathsNV = (PFNGLDELETEPATHSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeletePathsNV")) == NULL) || r;
-  r = ((glGenPathsNV = (PFNGLGENPATHSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGenPathsNV")) == NULL) || r;
-  r = ((glGetPathColorGenfvNV = (PFNGLGETPATHCOLORGENFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathColorGenfvNV")) == NULL) || r;
-  r = ((glGetPathColorGenivNV = (PFNGLGETPATHCOLORGENIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathColorGenivNV")) == NULL) || r;
-  r = ((glGetPathCommandsNV = (PFNGLGETPATHCOMMANDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathCommandsNV")) == NULL) || r;
-  r = ((glGetPathCoordsNV = (PFNGLGETPATHCOORDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathCoordsNV")) == NULL) || r;
-  r = ((glGetPathDashArrayNV = (PFNGLGETPATHDASHARRAYNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathDashArrayNV")) == NULL) || r;
-  r = ((glGetPathLengthNV = (PFNGLGETPATHLENGTHNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathLengthNV")) == NULL) || r;
-  r = ((glGetPathMetricRangeNV = (PFNGLGETPATHMETRICRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathMetricRangeNV")) == NULL) || r;
-  r = ((glGetPathMetricsNV = (PFNGLGETPATHMETRICSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathMetricsNV")) == NULL) || r;
-  r = ((glGetPathParameterfvNV = (PFNGLGETPATHPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathParameterfvNV")) == NULL) || r;
-  r = ((glGetPathParameterivNV = (PFNGLGETPATHPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathParameterivNV")) == NULL) || r;
-  r = ((glGetPathSpacingNV = (PFNGLGETPATHSPACINGNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathSpacingNV")) == NULL) || r;
-  r = ((glGetPathTexGenfvNV = (PFNGLGETPATHTEXGENFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathTexGenfvNV")) == NULL) || r;
-  r = ((glGetPathTexGenivNV = (PFNGLGETPATHTEXGENIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetPathTexGenivNV")) == NULL) || r;
-  r = ((glGetProgramResourcefvNV = (PFNGLGETPROGRAMRESOURCEFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramResourcefvNV")) == NULL) || r;
-  r = ((glInterpolatePathsNV = (PFNGLINTERPOLATEPATHSNVPROC)glewGetProcSubtractress((const GLubyte*)"glInterpolatePathsNV")) == NULL) || r;
-  r = ((glIsPathNV = (PFNGLISPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsPathNV")) == NULL) || r;
-  r = ((glIsPointInFillPathNV = (PFNGLISPOINTINFILLPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsPointInFillPathNV")) == NULL) || r;
-  r = ((glIsPointInStrokePathNV = (PFNGLISPOINTINSTROKEPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsPointInStrokePathNV")) == NULL) || r;
-  r = ((glMatrixLoad3x2fNV = (PFNGLMATRIXLOAD3X2FNVPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoad3x2fNV")) == NULL) || r;
-  r = ((glMatrixLoad3x3fNV = (PFNGLMATRIXLOAD3X3FNVPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoad3x3fNV")) == NULL) || r;
-  r = ((glMatrixLoadTranspose3x3fNV = (PFNGLMATRIXLOADTRANSPOSE3X3FNVPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixLoadTranspose3x3fNV")) == NULL) || r;
-  r = ((glMatrixMult3x2fNV = (PFNGLMATRIXMULT3X2FNVPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMult3x2fNV")) == NULL) || r;
-  r = ((glMatrixMult3x3fNV = (PFNGLMATRIXMULT3X3FNVPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMult3x3fNV")) == NULL) || r;
-  r = ((glMatrixMultTranspose3x3fNV = (PFNGLMATRIXMULTTRANSPOSE3X3FNVPROC)glewGetProcSubtractress((const GLubyte*)"glMatrixMultTranspose3x3fNV")) == NULL) || r;
-  r = ((glPathColorGenNV = (PFNGLPATHCOLORGENNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathColorGenNV")) == NULL) || r;
-  r = ((glPathCommandsNV = (PFNGLPATHCOMMANDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathCommandsNV")) == NULL) || r;
-  r = ((glPathCoordsNV = (PFNGLPATHCOORDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathCoordsNV")) == NULL) || r;
-  r = ((glPathCoverDepthFuncNV = (PFNGLPATHCOVERDEPTHFUNCNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathCoverDepthFuncNV")) == NULL) || r;
-  r = ((glPathDashArrayNV = (PFNGLPATHDASHARRAYNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathDashArrayNV")) == NULL) || r;
-  r = ((glPathFogGenNV = (PFNGLPATHFOGGENNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathFogGenNV")) == NULL) || r;
-  r = ((glPathGlyphIndexArrayNV = (PFNGLPATHGLYPHINDEXARRAYNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathGlyphIndexArrayNV")) == NULL) || r;
-  r = ((glPathGlyphIndexRangeNV = (PFNGLPATHGLYPHINDEXRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glPathGlyphIndexRangeNV")) == NULL) || r;
-  r = ((glPathGlyphRangeNV = (PFNGLPATHGLYPHRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glPathGlyphRangeNV")) == NULL) || r;
-  r = ((glPathGlyphsNV = (PFNGLPATHGLYPHSNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathGlyphsNV")) == NULL) || r;
-  r = ((glPathMemoryGlyphIndexArrayNV = (PFNGLPATHMEMORYGLYPHINDEXARRAYNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathMemoryGlyphIndexArrayNV")) == NULL) || r;
-  r = ((glPathParameterfNV = (PFNGLPATHPARAMETERFNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathParameterfNV")) == NULL) || r;
-  r = ((glPathParameterfvNV = (PFNGLPATHPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathParameterfvNV")) == NULL) || r;
-  r = ((glPathParameteriNV = (PFNGLPATHPARAMETERINVPROC)glewGetProcSubtractress((const GLubyte*)"glPathParameteriNV")) == NULL) || r;
-  r = ((glPathParameterivNV = (PFNGLPATHPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathParameterivNV")) == NULL) || r;
-  r = ((glPathStencilDepthOffsetNV = (PFNGLPATHSTENCILDEPTHOFFSETNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathStencilDepthOffsetNV")) == NULL) || r;
-  r = ((glPathStencilFuncNV = (PFNGLPATHSTENCILFUNCNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathStencilFuncNV")) == NULL) || r;
-  r = ((glPathStringNV = (PFNGLPATHSTRINGNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathStringNV")) == NULL) || r;
-  r = ((glPathSubCommandsNV = (PFNGLPATHSUBCOMMANDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathSubCommandsNV")) == NULL) || r;
-  r = ((glPathSubCoordsNV = (PFNGLPATHSUBCOORDSNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathSubCoordsNV")) == NULL) || r;
-  r = ((glPathTexGenNV = (PFNGLPATHTEXGENNVPROC)glewGetProcSubtractress((const GLubyte*)"glPathTexGenNV")) == NULL) || r;
-  r = ((glPointAlongPathNV = (PFNGLPOINTALONGPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glPointAlongPathNV")) == NULL) || r;
-  r = ((glProgramPathFragmentInputGenNV = (PFNGLPROGRAMPATHFRAGMENTINPUTGENNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramPathFragmentInputGenNV")) == NULL) || r;
-  r = ((glStencilFillPathInstancedNV = (PFNGLSTENCILFILLPATHINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilFillPathInstancedNV")) == NULL) || r;
-  r = ((glStencilFillPathNV = (PFNGLSTENCILFILLPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilFillPathNV")) == NULL) || r;
-  r = ((glStencilStrokePathInstancedNV = (PFNGLSTENCILSTROKEPATHINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilStrokePathInstancedNV")) == NULL) || r;
-  r = ((glStencilStrokePathNV = (PFNGLSTENCILSTROKEPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilStrokePathNV")) == NULL) || r;
-  r = ((glStencilThenCoverFillPathInstancedNV = (PFNGLSTENCILTHENCOVERFILLPATHINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilThenCoverFillPathInstancedNV")) == NULL) || r;
-  r = ((glStencilThenCoverFillPathNV = (PFNGLSTENCILTHENCOVERFILLPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilThenCoverFillPathNV")) == NULL) || r;
-  r = ((glStencilThenCoverStrokePathInstancedNV = (PFNGLSTENCILTHENCOVERSTROKEPATHINSTANCEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilThenCoverStrokePathInstancedNV")) == NULL) || r;
-  r = ((glStencilThenCoverStrokePathNV = (PFNGLSTENCILTHENCOVERSTROKEPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glStencilThenCoverStrokePathNV")) == NULL) || r;
-  r = ((glTransformPathNV = (PFNGLTRANSFORMPATHNVPROC)glewGetProcSubtractress((const GLubyte*)"glTransformPathNV")) == NULL) || r;
-  r = ((glWeightPathsNV = (PFNGLWEIGHTPATHSNVPROC)glewGetProcSubtractress((const GLubyte*)"glWeightPathsNV")) == NULL) || r;
+  r = ((glCopyPathNV = (PFNGLCOPYPATHNVPROC)glewGetProcAddress((const GLubyte*)"glCopyPathNV")) == NULL) || r;
+  r = ((glCoverFillPathInstancedNV = (PFNGLCOVERFILLPATHINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glCoverFillPathInstancedNV")) == NULL) || r;
+  r = ((glCoverFillPathNV = (PFNGLCOVERFILLPATHNVPROC)glewGetProcAddress((const GLubyte*)"glCoverFillPathNV")) == NULL) || r;
+  r = ((glCoverStrokePathInstancedNV = (PFNGLCOVERSTROKEPATHINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glCoverStrokePathInstancedNV")) == NULL) || r;
+  r = ((glCoverStrokePathNV = (PFNGLCOVERSTROKEPATHNVPROC)glewGetProcAddress((const GLubyte*)"glCoverStrokePathNV")) == NULL) || r;
+  r = ((glDeletePathsNV = (PFNGLDELETEPATHSNVPROC)glewGetProcAddress((const GLubyte*)"glDeletePathsNV")) == NULL) || r;
+  r = ((glGenPathsNV = (PFNGLGENPATHSNVPROC)glewGetProcAddress((const GLubyte*)"glGenPathsNV")) == NULL) || r;
+  r = ((glGetPathColorGenfvNV = (PFNGLGETPATHCOLORGENFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathColorGenfvNV")) == NULL) || r;
+  r = ((glGetPathColorGenivNV = (PFNGLGETPATHCOLORGENIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathColorGenivNV")) == NULL) || r;
+  r = ((glGetPathCommandsNV = (PFNGLGETPATHCOMMANDSNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathCommandsNV")) == NULL) || r;
+  r = ((glGetPathCoordsNV = (PFNGLGETPATHCOORDSNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathCoordsNV")) == NULL) || r;
+  r = ((glGetPathDashArrayNV = (PFNGLGETPATHDASHARRAYNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathDashArrayNV")) == NULL) || r;
+  r = ((glGetPathLengthNV = (PFNGLGETPATHLENGTHNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathLengthNV")) == NULL) || r;
+  r = ((glGetPathMetricRangeNV = (PFNGLGETPATHMETRICRANGENVPROC)glewGetProcAddress((const GLubyte*)"glGetPathMetricRangeNV")) == NULL) || r;
+  r = ((glGetPathMetricsNV = (PFNGLGETPATHMETRICSNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathMetricsNV")) == NULL) || r;
+  r = ((glGetPathParameterfvNV = (PFNGLGETPATHPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathParameterfvNV")) == NULL) || r;
+  r = ((glGetPathParameterivNV = (PFNGLGETPATHPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathParameterivNV")) == NULL) || r;
+  r = ((glGetPathSpacingNV = (PFNGLGETPATHSPACINGNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathSpacingNV")) == NULL) || r;
+  r = ((glGetPathTexGenfvNV = (PFNGLGETPATHTEXGENFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathTexGenfvNV")) == NULL) || r;
+  r = ((glGetPathTexGenivNV = (PFNGLGETPATHTEXGENIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetPathTexGenivNV")) == NULL) || r;
+  r = ((glGetProgramResourcefvNV = (PFNGLGETPROGRAMRESOURCEFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramResourcefvNV")) == NULL) || r;
+  r = ((glInterpolatePathsNV = (PFNGLINTERPOLATEPATHSNVPROC)glewGetProcAddress((const GLubyte*)"glInterpolatePathsNV")) == NULL) || r;
+  r = ((glIsPathNV = (PFNGLISPATHNVPROC)glewGetProcAddress((const GLubyte*)"glIsPathNV")) == NULL) || r;
+  r = ((glIsPointInFillPathNV = (PFNGLISPOINTINFILLPATHNVPROC)glewGetProcAddress((const GLubyte*)"glIsPointInFillPathNV")) == NULL) || r;
+  r = ((glIsPointInStrokePathNV = (PFNGLISPOINTINSTROKEPATHNVPROC)glewGetProcAddress((const GLubyte*)"glIsPointInStrokePathNV")) == NULL) || r;
+  r = ((glMatrixLoad3x2fNV = (PFNGLMATRIXLOAD3X2FNVPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoad3x2fNV")) == NULL) || r;
+  r = ((glMatrixLoad3x3fNV = (PFNGLMATRIXLOAD3X3FNVPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoad3x3fNV")) == NULL) || r;
+  r = ((glMatrixLoadTranspose3x3fNV = (PFNGLMATRIXLOADTRANSPOSE3X3FNVPROC)glewGetProcAddress((const GLubyte*)"glMatrixLoadTranspose3x3fNV")) == NULL) || r;
+  r = ((glMatrixMult3x2fNV = (PFNGLMATRIXMULT3X2FNVPROC)glewGetProcAddress((const GLubyte*)"glMatrixMult3x2fNV")) == NULL) || r;
+  r = ((glMatrixMult3x3fNV = (PFNGLMATRIXMULT3X3FNVPROC)glewGetProcAddress((const GLubyte*)"glMatrixMult3x3fNV")) == NULL) || r;
+  r = ((glMatrixMultTranspose3x3fNV = (PFNGLMATRIXMULTTRANSPOSE3X3FNVPROC)glewGetProcAddress((const GLubyte*)"glMatrixMultTranspose3x3fNV")) == NULL) || r;
+  r = ((glPathColorGenNV = (PFNGLPATHCOLORGENNVPROC)glewGetProcAddress((const GLubyte*)"glPathColorGenNV")) == NULL) || r;
+  r = ((glPathCommandsNV = (PFNGLPATHCOMMANDSNVPROC)glewGetProcAddress((const GLubyte*)"glPathCommandsNV")) == NULL) || r;
+  r = ((glPathCoordsNV = (PFNGLPATHCOORDSNVPROC)glewGetProcAddress((const GLubyte*)"glPathCoordsNV")) == NULL) || r;
+  r = ((glPathCoverDepthFuncNV = (PFNGLPATHCOVERDEPTHFUNCNVPROC)glewGetProcAddress((const GLubyte*)"glPathCoverDepthFuncNV")) == NULL) || r;
+  r = ((glPathDashArrayNV = (PFNGLPATHDASHARRAYNVPROC)glewGetProcAddress((const GLubyte*)"glPathDashArrayNV")) == NULL) || r;
+  r = ((glPathFogGenNV = (PFNGLPATHFOGGENNVPROC)glewGetProcAddress((const GLubyte*)"glPathFogGenNV")) == NULL) || r;
+  r = ((glPathGlyphIndexArrayNV = (PFNGLPATHGLYPHINDEXARRAYNVPROC)glewGetProcAddress((const GLubyte*)"glPathGlyphIndexArrayNV")) == NULL) || r;
+  r = ((glPathGlyphIndexRangeNV = (PFNGLPATHGLYPHINDEXRANGENVPROC)glewGetProcAddress((const GLubyte*)"glPathGlyphIndexRangeNV")) == NULL) || r;
+  r = ((glPathGlyphRangeNV = (PFNGLPATHGLYPHRANGENVPROC)glewGetProcAddress((const GLubyte*)"glPathGlyphRangeNV")) == NULL) || r;
+  r = ((glPathGlyphsNV = (PFNGLPATHGLYPHSNVPROC)glewGetProcAddress((const GLubyte*)"glPathGlyphsNV")) == NULL) || r;
+  r = ((glPathMemoryGlyphIndexArrayNV = (PFNGLPATHMEMORYGLYPHINDEXARRAYNVPROC)glewGetProcAddress((const GLubyte*)"glPathMemoryGlyphIndexArrayNV")) == NULL) || r;
+  r = ((glPathParameterfNV = (PFNGLPATHPARAMETERFNVPROC)glewGetProcAddress((const GLubyte*)"glPathParameterfNV")) == NULL) || r;
+  r = ((glPathParameterfvNV = (PFNGLPATHPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glPathParameterfvNV")) == NULL) || r;
+  r = ((glPathParameteriNV = (PFNGLPATHPARAMETERINVPROC)glewGetProcAddress((const GLubyte*)"glPathParameteriNV")) == NULL) || r;
+  r = ((glPathParameterivNV = (PFNGLPATHPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glPathParameterivNV")) == NULL) || r;
+  r = ((glPathStencilDepthOffsetNV = (PFNGLPATHSTENCILDEPTHOFFSETNVPROC)glewGetProcAddress((const GLubyte*)"glPathStencilDepthOffsetNV")) == NULL) || r;
+  r = ((glPathStencilFuncNV = (PFNGLPATHSTENCILFUNCNVPROC)glewGetProcAddress((const GLubyte*)"glPathStencilFuncNV")) == NULL) || r;
+  r = ((glPathStringNV = (PFNGLPATHSTRINGNVPROC)glewGetProcAddress((const GLubyte*)"glPathStringNV")) == NULL) || r;
+  r = ((glPathSubCommandsNV = (PFNGLPATHSUBCOMMANDSNVPROC)glewGetProcAddress((const GLubyte*)"glPathSubCommandsNV")) == NULL) || r;
+  r = ((glPathSubCoordsNV = (PFNGLPATHSUBCOORDSNVPROC)glewGetProcAddress((const GLubyte*)"glPathSubCoordsNV")) == NULL) || r;
+  r = ((glPathTexGenNV = (PFNGLPATHTEXGENNVPROC)glewGetProcAddress((const GLubyte*)"glPathTexGenNV")) == NULL) || r;
+  r = ((glPointAlongPathNV = (PFNGLPOINTALONGPATHNVPROC)glewGetProcAddress((const GLubyte*)"glPointAlongPathNV")) == NULL) || r;
+  r = ((glProgramPathFragmentInputGenNV = (PFNGLPROGRAMPATHFRAGMENTINPUTGENNVPROC)glewGetProcAddress((const GLubyte*)"glProgramPathFragmentInputGenNV")) == NULL) || r;
+  r = ((glStencilFillPathInstancedNV = (PFNGLSTENCILFILLPATHINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glStencilFillPathInstancedNV")) == NULL) || r;
+  r = ((glStencilFillPathNV = (PFNGLSTENCILFILLPATHNVPROC)glewGetProcAddress((const GLubyte*)"glStencilFillPathNV")) == NULL) || r;
+  r = ((glStencilStrokePathInstancedNV = (PFNGLSTENCILSTROKEPATHINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glStencilStrokePathInstancedNV")) == NULL) || r;
+  r = ((glStencilStrokePathNV = (PFNGLSTENCILSTROKEPATHNVPROC)glewGetProcAddress((const GLubyte*)"glStencilStrokePathNV")) == NULL) || r;
+  r = ((glStencilThenCoverFillPathInstancedNV = (PFNGLSTENCILTHENCOVERFILLPATHINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glStencilThenCoverFillPathInstancedNV")) == NULL) || r;
+  r = ((glStencilThenCoverFillPathNV = (PFNGLSTENCILTHENCOVERFILLPATHNVPROC)glewGetProcAddress((const GLubyte*)"glStencilThenCoverFillPathNV")) == NULL) || r;
+  r = ((glStencilThenCoverStrokePathInstancedNV = (PFNGLSTENCILTHENCOVERSTROKEPATHINSTANCEDNVPROC)glewGetProcAddress((const GLubyte*)"glStencilThenCoverStrokePathInstancedNV")) == NULL) || r;
+  r = ((glStencilThenCoverStrokePathNV = (PFNGLSTENCILTHENCOVERSTROKEPATHNVPROC)glewGetProcAddress((const GLubyte*)"glStencilThenCoverStrokePathNV")) == NULL) || r;
+  r = ((glTransformPathNV = (PFNGLTRANSFORMPATHNVPROC)glewGetProcAddress((const GLubyte*)"glTransformPathNV")) == NULL) || r;
+  r = ((glWeightPathsNV = (PFNGLWEIGHTPATHSNVPROC)glewGetProcAddress((const GLubyte*)"glWeightPathsNV")) == NULL) || r;
 
   return r;
 }
@@ -14805,8 +14802,8 @@ static GLboolean _glewInit_GL_NV_pixel_data_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFlushPixelDataRangeNV = (PFNGLFLUSHPIXELDATARANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glFlushPixelDataRangeNV")) == NULL) || r;
-  r = ((glPixelDataRangeNV = (PFNGLPIXELDATARANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glPixelDataRangeNV")) == NULL) || r;
+  r = ((glFlushPixelDataRangeNV = (PFNGLFLUSHPIXELDATARANGENVPROC)glewGetProcAddress((const GLubyte*)"glFlushPixelDataRangeNV")) == NULL) || r;
+  r = ((glPixelDataRangeNV = (PFNGLPIXELDATARANGENVPROC)glewGetProcAddress((const GLubyte*)"glPixelDataRangeNV")) == NULL) || r;
 
   return r;
 }
@@ -14819,8 +14816,8 @@ static GLboolean _glewInit_GL_NV_point_sprite ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPointParameteriNV = (PFNGLPOINTPARAMETERINVPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameteriNV")) == NULL) || r;
-  r = ((glPointParameterivNV = (PFNGLPOINTPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterivNV")) == NULL) || r;
+  r = ((glPointParameteriNV = (PFNGLPOINTPARAMETERINVPROC)glewGetProcAddress((const GLubyte*)"glPointParameteriNV")) == NULL) || r;
+  r = ((glPointParameterivNV = (PFNGLPOINTPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glPointParameterivNV")) == NULL) || r;
 
   return r;
 }
@@ -14833,7 +14830,7 @@ static GLboolean _glewInit_GL_NV_polygon_mode ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPolygonModeNV = (PFNGLPOLYGONMODENVPROC)glewGetProcSubtractress((const GLubyte*)"glPolygonModeNV")) == NULL) || r;
+  r = ((glPolygonModeNV = (PFNGLPOLYGONMODENVPROC)glewGetProcAddress((const GLubyte*)"glPolygonModeNV")) == NULL) || r;
 
   return r;
 }
@@ -14846,12 +14843,12 @@ static GLboolean _glewInit_GL_NV_present_video ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetVideoi64vNV = (PFNGLGETVIDEOI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoi64vNV")) == NULL) || r;
-  r = ((glGetVideoivNV = (PFNGLGETVIDEOIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoivNV")) == NULL) || r;
-  r = ((glGetVideoui64vNV = (PFNGLGETVIDEOUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoui64vNV")) == NULL) || r;
-  r = ((glGetVideouivNV = (PFNGLGETVIDEOUIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideouivNV")) == NULL) || r;
-  r = ((glPresentFrameDualFillNV = (PFNGLPRESENTFRAMEDUALFILLNVPROC)glewGetProcSubtractress((const GLubyte*)"glPresentFrameDualFillNV")) == NULL) || r;
-  r = ((glPresentFrameKeyedNV = (PFNGLPRESENTFRAMEKEYEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glPresentFrameKeyedNV")) == NULL) || r;
+  r = ((glGetVideoi64vNV = (PFNGLGETVIDEOI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoi64vNV")) == NULL) || r;
+  r = ((glGetVideoivNV = (PFNGLGETVIDEOIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoivNV")) == NULL) || r;
+  r = ((glGetVideoui64vNV = (PFNGLGETVIDEOUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoui64vNV")) == NULL) || r;
+  r = ((glGetVideouivNV = (PFNGLGETVIDEOUIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideouivNV")) == NULL) || r;
+  r = ((glPresentFrameDualFillNV = (PFNGLPRESENTFRAMEDUALFILLNVPROC)glewGetProcAddress((const GLubyte*)"glPresentFrameDualFillNV")) == NULL) || r;
+  r = ((glPresentFrameKeyedNV = (PFNGLPRESENTFRAMEKEYEDNVPROC)glewGetProcAddress((const GLubyte*)"glPresentFrameKeyedNV")) == NULL) || r;
 
   return r;
 }
@@ -14864,8 +14861,8 @@ static GLboolean _glewInit_GL_NV_primitive_restart ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPrimitiveRestartIndexNV = (PFNGLPRIMITIVERESTARTINDEXNVPROC)glewGetProcSubtractress((const GLubyte*)"glPrimitiveRestartIndexNV")) == NULL) || r;
-  r = ((glPrimitiveRestartNV = (PFNGLPRIMITIVERESTARTNVPROC)glewGetProcSubtractress((const GLubyte*)"glPrimitiveRestartNV")) == NULL) || r;
+  r = ((glPrimitiveRestartIndexNV = (PFNGLPRIMITIVERESTARTINDEXNVPROC)glewGetProcAddress((const GLubyte*)"glPrimitiveRestartIndexNV")) == NULL) || r;
+  r = ((glPrimitiveRestartNV = (PFNGLPRIMITIVERESTARTNVPROC)glewGetProcAddress((const GLubyte*)"glPrimitiveRestartNV")) == NULL) || r;
 
   return r;
 }
@@ -14878,19 +14875,19 @@ static GLboolean _glewInit_GL_NV_register_combiners ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCombinerInputNV = (PFNGLCOMBINERINPUTNVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerInputNV")) == NULL) || r;
-  r = ((glCombinerOutputNV = (PFNGLCOMBINEROUTPUTNVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerOutputNV")) == NULL) || r;
-  r = ((glCombinerParameterfNV = (PFNGLCOMBINERPARAMETERFNVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerParameterfNV")) == NULL) || r;
-  r = ((glCombinerParameterfvNV = (PFNGLCOMBINERPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerParameterfvNV")) == NULL) || r;
-  r = ((glCombinerParameteriNV = (PFNGLCOMBINERPARAMETERINVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerParameteriNV")) == NULL) || r;
-  r = ((glCombinerParameterivNV = (PFNGLCOMBINERPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerParameterivNV")) == NULL) || r;
-  r = ((glFinalCombinerInputNV = (PFNGLFINALCOMBINERINPUTNVPROC)glewGetProcSubtractress((const GLubyte*)"glFinalCombinerInputNV")) == NULL) || r;
-  r = ((glGetCombinerInputParameterfvNV = (PFNGLGETCOMBINERINPUTPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCombinerInputParameterfvNV")) == NULL) || r;
-  r = ((glGetCombinerInputParameterivNV = (PFNGLGETCOMBINERINPUTPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCombinerInputParameterivNV")) == NULL) || r;
-  r = ((glGetCombinerOutputParameterfvNV = (PFNGLGETCOMBINEROUTPUTPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCombinerOutputParameterfvNV")) == NULL) || r;
-  r = ((glGetCombinerOutputParameterivNV = (PFNGLGETCOMBINEROUTPUTPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCombinerOutputParameterivNV")) == NULL) || r;
-  r = ((glGetFinalCombinerInputParameterfvNV = (PFNGLGETFINALCOMBINERINPUTPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFinalCombinerInputParameterfvNV")) == NULL) || r;
-  r = ((glGetFinalCombinerInputParameterivNV = (PFNGLGETFINALCOMBINERINPUTPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFinalCombinerInputParameterivNV")) == NULL) || r;
+  r = ((glCombinerInputNV = (PFNGLCOMBINERINPUTNVPROC)glewGetProcAddress((const GLubyte*)"glCombinerInputNV")) == NULL) || r;
+  r = ((glCombinerOutputNV = (PFNGLCOMBINEROUTPUTNVPROC)glewGetProcAddress((const GLubyte*)"glCombinerOutputNV")) == NULL) || r;
+  r = ((glCombinerParameterfNV = (PFNGLCOMBINERPARAMETERFNVPROC)glewGetProcAddress((const GLubyte*)"glCombinerParameterfNV")) == NULL) || r;
+  r = ((glCombinerParameterfvNV = (PFNGLCOMBINERPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glCombinerParameterfvNV")) == NULL) || r;
+  r = ((glCombinerParameteriNV = (PFNGLCOMBINERPARAMETERINVPROC)glewGetProcAddress((const GLubyte*)"glCombinerParameteriNV")) == NULL) || r;
+  r = ((glCombinerParameterivNV = (PFNGLCOMBINERPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glCombinerParameterivNV")) == NULL) || r;
+  r = ((glFinalCombinerInputNV = (PFNGLFINALCOMBINERINPUTNVPROC)glewGetProcAddress((const GLubyte*)"glFinalCombinerInputNV")) == NULL) || r;
+  r = ((glGetCombinerInputParameterfvNV = (PFNGLGETCOMBINERINPUTPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetCombinerInputParameterfvNV")) == NULL) || r;
+  r = ((glGetCombinerInputParameterivNV = (PFNGLGETCOMBINERINPUTPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetCombinerInputParameterivNV")) == NULL) || r;
+  r = ((glGetCombinerOutputParameterfvNV = (PFNGLGETCOMBINEROUTPUTPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetCombinerOutputParameterfvNV")) == NULL) || r;
+  r = ((glGetCombinerOutputParameterivNV = (PFNGLGETCOMBINEROUTPUTPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetCombinerOutputParameterivNV")) == NULL) || r;
+  r = ((glGetFinalCombinerInputParameterfvNV = (PFNGLGETFINALCOMBINERINPUTPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetFinalCombinerInputParameterfvNV")) == NULL) || r;
+  r = ((glGetFinalCombinerInputParameterivNV = (PFNGLGETFINALCOMBINERINPUTPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetFinalCombinerInputParameterivNV")) == NULL) || r;
 
   return r;
 }
@@ -14903,8 +14900,8 @@ static GLboolean _glewInit_GL_NV_register_combiners2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCombinerStageParameterfvNV = (PFNGLCOMBINERSTAGEPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glCombinerStageParameterfvNV")) == NULL) || r;
-  r = ((glGetCombinerStageParameterfvNV = (PFNGLGETCOMBINERSTAGEPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetCombinerStageParameterfvNV")) == NULL) || r;
+  r = ((glCombinerStageParameterfvNV = (PFNGLCOMBINERSTAGEPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glCombinerStageParameterfvNV")) == NULL) || r;
+  r = ((glGetCombinerStageParameterfvNV = (PFNGLGETCOMBINERSTAGEPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetCombinerStageParameterfvNV")) == NULL) || r;
 
   return r;
 }
@@ -14917,8 +14914,8 @@ static GLboolean _glewInit_GL_NV_sample_locations ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferSampleLocationsfvNV = (PFNGLFRAMEBUFFERSAMPLELOCATIONSFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferSampleLocationsfvNV")) == NULL) || r;
-  r = ((glNamedFramebufferSampleLocationsfvNV = (PFNGLNAMEDFRAMEBUFFERSAMPLELOCATIONSFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glNamedFramebufferSampleLocationsfvNV")) == NULL) || r;
+  r = ((glFramebufferSampleLocationsfvNV = (PFNGLFRAMEBUFFERSAMPLELOCATIONSFVNVPROC)glewGetProcAddress((const GLubyte*)"glFramebufferSampleLocationsfvNV")) == NULL) || r;
+  r = ((glNamedFramebufferSampleLocationsfvNV = (PFNGLNAMEDFRAMEBUFFERSAMPLELOCATIONSFVNVPROC)glewGetProcAddress((const GLubyte*)"glNamedFramebufferSampleLocationsfvNV")) == NULL) || r;
 
   return r;
 }
@@ -14931,19 +14928,19 @@ static GLboolean _glewInit_GL_NV_shader_buffer_load ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetBufferParameterui64vNV = (PFNGLGETBUFFERPARAMETERUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetBufferParameterui64vNV")) == NULL) || r;
-  r = ((glGetIntegerui64vNV = (PFNGLGETINTEGERUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetIntegerui64vNV")) == NULL) || r;
-  r = ((glGetNamedBufferParameterui64vNV = (PFNGLGETNAMEDBUFFERPARAMETERUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetNamedBufferParameterui64vNV")) == NULL) || r;
-  r = ((glIsBufferResidentNV = (PFNGLISBUFFERRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsBufferResidentNV")) == NULL) || r;
-  r = ((glIsNamedBufferResidentNV = (PFNGLISNAMEDBUFFERRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsNamedBufferResidentNV")) == NULL) || r;
-  r = ((glMakeBufferNonResidentNV = (PFNGLMAKEBUFFERNONRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeBufferNonResidentNV")) == NULL) || r;
-  r = ((glMakeBufferResidentNV = (PFNGLMAKEBUFFERRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeBufferResidentNV")) == NULL) || r;
-  r = ((glMakeNamedBufferNonResidentNV = (PFNGLMAKENAMEDBUFFERNONRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeNamedBufferNonResidentNV")) == NULL) || r;
-  r = ((glMakeNamedBufferResidentNV = (PFNGLMAKENAMEDBUFFERRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glMakeNamedBufferResidentNV")) == NULL) || r;
-  r = ((glProgramUniformui64NV = (PFNGLPROGRAMUNIFORMUI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformui64NV")) == NULL) || r;
-  r = ((glProgramUniformui64vNV = (PFNGLPROGRAMUNIFORMUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramUniformui64vNV")) == NULL) || r;
-  r = ((glUniformui64NV = (PFNGLUNIFORMUI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformui64NV")) == NULL) || r;
-  r = ((glUniformui64vNV = (PFNGLUNIFORMUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glUniformui64vNV")) == NULL) || r;
+  r = ((glGetBufferParameterui64vNV = (PFNGLGETBUFFERPARAMETERUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetBufferParameterui64vNV")) == NULL) || r;
+  r = ((glGetIntegerui64vNV = (PFNGLGETINTEGERUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetIntegerui64vNV")) == NULL) || r;
+  r = ((glGetNamedBufferParameterui64vNV = (PFNGLGETNAMEDBUFFERPARAMETERUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetNamedBufferParameterui64vNV")) == NULL) || r;
+  r = ((glIsBufferResidentNV = (PFNGLISBUFFERRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glIsBufferResidentNV")) == NULL) || r;
+  r = ((glIsNamedBufferResidentNV = (PFNGLISNAMEDBUFFERRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glIsNamedBufferResidentNV")) == NULL) || r;
+  r = ((glMakeBufferNonResidentNV = (PFNGLMAKEBUFFERNONRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeBufferNonResidentNV")) == NULL) || r;
+  r = ((glMakeBufferResidentNV = (PFNGLMAKEBUFFERRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeBufferResidentNV")) == NULL) || r;
+  r = ((glMakeNamedBufferNonResidentNV = (PFNGLMAKENAMEDBUFFERNONRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeNamedBufferNonResidentNV")) == NULL) || r;
+  r = ((glMakeNamedBufferResidentNV = (PFNGLMAKENAMEDBUFFERRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glMakeNamedBufferResidentNV")) == NULL) || r;
+  r = ((glProgramUniformui64NV = (PFNGLPROGRAMUNIFORMUI64NVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformui64NV")) == NULL) || r;
+  r = ((glProgramUniformui64vNV = (PFNGLPROGRAMUNIFORMUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glProgramUniformui64vNV")) == NULL) || r;
+  r = ((glUniformui64NV = (PFNGLUNIFORMUI64NVPROC)glewGetProcAddress((const GLubyte*)"glUniformui64NV")) == NULL) || r;
+  r = ((glUniformui64vNV = (PFNGLUNIFORMUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glUniformui64vNV")) == NULL) || r;
 
   return r;
 }
@@ -14956,12 +14953,12 @@ static GLboolean _glewInit_GL_NV_texture_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glCompressedTexImage3DNV = (PFNGLCOMPRESSEDTEXIMAGE3DNVPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexImage3DNV")) == NULL) || r;
-  r = ((glCompressedTexSubImage3DNV = (PFNGLCOMPRESSEDTEXSUBIMAGE3DNVPROC)glewGetProcSubtractress((const GLubyte*)"glCompressedTexSubImage3DNV")) == NULL) || r;
-  r = ((glCopyTexSubImage3DNV = (PFNGLCOPYTEXSUBIMAGE3DNVPROC)glewGetProcSubtractress((const GLubyte*)"glCopyTexSubImage3DNV")) == NULL) || r;
-  r = ((glFramebufferTextureLayerNV = (PFNGLFRAMEBUFFERTEXTURELAYERNVPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureLayerNV")) == NULL) || r;
-  r = ((glTexImage3DNV = (PFNGLTEXIMAGE3DNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage3DNV")) == NULL) || r;
-  r = ((glTexSubImage3DNV = (PFNGLTEXSUBIMAGE3DNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexSubImage3DNV")) == NULL) || r;
+  r = ((glCompressedTexImage3DNV = (PFNGLCOMPRESSEDTEXIMAGE3DNVPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexImage3DNV")) == NULL) || r;
+  r = ((glCompressedTexSubImage3DNV = (PFNGLCOMPRESSEDTEXSUBIMAGE3DNVPROC)glewGetProcAddress((const GLubyte*)"glCompressedTexSubImage3DNV")) == NULL) || r;
+  r = ((glCopyTexSubImage3DNV = (PFNGLCOPYTEXSUBIMAGE3DNVPROC)glewGetProcAddress((const GLubyte*)"glCopyTexSubImage3DNV")) == NULL) || r;
+  r = ((glFramebufferTextureLayerNV = (PFNGLFRAMEBUFFERTEXTURELAYERNVPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureLayerNV")) == NULL) || r;
+  r = ((glTexImage3DNV = (PFNGLTEXIMAGE3DNVPROC)glewGetProcAddress((const GLubyte*)"glTexImage3DNV")) == NULL) || r;
+  r = ((glTexSubImage3DNV = (PFNGLTEXSUBIMAGE3DNVPROC)glewGetProcAddress((const GLubyte*)"glTexSubImage3DNV")) == NULL) || r;
 
   return r;
 }
@@ -14974,7 +14971,7 @@ static GLboolean _glewInit_GL_NV_texture_barrier ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTextureBarrierNV = (PFNGLTEXTUREBARRIERNVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureBarrierNV")) == NULL) || r;
+  r = ((glTextureBarrierNV = (PFNGLTEXTUREBARRIERNVPROC)glewGetProcAddress((const GLubyte*)"glTextureBarrierNV")) == NULL) || r;
 
   return r;
 }
@@ -14987,12 +14984,12 @@ static GLboolean _glewInit_GL_NV_texture_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexImage2DMultisampleCoverageNV = (PFNGLTEXIMAGE2DMULTISAMPLECOVERAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage2DMultisampleCoverageNV")) == NULL) || r;
-  r = ((glTexImage3DMultisampleCoverageNV = (PFNGLTEXIMAGE3DMULTISAMPLECOVERAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage3DMultisampleCoverageNV")) == NULL) || r;
-  r = ((glTextureImage2DMultisampleCoverageNV = (PFNGLTEXTUREIMAGE2DMULTISAMPLECOVERAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage2DMultisampleCoverageNV")) == NULL) || r;
-  r = ((glTextureImage2DMultisampleNV = (PFNGLTEXTUREIMAGE2DMULTISAMPLENVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage2DMultisampleNV")) == NULL) || r;
-  r = ((glTextureImage3DMultisampleCoverageNV = (PFNGLTEXTUREIMAGE3DMULTISAMPLECOVERAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage3DMultisampleCoverageNV")) == NULL) || r;
-  r = ((glTextureImage3DMultisampleNV = (PFNGLTEXTUREIMAGE3DMULTISAMPLENVPROC)glewGetProcSubtractress((const GLubyte*)"glTextureImage3DMultisampleNV")) == NULL) || r;
+  r = ((glTexImage2DMultisampleCoverageNV = (PFNGLTEXIMAGE2DMULTISAMPLECOVERAGENVPROC)glewGetProcAddress((const GLubyte*)"glTexImage2DMultisampleCoverageNV")) == NULL) || r;
+  r = ((glTexImage3DMultisampleCoverageNV = (PFNGLTEXIMAGE3DMULTISAMPLECOVERAGENVPROC)glewGetProcAddress((const GLubyte*)"glTexImage3DMultisampleCoverageNV")) == NULL) || r;
+  r = ((glTextureImage2DMultisampleCoverageNV = (PFNGLTEXTUREIMAGE2DMULTISAMPLECOVERAGENVPROC)glewGetProcAddress((const GLubyte*)"glTextureImage2DMultisampleCoverageNV")) == NULL) || r;
+  r = ((glTextureImage2DMultisampleNV = (PFNGLTEXTUREIMAGE2DMULTISAMPLENVPROC)glewGetProcAddress((const GLubyte*)"glTextureImage2DMultisampleNV")) == NULL) || r;
+  r = ((glTextureImage3DMultisampleCoverageNV = (PFNGLTEXTUREIMAGE3DMULTISAMPLECOVERAGENVPROC)glewGetProcAddress((const GLubyte*)"glTextureImage3DMultisampleCoverageNV")) == NULL) || r;
+  r = ((glTextureImage3DMultisampleNV = (PFNGLTEXTUREIMAGE3DMULTISAMPLENVPROC)glewGetProcAddress((const GLubyte*)"glTextureImage3DMultisampleNV")) == NULL) || r;
 
   return r;
 }
@@ -15005,17 +15002,17 @@ static GLboolean _glewInit_GL_NV_transform_feedback ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glActiveVaryingNV = (PFNGLACTIVEVARYINGNVPROC)glewGetProcSubtractress((const GLubyte*)"glActiveVaryingNV")) == NULL) || r;
-  r = ((glBeginTransformFeedbackNV = (PFNGLBEGINTRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glBeginTransformFeedbackNV")) == NULL) || r;
-  r = ((glBindBufferBaseNV = (PFNGLBINDBUFFERBASENVPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferBaseNV")) == NULL) || r;
-  r = ((glBindBufferOffsetNV = (PFNGLBINDBUFFEROFFSETNVPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferOffsetNV")) == NULL) || r;
-  r = ((glBindBufferRangeNV = (PFNGLBINDBUFFERRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glBindBufferRangeNV")) == NULL) || r;
-  r = ((glEndTransformFeedbackNV = (PFNGLENDTRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glEndTransformFeedbackNV")) == NULL) || r;
-  r = ((glGetActiveVaryingNV = (PFNGLGETACTIVEVARYINGNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetActiveVaryingNV")) == NULL) || r;
-  r = ((glGetTransformFeedbackVaryingNV = (PFNGLGETTRANSFORMFEEDBACKVARYINGNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTransformFeedbackVaryingNV")) == NULL) || r;
-  r = ((glGetVaryingLocationNV = (PFNGLGETVARYINGLOCATIONNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVaryingLocationNV")) == NULL) || r;
-  r = ((glTransformFeedbackAttribsNV = (PFNGLTRANSFORMFEEDBACKATTRIBSNVPROC)glewGetProcSubtractress((const GLubyte*)"glTransformFeedbackAttribsNV")) == NULL) || r;
-  r = ((glTransformFeedbackVaryingsNV = (PFNGLTRANSFORMFEEDBACKVARYINGSNVPROC)glewGetProcSubtractress((const GLubyte*)"glTransformFeedbackVaryingsNV")) == NULL) || r;
+  r = ((glActiveVaryingNV = (PFNGLACTIVEVARYINGNVPROC)glewGetProcAddress((const GLubyte*)"glActiveVaryingNV")) == NULL) || r;
+  r = ((glBeginTransformFeedbackNV = (PFNGLBEGINTRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glBeginTransformFeedbackNV")) == NULL) || r;
+  r = ((glBindBufferBaseNV = (PFNGLBINDBUFFERBASENVPROC)glewGetProcAddress((const GLubyte*)"glBindBufferBaseNV")) == NULL) || r;
+  r = ((glBindBufferOffsetNV = (PFNGLBINDBUFFEROFFSETNVPROC)glewGetProcAddress((const GLubyte*)"glBindBufferOffsetNV")) == NULL) || r;
+  r = ((glBindBufferRangeNV = (PFNGLBINDBUFFERRANGENVPROC)glewGetProcAddress((const GLubyte*)"glBindBufferRangeNV")) == NULL) || r;
+  r = ((glEndTransformFeedbackNV = (PFNGLENDTRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glEndTransformFeedbackNV")) == NULL) || r;
+  r = ((glGetActiveVaryingNV = (PFNGLGETACTIVEVARYINGNVPROC)glewGetProcAddress((const GLubyte*)"glGetActiveVaryingNV")) == NULL) || r;
+  r = ((glGetTransformFeedbackVaryingNV = (PFNGLGETTRANSFORMFEEDBACKVARYINGNVPROC)glewGetProcAddress((const GLubyte*)"glGetTransformFeedbackVaryingNV")) == NULL) || r;
+  r = ((glGetVaryingLocationNV = (PFNGLGETVARYINGLOCATIONNVPROC)glewGetProcAddress((const GLubyte*)"glGetVaryingLocationNV")) == NULL) || r;
+  r = ((glTransformFeedbackAttribsNV = (PFNGLTRANSFORMFEEDBACKATTRIBSNVPROC)glewGetProcAddress((const GLubyte*)"glTransformFeedbackAttribsNV")) == NULL) || r;
+  r = ((glTransformFeedbackVaryingsNV = (PFNGLTRANSFORMFEEDBACKVARYINGSNVPROC)glewGetProcAddress((const GLubyte*)"glTransformFeedbackVaryingsNV")) == NULL) || r;
 
   return r;
 }
@@ -15028,13 +15025,13 @@ static GLboolean _glewInit_GL_NV_transform_feedback2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBindTransformFeedbackNV = (PFNGLBINDTRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glBindTransformFeedbackNV")) == NULL) || r;
-  r = ((glDeleteTransformFeedbacksNV = (PFNGLDELETETRANSFORMFEEDBACKSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteTransformFeedbacksNV")) == NULL) || r;
-  r = ((glDrawTransformFeedbackNV = (PFNGLDRAWTRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glDrawTransformFeedbackNV")) == NULL) || r;
-  r = ((glGenTransformFeedbacksNV = (PFNGLGENTRANSFORMFEEDBACKSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGenTransformFeedbacksNV")) == NULL) || r;
-  r = ((glIsTransformFeedbackNV = (PFNGLISTRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsTransformFeedbackNV")) == NULL) || r;
-  r = ((glPauseTransformFeedbackNV = (PFNGLPAUSETRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glPauseTransformFeedbackNV")) == NULL) || r;
-  r = ((glResumeTransformFeedbackNV = (PFNGLRESUMETRANSFORMFEEDBACKNVPROC)glewGetProcSubtractress((const GLubyte*)"glResumeTransformFeedbackNV")) == NULL) || r;
+  r = ((glBindTransformFeedbackNV = (PFNGLBINDTRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glBindTransformFeedbackNV")) == NULL) || r;
+  r = ((glDeleteTransformFeedbacksNV = (PFNGLDELETETRANSFORMFEEDBACKSNVPROC)glewGetProcAddress((const GLubyte*)"glDeleteTransformFeedbacksNV")) == NULL) || r;
+  r = ((glDrawTransformFeedbackNV = (PFNGLDRAWTRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glDrawTransformFeedbackNV")) == NULL) || r;
+  r = ((glGenTransformFeedbacksNV = (PFNGLGENTRANSFORMFEEDBACKSNVPROC)glewGetProcAddress((const GLubyte*)"glGenTransformFeedbacksNV")) == NULL) || r;
+  r = ((glIsTransformFeedbackNV = (PFNGLISTRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glIsTransformFeedbackNV")) == NULL) || r;
+  r = ((glPauseTransformFeedbackNV = (PFNGLPAUSETRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glPauseTransformFeedbackNV")) == NULL) || r;
+  r = ((glResumeTransformFeedbackNV = (PFNGLRESUMETRANSFORMFEEDBACKNVPROC)glewGetProcAddress((const GLubyte*)"glResumeTransformFeedbackNV")) == NULL) || r;
 
   return r;
 }
@@ -15047,16 +15044,16 @@ static GLboolean _glewInit_GL_NV_vdpau_interop ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glVDPAUFiniNV = (PFNGLVDPAUFININVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUFiniNV")) == NULL) || r;
-  r = ((glVDPAUGetSurfaceivNV = (PFNGLVDPAUGETSURFACEIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUGetSurfaceivNV")) == NULL) || r;
-  r = ((glVDPAUInitNV = (PFNGLVDPAUINITNVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUInitNV")) == NULL) || r;
-  r = ((glVDPAUIsSurfaceNV = (PFNGLVDPAUISSURFACENVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUIsSurfaceNV")) == NULL) || r;
-  r = ((glVDPAUMapSurfacesNV = (PFNGLVDPAUMAPSURFACESNVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUMapSurfacesNV")) == NULL) || r;
-  r = ((glVDPAURegisterOutputSurfaceNV = (PFNGLVDPAUREGISTEROUTPUTSURFACENVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAURegisterOutputSurfaceNV")) == NULL) || r;
-  r = ((glVDPAURegisterVideoSurfaceNV = (PFNGLVDPAUREGISTERVIDEOSURFACENVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAURegisterVideoSurfaceNV")) == NULL) || r;
-  r = ((glVDPAUSurfaceAccessNV = (PFNGLVDPAUSURFACEACCESSNVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUSurfaceAccessNV")) == NULL) || r;
-  r = ((glVDPAUUnmapSurfacesNV = (PFNGLVDPAUUNMAPSURFACESNVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUUnmapSurfacesNV")) == NULL) || r;
-  r = ((glVDPAUUnregisterSurfaceNV = (PFNGLVDPAUUNREGISTERSURFACENVPROC)glewGetProcSubtractress((const GLubyte*)"glVDPAUUnregisterSurfaceNV")) == NULL) || r;
+  r = ((glVDPAUFiniNV = (PFNGLVDPAUFININVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUFiniNV")) == NULL) || r;
+  r = ((glVDPAUGetSurfaceivNV = (PFNGLVDPAUGETSURFACEIVNVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUGetSurfaceivNV")) == NULL) || r;
+  r = ((glVDPAUInitNV = (PFNGLVDPAUINITNVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUInitNV")) == NULL) || r;
+  r = ((glVDPAUIsSurfaceNV = (PFNGLVDPAUISSURFACENVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUIsSurfaceNV")) == NULL) || r;
+  r = ((glVDPAUMapSurfacesNV = (PFNGLVDPAUMAPSURFACESNVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUMapSurfacesNV")) == NULL) || r;
+  r = ((glVDPAURegisterOutputSurfaceNV = (PFNGLVDPAUREGISTEROUTPUTSURFACENVPROC)glewGetProcAddress((const GLubyte*)"glVDPAURegisterOutputSurfaceNV")) == NULL) || r;
+  r = ((glVDPAURegisterVideoSurfaceNV = (PFNGLVDPAUREGISTERVIDEOSURFACENVPROC)glewGetProcAddress((const GLubyte*)"glVDPAURegisterVideoSurfaceNV")) == NULL) || r;
+  r = ((glVDPAUSurfaceAccessNV = (PFNGLVDPAUSURFACEACCESSNVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUSurfaceAccessNV")) == NULL) || r;
+  r = ((glVDPAUUnmapSurfacesNV = (PFNGLVDPAUUNMAPSURFACESNVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUUnmapSurfacesNV")) == NULL) || r;
+  r = ((glVDPAUUnregisterSurfaceNV = (PFNGLVDPAUUNREGISTERSURFACENVPROC)glewGetProcAddress((const GLubyte*)"glVDPAUUnregisterSurfaceNV")) == NULL) || r;
 
   return r;
 }
@@ -15069,8 +15066,8 @@ static GLboolean _glewInit_GL_NV_vertex_array_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFlushVertexArrayRangeNV = (PFNGLFLUSHVERTEXARRAYRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glFlushVertexArrayRangeNV")) == NULL) || r;
-  r = ((glVertexArrayRangeNV = (PFNGLVERTEXARRAYRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexArrayRangeNV")) == NULL) || r;
+  r = ((glFlushVertexArrayRangeNV = (PFNGLFLUSHVERTEXARRAYRANGENVPROC)glewGetProcAddress((const GLubyte*)"glFlushVertexArrayRangeNV")) == NULL) || r;
+  r = ((glVertexArrayRangeNV = (PFNGLVERTEXARRAYRANGENVPROC)glewGetProcAddress((const GLubyte*)"glVertexArrayRangeNV")) == NULL) || r;
 
   return r;
 }
@@ -15083,25 +15080,25 @@ static GLboolean _glewInit_GL_NV_vertex_attrib_integer_64bit ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetVertexAttribLi64vNV = (PFNGLGETVERTEXATTRIBLI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribLi64vNV")) == NULL) || r;
-  r = ((glGetVertexAttribLui64vNV = (PFNGLGETVERTEXATTRIBLUI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribLui64vNV")) == NULL) || r;
-  r = ((glVertexAttribL1i64NV = (PFNGLVERTEXATTRIBL1I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1i64NV")) == NULL) || r;
-  r = ((glVertexAttribL1i64vNV = (PFNGLVERTEXATTRIBL1I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1i64vNV")) == NULL) || r;
-  r = ((glVertexAttribL1ui64NV = (PFNGLVERTEXATTRIBL1UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1ui64NV")) == NULL) || r;
-  r = ((glVertexAttribL1ui64vNV = (PFNGLVERTEXATTRIBL1UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL1ui64vNV")) == NULL) || r;
-  r = ((glVertexAttribL2i64NV = (PFNGLVERTEXATTRIBL2I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2i64NV")) == NULL) || r;
-  r = ((glVertexAttribL2i64vNV = (PFNGLVERTEXATTRIBL2I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2i64vNV")) == NULL) || r;
-  r = ((glVertexAttribL2ui64NV = (PFNGLVERTEXATTRIBL2UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2ui64NV")) == NULL) || r;
-  r = ((glVertexAttribL2ui64vNV = (PFNGLVERTEXATTRIBL2UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL2ui64vNV")) == NULL) || r;
-  r = ((glVertexAttribL3i64NV = (PFNGLVERTEXATTRIBL3I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3i64NV")) == NULL) || r;
-  r = ((glVertexAttribL3i64vNV = (PFNGLVERTEXATTRIBL3I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3i64vNV")) == NULL) || r;
-  r = ((glVertexAttribL3ui64NV = (PFNGLVERTEXATTRIBL3UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3ui64NV")) == NULL) || r;
-  r = ((glVertexAttribL3ui64vNV = (PFNGLVERTEXATTRIBL3UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL3ui64vNV")) == NULL) || r;
-  r = ((glVertexAttribL4i64NV = (PFNGLVERTEXATTRIBL4I64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4i64NV")) == NULL) || r;
-  r = ((glVertexAttribL4i64vNV = (PFNGLVERTEXATTRIBL4I64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4i64vNV")) == NULL) || r;
-  r = ((glVertexAttribL4ui64NV = (PFNGLVERTEXATTRIBL4UI64NVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4ui64NV")) == NULL) || r;
-  r = ((glVertexAttribL4ui64vNV = (PFNGLVERTEXATTRIBL4UI64VNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribL4ui64vNV")) == NULL) || r;
-  r = ((glVertexAttribLFormatNV = (PFNGLVERTEXATTRIBLFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribLFormatNV")) == NULL) || r;
+  r = ((glGetVertexAttribLi64vNV = (PFNGLGETVERTEXATTRIBLI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribLi64vNV")) == NULL) || r;
+  r = ((glGetVertexAttribLui64vNV = (PFNGLGETVERTEXATTRIBLUI64VNVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribLui64vNV")) == NULL) || r;
+  r = ((glVertexAttribL1i64NV = (PFNGLVERTEXATTRIBL1I64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1i64NV")) == NULL) || r;
+  r = ((glVertexAttribL1i64vNV = (PFNGLVERTEXATTRIBL1I64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1i64vNV")) == NULL) || r;
+  r = ((glVertexAttribL1ui64NV = (PFNGLVERTEXATTRIBL1UI64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1ui64NV")) == NULL) || r;
+  r = ((glVertexAttribL1ui64vNV = (PFNGLVERTEXATTRIBL1UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL1ui64vNV")) == NULL) || r;
+  r = ((glVertexAttribL2i64NV = (PFNGLVERTEXATTRIBL2I64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2i64NV")) == NULL) || r;
+  r = ((glVertexAttribL2i64vNV = (PFNGLVERTEXATTRIBL2I64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2i64vNV")) == NULL) || r;
+  r = ((glVertexAttribL2ui64NV = (PFNGLVERTEXATTRIBL2UI64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2ui64NV")) == NULL) || r;
+  r = ((glVertexAttribL2ui64vNV = (PFNGLVERTEXATTRIBL2UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL2ui64vNV")) == NULL) || r;
+  r = ((glVertexAttribL3i64NV = (PFNGLVERTEXATTRIBL3I64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3i64NV")) == NULL) || r;
+  r = ((glVertexAttribL3i64vNV = (PFNGLVERTEXATTRIBL3I64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3i64vNV")) == NULL) || r;
+  r = ((glVertexAttribL3ui64NV = (PFNGLVERTEXATTRIBL3UI64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3ui64NV")) == NULL) || r;
+  r = ((glVertexAttribL3ui64vNV = (PFNGLVERTEXATTRIBL3UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL3ui64vNV")) == NULL) || r;
+  r = ((glVertexAttribL4i64NV = (PFNGLVERTEXATTRIBL4I64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4i64NV")) == NULL) || r;
+  r = ((glVertexAttribL4i64vNV = (PFNGLVERTEXATTRIBL4I64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4i64vNV")) == NULL) || r;
+  r = ((glVertexAttribL4ui64NV = (PFNGLVERTEXATTRIBL4UI64NVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4ui64NV")) == NULL) || r;
+  r = ((glVertexAttribL4ui64vNV = (PFNGLVERTEXATTRIBL4UI64VNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribL4ui64vNV")) == NULL) || r;
+  r = ((glVertexAttribLFormatNV = (PFNGLVERTEXATTRIBLFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribLFormatNV")) == NULL) || r;
 
   return r;
 }
@@ -15114,18 +15111,18 @@ static GLboolean _glewInit_GL_NV_vertex_buffer_unified_memory ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBufferSubtractressRangeNV = (PFNGLBUFFERADDRESSRANGENVPROC)glewGetProcSubtractress((const GLubyte*)"glBufferSubtractressRangeNV")) == NULL) || r;
-  r = ((glColorFormatNV = (PFNGLCOLORFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glColorFormatNV")) == NULL) || r;
-  r = ((glEdgeFlagFormatNV = (PFNGLEDGEFLAGFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glEdgeFlagFormatNV")) == NULL) || r;
-  r = ((glFogCoordFormatNV = (PFNGLFOGCOORDFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glFogCoordFormatNV")) == NULL) || r;
-  r = ((glGetIntegerui64i_vNV = (PFNGLGETINTEGERUI64I_VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetIntegerui64i_vNV")) == NULL) || r;
-  r = ((glIndexFormatNV = (PFNGLINDEXFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glIndexFormatNV")) == NULL) || r;
-  r = ((glNormalFormatNV = (PFNGLNORMALFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glNormalFormatNV")) == NULL) || r;
-  r = ((glSecondaryColorFormatNV = (PFNGLSECONDARYCOLORFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glSecondaryColorFormatNV")) == NULL) || r;
-  r = ((glTexCoordFormatNV = (PFNGLTEXCOORDFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoordFormatNV")) == NULL) || r;
-  r = ((glVertexAttribFormatNV = (PFNGLVERTEXATTRIBFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribFormatNV")) == NULL) || r;
-  r = ((glVertexAttribIFormatNV = (PFNGLVERTEXATTRIBIFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribIFormatNV")) == NULL) || r;
-  r = ((glVertexFormatNV = (PFNGLVERTEXFORMATNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexFormatNV")) == NULL) || r;
+  r = ((glBufferAddressRangeNV = (PFNGLBUFFERADDRESSRANGENVPROC)glewGetProcAddress((const GLubyte*)"glBufferAddressRangeNV")) == NULL) || r;
+  r = ((glColorFormatNV = (PFNGLCOLORFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glColorFormatNV")) == NULL) || r;
+  r = ((glEdgeFlagFormatNV = (PFNGLEDGEFLAGFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glEdgeFlagFormatNV")) == NULL) || r;
+  r = ((glFogCoordFormatNV = (PFNGLFOGCOORDFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glFogCoordFormatNV")) == NULL) || r;
+  r = ((glGetIntegerui64i_vNV = (PFNGLGETINTEGERUI64I_VNVPROC)glewGetProcAddress((const GLubyte*)"glGetIntegerui64i_vNV")) == NULL) || r;
+  r = ((glIndexFormatNV = (PFNGLINDEXFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glIndexFormatNV")) == NULL) || r;
+  r = ((glNormalFormatNV = (PFNGLNORMALFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glNormalFormatNV")) == NULL) || r;
+  r = ((glSecondaryColorFormatNV = (PFNGLSECONDARYCOLORFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glSecondaryColorFormatNV")) == NULL) || r;
+  r = ((glTexCoordFormatNV = (PFNGLTEXCOORDFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glTexCoordFormatNV")) == NULL) || r;
+  r = ((glVertexAttribFormatNV = (PFNGLVERTEXATTRIBFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribFormatNV")) == NULL) || r;
+  r = ((glVertexAttribIFormatNV = (PFNGLVERTEXATTRIBIFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribIFormatNV")) == NULL) || r;
+  r = ((glVertexFormatNV = (PFNGLVERTEXFORMATNVPROC)glewGetProcAddress((const GLubyte*)"glVertexFormatNV")) == NULL) || r;
 
   return r;
 }
@@ -15138,70 +15135,70 @@ static GLboolean _glewInit_GL_NV_vertex_program ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAreProgramsResidentNV = (PFNGLAREPROGRAMSRESIDENTNVPROC)glewGetProcSubtractress((const GLubyte*)"glAreProgramsResidentNV")) == NULL) || r;
-  r = ((glBindProgramNV = (PFNGLBINDPROGRAMNVPROC)glewGetProcSubtractress((const GLubyte*)"glBindProgramNV")) == NULL) || r;
-  r = ((glDeleteProgramsNV = (PFNGLDELETEPROGRAMSNVPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteProgramsNV")) == NULL) || r;
-  r = ((glExecuteProgramNV = (PFNGLEXECUTEPROGRAMNVPROC)glewGetProcSubtractress((const GLubyte*)"glExecuteProgramNV")) == NULL) || r;
-  r = ((glGenProgramsNV = (PFNGLGENPROGRAMSNVPROC)glewGetProcSubtractress((const GLubyte*)"glGenProgramsNV")) == NULL) || r;
-  r = ((glGetProgramParameterdvNV = (PFNGLGETPROGRAMPARAMETERDVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramParameterdvNV")) == NULL) || r;
-  r = ((glGetProgramParameterfvNV = (PFNGLGETPROGRAMPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramParameterfvNV")) == NULL) || r;
-  r = ((glGetProgramStringNV = (PFNGLGETPROGRAMSTRINGNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramStringNV")) == NULL) || r;
-  r = ((glGetProgramivNV = (PFNGLGETPROGRAMIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetProgramivNV")) == NULL) || r;
-  r = ((glGetTrackMatrixivNV = (PFNGLGETTRACKMATRIXIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTrackMatrixivNV")) == NULL) || r;
-  r = ((glGetVertexAttribPointervNV = (PFNGLGETVERTEXATTRIBPOINTERVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribPointervNV")) == NULL) || r;
-  r = ((glGetVertexAttribdvNV = (PFNGLGETVERTEXATTRIBDVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribdvNV")) == NULL) || r;
-  r = ((glGetVertexAttribfvNV = (PFNGLGETVERTEXATTRIBFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribfvNV")) == NULL) || r;
-  r = ((glGetVertexAttribivNV = (PFNGLGETVERTEXATTRIBIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVertexAttribivNV")) == NULL) || r;
-  r = ((glIsProgramNV = (PFNGLISPROGRAMNVPROC)glewGetProcSubtractress((const GLubyte*)"glIsProgramNV")) == NULL) || r;
-  r = ((glLoadProgramNV = (PFNGLLOADPROGRAMNVPROC)glewGetProcSubtractress((const GLubyte*)"glLoadProgramNV")) == NULL) || r;
-  r = ((glProgramParameter4dNV = (PFNGLPROGRAMPARAMETER4DNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameter4dNV")) == NULL) || r;
-  r = ((glProgramParameter4dvNV = (PFNGLPROGRAMPARAMETER4DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameter4dvNV")) == NULL) || r;
-  r = ((glProgramParameter4fNV = (PFNGLPROGRAMPARAMETER4FNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameter4fNV")) == NULL) || r;
-  r = ((glProgramParameter4fvNV = (PFNGLPROGRAMPARAMETER4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameter4fvNV")) == NULL) || r;
-  r = ((glProgramParameters4dvNV = (PFNGLPROGRAMPARAMETERS4DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameters4dvNV")) == NULL) || r;
-  r = ((glProgramParameters4fvNV = (PFNGLPROGRAMPARAMETERS4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glProgramParameters4fvNV")) == NULL) || r;
-  r = ((glRequestResidentProgramsNV = (PFNGLREQUESTRESIDENTPROGRAMSNVPROC)glewGetProcSubtractress((const GLubyte*)"glRequestResidentProgramsNV")) == NULL) || r;
-  r = ((glTrackMatrixNV = (PFNGLTRACKMATRIXNVPROC)glewGetProcSubtractress((const GLubyte*)"glTrackMatrixNV")) == NULL) || r;
-  r = ((glVertexAttrib1dNV = (PFNGLVERTEXATTRIB1DNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1dNV")) == NULL) || r;
-  r = ((glVertexAttrib1dvNV = (PFNGLVERTEXATTRIB1DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1dvNV")) == NULL) || r;
-  r = ((glVertexAttrib1fNV = (PFNGLVERTEXATTRIB1FNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1fNV")) == NULL) || r;
-  r = ((glVertexAttrib1fvNV = (PFNGLVERTEXATTRIB1FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1fvNV")) == NULL) || r;
-  r = ((glVertexAttrib1sNV = (PFNGLVERTEXATTRIB1SNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1sNV")) == NULL) || r;
-  r = ((glVertexAttrib1svNV = (PFNGLVERTEXATTRIB1SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib1svNV")) == NULL) || r;
-  r = ((glVertexAttrib2dNV = (PFNGLVERTEXATTRIB2DNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2dNV")) == NULL) || r;
-  r = ((glVertexAttrib2dvNV = (PFNGLVERTEXATTRIB2DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2dvNV")) == NULL) || r;
-  r = ((glVertexAttrib2fNV = (PFNGLVERTEXATTRIB2FNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2fNV")) == NULL) || r;
-  r = ((glVertexAttrib2fvNV = (PFNGLVERTEXATTRIB2FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2fvNV")) == NULL) || r;
-  r = ((glVertexAttrib2sNV = (PFNGLVERTEXATTRIB2SNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2sNV")) == NULL) || r;
-  r = ((glVertexAttrib2svNV = (PFNGLVERTEXATTRIB2SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib2svNV")) == NULL) || r;
-  r = ((glVertexAttrib3dNV = (PFNGLVERTEXATTRIB3DNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3dNV")) == NULL) || r;
-  r = ((glVertexAttrib3dvNV = (PFNGLVERTEXATTRIB3DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3dvNV")) == NULL) || r;
-  r = ((glVertexAttrib3fNV = (PFNGLVERTEXATTRIB3FNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3fNV")) == NULL) || r;
-  r = ((glVertexAttrib3fvNV = (PFNGLVERTEXATTRIB3FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3fvNV")) == NULL) || r;
-  r = ((glVertexAttrib3sNV = (PFNGLVERTEXATTRIB3SNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3sNV")) == NULL) || r;
-  r = ((glVertexAttrib3svNV = (PFNGLVERTEXATTRIB3SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib3svNV")) == NULL) || r;
-  r = ((glVertexAttrib4dNV = (PFNGLVERTEXATTRIB4DNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4dNV")) == NULL) || r;
-  r = ((glVertexAttrib4dvNV = (PFNGLVERTEXATTRIB4DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4dvNV")) == NULL) || r;
-  r = ((glVertexAttrib4fNV = (PFNGLVERTEXATTRIB4FNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4fNV")) == NULL) || r;
-  r = ((glVertexAttrib4fvNV = (PFNGLVERTEXATTRIB4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4fvNV")) == NULL) || r;
-  r = ((glVertexAttrib4sNV = (PFNGLVERTEXATTRIB4SNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4sNV")) == NULL) || r;
-  r = ((glVertexAttrib4svNV = (PFNGLVERTEXATTRIB4SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4svNV")) == NULL) || r;
-  r = ((glVertexAttrib4ubNV = (PFNGLVERTEXATTRIB4UBNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4ubNV")) == NULL) || r;
-  r = ((glVertexAttrib4ubvNV = (PFNGLVERTEXATTRIB4UBVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttrib4ubvNV")) == NULL) || r;
-  r = ((glVertexAttribPointerNV = (PFNGLVERTEXATTRIBPOINTERNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribPointerNV")) == NULL) || r;
-  r = ((glVertexAttribs1dvNV = (PFNGLVERTEXATTRIBS1DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs1dvNV")) == NULL) || r;
-  r = ((glVertexAttribs1fvNV = (PFNGLVERTEXATTRIBS1FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs1fvNV")) == NULL) || r;
-  r = ((glVertexAttribs1svNV = (PFNGLVERTEXATTRIBS1SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs1svNV")) == NULL) || r;
-  r = ((glVertexAttribs2dvNV = (PFNGLVERTEXATTRIBS2DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs2dvNV")) == NULL) || r;
-  r = ((glVertexAttribs2fvNV = (PFNGLVERTEXATTRIBS2FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs2fvNV")) == NULL) || r;
-  r = ((glVertexAttribs2svNV = (PFNGLVERTEXATTRIBS2SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs2svNV")) == NULL) || r;
-  r = ((glVertexAttribs3dvNV = (PFNGLVERTEXATTRIBS3DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs3dvNV")) == NULL) || r;
-  r = ((glVertexAttribs3fvNV = (PFNGLVERTEXATTRIBS3FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs3fvNV")) == NULL) || r;
-  r = ((glVertexAttribs3svNV = (PFNGLVERTEXATTRIBS3SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs3svNV")) == NULL) || r;
-  r = ((glVertexAttribs4dvNV = (PFNGLVERTEXATTRIBS4DVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs4dvNV")) == NULL) || r;
-  r = ((glVertexAttribs4fvNV = (PFNGLVERTEXATTRIBS4FVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs4fvNV")) == NULL) || r;
-  r = ((glVertexAttribs4svNV = (PFNGLVERTEXATTRIBS4SVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs4svNV")) == NULL) || r;
-  r = ((glVertexAttribs4ubvNV = (PFNGLVERTEXATTRIBS4UBVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVertexAttribs4ubvNV")) == NULL) || r;
+  r = ((glAreProgramsResidentNV = (PFNGLAREPROGRAMSRESIDENTNVPROC)glewGetProcAddress((const GLubyte*)"glAreProgramsResidentNV")) == NULL) || r;
+  r = ((glBindProgramNV = (PFNGLBINDPROGRAMNVPROC)glewGetProcAddress((const GLubyte*)"glBindProgramNV")) == NULL) || r;
+  r = ((glDeleteProgramsNV = (PFNGLDELETEPROGRAMSNVPROC)glewGetProcAddress((const GLubyte*)"glDeleteProgramsNV")) == NULL) || r;
+  r = ((glExecuteProgramNV = (PFNGLEXECUTEPROGRAMNVPROC)glewGetProcAddress((const GLubyte*)"glExecuteProgramNV")) == NULL) || r;
+  r = ((glGenProgramsNV = (PFNGLGENPROGRAMSNVPROC)glewGetProcAddress((const GLubyte*)"glGenProgramsNV")) == NULL) || r;
+  r = ((glGetProgramParameterdvNV = (PFNGLGETPROGRAMPARAMETERDVNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramParameterdvNV")) == NULL) || r;
+  r = ((glGetProgramParameterfvNV = (PFNGLGETPROGRAMPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramParameterfvNV")) == NULL) || r;
+  r = ((glGetProgramStringNV = (PFNGLGETPROGRAMSTRINGNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramStringNV")) == NULL) || r;
+  r = ((glGetProgramivNV = (PFNGLGETPROGRAMIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetProgramivNV")) == NULL) || r;
+  r = ((glGetTrackMatrixivNV = (PFNGLGETTRACKMATRIXIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetTrackMatrixivNV")) == NULL) || r;
+  r = ((glGetVertexAttribPointervNV = (PFNGLGETVERTEXATTRIBPOINTERVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribPointervNV")) == NULL) || r;
+  r = ((glGetVertexAttribdvNV = (PFNGLGETVERTEXATTRIBDVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribdvNV")) == NULL) || r;
+  r = ((glGetVertexAttribfvNV = (PFNGLGETVERTEXATTRIBFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribfvNV")) == NULL) || r;
+  r = ((glGetVertexAttribivNV = (PFNGLGETVERTEXATTRIBIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVertexAttribivNV")) == NULL) || r;
+  r = ((glIsProgramNV = (PFNGLISPROGRAMNVPROC)glewGetProcAddress((const GLubyte*)"glIsProgramNV")) == NULL) || r;
+  r = ((glLoadProgramNV = (PFNGLLOADPROGRAMNVPROC)glewGetProcAddress((const GLubyte*)"glLoadProgramNV")) == NULL) || r;
+  r = ((glProgramParameter4dNV = (PFNGLPROGRAMPARAMETER4DNVPROC)glewGetProcAddress((const GLubyte*)"glProgramParameter4dNV")) == NULL) || r;
+  r = ((glProgramParameter4dvNV = (PFNGLPROGRAMPARAMETER4DVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramParameter4dvNV")) == NULL) || r;
+  r = ((glProgramParameter4fNV = (PFNGLPROGRAMPARAMETER4FNVPROC)glewGetProcAddress((const GLubyte*)"glProgramParameter4fNV")) == NULL) || r;
+  r = ((glProgramParameter4fvNV = (PFNGLPROGRAMPARAMETER4FVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramParameter4fvNV")) == NULL) || r;
+  r = ((glProgramParameters4dvNV = (PFNGLPROGRAMPARAMETERS4DVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramParameters4dvNV")) == NULL) || r;
+  r = ((glProgramParameters4fvNV = (PFNGLPROGRAMPARAMETERS4FVNVPROC)glewGetProcAddress((const GLubyte*)"glProgramParameters4fvNV")) == NULL) || r;
+  r = ((glRequestResidentProgramsNV = (PFNGLREQUESTRESIDENTPROGRAMSNVPROC)glewGetProcAddress((const GLubyte*)"glRequestResidentProgramsNV")) == NULL) || r;
+  r = ((glTrackMatrixNV = (PFNGLTRACKMATRIXNVPROC)glewGetProcAddress((const GLubyte*)"glTrackMatrixNV")) == NULL) || r;
+  r = ((glVertexAttrib1dNV = (PFNGLVERTEXATTRIB1DNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1dNV")) == NULL) || r;
+  r = ((glVertexAttrib1dvNV = (PFNGLVERTEXATTRIB1DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1dvNV")) == NULL) || r;
+  r = ((glVertexAttrib1fNV = (PFNGLVERTEXATTRIB1FNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1fNV")) == NULL) || r;
+  r = ((glVertexAttrib1fvNV = (PFNGLVERTEXATTRIB1FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1fvNV")) == NULL) || r;
+  r = ((glVertexAttrib1sNV = (PFNGLVERTEXATTRIB1SNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1sNV")) == NULL) || r;
+  r = ((glVertexAttrib1svNV = (PFNGLVERTEXATTRIB1SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib1svNV")) == NULL) || r;
+  r = ((glVertexAttrib2dNV = (PFNGLVERTEXATTRIB2DNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2dNV")) == NULL) || r;
+  r = ((glVertexAttrib2dvNV = (PFNGLVERTEXATTRIB2DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2dvNV")) == NULL) || r;
+  r = ((glVertexAttrib2fNV = (PFNGLVERTEXATTRIB2FNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2fNV")) == NULL) || r;
+  r = ((glVertexAttrib2fvNV = (PFNGLVERTEXATTRIB2FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2fvNV")) == NULL) || r;
+  r = ((glVertexAttrib2sNV = (PFNGLVERTEXATTRIB2SNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2sNV")) == NULL) || r;
+  r = ((glVertexAttrib2svNV = (PFNGLVERTEXATTRIB2SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib2svNV")) == NULL) || r;
+  r = ((glVertexAttrib3dNV = (PFNGLVERTEXATTRIB3DNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3dNV")) == NULL) || r;
+  r = ((glVertexAttrib3dvNV = (PFNGLVERTEXATTRIB3DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3dvNV")) == NULL) || r;
+  r = ((glVertexAttrib3fNV = (PFNGLVERTEXATTRIB3FNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3fNV")) == NULL) || r;
+  r = ((glVertexAttrib3fvNV = (PFNGLVERTEXATTRIB3FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3fvNV")) == NULL) || r;
+  r = ((glVertexAttrib3sNV = (PFNGLVERTEXATTRIB3SNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3sNV")) == NULL) || r;
+  r = ((glVertexAttrib3svNV = (PFNGLVERTEXATTRIB3SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib3svNV")) == NULL) || r;
+  r = ((glVertexAttrib4dNV = (PFNGLVERTEXATTRIB4DNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4dNV")) == NULL) || r;
+  r = ((glVertexAttrib4dvNV = (PFNGLVERTEXATTRIB4DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4dvNV")) == NULL) || r;
+  r = ((glVertexAttrib4fNV = (PFNGLVERTEXATTRIB4FNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4fNV")) == NULL) || r;
+  r = ((glVertexAttrib4fvNV = (PFNGLVERTEXATTRIB4FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4fvNV")) == NULL) || r;
+  r = ((glVertexAttrib4sNV = (PFNGLVERTEXATTRIB4SNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4sNV")) == NULL) || r;
+  r = ((glVertexAttrib4svNV = (PFNGLVERTEXATTRIB4SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4svNV")) == NULL) || r;
+  r = ((glVertexAttrib4ubNV = (PFNGLVERTEXATTRIB4UBNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4ubNV")) == NULL) || r;
+  r = ((glVertexAttrib4ubvNV = (PFNGLVERTEXATTRIB4UBVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttrib4ubvNV")) == NULL) || r;
+  r = ((glVertexAttribPointerNV = (PFNGLVERTEXATTRIBPOINTERNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribPointerNV")) == NULL) || r;
+  r = ((glVertexAttribs1dvNV = (PFNGLVERTEXATTRIBS1DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs1dvNV")) == NULL) || r;
+  r = ((glVertexAttribs1fvNV = (PFNGLVERTEXATTRIBS1FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs1fvNV")) == NULL) || r;
+  r = ((glVertexAttribs1svNV = (PFNGLVERTEXATTRIBS1SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs1svNV")) == NULL) || r;
+  r = ((glVertexAttribs2dvNV = (PFNGLVERTEXATTRIBS2DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs2dvNV")) == NULL) || r;
+  r = ((glVertexAttribs2fvNV = (PFNGLVERTEXATTRIBS2FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs2fvNV")) == NULL) || r;
+  r = ((glVertexAttribs2svNV = (PFNGLVERTEXATTRIBS2SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs2svNV")) == NULL) || r;
+  r = ((glVertexAttribs3dvNV = (PFNGLVERTEXATTRIBS3DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs3dvNV")) == NULL) || r;
+  r = ((glVertexAttribs3fvNV = (PFNGLVERTEXATTRIBS3FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs3fvNV")) == NULL) || r;
+  r = ((glVertexAttribs3svNV = (PFNGLVERTEXATTRIBS3SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs3svNV")) == NULL) || r;
+  r = ((glVertexAttribs4dvNV = (PFNGLVERTEXATTRIBS4DVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs4dvNV")) == NULL) || r;
+  r = ((glVertexAttribs4fvNV = (PFNGLVERTEXATTRIBS4FVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs4fvNV")) == NULL) || r;
+  r = ((glVertexAttribs4svNV = (PFNGLVERTEXATTRIBS4SVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs4svNV")) == NULL) || r;
+  r = ((glVertexAttribs4ubvNV = (PFNGLVERTEXATTRIBS4UBVNVPROC)glewGetProcAddress((const GLubyte*)"glVertexAttribs4ubvNV")) == NULL) || r;
 
   return r;
 }
@@ -15214,18 +15211,18 @@ static GLboolean _glewInit_GL_NV_video_capture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glBeginVideoCaptureNV = (PFNGLBEGINVIDEOCAPTURENVPROC)glewGetProcSubtractress((const GLubyte*)"glBeginVideoCaptureNV")) == NULL) || r;
-  r = ((glBindVideoCaptureStreamBufferNV = (PFNGLBINDVIDEOCAPTURESTREAMBUFFERNVPROC)glewGetProcSubtractress((const GLubyte*)"glBindVideoCaptureStreamBufferNV")) == NULL) || r;
-  r = ((glBindVideoCaptureStreamTextureNV = (PFNGLBINDVIDEOCAPTURESTREAMTEXTURENVPROC)glewGetProcSubtractress((const GLubyte*)"glBindVideoCaptureStreamTextureNV")) == NULL) || r;
-  r = ((glEndVideoCaptureNV = (PFNGLENDVIDEOCAPTURENVPROC)glewGetProcSubtractress((const GLubyte*)"glEndVideoCaptureNV")) == NULL) || r;
-  r = ((glGetVideoCaptureStreamdvNV = (PFNGLGETVIDEOCAPTURESTREAMDVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoCaptureStreamdvNV")) == NULL) || r;
-  r = ((glGetVideoCaptureStreamfvNV = (PFNGLGETVIDEOCAPTURESTREAMFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoCaptureStreamfvNV")) == NULL) || r;
-  r = ((glGetVideoCaptureStreamivNV = (PFNGLGETVIDEOCAPTURESTREAMIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoCaptureStreamivNV")) == NULL) || r;
-  r = ((glGetVideoCaptureivNV = (PFNGLGETVIDEOCAPTUREIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetVideoCaptureivNV")) == NULL) || r;
-  r = ((glVideoCaptureNV = (PFNGLVIDEOCAPTURENVPROC)glewGetProcSubtractress((const GLubyte*)"glVideoCaptureNV")) == NULL) || r;
-  r = ((glVideoCaptureStreamParameterdvNV = (PFNGLVIDEOCAPTURESTREAMPARAMETERDVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVideoCaptureStreamParameterdvNV")) == NULL) || r;
-  r = ((glVideoCaptureStreamParameterfvNV = (PFNGLVIDEOCAPTURESTREAMPARAMETERFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVideoCaptureStreamParameterfvNV")) == NULL) || r;
-  r = ((glVideoCaptureStreamParameterivNV = (PFNGLVIDEOCAPTURESTREAMPARAMETERIVNVPROC)glewGetProcSubtractress((const GLubyte*)"glVideoCaptureStreamParameterivNV")) == NULL) || r;
+  r = ((glBeginVideoCaptureNV = (PFNGLBEGINVIDEOCAPTURENVPROC)glewGetProcAddress((const GLubyte*)"glBeginVideoCaptureNV")) == NULL) || r;
+  r = ((glBindVideoCaptureStreamBufferNV = (PFNGLBINDVIDEOCAPTURESTREAMBUFFERNVPROC)glewGetProcAddress((const GLubyte*)"glBindVideoCaptureStreamBufferNV")) == NULL) || r;
+  r = ((glBindVideoCaptureStreamTextureNV = (PFNGLBINDVIDEOCAPTURESTREAMTEXTURENVPROC)glewGetProcAddress((const GLubyte*)"glBindVideoCaptureStreamTextureNV")) == NULL) || r;
+  r = ((glEndVideoCaptureNV = (PFNGLENDVIDEOCAPTURENVPROC)glewGetProcAddress((const GLubyte*)"glEndVideoCaptureNV")) == NULL) || r;
+  r = ((glGetVideoCaptureStreamdvNV = (PFNGLGETVIDEOCAPTURESTREAMDVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoCaptureStreamdvNV")) == NULL) || r;
+  r = ((glGetVideoCaptureStreamfvNV = (PFNGLGETVIDEOCAPTURESTREAMFVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoCaptureStreamfvNV")) == NULL) || r;
+  r = ((glGetVideoCaptureStreamivNV = (PFNGLGETVIDEOCAPTURESTREAMIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoCaptureStreamivNV")) == NULL) || r;
+  r = ((glGetVideoCaptureivNV = (PFNGLGETVIDEOCAPTUREIVNVPROC)glewGetProcAddress((const GLubyte*)"glGetVideoCaptureivNV")) == NULL) || r;
+  r = ((glVideoCaptureNV = (PFNGLVIDEOCAPTURENVPROC)glewGetProcAddress((const GLubyte*)"glVideoCaptureNV")) == NULL) || r;
+  r = ((glVideoCaptureStreamParameterdvNV = (PFNGLVIDEOCAPTURESTREAMPARAMETERDVNVPROC)glewGetProcAddress((const GLubyte*)"glVideoCaptureStreamParameterdvNV")) == NULL) || r;
+  r = ((glVideoCaptureStreamParameterfvNV = (PFNGLVIDEOCAPTURESTREAMPARAMETERFVNVPROC)glewGetProcAddress((const GLubyte*)"glVideoCaptureStreamParameterfvNV")) == NULL) || r;
+  r = ((glVideoCaptureStreamParameterivNV = (PFNGLVIDEOCAPTURESTREAMPARAMETERIVNVPROC)glewGetProcAddress((const GLubyte*)"glVideoCaptureStreamParameterivNV")) == NULL) || r;
 
   return r;
 }
@@ -15238,18 +15235,18 @@ static GLboolean _glewInit_GL_NV_viewport_array ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDepthRangeArrayfvNV = (PFNGLDEPTHRANGEARRAYFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangeArrayfvNV")) == NULL) || r;
-  r = ((glDepthRangeIndexedfNV = (PFNGLDEPTHRANGEINDEXEDFNVPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangeIndexedfNV")) == NULL) || r;
-  r = ((glDisableiNV = (PFNGLDISABLEINVPROC)glewGetProcSubtractress((const GLubyte*)"glDisableiNV")) == NULL) || r;
-  r = ((glEnableiNV = (PFNGLENABLEINVPROC)glewGetProcSubtractress((const GLubyte*)"glEnableiNV")) == NULL) || r;
-  r = ((glGetFloati_vNV = (PFNGLGETFLOATI_VNVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFloati_vNV")) == NULL) || r;
-  r = ((glIsEnablediNV = (PFNGLISENABLEDINVPROC)glewGetProcSubtractress((const GLubyte*)"glIsEnablediNV")) == NULL) || r;
-  r = ((glScissorArrayvNV = (PFNGLSCISSORARRAYVNVPROC)glewGetProcSubtractress((const GLubyte*)"glScissorArrayvNV")) == NULL) || r;
-  r = ((glScissorIndexedNV = (PFNGLSCISSORINDEXEDNVPROC)glewGetProcSubtractress((const GLubyte*)"glScissorIndexedNV")) == NULL) || r;
-  r = ((glScissorIndexedvNV = (PFNGLSCISSORINDEXEDVNVPROC)glewGetProcSubtractress((const GLubyte*)"glScissorIndexedvNV")) == NULL) || r;
-  r = ((glViewportArrayvNV = (PFNGLVIEWPORTARRAYVNVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportArrayvNV")) == NULL) || r;
-  r = ((glViewportIndexedfNV = (PFNGLVIEWPORTINDEXEDFNVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportIndexedfNV")) == NULL) || r;
-  r = ((glViewportIndexedfvNV = (PFNGLVIEWPORTINDEXEDFVNVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportIndexedfvNV")) == NULL) || r;
+  r = ((glDepthRangeArrayfvNV = (PFNGLDEPTHRANGEARRAYFVNVPROC)glewGetProcAddress((const GLubyte*)"glDepthRangeArrayfvNV")) == NULL) || r;
+  r = ((glDepthRangeIndexedfNV = (PFNGLDEPTHRANGEINDEXEDFNVPROC)glewGetProcAddress((const GLubyte*)"glDepthRangeIndexedfNV")) == NULL) || r;
+  r = ((glDisableiNV = (PFNGLDISABLEINVPROC)glewGetProcAddress((const GLubyte*)"glDisableiNV")) == NULL) || r;
+  r = ((glEnableiNV = (PFNGLENABLEINVPROC)glewGetProcAddress((const GLubyte*)"glEnableiNV")) == NULL) || r;
+  r = ((glGetFloati_vNV = (PFNGLGETFLOATI_VNVPROC)glewGetProcAddress((const GLubyte*)"glGetFloati_vNV")) == NULL) || r;
+  r = ((glIsEnablediNV = (PFNGLISENABLEDINVPROC)glewGetProcAddress((const GLubyte*)"glIsEnablediNV")) == NULL) || r;
+  r = ((glScissorArrayvNV = (PFNGLSCISSORARRAYVNVPROC)glewGetProcAddress((const GLubyte*)"glScissorArrayvNV")) == NULL) || r;
+  r = ((glScissorIndexedNV = (PFNGLSCISSORINDEXEDNVPROC)glewGetProcAddress((const GLubyte*)"glScissorIndexedNV")) == NULL) || r;
+  r = ((glScissorIndexedvNV = (PFNGLSCISSORINDEXEDVNVPROC)glewGetProcAddress((const GLubyte*)"glScissorIndexedvNV")) == NULL) || r;
+  r = ((glViewportArrayvNV = (PFNGLVIEWPORTARRAYVNVPROC)glewGetProcAddress((const GLubyte*)"glViewportArrayvNV")) == NULL) || r;
+  r = ((glViewportIndexedfNV = (PFNGLVIEWPORTINDEXEDFNVPROC)glewGetProcAddress((const GLubyte*)"glViewportIndexedfNV")) == NULL) || r;
+  r = ((glViewportIndexedfvNV = (PFNGLVIEWPORTINDEXEDFVNVPROC)glewGetProcAddress((const GLubyte*)"glViewportIndexedfvNV")) == NULL) || r;
 
   return r;
 }
@@ -15262,7 +15259,7 @@ static GLboolean _glewInit_GL_NV_viewport_swizzle ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glViewportSwizzleNV = (PFNGLVIEWPORTSWIZZLENVPROC)glewGetProcSubtractress((const GLubyte*)"glViewportSwizzleNV")) == NULL) || r;
+  r = ((glViewportSwizzleNV = (PFNGLVIEWPORTSWIZZLENVPROC)glewGetProcAddress((const GLubyte*)"glViewportSwizzleNV")) == NULL) || r;
 
   return r;
 }
@@ -15275,7 +15272,7 @@ static GLboolean _glewInit_GL_OVR_multiview ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferTextureMultiviewOVR = (PFNGLFRAMEBUFFERTEXTUREMULTIVIEWOVRPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureMultiviewOVR")) == NULL) || r;
+  r = ((glFramebufferTextureMultiviewOVR = (PFNGLFRAMEBUFFERTEXTUREMULTIVIEWOVRPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureMultiviewOVR")) == NULL) || r;
 
   return r;
 }
@@ -15288,7 +15285,7 @@ static GLboolean _glewInit_GL_OVR_multiview_multisampled_render_to_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferTextureMultisampleMultiviewOVR = (PFNGLFRAMEBUFFERTEXTUREMULTISAMPLEMULTIVIEWOVRPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferTextureMultisampleMultiviewOVR")) == NULL) || r;
+  r = ((glFramebufferTextureMultisampleMultiviewOVR = (PFNGLFRAMEBUFFERTEXTUREMULTISAMPLEMULTIVIEWOVRPROC)glewGetProcAddress((const GLubyte*)"glFramebufferTextureMultisampleMultiviewOVR")) == NULL) || r;
 
   return r;
 }
@@ -15301,7 +15298,7 @@ static GLboolean _glewInit_GL_QCOM_alpha_test ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAlphaFuncQCOM = (PFNGLALPHAFUNCQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glAlphaFuncQCOM")) == NULL) || r;
+  r = ((glAlphaFuncQCOM = (PFNGLALPHAFUNCQCOMPROC)glewGetProcAddress((const GLubyte*)"glAlphaFuncQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15314,10 +15311,10 @@ static GLboolean _glewInit_GL_QCOM_driver_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDisableDriverControlQCOM = (PFNGLDISABLEDRIVERCONTROLQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glDisableDriverControlQCOM")) == NULL) || r;
-  r = ((glEnableDriverControlQCOM = (PFNGLENABLEDRIVERCONTROLQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glEnableDriverControlQCOM")) == NULL) || r;
-  r = ((glGetDriverControlStringQCOM = (PFNGLGETDRIVERCONTROLSTRINGQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glGetDriverControlStringQCOM")) == NULL) || r;
-  r = ((glGetDriverControlsQCOM = (PFNGLGETDRIVERCONTROLSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glGetDriverControlsQCOM")) == NULL) || r;
+  r = ((glDisableDriverControlQCOM = (PFNGLDISABLEDRIVERCONTROLQCOMPROC)glewGetProcAddress((const GLubyte*)"glDisableDriverControlQCOM")) == NULL) || r;
+  r = ((glEnableDriverControlQCOM = (PFNGLENABLEDRIVERCONTROLQCOMPROC)glewGetProcAddress((const GLubyte*)"glEnableDriverControlQCOM")) == NULL) || r;
+  r = ((glGetDriverControlStringQCOM = (PFNGLGETDRIVERCONTROLSTRINGQCOMPROC)glewGetProcAddress((const GLubyte*)"glGetDriverControlStringQCOM")) == NULL) || r;
+  r = ((glGetDriverControlsQCOM = (PFNGLGETDRIVERCONTROLSQCOMPROC)glewGetProcAddress((const GLubyte*)"glGetDriverControlsQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15330,14 +15327,14 @@ static GLboolean _glewInit_GL_QCOM_extended_get ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glExtGetBufferPointervQCOM = (PFNGLEXTGETBUFFERPOINTERVQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetBufferPointervQCOM")) == NULL) || r;
-  r = ((glExtGetBuffersQCOM = (PFNGLEXTGETBUFFERSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetBuffersQCOM")) == NULL) || r;
-  r = ((glExtGetFramebuffersQCOM = (PFNGLEXTGETFRAMEBUFFERSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetFramebuffersQCOM")) == NULL) || r;
-  r = ((glExtGetRenderbuffersQCOM = (PFNGLEXTGETRENDERBUFFERSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetRenderbuffersQCOM")) == NULL) || r;
-  r = ((glExtGetTexLevelParameterivQCOM = (PFNGLEXTGETTEXLEVELPARAMETERIVQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetTexLevelParameterivQCOM")) == NULL) || r;
-  r = ((glExtGetTexSubImageQCOM = (PFNGLEXTGETTEXSUBIMAGEQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetTexSubImageQCOM")) == NULL) || r;
-  r = ((glExtGetTexturesQCOM = (PFNGLEXTGETTEXTURESQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetTexturesQCOM")) == NULL) || r;
-  r = ((glExtTexObjectStateOverrideiQCOM = (PFNGLEXTTEXOBJECTSTATEOVERRIDEIQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtTexObjectStateOverrideiQCOM")) == NULL) || r;
+  r = ((glExtGetBufferPointervQCOM = (PFNGLEXTGETBUFFERPOINTERVQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetBufferPointervQCOM")) == NULL) || r;
+  r = ((glExtGetBuffersQCOM = (PFNGLEXTGETBUFFERSQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetBuffersQCOM")) == NULL) || r;
+  r = ((glExtGetFramebuffersQCOM = (PFNGLEXTGETFRAMEBUFFERSQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetFramebuffersQCOM")) == NULL) || r;
+  r = ((glExtGetRenderbuffersQCOM = (PFNGLEXTGETRENDERBUFFERSQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetRenderbuffersQCOM")) == NULL) || r;
+  r = ((glExtGetTexLevelParameterivQCOM = (PFNGLEXTGETTEXLEVELPARAMETERIVQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetTexLevelParameterivQCOM")) == NULL) || r;
+  r = ((glExtGetTexSubImageQCOM = (PFNGLEXTGETTEXSUBIMAGEQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetTexSubImageQCOM")) == NULL) || r;
+  r = ((glExtGetTexturesQCOM = (PFNGLEXTGETTEXTURESQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetTexturesQCOM")) == NULL) || r;
+  r = ((glExtTexObjectStateOverrideiQCOM = (PFNGLEXTTEXOBJECTSTATEOVERRIDEIQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtTexObjectStateOverrideiQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15350,10 +15347,10 @@ static GLboolean _glewInit_GL_QCOM_extended_get2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glExtGetProgramBinarySourceQCOM = (PFNGLEXTGETPROGRAMBINARYSOURCEQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetProgramBinarySourceQCOM")) == NULL) || r;
-  r = ((glExtGetProgramsQCOM = (PFNGLEXTGETPROGRAMSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetProgramsQCOM")) == NULL) || r;
-  r = ((glExtGetShadersQCOM = (PFNGLEXTGETSHADERSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtGetShadersQCOM")) == NULL) || r;
-  r = ((glExtIsProgramBinaryQCOM = (PFNGLEXTISPROGRAMBINARYQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glExtIsProgramBinaryQCOM")) == NULL) || r;
+  r = ((glExtGetProgramBinarySourceQCOM = (PFNGLEXTGETPROGRAMBINARYSOURCEQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetProgramBinarySourceQCOM")) == NULL) || r;
+  r = ((glExtGetProgramsQCOM = (PFNGLEXTGETPROGRAMSQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetProgramsQCOM")) == NULL) || r;
+  r = ((glExtGetShadersQCOM = (PFNGLEXTGETSHADERSQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtGetShadersQCOM")) == NULL) || r;
+  r = ((glExtIsProgramBinaryQCOM = (PFNGLEXTISPROGRAMBINARYQCOMPROC)glewGetProcAddress((const GLubyte*)"glExtIsProgramBinaryQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15366,8 +15363,8 @@ static GLboolean _glewInit_GL_QCOM_framebuffer_foveated ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferFoveationConfigQCOM = (PFNGLFRAMEBUFFERFOVEATIONCONFIGQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferFoveationConfigQCOM")) == NULL) || r;
-  r = ((glFramebufferFoveationParametersQCOM = (PFNGLFRAMEBUFFERFOVEATIONPARAMETERSQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferFoveationParametersQCOM")) == NULL) || r;
+  r = ((glFramebufferFoveationConfigQCOM = (PFNGLFRAMEBUFFERFOVEATIONCONFIGQCOMPROC)glewGetProcAddress((const GLubyte*)"glFramebufferFoveationConfigQCOM")) == NULL) || r;
+  r = ((glFramebufferFoveationParametersQCOM = (PFNGLFRAMEBUFFERFOVEATIONPARAMETERSQCOMPROC)glewGetProcAddress((const GLubyte*)"glFramebufferFoveationParametersQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15380,7 +15377,7 @@ static GLboolean _glewInit_GL_QCOM_shader_framebuffer_fetch_noncoherent ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFramebufferFetchBarrierQCOM = (PFNGLFRAMEBUFFERFETCHBARRIERQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glFramebufferFetchBarrierQCOM")) == NULL) || r;
+  r = ((glFramebufferFetchBarrierQCOM = (PFNGLFRAMEBUFFERFETCHBARRIERQCOMPROC)glewGetProcAddress((const GLubyte*)"glFramebufferFetchBarrierQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15393,8 +15390,8 @@ static GLboolean _glewInit_GL_QCOM_tiled_rendering ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glEndTilingQCOM = (PFNGLENDTILINGQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glEndTilingQCOM")) == NULL) || r;
-  r = ((glStartTilingQCOM = (PFNGLSTARTTILINGQCOMPROC)glewGetProcSubtractress((const GLubyte*)"glStartTilingQCOM")) == NULL) || r;
+  r = ((glEndTilingQCOM = (PFNGLENDTILINGQCOMPROC)glewGetProcAddress((const GLubyte*)"glEndTilingQCOM")) == NULL) || r;
+  r = ((glStartTilingQCOM = (PFNGLSTARTTILINGQCOMPROC)glewGetProcAddress((const GLubyte*)"glStartTilingQCOM")) == NULL) || r;
 
   return r;
 }
@@ -15407,37 +15404,37 @@ static GLboolean _glewInit_GL_REGAL_ES1_0_compatibility ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAlphaFuncx = (PFNGLALPHAFUNCXPROC)glewGetProcSubtractress((const GLubyte*)"glAlphaFuncx")) == NULL) || r;
-  r = ((glClearColorx = (PFNGLCLEARCOLORXPROC)glewGetProcSubtractress((const GLubyte*)"glClearColorx")) == NULL) || r;
-  r = ((glClearDepthx = (PFNGLCLEARDEPTHXPROC)glewGetProcSubtractress((const GLubyte*)"glClearDepthx")) == NULL) || r;
-  r = ((glColor4x = (PFNGLCOLOR4XPROC)glewGetProcSubtractress((const GLubyte*)"glColor4x")) == NULL) || r;
-  r = ((glDepthRangex = (PFNGLDEPTHRANGEXPROC)glewGetProcSubtractress((const GLubyte*)"glDepthRangex")) == NULL) || r;
-  r = ((glFogx = (PFNGLFOGXPROC)glewGetProcSubtractress((const GLubyte*)"glFogx")) == NULL) || r;
-  r = ((glFogxv = (PFNGLFOGXVPROC)glewGetProcSubtractress((const GLubyte*)"glFogxv")) == NULL) || r;
-  r = ((glFrustumf = (PFNGLFRUSTUMFPROC)glewGetProcSubtractress((const GLubyte*)"glFrustumf")) == NULL) || r;
-  r = ((glFrustumx = (PFNGLFRUSTUMXPROC)glewGetProcSubtractress((const GLubyte*)"glFrustumx")) == NULL) || r;
-  r = ((glLightModelx = (PFNGLLIGHTMODELXPROC)glewGetProcSubtractress((const GLubyte*)"glLightModelx")) == NULL) || r;
-  r = ((glLightModelxv = (PFNGLLIGHTMODELXVPROC)glewGetProcSubtractress((const GLubyte*)"glLightModelxv")) == NULL) || r;
-  r = ((glLightx = (PFNGLLIGHTXPROC)glewGetProcSubtractress((const GLubyte*)"glLightx")) == NULL) || r;
-  r = ((glLightxv = (PFNGLLIGHTXVPROC)glewGetProcSubtractress((const GLubyte*)"glLightxv")) == NULL) || r;
-  r = ((glLineWidthx = (PFNGLLINEWIDTHXPROC)glewGetProcSubtractress((const GLubyte*)"glLineWidthx")) == NULL) || r;
-  r = ((glLoadMatrixx = (PFNGLLOADMATRIXXPROC)glewGetProcSubtractress((const GLubyte*)"glLoadMatrixx")) == NULL) || r;
-  r = ((glMaterialx = (PFNGLMATERIALXPROC)glewGetProcSubtractress((const GLubyte*)"glMaterialx")) == NULL) || r;
-  r = ((glMaterialxv = (PFNGLMATERIALXVPROC)glewGetProcSubtractress((const GLubyte*)"glMaterialxv")) == NULL) || r;
-  r = ((glMultMatrixx = (PFNGLMULTMATRIXXPROC)glewGetProcSubtractress((const GLubyte*)"glMultMatrixx")) == NULL) || r;
-  r = ((glMultiTexCoord4x = (PFNGLMULTITEXCOORD4XPROC)glewGetProcSubtractress((const GLubyte*)"glMultiTexCoord4x")) == NULL) || r;
-  r = ((glNormal3x = (PFNGLNORMAL3XPROC)glewGetProcSubtractress((const GLubyte*)"glNormal3x")) == NULL) || r;
-  r = ((glOrthof = (PFNGLORTHOFPROC)glewGetProcSubtractress((const GLubyte*)"glOrthof")) == NULL) || r;
-  r = ((glOrthox = (PFNGLORTHOXPROC)glewGetProcSubtractress((const GLubyte*)"glOrthox")) == NULL) || r;
-  r = ((glPointSizex = (PFNGLPOINTSIZEXPROC)glewGetProcSubtractress((const GLubyte*)"glPointSizex")) == NULL) || r;
-  r = ((glPolygonOffsetx = (PFNGLPOLYGONOFFSETXPROC)glewGetProcSubtractress((const GLubyte*)"glPolygonOffsetx")) == NULL) || r;
-  r = ((glRotatex = (PFNGLROTATEXPROC)glewGetProcSubtractress((const GLubyte*)"glRotatex")) == NULL) || r;
-  r = ((glSampleCoveragex = (PFNGLSAMPLECOVERAGEXPROC)glewGetProcSubtractress((const GLubyte*)"glSampleCoveragex")) == NULL) || r;
-  r = ((glScalex = (PFNGLSCALEXPROC)glewGetProcSubtractress((const GLubyte*)"glScalex")) == NULL) || r;
-  r = ((glTexEnvx = (PFNGLTEXENVXPROC)glewGetProcSubtractress((const GLubyte*)"glTexEnvx")) == NULL) || r;
-  r = ((glTexEnvxv = (PFNGLTEXENVXVPROC)glewGetProcSubtractress((const GLubyte*)"glTexEnvxv")) == NULL) || r;
-  r = ((glTexParameterx = (PFNGLTEXPARAMETERXPROC)glewGetProcSubtractress((const GLubyte*)"glTexParameterx")) == NULL) || r;
-  r = ((glTranslatex = (PFNGLTRANSLATEXPROC)glewGetProcSubtractress((const GLubyte*)"glTranslatex")) == NULL) || r;
+  r = ((glAlphaFuncx = (PFNGLALPHAFUNCXPROC)glewGetProcAddress((const GLubyte*)"glAlphaFuncx")) == NULL) || r;
+  r = ((glClearColorx = (PFNGLCLEARCOLORXPROC)glewGetProcAddress((const GLubyte*)"glClearColorx")) == NULL) || r;
+  r = ((glClearDepthx = (PFNGLCLEARDEPTHXPROC)glewGetProcAddress((const GLubyte*)"glClearDepthx")) == NULL) || r;
+  r = ((glColor4x = (PFNGLCOLOR4XPROC)glewGetProcAddress((const GLubyte*)"glColor4x")) == NULL) || r;
+  r = ((glDepthRangex = (PFNGLDEPTHRANGEXPROC)glewGetProcAddress((const GLubyte*)"glDepthRangex")) == NULL) || r;
+  r = ((glFogx = (PFNGLFOGXPROC)glewGetProcAddress((const GLubyte*)"glFogx")) == NULL) || r;
+  r = ((glFogxv = (PFNGLFOGXVPROC)glewGetProcAddress((const GLubyte*)"glFogxv")) == NULL) || r;
+  r = ((glFrustumf = (PFNGLFRUSTUMFPROC)glewGetProcAddress((const GLubyte*)"glFrustumf")) == NULL) || r;
+  r = ((glFrustumx = (PFNGLFRUSTUMXPROC)glewGetProcAddress((const GLubyte*)"glFrustumx")) == NULL) || r;
+  r = ((glLightModelx = (PFNGLLIGHTMODELXPROC)glewGetProcAddress((const GLubyte*)"glLightModelx")) == NULL) || r;
+  r = ((glLightModelxv = (PFNGLLIGHTMODELXVPROC)glewGetProcAddress((const GLubyte*)"glLightModelxv")) == NULL) || r;
+  r = ((glLightx = (PFNGLLIGHTXPROC)glewGetProcAddress((const GLubyte*)"glLightx")) == NULL) || r;
+  r = ((glLightxv = (PFNGLLIGHTXVPROC)glewGetProcAddress((const GLubyte*)"glLightxv")) == NULL) || r;
+  r = ((glLineWidthx = (PFNGLLINEWIDTHXPROC)glewGetProcAddress((const GLubyte*)"glLineWidthx")) == NULL) || r;
+  r = ((glLoadMatrixx = (PFNGLLOADMATRIXXPROC)glewGetProcAddress((const GLubyte*)"glLoadMatrixx")) == NULL) || r;
+  r = ((glMaterialx = (PFNGLMATERIALXPROC)glewGetProcAddress((const GLubyte*)"glMaterialx")) == NULL) || r;
+  r = ((glMaterialxv = (PFNGLMATERIALXVPROC)glewGetProcAddress((const GLubyte*)"glMaterialxv")) == NULL) || r;
+  r = ((glMultMatrixx = (PFNGLMULTMATRIXXPROC)glewGetProcAddress((const GLubyte*)"glMultMatrixx")) == NULL) || r;
+  r = ((glMultiTexCoord4x = (PFNGLMULTITEXCOORD4XPROC)glewGetProcAddress((const GLubyte*)"glMultiTexCoord4x")) == NULL) || r;
+  r = ((glNormal3x = (PFNGLNORMAL3XPROC)glewGetProcAddress((const GLubyte*)"glNormal3x")) == NULL) || r;
+  r = ((glOrthof = (PFNGLORTHOFPROC)glewGetProcAddress((const GLubyte*)"glOrthof")) == NULL) || r;
+  r = ((glOrthox = (PFNGLORTHOXPROC)glewGetProcAddress((const GLubyte*)"glOrthox")) == NULL) || r;
+  r = ((glPointSizex = (PFNGLPOINTSIZEXPROC)glewGetProcAddress((const GLubyte*)"glPointSizex")) == NULL) || r;
+  r = ((glPolygonOffsetx = (PFNGLPOLYGONOFFSETXPROC)glewGetProcAddress((const GLubyte*)"glPolygonOffsetx")) == NULL) || r;
+  r = ((glRotatex = (PFNGLROTATEXPROC)glewGetProcAddress((const GLubyte*)"glRotatex")) == NULL) || r;
+  r = ((glSampleCoveragex = (PFNGLSAMPLECOVERAGEXPROC)glewGetProcAddress((const GLubyte*)"glSampleCoveragex")) == NULL) || r;
+  r = ((glScalex = (PFNGLSCALEXPROC)glewGetProcAddress((const GLubyte*)"glScalex")) == NULL) || r;
+  r = ((glTexEnvx = (PFNGLTEXENVXPROC)glewGetProcAddress((const GLubyte*)"glTexEnvx")) == NULL) || r;
+  r = ((glTexEnvxv = (PFNGLTEXENVXVPROC)glewGetProcAddress((const GLubyte*)"glTexEnvxv")) == NULL) || r;
+  r = ((glTexParameterx = (PFNGLTEXPARAMETERXPROC)glewGetProcAddress((const GLubyte*)"glTexParameterx")) == NULL) || r;
+  r = ((glTranslatex = (PFNGLTRANSLATEXPROC)glewGetProcAddress((const GLubyte*)"glTranslatex")) == NULL) || r;
 
   return r;
 }
@@ -15450,19 +15447,19 @@ static GLboolean _glewInit_GL_REGAL_ES1_1_compatibility ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glClipPlanef = (PFNGLCLIPPLANEFPROC)glewGetProcSubtractress((const GLubyte*)"glClipPlanef")) == NULL) || r;
-  r = ((glClipPlanex = (PFNGLCLIPPLANEXPROC)glewGetProcSubtractress((const GLubyte*)"glClipPlanex")) == NULL) || r;
-  r = ((glGetClipPlanef = (PFNGLGETCLIPPLANEFPROC)glewGetProcSubtractress((const GLubyte*)"glGetClipPlanef")) == NULL) || r;
-  r = ((glGetClipPlanex = (PFNGLGETCLIPPLANEXPROC)glewGetProcSubtractress((const GLubyte*)"glGetClipPlanex")) == NULL) || r;
-  r = ((glGetFixedv = (PFNGLGETFIXEDVPROC)glewGetProcSubtractress((const GLubyte*)"glGetFixedv")) == NULL) || r;
-  r = ((glGetLightxv = (PFNGLGETLIGHTXVPROC)glewGetProcSubtractress((const GLubyte*)"glGetLightxv")) == NULL) || r;
-  r = ((glGetMaterialxv = (PFNGLGETMATERIALXVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMaterialxv")) == NULL) || r;
-  r = ((glGetTexEnvxv = (PFNGLGETTEXENVXVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexEnvxv")) == NULL) || r;
-  r = ((glGetTexParameterxv = (PFNGLGETTEXPARAMETERXVPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexParameterxv")) == NULL) || r;
-  r = ((glPointParameterx = (PFNGLPOINTPARAMETERXPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterx")) == NULL) || r;
-  r = ((glPointParameterxv = (PFNGLPOINTPARAMETERXVPROC)glewGetProcSubtractress((const GLubyte*)"glPointParameterxv")) == NULL) || r;
-  r = ((glPointSizePointerOES = (PFNGLPOINTSIZEPOINTEROESPROC)glewGetProcSubtractress((const GLubyte*)"glPointSizePointerOES")) == NULL) || r;
-  r = ((glTexParameterxv = (PFNGLTEXPARAMETERXVPROC)glewGetProcSubtractress((const GLubyte*)"glTexParameterxv")) == NULL) || r;
+  r = ((glClipPlanef = (PFNGLCLIPPLANEFPROC)glewGetProcAddress((const GLubyte*)"glClipPlanef")) == NULL) || r;
+  r = ((glClipPlanex = (PFNGLCLIPPLANEXPROC)glewGetProcAddress((const GLubyte*)"glClipPlanex")) == NULL) || r;
+  r = ((glGetClipPlanef = (PFNGLGETCLIPPLANEFPROC)glewGetProcAddress((const GLubyte*)"glGetClipPlanef")) == NULL) || r;
+  r = ((glGetClipPlanex = (PFNGLGETCLIPPLANEXPROC)glewGetProcAddress((const GLubyte*)"glGetClipPlanex")) == NULL) || r;
+  r = ((glGetFixedv = (PFNGLGETFIXEDVPROC)glewGetProcAddress((const GLubyte*)"glGetFixedv")) == NULL) || r;
+  r = ((glGetLightxv = (PFNGLGETLIGHTXVPROC)glewGetProcAddress((const GLubyte*)"glGetLightxv")) == NULL) || r;
+  r = ((glGetMaterialxv = (PFNGLGETMATERIALXVPROC)glewGetProcAddress((const GLubyte*)"glGetMaterialxv")) == NULL) || r;
+  r = ((glGetTexEnvxv = (PFNGLGETTEXENVXVPROC)glewGetProcAddress((const GLubyte*)"glGetTexEnvxv")) == NULL) || r;
+  r = ((glGetTexParameterxv = (PFNGLGETTEXPARAMETERXVPROC)glewGetProcAddress((const GLubyte*)"glGetTexParameterxv")) == NULL) || r;
+  r = ((glPointParameterx = (PFNGLPOINTPARAMETERXPROC)glewGetProcAddress((const GLubyte*)"glPointParameterx")) == NULL) || r;
+  r = ((glPointParameterxv = (PFNGLPOINTPARAMETERXVPROC)glewGetProcAddress((const GLubyte*)"glPointParameterxv")) == NULL) || r;
+  r = ((glPointSizePointerOES = (PFNGLPOINTSIZEPOINTEROESPROC)glewGetProcAddress((const GLubyte*)"glPointSizePointerOES")) == NULL) || r;
+  r = ((glTexParameterxv = (PFNGLTEXPARAMETERXVPROC)glewGetProcAddress((const GLubyte*)"glTexParameterxv")) == NULL) || r;
 
   return r;
 }
@@ -15475,7 +15472,7 @@ static GLboolean _glewInit_GL_REGAL_error_string ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glErrorStringREGAL = (PFNGLERRORSTRINGREGALPROC)glewGetProcSubtractress((const GLubyte*)"glErrorStringREGAL")) == NULL) || r;
+  r = ((glErrorStringREGAL = (PFNGLERRORSTRINGREGALPROC)glewGetProcAddress((const GLubyte*)"glErrorStringREGAL")) == NULL) || r;
 
   return r;
 }
@@ -15488,8 +15485,8 @@ static GLboolean _glewInit_GL_REGAL_extension_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetExtensionREGAL = (PFNGLGETEXTENSIONREGALPROC)glewGetProcSubtractress((const GLubyte*)"glGetExtensionREGAL")) == NULL) || r;
-  r = ((glIsSupportedREGAL = (PFNGLISSUPPORTEDREGALPROC)glewGetProcSubtractress((const GLubyte*)"glIsSupportedREGAL")) == NULL) || r;
+  r = ((glGetExtensionREGAL = (PFNGLGETEXTENSIONREGALPROC)glewGetProcAddress((const GLubyte*)"glGetExtensionREGAL")) == NULL) || r;
+  r = ((glIsSupportedREGAL = (PFNGLISSUPPORTEDREGALPROC)glewGetProcAddress((const GLubyte*)"glIsSupportedREGAL")) == NULL) || r;
 
   return r;
 }
@@ -15502,7 +15499,7 @@ static GLboolean _glewInit_GL_REGAL_log ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glLogMessageCallbackREGAL = (PFNGLLOGMESSAGECALLBACKREGALPROC)glewGetProcSubtractress((const GLubyte*)"glLogMessageCallbackREGAL")) == NULL) || r;
+  r = ((glLogMessageCallbackREGAL = (PFNGLLOGMESSAGECALLBACKREGALPROC)glewGetProcAddress((const GLubyte*)"glLogMessageCallbackREGAL")) == NULL) || r;
 
   return r;
 }
@@ -15515,7 +15512,7 @@ static GLboolean _glewInit_GL_REGAL_proc_address ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetProcSubtractressREGAL = (PFNGLGETPROCADDRESSREGALPROC)glewGetProcSubtractress((const GLubyte*)"glGetProcSubtractressREGAL")) == NULL) || r;
+  r = ((glGetProcAddressREGAL = (PFNGLGETPROCADDRESSREGALPROC)glewGetProcAddress((const GLubyte*)"glGetProcAddressREGAL")) == NULL) || r;
 
   return r;
 }
@@ -15528,8 +15525,8 @@ static GLboolean _glewInit_GL_SGIS_detail_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDetailTexFuncSGIS = (PFNGLDETAILTEXFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glDetailTexFuncSGIS")) == NULL) || r;
-  r = ((glGetDetailTexFuncSGIS = (PFNGLGETDETAILTEXFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glGetDetailTexFuncSGIS")) == NULL) || r;
+  r = ((glDetailTexFuncSGIS = (PFNGLDETAILTEXFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glDetailTexFuncSGIS")) == NULL) || r;
+  r = ((glGetDetailTexFuncSGIS = (PFNGLGETDETAILTEXFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glGetDetailTexFuncSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15542,8 +15539,8 @@ static GLboolean _glewInit_GL_SGIS_fog_function ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFogFuncSGIS = (PFNGLFOGFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glFogFuncSGIS")) == NULL) || r;
-  r = ((glGetFogFuncSGIS = (PFNGLGETFOGFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glGetFogFuncSGIS")) == NULL) || r;
+  r = ((glFogFuncSGIS = (PFNGLFOGFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glFogFuncSGIS")) == NULL) || r;
+  r = ((glGetFogFuncSGIS = (PFNGLGETFOGFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glGetFogFuncSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15556,8 +15553,8 @@ static GLboolean _glewInit_GL_SGIS_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSampleMaskSGIS = (PFNGLSAMPLEMASKSGISPROC)glewGetProcSubtractress((const GLubyte*)"glSampleMaskSGIS")) == NULL) || r;
-  r = ((glSamplePatternSGIS = (PFNGLSAMPLEPATTERNSGISPROC)glewGetProcSubtractress((const GLubyte*)"glSamplePatternSGIS")) == NULL) || r;
+  r = ((glSampleMaskSGIS = (PFNGLSAMPLEMASKSGISPROC)glewGetProcAddress((const GLubyte*)"glSampleMaskSGIS")) == NULL) || r;
+  r = ((glSamplePatternSGIS = (PFNGLSAMPLEPATTERNSGISPROC)glewGetProcAddress((const GLubyte*)"glSamplePatternSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15570,10 +15567,10 @@ static GLboolean _glewInit_GL_SGIS_multitexture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glInterleavedTextureCoordSetsSGIS = (PFNGLINTERLEAVEDTEXTURECOORDSETSSGISPROC)glewGetProcSubtractress((const GLubyte*)"glInterleavedTextureCoordSetsSGIS")) == NULL) || r;
-  r = ((glSelectTextureCoordSetSGIS = (PFNGLSELECTTEXTURECOORDSETSGISPROC)glewGetProcSubtractress((const GLubyte*)"glSelectTextureCoordSetSGIS")) == NULL) || r;
-  r = ((glSelectTextureSGIS = (PFNGLSELECTTEXTURESGISPROC)glewGetProcSubtractress((const GLubyte*)"glSelectTextureSGIS")) == NULL) || r;
-  r = ((glSelectTextureTransformSGIS = (PFNGLSELECTTEXTURETRANSFORMSGISPROC)glewGetProcSubtractress((const GLubyte*)"glSelectTextureTransformSGIS")) == NULL) || r;
+  r = ((glInterleavedTextureCoordSetsSGIS = (PFNGLINTERLEAVEDTEXTURECOORDSETSSGISPROC)glewGetProcAddress((const GLubyte*)"glInterleavedTextureCoordSetsSGIS")) == NULL) || r;
+  r = ((glSelectTextureCoordSetSGIS = (PFNGLSELECTTEXTURECOORDSETSGISPROC)glewGetProcAddress((const GLubyte*)"glSelectTextureCoordSetSGIS")) == NULL) || r;
+  r = ((glSelectTextureSGIS = (PFNGLSELECTTEXTURESGISPROC)glewGetProcAddress((const GLubyte*)"glSelectTextureSGIS")) == NULL) || r;
+  r = ((glSelectTextureTransformSGIS = (PFNGLSELECTTEXTURETRANSFORMSGISPROC)glewGetProcAddress((const GLubyte*)"glSelectTextureTransformSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15586,7 +15583,7 @@ static GLboolean _glewInit_GL_SGIS_shared_multisample ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMultisampleSubRectPosSGIS = (PFNGLMULTISAMPLESUBRECTPOSSGISPROC)glewGetProcSubtractress((const GLubyte*)"glMultisampleSubRectPosSGIS")) == NULL) || r;
+  r = ((glMultisampleSubRectPosSGIS = (PFNGLMULTISAMPLESUBRECTPOSSGISPROC)glewGetProcAddress((const GLubyte*)"glMultisampleSubRectPosSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15599,8 +15596,8 @@ static GLboolean _glewInit_GL_SGIS_sharpen_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetSharpenTexFuncSGIS = (PFNGLGETSHARPENTEXFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glGetSharpenTexFuncSGIS")) == NULL) || r;
-  r = ((glSharpenTexFuncSGIS = (PFNGLSHARPENTEXFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glSharpenTexFuncSGIS")) == NULL) || r;
+  r = ((glGetSharpenTexFuncSGIS = (PFNGLGETSHARPENTEXFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glGetSharpenTexFuncSGIS")) == NULL) || r;
+  r = ((glSharpenTexFuncSGIS = (PFNGLSHARPENTEXFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glSharpenTexFuncSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15613,8 +15610,8 @@ static GLboolean _glewInit_GL_SGIS_texture4D ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTexImage4DSGIS = (PFNGLTEXIMAGE4DSGISPROC)glewGetProcSubtractress((const GLubyte*)"glTexImage4DSGIS")) == NULL) || r;
-  r = ((glTexSubImage4DSGIS = (PFNGLTEXSUBIMAGE4DSGISPROC)glewGetProcSubtractress((const GLubyte*)"glTexSubImage4DSGIS")) == NULL) || r;
+  r = ((glTexImage4DSGIS = (PFNGLTEXIMAGE4DSGISPROC)glewGetProcAddress((const GLubyte*)"glTexImage4DSGIS")) == NULL) || r;
+  r = ((glTexSubImage4DSGIS = (PFNGLTEXSUBIMAGE4DSGISPROC)glewGetProcAddress((const GLubyte*)"glTexSubImage4DSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15627,8 +15624,8 @@ static GLboolean _glewInit_GL_SGIS_texture_filter4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetTexFilterFuncSGIS = (PFNGLGETTEXFILTERFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glGetTexFilterFuncSGIS")) == NULL) || r;
-  r = ((glTexFilterFuncSGIS = (PFNGLTEXFILTERFUNCSGISPROC)glewGetProcSubtractress((const GLubyte*)"glTexFilterFuncSGIS")) == NULL) || r;
+  r = ((glGetTexFilterFuncSGIS = (PFNGLGETTEXFILTERFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glGetTexFilterFuncSGIS")) == NULL) || r;
+  r = ((glTexFilterFuncSGIS = (PFNGLTEXFILTERFUNCSGISPROC)glewGetProcAddress((const GLubyte*)"glTexFilterFuncSGIS")) == NULL) || r;
 
   return r;
 }
@@ -15641,12 +15638,12 @@ static GLboolean _glewInit_GL_SGIX_async ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAsyncMarkerSGIX = (PFNGLASYNCMARKERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glAsyncMarkerSGIX")) == NULL) || r;
-  r = ((glDeleteAsyncMarkersSGIX = (PFNGLDELETEASYNCMARKERSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteAsyncMarkersSGIX")) == NULL) || r;
-  r = ((glFinishAsyncSGIX = (PFNGLFINISHASYNCSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFinishAsyncSGIX")) == NULL) || r;
-  r = ((glGenAsyncMarkersSGIX = (PFNGLGENASYNCMARKERSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGenAsyncMarkersSGIX")) == NULL) || r;
-  r = ((glIsAsyncMarkerSGIX = (PFNGLISASYNCMARKERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glIsAsyncMarkerSGIX")) == NULL) || r;
-  r = ((glPollAsyncSGIX = (PFNGLPOLLASYNCSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glPollAsyncSGIX")) == NULL) || r;
+  r = ((glAsyncMarkerSGIX = (PFNGLASYNCMARKERSGIXPROC)glewGetProcAddress((const GLubyte*)"glAsyncMarkerSGIX")) == NULL) || r;
+  r = ((glDeleteAsyncMarkersSGIX = (PFNGLDELETEASYNCMARKERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glDeleteAsyncMarkersSGIX")) == NULL) || r;
+  r = ((glFinishAsyncSGIX = (PFNGLFINISHASYNCSGIXPROC)glewGetProcAddress((const GLubyte*)"glFinishAsyncSGIX")) == NULL) || r;
+  r = ((glGenAsyncMarkersSGIX = (PFNGLGENASYNCMARKERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glGenAsyncMarkersSGIX")) == NULL) || r;
+  r = ((glIsAsyncMarkerSGIX = (PFNGLISASYNCMARKERSGIXPROC)glewGetProcAddress((const GLubyte*)"glIsAsyncMarkerSGIX")) == NULL) || r;
+  r = ((glPollAsyncSGIX = (PFNGLPOLLASYNCSGIXPROC)glewGetProcAddress((const GLubyte*)"glPollAsyncSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15659,8 +15656,8 @@ static GLboolean _glewInit_GL_SGIX_datapipe ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSubtractressSpace = (PFNGLADDRESSSPACEPROC)glewGetProcSubtractress((const GLubyte*)"glSubtractressSpace")) == NULL) || r;
-  r = ((glDataPipe = (PFNGLDATAPIPEPROC)glewGetProcSubtractress((const GLubyte*)"glDataPipe")) == NULL) || r;
+  r = ((glAddressSpace = (PFNGLADDRESSSPACEPROC)glewGetProcAddress((const GLubyte*)"glAddressSpace")) == NULL) || r;
+  r = ((glDataPipe = (PFNGLDATAPIPEPROC)glewGetProcAddress((const GLubyte*)"glDataPipe")) == NULL) || r;
 
   return r;
 }
@@ -15673,7 +15670,7 @@ static GLboolean _glewInit_GL_SGIX_flush_raster ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFlushRasterSGIX = (PFNGLFLUSHRASTERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFlushRasterSGIX")) == NULL) || r;
+  r = ((glFlushRasterSGIX = (PFNGLFLUSHRASTERSGIXPROC)glewGetProcAddress((const GLubyte*)"glFlushRasterSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15686,8 +15683,8 @@ static GLboolean _glewInit_GL_SGIX_fog_layers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFogLayersSGIX = (PFNGLFOGLAYERSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFogLayersSGIX")) == NULL) || r;
-  r = ((glGetFogLayersSGIX = (PFNGLGETFOGLAYERSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetFogLayersSGIX")) == NULL) || r;
+  r = ((glFogLayersSGIX = (PFNGLFOGLAYERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glFogLayersSGIX")) == NULL) || r;
+  r = ((glGetFogLayersSGIX = (PFNGLGETFOGLAYERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetFogLayersSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15700,7 +15697,7 @@ static GLboolean _glewInit_GL_SGIX_fog_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTextureFogSGIX = (PFNGLTEXTUREFOGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glTextureFogSGIX")) == NULL) || r;
+  r = ((glTextureFogSGIX = (PFNGLTEXTUREFOGSGIXPROC)glewGetProcAddress((const GLubyte*)"glTextureFogSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15713,23 +15710,23 @@ static GLboolean _glewInit_GL_SGIX_fragment_specular_lighting ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFragmentColorMaterialSGIX = (PFNGLFRAGMENTCOLORMATERIALSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentColorMaterialSGIX")) == NULL) || r;
-  r = ((glFragmentLightModelfSGIX = (PFNGLFRAGMENTLIGHTMODELFSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModelfSGIX")) == NULL) || r;
-  r = ((glFragmentLightModelfvSGIX = (PFNGLFRAGMENTLIGHTMODELFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModelfvSGIX")) == NULL) || r;
-  r = ((glFragmentLightModeliSGIX = (PFNGLFRAGMENTLIGHTMODELISGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModeliSGIX")) == NULL) || r;
-  r = ((glFragmentLightModelivSGIX = (PFNGLFRAGMENTLIGHTMODELIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightModelivSGIX")) == NULL) || r;
-  r = ((glFragmentLightfSGIX = (PFNGLFRAGMENTLIGHTFSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightfSGIX")) == NULL) || r;
-  r = ((glFragmentLightfvSGIX = (PFNGLFRAGMENTLIGHTFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightfvSGIX")) == NULL) || r;
-  r = ((glFragmentLightiSGIX = (PFNGLFRAGMENTLIGHTISGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightiSGIX")) == NULL) || r;
-  r = ((glFragmentLightivSGIX = (PFNGLFRAGMENTLIGHTIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentLightivSGIX")) == NULL) || r;
-  r = ((glFragmentMaterialfSGIX = (PFNGLFRAGMENTMATERIALFSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialfSGIX")) == NULL) || r;
-  r = ((glFragmentMaterialfvSGIX = (PFNGLFRAGMENTMATERIALFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialfvSGIX")) == NULL) || r;
-  r = ((glFragmentMaterialiSGIX = (PFNGLFRAGMENTMATERIALISGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialiSGIX")) == NULL) || r;
-  r = ((glFragmentMaterialivSGIX = (PFNGLFRAGMENTMATERIALIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFragmentMaterialivSGIX")) == NULL) || r;
-  r = ((glGetFragmentLightfvSGIX = (PFNGLGETFRAGMENTLIGHTFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentLightfvSGIX")) == NULL) || r;
-  r = ((glGetFragmentLightivSGIX = (PFNGLGETFRAGMENTLIGHTIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentLightivSGIX")) == NULL) || r;
-  r = ((glGetFragmentMaterialfvSGIX = (PFNGLGETFRAGMENTMATERIALFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentMaterialfvSGIX")) == NULL) || r;
-  r = ((glGetFragmentMaterialivSGIX = (PFNGLGETFRAGMENTMATERIALIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetFragmentMaterialivSGIX")) == NULL) || r;
+  r = ((glFragmentColorMaterialSGIX = (PFNGLFRAGMENTCOLORMATERIALSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentColorMaterialSGIX")) == NULL) || r;
+  r = ((glFragmentLightModelfSGIX = (PFNGLFRAGMENTLIGHTMODELFSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModelfSGIX")) == NULL) || r;
+  r = ((glFragmentLightModelfvSGIX = (PFNGLFRAGMENTLIGHTMODELFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModelfvSGIX")) == NULL) || r;
+  r = ((glFragmentLightModeliSGIX = (PFNGLFRAGMENTLIGHTMODELISGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModeliSGIX")) == NULL) || r;
+  r = ((glFragmentLightModelivSGIX = (PFNGLFRAGMENTLIGHTMODELIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightModelivSGIX")) == NULL) || r;
+  r = ((glFragmentLightfSGIX = (PFNGLFRAGMENTLIGHTFSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightfSGIX")) == NULL) || r;
+  r = ((glFragmentLightfvSGIX = (PFNGLFRAGMENTLIGHTFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightfvSGIX")) == NULL) || r;
+  r = ((glFragmentLightiSGIX = (PFNGLFRAGMENTLIGHTISGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightiSGIX")) == NULL) || r;
+  r = ((glFragmentLightivSGIX = (PFNGLFRAGMENTLIGHTIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentLightivSGIX")) == NULL) || r;
+  r = ((glFragmentMaterialfSGIX = (PFNGLFRAGMENTMATERIALFSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialfSGIX")) == NULL) || r;
+  r = ((glFragmentMaterialfvSGIX = (PFNGLFRAGMENTMATERIALFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialfvSGIX")) == NULL) || r;
+  r = ((glFragmentMaterialiSGIX = (PFNGLFRAGMENTMATERIALISGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialiSGIX")) == NULL) || r;
+  r = ((glFragmentMaterialivSGIX = (PFNGLFRAGMENTMATERIALIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glFragmentMaterialivSGIX")) == NULL) || r;
+  r = ((glGetFragmentLightfvSGIX = (PFNGLGETFRAGMENTLIGHTFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentLightfvSGIX")) == NULL) || r;
+  r = ((glGetFragmentLightivSGIX = (PFNGLGETFRAGMENTLIGHTIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentLightivSGIX")) == NULL) || r;
+  r = ((glGetFragmentMaterialfvSGIX = (PFNGLGETFRAGMENTMATERIALFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentMaterialfvSGIX")) == NULL) || r;
+  r = ((glGetFragmentMaterialivSGIX = (PFNGLGETFRAGMENTMATERIALIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetFragmentMaterialivSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15742,7 +15739,7 @@ static GLboolean _glewInit_GL_SGIX_framezoom ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFrameZoomSGIX = (PFNGLFRAMEZOOMSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glFrameZoomSGIX")) == NULL) || r;
+  r = ((glFrameZoomSGIX = (PFNGLFRAMEZOOMSGIXPROC)glewGetProcAddress((const GLubyte*)"glFrameZoomSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15755,7 +15752,7 @@ static GLboolean _glewInit_GL_SGIX_igloo_interface ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glIglooInterfaceSGIX = (PFNGLIGLOOINTERFACESGIXPROC)glewGetProcSubtractress((const GLubyte*)"glIglooInterfaceSGIX")) == NULL) || r;
+  r = ((glIglooInterfaceSGIX = (PFNGLIGLOOINTERFACESGIXPROC)glewGetProcAddress((const GLubyte*)"glIglooInterfaceSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15768,17 +15765,17 @@ static GLboolean _glewInit_GL_SGIX_mpeg1 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAllocMPEGPredictorsSGIX = (PFNGLALLOCMPEGPREDICTORSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glAllocMPEGPredictorsSGIX")) == NULL) || r;
-  r = ((glDeleteMPEGPredictorsSGIX = (PFNGLDELETEMPEGPREDICTORSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteMPEGPredictorsSGIX")) == NULL) || r;
-  r = ((glGenMPEGPredictorsSGIX = (PFNGLGENMPEGPREDICTORSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGenMPEGPredictorsSGIX")) == NULL) || r;
-  r = ((glGetMPEGParameterfvSGIX = (PFNGLGETMPEGPARAMETERFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetMPEGParameterfvSGIX")) == NULL) || r;
-  r = ((glGetMPEGParameterivSGIX = (PFNGLGETMPEGPARAMETERIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetMPEGParameterivSGIX")) == NULL) || r;
-  r = ((glGetMPEGPredictorSGIX = (PFNGLGETMPEGPREDICTORSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetMPEGPredictorSGIX")) == NULL) || r;
-  r = ((glGetMPEGQuantTableubv = (PFNGLGETMPEGQUANTTABLEUBVPROC)glewGetProcSubtractress((const GLubyte*)"glGetMPEGQuantTableubv")) == NULL) || r;
-  r = ((glIsMPEGPredictorSGIX = (PFNGLISMPEGPREDICTORSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glIsMPEGPredictorSGIX")) == NULL) || r;
-  r = ((glMPEGPredictorSGIX = (PFNGLMPEGPREDICTORSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glMPEGPredictorSGIX")) == NULL) || r;
-  r = ((glMPEGQuantTableubv = (PFNGLMPEGQUANTTABLEUBVPROC)glewGetProcSubtractress((const GLubyte*)"glMPEGQuantTableubv")) == NULL) || r;
-  r = ((glSwapMPEGPredictorsSGIX = (PFNGLSWAPMPEGPREDICTORSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glSwapMPEGPredictorsSGIX")) == NULL) || r;
+  r = ((glAllocMPEGPredictorsSGIX = (PFNGLALLOCMPEGPREDICTORSSGIXPROC)glewGetProcAddress((const GLubyte*)"glAllocMPEGPredictorsSGIX")) == NULL) || r;
+  r = ((glDeleteMPEGPredictorsSGIX = (PFNGLDELETEMPEGPREDICTORSSGIXPROC)glewGetProcAddress((const GLubyte*)"glDeleteMPEGPredictorsSGIX")) == NULL) || r;
+  r = ((glGenMPEGPredictorsSGIX = (PFNGLGENMPEGPREDICTORSSGIXPROC)glewGetProcAddress((const GLubyte*)"glGenMPEGPredictorsSGIX")) == NULL) || r;
+  r = ((glGetMPEGParameterfvSGIX = (PFNGLGETMPEGPARAMETERFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetMPEGParameterfvSGIX")) == NULL) || r;
+  r = ((glGetMPEGParameterivSGIX = (PFNGLGETMPEGPARAMETERIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetMPEGParameterivSGIX")) == NULL) || r;
+  r = ((glGetMPEGPredictorSGIX = (PFNGLGETMPEGPREDICTORSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetMPEGPredictorSGIX")) == NULL) || r;
+  r = ((glGetMPEGQuantTableubv = (PFNGLGETMPEGQUANTTABLEUBVPROC)glewGetProcAddress((const GLubyte*)"glGetMPEGQuantTableubv")) == NULL) || r;
+  r = ((glIsMPEGPredictorSGIX = (PFNGLISMPEGPREDICTORSGIXPROC)glewGetProcAddress((const GLubyte*)"glIsMPEGPredictorSGIX")) == NULL) || r;
+  r = ((glMPEGPredictorSGIX = (PFNGLMPEGPREDICTORSGIXPROC)glewGetProcAddress((const GLubyte*)"glMPEGPredictorSGIX")) == NULL) || r;
+  r = ((glMPEGQuantTableubv = (PFNGLMPEGQUANTTABLEUBVPROC)glewGetProcAddress((const GLubyte*)"glMPEGQuantTableubv")) == NULL) || r;
+  r = ((glSwapMPEGPredictorsSGIX = (PFNGLSWAPMPEGPREDICTORSSGIXPROC)glewGetProcAddress((const GLubyte*)"glSwapMPEGPredictorsSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15791,10 +15788,10 @@ static GLboolean _glewInit_GL_SGIX_nonlinear_lighting_pervertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetNonlinLightfvSGIX = (PFNGLGETNONLINLIGHTFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetNonlinLightfvSGIX")) == NULL) || r;
-  r = ((glGetNonlinMaterialfvSGIX = (PFNGLGETNONLINMATERIALFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetNonlinMaterialfvSGIX")) == NULL) || r;
-  r = ((glNonlinLightfvSGIX = (PFNGLNONLINLIGHTFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glNonlinLightfvSGIX")) == NULL) || r;
-  r = ((glNonlinMaterialfvSGIX = (PFNGLNONLINMATERIALFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glNonlinMaterialfvSGIX")) == NULL) || r;
+  r = ((glGetNonlinLightfvSGIX = (PFNGLGETNONLINLIGHTFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetNonlinLightfvSGIX")) == NULL) || r;
+  r = ((glGetNonlinMaterialfvSGIX = (PFNGLGETNONLINMATERIALFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetNonlinMaterialfvSGIX")) == NULL) || r;
+  r = ((glNonlinLightfvSGIX = (PFNGLNONLINLIGHTFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glNonlinLightfvSGIX")) == NULL) || r;
+  r = ((glNonlinMaterialfvSGIX = (PFNGLNONLINMATERIALFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glNonlinMaterialfvSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15807,7 +15804,7 @@ static GLboolean _glewInit_GL_SGIX_pixel_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glPixelTexGenSGIX = (PFNGLPIXELTEXGENSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTexGenSGIX")) == NULL) || r;
+  r = ((glPixelTexGenSGIX = (PFNGLPIXELTEXGENSGIXPROC)glewGetProcAddress((const GLubyte*)"glPixelTexGenSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15820,8 +15817,8 @@ static GLboolean _glewInit_GL_SGIX_polynomial_ffd ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glDeformSGIX = (PFNGLDEFORMSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glDeformSGIX")) == NULL) || r;
-  r = ((glLoadIdentityDeformationMapSGIX = (PFNGLLOADIDENTITYDEFORMATIONMAPSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glLoadIdentityDeformationMapSGIX")) == NULL) || r;
+  r = ((glDeformSGIX = (PFNGLDEFORMSGIXPROC)glewGetProcAddress((const GLubyte*)"glDeformSGIX")) == NULL) || r;
+  r = ((glLoadIdentityDeformationMapSGIX = (PFNGLLOADIDENTITYDEFORMATIONMAPSGIXPROC)glewGetProcAddress((const GLubyte*)"glLoadIdentityDeformationMapSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15834,8 +15831,8 @@ static GLboolean _glewInit_GL_SGIX_quad_mesh ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glMeshBreadthSGIX = (PFNGLMESHBREADTHSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glMeshBreadthSGIX")) == NULL) || r;
-  r = ((glMeshStrideSGIX = (PFNGLMESHSTRIDESGIXPROC)glewGetProcSubtractress((const GLubyte*)"glMeshStrideSGIX")) == NULL) || r;
+  r = ((glMeshBreadthSGIX = (PFNGLMESHBREADTHSGIXPROC)glewGetProcAddress((const GLubyte*)"glMeshBreadthSGIX")) == NULL) || r;
+  r = ((glMeshStrideSGIX = (PFNGLMESHSTRIDESGIXPROC)glewGetProcAddress((const GLubyte*)"glMeshStrideSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15848,7 +15845,7 @@ static GLboolean _glewInit_GL_SGIX_reference_plane ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glReferencePlaneSGIX = (PFNGLREFERENCEPLANESGIXPROC)glewGetProcSubtractress((const GLubyte*)"glReferencePlaneSGIX")) == NULL) || r;
+  r = ((glReferencePlaneSGIX = (PFNGLREFERENCEPLANESGIXPROC)glewGetProcAddress((const GLubyte*)"glReferencePlaneSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15861,10 +15858,10 @@ static GLboolean _glewInit_GL_SGIX_sprite ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSpriteParameterfSGIX = (PFNGLSPRITEPARAMETERFSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glSpriteParameterfSGIX")) == NULL) || r;
-  r = ((glSpriteParameterfvSGIX = (PFNGLSPRITEPARAMETERFVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glSpriteParameterfvSGIX")) == NULL) || r;
-  r = ((glSpriteParameteriSGIX = (PFNGLSPRITEPARAMETERISGIXPROC)glewGetProcSubtractress((const GLubyte*)"glSpriteParameteriSGIX")) == NULL) || r;
-  r = ((glSpriteParameterivSGIX = (PFNGLSPRITEPARAMETERIVSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glSpriteParameterivSGIX")) == NULL) || r;
+  r = ((glSpriteParameterfSGIX = (PFNGLSPRITEPARAMETERFSGIXPROC)glewGetProcAddress((const GLubyte*)"glSpriteParameterfSGIX")) == NULL) || r;
+  r = ((glSpriteParameterfvSGIX = (PFNGLSPRITEPARAMETERFVSGIXPROC)glewGetProcAddress((const GLubyte*)"glSpriteParameterfvSGIX")) == NULL) || r;
+  r = ((glSpriteParameteriSGIX = (PFNGLSPRITEPARAMETERISGIXPROC)glewGetProcAddress((const GLubyte*)"glSpriteParameteriSGIX")) == NULL) || r;
+  r = ((glSpriteParameterivSGIX = (PFNGLSPRITEPARAMETERIVSGIXPROC)glewGetProcAddress((const GLubyte*)"glSpriteParameterivSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15877,7 +15874,7 @@ static GLboolean _glewInit_GL_SGIX_tag_sample_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glTagSampleBufferSGIX = (PFNGLTAGSAMPLEBUFFERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glTagSampleBufferSGIX")) == NULL) || r;
+  r = ((glTagSampleBufferSGIX = (PFNGLTAGSAMPLEBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glTagSampleBufferSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15890,8 +15887,8 @@ static GLboolean _glewInit_GL_SGIX_vector_ops ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetVectorOperationSGIX = (PFNGLGETVECTOROPERATIONSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGetVectorOperationSGIX")) == NULL) || r;
-  r = ((glVectorOperationSGIX = (PFNGLVECTOROPERATIONSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glVectorOperationSGIX")) == NULL) || r;
+  r = ((glGetVectorOperationSGIX = (PFNGLGETVECTOROPERATIONSGIXPROC)glewGetProcAddress((const GLubyte*)"glGetVectorOperationSGIX")) == NULL) || r;
+  r = ((glVectorOperationSGIX = (PFNGLVECTOROPERATIONSGIXPROC)glewGetProcAddress((const GLubyte*)"glVectorOperationSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15904,12 +15901,12 @@ static GLboolean _glewInit_GL_SGIX_vertex_array_object ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glAreVertexArraysResidentSGIX = (PFNGLAREVERTEXARRAYSRESIDENTSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glAreVertexArraysResidentSGIX")) == NULL) || r;
-  r = ((glBindVertexArraySGIX = (PFNGLBINDVERTEXARRAYSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glBindVertexArraySGIX")) == NULL) || r;
-  r = ((glDeleteVertexArraysSGIX = (PFNGLDELETEVERTEXARRAYSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glDeleteVertexArraysSGIX")) == NULL) || r;
-  r = ((glGenVertexArraysSGIX = (PFNGLGENVERTEXARRAYSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glGenVertexArraysSGIX")) == NULL) || r;
-  r = ((glIsVertexArraySGIX = (PFNGLISVERTEXARRAYSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glIsVertexArraySGIX")) == NULL) || r;
-  r = ((glPrioritizeVertexArraysSGIX = (PFNGLPRIORITIZEVERTEXARRAYSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glPrioritizeVertexArraysSGIX")) == NULL) || r;
+  r = ((glAreVertexArraysResidentSGIX = (PFNGLAREVERTEXARRAYSRESIDENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glAreVertexArraysResidentSGIX")) == NULL) || r;
+  r = ((glBindVertexArraySGIX = (PFNGLBINDVERTEXARRAYSGIXPROC)glewGetProcAddress((const GLubyte*)"glBindVertexArraySGIX")) == NULL) || r;
+  r = ((glDeleteVertexArraysSGIX = (PFNGLDELETEVERTEXARRAYSSGIXPROC)glewGetProcAddress((const GLubyte*)"glDeleteVertexArraysSGIX")) == NULL) || r;
+  r = ((glGenVertexArraysSGIX = (PFNGLGENVERTEXARRAYSSGIXPROC)glewGetProcAddress((const GLubyte*)"glGenVertexArraysSGIX")) == NULL) || r;
+  r = ((glIsVertexArraySGIX = (PFNGLISVERTEXARRAYSGIXPROC)glewGetProcAddress((const GLubyte*)"glIsVertexArraySGIX")) == NULL) || r;
+  r = ((glPrioritizeVertexArraysSGIX = (PFNGLPRIORITIZEVERTEXARRAYSSGIXPROC)glewGetProcAddress((const GLubyte*)"glPrioritizeVertexArraysSGIX")) == NULL) || r;
 
   return r;
 }
@@ -15922,13 +15919,13 @@ static GLboolean _glewInit_GL_SGI_color_table ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColorTableParameterfvSGI = (PFNGLCOLORTABLEPARAMETERFVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glColorTableParameterfvSGI")) == NULL) || r;
-  r = ((glColorTableParameterivSGI = (PFNGLCOLORTABLEPARAMETERIVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glColorTableParameterivSGI")) == NULL) || r;
-  r = ((glColorTableSGI = (PFNGLCOLORTABLESGIPROC)glewGetProcSubtractress((const GLubyte*)"glColorTableSGI")) == NULL) || r;
-  r = ((glCopyColorTableSGI = (PFNGLCOPYCOLORTABLESGIPROC)glewGetProcSubtractress((const GLubyte*)"glCopyColorTableSGI")) == NULL) || r;
-  r = ((glGetColorTableParameterfvSGI = (PFNGLGETCOLORTABLEPARAMETERFVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableParameterfvSGI")) == NULL) || r;
-  r = ((glGetColorTableParameterivSGI = (PFNGLGETCOLORTABLEPARAMETERIVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableParameterivSGI")) == NULL) || r;
-  r = ((glGetColorTableSGI = (PFNGLGETCOLORTABLESGIPROC)glewGetProcSubtractress((const GLubyte*)"glGetColorTableSGI")) == NULL) || r;
+  r = ((glColorTableParameterfvSGI = (PFNGLCOLORTABLEPARAMETERFVSGIPROC)glewGetProcAddress((const GLubyte*)"glColorTableParameterfvSGI")) == NULL) || r;
+  r = ((glColorTableParameterivSGI = (PFNGLCOLORTABLEPARAMETERIVSGIPROC)glewGetProcAddress((const GLubyte*)"glColorTableParameterivSGI")) == NULL) || r;
+  r = ((glColorTableSGI = (PFNGLCOLORTABLESGIPROC)glewGetProcAddress((const GLubyte*)"glColorTableSGI")) == NULL) || r;
+  r = ((glCopyColorTableSGI = (PFNGLCOPYCOLORTABLESGIPROC)glewGetProcAddress((const GLubyte*)"glCopyColorTableSGI")) == NULL) || r;
+  r = ((glGetColorTableParameterfvSGI = (PFNGLGETCOLORTABLEPARAMETERFVSGIPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableParameterfvSGI")) == NULL) || r;
+  r = ((glGetColorTableParameterivSGI = (PFNGLGETCOLORTABLEPARAMETERIVSGIPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableParameterivSGI")) == NULL) || r;
+  r = ((glGetColorTableSGI = (PFNGLGETCOLORTABLESGIPROC)glewGetProcAddress((const GLubyte*)"glGetColorTableSGI")) == NULL) || r;
 
   return r;
 }
@@ -15941,13 +15938,13 @@ static GLboolean _glewInit_GL_SGI_fft ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGetPixelTransformParameterfvSGI = (PFNGLGETPIXELTRANSFORMPARAMETERFVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glGetPixelTransformParameterfvSGI")) == NULL) || r;
-  r = ((glGetPixelTransformParameterivSGI = (PFNGLGETPIXELTRANSFORMPARAMETERIVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glGetPixelTransformParameterivSGI")) == NULL) || r;
-  r = ((glPixelTransformParameterfSGI = (PFNGLPIXELTRANSFORMPARAMETERFSGIPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameterfSGI")) == NULL) || r;
-  r = ((glPixelTransformParameterfvSGI = (PFNGLPIXELTRANSFORMPARAMETERFVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameterfvSGI")) == NULL) || r;
-  r = ((glPixelTransformParameteriSGI = (PFNGLPIXELTRANSFORMPARAMETERISGIPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameteriSGI")) == NULL) || r;
-  r = ((glPixelTransformParameterivSGI = (PFNGLPIXELTRANSFORMPARAMETERIVSGIPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformParameterivSGI")) == NULL) || r;
-  r = ((glPixelTransformSGI = (PFNGLPIXELTRANSFORMSGIPROC)glewGetProcSubtractress((const GLubyte*)"glPixelTransformSGI")) == NULL) || r;
+  r = ((glGetPixelTransformParameterfvSGI = (PFNGLGETPIXELTRANSFORMPARAMETERFVSGIPROC)glewGetProcAddress((const GLubyte*)"glGetPixelTransformParameterfvSGI")) == NULL) || r;
+  r = ((glGetPixelTransformParameterivSGI = (PFNGLGETPIXELTRANSFORMPARAMETERIVSGIPROC)glewGetProcAddress((const GLubyte*)"glGetPixelTransformParameterivSGI")) == NULL) || r;
+  r = ((glPixelTransformParameterfSGI = (PFNGLPIXELTRANSFORMPARAMETERFSGIPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameterfSGI")) == NULL) || r;
+  r = ((glPixelTransformParameterfvSGI = (PFNGLPIXELTRANSFORMPARAMETERFVSGIPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameterfvSGI")) == NULL) || r;
+  r = ((glPixelTransformParameteriSGI = (PFNGLPIXELTRANSFORMPARAMETERISGIPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameteriSGI")) == NULL) || r;
+  r = ((glPixelTransformParameterivSGI = (PFNGLPIXELTRANSFORMPARAMETERIVSGIPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformParameterivSGI")) == NULL) || r;
+  r = ((glPixelTransformSGI = (PFNGLPIXELTRANSFORMSGIPROC)glewGetProcAddress((const GLubyte*)"glPixelTransformSGI")) == NULL) || r;
 
   return r;
 }
@@ -15960,7 +15957,7 @@ static GLboolean _glewInit_GL_SUNX_constant_data ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glFinishTextureSUNX = (PFNGLFINISHTEXTURESUNXPROC)glewGetProcSubtractress((const GLubyte*)"glFinishTextureSUNX")) == NULL) || r;
+  r = ((glFinishTextureSUNX = (PFNGLFINISHTEXTURESUNXPROC)glewGetProcAddress((const GLubyte*)"glFinishTextureSUNX")) == NULL) || r;
 
   return r;
 }
@@ -15973,14 +15970,14 @@ static GLboolean _glewInit_GL_SUN_global_alpha ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glGlobalAlphaFactorbSUN = (PFNGLGLOBALALPHAFACTORBSUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactorbSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactordSUN = (PFNGLGLOBALALPHAFACTORDSUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactordSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactorfSUN = (PFNGLGLOBALALPHAFACTORFSUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactorfSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactoriSUN = (PFNGLGLOBALALPHAFACTORISUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactoriSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactorsSUN = (PFNGLGLOBALALPHAFACTORSSUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactorsSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactorubSUN = (PFNGLGLOBALALPHAFACTORUBSUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactorubSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactoruiSUN = (PFNGLGLOBALALPHAFACTORUISUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactoruiSUN")) == NULL) || r;
-  r = ((glGlobalAlphaFactorusSUN = (PFNGLGLOBALALPHAFACTORUSSUNPROC)glewGetProcSubtractress((const GLubyte*)"glGlobalAlphaFactorusSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactorbSUN = (PFNGLGLOBALALPHAFACTORBSUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactorbSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactordSUN = (PFNGLGLOBALALPHAFACTORDSUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactordSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactorfSUN = (PFNGLGLOBALALPHAFACTORFSUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactorfSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactoriSUN = (PFNGLGLOBALALPHAFACTORISUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactoriSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactorsSUN = (PFNGLGLOBALALPHAFACTORSSUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactorsSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactorubSUN = (PFNGLGLOBALALPHAFACTORUBSUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactorubSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactoruiSUN = (PFNGLGLOBALALPHAFACTORUISUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactoruiSUN")) == NULL) || r;
+  r = ((glGlobalAlphaFactorusSUN = (PFNGLGLOBALALPHAFACTORUSSUNPROC)glewGetProcAddress((const GLubyte*)"glGlobalAlphaFactorusSUN")) == NULL) || r;
 
   return r;
 }
@@ -15993,7 +15990,7 @@ static GLboolean _glewInit_GL_SUN_read_video_pixels ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glReadVideoPixelsSUN = (PFNGLREADVIDEOPIXELSSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReadVideoPixelsSUN")) == NULL) || r;
+  r = ((glReadVideoPixelsSUN = (PFNGLREADVIDEOPIXELSSUNPROC)glewGetProcAddress((const GLubyte*)"glReadVideoPixelsSUN")) == NULL) || r;
 
   return r;
 }
@@ -16006,13 +16003,13 @@ static GLboolean _glewInit_GL_SUN_triangle_list ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glReplacementCodePointerSUN = (PFNGLREPLACEMENTCODEPOINTERSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodePointerSUN")) == NULL) || r;
-  r = ((glReplacementCodeubSUN = (PFNGLREPLACEMENTCODEUBSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeubSUN")) == NULL) || r;
-  r = ((glReplacementCodeubvSUN = (PFNGLREPLACEMENTCODEUBVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeubvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiSUN = (PFNGLREPLACEMENTCODEUISUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiSUN")) == NULL) || r;
-  r = ((glReplacementCodeuivSUN = (PFNGLREPLACEMENTCODEUIVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuivSUN")) == NULL) || r;
-  r = ((glReplacementCodeusSUN = (PFNGLREPLACEMENTCODEUSSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeusSUN")) == NULL) || r;
-  r = ((glReplacementCodeusvSUN = (PFNGLREPLACEMENTCODEUSVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeusvSUN")) == NULL) || r;
+  r = ((glReplacementCodePointerSUN = (PFNGLREPLACEMENTCODEPOINTERSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodePointerSUN")) == NULL) || r;
+  r = ((glReplacementCodeubSUN = (PFNGLREPLACEMENTCODEUBSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeubSUN")) == NULL) || r;
+  r = ((glReplacementCodeubvSUN = (PFNGLREPLACEMENTCODEUBVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeubvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiSUN = (PFNGLREPLACEMENTCODEUISUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiSUN")) == NULL) || r;
+  r = ((glReplacementCodeuivSUN = (PFNGLREPLACEMENTCODEUIVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuivSUN")) == NULL) || r;
+  r = ((glReplacementCodeusSUN = (PFNGLREPLACEMENTCODEUSSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeusSUN")) == NULL) || r;
+  r = ((glReplacementCodeusvSUN = (PFNGLREPLACEMENTCODEUSVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeusvSUN")) == NULL) || r;
 
   return r;
 }
@@ -16025,46 +16022,46 @@ static GLboolean _glewInit_GL_SUN_vertex ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glColor3fVertex3fSUN = (PFNGLCOLOR3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor3fVertex3fSUN")) == NULL) || r;
-  r = ((glColor3fVertex3fvSUN = (PFNGLCOLOR3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor3fVertex3fvSUN")) == NULL) || r;
-  r = ((glColor4fNormal3fVertex3fSUN = (PFNGLCOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor4fNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glColor4fNormal3fVertex3fvSUN = (PFNGLCOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor4fNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glColor4ubVertex2fSUN = (PFNGLCOLOR4UBVERTEX2FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor4ubVertex2fSUN")) == NULL) || r;
-  r = ((glColor4ubVertex2fvSUN = (PFNGLCOLOR4UBVERTEX2FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor4ubVertex2fvSUN")) == NULL) || r;
-  r = ((glColor4ubVertex3fSUN = (PFNGLCOLOR4UBVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor4ubVertex3fSUN")) == NULL) || r;
-  r = ((glColor4ubVertex3fvSUN = (PFNGLCOLOR4UBVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glColor4ubVertex3fvSUN")) == NULL) || r;
-  r = ((glNormal3fVertex3fSUN = (PFNGLNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glNormal3fVertex3fvSUN = (PFNGLNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiColor3fVertex3fSUN = (PFNGLREPLACEMENTCODEUICOLOR3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiColor3fVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiColor3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUICOLOR3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiColor3fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiColor4fNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUICOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiColor4fNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiColor4fNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUICOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiColor4fNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiColor4ubVertex3fSUN = (PFNGLREPLACEMENTCODEUICOLOR4UBVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiColor4ubVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiColor4ubVertex3fvSUN = (PFNGLREPLACEMENTCODEUICOLOR4UBVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiColor4ubVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUINORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUINORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FCOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FCOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiTexCoord2fVertex3fSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiTexCoord2fVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiTexCoord2fVertex3fvSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiTexCoord2fVertex3fvSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiVertex3fSUN = (PFNGLREPLACEMENTCODEUIVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiVertex3fSUN")) == NULL) || r;
-  r = ((glReplacementCodeuiVertex3fvSUN = (PFNGLREPLACEMENTCODEUIVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glReplacementCodeuiVertex3fvSUN")) == NULL) || r;
-  r = ((glTexCoord2fColor3fVertex3fSUN = (PFNGLTEXCOORD2FCOLOR3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fColor3fVertex3fSUN")) == NULL) || r;
-  r = ((glTexCoord2fColor3fVertex3fvSUN = (PFNGLTEXCOORD2FCOLOR3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fColor3fVertex3fvSUN")) == NULL) || r;
-  r = ((glTexCoord2fColor4fNormal3fVertex3fSUN = (PFNGLTEXCOORD2FCOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fColor4fNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glTexCoord2fColor4fNormal3fVertex3fvSUN = (PFNGLTEXCOORD2FCOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fColor4fNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glTexCoord2fColor4ubVertex3fSUN = (PFNGLTEXCOORD2FCOLOR4UBVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fColor4ubVertex3fSUN")) == NULL) || r;
-  r = ((glTexCoord2fColor4ubVertex3fvSUN = (PFNGLTEXCOORD2FCOLOR4UBVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fColor4ubVertex3fvSUN")) == NULL) || r;
-  r = ((glTexCoord2fNormal3fVertex3fSUN = (PFNGLTEXCOORD2FNORMAL3FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fNormal3fVertex3fSUN")) == NULL) || r;
-  r = ((glTexCoord2fNormal3fVertex3fvSUN = (PFNGLTEXCOORD2FNORMAL3FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fNormal3fVertex3fvSUN")) == NULL) || r;
-  r = ((glTexCoord2fVertex3fSUN = (PFNGLTEXCOORD2FVERTEX3FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fVertex3fSUN")) == NULL) || r;
-  r = ((glTexCoord2fVertex3fvSUN = (PFNGLTEXCOORD2FVERTEX3FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord2fVertex3fvSUN")) == NULL) || r;
-  r = ((glTexCoord4fColor4fNormal3fVertex4fSUN = (PFNGLTEXCOORD4FCOLOR4FNORMAL3FVERTEX4FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord4fColor4fNormal3fVertex4fSUN")) == NULL) || r;
-  r = ((glTexCoord4fColor4fNormal3fVertex4fvSUN = (PFNGLTEXCOORD4FCOLOR4FNORMAL3FVERTEX4FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord4fColor4fNormal3fVertex4fvSUN")) == NULL) || r;
-  r = ((glTexCoord4fVertex4fSUN = (PFNGLTEXCOORD4FVERTEX4FSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord4fVertex4fSUN")) == NULL) || r;
-  r = ((glTexCoord4fVertex4fvSUN = (PFNGLTEXCOORD4FVERTEX4FVSUNPROC)glewGetProcSubtractress((const GLubyte*)"glTexCoord4fVertex4fvSUN")) == NULL) || r;
+  r = ((glColor3fVertex3fSUN = (PFNGLCOLOR3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glColor3fVertex3fSUN")) == NULL) || r;
+  r = ((glColor3fVertex3fvSUN = (PFNGLCOLOR3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glColor3fVertex3fvSUN")) == NULL) || r;
+  r = ((glColor4fNormal3fVertex3fSUN = (PFNGLCOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glColor4fNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glColor4fNormal3fVertex3fvSUN = (PFNGLCOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glColor4fNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glColor4ubVertex2fSUN = (PFNGLCOLOR4UBVERTEX2FSUNPROC)glewGetProcAddress((const GLubyte*)"glColor4ubVertex2fSUN")) == NULL) || r;
+  r = ((glColor4ubVertex2fvSUN = (PFNGLCOLOR4UBVERTEX2FVSUNPROC)glewGetProcAddress((const GLubyte*)"glColor4ubVertex2fvSUN")) == NULL) || r;
+  r = ((glColor4ubVertex3fSUN = (PFNGLCOLOR4UBVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glColor4ubVertex3fSUN")) == NULL) || r;
+  r = ((glColor4ubVertex3fvSUN = (PFNGLCOLOR4UBVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glColor4ubVertex3fvSUN")) == NULL) || r;
+  r = ((glNormal3fVertex3fSUN = (PFNGLNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glNormal3fVertex3fvSUN = (PFNGLNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiColor3fVertex3fSUN = (PFNGLREPLACEMENTCODEUICOLOR3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiColor3fVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiColor3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUICOLOR3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiColor3fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiColor4fNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUICOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiColor4fNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiColor4fNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUICOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiColor4fNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiColor4ubVertex3fSUN = (PFNGLREPLACEMENTCODEUICOLOR4UBVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiColor4ubVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiColor4ubVertex3fvSUN = (PFNGLREPLACEMENTCODEUICOLOR4UBVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiColor4ubVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUINORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUINORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FCOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FCOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiTexCoord2fVertex3fSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiTexCoord2fVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiTexCoord2fVertex3fvSUN = (PFNGLREPLACEMENTCODEUITEXCOORD2FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiTexCoord2fVertex3fvSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiVertex3fSUN = (PFNGLREPLACEMENTCODEUIVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiVertex3fSUN")) == NULL) || r;
+  r = ((glReplacementCodeuiVertex3fvSUN = (PFNGLREPLACEMENTCODEUIVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glReplacementCodeuiVertex3fvSUN")) == NULL) || r;
+  r = ((glTexCoord2fColor3fVertex3fSUN = (PFNGLTEXCOORD2FCOLOR3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fColor3fVertex3fSUN")) == NULL) || r;
+  r = ((glTexCoord2fColor3fVertex3fvSUN = (PFNGLTEXCOORD2FCOLOR3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fColor3fVertex3fvSUN")) == NULL) || r;
+  r = ((glTexCoord2fColor4fNormal3fVertex3fSUN = (PFNGLTEXCOORD2FCOLOR4FNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fColor4fNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glTexCoord2fColor4fNormal3fVertex3fvSUN = (PFNGLTEXCOORD2FCOLOR4FNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fColor4fNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glTexCoord2fColor4ubVertex3fSUN = (PFNGLTEXCOORD2FCOLOR4UBVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fColor4ubVertex3fSUN")) == NULL) || r;
+  r = ((glTexCoord2fColor4ubVertex3fvSUN = (PFNGLTEXCOORD2FCOLOR4UBVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fColor4ubVertex3fvSUN")) == NULL) || r;
+  r = ((glTexCoord2fNormal3fVertex3fSUN = (PFNGLTEXCOORD2FNORMAL3FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fNormal3fVertex3fSUN")) == NULL) || r;
+  r = ((glTexCoord2fNormal3fVertex3fvSUN = (PFNGLTEXCOORD2FNORMAL3FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fNormal3fVertex3fvSUN")) == NULL) || r;
+  r = ((glTexCoord2fVertex3fSUN = (PFNGLTEXCOORD2FVERTEX3FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fVertex3fSUN")) == NULL) || r;
+  r = ((glTexCoord2fVertex3fvSUN = (PFNGLTEXCOORD2FVERTEX3FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord2fVertex3fvSUN")) == NULL) || r;
+  r = ((glTexCoord4fColor4fNormal3fVertex4fSUN = (PFNGLTEXCOORD4FCOLOR4FNORMAL3FVERTEX4FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord4fColor4fNormal3fVertex4fSUN")) == NULL) || r;
+  r = ((glTexCoord4fColor4fNormal3fVertex4fvSUN = (PFNGLTEXCOORD4FCOLOR4FNORMAL3FVERTEX4FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord4fColor4fNormal3fVertex4fvSUN")) == NULL) || r;
+  r = ((glTexCoord4fVertex4fSUN = (PFNGLTEXCOORD4FVERTEX4FSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord4fVertex4fSUN")) == NULL) || r;
+  r = ((glTexCoord4fVertex4fvSUN = (PFNGLTEXCOORD4FVERTEX4FVSUNPROC)glewGetProcAddress((const GLubyte*)"glTexCoord4fVertex4fvSUN")) == NULL) || r;
 
   return r;
 }
@@ -16077,7 +16074,7 @@ static GLboolean _glewInit_GL_WIN_swap_hint ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glSubtractSwapHintRectWIN = (PFNGLADDSWAPHINTRECTWINPROC)glewGetProcSubtractress((const GLubyte*)"glSubtractSwapHintRectWIN")) == NULL) || r;
+  r = ((glAddSwapHintRectWIN = (PFNGLADDSWAPHINTRECTWINPROC)glewGetProcAddress((const GLubyte*)"glAddSwapHintRectWIN")) == NULL) || r;
 
   return r;
 }
@@ -16170,7 +16167,7 @@ static GLenum GLEWAPIENTRY glewContextInit ()
   #ifdef _WIN32
   getString = glGetString;
   #else
-  getString = (PFNGLGETSTRINGPROC) glewGetProcSubtractress((const GLubyte*)"glGetString");
+  getString = (PFNGLGETSTRINGPROC) glewGetProcAddress((const GLubyte*)"glGetString");
   if (!getString)
     return GLEW_ERROR_NO_GL_VERSION;
   #endif
@@ -16231,14 +16228,14 @@ static GLenum GLEWAPIENTRY glewContextInit ()
     #ifdef _WIN32
     getIntegerv = glGetIntegerv;
     #else
-    getIntegerv = (PFNGLGETINTEGERVPROC) glewGetProcSubtractress((const GLubyte*)"glGetIntegerv");
+    getIntegerv = (PFNGLGETINTEGERVPROC) glewGetProcAddress((const GLubyte*)"glGetIntegerv");
     #endif
 
     if (getIntegerv)
       getIntegerv(GL_NUM_EXTENSIONS, &n);
 
     /* glGetStringi is OpenGL 3.0 */
-    getStringi = (PFNGLGETSTRINGIPROC) glewGetProcSubtractress((const GLubyte*)"glGetStringi");
+    getStringi = (PFNGLGETSTRINGIPROC) glewGetProcAddress((const GLubyte*)"glGetStringi");
     if (getStringi)
       for (i = 0; i<n; ++i)
       {
@@ -17671,29 +17668,29 @@ static GLboolean _glewInit_EGL_VERSION_1_0 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglChooseConfig = (PFNEGLCHOOSECONFIGPROC)glewGetProcSubtractress((const GLubyte*)"eglChooseConfig")) == NULL) || r;
-  r = ((eglCopyBuffers = (PFNEGLCOPYBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"eglCopyBuffers")) == NULL) || r;
-  r = ((eglCreateContext = (PFNEGLCREATECONTEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateContext")) == NULL) || r;
-  r = ((eglCreatePbufferSurface = (PFNEGLCREATEPBUFFERSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePbufferSurface")) == NULL) || r;
-  r = ((eglCreatePixmapSurface = (PFNEGLCREATEPIXMAPSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePixmapSurface")) == NULL) || r;
-  r = ((eglCreateWindowSurface = (PFNEGLCREATEWINDOWSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateWindowSurface")) == NULL) || r;
-  r = ((eglDestroyContext = (PFNEGLDESTROYCONTEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroyContext")) == NULL) || r;
-  r = ((eglDestroySurface = (PFNEGLDESTROYSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroySurface")) == NULL) || r;
-  r = ((eglGetConfigAttrib = (PFNEGLGETCONFIGATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"eglGetConfigAttrib")) == NULL) || r;
-  r = ((eglGetConfigs = (PFNEGLGETCONFIGSPROC)glewGetProcSubtractress((const GLubyte*)"eglGetConfigs")) == NULL) || r;
-  r = ((eglGetCurrentDisplay = (PFNEGLGETCURRENTDISPLAYPROC)glewGetProcSubtractress((const GLubyte*)"eglGetCurrentDisplay")) == NULL) || r;
-  r = ((eglGetCurrentSurface = (PFNEGLGETCURRENTSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglGetCurrentSurface")) == NULL) || r;
-  r = ((eglGetDisplay = (PFNEGLGETDISPLAYPROC)glewGetProcSubtractress((const GLubyte*)"eglGetDisplay")) == NULL) || r;
-  r = ((eglGetError = (PFNEGLGETERRORPROC)glewGetProcSubtractress((const GLubyte*)"eglGetError")) == NULL) || r;
-  r = ((eglInitialize = (PFNEGLINITIALIZEPROC)glewGetProcSubtractress((const GLubyte*)"eglInitialize")) == NULL) || r;
-  r = ((eglMakeCurrent = (PFNEGLMAKECURRENTPROC)glewGetProcSubtractress((const GLubyte*)"eglMakeCurrent")) == NULL) || r;
-  r = ((eglQueryContext = (PFNEGLQUERYCONTEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryContext")) == NULL) || r;
-  r = ((eglQueryString = (PFNEGLQUERYSTRINGPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryString")) == NULL) || r;
-  r = ((eglQuerySurface = (PFNEGLQUERYSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglQuerySurface")) == NULL) || r;
-  r = ((eglSwapBuffers = (PFNEGLSWAPBUFFERSPROC)glewGetProcSubtractress((const GLubyte*)"eglSwapBuffers")) == NULL) || r;
-  r = ((eglTerminate = (PFNEGLTERMINATEPROC)glewGetProcSubtractress((const GLubyte*)"eglTerminate")) == NULL) || r;
-  r = ((eglWaitGL = (PFNEGLWAITGLPROC)glewGetProcSubtractress((const GLubyte*)"eglWaitGL")) == NULL) || r;
-  r = ((eglWaitNative = (PFNEGLWAITNATIVEPROC)glewGetProcSubtractress((const GLubyte*)"eglWaitNative")) == NULL) || r;
+  r = ((eglChooseConfig = (PFNEGLCHOOSECONFIGPROC)glewGetProcAddress((const GLubyte*)"eglChooseConfig")) == NULL) || r;
+  r = ((eglCopyBuffers = (PFNEGLCOPYBUFFERSPROC)glewGetProcAddress((const GLubyte*)"eglCopyBuffers")) == NULL) || r;
+  r = ((eglCreateContext = (PFNEGLCREATECONTEXTPROC)glewGetProcAddress((const GLubyte*)"eglCreateContext")) == NULL) || r;
+  r = ((eglCreatePbufferSurface = (PFNEGLCREATEPBUFFERSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglCreatePbufferSurface")) == NULL) || r;
+  r = ((eglCreatePixmapSurface = (PFNEGLCREATEPIXMAPSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglCreatePixmapSurface")) == NULL) || r;
+  r = ((eglCreateWindowSurface = (PFNEGLCREATEWINDOWSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglCreateWindowSurface")) == NULL) || r;
+  r = ((eglDestroyContext = (PFNEGLDESTROYCONTEXTPROC)glewGetProcAddress((const GLubyte*)"eglDestroyContext")) == NULL) || r;
+  r = ((eglDestroySurface = (PFNEGLDESTROYSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglDestroySurface")) == NULL) || r;
+  r = ((eglGetConfigAttrib = (PFNEGLGETCONFIGATTRIBPROC)glewGetProcAddress((const GLubyte*)"eglGetConfigAttrib")) == NULL) || r;
+  r = ((eglGetConfigs = (PFNEGLGETCONFIGSPROC)glewGetProcAddress((const GLubyte*)"eglGetConfigs")) == NULL) || r;
+  r = ((eglGetCurrentDisplay = (PFNEGLGETCURRENTDISPLAYPROC)glewGetProcAddress((const GLubyte*)"eglGetCurrentDisplay")) == NULL) || r;
+  r = ((eglGetCurrentSurface = (PFNEGLGETCURRENTSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglGetCurrentSurface")) == NULL) || r;
+  r = ((eglGetDisplay = (PFNEGLGETDISPLAYPROC)glewGetProcAddress((const GLubyte*)"eglGetDisplay")) == NULL) || r;
+  r = ((eglGetError = (PFNEGLGETERRORPROC)glewGetProcAddress((const GLubyte*)"eglGetError")) == NULL) || r;
+  r = ((eglInitialize = (PFNEGLINITIALIZEPROC)glewGetProcAddress((const GLubyte*)"eglInitialize")) == NULL) || r;
+  r = ((eglMakeCurrent = (PFNEGLMAKECURRENTPROC)glewGetProcAddress((const GLubyte*)"eglMakeCurrent")) == NULL) || r;
+  r = ((eglQueryContext = (PFNEGLQUERYCONTEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryContext")) == NULL) || r;
+  r = ((eglQueryString = (PFNEGLQUERYSTRINGPROC)glewGetProcAddress((const GLubyte*)"eglQueryString")) == NULL) || r;
+  r = ((eglQuerySurface = (PFNEGLQUERYSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglQuerySurface")) == NULL) || r;
+  r = ((eglSwapBuffers = (PFNEGLSWAPBUFFERSPROC)glewGetProcAddress((const GLubyte*)"eglSwapBuffers")) == NULL) || r;
+  r = ((eglTerminate = (PFNEGLTERMINATEPROC)glewGetProcAddress((const GLubyte*)"eglTerminate")) == NULL) || r;
+  r = ((eglWaitGL = (PFNEGLWAITGLPROC)glewGetProcAddress((const GLubyte*)"eglWaitGL")) == NULL) || r;
+  r = ((eglWaitNative = (PFNEGLWAITNATIVEPROC)glewGetProcAddress((const GLubyte*)"eglWaitNative")) == NULL) || r;
 
   return r;
 }
@@ -17706,10 +17703,10 @@ static GLboolean _glewInit_EGL_VERSION_1_1 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglBindTexImage = (PFNEGLBINDTEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"eglBindTexImage")) == NULL) || r;
-  r = ((eglReleaseTexImage = (PFNEGLRELEASETEXIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"eglReleaseTexImage")) == NULL) || r;
-  r = ((eglSurfaceAttrib = (PFNEGLSURFACEATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"eglSurfaceAttrib")) == NULL) || r;
-  r = ((eglSwapInterval = (PFNEGLSWAPINTERVALPROC)glewGetProcSubtractress((const GLubyte*)"eglSwapInterval")) == NULL) || r;
+  r = ((eglBindTexImage = (PFNEGLBINDTEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"eglBindTexImage")) == NULL) || r;
+  r = ((eglReleaseTexImage = (PFNEGLRELEASETEXIMAGEPROC)glewGetProcAddress((const GLubyte*)"eglReleaseTexImage")) == NULL) || r;
+  r = ((eglSurfaceAttrib = (PFNEGLSURFACEATTRIBPROC)glewGetProcAddress((const GLubyte*)"eglSurfaceAttrib")) == NULL) || r;
+  r = ((eglSwapInterval = (PFNEGLSWAPINTERVALPROC)glewGetProcAddress((const GLubyte*)"eglSwapInterval")) == NULL) || r;
 
   return r;
 }
@@ -17722,11 +17719,11 @@ static GLboolean _glewInit_EGL_VERSION_1_2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglBindAPI = (PFNEGLBINDAPIPROC)glewGetProcSubtractress((const GLubyte*)"eglBindAPI")) == NULL) || r;
-  r = ((eglCreatePbufferFromClientBuffer = (PFNEGLCREATEPBUFFERFROMCLIENTBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePbufferFromClientBuffer")) == NULL) || r;
-  r = ((eglQueryAPI = (PFNEGLQUERYAPIPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryAPI")) == NULL) || r;
-  r = ((eglReleaseThread = (PFNEGLRELEASETHREADPROC)glewGetProcSubtractress((const GLubyte*)"eglReleaseThread")) == NULL) || r;
-  r = ((eglWaitClient = (PFNEGLWAITCLIENTPROC)glewGetProcSubtractress((const GLubyte*)"eglWaitClient")) == NULL) || r;
+  r = ((eglBindAPI = (PFNEGLBINDAPIPROC)glewGetProcAddress((const GLubyte*)"eglBindAPI")) == NULL) || r;
+  r = ((eglCreatePbufferFromClientBuffer = (PFNEGLCREATEPBUFFERFROMCLIENTBUFFERPROC)glewGetProcAddress((const GLubyte*)"eglCreatePbufferFromClientBuffer")) == NULL) || r;
+  r = ((eglQueryAPI = (PFNEGLQUERYAPIPROC)glewGetProcAddress((const GLubyte*)"eglQueryAPI")) == NULL) || r;
+  r = ((eglReleaseThread = (PFNEGLRELEASETHREADPROC)glewGetProcAddress((const GLubyte*)"eglReleaseThread")) == NULL) || r;
+  r = ((eglWaitClient = (PFNEGLWAITCLIENTPROC)glewGetProcAddress((const GLubyte*)"eglWaitClient")) == NULL) || r;
 
   return r;
 }
@@ -17739,7 +17736,7 @@ static GLboolean _glewInit_EGL_VERSION_1_4 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglGetCurrentContext = (PFNEGLGETCURRENTCONTEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglGetCurrentContext")) == NULL) || r;
+  r = ((eglGetCurrentContext = (PFNEGLGETCURRENTCONTEXTPROC)glewGetProcAddress((const GLubyte*)"eglGetCurrentContext")) == NULL) || r;
 
   return r;
 }
@@ -17752,16 +17749,16 @@ static GLboolean _glewInit_EGL_VERSION_1_5 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglClientWaitSync = (PFNEGLCLIENTWAITSYNCPROC)glewGetProcSubtractress((const GLubyte*)"eglClientWaitSync")) == NULL) || r;
-  r = ((eglCreateImage = (PFNEGLCREATEIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateImage")) == NULL) || r;
-  r = ((eglCreatePlatformPixmapSurface = (PFNEGLCREATEPLATFORMPIXMAPSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePlatformPixmapSurface")) == NULL) || r;
-  r = ((eglCreatePlatformWindowSurface = (PFNEGLCREATEPLATFORMWINDOWSURFACEPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePlatformWindowSurface")) == NULL) || r;
-  r = ((eglCreateSync = (PFNEGLCREATESYNCPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateSync")) == NULL) || r;
-  r = ((eglDestroyImage = (PFNEGLDESTROYIMAGEPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroyImage")) == NULL) || r;
-  r = ((eglDestroySync = (PFNEGLDESTROYSYNCPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroySync")) == NULL) || r;
-  r = ((eglGetPlatformDisplay = (PFNEGLGETPLATFORMDISPLAYPROC)glewGetProcSubtractress((const GLubyte*)"eglGetPlatformDisplay")) == NULL) || r;
-  r = ((eglGetSyncAttrib = (PFNEGLGETSYNCATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"eglGetSyncAttrib")) == NULL) || r;
-  r = ((eglWaitSync = (PFNEGLWAITSYNCPROC)glewGetProcSubtractress((const GLubyte*)"eglWaitSync")) == NULL) || r;
+  r = ((eglClientWaitSync = (PFNEGLCLIENTWAITSYNCPROC)glewGetProcAddress((const GLubyte*)"eglClientWaitSync")) == NULL) || r;
+  r = ((eglCreateImage = (PFNEGLCREATEIMAGEPROC)glewGetProcAddress((const GLubyte*)"eglCreateImage")) == NULL) || r;
+  r = ((eglCreatePlatformPixmapSurface = (PFNEGLCREATEPLATFORMPIXMAPSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglCreatePlatformPixmapSurface")) == NULL) || r;
+  r = ((eglCreatePlatformWindowSurface = (PFNEGLCREATEPLATFORMWINDOWSURFACEPROC)glewGetProcAddress((const GLubyte*)"eglCreatePlatformWindowSurface")) == NULL) || r;
+  r = ((eglCreateSync = (PFNEGLCREATESYNCPROC)glewGetProcAddress((const GLubyte*)"eglCreateSync")) == NULL) || r;
+  r = ((eglDestroyImage = (PFNEGLDESTROYIMAGEPROC)glewGetProcAddress((const GLubyte*)"eglDestroyImage")) == NULL) || r;
+  r = ((eglDestroySync = (PFNEGLDESTROYSYNCPROC)glewGetProcAddress((const GLubyte*)"eglDestroySync")) == NULL) || r;
+  r = ((eglGetPlatformDisplay = (PFNEGLGETPLATFORMDISPLAYPROC)glewGetProcAddress((const GLubyte*)"eglGetPlatformDisplay")) == NULL) || r;
+  r = ((eglGetSyncAttrib = (PFNEGLGETSYNCATTRIBPROC)glewGetProcAddress((const GLubyte*)"eglGetSyncAttrib")) == NULL) || r;
+  r = ((eglWaitSync = (PFNEGLWAITSYNCPROC)glewGetProcAddress((const GLubyte*)"eglWaitSync")) == NULL) || r;
 
   return r;
 }
@@ -17774,7 +17771,7 @@ static GLboolean _glewInit_EGL_ANDROID_blob_cache ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglSetBlobCacheFuncsANDROID = (PFNEGLSETBLOBCACHEFUNCSANDROIDPROC)glewGetProcSubtractress((const GLubyte*)"eglSetBlobCacheFuncsANDROID")) == NULL) || r;
+  r = ((eglSetBlobCacheFuncsANDROID = (PFNEGLSETBLOBCACHEFUNCSANDROIDPROC)glewGetProcAddress((const GLubyte*)"eglSetBlobCacheFuncsANDROID")) == NULL) || r;
 
   return r;
 }
@@ -17787,7 +17784,7 @@ static GLboolean _glewInit_EGL_ANDROID_create_native_client_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateNativeClientBufferANDROID = (PFNEGLCREATENATIVECLIENTBUFFERANDROIDPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateNativeClientBufferANDROID")) == NULL) || r;
+  r = ((eglCreateNativeClientBufferANDROID = (PFNEGLCREATENATIVECLIENTBUFFERANDROIDPROC)glewGetProcAddress((const GLubyte*)"eglCreateNativeClientBufferANDROID")) == NULL) || r;
 
   return r;
 }
@@ -17800,7 +17797,7 @@ static GLboolean _glewInit_EGL_ANDROID_native_fence_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglDupNativeFenceFDANDROID = (PFNEGLDUPNATIVEFENCEFDANDROIDPROC)glewGetProcSubtractress((const GLubyte*)"eglDupNativeFenceFDANDROID")) == NULL) || r;
+  r = ((eglDupNativeFenceFDANDROID = (PFNEGLDUPNATIVEFENCEFDANDROIDPROC)glewGetProcAddress((const GLubyte*)"eglDupNativeFenceFDANDROID")) == NULL) || r;
 
   return r;
 }
@@ -17813,7 +17810,7 @@ static GLboolean _glewInit_EGL_ANDROID_presentation_time ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglPresentationTimeANDROID = (PFNEGLPRESENTATIONTIMEANDROIDPROC)glewGetProcSubtractress((const GLubyte*)"eglPresentationTimeANDROID")) == NULL) || r;
+  r = ((eglPresentationTimeANDROID = (PFNEGLPRESENTATIONTIMEANDROIDPROC)glewGetProcAddress((const GLubyte*)"eglPresentationTimeANDROID")) == NULL) || r;
 
   return r;
 }
@@ -17826,7 +17823,7 @@ static GLboolean _glewInit_EGL_ANGLE_query_surface_pointer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQuerySurfacePointerANGLE = (PFNEGLQUERYSURFACEPOINTERANGLEPROC)glewGetProcSubtractress((const GLubyte*)"eglQuerySurfacePointerANGLE")) == NULL) || r;
+  r = ((eglQuerySurfacePointerANGLE = (PFNEGLQUERYSURFACEPOINTERANGLEPROC)glewGetProcAddress((const GLubyte*)"eglQuerySurfacePointerANGLE")) == NULL) || r;
 
   return r;
 }
@@ -17839,7 +17836,7 @@ static GLboolean _glewInit_EGL_EXT_device_enumeration ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQueryDevicesEXT = (PFNEGLQUERYDEVICESEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDevicesEXT")) == NULL) || r;
+  r = ((eglQueryDevicesEXT = (PFNEGLQUERYDEVICESEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryDevicesEXT")) == NULL) || r;
 
   return r;
 }
@@ -17852,9 +17849,9 @@ static GLboolean _glewInit_EGL_EXT_device_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQueryDeviceAttribEXT = (PFNEGLQUERYDEVICEATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDeviceAttribEXT")) == NULL) || r;
-  r = ((eglQueryDeviceStringEXT = (PFNEGLQUERYDEVICESTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDeviceStringEXT")) == NULL) || r;
-  r = ((eglQueryDisplayAttribEXT = (PFNEGLQUERYDISPLAYATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDisplayAttribEXT")) == NULL) || r;
+  r = ((eglQueryDeviceAttribEXT = (PFNEGLQUERYDEVICEATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryDeviceAttribEXT")) == NULL) || r;
+  r = ((eglQueryDeviceStringEXT = (PFNEGLQUERYDEVICESTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryDeviceStringEXT")) == NULL) || r;
+  r = ((eglQueryDisplayAttribEXT = (PFNEGLQUERYDISPLAYATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryDisplayAttribEXT")) == NULL) || r;
 
   return r;
 }
@@ -17867,8 +17864,8 @@ static GLboolean _glewInit_EGL_EXT_image_dma_buf_import_modifiers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQueryDmaBufFormatsEXT = (PFNEGLQUERYDMABUFFORMATSEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDmaBufFormatsEXT")) == NULL) || r;
-  r = ((eglQueryDmaBufModifiersEXT = (PFNEGLQUERYDMABUFMODIFIERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDmaBufModifiersEXT")) == NULL) || r;
+  r = ((eglQueryDmaBufFormatsEXT = (PFNEGLQUERYDMABUFFORMATSEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryDmaBufFormatsEXT")) == NULL) || r;
+  r = ((eglQueryDmaBufModifiersEXT = (PFNEGLQUERYDMABUFMODIFIERSEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryDmaBufModifiersEXT")) == NULL) || r;
 
   return r;
 }
@@ -17881,14 +17878,14 @@ static GLboolean _glewInit_EGL_EXT_output_base ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglGetOutputLayersEXT = (PFNEGLGETOUTPUTLAYERSEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglGetOutputLayersEXT")) == NULL) || r;
-  r = ((eglGetOutputPortsEXT = (PFNEGLGETOUTPUTPORTSEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglGetOutputPortsEXT")) == NULL) || r;
-  r = ((eglOutputLayerAttribEXT = (PFNEGLOUTPUTLAYERATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglOutputLayerAttribEXT")) == NULL) || r;
-  r = ((eglOutputPortAttribEXT = (PFNEGLOUTPUTPORTATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglOutputPortAttribEXT")) == NULL) || r;
-  r = ((eglQueryOutputLayerAttribEXT = (PFNEGLQUERYOUTPUTLAYERATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryOutputLayerAttribEXT")) == NULL) || r;
-  r = ((eglQueryOutputLayerStringEXT = (PFNEGLQUERYOUTPUTLAYERSTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryOutputLayerStringEXT")) == NULL) || r;
-  r = ((eglQueryOutputPortAttribEXT = (PFNEGLQUERYOUTPUTPORTATTRIBEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryOutputPortAttribEXT")) == NULL) || r;
-  r = ((eglQueryOutputPortStringEXT = (PFNEGLQUERYOUTPUTPORTSTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryOutputPortStringEXT")) == NULL) || r;
+  r = ((eglGetOutputLayersEXT = (PFNEGLGETOUTPUTLAYERSEXTPROC)glewGetProcAddress((const GLubyte*)"eglGetOutputLayersEXT")) == NULL) || r;
+  r = ((eglGetOutputPortsEXT = (PFNEGLGETOUTPUTPORTSEXTPROC)glewGetProcAddress((const GLubyte*)"eglGetOutputPortsEXT")) == NULL) || r;
+  r = ((eglOutputLayerAttribEXT = (PFNEGLOUTPUTLAYERATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"eglOutputLayerAttribEXT")) == NULL) || r;
+  r = ((eglOutputPortAttribEXT = (PFNEGLOUTPUTPORTATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"eglOutputPortAttribEXT")) == NULL) || r;
+  r = ((eglQueryOutputLayerAttribEXT = (PFNEGLQUERYOUTPUTLAYERATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryOutputLayerAttribEXT")) == NULL) || r;
+  r = ((eglQueryOutputLayerStringEXT = (PFNEGLQUERYOUTPUTLAYERSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryOutputLayerStringEXT")) == NULL) || r;
+  r = ((eglQueryOutputPortAttribEXT = (PFNEGLQUERYOUTPUTPORTATTRIBEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryOutputPortAttribEXT")) == NULL) || r;
+  r = ((eglQueryOutputPortStringEXT = (PFNEGLQUERYOUTPUTPORTSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"eglQueryOutputPortStringEXT")) == NULL) || r;
 
   return r;
 }
@@ -17901,9 +17898,9 @@ static GLboolean _glewInit_EGL_EXT_platform_base ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreatePlatformPixmapSurfaceEXT = (PFNEGLCREATEPLATFORMPIXMAPSURFACEEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePlatformPixmapSurfaceEXT")) == NULL) || r;
-  r = ((eglCreatePlatformWindowSurfaceEXT = (PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePlatformWindowSurfaceEXT")) == NULL) || r;
-  r = ((eglGetPlatformDisplayEXT = (PFNEGLGETPLATFORMDISPLAYEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglGetPlatformDisplayEXT")) == NULL) || r;
+  r = ((eglCreatePlatformPixmapSurfaceEXT = (PFNEGLCREATEPLATFORMPIXMAPSURFACEEXTPROC)glewGetProcAddress((const GLubyte*)"eglCreatePlatformPixmapSurfaceEXT")) == NULL) || r;
+  r = ((eglCreatePlatformWindowSurfaceEXT = (PFNEGLCREATEPLATFORMWINDOWSURFACEEXTPROC)glewGetProcAddress((const GLubyte*)"eglCreatePlatformWindowSurfaceEXT")) == NULL) || r;
+  r = ((eglGetPlatformDisplayEXT = (PFNEGLGETPLATFORMDISPLAYEXTPROC)glewGetProcAddress((const GLubyte*)"eglGetPlatformDisplayEXT")) == NULL) || r;
 
   return r;
 }
@@ -17916,7 +17913,7 @@ static GLboolean _glewInit_EGL_EXT_stream_consumer_egloutput ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglStreamConsumerOutputEXT = (PFNEGLSTREAMCONSUMEROUTPUTEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerOutputEXT")) == NULL) || r;
+  r = ((eglStreamConsumerOutputEXT = (PFNEGLSTREAMCONSUMEROUTPUTEXTPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerOutputEXT")) == NULL) || r;
 
   return r;
 }
@@ -17929,7 +17926,7 @@ static GLboolean _glewInit_EGL_EXT_swap_buffers_with_damage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglSwapBuffersWithDamageEXT = (PFNEGLSWAPBUFFERSWITHDAMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"eglSwapBuffersWithDamageEXT")) == NULL) || r;
+  r = ((eglSwapBuffersWithDamageEXT = (PFNEGLSWAPBUFFERSWITHDAMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"eglSwapBuffersWithDamageEXT")) == NULL) || r;
 
   return r;
 }
@@ -17942,7 +17939,7 @@ static GLboolean _glewInit_EGL_HI_clientpixmap ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreatePixmapSurfaceHI = (PFNEGLCREATEPIXMAPSURFACEHIPROC)glewGetProcSubtractress((const GLubyte*)"eglCreatePixmapSurfaceHI")) == NULL) || r;
+  r = ((eglCreatePixmapSurfaceHI = (PFNEGLCREATEPIXMAPSURFACEHIPROC)glewGetProcAddress((const GLubyte*)"eglCreatePixmapSurfaceHI")) == NULL) || r;
 
   return r;
 }
@@ -17955,7 +17952,7 @@ static GLboolean _glewInit_EGL_KHR_cl_event2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateSync64KHR = (PFNEGLCREATESYNC64KHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateSync64KHR")) == NULL) || r;
+  r = ((eglCreateSync64KHR = (PFNEGLCREATESYNC64KHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateSync64KHR")) == NULL) || r;
 
   return r;
 }
@@ -17968,9 +17965,9 @@ static GLboolean _glewInit_EGL_KHR_debug ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglDebugMessageControlKHR = (PFNEGLDEBUGMESSAGECONTROLKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglDebugMessageControlKHR")) == NULL) || r;
-  r = ((eglLabelObjectKHR = (PFNEGLLABELOBJECTKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglLabelObjectKHR")) == NULL) || r;
-  r = ((eglQueryDebugKHR = (PFNEGLQUERYDEBUGKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDebugKHR")) == NULL) || r;
+  r = ((eglDebugMessageControlKHR = (PFNEGLDEBUGMESSAGECONTROLKHRPROC)glewGetProcAddress((const GLubyte*)"eglDebugMessageControlKHR")) == NULL) || r;
+  r = ((eglLabelObjectKHR = (PFNEGLLABELOBJECTKHRPROC)glewGetProcAddress((const GLubyte*)"eglLabelObjectKHR")) == NULL) || r;
+  r = ((eglQueryDebugKHR = (PFNEGLQUERYDEBUGKHRPROC)glewGetProcAddress((const GLubyte*)"eglQueryDebugKHR")) == NULL) || r;
 
   return r;
 }
@@ -17983,8 +17980,8 @@ static GLboolean _glewInit_EGL_KHR_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateImageKHR = (PFNEGLCREATEIMAGEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateImageKHR")) == NULL) || r;
-  r = ((eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroyImageKHR")) == NULL) || r;
+  r = ((eglCreateImageKHR = (PFNEGLCREATEIMAGEKHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateImageKHR")) == NULL) || r;
+  r = ((eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC)glewGetProcAddress((const GLubyte*)"eglDestroyImageKHR")) == NULL) || r;
 
   return r;
 }
@@ -17997,8 +17994,8 @@ static GLboolean _glewInit_EGL_KHR_lock_surface ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglLockSurfaceKHR = (PFNEGLLOCKSURFACEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglLockSurfaceKHR")) == NULL) || r;
-  r = ((eglUnlockSurfaceKHR = (PFNEGLUNLOCKSURFACEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglUnlockSurfaceKHR")) == NULL) || r;
+  r = ((eglLockSurfaceKHR = (PFNEGLLOCKSURFACEKHRPROC)glewGetProcAddress((const GLubyte*)"eglLockSurfaceKHR")) == NULL) || r;
+  r = ((eglUnlockSurfaceKHR = (PFNEGLUNLOCKSURFACEKHRPROC)glewGetProcAddress((const GLubyte*)"eglUnlockSurfaceKHR")) == NULL) || r;
 
   return r;
 }
@@ -18011,7 +18008,7 @@ static GLboolean _glewInit_EGL_KHR_lock_surface3 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQuerySurface64KHR = (PFNEGLQUERYSURFACE64KHRPROC)glewGetProcSubtractress((const GLubyte*)"eglQuerySurface64KHR")) == NULL) || r;
+  r = ((eglQuerySurface64KHR = (PFNEGLQUERYSURFACE64KHRPROC)glewGetProcAddress((const GLubyte*)"eglQuerySurface64KHR")) == NULL) || r;
 
   return r;
 }
@@ -18024,7 +18021,7 @@ static GLboolean _glewInit_EGL_KHR_partial_update ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglSetDamageRegionKHR = (PFNEGLSETDAMAGEREGIONKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglSetDamageRegionKHR")) == NULL) || r;
+  r = ((eglSetDamageRegionKHR = (PFNEGLSETDAMAGEREGIONKHRPROC)glewGetProcAddress((const GLubyte*)"eglSetDamageRegionKHR")) == NULL) || r;
 
   return r;
 }
@@ -18037,11 +18034,11 @@ static GLboolean _glewInit_EGL_KHR_reusable_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglClientWaitSyncKHR = (PFNEGLCLIENTWAITSYNCKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglClientWaitSyncKHR")) == NULL) || r;
-  r = ((eglCreateSyncKHR = (PFNEGLCREATESYNCKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateSyncKHR")) == NULL) || r;
-  r = ((eglDestroySyncKHR = (PFNEGLDESTROYSYNCKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroySyncKHR")) == NULL) || r;
-  r = ((eglGetSyncAttribKHR = (PFNEGLGETSYNCATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglGetSyncAttribKHR")) == NULL) || r;
-  r = ((eglSignalSyncKHR = (PFNEGLSIGNALSYNCKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglSignalSyncKHR")) == NULL) || r;
+  r = ((eglClientWaitSyncKHR = (PFNEGLCLIENTWAITSYNCKHRPROC)glewGetProcAddress((const GLubyte*)"eglClientWaitSyncKHR")) == NULL) || r;
+  r = ((eglCreateSyncKHR = (PFNEGLCREATESYNCKHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateSyncKHR")) == NULL) || r;
+  r = ((eglDestroySyncKHR = (PFNEGLDESTROYSYNCKHRPROC)glewGetProcAddress((const GLubyte*)"eglDestroySyncKHR")) == NULL) || r;
+  r = ((eglGetSyncAttribKHR = (PFNEGLGETSYNCATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglGetSyncAttribKHR")) == NULL) || r;
+  r = ((eglSignalSyncKHR = (PFNEGLSIGNALSYNCKHRPROC)glewGetProcAddress((const GLubyte*)"eglSignalSyncKHR")) == NULL) || r;
 
   return r;
 }
@@ -18054,11 +18051,11 @@ static GLboolean _glewInit_EGL_KHR_stream ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateStreamKHR = (PFNEGLCREATESTREAMKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateStreamKHR")) == NULL) || r;
-  r = ((eglDestroyStreamKHR = (PFNEGLDESTROYSTREAMKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroyStreamKHR")) == NULL) || r;
-  r = ((eglQueryStreamKHR = (PFNEGLQUERYSTREAMKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryStreamKHR")) == NULL) || r;
-  r = ((eglQueryStreamu64KHR = (PFNEGLQUERYSTREAMU64KHRPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryStreamu64KHR")) == NULL) || r;
-  r = ((eglStreamAttribKHR = (PFNEGLSTREAMATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamAttribKHR")) == NULL) || r;
+  r = ((eglCreateStreamKHR = (PFNEGLCREATESTREAMKHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateStreamKHR")) == NULL) || r;
+  r = ((eglDestroyStreamKHR = (PFNEGLDESTROYSTREAMKHRPROC)glewGetProcAddress((const GLubyte*)"eglDestroyStreamKHR")) == NULL) || r;
+  r = ((eglQueryStreamKHR = (PFNEGLQUERYSTREAMKHRPROC)glewGetProcAddress((const GLubyte*)"eglQueryStreamKHR")) == NULL) || r;
+  r = ((eglQueryStreamu64KHR = (PFNEGLQUERYSTREAMU64KHRPROC)glewGetProcAddress((const GLubyte*)"eglQueryStreamu64KHR")) == NULL) || r;
+  r = ((eglStreamAttribKHR = (PFNEGLSTREAMATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglStreamAttribKHR")) == NULL) || r;
 
   return r;
 }
@@ -18071,11 +18068,11 @@ static GLboolean _glewInit_EGL_KHR_stream_attrib ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateStreamAttribKHR = (PFNEGLCREATESTREAMATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateStreamAttribKHR")) == NULL) || r;
-  r = ((eglQueryStreamAttribKHR = (PFNEGLQUERYSTREAMATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryStreamAttribKHR")) == NULL) || r;
-  r = ((eglSetStreamAttribKHR = (PFNEGLSETSTREAMATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglSetStreamAttribKHR")) == NULL) || r;
-  r = ((eglStreamConsumerAcquireAttribKHR = (PFNEGLSTREAMCONSUMERACQUIREATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerAcquireAttribKHR")) == NULL) || r;
-  r = ((eglStreamConsumerReleaseAttribKHR = (PFNEGLSTREAMCONSUMERRELEASEATTRIBKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerReleaseAttribKHR")) == NULL) || r;
+  r = ((eglCreateStreamAttribKHR = (PFNEGLCREATESTREAMATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateStreamAttribKHR")) == NULL) || r;
+  r = ((eglQueryStreamAttribKHR = (PFNEGLQUERYSTREAMATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglQueryStreamAttribKHR")) == NULL) || r;
+  r = ((eglSetStreamAttribKHR = (PFNEGLSETSTREAMATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglSetStreamAttribKHR")) == NULL) || r;
+  r = ((eglStreamConsumerAcquireAttribKHR = (PFNEGLSTREAMCONSUMERACQUIREATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerAcquireAttribKHR")) == NULL) || r;
+  r = ((eglStreamConsumerReleaseAttribKHR = (PFNEGLSTREAMCONSUMERRELEASEATTRIBKHRPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerReleaseAttribKHR")) == NULL) || r;
 
   return r;
 }
@@ -18088,9 +18085,9 @@ static GLboolean _glewInit_EGL_KHR_stream_consumer_gltexture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglStreamConsumerAcquireKHR = (PFNEGLSTREAMCONSUMERACQUIREKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerAcquireKHR")) == NULL) || r;
-  r = ((eglStreamConsumerGLTextureExternalKHR = (PFNEGLSTREAMCONSUMERGLTEXTUREEXTERNALKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerGLTextureExternalKHR")) == NULL) || r;
-  r = ((eglStreamConsumerReleaseKHR = (PFNEGLSTREAMCONSUMERRELEASEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerReleaseKHR")) == NULL) || r;
+  r = ((eglStreamConsumerAcquireKHR = (PFNEGLSTREAMCONSUMERACQUIREKHRPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerAcquireKHR")) == NULL) || r;
+  r = ((eglStreamConsumerGLTextureExternalKHR = (PFNEGLSTREAMCONSUMERGLTEXTUREEXTERNALKHRPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerGLTextureExternalKHR")) == NULL) || r;
+  r = ((eglStreamConsumerReleaseKHR = (PFNEGLSTREAMCONSUMERRELEASEKHRPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerReleaseKHR")) == NULL) || r;
 
   return r;
 }
@@ -18103,8 +18100,8 @@ static GLboolean _glewInit_EGL_KHR_stream_cross_process_fd ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateStreamFromFileDescriptorKHR = (PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateStreamFromFileDescriptorKHR")) == NULL) || r;
-  r = ((eglGetStreamFileDescriptorKHR = (PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglGetStreamFileDescriptorKHR")) == NULL) || r;
+  r = ((eglCreateStreamFromFileDescriptorKHR = (PFNEGLCREATESTREAMFROMFILEDESCRIPTORKHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateStreamFromFileDescriptorKHR")) == NULL) || r;
+  r = ((eglGetStreamFileDescriptorKHR = (PFNEGLGETSTREAMFILEDESCRIPTORKHRPROC)glewGetProcAddress((const GLubyte*)"eglGetStreamFileDescriptorKHR")) == NULL) || r;
 
   return r;
 }
@@ -18117,7 +18114,7 @@ static GLboolean _glewInit_EGL_KHR_stream_fifo ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQueryStreamTimeKHR = (PFNEGLQUERYSTREAMTIMEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryStreamTimeKHR")) == NULL) || r;
+  r = ((eglQueryStreamTimeKHR = (PFNEGLQUERYSTREAMTIMEKHRPROC)glewGetProcAddress((const GLubyte*)"eglQueryStreamTimeKHR")) == NULL) || r;
 
   return r;
 }
@@ -18130,7 +18127,7 @@ static GLboolean _glewInit_EGL_KHR_stream_producer_eglsurface ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateStreamProducerSurfaceKHR = (PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateStreamProducerSurfaceKHR")) == NULL) || r;
+  r = ((eglCreateStreamProducerSurfaceKHR = (PFNEGLCREATESTREAMPRODUCERSURFACEKHRPROC)glewGetProcAddress((const GLubyte*)"eglCreateStreamProducerSurfaceKHR")) == NULL) || r;
 
   return r;
 }
@@ -18143,7 +18140,7 @@ static GLboolean _glewInit_EGL_KHR_swap_buffers_with_damage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglSwapBuffersWithDamageKHR = (PFNEGLSWAPBUFFERSWITHDAMAGEKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglSwapBuffersWithDamageKHR")) == NULL) || r;
+  r = ((eglSwapBuffersWithDamageKHR = (PFNEGLSWAPBUFFERSWITHDAMAGEKHRPROC)glewGetProcAddress((const GLubyte*)"eglSwapBuffersWithDamageKHR")) == NULL) || r;
 
   return r;
 }
@@ -18156,7 +18153,7 @@ static GLboolean _glewInit_EGL_KHR_wait_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglWaitSyncKHR = (PFNEGLWAITSYNCKHRPROC)glewGetProcSubtractress((const GLubyte*)"eglWaitSyncKHR")) == NULL) || r;
+  r = ((eglWaitSyncKHR = (PFNEGLWAITSYNCKHRPROC)glewGetProcAddress((const GLubyte*)"eglWaitSyncKHR")) == NULL) || r;
 
   return r;
 }
@@ -18169,8 +18166,8 @@ static GLboolean _glewInit_EGL_MESA_drm_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateDRMImageMESA = (PFNEGLCREATEDRMIMAGEMESAPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateDRMImageMESA")) == NULL) || r;
-  r = ((eglExportDRMImageMESA = (PFNEGLEXPORTDRMIMAGEMESAPROC)glewGetProcSubtractress((const GLubyte*)"eglExportDRMImageMESA")) == NULL) || r;
+  r = ((eglCreateDRMImageMESA = (PFNEGLCREATEDRMIMAGEMESAPROC)glewGetProcAddress((const GLubyte*)"eglCreateDRMImageMESA")) == NULL) || r;
+  r = ((eglExportDRMImageMESA = (PFNEGLEXPORTDRMIMAGEMESAPROC)glewGetProcAddress((const GLubyte*)"eglExportDRMImageMESA")) == NULL) || r;
 
   return r;
 }
@@ -18183,8 +18180,8 @@ static GLboolean _glewInit_EGL_MESA_image_dma_buf_export ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglExportDMABUFImageMESA = (PFNEGLEXPORTDMABUFIMAGEMESAPROC)glewGetProcSubtractress((const GLubyte*)"eglExportDMABUFImageMESA")) == NULL) || r;
-  r = ((eglExportDMABUFImageQueryMESA = (PFNEGLEXPORTDMABUFIMAGEQUERYMESAPROC)glewGetProcSubtractress((const GLubyte*)"eglExportDMABUFImageQueryMESA")) == NULL) || r;
+  r = ((eglExportDMABUFImageMESA = (PFNEGLEXPORTDMABUFIMAGEMESAPROC)glewGetProcAddress((const GLubyte*)"eglExportDMABUFImageMESA")) == NULL) || r;
+  r = ((eglExportDMABUFImageQueryMESA = (PFNEGLEXPORTDMABUFIMAGEQUERYMESAPROC)glewGetProcAddress((const GLubyte*)"eglExportDMABUFImageQueryMESA")) == NULL) || r;
 
   return r;
 }
@@ -18197,7 +18194,7 @@ static GLboolean _glewInit_EGL_NOK_swap_region ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglSwapBuffersRegionNOK = (PFNEGLSWAPBUFFERSREGIONNOKPROC)glewGetProcSubtractress((const GLubyte*)"eglSwapBuffersRegionNOK")) == NULL) || r;
+  r = ((eglSwapBuffersRegionNOK = (PFNEGLSWAPBUFFERSREGIONNOKPROC)glewGetProcAddress((const GLubyte*)"eglSwapBuffersRegionNOK")) == NULL) || r;
 
   return r;
 }
@@ -18210,7 +18207,7 @@ static GLboolean _glewInit_EGL_NOK_swap_region2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglSwapBuffersRegion2NOK = (PFNEGLSWAPBUFFERSREGION2NOKPROC)glewGetProcSubtractress((const GLubyte*)"eglSwapBuffersRegion2NOK")) == NULL) || r;
+  r = ((eglSwapBuffersRegion2NOK = (PFNEGLSWAPBUFFERSREGION2NOKPROC)glewGetProcAddress((const GLubyte*)"eglSwapBuffersRegion2NOK")) == NULL) || r;
 
   return r;
 }
@@ -18223,9 +18220,9 @@ static GLboolean _glewInit_EGL_NV_native_query ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQueryNativeDisplayNV = (PFNEGLQUERYNATIVEDISPLAYNVPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryNativeDisplayNV")) == NULL) || r;
-  r = ((eglQueryNativePixmapNV = (PFNEGLQUERYNATIVEPIXMAPNVPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryNativePixmapNV")) == NULL) || r;
-  r = ((eglQueryNativeWindowNV = (PFNEGLQUERYNATIVEWINDOWNVPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryNativeWindowNV")) == NULL) || r;
+  r = ((eglQueryNativeDisplayNV = (PFNEGLQUERYNATIVEDISPLAYNVPROC)glewGetProcAddress((const GLubyte*)"eglQueryNativeDisplayNV")) == NULL) || r;
+  r = ((eglQueryNativePixmapNV = (PFNEGLQUERYNATIVEPIXMAPNVPROC)glewGetProcAddress((const GLubyte*)"eglQueryNativePixmapNV")) == NULL) || r;
+  r = ((eglQueryNativeWindowNV = (PFNEGLQUERYNATIVEWINDOWNVPROC)glewGetProcAddress((const GLubyte*)"eglQueryNativeWindowNV")) == NULL) || r;
 
   return r;
 }
@@ -18238,7 +18235,7 @@ static GLboolean _glewInit_EGL_NV_post_sub_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglPostSubBufferNV = (PFNEGLPOSTSUBBUFFERNVPROC)glewGetProcSubtractress((const GLubyte*)"eglPostSubBufferNV")) == NULL) || r;
+  r = ((eglPostSubBufferNV = (PFNEGLPOSTSUBBUFFERNVPROC)glewGetProcAddress((const GLubyte*)"eglPostSubBufferNV")) == NULL) || r;
 
   return r;
 }
@@ -18251,7 +18248,7 @@ static GLboolean _glewInit_EGL_NV_stream_consumer_gltexture_yuv ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglStreamConsumerGLTextureExternalAttribsNV = (PFNEGLSTREAMCONSUMERGLTEXTUREEXTERNALATTRIBSNVPROC)glewGetProcSubtractress((const GLubyte*)"eglStreamConsumerGLTextureExternalAttribsNV")) == NULL) || r;
+  r = ((eglStreamConsumerGLTextureExternalAttribsNV = (PFNEGLSTREAMCONSUMERGLTEXTUREEXTERNALATTRIBSNVPROC)glewGetProcAddress((const GLubyte*)"eglStreamConsumerGLTextureExternalAttribsNV")) == NULL) || r;
 
   return r;
 }
@@ -18264,9 +18261,9 @@ static GLboolean _glewInit_EGL_NV_stream_metadata ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglQueryDisplayAttribNV = (PFNEGLQUERYDISPLAYATTRIBNVPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryDisplayAttribNV")) == NULL) || r;
-  r = ((eglQueryStreamMetadataNV = (PFNEGLQUERYSTREAMMETADATANVPROC)glewGetProcSubtractress((const GLubyte*)"eglQueryStreamMetadataNV")) == NULL) || r;
-  r = ((eglSetStreamMetadataNV = (PFNEGLSETSTREAMMETADATANVPROC)glewGetProcSubtractress((const GLubyte*)"eglSetStreamMetadataNV")) == NULL) || r;
+  r = ((eglQueryDisplayAttribNV = (PFNEGLQUERYDISPLAYATTRIBNVPROC)glewGetProcAddress((const GLubyte*)"eglQueryDisplayAttribNV")) == NULL) || r;
+  r = ((eglQueryStreamMetadataNV = (PFNEGLQUERYSTREAMMETADATANVPROC)glewGetProcAddress((const GLubyte*)"eglQueryStreamMetadataNV")) == NULL) || r;
+  r = ((eglSetStreamMetadataNV = (PFNEGLSETSTREAMMETADATANVPROC)glewGetProcAddress((const GLubyte*)"eglSetStreamMetadataNV")) == NULL) || r;
 
   return r;
 }
@@ -18279,7 +18276,7 @@ static GLboolean _glewInit_EGL_NV_stream_reset ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglResetStreamNV = (PFNEGLRESETSTREAMNVPROC)glewGetProcSubtractress((const GLubyte*)"eglResetStreamNV")) == NULL) || r;
+  r = ((eglResetStreamNV = (PFNEGLRESETSTREAMNVPROC)glewGetProcAddress((const GLubyte*)"eglResetStreamNV")) == NULL) || r;
 
   return r;
 }
@@ -18292,7 +18289,7 @@ static GLboolean _glewInit_EGL_NV_stream_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglCreateStreamSyncNV = (PFNEGLCREATESTREAMSYNCNVPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateStreamSyncNV")) == NULL) || r;
+  r = ((eglCreateStreamSyncNV = (PFNEGLCREATESTREAMSYNCNVPROC)glewGetProcAddress((const GLubyte*)"eglCreateStreamSyncNV")) == NULL) || r;
 
   return r;
 }
@@ -18305,12 +18302,12 @@ static GLboolean _glewInit_EGL_NV_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglClientWaitSyncNV = (PFNEGLCLIENTWAITSYNCNVPROC)glewGetProcSubtractress((const GLubyte*)"eglClientWaitSyncNV")) == NULL) || r;
-  r = ((eglCreateFenceSyncNV = (PFNEGLCREATEFENCESYNCNVPROC)glewGetProcSubtractress((const GLubyte*)"eglCreateFenceSyncNV")) == NULL) || r;
-  r = ((eglDestroySyncNV = (PFNEGLDESTROYSYNCNVPROC)glewGetProcSubtractress((const GLubyte*)"eglDestroySyncNV")) == NULL) || r;
-  r = ((eglFenceNV = (PFNEGLFENCENVPROC)glewGetProcSubtractress((const GLubyte*)"eglFenceNV")) == NULL) || r;
-  r = ((eglGetSyncAttribNV = (PFNEGLGETSYNCATTRIBNVPROC)glewGetProcSubtractress((const GLubyte*)"eglGetSyncAttribNV")) == NULL) || r;
-  r = ((eglSignalSyncNV = (PFNEGLSIGNALSYNCNVPROC)glewGetProcSubtractress((const GLubyte*)"eglSignalSyncNV")) == NULL) || r;
+  r = ((eglClientWaitSyncNV = (PFNEGLCLIENTWAITSYNCNVPROC)glewGetProcAddress((const GLubyte*)"eglClientWaitSyncNV")) == NULL) || r;
+  r = ((eglCreateFenceSyncNV = (PFNEGLCREATEFENCESYNCNVPROC)glewGetProcAddress((const GLubyte*)"eglCreateFenceSyncNV")) == NULL) || r;
+  r = ((eglDestroySyncNV = (PFNEGLDESTROYSYNCNVPROC)glewGetProcAddress((const GLubyte*)"eglDestroySyncNV")) == NULL) || r;
+  r = ((eglFenceNV = (PFNEGLFENCENVPROC)glewGetProcAddress((const GLubyte*)"eglFenceNV")) == NULL) || r;
+  r = ((eglGetSyncAttribNV = (PFNEGLGETSYNCATTRIBNVPROC)glewGetProcAddress((const GLubyte*)"eglGetSyncAttribNV")) == NULL) || r;
+  r = ((eglSignalSyncNV = (PFNEGLSIGNALSYNCNVPROC)glewGetProcAddress((const GLubyte*)"eglSignalSyncNV")) == NULL) || r;
 
   return r;
 }
@@ -18323,8 +18320,8 @@ static GLboolean _glewInit_EGL_NV_system_time ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((eglGetSystemTimeFrequencyNV = (PFNEGLGETSYSTEMTIMEFREQUENCYNVPROC)glewGetProcSubtractress((const GLubyte*)"eglGetSystemTimeFrequencyNV")) == NULL) || r;
-  r = ((eglGetSystemTimeNV = (PFNEGLGETSYSTEMTIMENVPROC)glewGetProcSubtractress((const GLubyte*)"eglGetSystemTimeNV")) == NULL) || r;
+  r = ((eglGetSystemTimeFrequencyNV = (PFNEGLGETSYSTEMTIMEFREQUENCYNVPROC)glewGetProcAddress((const GLubyte*)"eglGetSystemTimeFrequencyNV")) == NULL) || r;
+  r = ((eglGetSystemTimeNV = (PFNEGLGETSYSTEMTIMENVPROC)glewGetProcAddress((const GLubyte*)"eglGetSystemTimeNV")) == NULL) || r;
 
   return r;
 }
@@ -18353,8 +18350,8 @@ GLenum eglewInit (EGLDisplay display)
   PFNEGLQUERYSTRINGPROC queryString = NULL;
 
   /* Load necessary entry points */
-  initialize = (PFNEGLINITIALIZEPROC)   glewGetProcSubtractress("eglInitialize");
-  queryString = (PFNEGLQUERYSTRINGPROC) glewGetProcSubtractress("eglQueryString");
+  initialize = (PFNEGLINITIALIZEPROC)   glewGetProcAddress("eglInitialize");
+  queryString = (PFNEGLQUERYSTRINGPROC) glewGetProcAddress("eglQueryString");
   if (!initialize || !queryString)
     return 1;
 
@@ -19020,7 +19017,7 @@ static GLboolean _glewInit_WGL_3DL_stereo_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglSetStereoEmitterState3DL = (PFNWGLSETSTEREOEMITTERSTATE3DLPROC)glewGetProcSubtractress((const GLubyte*)"wglSetStereoEmitterState3DL")) == NULL) || r;
+  r = ((wglSetStereoEmitterState3DL = (PFNWGLSETSTEREOEMITTERSTATE3DLPROC)glewGetProcAddress((const GLubyte*)"wglSetStereoEmitterState3DL")) == NULL) || r;
 
   return r;
 }
@@ -19033,15 +19030,15 @@ static GLboolean _glewInit_WGL_AMD_gpu_association ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBlitContextFramebufferAMD = (PFNWGLBLITCONTEXTFRAMEBUFFERAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglBlitContextFramebufferAMD")) == NULL) || r;
-  r = ((wglCreateAssociatedContextAMD = (PFNWGLCREATEASSOCIATEDCONTEXTAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateAssociatedContextAMD")) == NULL) || r;
-  r = ((wglCreateAssociatedContextAttribsAMD = (PFNWGLCREATEASSOCIATEDCONTEXTATTRIBSAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateAssociatedContextAttribsAMD")) == NULL) || r;
-  r = ((wglDeleteAssociatedContextAMD = (PFNWGLDELETEASSOCIATEDCONTEXTAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglDeleteAssociatedContextAMD")) == NULL) || r;
-  r = ((wglGetContextGPUIDAMD = (PFNWGLGETCONTEXTGPUIDAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglGetContextGPUIDAMD")) == NULL) || r;
-  r = ((wglGetCurrentAssociatedContextAMD = (PFNWGLGETCURRENTASSOCIATEDCONTEXTAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglGetCurrentAssociatedContextAMD")) == NULL) || r;
-  r = ((wglGetGPUIDsAMD = (PFNWGLGETGPUIDSAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGPUIDsAMD")) == NULL) || r;
-  r = ((wglGetGPUInfoAMD = (PFNWGLGETGPUINFOAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGPUInfoAMD")) == NULL) || r;
-  r = ((wglMakeAssociatedContextCurrentAMD = (PFNWGLMAKEASSOCIATEDCONTEXTCURRENTAMDPROC)glewGetProcSubtractress((const GLubyte*)"wglMakeAssociatedContextCurrentAMD")) == NULL) || r;
+  r = ((wglBlitContextFramebufferAMD = (PFNWGLBLITCONTEXTFRAMEBUFFERAMDPROC)glewGetProcAddress((const GLubyte*)"wglBlitContextFramebufferAMD")) == NULL) || r;
+  r = ((wglCreateAssociatedContextAMD = (PFNWGLCREATEASSOCIATEDCONTEXTAMDPROC)glewGetProcAddress((const GLubyte*)"wglCreateAssociatedContextAMD")) == NULL) || r;
+  r = ((wglCreateAssociatedContextAttribsAMD = (PFNWGLCREATEASSOCIATEDCONTEXTATTRIBSAMDPROC)glewGetProcAddress((const GLubyte*)"wglCreateAssociatedContextAttribsAMD")) == NULL) || r;
+  r = ((wglDeleteAssociatedContextAMD = (PFNWGLDELETEASSOCIATEDCONTEXTAMDPROC)glewGetProcAddress((const GLubyte*)"wglDeleteAssociatedContextAMD")) == NULL) || r;
+  r = ((wglGetContextGPUIDAMD = (PFNWGLGETCONTEXTGPUIDAMDPROC)glewGetProcAddress((const GLubyte*)"wglGetContextGPUIDAMD")) == NULL) || r;
+  r = ((wglGetCurrentAssociatedContextAMD = (PFNWGLGETCURRENTASSOCIATEDCONTEXTAMDPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentAssociatedContextAMD")) == NULL) || r;
+  r = ((wglGetGPUIDsAMD = (PFNWGLGETGPUIDSAMDPROC)glewGetProcAddress((const GLubyte*)"wglGetGPUIDsAMD")) == NULL) || r;
+  r = ((wglGetGPUInfoAMD = (PFNWGLGETGPUINFOAMDPROC)glewGetProcAddress((const GLubyte*)"wglGetGPUInfoAMD")) == NULL) || r;
+  r = ((wglMakeAssociatedContextCurrentAMD = (PFNWGLMAKEASSOCIATEDCONTEXTCURRENTAMDPROC)glewGetProcAddress((const GLubyte*)"wglMakeAssociatedContextCurrentAMD")) == NULL) || r;
 
   return r;
 }
@@ -19054,10 +19051,10 @@ static GLboolean _glewInit_WGL_ARB_buffer_region ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglCreateBufferRegionARB = (PFNWGLCREATEBUFFERREGIONARBPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateBufferRegionARB")) == NULL) || r;
-  r = ((wglDeleteBufferRegionARB = (PFNWGLDELETEBUFFERREGIONARBPROC)glewGetProcSubtractress((const GLubyte*)"wglDeleteBufferRegionARB")) == NULL) || r;
-  r = ((wglRestoreBufferRegionARB = (PFNWGLRESTOREBUFFERREGIONARBPROC)glewGetProcSubtractress((const GLubyte*)"wglRestoreBufferRegionARB")) == NULL) || r;
-  r = ((wglSaveBufferRegionARB = (PFNWGLSAVEBUFFERREGIONARBPROC)glewGetProcSubtractress((const GLubyte*)"wglSaveBufferRegionARB")) == NULL) || r;
+  r = ((wglCreateBufferRegionARB = (PFNWGLCREATEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglCreateBufferRegionARB")) == NULL) || r;
+  r = ((wglDeleteBufferRegionARB = (PFNWGLDELETEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglDeleteBufferRegionARB")) == NULL) || r;
+  r = ((wglRestoreBufferRegionARB = (PFNWGLRESTOREBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglRestoreBufferRegionARB")) == NULL) || r;
+  r = ((wglSaveBufferRegionARB = (PFNWGLSAVEBUFFERREGIONARBPROC)glewGetProcAddress((const GLubyte*)"wglSaveBufferRegionARB")) == NULL) || r;
 
   return r;
 }
@@ -19070,7 +19067,7 @@ static GLboolean _glewInit_WGL_ARB_create_context ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateContextAttribsARB")) == NULL) || r;
+  r = ((wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)glewGetProcAddress((const GLubyte*)"wglCreateContextAttribsARB")) == NULL) || r;
 
   return r;
 }
@@ -19083,7 +19080,7 @@ static GLboolean _glewInit_WGL_ARB_extensions_string ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"wglGetExtensionsStringARB")) == NULL) || r;
+  r = ((wglGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringARB")) == NULL) || r;
 
   return r;
 }
@@ -19096,8 +19093,8 @@ static GLboolean _glewInit_WGL_ARB_make_current_read ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetCurrentReadDCARB = (PFNWGLGETCURRENTREADDCARBPROC)glewGetProcSubtractress((const GLubyte*)"wglGetCurrentReadDCARB")) == NULL) || r;
-  r = ((wglMakeContextCurrentARB = (PFNWGLMAKECONTEXTCURRENTARBPROC)glewGetProcSubtractress((const GLubyte*)"wglMakeContextCurrentARB")) == NULL) || r;
+  r = ((wglGetCurrentReadDCARB = (PFNWGLGETCURRENTREADDCARBPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentReadDCARB")) == NULL) || r;
+  r = ((wglMakeContextCurrentARB = (PFNWGLMAKECONTEXTCURRENTARBPROC)glewGetProcAddress((const GLubyte*)"wglMakeContextCurrentARB")) == NULL) || r;
 
   return r;
 }
@@ -19110,11 +19107,11 @@ static GLboolean _glewInit_WGL_ARB_pbuffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglCreatePbufferARB = (PFNWGLCREATEPBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"wglCreatePbufferARB")) == NULL) || r;
-  r = ((wglDestroyPbufferARB = (PFNWGLDESTROYPBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"wglDestroyPbufferARB")) == NULL) || r;
-  r = ((wglGetPbufferDCARB = (PFNWGLGETPBUFFERDCARBPROC)glewGetProcSubtractress((const GLubyte*)"wglGetPbufferDCARB")) == NULL) || r;
-  r = ((wglQueryPbufferARB = (PFNWGLQUERYPBUFFERARBPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryPbufferARB")) == NULL) || r;
-  r = ((wglReleasePbufferDCARB = (PFNWGLRELEASEPBUFFERDCARBPROC)glewGetProcSubtractress((const GLubyte*)"wglReleasePbufferDCARB")) == NULL) || r;
+  r = ((wglCreatePbufferARB = (PFNWGLCREATEPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglCreatePbufferARB")) == NULL) || r;
+  r = ((wglDestroyPbufferARB = (PFNWGLDESTROYPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglDestroyPbufferARB")) == NULL) || r;
+  r = ((wglGetPbufferDCARB = (PFNWGLGETPBUFFERDCARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPbufferDCARB")) == NULL) || r;
+  r = ((wglQueryPbufferARB = (PFNWGLQUERYPBUFFERARBPROC)glewGetProcAddress((const GLubyte*)"wglQueryPbufferARB")) == NULL) || r;
+  r = ((wglReleasePbufferDCARB = (PFNWGLRELEASEPBUFFERDCARBPROC)glewGetProcAddress((const GLubyte*)"wglReleasePbufferDCARB")) == NULL) || r;
 
   return r;
 }
@@ -19127,9 +19124,9 @@ static GLboolean _glewInit_WGL_ARB_pixel_format ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)glewGetProcSubtractress((const GLubyte*)"wglChoosePixelFormatARB")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)glewGetProcSubtractress((const GLubyte*)"wglGetPixelFormatAttribfvARB")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)glewGetProcSubtractress((const GLubyte*)"wglGetPixelFormatAttribivARB")) == NULL) || r;
+  r = ((wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)glewGetProcAddress((const GLubyte*)"wglChoosePixelFormatARB")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribfvARB = (PFNWGLGETPIXELFORMATATTRIBFVARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribfvARB")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribivARB = (PFNWGLGETPIXELFORMATATTRIBIVARBPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribivARB")) == NULL) || r;
 
   return r;
 }
@@ -19142,9 +19139,9 @@ static GLboolean _glewInit_WGL_ARB_render_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBindTexImageARB = (PFNWGLBINDTEXIMAGEARBPROC)glewGetProcSubtractress((const GLubyte*)"wglBindTexImageARB")) == NULL) || r;
-  r = ((wglReleaseTexImageARB = (PFNWGLRELEASETEXIMAGEARBPROC)glewGetProcSubtractress((const GLubyte*)"wglReleaseTexImageARB")) == NULL) || r;
-  r = ((wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)glewGetProcSubtractress((const GLubyte*)"wglSetPbufferAttribARB")) == NULL) || r;
+  r = ((wglBindTexImageARB = (PFNWGLBINDTEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"wglBindTexImageARB")) == NULL) || r;
+  r = ((wglReleaseTexImageARB = (PFNWGLRELEASETEXIMAGEARBPROC)glewGetProcAddress((const GLubyte*)"wglReleaseTexImageARB")) == NULL) || r;
+  r = ((wglSetPbufferAttribARB = (PFNWGLSETPBUFFERATTRIBARBPROC)glewGetProcAddress((const GLubyte*)"wglSetPbufferAttribARB")) == NULL) || r;
 
   return r;
 }
@@ -19157,10 +19154,10 @@ static GLboolean _glewInit_WGL_EXT_display_color_table ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBindDisplayColorTableEXT = (PFNWGLBINDDISPLAYCOLORTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglBindDisplayColorTableEXT")) == NULL) || r;
-  r = ((wglCreateDisplayColorTableEXT = (PFNWGLCREATEDISPLAYCOLORTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateDisplayColorTableEXT")) == NULL) || r;
-  r = ((wglDestroyDisplayColorTableEXT = (PFNWGLDESTROYDISPLAYCOLORTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglDestroyDisplayColorTableEXT")) == NULL) || r;
-  r = ((wglLoadDisplayColorTableEXT = (PFNWGLLOADDISPLAYCOLORTABLEEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglLoadDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglBindDisplayColorTableEXT = (PFNWGLBINDDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglBindDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglCreateDisplayColorTableEXT = (PFNWGLCREATEDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglCreateDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglDestroyDisplayColorTableEXT = (PFNWGLDESTROYDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglDestroyDisplayColorTableEXT")) == NULL) || r;
+  r = ((wglLoadDisplayColorTableEXT = (PFNWGLLOADDISPLAYCOLORTABLEEXTPROC)glewGetProcAddress((const GLubyte*)"wglLoadDisplayColorTableEXT")) == NULL) || r;
 
   return r;
 }
@@ -19173,7 +19170,7 @@ static GLboolean _glewInit_WGL_EXT_extensions_string ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetExtensionsStringEXT")) == NULL) || r;
+  r = ((wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringEXT")) == NULL) || r;
 
   return r;
 }
@@ -19186,8 +19183,8 @@ static GLboolean _glewInit_WGL_EXT_make_current_read ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetCurrentReadDCEXT = (PFNWGLGETCURRENTREADDCEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetCurrentReadDCEXT")) == NULL) || r;
-  r = ((wglMakeContextCurrentEXT = (PFNWGLMAKECONTEXTCURRENTEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglMakeContextCurrentEXT")) == NULL) || r;
+  r = ((wglGetCurrentReadDCEXT = (PFNWGLGETCURRENTREADDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetCurrentReadDCEXT")) == NULL) || r;
+  r = ((wglMakeContextCurrentEXT = (PFNWGLMAKECONTEXTCURRENTEXTPROC)glewGetProcAddress((const GLubyte*)"wglMakeContextCurrentEXT")) == NULL) || r;
 
   return r;
 }
@@ -19200,11 +19197,11 @@ static GLboolean _glewInit_WGL_EXT_pbuffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglCreatePbufferEXT = (PFNWGLCREATEPBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"wglCreatePbufferEXT")) == NULL) || r;
-  r = ((wglDestroyPbufferEXT = (PFNWGLDESTROYPBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"wglDestroyPbufferEXT")) == NULL) || r;
-  r = ((wglGetPbufferDCEXT = (PFNWGLGETPBUFFERDCEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetPbufferDCEXT")) == NULL) || r;
-  r = ((wglQueryPbufferEXT = (PFNWGLQUERYPBUFFEREXTPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryPbufferEXT")) == NULL) || r;
-  r = ((wglReleasePbufferDCEXT = (PFNWGLRELEASEPBUFFERDCEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglReleasePbufferDCEXT")) == NULL) || r;
+  r = ((wglCreatePbufferEXT = (PFNWGLCREATEPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglCreatePbufferEXT")) == NULL) || r;
+  r = ((wglDestroyPbufferEXT = (PFNWGLDESTROYPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglDestroyPbufferEXT")) == NULL) || r;
+  r = ((wglGetPbufferDCEXT = (PFNWGLGETPBUFFERDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPbufferDCEXT")) == NULL) || r;
+  r = ((wglQueryPbufferEXT = (PFNWGLQUERYPBUFFEREXTPROC)glewGetProcAddress((const GLubyte*)"wglQueryPbufferEXT")) == NULL) || r;
+  r = ((wglReleasePbufferDCEXT = (PFNWGLRELEASEPBUFFERDCEXTPROC)glewGetProcAddress((const GLubyte*)"wglReleasePbufferDCEXT")) == NULL) || r;
 
   return r;
 }
@@ -19217,9 +19214,9 @@ static GLboolean _glewInit_WGL_EXT_pixel_format ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglChoosePixelFormatEXT = (PFNWGLCHOOSEPIXELFORMATEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglChoosePixelFormatEXT")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribfvEXT = (PFNWGLGETPIXELFORMATATTRIBFVEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetPixelFormatAttribfvEXT")) == NULL) || r;
-  r = ((wglGetPixelFormatAttribivEXT = (PFNWGLGETPIXELFORMATATTRIBIVEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetPixelFormatAttribivEXT")) == NULL) || r;
+  r = ((wglChoosePixelFormatEXT = (PFNWGLCHOOSEPIXELFORMATEXTPROC)glewGetProcAddress((const GLubyte*)"wglChoosePixelFormatEXT")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribfvEXT = (PFNWGLGETPIXELFORMATATTRIBFVEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribfvEXT")) == NULL) || r;
+  r = ((wglGetPixelFormatAttribivEXT = (PFNWGLGETPIXELFORMATATTRIBIVEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetPixelFormatAttribivEXT")) == NULL) || r;
 
   return r;
 }
@@ -19232,8 +19229,8 @@ static GLboolean _glewInit_WGL_EXT_swap_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetSwapIntervalEXT")) == NULL) || r;
-  r = ((wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglSwapIntervalEXT")) == NULL) || r;
+  r = ((wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetSwapIntervalEXT")) == NULL) || r;
+  r = ((wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"wglSwapIntervalEXT")) == NULL) || r;
 
   return r;
 }
@@ -19246,8 +19243,8 @@ static GLboolean _glewInit_WGL_I3D_digital_video_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetDigitalVideoParametersI3D = (PFNWGLGETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetDigitalVideoParametersI3D")) == NULL) || r;
-  r = ((wglSetDigitalVideoParametersI3D = (PFNWGLSETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglSetDigitalVideoParametersI3D")) == NULL) || r;
+  r = ((wglGetDigitalVideoParametersI3D = (PFNWGLGETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetDigitalVideoParametersI3D")) == NULL) || r;
+  r = ((wglSetDigitalVideoParametersI3D = (PFNWGLSETDIGITALVIDEOPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetDigitalVideoParametersI3D")) == NULL) || r;
 
   return r;
 }
@@ -19260,10 +19257,10 @@ static GLboolean _glewInit_WGL_I3D_gamma ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetGammaTableI3D = (PFNWGLGETGAMMATABLEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGammaTableI3D")) == NULL) || r;
-  r = ((wglGetGammaTableParametersI3D = (PFNWGLGETGAMMATABLEPARAMETERSI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGammaTableParametersI3D")) == NULL) || r;
-  r = ((wglSetGammaTableI3D = (PFNWGLSETGAMMATABLEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglSetGammaTableI3D")) == NULL) || r;
-  r = ((wglSetGammaTableParametersI3D = (PFNWGLSETGAMMATABLEPARAMETERSI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglSetGammaTableParametersI3D")) == NULL) || r;
+  r = ((wglGetGammaTableI3D = (PFNWGLGETGAMMATABLEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGammaTableI3D")) == NULL) || r;
+  r = ((wglGetGammaTableParametersI3D = (PFNWGLGETGAMMATABLEPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGammaTableParametersI3D")) == NULL) || r;
+  r = ((wglSetGammaTableI3D = (PFNWGLSETGAMMATABLEI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetGammaTableI3D")) == NULL) || r;
+  r = ((wglSetGammaTableParametersI3D = (PFNWGLSETGAMMATABLEPARAMETERSI3DPROC)glewGetProcAddress((const GLubyte*)"wglSetGammaTableParametersI3D")) == NULL) || r;
 
   return r;
 }
@@ -19276,18 +19273,18 @@ static GLboolean _glewInit_WGL_I3D_genlock ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglDisableGenlockI3D = (PFNWGLDISABLEGENLOCKI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglDisableGenlockI3D")) == NULL) || r;
-  r = ((wglEnableGenlockI3D = (PFNWGLENABLEGENLOCKI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglEnableGenlockI3D")) == NULL) || r;
-  r = ((wglGenlockSampleRateI3D = (PFNWGLGENLOCKSAMPLERATEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGenlockSampleRateI3D")) == NULL) || r;
-  r = ((wglGenlockSourceDelayI3D = (PFNWGLGENLOCKSOURCEDELAYI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGenlockSourceDelayI3D")) == NULL) || r;
-  r = ((wglGenlockSourceEdgeI3D = (PFNWGLGENLOCKSOURCEEDGEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGenlockSourceEdgeI3D")) == NULL) || r;
-  r = ((wglGenlockSourceI3D = (PFNWGLGENLOCKSOURCEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGenlockSourceI3D")) == NULL) || r;
-  r = ((wglGetGenlockSampleRateI3D = (PFNWGLGETGENLOCKSAMPLERATEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGenlockSampleRateI3D")) == NULL) || r;
-  r = ((wglGetGenlockSourceDelayI3D = (PFNWGLGETGENLOCKSOURCEDELAYI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGenlockSourceDelayI3D")) == NULL) || r;
-  r = ((wglGetGenlockSourceEdgeI3D = (PFNWGLGETGENLOCKSOURCEEDGEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGenlockSourceEdgeI3D")) == NULL) || r;
-  r = ((wglGetGenlockSourceI3D = (PFNWGLGETGENLOCKSOURCEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetGenlockSourceI3D")) == NULL) || r;
-  r = ((wglIsEnabledGenlockI3D = (PFNWGLISENABLEDGENLOCKI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglIsEnabledGenlockI3D")) == NULL) || r;
-  r = ((wglQueryGenlockMaxSourceDelayI3D = (PFNWGLQUERYGENLOCKMAXSOURCEDELAYI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryGenlockMaxSourceDelayI3D")) == NULL) || r;
+  r = ((wglDisableGenlockI3D = (PFNWGLDISABLEGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglDisableGenlockI3D")) == NULL) || r;
+  r = ((wglEnableGenlockI3D = (PFNWGLENABLEGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglEnableGenlockI3D")) == NULL) || r;
+  r = ((wglGenlockSampleRateI3D = (PFNWGLGENLOCKSAMPLERATEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSampleRateI3D")) == NULL) || r;
+  r = ((wglGenlockSourceDelayI3D = (PFNWGLGENLOCKSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceDelayI3D")) == NULL) || r;
+  r = ((wglGenlockSourceEdgeI3D = (PFNWGLGENLOCKSOURCEEDGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceEdgeI3D")) == NULL) || r;
+  r = ((wglGenlockSourceI3D = (PFNWGLGENLOCKSOURCEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGenlockSourceI3D")) == NULL) || r;
+  r = ((wglGetGenlockSampleRateI3D = (PFNWGLGETGENLOCKSAMPLERATEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSampleRateI3D")) == NULL) || r;
+  r = ((wglGetGenlockSourceDelayI3D = (PFNWGLGETGENLOCKSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceDelayI3D")) == NULL) || r;
+  r = ((wglGetGenlockSourceEdgeI3D = (PFNWGLGETGENLOCKSOURCEEDGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceEdgeI3D")) == NULL) || r;
+  r = ((wglGetGenlockSourceI3D = (PFNWGLGETGENLOCKSOURCEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetGenlockSourceI3D")) == NULL) || r;
+  r = ((wglIsEnabledGenlockI3D = (PFNWGLISENABLEDGENLOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglIsEnabledGenlockI3D")) == NULL) || r;
+  r = ((wglQueryGenlockMaxSourceDelayI3D = (PFNWGLQUERYGENLOCKMAXSOURCEDELAYI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryGenlockMaxSourceDelayI3D")) == NULL) || r;
 
   return r;
 }
@@ -19300,10 +19297,10 @@ static GLboolean _glewInit_WGL_I3D_image_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglAssociateImageBufferEventsI3D = (PFNWGLASSOCIATEIMAGEBUFFEREVENTSI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglAssociateImageBufferEventsI3D")) == NULL) || r;
-  r = ((wglCreateImageBufferI3D = (PFNWGLCREATEIMAGEBUFFERI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateImageBufferI3D")) == NULL) || r;
-  r = ((wglDestroyImageBufferI3D = (PFNWGLDESTROYIMAGEBUFFERI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglDestroyImageBufferI3D")) == NULL) || r;
-  r = ((wglReleaseImageBufferEventsI3D = (PFNWGLRELEASEIMAGEBUFFEREVENTSI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglReleaseImageBufferEventsI3D")) == NULL) || r;
+  r = ((wglAssociateImageBufferEventsI3D = (PFNWGLASSOCIATEIMAGEBUFFEREVENTSI3DPROC)glewGetProcAddress((const GLubyte*)"wglAssociateImageBufferEventsI3D")) == NULL) || r;
+  r = ((wglCreateImageBufferI3D = (PFNWGLCREATEIMAGEBUFFERI3DPROC)glewGetProcAddress((const GLubyte*)"wglCreateImageBufferI3D")) == NULL) || r;
+  r = ((wglDestroyImageBufferI3D = (PFNWGLDESTROYIMAGEBUFFERI3DPROC)glewGetProcAddress((const GLubyte*)"wglDestroyImageBufferI3D")) == NULL) || r;
+  r = ((wglReleaseImageBufferEventsI3D = (PFNWGLRELEASEIMAGEBUFFEREVENTSI3DPROC)glewGetProcAddress((const GLubyte*)"wglReleaseImageBufferEventsI3D")) == NULL) || r;
 
   return r;
 }
@@ -19316,10 +19313,10 @@ static GLboolean _glewInit_WGL_I3D_swap_frame_lock ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglDisableFrameLockI3D = (PFNWGLDISABLEFRAMELOCKI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglDisableFrameLockI3D")) == NULL) || r;
-  r = ((wglEnableFrameLockI3D = (PFNWGLENABLEFRAMELOCKI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglEnableFrameLockI3D")) == NULL) || r;
-  r = ((wglIsEnabledFrameLockI3D = (PFNWGLISENABLEDFRAMELOCKI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglIsEnabledFrameLockI3D")) == NULL) || r;
-  r = ((wglQueryFrameLockMasterI3D = (PFNWGLQUERYFRAMELOCKMASTERI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryFrameLockMasterI3D")) == NULL) || r;
+  r = ((wglDisableFrameLockI3D = (PFNWGLDISABLEFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglDisableFrameLockI3D")) == NULL) || r;
+  r = ((wglEnableFrameLockI3D = (PFNWGLENABLEFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglEnableFrameLockI3D")) == NULL) || r;
+  r = ((wglIsEnabledFrameLockI3D = (PFNWGLISENABLEDFRAMELOCKI3DPROC)glewGetProcAddress((const GLubyte*)"wglIsEnabledFrameLockI3D")) == NULL) || r;
+  r = ((wglQueryFrameLockMasterI3D = (PFNWGLQUERYFRAMELOCKMASTERI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameLockMasterI3D")) == NULL) || r;
 
   return r;
 }
@@ -19332,10 +19329,10 @@ static GLboolean _glewInit_WGL_I3D_swap_frame_usage ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBeginFrameTrackingI3D = (PFNWGLBEGINFRAMETRACKINGI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglBeginFrameTrackingI3D")) == NULL) || r;
-  r = ((wglEndFrameTrackingI3D = (PFNWGLENDFRAMETRACKINGI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglEndFrameTrackingI3D")) == NULL) || r;
-  r = ((wglGetFrameUsageI3D = (PFNWGLGETFRAMEUSAGEI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglGetFrameUsageI3D")) == NULL) || r;
-  r = ((wglQueryFrameTrackingI3D = (PFNWGLQUERYFRAMETRACKINGI3DPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryFrameTrackingI3D")) == NULL) || r;
+  r = ((wglBeginFrameTrackingI3D = (PFNWGLBEGINFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglBeginFrameTrackingI3D")) == NULL) || r;
+  r = ((wglEndFrameTrackingI3D = (PFNWGLENDFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglEndFrameTrackingI3D")) == NULL) || r;
+  r = ((wglGetFrameUsageI3D = (PFNWGLGETFRAMEUSAGEI3DPROC)glewGetProcAddress((const GLubyte*)"wglGetFrameUsageI3D")) == NULL) || r;
+  r = ((wglQueryFrameTrackingI3D = (PFNWGLQUERYFRAMETRACKINGI3DPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameTrackingI3D")) == NULL) || r;
 
   return r;
 }
@@ -19348,14 +19345,14 @@ static GLboolean _glewInit_WGL_NV_DX_interop ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglDXCloseDeviceNV = (PFNWGLDXCLOSEDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXCloseDeviceNV")) == NULL) || r;
-  r = ((wglDXLockObjectsNV = (PFNWGLDXLOCKOBJECTSNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXLockObjectsNV")) == NULL) || r;
-  r = ((wglDXObjectAccessNV = (PFNWGLDXOBJECTACCESSNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXObjectAccessNV")) == NULL) || r;
-  r = ((wglDXOpenDeviceNV = (PFNWGLDXOPENDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXOpenDeviceNV")) == NULL) || r;
-  r = ((wglDXRegisterObjectNV = (PFNWGLDXREGISTEROBJECTNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXRegisterObjectNV")) == NULL) || r;
-  r = ((wglDXSetResourceShareHandleNV = (PFNWGLDXSETRESOURCESHAREHANDLENVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXSetResourceShareHandleNV")) == NULL) || r;
-  r = ((wglDXUnlockObjectsNV = (PFNWGLDXUNLOCKOBJECTSNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXUnlockObjectsNV")) == NULL) || r;
-  r = ((wglDXUnregisterObjectNV = (PFNWGLDXUNREGISTEROBJECTNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDXUnregisterObjectNV")) == NULL) || r;
+  r = ((wglDXCloseDeviceNV = (PFNWGLDXCLOSEDEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglDXCloseDeviceNV")) == NULL) || r;
+  r = ((wglDXLockObjectsNV = (PFNWGLDXLOCKOBJECTSNVPROC)glewGetProcAddress((const GLubyte*)"wglDXLockObjectsNV")) == NULL) || r;
+  r = ((wglDXObjectAccessNV = (PFNWGLDXOBJECTACCESSNVPROC)glewGetProcAddress((const GLubyte*)"wglDXObjectAccessNV")) == NULL) || r;
+  r = ((wglDXOpenDeviceNV = (PFNWGLDXOPENDEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglDXOpenDeviceNV")) == NULL) || r;
+  r = ((wglDXRegisterObjectNV = (PFNWGLDXREGISTEROBJECTNVPROC)glewGetProcAddress((const GLubyte*)"wglDXRegisterObjectNV")) == NULL) || r;
+  r = ((wglDXSetResourceShareHandleNV = (PFNWGLDXSETRESOURCESHAREHANDLENVPROC)glewGetProcAddress((const GLubyte*)"wglDXSetResourceShareHandleNV")) == NULL) || r;
+  r = ((wglDXUnlockObjectsNV = (PFNWGLDXUNLOCKOBJECTSNVPROC)glewGetProcAddress((const GLubyte*)"wglDXUnlockObjectsNV")) == NULL) || r;
+  r = ((wglDXUnregisterObjectNV = (PFNWGLDXUNREGISTEROBJECTNVPROC)glewGetProcAddress((const GLubyte*)"wglDXUnregisterObjectNV")) == NULL) || r;
 
   return r;
 }
@@ -19368,7 +19365,7 @@ static GLboolean _glewInit_WGL_NV_copy_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglCopyImageSubDataNV = (PFNWGLCOPYIMAGESUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"wglCopyImageSubDataNV")) == NULL) || r;
+  r = ((wglCopyImageSubDataNV = (PFNWGLCOPYIMAGESUBDATANVPROC)glewGetProcAddress((const GLubyte*)"wglCopyImageSubDataNV")) == NULL) || r;
 
   return r;
 }
@@ -19381,7 +19378,7 @@ static GLboolean _glewInit_WGL_NV_delay_before_swap ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglDelayBeforeSwapNV = (PFNWGLDELAYBEFORESWAPNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDelayBeforeSwapNV")) == NULL) || r;
+  r = ((wglDelayBeforeSwapNV = (PFNWGLDELAYBEFORESWAPNVPROC)glewGetProcAddress((const GLubyte*)"wglDelayBeforeSwapNV")) == NULL) || r;
 
   return r;
 }
@@ -19394,11 +19391,11 @@ static GLboolean _glewInit_WGL_NV_gpu_affinity ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglCreateAffinityDCNV = (PFNWGLCREATEAFFINITYDCNVPROC)glewGetProcSubtractress((const GLubyte*)"wglCreateAffinityDCNV")) == NULL) || r;
-  r = ((wglDeleteDCNV = (PFNWGLDELETEDCNVPROC)glewGetProcSubtractress((const GLubyte*)"wglDeleteDCNV")) == NULL) || r;
-  r = ((wglEnumGpuDevicesNV = (PFNWGLENUMGPUDEVICESNVPROC)glewGetProcSubtractress((const GLubyte*)"wglEnumGpuDevicesNV")) == NULL) || r;
-  r = ((wglEnumGpusFromAffinityDCNV = (PFNWGLENUMGPUSFROMAFFINITYDCNVPROC)glewGetProcSubtractress((const GLubyte*)"wglEnumGpusFromAffinityDCNV")) == NULL) || r;
-  r = ((wglEnumGpusNV = (PFNWGLENUMGPUSNVPROC)glewGetProcSubtractress((const GLubyte*)"wglEnumGpusNV")) == NULL) || r;
+  r = ((wglCreateAffinityDCNV = (PFNWGLCREATEAFFINITYDCNVPROC)glewGetProcAddress((const GLubyte*)"wglCreateAffinityDCNV")) == NULL) || r;
+  r = ((wglDeleteDCNV = (PFNWGLDELETEDCNVPROC)glewGetProcAddress((const GLubyte*)"wglDeleteDCNV")) == NULL) || r;
+  r = ((wglEnumGpuDevicesNV = (PFNWGLENUMGPUDEVICESNVPROC)glewGetProcAddress((const GLubyte*)"wglEnumGpuDevicesNV")) == NULL) || r;
+  r = ((wglEnumGpusFromAffinityDCNV = (PFNWGLENUMGPUSFROMAFFINITYDCNVPROC)glewGetProcAddress((const GLubyte*)"wglEnumGpusFromAffinityDCNV")) == NULL) || r;
+  r = ((wglEnumGpusNV = (PFNWGLENUMGPUSNVPROC)glewGetProcAddress((const GLubyte*)"wglEnumGpusNV")) == NULL) || r;
 
   return r;
 }
@@ -19411,9 +19408,9 @@ static GLboolean _glewInit_WGL_NV_present_video ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBindVideoDeviceNV = (PFNWGLBINDVIDEODEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglBindVideoDeviceNV")) == NULL) || r;
-  r = ((wglEnumerateVideoDevicesNV = (PFNWGLENUMERATEVIDEODEVICESNVPROC)glewGetProcSubtractress((const GLubyte*)"wglEnumerateVideoDevicesNV")) == NULL) || r;
-  r = ((wglQueryCurrentContextNV = (PFNWGLQUERYCURRENTCONTEXTNVPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryCurrentContextNV")) == NULL) || r;
+  r = ((wglBindVideoDeviceNV = (PFNWGLBINDVIDEODEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglBindVideoDeviceNV")) == NULL) || r;
+  r = ((wglEnumerateVideoDevicesNV = (PFNWGLENUMERATEVIDEODEVICESNVPROC)glewGetProcAddress((const GLubyte*)"wglEnumerateVideoDevicesNV")) == NULL) || r;
+  r = ((wglQueryCurrentContextNV = (PFNWGLQUERYCURRENTCONTEXTNVPROC)glewGetProcAddress((const GLubyte*)"wglQueryCurrentContextNV")) == NULL) || r;
 
   return r;
 }
@@ -19426,12 +19423,12 @@ static GLboolean _glewInit_WGL_NV_swap_group ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBindSwapBarrierNV = (PFNWGLBINDSWAPBARRIERNVPROC)glewGetProcSubtractress((const GLubyte*)"wglBindSwapBarrierNV")) == NULL) || r;
-  r = ((wglJoinSwapGroupNV = (PFNWGLJOINSWAPGROUPNVPROC)glewGetProcSubtractress((const GLubyte*)"wglJoinSwapGroupNV")) == NULL) || r;
-  r = ((wglQueryFrameCountNV = (PFNWGLQUERYFRAMECOUNTNVPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryFrameCountNV")) == NULL) || r;
-  r = ((wglQueryMaxSwapGroupsNV = (PFNWGLQUERYMAXSWAPGROUPSNVPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryMaxSwapGroupsNV")) == NULL) || r;
-  r = ((wglQuerySwapGroupNV = (PFNWGLQUERYSWAPGROUPNVPROC)glewGetProcSubtractress((const GLubyte*)"wglQuerySwapGroupNV")) == NULL) || r;
-  r = ((wglResetFrameCountNV = (PFNWGLRESETFRAMECOUNTNVPROC)glewGetProcSubtractress((const GLubyte*)"wglResetFrameCountNV")) == NULL) || r;
+  r = ((wglBindSwapBarrierNV = (PFNWGLBINDSWAPBARRIERNVPROC)glewGetProcAddress((const GLubyte*)"wglBindSwapBarrierNV")) == NULL) || r;
+  r = ((wglJoinSwapGroupNV = (PFNWGLJOINSWAPGROUPNVPROC)glewGetProcAddress((const GLubyte*)"wglJoinSwapGroupNV")) == NULL) || r;
+  r = ((wglQueryFrameCountNV = (PFNWGLQUERYFRAMECOUNTNVPROC)glewGetProcAddress((const GLubyte*)"wglQueryFrameCountNV")) == NULL) || r;
+  r = ((wglQueryMaxSwapGroupsNV = (PFNWGLQUERYMAXSWAPGROUPSNVPROC)glewGetProcAddress((const GLubyte*)"wglQueryMaxSwapGroupsNV")) == NULL) || r;
+  r = ((wglQuerySwapGroupNV = (PFNWGLQUERYSWAPGROUPNVPROC)glewGetProcAddress((const GLubyte*)"wglQuerySwapGroupNV")) == NULL) || r;
+  r = ((wglResetFrameCountNV = (PFNWGLRESETFRAMECOUNTNVPROC)glewGetProcAddress((const GLubyte*)"wglResetFrameCountNV")) == NULL) || r;
 
   return r;
 }
@@ -19444,8 +19441,8 @@ static GLboolean _glewInit_WGL_NV_vertex_array_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglAllocateMemoryNV = (PFNWGLALLOCATEMEMORYNVPROC)glewGetProcSubtractress((const GLubyte*)"wglAllocateMemoryNV")) == NULL) || r;
-  r = ((wglFreeMemoryNV = (PFNWGLFREEMEMORYNVPROC)glewGetProcSubtractress((const GLubyte*)"wglFreeMemoryNV")) == NULL) || r;
+  r = ((wglAllocateMemoryNV = (PFNWGLALLOCATEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"wglAllocateMemoryNV")) == NULL) || r;
+  r = ((wglFreeMemoryNV = (PFNWGLFREEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"wglFreeMemoryNV")) == NULL) || r;
 
   return r;
 }
@@ -19458,11 +19455,11 @@ static GLboolean _glewInit_WGL_NV_video_capture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBindVideoCaptureDeviceNV = (PFNWGLBINDVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglBindVideoCaptureDeviceNV")) == NULL) || r;
-  r = ((wglEnumerateVideoCaptureDevicesNV = (PFNWGLENUMERATEVIDEOCAPTUREDEVICESNVPROC)glewGetProcSubtractress((const GLubyte*)"wglEnumerateVideoCaptureDevicesNV")) == NULL) || r;
-  r = ((wglLockVideoCaptureDeviceNV = (PFNWGLLOCKVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglLockVideoCaptureDeviceNV")) == NULL) || r;
-  r = ((wglQueryVideoCaptureDeviceNV = (PFNWGLQUERYVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglQueryVideoCaptureDeviceNV")) == NULL) || r;
-  r = ((wglReleaseVideoCaptureDeviceNV = (PFNWGLRELEASEVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglReleaseVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((wglBindVideoCaptureDeviceNV = (PFNWGLBINDVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglBindVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((wglEnumerateVideoCaptureDevicesNV = (PFNWGLENUMERATEVIDEOCAPTUREDEVICESNVPROC)glewGetProcAddress((const GLubyte*)"wglEnumerateVideoCaptureDevicesNV")) == NULL) || r;
+  r = ((wglLockVideoCaptureDeviceNV = (PFNWGLLOCKVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglLockVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((wglQueryVideoCaptureDeviceNV = (PFNWGLQUERYVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglQueryVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((wglReleaseVideoCaptureDeviceNV = (PFNWGLRELEASEVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglReleaseVideoCaptureDeviceNV")) == NULL) || r;
 
   return r;
 }
@@ -19475,12 +19472,12 @@ static GLboolean _glewInit_WGL_NV_video_output ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglBindVideoImageNV = (PFNWGLBINDVIDEOIMAGENVPROC)glewGetProcSubtractress((const GLubyte*)"wglBindVideoImageNV")) == NULL) || r;
-  r = ((wglGetVideoDeviceNV = (PFNWGLGETVIDEODEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglGetVideoDeviceNV")) == NULL) || r;
-  r = ((wglGetVideoInfoNV = (PFNWGLGETVIDEOINFONVPROC)glewGetProcSubtractress((const GLubyte*)"wglGetVideoInfoNV")) == NULL) || r;
-  r = ((wglReleaseVideoDeviceNV = (PFNWGLRELEASEVIDEODEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"wglReleaseVideoDeviceNV")) == NULL) || r;
-  r = ((wglReleaseVideoImageNV = (PFNWGLRELEASEVIDEOIMAGENVPROC)glewGetProcSubtractress((const GLubyte*)"wglReleaseVideoImageNV")) == NULL) || r;
-  r = ((wglSendPbufferToVideoNV = (PFNWGLSENDPBUFFERTOVIDEONVPROC)glewGetProcSubtractress((const GLubyte*)"wglSendPbufferToVideoNV")) == NULL) || r;
+  r = ((wglBindVideoImageNV = (PFNWGLBINDVIDEOIMAGENVPROC)glewGetProcAddress((const GLubyte*)"wglBindVideoImageNV")) == NULL) || r;
+  r = ((wglGetVideoDeviceNV = (PFNWGLGETVIDEODEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglGetVideoDeviceNV")) == NULL) || r;
+  r = ((wglGetVideoInfoNV = (PFNWGLGETVIDEOINFONVPROC)glewGetProcAddress((const GLubyte*)"wglGetVideoInfoNV")) == NULL) || r;
+  r = ((wglReleaseVideoDeviceNV = (PFNWGLRELEASEVIDEODEVICENVPROC)glewGetProcAddress((const GLubyte*)"wglReleaseVideoDeviceNV")) == NULL) || r;
+  r = ((wglReleaseVideoImageNV = (PFNWGLRELEASEVIDEOIMAGENVPROC)glewGetProcAddress((const GLubyte*)"wglReleaseVideoImageNV")) == NULL) || r;
+  r = ((wglSendPbufferToVideoNV = (PFNWGLSENDPBUFFERTOVIDEONVPROC)glewGetProcAddress((const GLubyte*)"wglSendPbufferToVideoNV")) == NULL) || r;
 
   return r;
 }
@@ -19493,12 +19490,12 @@ static GLboolean _glewInit_WGL_OML_sync_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((wglGetMscRateOML = (PFNWGLGETMSCRATEOMLPROC)glewGetProcSubtractress((const GLubyte*)"wglGetMscRateOML")) == NULL) || r;
-  r = ((wglGetSyncValuesOML = (PFNWGLGETSYNCVALUESOMLPROC)glewGetProcSubtractress((const GLubyte*)"wglGetSyncValuesOML")) == NULL) || r;
-  r = ((wglSwapBuffersMscOML = (PFNWGLSWAPBUFFERSMSCOMLPROC)glewGetProcSubtractress((const GLubyte*)"wglSwapBuffersMscOML")) == NULL) || r;
-  r = ((wglSwapLayerBuffersMscOML = (PFNWGLSWAPLAYERBUFFERSMSCOMLPROC)glewGetProcSubtractress((const GLubyte*)"wglSwapLayerBuffersMscOML")) == NULL) || r;
-  r = ((wglWaitForMscOML = (PFNWGLWAITFORMSCOMLPROC)glewGetProcSubtractress((const GLubyte*)"wglWaitForMscOML")) == NULL) || r;
-  r = ((wglWaitForSbcOML = (PFNWGLWAITFORSBCOMLPROC)glewGetProcSubtractress((const GLubyte*)"wglWaitForSbcOML")) == NULL) || r;
+  r = ((wglGetMscRateOML = (PFNWGLGETMSCRATEOMLPROC)glewGetProcAddress((const GLubyte*)"wglGetMscRateOML")) == NULL) || r;
+  r = ((wglGetSyncValuesOML = (PFNWGLGETSYNCVALUESOMLPROC)glewGetProcAddress((const GLubyte*)"wglGetSyncValuesOML")) == NULL) || r;
+  r = ((wglSwapBuffersMscOML = (PFNWGLSWAPBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglSwapBuffersMscOML")) == NULL) || r;
+  r = ((wglSwapLayerBuffersMscOML = (PFNWGLSWAPLAYERBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglSwapLayerBuffersMscOML")) == NULL) || r;
+  r = ((wglWaitForMscOML = (PFNWGLWAITFORMSCOMLPROC)glewGetProcAddress((const GLubyte*)"wglWaitForMscOML")) == NULL) || r;
+  r = ((wglWaitForSbcOML = (PFNWGLWAITFORSBCOMLPROC)glewGetProcAddress((const GLubyte*)"wglWaitForSbcOML")) == NULL) || r;
 
   return r;
 }
@@ -19533,8 +19530,8 @@ GLenum GLEWAPIENTRY wglewInit ()
   const GLubyte* extStart;
   const GLubyte* extEnd;
   /* find wgl extension string query functions */
-  _wglewGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcSubtractress((const GLubyte*)"wglGetExtensionsStringARB");
-  _wglewGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcSubtractress((const GLubyte*)"wglGetExtensionsStringEXT");
+  _wglewGetExtensionsStringARB = (PFNWGLGETEXTENSIONSSTRINGARBPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringARB");
+  _wglewGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)glewGetProcAddress((const GLubyte*)"wglGetExtensionsStringEXT");
   /* query wgl extension string */
   if (_wglewGetExtensionsStringARB == NULL)
     if (_wglewGetExtensionsStringEXT == NULL)
@@ -19981,7 +19978,7 @@ static GLboolean _glewInit_GLX_VERSION_1_2 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetCurrentDisplay = (PFNGLXGETCURRENTDISPLAYPROC)glewGetProcSubtractress((const GLubyte*)"glXGetCurrentDisplay")) == NULL) || r;
+  r = ((glXGetCurrentDisplay = (PFNGLXGETCURRENTDISPLAYPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentDisplay")) == NULL) || r;
 
   return r;
 }
@@ -19994,23 +19991,23 @@ static GLboolean _glewInit_GLX_VERSION_1_3 ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glewGetProcSubtractress((const GLubyte*)"glXChooseFBConfig")) == NULL) || r;
-  r = ((glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateNewContext")) == NULL) || r;
-  r = ((glXCreatePbuffer = (PFNGLXCREATEPBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glXCreatePbuffer")) == NULL) || r;
-  r = ((glXCreatePixmap = (PFNGLXCREATEPIXMAPPROC)glewGetProcSubtractress((const GLubyte*)"glXCreatePixmap")) == NULL) || r;
-  r = ((glXCreateWindow = (PFNGLXCREATEWINDOWPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateWindow")) == NULL) || r;
-  r = ((glXDestroyPbuffer = (PFNGLXDESTROYPBUFFERPROC)glewGetProcSubtractress((const GLubyte*)"glXDestroyPbuffer")) == NULL) || r;
-  r = ((glXDestroyPixmap = (PFNGLXDESTROYPIXMAPPROC)glewGetProcSubtractress((const GLubyte*)"glXDestroyPixmap")) == NULL) || r;
-  r = ((glXDestroyWindow = (PFNGLXDESTROYWINDOWPROC)glewGetProcSubtractress((const GLubyte*)"glXDestroyWindow")) == NULL) || r;
-  r = ((glXGetCurrentReadDrawable = (PFNGLXGETCURRENTREADDRAWABLEPROC)glewGetProcSubtractress((const GLubyte*)"glXGetCurrentReadDrawable")) == NULL) || r;
-  r = ((glXGetFBConfigAttrib = (PFNGLXGETFBCONFIGATTRIBPROC)glewGetProcSubtractress((const GLubyte*)"glXGetFBConfigAttrib")) == NULL) || r;
-  r = ((glXGetFBConfigs = (PFNGLXGETFBCONFIGSPROC)glewGetProcSubtractress((const GLubyte*)"glXGetFBConfigs")) == NULL) || r;
-  r = ((glXGetSelectedEvent = (PFNGLXGETSELECTEDEVENTPROC)glewGetProcSubtractress((const GLubyte*)"glXGetSelectedEvent")) == NULL) || r;
-  r = ((glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glewGetProcSubtractress((const GLubyte*)"glXGetVisualFromFBConfig")) == NULL) || r;
-  r = ((glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glewGetProcSubtractress((const GLubyte*)"glXMakeContextCurrent")) == NULL) || r;
-  r = ((glXQueryContext = (PFNGLXQUERYCONTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryContext")) == NULL) || r;
-  r = ((glXQueryDrawable = (PFNGLXQUERYDRAWABLEPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryDrawable")) == NULL) || r;
-  r = ((glXSelectEvent = (PFNGLXSELECTEVENTPROC)glewGetProcSubtractress((const GLubyte*)"glXSelectEvent")) == NULL) || r;
+  r = ((glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glewGetProcAddress((const GLubyte*)"glXChooseFBConfig")) == NULL) || r;
+  r = ((glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glewGetProcAddress((const GLubyte*)"glXCreateNewContext")) == NULL) || r;
+  r = ((glXCreatePbuffer = (PFNGLXCREATEPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glXCreatePbuffer")) == NULL) || r;
+  r = ((glXCreatePixmap = (PFNGLXCREATEPIXMAPPROC)glewGetProcAddress((const GLubyte*)"glXCreatePixmap")) == NULL) || r;
+  r = ((glXCreateWindow = (PFNGLXCREATEWINDOWPROC)glewGetProcAddress((const GLubyte*)"glXCreateWindow")) == NULL) || r;
+  r = ((glXDestroyPbuffer = (PFNGLXDESTROYPBUFFERPROC)glewGetProcAddress((const GLubyte*)"glXDestroyPbuffer")) == NULL) || r;
+  r = ((glXDestroyPixmap = (PFNGLXDESTROYPIXMAPPROC)glewGetProcAddress((const GLubyte*)"glXDestroyPixmap")) == NULL) || r;
+  r = ((glXDestroyWindow = (PFNGLXDESTROYWINDOWPROC)glewGetProcAddress((const GLubyte*)"glXDestroyWindow")) == NULL) || r;
+  r = ((glXGetCurrentReadDrawable = (PFNGLXGETCURRENTREADDRAWABLEPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentReadDrawable")) == NULL) || r;
+  r = ((glXGetFBConfigAttrib = (PFNGLXGETFBCONFIGATTRIBPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigAttrib")) == NULL) || r;
+  r = ((glXGetFBConfigs = (PFNGLXGETFBCONFIGSPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigs")) == NULL) || r;
+  r = ((glXGetSelectedEvent = (PFNGLXGETSELECTEDEVENTPROC)glewGetProcAddress((const GLubyte*)"glXGetSelectedEvent")) == NULL) || r;
+  r = ((glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glewGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfig")) == NULL) || r;
+  r = ((glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glewGetProcAddress((const GLubyte*)"glXMakeContextCurrent")) == NULL) || r;
+  r = ((glXQueryContext = (PFNGLXQUERYCONTEXTPROC)glewGetProcAddress((const GLubyte*)"glXQueryContext")) == NULL) || r;
+  r = ((glXQueryDrawable = (PFNGLXQUERYDRAWABLEPROC)glewGetProcAddress((const GLubyte*)"glXQueryDrawable")) == NULL) || r;
+  r = ((glXSelectEvent = (PFNGLXSELECTEVENTPROC)glewGetProcAddress((const GLubyte*)"glXSelectEvent")) == NULL) || r;
 
   return r;
 }
@@ -20023,15 +20020,15 @@ static GLboolean _glewInit_GLX_AMD_gpu_association ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBlitContextFramebufferAMD = (PFNGLXBLITCONTEXTFRAMEBUFFERAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXBlitContextFramebufferAMD")) == NULL) || r;
-  r = ((glXCreateAssociatedContextAMD = (PFNGLXCREATEASSOCIATEDCONTEXTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateAssociatedContextAMD")) == NULL) || r;
-  r = ((glXCreateAssociatedContextAttribsAMD = (PFNGLXCREATEASSOCIATEDCONTEXTATTRIBSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateAssociatedContextAttribsAMD")) == NULL) || r;
-  r = ((glXDeleteAssociatedContextAMD = (PFNGLXDELETEASSOCIATEDCONTEXTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXDeleteAssociatedContextAMD")) == NULL) || r;
-  r = ((glXGetContextGPUIDAMD = (PFNGLXGETCONTEXTGPUIDAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXGetContextGPUIDAMD")) == NULL) || r;
-  r = ((glXGetCurrentAssociatedContextAMD = (PFNGLXGETCURRENTASSOCIATEDCONTEXTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXGetCurrentAssociatedContextAMD")) == NULL) || r;
-  r = ((glXGetGPUIDsAMD = (PFNGLXGETGPUIDSAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXGetGPUIDsAMD")) == NULL) || r;
-  r = ((glXGetGPUInfoAMD = (PFNGLXGETGPUINFOAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXGetGPUInfoAMD")) == NULL) || r;
-  r = ((glXMakeAssociatedContextCurrentAMD = (PFNGLXMAKEASSOCIATEDCONTEXTCURRENTAMDPROC)glewGetProcSubtractress((const GLubyte*)"glXMakeAssociatedContextCurrentAMD")) == NULL) || r;
+  r = ((glXBlitContextFramebufferAMD = (PFNGLXBLITCONTEXTFRAMEBUFFERAMDPROC)glewGetProcAddress((const GLubyte*)"glXBlitContextFramebufferAMD")) == NULL) || r;
+  r = ((glXCreateAssociatedContextAMD = (PFNGLXCREATEASSOCIATEDCONTEXTAMDPROC)glewGetProcAddress((const GLubyte*)"glXCreateAssociatedContextAMD")) == NULL) || r;
+  r = ((glXCreateAssociatedContextAttribsAMD = (PFNGLXCREATEASSOCIATEDCONTEXTATTRIBSAMDPROC)glewGetProcAddress((const GLubyte*)"glXCreateAssociatedContextAttribsAMD")) == NULL) || r;
+  r = ((glXDeleteAssociatedContextAMD = (PFNGLXDELETEASSOCIATEDCONTEXTAMDPROC)glewGetProcAddress((const GLubyte*)"glXDeleteAssociatedContextAMD")) == NULL) || r;
+  r = ((glXGetContextGPUIDAMD = (PFNGLXGETCONTEXTGPUIDAMDPROC)glewGetProcAddress((const GLubyte*)"glXGetContextGPUIDAMD")) == NULL) || r;
+  r = ((glXGetCurrentAssociatedContextAMD = (PFNGLXGETCURRENTASSOCIATEDCONTEXTAMDPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentAssociatedContextAMD")) == NULL) || r;
+  r = ((glXGetGPUIDsAMD = (PFNGLXGETGPUIDSAMDPROC)glewGetProcAddress((const GLubyte*)"glXGetGPUIDsAMD")) == NULL) || r;
+  r = ((glXGetGPUInfoAMD = (PFNGLXGETGPUINFOAMDPROC)glewGetProcAddress((const GLubyte*)"glXGetGPUInfoAMD")) == NULL) || r;
+  r = ((glXMakeAssociatedContextCurrentAMD = (PFNGLXMAKEASSOCIATEDCONTEXTCURRENTAMDPROC)glewGetProcAddress((const GLubyte*)"glXMakeAssociatedContextCurrentAMD")) == NULL) || r;
 
   return r;
 }
@@ -20044,7 +20041,7 @@ static GLboolean _glewInit_GLX_ARB_create_context ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateContextAttribsARB")) == NULL) || r;
+  r = ((glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glewGetProcAddress((const GLubyte*)"glXCreateContextAttribsARB")) == NULL) || r;
 
   return r;
 }
@@ -20057,9 +20054,9 @@ static GLboolean _glewInit_GLX_ATI_render_texture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindTexImageATI = (PFNGLXBINDTEXIMAGEATIPROC)glewGetProcSubtractress((const GLubyte*)"glXBindTexImageATI")) == NULL) || r;
-  r = ((glXDrawableAttribATI = (PFNGLXDRAWABLEATTRIBATIPROC)glewGetProcSubtractress((const GLubyte*)"glXDrawableAttribATI")) == NULL) || r;
-  r = ((glXReleaseTexImageATI = (PFNGLXRELEASETEXIMAGEATIPROC)glewGetProcSubtractress((const GLubyte*)"glXReleaseTexImageATI")) == NULL) || r;
+  r = ((glXBindTexImageATI = (PFNGLXBINDTEXIMAGEATIPROC)glewGetProcAddress((const GLubyte*)"glXBindTexImageATI")) == NULL) || r;
+  r = ((glXDrawableAttribATI = (PFNGLXDRAWABLEATTRIBATIPROC)glewGetProcAddress((const GLubyte*)"glXDrawableAttribATI")) == NULL) || r;
+  r = ((glXReleaseTexImageATI = (PFNGLXRELEASETEXIMAGEATIPROC)glewGetProcAddress((const GLubyte*)"glXReleaseTexImageATI")) == NULL) || r;
 
   return r;
 }
@@ -20072,10 +20069,10 @@ static GLboolean _glewInit_GLX_EXT_import_context ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXFreeContextEXT = (PFNGLXFREECONTEXTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXFreeContextEXT")) == NULL) || r;
-  r = ((glXGetContextIDEXT = (PFNGLXGETCONTEXTIDEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXGetContextIDEXT")) == NULL) || r;
-  r = ((glXImportContextEXT = (PFNGLXIMPORTCONTEXTEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXImportContextEXT")) == NULL) || r;
-  r = ((glXQueryContextInfoEXT = (PFNGLXQUERYCONTEXTINFOEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryContextInfoEXT")) == NULL) || r;
+  r = ((glXFreeContextEXT = (PFNGLXFREECONTEXTEXTPROC)glewGetProcAddress((const GLubyte*)"glXFreeContextEXT")) == NULL) || r;
+  r = ((glXGetContextIDEXT = (PFNGLXGETCONTEXTIDEXTPROC)glewGetProcAddress((const GLubyte*)"glXGetContextIDEXT")) == NULL) || r;
+  r = ((glXImportContextEXT = (PFNGLXIMPORTCONTEXTEXTPROC)glewGetProcAddress((const GLubyte*)"glXImportContextEXT")) == NULL) || r;
+  r = ((glXQueryContextInfoEXT = (PFNGLXQUERYCONTEXTINFOEXTPROC)glewGetProcAddress((const GLubyte*)"glXQueryContextInfoEXT")) == NULL) || r;
 
   return r;
 }
@@ -20088,7 +20085,7 @@ static GLboolean _glewInit_GLX_EXT_swap_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXSwapIntervalEXT")) == NULL) || r;
+  r = ((glXSwapIntervalEXT = (PFNGLXSWAPINTERVALEXTPROC)glewGetProcAddress((const GLubyte*)"glXSwapIntervalEXT")) == NULL) || r;
 
   return r;
 }
@@ -20101,8 +20098,8 @@ static GLboolean _glewInit_GLX_EXT_texture_from_pixmap ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindTexImageEXT = (PFNGLXBINDTEXIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXBindTexImageEXT")) == NULL) || r;
-  r = ((glXReleaseTexImageEXT = (PFNGLXRELEASETEXIMAGEEXTPROC)glewGetProcSubtractress((const GLubyte*)"glXReleaseTexImageEXT")) == NULL) || r;
+  r = ((glXBindTexImageEXT = (PFNGLXBINDTEXIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glXBindTexImageEXT")) == NULL) || r;
+  r = ((glXReleaseTexImageEXT = (PFNGLXRELEASETEXIMAGEEXTPROC)glewGetProcAddress((const GLubyte*)"glXReleaseTexImageEXT")) == NULL) || r;
 
   return r;
 }
@@ -20115,7 +20112,7 @@ static GLboolean _glewInit_GLX_MESA_agp_offset ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetAGPOffsetMESA = (PFNGLXGETAGPOFFSETMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXGetAGPOffsetMESA")) == NULL) || r;
+  r = ((glXGetAGPOffsetMESA = (PFNGLXGETAGPOFFSETMESAPROC)glewGetProcAddress((const GLubyte*)"glXGetAGPOffsetMESA")) == NULL) || r;
 
   return r;
 }
@@ -20128,7 +20125,7 @@ static GLboolean _glewInit_GLX_MESA_copy_sub_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCopySubBufferMESA = (PFNGLXCOPYSUBBUFFERMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXCopySubBufferMESA")) == NULL) || r;
+  r = ((glXCopySubBufferMESA = (PFNGLXCOPYSUBBUFFERMESAPROC)glewGetProcAddress((const GLubyte*)"glXCopySubBufferMESA")) == NULL) || r;
 
   return r;
 }
@@ -20141,7 +20138,7 @@ static GLboolean _glewInit_GLX_MESA_pixmap_colormap ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCreateGLXPixmapMESA = (PFNGLXCREATEGLXPIXMAPMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateGLXPixmapMESA")) == NULL) || r;
+  r = ((glXCreateGLXPixmapMESA = (PFNGLXCREATEGLXPIXMAPMESAPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPixmapMESA")) == NULL) || r;
 
   return r;
 }
@@ -20154,10 +20151,10 @@ static GLboolean _glewInit_GLX_MESA_query_renderer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXQueryCurrentRendererIntegerMESA = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryCurrentRendererIntegerMESA")) == NULL) || r;
-  r = ((glXQueryCurrentRendererStringMESA = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryCurrentRendererStringMESA")) == NULL) || r;
-  r = ((glXQueryRendererIntegerMESA = (PFNGLXQUERYRENDERERINTEGERMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryRendererIntegerMESA")) == NULL) || r;
-  r = ((glXQueryRendererStringMESA = (PFNGLXQUERYRENDERERSTRINGMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryRendererStringMESA")) == NULL) || r;
+  r = ((glXQueryCurrentRendererIntegerMESA = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glewGetProcAddress((const GLubyte*)"glXQueryCurrentRendererIntegerMESA")) == NULL) || r;
+  r = ((glXQueryCurrentRendererStringMESA = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glewGetProcAddress((const GLubyte*)"glXQueryCurrentRendererStringMESA")) == NULL) || r;
+  r = ((glXQueryRendererIntegerMESA = (PFNGLXQUERYRENDERERINTEGERMESAPROC)glewGetProcAddress((const GLubyte*)"glXQueryRendererIntegerMESA")) == NULL) || r;
+  r = ((glXQueryRendererStringMESA = (PFNGLXQUERYRENDERERSTRINGMESAPROC)glewGetProcAddress((const GLubyte*)"glXQueryRendererStringMESA")) == NULL) || r;
 
   return r;
 }
@@ -20170,7 +20167,7 @@ static GLboolean _glewInit_GLX_MESA_release_buffers ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXReleaseBuffersMESA = (PFNGLXRELEASEBUFFERSMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXReleaseBuffersMESA")) == NULL) || r;
+  r = ((glXReleaseBuffersMESA = (PFNGLXRELEASEBUFFERSMESAPROC)glewGetProcAddress((const GLubyte*)"glXReleaseBuffersMESA")) == NULL) || r;
 
   return r;
 }
@@ -20183,7 +20180,7 @@ static GLboolean _glewInit_GLX_MESA_set_3dfx_mode ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXSet3DfxModeMESA = (PFNGLXSET3DFXMODEMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXSet3DfxModeMESA")) == NULL) || r;
+  r = ((glXSet3DfxModeMESA = (PFNGLXSET3DFXMODEMESAPROC)glewGetProcAddress((const GLubyte*)"glXSet3DfxModeMESA")) == NULL) || r;
 
   return r;
 }
@@ -20196,8 +20193,8 @@ static GLboolean _glewInit_GLX_MESA_swap_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetSwapIntervalMESA = (PFNGLXGETSWAPINTERVALMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXGetSwapIntervalMESA")) == NULL) || r;
-  r = ((glXSwapIntervalMESA = (PFNGLXSWAPINTERVALMESAPROC)glewGetProcSubtractress((const GLubyte*)"glXSwapIntervalMESA")) == NULL) || r;
+  r = ((glXGetSwapIntervalMESA = (PFNGLXGETSWAPINTERVALMESAPROC)glewGetProcAddress((const GLubyte*)"glXGetSwapIntervalMESA")) == NULL) || r;
+  r = ((glXSwapIntervalMESA = (PFNGLXSWAPINTERVALMESAPROC)glewGetProcAddress((const GLubyte*)"glXSwapIntervalMESA")) == NULL) || r;
 
   return r;
 }
@@ -20210,8 +20207,8 @@ static GLboolean _glewInit_GLX_NV_copy_buffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCopyBufferSubDataNV = (PFNGLXCOPYBUFFERSUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glXCopyBufferSubDataNV")) == NULL) || r;
-  r = ((glXNamedCopyBufferSubDataNV = (PFNGLXNAMEDCOPYBUFFERSUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glXNamedCopyBufferSubDataNV")) == NULL) || r;
+  r = ((glXCopyBufferSubDataNV = (PFNGLXCOPYBUFFERSUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glXCopyBufferSubDataNV")) == NULL) || r;
+  r = ((glXNamedCopyBufferSubDataNV = (PFNGLXNAMEDCOPYBUFFERSUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glXNamedCopyBufferSubDataNV")) == NULL) || r;
 
   return r;
 }
@@ -20224,7 +20221,7 @@ static GLboolean _glewInit_GLX_NV_copy_image ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCopyImageSubDataNV = (PFNGLXCOPYIMAGESUBDATANVPROC)glewGetProcSubtractress((const GLubyte*)"glXCopyImageSubDataNV")) == NULL) || r;
+  r = ((glXCopyImageSubDataNV = (PFNGLXCOPYIMAGESUBDATANVPROC)glewGetProcAddress((const GLubyte*)"glXCopyImageSubDataNV")) == NULL) || r;
 
   return r;
 }
@@ -20237,7 +20234,7 @@ static GLboolean _glewInit_GLX_NV_delay_before_swap ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXDelayBeforeSwapNV = (PFNGLXDELAYBEFORESWAPNVPROC)glewGetProcSubtractress((const GLubyte*)"glXDelayBeforeSwapNV")) == NULL) || r;
+  r = ((glXDelayBeforeSwapNV = (PFNGLXDELAYBEFORESWAPNVPROC)glewGetProcAddress((const GLubyte*)"glXDelayBeforeSwapNV")) == NULL) || r;
 
   return r;
 }
@@ -20250,8 +20247,8 @@ static GLboolean _glewInit_GLX_NV_present_video ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindVideoDeviceNV = (PFNGLXBINDVIDEODEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXBindVideoDeviceNV")) == NULL) || r;
-  r = ((glXEnumerateVideoDevicesNV = (PFNGLXENUMERATEVIDEODEVICESNVPROC)glewGetProcSubtractress((const GLubyte*)"glXEnumerateVideoDevicesNV")) == NULL) || r;
+  r = ((glXBindVideoDeviceNV = (PFNGLXBINDVIDEODEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXBindVideoDeviceNV")) == NULL) || r;
+  r = ((glXEnumerateVideoDevicesNV = (PFNGLXENUMERATEVIDEODEVICESNVPROC)glewGetProcAddress((const GLubyte*)"glXEnumerateVideoDevicesNV")) == NULL) || r;
 
   return r;
 }
@@ -20264,12 +20261,12 @@ static GLboolean _glewInit_GLX_NV_swap_group ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindSwapBarrierNV = (PFNGLXBINDSWAPBARRIERNVPROC)glewGetProcSubtractress((const GLubyte*)"glXBindSwapBarrierNV")) == NULL) || r;
-  r = ((glXJoinSwapGroupNV = (PFNGLXJOINSWAPGROUPNVPROC)glewGetProcSubtractress((const GLubyte*)"glXJoinSwapGroupNV")) == NULL) || r;
-  r = ((glXQueryFrameCountNV = (PFNGLXQUERYFRAMECOUNTNVPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryFrameCountNV")) == NULL) || r;
-  r = ((glXQueryMaxSwapGroupsNV = (PFNGLXQUERYMAXSWAPGROUPSNVPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryMaxSwapGroupsNV")) == NULL) || r;
-  r = ((glXQuerySwapGroupNV = (PFNGLXQUERYSWAPGROUPNVPROC)glewGetProcSubtractress((const GLubyte*)"glXQuerySwapGroupNV")) == NULL) || r;
-  r = ((glXResetFrameCountNV = (PFNGLXRESETFRAMECOUNTNVPROC)glewGetProcSubtractress((const GLubyte*)"glXResetFrameCountNV")) == NULL) || r;
+  r = ((glXBindSwapBarrierNV = (PFNGLXBINDSWAPBARRIERNVPROC)glewGetProcAddress((const GLubyte*)"glXBindSwapBarrierNV")) == NULL) || r;
+  r = ((glXJoinSwapGroupNV = (PFNGLXJOINSWAPGROUPNVPROC)glewGetProcAddress((const GLubyte*)"glXJoinSwapGroupNV")) == NULL) || r;
+  r = ((glXQueryFrameCountNV = (PFNGLXQUERYFRAMECOUNTNVPROC)glewGetProcAddress((const GLubyte*)"glXQueryFrameCountNV")) == NULL) || r;
+  r = ((glXQueryMaxSwapGroupsNV = (PFNGLXQUERYMAXSWAPGROUPSNVPROC)glewGetProcAddress((const GLubyte*)"glXQueryMaxSwapGroupsNV")) == NULL) || r;
+  r = ((glXQuerySwapGroupNV = (PFNGLXQUERYSWAPGROUPNVPROC)glewGetProcAddress((const GLubyte*)"glXQuerySwapGroupNV")) == NULL) || r;
+  r = ((glXResetFrameCountNV = (PFNGLXRESETFRAMECOUNTNVPROC)glewGetProcAddress((const GLubyte*)"glXResetFrameCountNV")) == NULL) || r;
 
   return r;
 }
@@ -20282,8 +20279,8 @@ static GLboolean _glewInit_GLX_NV_vertex_array_range ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXAllocateMemoryNV = (PFNGLXALLOCATEMEMORYNVPROC)glewGetProcSubtractress((const GLubyte*)"glXAllocateMemoryNV")) == NULL) || r;
-  r = ((glXFreeMemoryNV = (PFNGLXFREEMEMORYNVPROC)glewGetProcSubtractress((const GLubyte*)"glXFreeMemoryNV")) == NULL) || r;
+  r = ((glXAllocateMemoryNV = (PFNGLXALLOCATEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"glXAllocateMemoryNV")) == NULL) || r;
+  r = ((glXFreeMemoryNV = (PFNGLXFREEMEMORYNVPROC)glewGetProcAddress((const GLubyte*)"glXFreeMemoryNV")) == NULL) || r;
 
   return r;
 }
@@ -20296,11 +20293,11 @@ static GLboolean _glewInit_GLX_NV_video_capture ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindVideoCaptureDeviceNV = (PFNGLXBINDVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXBindVideoCaptureDeviceNV")) == NULL) || r;
-  r = ((glXEnumerateVideoCaptureDevicesNV = (PFNGLXENUMERATEVIDEOCAPTUREDEVICESNVPROC)glewGetProcSubtractress((const GLubyte*)"glXEnumerateVideoCaptureDevicesNV")) == NULL) || r;
-  r = ((glXLockVideoCaptureDeviceNV = (PFNGLXLOCKVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXLockVideoCaptureDeviceNV")) == NULL) || r;
-  r = ((glXQueryVideoCaptureDeviceNV = (PFNGLXQUERYVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryVideoCaptureDeviceNV")) == NULL) || r;
-  r = ((glXReleaseVideoCaptureDeviceNV = (PFNGLXRELEASEVIDEOCAPTUREDEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXReleaseVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((glXBindVideoCaptureDeviceNV = (PFNGLXBINDVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXBindVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((glXEnumerateVideoCaptureDevicesNV = (PFNGLXENUMERATEVIDEOCAPTUREDEVICESNVPROC)glewGetProcAddress((const GLubyte*)"glXEnumerateVideoCaptureDevicesNV")) == NULL) || r;
+  r = ((glXLockVideoCaptureDeviceNV = (PFNGLXLOCKVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXLockVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((glXQueryVideoCaptureDeviceNV = (PFNGLXQUERYVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXQueryVideoCaptureDeviceNV")) == NULL) || r;
+  r = ((glXReleaseVideoCaptureDeviceNV = (PFNGLXRELEASEVIDEOCAPTUREDEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXReleaseVideoCaptureDeviceNV")) == NULL) || r;
 
   return r;
 }
@@ -20313,12 +20310,12 @@ static GLboolean _glewInit_GLX_NV_video_out ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindVideoImageNV = (PFNGLXBINDVIDEOIMAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glXBindVideoImageNV")) == NULL) || r;
-  r = ((glXGetVideoDeviceNV = (PFNGLXGETVIDEODEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXGetVideoDeviceNV")) == NULL) || r;
-  r = ((glXGetVideoInfoNV = (PFNGLXGETVIDEOINFONVPROC)glewGetProcSubtractress((const GLubyte*)"glXGetVideoInfoNV")) == NULL) || r;
-  r = ((glXReleaseVideoDeviceNV = (PFNGLXRELEASEVIDEODEVICENVPROC)glewGetProcSubtractress((const GLubyte*)"glXReleaseVideoDeviceNV")) == NULL) || r;
-  r = ((glXReleaseVideoImageNV = (PFNGLXRELEASEVIDEOIMAGENVPROC)glewGetProcSubtractress((const GLubyte*)"glXReleaseVideoImageNV")) == NULL) || r;
-  r = ((glXSendPbufferToVideoNV = (PFNGLXSENDPBUFFERTOVIDEONVPROC)glewGetProcSubtractress((const GLubyte*)"glXSendPbufferToVideoNV")) == NULL) || r;
+  r = ((glXBindVideoImageNV = (PFNGLXBINDVIDEOIMAGENVPROC)glewGetProcAddress((const GLubyte*)"glXBindVideoImageNV")) == NULL) || r;
+  r = ((glXGetVideoDeviceNV = (PFNGLXGETVIDEODEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoDeviceNV")) == NULL) || r;
+  r = ((glXGetVideoInfoNV = (PFNGLXGETVIDEOINFONVPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoInfoNV")) == NULL) || r;
+  r = ((glXReleaseVideoDeviceNV = (PFNGLXRELEASEVIDEODEVICENVPROC)glewGetProcAddress((const GLubyte*)"glXReleaseVideoDeviceNV")) == NULL) || r;
+  r = ((glXReleaseVideoImageNV = (PFNGLXRELEASEVIDEOIMAGENVPROC)glewGetProcAddress((const GLubyte*)"glXReleaseVideoImageNV")) == NULL) || r;
+  r = ((glXSendPbufferToVideoNV = (PFNGLXSENDPBUFFERTOVIDEONVPROC)glewGetProcAddress((const GLubyte*)"glXSendPbufferToVideoNV")) == NULL) || r;
 
   return r;
 }
@@ -20331,11 +20328,11 @@ static GLboolean _glewInit_GLX_OML_sync_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetMscRateOML = (PFNGLXGETMSCRATEOMLPROC)glewGetProcSubtractress((const GLubyte*)"glXGetMscRateOML")) == NULL) || r;
-  r = ((glXGetSyncValuesOML = (PFNGLXGETSYNCVALUESOMLPROC)glewGetProcSubtractress((const GLubyte*)"glXGetSyncValuesOML")) == NULL) || r;
-  r = ((glXSwapBuffersMscOML = (PFNGLXSWAPBUFFERSMSCOMLPROC)glewGetProcSubtractress((const GLubyte*)"glXSwapBuffersMscOML")) == NULL) || r;
-  r = ((glXWaitForMscOML = (PFNGLXWAITFORMSCOMLPROC)glewGetProcSubtractress((const GLubyte*)"glXWaitForMscOML")) == NULL) || r;
-  r = ((glXWaitForSbcOML = (PFNGLXWAITFORSBCOMLPROC)glewGetProcSubtractress((const GLubyte*)"glXWaitForSbcOML")) == NULL) || r;
+  r = ((glXGetMscRateOML = (PFNGLXGETMSCRATEOMLPROC)glewGetProcAddress((const GLubyte*)"glXGetMscRateOML")) == NULL) || r;
+  r = ((glXGetSyncValuesOML = (PFNGLXGETSYNCVALUESOMLPROC)glewGetProcAddress((const GLubyte*)"glXGetSyncValuesOML")) == NULL) || r;
+  r = ((glXSwapBuffersMscOML = (PFNGLXSWAPBUFFERSMSCOMLPROC)glewGetProcAddress((const GLubyte*)"glXSwapBuffersMscOML")) == NULL) || r;
+  r = ((glXWaitForMscOML = (PFNGLXWAITFORMSCOMLPROC)glewGetProcAddress((const GLubyte*)"glXWaitForMscOML")) == NULL) || r;
+  r = ((glXWaitForSbcOML = (PFNGLXWAITFORSBCOMLPROC)glewGetProcAddress((const GLubyte*)"glXWaitForSbcOML")) == NULL) || r;
 
   return r;
 }
@@ -20348,12 +20345,12 @@ static GLboolean _glewInit_GLX_SGIX_fbconfig ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXChooseFBConfigSGIX = (PFNGLXCHOOSEFBCONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXChooseFBConfigSGIX")) == NULL) || r;
-  r = ((glXCreateContextWithConfigSGIX = (PFNGLXCREATECONTEXTWITHCONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateContextWithConfigSGIX")) == NULL) || r;
-  r = ((glXCreateGLXPixmapWithConfigSGIX = (PFNGLXCREATEGLXPIXMAPWITHCONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateGLXPixmapWithConfigSGIX")) == NULL) || r;
-  r = ((glXGetFBConfigAttribSGIX = (PFNGLXGETFBCONFIGATTRIBSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXGetFBConfigAttribSGIX")) == NULL) || r;
-  r = ((glXGetFBConfigFromVisualSGIX = (PFNGLXGETFBCONFIGFROMVISUALSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXGetFBConfigFromVisualSGIX")) == NULL) || r;
-  r = ((glXGetVisualFromFBConfigSGIX = (PFNGLXGETVISUALFROMFBCONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXGetVisualFromFBConfigSGIX")) == NULL) || r;
+  r = ((glXChooseFBConfigSGIX = (PFNGLXCHOOSEFBCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChooseFBConfigSGIX")) == NULL) || r;
+  r = ((glXCreateContextWithConfigSGIX = (PFNGLXCREATECONTEXTWITHCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateContextWithConfigSGIX")) == NULL) || r;
+  r = ((glXCreateGLXPixmapWithConfigSGIX = (PFNGLXCREATEGLXPIXMAPWITHCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPixmapWithConfigSGIX")) == NULL) || r;
+  r = ((glXGetFBConfigAttribSGIX = (PFNGLXGETFBCONFIGATTRIBSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigAttribSGIX")) == NULL) || r;
+  r = ((glXGetFBConfigFromVisualSGIX = (PFNGLXGETFBCONFIGFROMVISUALSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetFBConfigFromVisualSGIX")) == NULL) || r;
+  r = ((glXGetVisualFromFBConfigSGIX = (PFNGLXGETVISUALFROMFBCONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfigSGIX")) == NULL) || r;
 
   return r;
 }
@@ -20366,14 +20363,14 @@ static GLboolean _glewInit_GLX_SGIX_hyperpipe ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindHyperpipeSGIX = (PFNGLXBINDHYPERPIPESGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXBindHyperpipeSGIX")) == NULL) || r;
-  r = ((glXDestroyHyperpipeConfigSGIX = (PFNGLXDESTROYHYPERPIPECONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXDestroyHyperpipeConfigSGIX")) == NULL) || r;
-  r = ((glXHyperpipeAttribSGIX = (PFNGLXHYPERPIPEATTRIBSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXHyperpipeAttribSGIX")) == NULL) || r;
-  r = ((glXHyperpipeConfigSGIX = (PFNGLXHYPERPIPECONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXHyperpipeConfigSGIX")) == NULL) || r;
-  r = ((glXQueryHyperpipeAttribSGIX = (PFNGLXQUERYHYPERPIPEATTRIBSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryHyperpipeAttribSGIX")) == NULL) || r;
-  r = ((glXQueryHyperpipeBestAttribSGIX = (PFNGLXQUERYHYPERPIPEBESTATTRIBSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryHyperpipeBestAttribSGIX")) == NULL) || r;
-  r = ((glXQueryHyperpipeConfigSGIX = (PFNGLXQUERYHYPERPIPECONFIGSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryHyperpipeConfigSGIX")) == NULL) || r;
-  r = ((glXQueryHyperpipeNetworkSGIX = (PFNGLXQUERYHYPERPIPENETWORKSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryHyperpipeNetworkSGIX")) == NULL) || r;
+  r = ((glXBindHyperpipeSGIX = (PFNGLXBINDHYPERPIPESGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindHyperpipeSGIX")) == NULL) || r;
+  r = ((glXDestroyHyperpipeConfigSGIX = (PFNGLXDESTROYHYPERPIPECONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXDestroyHyperpipeConfigSGIX")) == NULL) || r;
+  r = ((glXHyperpipeAttribSGIX = (PFNGLXHYPERPIPEATTRIBSGIXPROC)glewGetProcAddress((const GLubyte*)"glXHyperpipeAttribSGIX")) == NULL) || r;
+  r = ((glXHyperpipeConfigSGIX = (PFNGLXHYPERPIPECONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXHyperpipeConfigSGIX")) == NULL) || r;
+  r = ((glXQueryHyperpipeAttribSGIX = (PFNGLXQUERYHYPERPIPEATTRIBSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryHyperpipeAttribSGIX")) == NULL) || r;
+  r = ((glXQueryHyperpipeBestAttribSGIX = (PFNGLXQUERYHYPERPIPEBESTATTRIBSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryHyperpipeBestAttribSGIX")) == NULL) || r;
+  r = ((glXQueryHyperpipeConfigSGIX = (PFNGLXQUERYHYPERPIPECONFIGSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryHyperpipeConfigSGIX")) == NULL) || r;
+  r = ((glXQueryHyperpipeNetworkSGIX = (PFNGLXQUERYHYPERPIPENETWORKSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryHyperpipeNetworkSGIX")) == NULL) || r;
 
   return r;
 }
@@ -20386,11 +20383,11 @@ static GLboolean _glewInit_GLX_SGIX_pbuffer ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCreateGLXPbufferSGIX = (PFNGLXCREATEGLXPBUFFERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXCreateGLXPbufferSGIX")) == NULL) || r;
-  r = ((glXDestroyGLXPbufferSGIX = (PFNGLXDESTROYGLXPBUFFERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXDestroyGLXPbufferSGIX")) == NULL) || r;
-  r = ((glXGetSelectedEventSGIX = (PFNGLXGETSELECTEDEVENTSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXGetSelectedEventSGIX")) == NULL) || r;
-  r = ((glXQueryGLXPbufferSGIX = (PFNGLXQUERYGLXPBUFFERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryGLXPbufferSGIX")) == NULL) || r;
-  r = ((glXSelectEventSGIX = (PFNGLXSELECTEVENTSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXSelectEventSGIX")) == NULL) || r;
+  r = ((glXCreateGLXPbufferSGIX = (PFNGLXCREATEGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXCreateGLXPbufferSGIX")) == NULL) || r;
+  r = ((glXDestroyGLXPbufferSGIX = (PFNGLXDESTROYGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXDestroyGLXPbufferSGIX")) == NULL) || r;
+  r = ((glXGetSelectedEventSGIX = (PFNGLXGETSELECTEDEVENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXGetSelectedEventSGIX")) == NULL) || r;
+  r = ((glXQueryGLXPbufferSGIX = (PFNGLXQUERYGLXPBUFFERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryGLXPbufferSGIX")) == NULL) || r;
+  r = ((glXSelectEventSGIX = (PFNGLXSELECTEVENTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXSelectEventSGIX")) == NULL) || r;
 
   return r;
 }
@@ -20403,8 +20400,8 @@ static GLboolean _glewInit_GLX_SGIX_swap_barrier ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindSwapBarrierSGIX = (PFNGLXBINDSWAPBARRIERSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXBindSwapBarrierSGIX")) == NULL) || r;
-  r = ((glXQueryMaxSwapBarriersSGIX = (PFNGLXQUERYMAXSWAPBARRIERSSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryMaxSwapBarriersSGIX")) == NULL) || r;
+  r = ((glXBindSwapBarrierSGIX = (PFNGLXBINDSWAPBARRIERSGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindSwapBarrierSGIX")) == NULL) || r;
+  r = ((glXQueryMaxSwapBarriersSGIX = (PFNGLXQUERYMAXSWAPBARRIERSSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryMaxSwapBarriersSGIX")) == NULL) || r;
 
   return r;
 }
@@ -20417,7 +20414,7 @@ static GLboolean _glewInit_GLX_SGIX_swap_group ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXJoinSwapGroupSGIX = (PFNGLXJOINSWAPGROUPSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXJoinSwapGroupSGIX")) == NULL) || r;
+  r = ((glXJoinSwapGroupSGIX = (PFNGLXJOINSWAPGROUPSGIXPROC)glewGetProcAddress((const GLubyte*)"glXJoinSwapGroupSGIX")) == NULL) || r;
 
   return r;
 }
@@ -20430,11 +20427,11 @@ static GLboolean _glewInit_GLX_SGIX_video_resize ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXBindChannelToWindowSGIX = (PFNGLXBINDCHANNELTOWINDOWSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXBindChannelToWindowSGIX")) == NULL) || r;
-  r = ((glXChannelRectSGIX = (PFNGLXCHANNELRECTSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXChannelRectSGIX")) == NULL) || r;
-  r = ((glXChannelRectSyncSGIX = (PFNGLXCHANNELRECTSYNCSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXChannelRectSyncSGIX")) == NULL) || r;
-  r = ((glXQueryChannelDeltasSGIX = (PFNGLXQUERYCHANNELDELTASSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryChannelDeltasSGIX")) == NULL) || r;
-  r = ((glXQueryChannelRectSGIX = (PFNGLXQUERYCHANNELRECTSGIXPROC)glewGetProcSubtractress((const GLubyte*)"glXQueryChannelRectSGIX")) == NULL) || r;
+  r = ((glXBindChannelToWindowSGIX = (PFNGLXBINDCHANNELTOWINDOWSGIXPROC)glewGetProcAddress((const GLubyte*)"glXBindChannelToWindowSGIX")) == NULL) || r;
+  r = ((glXChannelRectSGIX = (PFNGLXCHANNELRECTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChannelRectSGIX")) == NULL) || r;
+  r = ((glXChannelRectSyncSGIX = (PFNGLXCHANNELRECTSYNCSGIXPROC)glewGetProcAddress((const GLubyte*)"glXChannelRectSyncSGIX")) == NULL) || r;
+  r = ((glXQueryChannelDeltasSGIX = (PFNGLXQUERYCHANNELDELTASSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryChannelDeltasSGIX")) == NULL) || r;
+  r = ((glXQueryChannelRectSGIX = (PFNGLXQUERYCHANNELRECTSGIXPROC)glewGetProcAddress((const GLubyte*)"glXQueryChannelRectSGIX")) == NULL) || r;
 
   return r;
 }
@@ -20447,7 +20444,7 @@ static GLboolean _glewInit_GLX_SGI_cushion ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXCushionSGI = (PFNGLXCUSHIONSGIPROC)glewGetProcSubtractress((const GLubyte*)"glXCushionSGI")) == NULL) || r;
+  r = ((glXCushionSGI = (PFNGLXCUSHIONSGIPROC)glewGetProcAddress((const GLubyte*)"glXCushionSGI")) == NULL) || r;
 
   return r;
 }
@@ -20460,8 +20457,8 @@ static GLboolean _glewInit_GLX_SGI_make_current_read ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetCurrentReadDrawableSGI = (PFNGLXGETCURRENTREADDRAWABLESGIPROC)glewGetProcSubtractress((const GLubyte*)"glXGetCurrentReadDrawableSGI")) == NULL) || r;
-  r = ((glXMakeCurrentReadSGI = (PFNGLXMAKECURRENTREADSGIPROC)glewGetProcSubtractress((const GLubyte*)"glXMakeCurrentReadSGI")) == NULL) || r;
+  r = ((glXGetCurrentReadDrawableSGI = (PFNGLXGETCURRENTREADDRAWABLESGIPROC)glewGetProcAddress((const GLubyte*)"glXGetCurrentReadDrawableSGI")) == NULL) || r;
+  r = ((glXMakeCurrentReadSGI = (PFNGLXMAKECURRENTREADSGIPROC)glewGetProcAddress((const GLubyte*)"glXMakeCurrentReadSGI")) == NULL) || r;
 
   return r;
 }
@@ -20474,7 +20471,7 @@ static GLboolean _glewInit_GLX_SGI_swap_control ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)glewGetProcSubtractress((const GLubyte*)"glXSwapIntervalSGI")) == NULL) || r;
+  r = ((glXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC)glewGetProcAddress((const GLubyte*)"glXSwapIntervalSGI")) == NULL) || r;
 
   return r;
 }
@@ -20487,8 +20484,8 @@ static GLboolean _glewInit_GLX_SGI_video_sync ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGIPROC)glewGetProcSubtractress((const GLubyte*)"glXGetVideoSyncSGI")) == NULL) || r;
-  r = ((glXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGIPROC)glewGetProcSubtractress((const GLubyte*)"glXWaitVideoSyncSGI")) == NULL) || r;
+  r = ((glXGetVideoSyncSGI = (PFNGLXGETVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoSyncSGI")) == NULL) || r;
+  r = ((glXWaitVideoSyncSGI = (PFNGLXWAITVIDEOSYNCSGIPROC)glewGetProcAddress((const GLubyte*)"glXWaitVideoSyncSGI")) == NULL) || r;
 
   return r;
 }
@@ -20501,7 +20498,7 @@ static GLboolean _glewInit_GLX_SUN_get_transparent_index ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetTransparentIndexSUN = (PFNGLXGETTRANSPARENTINDEXSUNPROC)glewGetProcSubtractress((const GLubyte*)"glXGetTransparentIndexSUN")) == NULL) || r;
+  r = ((glXGetTransparentIndexSUN = (PFNGLXGETTRANSPARENTINDEXSUNPROC)glewGetProcAddress((const GLubyte*)"glXGetTransparentIndexSUN")) == NULL) || r;
 
   return r;
 }
@@ -20514,8 +20511,8 @@ static GLboolean _glewInit_GLX_SUN_video_resize ()
 {
   GLboolean r = GL_FALSE;
 
-  r = ((glXGetVideoResizeSUN = (PFNGLXGETVIDEORESIZESUNPROC)glewGetProcSubtractress((const GLubyte*)"glXGetVideoResizeSUN")) == NULL) || r;
-  r = ((glXVideoResizeSUN = (PFNGLXVIDEORESIZESUNPROC)glewGetProcSubtractress((const GLubyte*)"glXVideoResizeSUN")) == NULL) || r;
+  r = ((glXGetVideoResizeSUN = (PFNGLXGETVIDEORESIZESUNPROC)glewGetProcAddress((const GLubyte*)"glXGetVideoResizeSUN")) == NULL) || r;
+  r = ((glXVideoResizeSUN = (PFNGLXVIDEORESIZESUNPROC)glewGetProcAddress((const GLubyte*)"glXVideoResizeSUN")) == NULL) || r;
 
   return r;
 }
@@ -20869,7 +20866,7 @@ GLenum GLEWAPIENTRY glewInit (void)
   r = glewContextInit();
   if ( r != 0 ) return r;
 #if defined(GLEW_EGL)
-  getCurrentDisplay = (PFNEGLGETCURRENTDISPLAYPROC) glewGetProcSubtractress("eglGetCurrentDisplay");
+  getCurrentDisplay = (PFNEGLGETCURRENTDISPLAYPROC) glewGetProcAddress("eglGetCurrentDisplay");
   return eglewInit(getCurrentDisplay());
 #elif defined(GLEW_OSMESA) || defined(__ANDROID__) || defined(__native_client__) || defined(__HAIKU__)
   return r;

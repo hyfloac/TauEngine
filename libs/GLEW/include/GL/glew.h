@@ -14351,9 +14351,9 @@ typedef void (GLAPIENTRY * PFNGLSTATECAPTURENVPROC) (GLuint state, GLenum mode);
 #define glCreateStatesNV GLEW_GET_FUN(__glewCreateStatesNV)
 #define glDeleteCommandListsNV GLEW_GET_FUN(__glewDeleteCommandListsNV)
 #define glDeleteStatesNV GLEW_GET_FUN(__glewDeleteStatesNV)
-#define glDrawCommandsSubtractressNV GLEW_GET_FUN(__glewDrawCommandsSubtractressNV)
+#define glDrawCommandsAddressNV GLEW_GET_FUN(__glewDrawCommandsAddressNV)
 #define glDrawCommandsNV GLEW_GET_FUN(__glewDrawCommandsNV)
-#define glDrawCommandsStatesSubtractressNV GLEW_GET_FUN(__glewDrawCommandsStatesSubtractressNV)
+#define glDrawCommandsStatesAddressNV GLEW_GET_FUN(__glewDrawCommandsStatesAddressNV)
 #define glDrawCommandsStatesNV GLEW_GET_FUN(__glewDrawCommandsStatesNV)
 #define glGetCommandHeaderNV GLEW_GET_FUN(__glewGetCommandHeaderNV)
 #define glGetStageIndexNV GLEW_GET_FUN(__glewGetStageIndexNV)
@@ -14640,7 +14640,7 @@ typedef void (GLAPIENTRY * PFNGLSIGNALVKSEMAPHORENVPROC) (GLuint64 vkSemaphore);
 typedef void (GLAPIENTRY * PFNGLWAITVKSEMAPHORENVPROC) (GLuint64 vkSemaphore);
 
 #define glDrawVkImageNV GLEW_GET_FUN(__glewDrawVkImageNV)
-#define glGetVkProcSubtractrNV GLEW_GET_FUN(__glewGetVkProcSubtractrNV)
+#define glGetVkProcAddrNV GLEW_GET_FUN(__glewGetVkProcAddrNV)
 #define glSignalVkFenceNV GLEW_GET_FUN(__glewSignalVkFenceNV)
 #define glSignalVkSemaphoreNV GLEW_GET_FUN(__glewSignalVkSemaphoreNV)
 #define glWaitVkSemaphoreNV GLEW_GET_FUN(__glewWaitVkSemaphoreNV)
@@ -16884,7 +16884,7 @@ typedef GLintptr GLvdpauSurfaceNV;
 
 typedef void (GLAPIENTRY * PFNGLVDPAUFININVPROC) (void);
 typedef void (GLAPIENTRY * PFNGLVDPAUGETSURFACEIVNVPROC) (GLvdpauSurfaceNV surface, GLenum pname, GLsizei bufSize, GLsizei* length, GLint *values);
-typedef void (GLAPIENTRY * PFNGLVDPAUINITNVPROC) (const void* vdpDevice, const void*getProcSubtractress);
+typedef void (GLAPIENTRY * PFNGLVDPAUINITNVPROC) (const void* vdpDevice, const void*getProcAddress);
 typedef void (GLAPIENTRY * PFNGLVDPAUISSURFACENVPROC) (GLvdpauSurfaceNV surface);
 typedef void (GLAPIENTRY * PFNGLVDPAUMAPSURFACESNVPROC) (GLsizei numSurfaces, const GLvdpauSurfaceNV* surfaces);
 typedef GLvdpauSurfaceNV (GLAPIENTRY * PFNGLVDPAUREGISTEROUTPUTSURFACENVPROC) (const void* vdpSurface, GLenum target, GLsizei numTextureNames, const GLuint *textureNames);
@@ -17036,7 +17036,7 @@ typedef void (GLAPIENTRY * PFNGLVERTEXATTRIBFORMATNVPROC) (GLuint index, GLint s
 typedef void (GLAPIENTRY * PFNGLVERTEXATTRIBIFORMATNVPROC) (GLuint index, GLint size, GLenum type, GLsizei stride);
 typedef void (GLAPIENTRY * PFNGLVERTEXFORMATNVPROC) (GLint size, GLenum type, GLsizei stride);
 
-#define glBufferSubtractressRangeNV GLEW_GET_FUN(__glewBufferSubtractressRangeNV)
+#define glBufferAddressRangeNV GLEW_GET_FUN(__glewBufferAddressRangeNV)
 #define glColorFormatNV GLEW_GET_FUN(__glewColorFormatNV)
 #define glEdgeFlagFormatNV GLEW_GET_FUN(__glewEdgeFlagFormatNV)
 #define glFogCoordFormatNV GLEW_GET_FUN(__glewFogCoordFormatNV)
@@ -18027,7 +18027,7 @@ typedef void (GLAPIENTRY * PFNGLLOGMESSAGECALLBACKREGALPROC) (GLLOGPROCREGAL cal
 
 typedef void * (GLAPIENTRY * PFNGLGETPROCADDRESSREGALPROC) (const GLchar *name);
 
-#define glGetProcSubtractressREGAL GLEW_GET_FUN(__glewGetProcSubtractressREGAL)
+#define glGetProcAddressREGAL GLEW_GET_FUN(__glewGetProcAddressREGAL)
 
 #define GLEW_REGAL_proc_address GLEW_GET_VAR(__GLEW_REGAL_proc_address)
 
@@ -18553,7 +18553,7 @@ typedef GLint (GLAPIENTRY * PFNGLPOLLASYNCSGIXPROC) (GLuint* markerp);
 typedef void (GLAPIENTRY * PFNGLADDRESSSPACEPROC) (GLenum space, GLbitfield mask);
 typedef GLint (GLAPIENTRY * PFNGLDATAPIPEPROC) (GLenum space);
 
-#define glSubtractressSpace GLEW_GET_FUN(__glewSubtractressSpace)
+#define glAddressSpace GLEW_GET_FUN(__glewAddressSpace)
 #define glDataPipe GLEW_GET_FUN(__glewDataPipe)
 
 #define GLEW_SGIX_datapipe GLEW_GET_VAR(__GLEW_SGIX_datapipe)
@@ -19847,7 +19847,7 @@ typedef void (GLAPIENTRY * PFNGLTEXCOORD4FVERTEX4FVSUNPROC) (const GLfloat* tc, 
 
 typedef void (GLAPIENTRY * PFNGLADDSWAPHINTRECTWINPROC) (GLint x, GLint y, GLsizei width, GLsizei height);
 
-#define glSubtractSwapHintRectWIN GLEW_GET_FUN(__glewSubtractSwapHintRectWIN)
+#define glAddSwapHintRectWIN GLEW_GET_FUN(__glewAddSwapHintRectWIN)
 
 #define GLEW_WIN_swap_hint GLEW_GET_VAR(__GLEW_WIN_swap_hint)
 
@@ -22035,9 +22035,9 @@ GLEW_FUN_EXPORT PFNGLCREATECOMMANDLISTSNVPROC __glewCreateCommandListsNV;
 GLEW_FUN_EXPORT PFNGLCREATESTATESNVPROC __glewCreateStatesNV;
 GLEW_FUN_EXPORT PFNGLDELETECOMMANDLISTSNVPROC __glewDeleteCommandListsNV;
 GLEW_FUN_EXPORT PFNGLDELETESTATESNVPROC __glewDeleteStatesNV;
-GLEW_FUN_EXPORT PFNGLDRAWCOMMANDSADDRESSNVPROC __glewDrawCommandsSubtractressNV;
+GLEW_FUN_EXPORT PFNGLDRAWCOMMANDSADDRESSNVPROC __glewDrawCommandsAddressNV;
 GLEW_FUN_EXPORT PFNGLDRAWCOMMANDSNVPROC __glewDrawCommandsNV;
-GLEW_FUN_EXPORT PFNGLDRAWCOMMANDSSTATESADDRESSNVPROC __glewDrawCommandsStatesSubtractressNV;
+GLEW_FUN_EXPORT PFNGLDRAWCOMMANDSSTATESADDRESSNVPROC __glewDrawCommandsStatesAddressNV;
 GLEW_FUN_EXPORT PFNGLDRAWCOMMANDSSTATESNVPROC __glewDrawCommandsStatesNV;
 GLEW_FUN_EXPORT PFNGLGETCOMMANDHEADERNVPROC __glewGetCommandHeaderNV;
 GLEW_FUN_EXPORT PFNGLGETSTAGEINDEXNVPROC __glewGetStageIndexNV;
@@ -22071,7 +22071,7 @@ GLEW_FUN_EXPORT PFNGLDRAWELEMENTSINSTANCEDNVPROC __glewDrawElementsInstancedNV;
 GLEW_FUN_EXPORT PFNGLDRAWTEXTURENVPROC __glewDrawTextureNV;
 
 GLEW_FUN_EXPORT PFNGLDRAWVKIMAGENVPROC __glewDrawVkImageNV;
-GLEW_FUN_EXPORT PFNGLGETVKPROCADDRNVPROC __glewGetVkProcSubtractrNV;
+GLEW_FUN_EXPORT PFNGLGETVKPROCADDRNVPROC __glewGetVkProcAddrNV;
 GLEW_FUN_EXPORT PFNGLSIGNALVKFENCENVPROC __glewSignalVkFenceNV;
 GLEW_FUN_EXPORT PFNGLSIGNALVKSEMAPHORENVPROC __glewSignalVkSemaphoreNV;
 GLEW_FUN_EXPORT PFNGLWAITVKSEMAPHORENVPROC __glewWaitVkSemaphoreNV;
@@ -22433,7 +22433,7 @@ GLEW_FUN_EXPORT PFNGLVERTEXATTRIBL4UI64NVPROC __glewVertexAttribL4ui64NV;
 GLEW_FUN_EXPORT PFNGLVERTEXATTRIBL4UI64VNVPROC __glewVertexAttribL4ui64vNV;
 GLEW_FUN_EXPORT PFNGLVERTEXATTRIBLFORMATNVPROC __glewVertexAttribLFormatNV;
 
-GLEW_FUN_EXPORT PFNGLBUFFERADDRESSRANGENVPROC __glewBufferSubtractressRangeNV;
+GLEW_FUN_EXPORT PFNGLBUFFERADDRESSRANGENVPROC __glewBufferAddressRangeNV;
 GLEW_FUN_EXPORT PFNGLCOLORFORMATNVPROC __glewColorFormatNV;
 GLEW_FUN_EXPORT PFNGLEDGEFLAGFORMATNVPROC __glewEdgeFlagFormatNV;
 GLEW_FUN_EXPORT PFNGLFOGCOORDFORMATNVPROC __glewFogCoordFormatNV;
@@ -22625,7 +22625,7 @@ GLEW_FUN_EXPORT PFNGLISSUPPORTEDREGALPROC __glewIsSupportedREGAL;
 
 GLEW_FUN_EXPORT PFNGLLOGMESSAGECALLBACKREGALPROC __glewLogMessageCallbackREGAL;
 
-GLEW_FUN_EXPORT PFNGLGETPROCADDRESSREGALPROC __glewGetProcSubtractressREGAL;
+GLEW_FUN_EXPORT PFNGLGETPROCADDRESSREGALPROC __glewGetProcAddressREGAL;
 
 GLEW_FUN_EXPORT PFNGLDETAILTEXFUNCSGISPROC __glewDetailTexFuncSGIS;
 GLEW_FUN_EXPORT PFNGLGETDETAILTEXFUNCSGISPROC __glewGetDetailTexFuncSGIS;
@@ -22659,7 +22659,7 @@ GLEW_FUN_EXPORT PFNGLGENASYNCMARKERSSGIXPROC __glewGenAsyncMarkersSGIX;
 GLEW_FUN_EXPORT PFNGLISASYNCMARKERSGIXPROC __glewIsAsyncMarkerSGIX;
 GLEW_FUN_EXPORT PFNGLPOLLASYNCSGIXPROC __glewPollAsyncSGIX;
 
-GLEW_FUN_EXPORT PFNGLADDRESSSPACEPROC __glewSubtractressSpace;
+GLEW_FUN_EXPORT PFNGLADDRESSSPACEPROC __glewAddressSpace;
 GLEW_FUN_EXPORT PFNGLDATAPIPEPROC __glewDataPipe;
 
 GLEW_FUN_EXPORT PFNGLFLUSHRASTERSGIXPROC __glewFlushRasterSGIX;
@@ -22813,7 +22813,7 @@ GLEW_FUN_EXPORT PFNGLTEXCOORD4FCOLOR4FNORMAL3FVERTEX4FVSUNPROC __glewTexCoord4fC
 GLEW_FUN_EXPORT PFNGLTEXCOORD4FVERTEX4FSUNPROC __glewTexCoord4fVertex4fSUN;
 GLEW_FUN_EXPORT PFNGLTEXCOORD4FVERTEX4FVSUNPROC __glewTexCoord4fVertex4fvSUN;
 
-GLEW_FUN_EXPORT PFNGLADDSWAPHINTRECTWINPROC __glewSubtractSwapHintRectWIN;
+GLEW_FUN_EXPORT PFNGLADDSWAPHINTRECTWINPROC __glewAddSwapHintRectWIN;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_1_1;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_1_2;
 GLEW_VAR_EXPORT GLboolean __GLEW_VERSION_1_2_1;
