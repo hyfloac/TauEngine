@@ -4,14 +4,16 @@
 #include <thread>
 #pragma warning(pop)
 
+#include <maths/Vector2f.hpp>
+#include <maths/Vector3f.hpp>
+#include <maths/Vector4f.hpp>
+#include <maths/Matrix4x4f.hpp>
 #include <DLL.hpp>
 #include <NumTypes.hpp>
 #include <system/Window.hpp>
 #include <system/Win32Event.hpp>
 
 class TextHandler;
-class Vector3f;
-class Matrix4x4f;
 class ITexture;
 class IBufferDescriptor;
 struct ImDrawData;
@@ -21,15 +23,11 @@ enum class RenderingOpcode : u8
     FINISH_RENDER = 1,
     LOAD_SHADER_UNIFORM,
     ACTIVATE_SHADER_PROGRAM,
-    // ACTIVATE_TEXTURE_UNIT,
     BIND_TEXTURE,
     UNBIND_TEXTURE,
     ENABLE_BUFFER_DESCRIPTOR,
     DISABLE_BUFFER_DESCRIPTOR,
-    // BIND_VAO,
     BIND_VBO,
-    // ENABLE_VAO_ATTRIBUTE,
-    // DISABLE_VAO_ATTRIBUTE,
     GL_DRAW_ARRAYS,
     GL_DRAW_ELEMENTS,
     GL_CLEAR_BUFFERS,
@@ -40,7 +38,8 @@ enum class RenderingOpcode : u8
     GL_FACE_WINDING,
     RESIZE_VIEWPORT,
     RENDER_TEXT,
-    IMGUI_RENDER
+    IMGUI_RENDER,
+    LAST = IMGUI_RENDER
 };
 
 enum class ShaderUniformType : u8
@@ -76,9 +75,13 @@ struct ParameterPack final
     ParameterPack& operator =(ParameterPack&&) noexcept = default;
 };
 
+typedef void (*__cdecl setupParams_f)(void);
+
 class TAU_DLL RenderingPipeline final
 {
 private:
+    Window& _window;
+
     u8* _instBuffer;
     u8* _backBuffer;
     volatile u32 _instPtr;
@@ -93,9 +96,7 @@ private:
     Win32Event   _possession2Signal;
     Win32Event   _exitSignal;
 public:
-    RenderingPipeline(Window* window, const u32 bufferSize = 16384) noexcept;
-
-    RenderingPipeline(const u32 bufferSize = 16384) noexcept;
+    RenderingPipeline(Window& window, setupParams_f setupParams, const bool async, const u32 bufferSize = 16384) noexcept;
     
     ~RenderingPipeline() noexcept;
 
@@ -241,103 +242,114 @@ public:
         prePushInst<RenderingOpcode::FINISH_RENDER>();
         _insertPtr = 0;
         postPushInst();
-        (void) _insertSignal.waitUntilSignaled();
+        if(_async)
+        {
+            (void) _insertSignal.waitUntilSignaled();
+        }
         u8* tmp = _instBuffer;
         _instBuffer = _backBuffer;
         _backBuffer = tmp;
-        _renderSignal.signal();
-    }
-
-    template<ShaderUniformType _UniType>
-    void pushLoadUniform(const ParameterPack&& params) noexcept
-    {
-        _backBuffer[_insertPtr++] = static_cast<u8>(RenderingOpcode::LOAD_SHADER_UNIFORM);
-        _backBuffer[_insertPtr++] = static_cast<u8>(_UniType);
-
-        const i32 uniformID = static_cast<i32>(params.p0);
-        LOAD_VALUE(uniformID);
-
-        switch(_UniType)
+        if(_async)
         {
-            case ShaderUniformType::INTEGER:
-            {
-                LOAD_VALUE(params.p1);
-                break;
-            }
-            case ShaderUniformType::FLOAT:
-            {
-                const u32 iVal = static_cast<u32>(params.p1);
-                const float fVal = reinterpret_cast<const float&>(iVal);
-                LOAD_VALUE(fVal);
-                break;
-            }
-            case ShaderUniformType::DOUBLE:
-            {
-                LOAD_VALUE(params.p1);
-                break;
-            }
-            case ShaderUniformType::VEC2F:
-            {
-                const u32 iv0 = static_cast<u32>(params.p1);
-                const float fv0 = reinterpret_cast<const float&>(iv0);
-                LOAD_VALUE(fv0);
-                const u32 iv1 = static_cast<u32>(params.p2);
-                const float fv1 = reinterpret_cast<const float&>(iv1);
-                LOAD_VALUE(fv1);
-                break;
-            }
-            case ShaderUniformType::VEC3F:
-            {
-                const u32 iv0 = static_cast<u32>(params.p1);
-                const float fv0 = reinterpret_cast<const float&>(iv0);
-                LOAD_VALUE(fv0);
-                const u32 iv1 = static_cast<u32>(params.p2);
-                const float fv1 = reinterpret_cast<const float&>(iv1);
-                LOAD_VALUE(fv1);
-                const u32 iv2 = static_cast<u32>(params.p3);
-                const float fv2 = reinterpret_cast<const float&>(iv2);
-                LOAD_VALUE(fv2);
-                break;
-            }
-            case ShaderUniformType::VEC4F:
-            {
-                const u32 iv0 = static_cast<u32>(params.p1);
-                const float fv0 = reinterpret_cast<const float&>(iv0);
-                LOAD_VALUE(fv0);
-                const u32 iv1 = static_cast<u32>(params.p2);
-                const float fv1 = reinterpret_cast<const float&>(iv1);
-                LOAD_VALUE(fv1);
-                const u32 iv2 = static_cast<u32>(params.p3);
-                const float fv2 = reinterpret_cast<const float&>(iv2);
-                LOAD_VALUE(fv2);
-                const u32 iv3 = static_cast<u32>(params.p4);
-                const float fv3 = reinterpret_cast<const float&>(iv3);
-                LOAD_VALUE(fv3);
-                break;
-            }
-            case ShaderUniformType::MAT4F:
-            {
-                const float* const mat = reinterpret_cast<const float*>(params.p1);
-                std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(mat), sizeof(float) * 16); 
-                _insertPtr += sizeof(float) * 16;
-                break;
-            }
-            default: break;
+            _renderSignal.signal();
+        }
+        else
+        {
+            runRenderingCycleSync();
+            _window.swapBuffers();
         }
     }
 
+    void pushLoadUniInt(GLint uniformID, GLint param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::INTEGER);
+        LOAD_VALUE(uniformID);
+        LOAD_VALUE(param);
+        postPushInst();
+    }
+
+    void pushLoadUniFloat(GLint uniformID, GLfloat param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::FLOAT);
+        LOAD_VALUE(uniformID);
+        LOAD_VALUE(param);
+        postPushInst();
+    }
+
+    void pushLoadUniDouble(GLint uniformID, GLdouble param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::DOUBLE);
+        LOAD_VALUE(uniformID);
+        LOAD_VALUE(param);
+        postPushInst();
+    }
+
+    void pushLoadUniVec2f(GLint uniformID, Vector2f param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::VEC2F);
+        LOAD_VALUE(uniformID);
+        LOAD_VALUE(param.x());
+        LOAD_VALUE(param.y());
+        postPushInst();
+    }
+
+    void pushLoadUniVec3f(GLint uniformID, Vector3f param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::VEC3F);
+        LOAD_VALUE(uniformID);
+        LOAD_VALUE(param.x());
+        LOAD_VALUE(param.y());
+        LOAD_VALUE(param.z());
+        postPushInst();
+    }
+
+    void pushLoadUniVec4f(GLint uniformID, Vector4f param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::VEC4F);
+        LOAD_VALUE(uniformID);
+        LOAD_VALUE(param.x());
+        LOAD_VALUE(param.y());
+        LOAD_VALUE(param.z());
+        LOAD_VALUE(param.w());
+        postPushInst();
+    }
+
+    void pushLoadUniMat4f(GLint uniformID, const Matrix4x4f& param) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
+        _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::MAT4F);
+        LOAD_VALUE(uniformID);
+        std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(param.data().m), sizeof(float) * 16);
+        _insertPtr += sizeof(float) * 16;
+        postPushInst();
+    }
+
+    void pushLoadUni(GLint uniformID, GLint param) noexcept { pushLoadUniInt(uniformID, param); }
+    void pushLoadUni(GLint uniformID, GLfloat param) noexcept { pushLoadUniFloat(uniformID, param); }
+    void pushLoadUni(GLint uniformID, GLdouble param) noexcept { pushLoadUniDouble(uniformID, param); }
+    void pushLoadUni(GLint uniformID, Vector2f param) noexcept { pushLoadUniVec2f(uniformID, param); }
+    void pushLoadUni(GLint uniformID, Vector3f param) noexcept { pushLoadUniVec3f(uniformID, param); }
+    void pushLoadUni(GLint uniformID, Vector4f param) noexcept { pushLoadUniVec4f(uniformID, param); }
+    void pushLoadUni(GLint uniformID, const Matrix4x4f& param) noexcept { pushLoadUniMat4f(uniformID, param); }
+
 #undef LOAD_VALUE
 
-    inline void runRenderingCycleSync() noexcept
+    void runRenderingCycleSync() noexcept
     {
         if(!_async) { runRenderingCycle(); }
     }
 
     // void dumpCommandBufferToFile(FILE* file) const noexcept;
 
-    void takeControlOfContext(Window* window) noexcept;
+    void takeControlOfContext() const noexcept;
 
-    void returnControlOfContext() noexcept;
+    void returnControlOfContext() const noexcept;
 private:
     void prePushInst(const RenderingOpcode opcode)
     {
@@ -347,15 +359,15 @@ private:
     template<RenderingOpcode _Opcode>
     void prePushInst() noexcept
     {
-        static_assert(_Opcode != RenderingOpcode::LOAD_SHADER_UNIFORM, "`LOAD_SHADER_UNIFORM` cannot be used with `pushInstruction`, you must use `pushLoadUniform`");
         prePushInst(_Opcode);
     }
 
+    // ReSharper disable once CppMemberFunctionMayBeStatic
     void postPushInst() const noexcept { }
 
-    void _passContext(Window* window) const noexcept;
+    void _passContext() const noexcept;
 
     void runRenderingCycle() noexcept;
 
-    void renderThreadFunc(Window* window) noexcept;
+    void renderThreadFunc(setupParams_f setupParams) noexcept;
 };

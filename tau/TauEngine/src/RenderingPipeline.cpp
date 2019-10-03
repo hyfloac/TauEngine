@@ -13,26 +13,26 @@
 #include <maths/Matrix4x4f.hpp>
 #include <imgui/ImGuiGLImpl.hpp>
 
-RenderingPipeline::RenderingPipeline(Window* window, const u32 bufferSize) noexcept
-    : _instBuffer(new u8[bufferSize]), _backBuffer(new u8[bufferSize]), _instPtr(0), _insertPtr(0),
-      _async(true), _renderThread(null)
-{
-    /* Unload context on main thread.
-       The context will be loaded on the rendering thread.
-       Not entirely sure if this required.
-     */
-    Window::unloadCurrentContext();
-    std::memset(reinterpret_cast<void*>(_instBuffer), 0, bufferSize);
-    std::memset(reinterpret_cast<void*>(_backBuffer), 0, bufferSize);
-    _renderThread = new std::thread(&RenderingPipeline::renderThreadFunc, this, window);
-}
-
-RenderingPipeline::RenderingPipeline(const u32 bufferSize) noexcept
-    : _instBuffer(new u8[bufferSize]), _backBuffer(new u8[bufferSize]), _instPtr(0), _insertPtr(0),
-      _async(false), _renderThread(null)
+RenderingPipeline::RenderingPipeline(Window& window, setupParams_f setupParams, const bool async, const u32 bufferSize) noexcept
+    : _window(window),
+      _instBuffer(new u8[bufferSize]), _backBuffer(new u8[bufferSize]), _instPtr(0), _insertPtr(0),
+      _async(async), _renderThread(null)
 {
     std::memset(reinterpret_cast<void*>(_instBuffer), 0, bufferSize);
     std::memset(reinterpret_cast<void*>(_backBuffer), 0, bufferSize);
+    if(async)
+    {
+        /* Unload context on main thread.
+           The context will be loaded on the rendering thread.
+           Not entirely sure if this required.
+         */
+        Window::unloadCurrentContext();
+        _renderThread = new std::thread(&RenderingPipeline::renderThreadFunc, this, setupParams);
+    }
+    else
+    {
+        setupParams();
+    }
 }
 
 RenderingPipeline::~RenderingPipeline() noexcept 
@@ -72,10 +72,16 @@ void RenderingPipeline::pushRenderText(const TextHandler* th, const char* str, G
     postPushInst();
 }
 
-#define GET_VALUE0(__TYPE, __VAR, __PTR) __TYPE __VAR = *reinterpret_cast<__TYPE*>(_instBuffer + (__PTR)); \
+#define GET_VALUE0(__TYPE, __VAR, __PTR) __TYPE __VAR = *reinterpret_cast<__TYPE*>(_instBuffer + (__PTR)); /* NOLINT(bugprone-macro-parentheses) */ \
                                          (__PTR) += sizeof(__VAR);
 
 #define GET_VALUE(__TYPE, __VAR) GET_VALUE0(__TYPE, __VAR, _instPtr)
+
+static inline void rpActivateShaderProgram(u8* _instBuffer, volatile u32& _instPtr) noexcept
+{
+    GET_VALUE(GLuint, shaderProgramID);
+    glUseProgram(shaderProgramID);
+}
 
 static inline void rpBindTexture(u8* _instBuffer, volatile u32& _instPtr) noexcept
 {
@@ -109,6 +115,96 @@ static inline void rpDisableBufferDescriptor(u8* _instBuffer, volatile u32& _ins
     bufferDescriptor->unbind();
 }
 
+static inline void rpBindVBO(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, target);
+    GET_VALUE(GLuint, vboID);
+    glBindBuffer(target, vboID);
+}
+
+static inline void rpGLDrawArrays(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, drawArraysMode);
+    GET_VALUE(GLint, drawArraysFirst);
+    GET_VALUE(GLsizei, drawArraysCount);
+
+    glDrawArrays(drawArraysMode, drawArraysFirst, drawArraysCount);
+}
+
+static inline void rpGLDrawElements(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, drawElemsMode);
+    GET_VALUE(GLsizei, drawElemsCount);
+    GET_VALUE(GLenum, drawElemsType);
+    GET_VALUE(void*, drawElemsIndices);
+
+    glDrawElements(drawElemsMode, drawElemsCount, drawElemsType, drawElemsIndices);
+}
+
+static inline void rpGLClearBuffers(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLbitfield, clearBuffers);
+    glClear(clearBuffers);
+}
+
+static inline void rpLoadBufferData(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, target);
+    GET_VALUE(GLsizeiptr, size);
+
+    const void* data = reinterpret_cast<const void*>(_instBuffer + _instPtr);
+    _instPtr += static_cast<u32>(size);
+
+    GET_VALUE(GLenum, usage);
+
+    glBufferData(target, size, data, usage);
+}
+
+static inline void rpModifyBufferData(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, target);
+    GET_VALUE(GLintptr, offset);
+    GET_VALUE(GLsizeiptr, size);
+
+    const void* data = reinterpret_cast<const void*>(_instBuffer + _instPtr);
+    _instPtr += static_cast<u32>(size);
+
+    glBufferSubData(target, offset, size, data);
+}
+
+static inline void rpGLEnable(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, cap);
+    glEnable(cap);
+}
+
+static inline void rpGLDisable(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, cap);
+    glDisable(cap);
+}
+
+static inline void rpGLFaceWinding(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLenum, mode);
+    glFrontFace(mode);
+}
+
+static inline void rpResizeViewport(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(GLint, x);
+    GET_VALUE(GLint, y);
+    GET_VALUE(GLsizei, width);
+    GET_VALUE(GLsizei, height);
+    glViewport(x, y, width, height);
+}
+
+static inline void rpImGuiRender(u8* _instBuffer, volatile u32& _instPtr)
+{
+    GET_VALUE(ImDrawData*, data);
+    ImGui_ImplGL_Render(data);
+}
+
 static inline void rpRenderText(u8* _instBuffer, volatile u32& _instPtr) noexcept
 {
     GET_VALUE(TextHandler*, th);
@@ -135,6 +231,8 @@ static inline void rpRenderText(u8* _instBuffer, volatile u32& _instPtr) noexcep
 
 void RenderingPipeline::runRenderingCycle() noexcept
 {
+#define RP_FUNC_HANDLER(_OP, _FUNC) case RenderingOpcode::_OP: _FUNC(_instBuffer, _instPtr); break
+
     _instPtr = 0;
 
     while(true)
@@ -207,162 +305,50 @@ void RenderingPipeline::runRenderingCycle() noexcept
                 }
                 break;
             }
-            case RenderingOpcode::ACTIVATE_SHADER_PROGRAM:
-            {
-                GET_VALUE(GLuint, shaderProgramID);
-                glUseProgram(shaderProgramID);
-                break;
-            }
-            case RenderingOpcode::BIND_TEXTURE:
-            {
-                rpBindTexture(_instBuffer, _instPtr);
-                break;
-            }
-            case RenderingOpcode::UNBIND_TEXTURE:
-            {
-                rpUnbindTexture(_instBuffer, _instPtr);
-                break;
-            }
-            case RenderingOpcode::ENABLE_BUFFER_DESCRIPTOR:
-            {
-                rpEnableBufferDescriptor(_instBuffer, _instPtr);
-                break;
-            }
-            case RenderingOpcode::DISABLE_BUFFER_DESCRIPTOR:
-            {
-                rpDisableBufferDescriptor(_instBuffer, _instPtr);
-                break;
-            }
-            case RenderingOpcode::BIND_VBO:
-            {
-                GET_VALUE(GLenum, target);
-                GET_VALUE(GLuint, vboID);
-                glBindBuffer(target, vboID);
-                break;
-            }
-            case RenderingOpcode::GL_DRAW_ARRAYS:
-            {
-                GET_VALUE(GLenum, drawArraysMode);
-                GET_VALUE(GLint, drawArraysFirst);
-                GET_VALUE(GLsizei, drawArraysCount);
-
-                glDrawArrays(drawArraysMode, drawArraysFirst, drawArraysCount);
-                break;
-            }
-            case RenderingOpcode::GL_DRAW_ELEMENTS:
-            {
-                GET_VALUE(GLenum, drawElemsMode);
-                GET_VALUE(GLsizei, drawElemsCount);
-                GET_VALUE(GLenum, drawElemsType);
-                GET_VALUE(void*, drawElemsIndices);
-
-                glDrawElements(drawElemsMode, drawElemsCount, drawElemsType, drawElemsIndices);
-                break;
-            }
-            case RenderingOpcode::GL_CLEAR_BUFFERS:
-            {
-                GET_VALUE(GLbitfield, clearBuffers);
-                glClear(clearBuffers);
-                break;
-            }
-            case RenderingOpcode::LOAD_BUFFER_DATA:
-            {
-                GET_VALUE(GLenum, target);
-                GET_VALUE(GLsizeiptr, size);
-
-                const void* data = reinterpret_cast<const void*>(_instBuffer + _instPtr);
-                _instPtr += static_cast<u32>(size);
-
-                GET_VALUE(GLenum, usage);
-
-                glBufferData(target, size, data, usage);
-                break;
-            }
-            case RenderingOpcode::MODIFY_BUFFER_DATA:
-            {
-                GET_VALUE(GLenum, target);
-                GET_VALUE(GLintptr, offset);
-                GET_VALUE(GLsizeiptr, size);
-
-                const void* data = reinterpret_cast<const void*>(_instBuffer + _instPtr);
-                _instPtr += static_cast<u32>(size);
-
-                glBufferSubData(target, offset, size, data);
-                break;
-            }
-            case RenderingOpcode::GL_ENABLE:
-            {
-                GET_VALUE(GLenum, cap);
-                glEnable(cap);
-                break;
-            }
-            case RenderingOpcode::GL_DISABLE:
-            {
-                GET_VALUE(GLenum, cap);
-                glDisable(cap);
-                break;
-            }
-            case RenderingOpcode::GL_FACE_WINDING:
-            {
-                GET_VALUE(GLenum, mode);
-                glFrontFace(mode);
-                break;
-            }
-            case RenderingOpcode::RESIZE_VIEWPORT:
-            {
-                GET_VALUE(GLint, x);
-                GET_VALUE(GLint, y);
-                GET_VALUE(GLsizei, width);
-                GET_VALUE(GLsizei, height);
-                glViewport(x, y, width, height);
-                break;
-            }
-            case RenderingOpcode::RENDER_TEXT:
-            {
-                rpRenderText(_instBuffer, _instPtr);
-                break;
-            }
-            case RenderingOpcode::IMGUI_RENDER:
-            {
-                GET_VALUE(ImDrawData*, data);
-                ImGui_ImplGL_Render(data);
-                break;
-            }
+            RP_FUNC_HANDLER(ACTIVATE_SHADER_PROGRAM, rpActivateShaderProgram);
+            RP_FUNC_HANDLER(BIND_TEXTURE, rpBindTexture);
+            RP_FUNC_HANDLER(UNBIND_TEXTURE, rpUnbindTexture);
+            RP_FUNC_HANDLER(ENABLE_BUFFER_DESCRIPTOR, rpEnableBufferDescriptor);
+            RP_FUNC_HANDLER(DISABLE_BUFFER_DESCRIPTOR, rpDisableBufferDescriptor);
+            RP_FUNC_HANDLER(BIND_VBO, rpBindVBO);
+            RP_FUNC_HANDLER(GL_DRAW_ARRAYS, rpGLDrawArrays);
+            RP_FUNC_HANDLER(GL_DRAW_ELEMENTS, rpGLDrawElements);
+            RP_FUNC_HANDLER(GL_CLEAR_BUFFERS, rpGLClearBuffers);
+            RP_FUNC_HANDLER(LOAD_BUFFER_DATA, rpLoadBufferData);
+            RP_FUNC_HANDLER(MODIFY_BUFFER_DATA, rpModifyBufferData);
+            RP_FUNC_HANDLER(GL_ENABLE, rpGLEnable);
+            RP_FUNC_HANDLER(GL_DISABLE, rpGLDisable);
+            RP_FUNC_HANDLER(GL_FACE_WINDING, rpGLFaceWinding);
+            RP_FUNC_HANDLER(RESIZE_VIEWPORT, rpResizeViewport);
+            RP_FUNC_HANDLER(RENDER_TEXT, rpRenderText);
+            RP_FUNC_HANDLER(IMGUI_RENDER, rpImGuiRender);
             default: break;
         }
     }
 
     std::memset(_instBuffer, 0, _instPtr);
+
+#undef RP_FUNC_HANDLER
 }
 #undef GET_VALUE
 
-void RenderingPipeline::_passContext(Window* window) const noexcept
+void RenderingPipeline::_passContext() const noexcept
 {
     if(_possession0Signal.checkIfSignaled())
     {
         Window::unloadCurrentContext();
         _possession1Signal.signal();
         (void) _possession2Signal.waitUntilSignaled();
-        window->makeContextCurrent();
+        _window.makeContextCurrent();
     }
 }
 
-void RenderingPipeline::renderThreadFunc(Window* window) noexcept
+void RenderingPipeline::renderThreadFunc(setupParams_f setupParams) noexcept
 {
     // Re-assign OpenGL rendering context to this rendering thread.
-    window->makeContextCurrent();
+    _window.makeContextCurrent();
 
-    glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
-
-    enableGLDepthTest();
-
-    enableGLCullFace();
-    glCullFace(GL_BACK);
-
-    glFrontFace(GL_CW);
-
-    setGLBlend(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    setupParams();
 
     _insertSignal.signal();
     (void) _renderSignal.waitUntilSignaled();
@@ -373,34 +359,40 @@ void RenderingPipeline::renderThreadFunc(Window* window) noexcept
     {
         if(_exitSignal.checkIfSignaled()) { break; }
 
-        _passContext(window);
+        _passContext();
 
         while(!renderSignaled)
         {
-            renderSignaled = _renderSignal.waitUntilSignaled(50);
-            _passContext(window);
+            renderSignaled = _renderSignal.waitUntilSignaled(1);
+            _passContext();
         }
 
         runRenderingCycle();
-        window->swapBuffers();
+        _window.swapBuffers();
 
         _insertSignal.signal();
-        renderSignaled = _renderSignal.waitUntilSignaled(50);
+        renderSignaled = _renderSignal.checkIfSignaled();
     }
 }
 
-void RenderingPipeline::takeControlOfContext(Window* window) noexcept
+void RenderingPipeline::takeControlOfContext() const noexcept
 {
-    _possession0Signal.signal();
-    (void) _possession1Signal.waitUntilSignaled();
-    window->makeContextCurrent();
+    if(_async)
+    {
+        _possession0Signal.signal();
+        (void) _possession1Signal.waitUntilSignaled();
+        _window.makeContextCurrent();
+    }
 
 }
 
-void RenderingPipeline::returnControlOfContext() noexcept
+void RenderingPipeline::returnControlOfContext() const noexcept
 {
-    Window::unloadCurrentContext();
-    _possession2Signal.signal();
+    if(_async)
+    {
+        Window::unloadCurrentContext();
+        _possession2Signal.signal();
+    }
 }
 
 // void RenderingPipeline::dumpCommandBufferToFile(FILE* file) const noexcept
