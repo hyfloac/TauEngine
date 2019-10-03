@@ -9,7 +9,11 @@
 #include <String.hpp>
 
 #ifndef EVENT_GEN_NAMES
-  #define EVENT_GEN_NAMES !defined(TAU_PRODUCTION)
+  #ifndef TAU_PRODUCTION
+    #define EVENT_GEN_NAMES 1
+  #else
+    #define EVENT_GEN_NAMES 0
+  #endif
 #endif
 
 #define EVENT_IMPL_BASE(_TYPE) private: \
@@ -28,19 +32,18 @@
 #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE); \
                           [[nodiscard]] virtual const char* getName() const noexcept override \
                           { return #_TYPE; }
+#define EVENT_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
 #else
 #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE)
+#defube EVENT_GET_NAME(_EVENT_PTR) ""
 #endif
-                               
-#if EVENT_GEN_NAMES
-#define EVENT_IMPL_INTERCEPTABLE(_TYPE) EVENT_IMPL(_TYPE); \
-                                        [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
-                                        { return true;  }
-#else
-#define EVENT_IMPL_INTERCEPTABLE(_TYPE) EVENT_IMPL(_TYPE) \
-                                        [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
-                                        { return true;  }
-#endif
+
+// #define EVENT_IMPL_INTERCEPTABLE(_TYPE) EVENT_IMPL(_TYPE); \
+//                                         [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
+//                                         { return true;  }
+
+#define EVENT_INTERCEPTABLE(_STATE) [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
+                                    { return _STATE;  }
 
 class TAU_DLL Event
 {
@@ -154,6 +157,22 @@ public:
         if(_cache == _T::getStaticType())
         {
             const bool intercepted = func(reinterpret_cast<_T&>(_event));
+            if(_event.canBeIntercepted())
+            {
+                _event._intercepted = intercepted;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    template<typename _T, typename _C, typename _F>
+    inline bool dispatch(_C* instance, const _F& func) noexcept
+    {
+        if(_event.intercepted()) { return false; }
+        if(_cache == _T::getStaticType())
+        {
+            const bool intercepted = (instance->*func)(reinterpret_cast<_T&>(_event));
             if(_event.canBeIntercepted())
             {
                 _event._intercepted = intercepted;

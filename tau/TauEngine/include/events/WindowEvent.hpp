@@ -20,7 +20,7 @@ public:
     [[nodiscard]] Window* window() noexcept { return  _window; }
     [[nodiscard]] const Window* window() const noexcept { return  _window; }
 
-    EVENT_IMPL(WindowEvent);
+    EVENT_IMPL(WindowEvent)
 };
 
 class WindowResizeEvent final : public WindowEvent
@@ -44,7 +44,7 @@ public:
     [[nodiscard]] u32 newWidth() const noexcept { return _newWidth; }
     [[nodiscard]] u32 newHeight() const noexcept { return _newHeight; }
 
-    EVENT_IMPL(WindowResizeEvent);
+    EVENT_IMPL(WindowResizeEvent)
 };
 
 class WindowActiveEvent final : public WindowEvent
@@ -60,7 +60,7 @@ public:
 
     [[nodiscard]] bool active() const noexcept { return _active; }
 
-    EVENT_IMPL(WindowActiveEvent);
+    EVENT_IMPL(WindowActiveEvent)
 };
 
 class WindowKeyEvent final : public WindowEvent
@@ -78,7 +78,8 @@ public:
     [[nodiscard]] KeyboardFlags flags() const noexcept { return _flags; }
     [[nodiscard]] u64 key() const noexcept { return _key; }
 
-    EVENT_IMPL_INTERCEPTABLE(WindowKeyEvent);
+    EVENT_IMPL(WindowKeyEvent)
+    EVENT_INTERCEPTABLE(true)
 };
 
 class WindowAsciiKeyEvent final : public WindowEvent
@@ -96,5 +97,6 @@ public:
     [[nodiscard]] wchar_t wideChar() const noexcept { return _wideChar; }
     [[nodiscard]] char c() const noexcept { return _c; }
 
-    EVENT_IMPL_INTERCEPTABLE(WindowAsciiKeyEvent);
+    EVENT_IMPL(WindowAsciiKeyEvent)
+    EVENT_INTERCEPTABLE(true)
 };
