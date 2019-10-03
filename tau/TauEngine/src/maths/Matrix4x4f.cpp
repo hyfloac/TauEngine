@@ -142,6 +142,7 @@ Matrix4x4f& Matrix4x4f::mul(const Matrix4x4f& other) noexcept
     return *this;
 }
 
+
 // Matrix4x4f& Matrix4x4f::mulSIMD(const Matrix4x4f& other) noexcept
 // {
 //     const Matrix4x4fData oldData = this->_data;
@@ -719,7 +720,7 @@ Matrix4x4f Matrix4x4f::perspective(float fov, float aspect, float nearPlane, flo
     const float halfFOV = fov * 0.5f;
 
     matrix.m11 = fastCosR(halfFOV) / fastSinR(halfFOV);
-    matrix.m00 = (leftHanded ? 1 : -1) * matrix.m11 / aspect;
+    matrix.m00 = (leftHanded ? 1.0f : -1.0f) * matrix.m11 / aspect;
     matrix.m22 = (farPlane + nearPlane) * rDepth;
     matrix.m23 = (-2 * farPlane * nearPlane) * rDepth;
     matrix.m32 = 1.0f;
@@ -752,7 +753,7 @@ Matrix4x4f Matrix4x4f::infDepthPerspective(float fov, float aspect, bool leftHan
     const float halfFOV = fov * 0.5f;
 
     matrix.m11 = fastCosR(halfFOV) / fastSinR(halfFOV);
-    matrix.m00 = (leftHanded ? 1 : -1) * matrix.m11 / aspect;
+    matrix.m00 = (leftHanded ? 1.0f : -1.0f) * matrix.m11 / aspect;
     matrix.m22 = 1.0f;
     matrix.m23 = 0.0f;
     matrix.m32 = 1.0f;
