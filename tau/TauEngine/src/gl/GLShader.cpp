@@ -64,7 +64,7 @@ bool GLShader::loadShader(const char* src) noexcept
 
     // const GLchar* shaderSrc = src ? src : readFileFast(this->_shaderPath);
     const GLchar* shaderSrc;
-    DynArray<u8> data(0);
+    RefDynArray<u8> data(0);
     if(src)
     {
         shaderSrc = src;
