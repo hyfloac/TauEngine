@@ -54,11 +54,12 @@ public:
     virtual i64 readString(char* buffer, u64 len) noexcept
     { return readBytes(reinterpret_cast<u8*>(buffer), len); }
 
-    virtual DynArray<u8> readFile() noexcept
+    virtual RefDynArray<u8> readFile() noexcept
     {
-        DynArray<u8> arr(size() + 1);
-        readBytes(arr.arr(), arr.size());
-        arr.arr()[size()] = '\0';
+        const size_t size_ = size();
+        RefDynArray<u8> arr(size_ + 1);
+        readBytes(arr.arr(), size_);
+        arr[size_] = '\0';
         return arr;
     }
 
