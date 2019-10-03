@@ -1,7 +1,9 @@
+#define APP_MAIN
+#include "Application.hpp"
+
 #pragma warning(push, 0)
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <imgui/imgui.h>
-#include <imgui/ImGuiGLImpl.hpp>
 #include <Utils.hpp>
 #include <GL/glew.h>
 #include <GL/wglew.h>
@@ -13,15 +15,12 @@
 #include <maths/Vector3f.hpp>
 #include <maths/Maths.hpp>
 #include <model/OBJLoader.hpp>
-#include <MathDefines.hpp>
 #include <model/RenderableObject.hpp>
 #include <console/ConsoleHandler.hpp>
 #include <texture/FITextureLoader.hpp>
 #include <CoreFuncs.h>
 #include <RenderingPipeline.hpp>
 #include <TextHandler.hpp>
-#include <astdio.h>
-#include <cstdlib>
 #include <Windows.h>
 #include <Camera.hpp>
 #include <events/Event.hpp>
@@ -30,21 +29,20 @@
 #include "Win32File.hpp"
 #pragma warning(pop)
 
-#define APP_MAIN
-#include "Application.hpp"
-
 std::shared_ptr<spdlog::logger> clientLogger;
 
 bool setupDebugCallback() noexcept;
 void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) noexcept;
 void onMouseMove(const MouseFlags mouseFlags, const u32 xPos, const u32 yPos, Window* window) noexcept;
 
-void onWindowEvent(Event& e) noexcept;
+void onWindowEvent(void*, WindowEvent& e) noexcept;
 
 i32 debugCommand(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept;
 
 void update(float fixedDelta);
 void render(float delta);
+
+void __cdecl setupParams(void) noexcept;
 
 struct RenderData final
 {
@@ -311,7 +309,7 @@ int EXPORT initGame() noexcept
     //
     // ImGui_ImplGL_Init();
 
-    RenderingPipeline rp(&window);
+    RenderingPipeline rp(window, setupParams, true);
 
     RenderData rd = { window, objects, glProgram, vertexShader, pixelShader, perspectiveProjMatrix, viewMatrix, modelMatrix, textureID, overlayID, compoundMatrixUniformLoc, projectionMatrixUniformLoc, cameraViewMatrixUniformLoc, modelViewMatrixUniformLoc, samplerLoc, overlayLoc, Camera(), &rp, th, ortho };
 
@@ -508,12 +506,12 @@ void render(float delta)
     Matrix4x4f tmpMat = renderData->camera.viewMatrix();
     tmpMat.mulSIMD_SSE3(renderData->perspectiveProjMatrix);
 
-    rp->pushLoadUniform<ShaderUniformType::MAT4F>(ParameterPack(renderData->compoundMatrixUniformLoc, PACK_PTR(tmpMat.data().m)));
-    rp->pushLoadUniform<ShaderUniformType::MAT4F>(ParameterPack(renderData->projectionMatrixUniformLoc, PACK_PTR(renderData->perspectiveProjMatrix.data().m)));
-    rp->pushLoadUniform<ShaderUniformType::MAT4F>(ParameterPack(renderData->cameraViewMatrixUniformLoc, PACK_PTR(renderData->camera.viewMatrix().data().m)));
-    rp->pushLoadUniform<ShaderUniformType::MAT4F>(ParameterPack(renderData->modelViewMatrixUniformLoc, PACK_PTR(renderData->modelMatrix.data().m)));
-    rp->pushLoadUniform<ShaderUniformType::INTEGER>(ParameterPack(renderData->samplerLoc, 0));
-    rp->pushLoadUniform<ShaderUniformType::INTEGER>(ParameterPack(renderData->overlayLoc, 1));
+    rp->pushLoadUni(renderData->compoundMatrixUniformLoc, tmpMat);
+    rp->pushLoadUni(renderData->projectionMatrixUniformLoc, renderData->perspectiveProjMatrix);
+    rp->pushLoadUni(renderData->cameraViewMatrixUniformLoc, renderData->camera.viewMatrix());
+    rp->pushLoadUni(renderData->modelViewMatrixUniformLoc, renderData->modelMatrix);
+    rp->pushLoadUni(renderData->samplerLoc, 0);
+    rp->pushLoadUni(renderData->overlayLoc, 1);
     
     rp->pushBindTexture(renderData->texID, 0);
     rp->pushBindTexture(renderData->overlayID, 1);
@@ -718,7 +716,7 @@ bool onCharPress(WindowAsciiKeyEvent& e) noexcept
     }
     else if(c == '[' || c == ']')
     {
-        renderData->rp->takeControlOfContext(&renderData->window);
+        renderData->rp->takeControlOfContext();
 
         delete renderData->pixelShader;
         delete renderData->vertexShader;
@@ -768,7 +766,7 @@ bool onCharPress(WindowAsciiKeyEvent& e) noexcept
 
         if(WGLEW_EXT_swap_control)
         {
-            renderData->rp->takeControlOfContext(&renderData->window);
+            renderData->rp->takeControlOfContext();
             vsync = !vsync;
             if(vsync)
             {
@@ -808,11 +806,26 @@ bool onWindowActive(WindowActiveEvent& e) noexcept
     return false;
 }
 
-void onWindowEvent(Event& e) noexcept
+void onWindowEvent(void*, WindowEvent& e) noexcept
 {
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<WindowResizeEvent>(&onWindowResize);
     dispatcher.dispatch<WindowActiveEvent>(&onWindowActive);
     dispatcher.dispatch<WindowKeyEvent>(&onKeyPress);
     dispatcher.dispatch<WindowAsciiKeyEvent>(&onCharPress);
+}
+
+void __cdecl setupParams() noexcept
+{
+    glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
+    
+    enableGLDepthTest();
+    
+    enableGLCullFace();
+    glCullFace(GL_BACK);
+    
+    glFrontFace(GL_CW);
+    
+    setGLBlend(true);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

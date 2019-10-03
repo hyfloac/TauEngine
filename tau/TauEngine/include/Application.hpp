@@ -2,7 +2,7 @@
 
 #include <NumTypes.hpp>
 #include "TauEngine.hpp"
-#include <DLL.hpp>
+#include "DLL.hpp"
 
 class TAU_DLL Application
 {
@@ -20,6 +20,8 @@ public:
     Application& operator =(Application&& move) noexcept = delete;
 
     virtual bool init(int argCount, char* args[]) noexcept = 0;
+
+    virtual void finalize() noexcept = 0;
 protected:
     virtual void update(const float fixedDelta) noexcept = 0;
 
@@ -32,7 +34,7 @@ public:
     void startGameLoop() noexcept;
 };
 
-#if defined(APP_MAIN) || 1
+#if defined(APP_MAIN)
 Application* startGame() noexcept;
 
 int main(int argCount, char* args[]) noexcept
@@ -49,6 +51,7 @@ int main(int argCount, char* args[]) noexcept
         return -1;
     }
     app->startGameLoop();
+    app->finalize();
 
     delete app;
 

@@ -1,11 +1,14 @@
 #pragma once
 
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <Application.hpp>
 #include <system/Window.hpp>
 #include <NumTypes.hpp>
 #include "TERenderer.hpp"
+#include <events/Event.hpp>
+#include <events/WindowEvent.hpp>
+
+static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
 class TauEditorApplication final : public Application
 {
@@ -25,6 +28,8 @@ public:
     TauEditorApplication& operator =(TauEditorApplication&& move) noexcept = delete;
 
     bool init(int argCount, char* args[]) noexcept override final;
+
+    void finalize() noexcept override final;
 protected:
     void update(const float fixedDelta) noexcept override final;
 
@@ -33,4 +38,12 @@ protected:
     void renderFPS(const u32 ups, const u32 fps) noexcept override final;
 
     void runMessageLoop() noexcept override final;
+private:
+    void onWindowEvent(WindowEvent& e) noexcept;
+
+    bool onCharPress(WindowAsciiKeyEvent& e) noexcept;
+
+    bool onKeyPress(WindowKeyEvent& e) noexcept;
+public:
+    friend void onWindowEvent(void* param, WindowEvent& e) noexcept;
 };

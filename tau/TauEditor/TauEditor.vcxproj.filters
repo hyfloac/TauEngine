@@ -29,13 +29,13 @@
     <ClInclude Include="include\Item.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\OBJLoaderOld.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\EditorApplication.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\TERenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\PhysWord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

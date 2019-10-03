@@ -1,8 +1,13 @@
 #include "EditorApplication.hpp"
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <VFS.hpp>
 #include <Win32File.hpp>
 #include <Utils.hpp>
-#include "gl/GLUtils.hpp"
+#include <gl/GLUtils.hpp>
+#include <events/Event.hpp>
+#include "events/WindowEvent.hpp"
+#include "GL/glew.h"
+#include "GL/wglew.h"
 
 TauEditorApplication::TauEditorApplication() noexcept
     : Application(32), _window(null), _renderer(null)
@@ -25,40 +30,59 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     VFS::Instance().mount("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 
-    _window = new Window(800, 600, "Tau Editor");
+    _window = new Window(800, 600, "Tau Editor", this);
 #if !defined(TAU_PRODUCTION)
     ContextSettings& contextSettings = _window->contextSettings();
     contextSettings.debug = true;
 #endif
     _window->createWindow();
     _window->showWindow();
+    if(!_window->createContext()) { return false; }
+    _window->makeContextCurrent();
+    _window->setEventHandler(::onWindowEvent);
 
-    if(!_window->createContext())
+    if(WGLEW_EXT_swap_control)
     {
-        return false;
+        constexpr bool vsync = false;
+        if(vsync)
+        {
+            wglSwapIntervalEXT(1);
+        }
+        else
+        {
+            wglSwapIntervalEXT(0);
+        }
     }
 
-    _window->makeContextCurrent();
+    glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
 
+    enableGLBlend();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _renderer = new TERenderer(*_window);
+
+    _renderer->renderingPipeline().pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _renderer->renderingPipeline().pushFinishRender();
+    _renderer->renderingPipeline().pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _renderer->renderingPipeline().pushFinishRender();
 
     return true;
 }
 
+void TauEditorApplication::finalize() noexcept
+{
+}
+
 void TauEditorApplication::render(const float delta) noexcept
 {
-    UNUSED(delta);
-    RenderingPipeline& rp = _renderer->renderingPipeline();
-
-    rp.pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    rp.pushRenderText(&_renderer->textHandler(), "Hello World!", 0.0f, static_cast<float>(_window->height() - 15), 0.35f, Vector3f(0.4f, 0.4f, 0.2f), _renderer->ortho());
-    rp.pushFinishRender();
+    // UNUSED(delta);
+    _renderer->render(delta);
 }
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
-    UNUSED(fixedDelta);
+    // UNUSED(fixedDelta);
+    _renderer->update(fixedDelta);
 }
 
 void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
@@ -83,7 +107,100 @@ void TauEditorApplication::runMessageLoop() noexcept
     }
 }
 
+void TauEditorApplication::onWindowEvent(WindowEvent& e) noexcept
+{
+    EventDispatcher dispatcher(e);
+    dispatcher.dispatch<WindowAsciiKeyEvent>(this, &TauEditorApplication::onCharPress);
+    dispatcher.dispatch<WindowKeyEvent>(this, &TauEditorApplication::onKeyPress);
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) noexcept
+{
+    switch(e.c())
+    {
+        // case 'p':
+        // {
+        //     _renderer->addTextSpeed(0.5f);
+        //     break;
+        // }
+        // case 'o':
+        // {
+        //     _renderer->addTextSpeed(-0.5f);
+        //     break;
+        // }
+        // case 'l':
+        // {
+        //     _renderer->addTextScale(0.05f);
+        //     break;
+        // }
+        // case 'k':
+        // {
+        //     _renderer->addTextScale(-0.05f);
+        //     break;
+        // }
+        // case 'e':
+        // {
+        //     _renderer->randomReset();
+        //     break;
+        // }
+        // case 'r':
+        // {
+        //     _renderer->screenReset();
+        //     break;
+        // }
+        case 'v':
+        {
+            static bool vsync = false;
+
+            if(WGLEW_EXT_swap_control)
+            {
+                _renderer->renderingPipeline().takeControlOfContext();
+                vsync = !vsync;
+                if(vsync)
+                {
+                    wglSwapIntervalEXT(1);
+                }
+                else
+                {
+                    wglSwapIntervalEXT(0);
+                }
+                _renderer->renderingPipeline().returnControlOfContext();
+            }
+        }
+        default: return false;
+    }
+
+    return false;
+}
+
+
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
+{
+    if(e.event() == KeyboardEvent::KE_KEY_PRESSED)
+    {
+        switch(e.key())
+        {
+            case 0x1B:
+            {
+                tauExit(0);
+                break;
+            }
+            default: return false;
+        }
+    }
+
+    return false;
+}
+
 Application* startGame() noexcept
 {
     return new TauEditorApplication;
+}
+
+static void onWindowEvent(void* param, WindowEvent& e) noexcept
+{
+    auto* app = reinterpret_cast<TauEditorApplication*>(param);
+    app->onWindowEvent(e);
 }
