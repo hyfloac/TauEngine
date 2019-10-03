@@ -14,6 +14,7 @@
 #include <maths/Matrix4x4f.hpp>
 #include <RenderingPipeline.hpp>
 #include <shader/GLShader.hpp>
+#include <DynArray.hpp>
 // #include <texture/Texture.hpp>
 
 class ITexture;
@@ -48,6 +49,7 @@ class TAU_DLL TextHandler final
 private:
     FT_Library _ft;
     FT_Face    _face;
+    RefDynArray<u8>* _data;
     GlyphCharacter* _chars;
     GLProgram _program;
     GLShader  _vertexShader;
@@ -62,11 +64,11 @@ public:
 
     ~TextHandler() noexcept;
 
-    TextHandler(const TextHandler& copy) noexcept = default;
-    TextHandler(TextHandler&& move) noexcept = default;
+    TextHandler(const TextHandler& copy) noexcept = delete;
+    TextHandler(TextHandler&& move) noexcept = delete;
 
-    TextHandler& operator =(const TextHandler& copy) noexcept = default;
-    TextHandler& operator =(TextHandler&& move) noexcept = default;
+    TextHandler& operator =(const TextHandler& copy) noexcept = delete;
+    TextHandler& operator =(TextHandler&& move) noexcept = delete;
 
     FT_Error init() noexcept;
 
@@ -78,4 +80,6 @@ public:
 
     void renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj, RenderingPipeline& rp) const noexcept;
     void renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj) const noexcept;
+
+    GLfloat computeLength(const char* str, GLfloat scale) const noexcept;
 };

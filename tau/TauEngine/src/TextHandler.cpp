@@ -60,15 +60,26 @@ FT_Error TextHandler::init() noexcept
 
 FT_Error TextHandler::loadTTFFile(const char* fileName) noexcept
 {
-    const VFS::Container path = VFS::Instance().resolvePath(fileName);
+    // const VFS::Container path = VFS::Instance().resolvePath(fileName);
+    //
+    // if(path.first.length() == 0)
+    // {
+    //     return -1;
+    // }
+    //
+    // const FT_Error error = FT_New_Face(_ft, path.first.c_str(), 0, &_face);
 
-    if(path.first.length() == 0)
+    Ref<IFile> file = VFS::Instance().openFile(fileName);
+    
+    if(!file)
     {
         return -1;
     }
-
-    const FT_Error error = FT_New_Face(_ft, path.first.c_str(), 0, &_face);
-
+    
+    _data = new RefDynArray<u8>(file->readFile());
+    
+    const FT_Error error = FT_New_Memory_Face(_ft, _data->arr(), _data->size() - 1, 0, &_face);
+    
     FT_Set_Pixel_Sizes(_face, 0, 48);
 
     return error;
@@ -83,9 +94,6 @@ void TextHandler::generateBitmapCharacters() const noexcept
         if(FT_Load_Char(_face, c, FT_LOAD_RENDER)) { continue; }
 
         ITexture* texture = ITexture::create(RenderingMode::getGlobalMode());
-        // GLuint texture;
-        // glGenTextures(1, &texture);
-        // glBindTexture(GL_TEXTURE_2D, texture);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -107,20 +115,17 @@ void TextHandler::generateBitmapCharacters() const noexcept
 void TextHandler::finishLoad() const noexcept
 {
     FT_Done_Face(_face);
+    delete _data;
 }
 
 void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj, RenderingPipeline& rp) const noexcept
 {
     rp.pushActivateShaderProgram(_program.programId());
-    rp.pushLoadUniform<ShaderUniformType::MAT4F> (ParameterPack(_projUni, PACK_PTR(proj.data().m)));
-    rp.pushLoadUniform<ShaderUniformType::INTEGER>(ParameterPack( _texUni, 0));
-    rp.pushLoadUniform<ShaderUniformType::VEC3F>(ParameterPack(_colorUni, reinterpret_cast<const u32&>(color.x()), reinterpret_cast<const u32&>(color.y()), reinterpret_cast<const u32&>(color.z())));
-    
-    // rp.pushInstruction<RenderingOpcode::ACTIVATE_TEXTURE_UNIT, 0>();
+    rp.pushLoadUni(_projUni, proj);
+    rp.pushLoadUni(_texUni, 0);
+    rp.pushLoadUni(_colorUni, color);
 
     rp.pushEnableBufferDescriptor(_bufferDescriptor);
-    // rp.pushInstruction<RenderingOpcode::BIND_VAO>(ParameterPack(_vao));
-    // rp.pushInstruction<RenderingOpcode::ENABLE_VAO_ATTRIBUTE, 0>();
 
     rp.pushGLFaceWinding(GL_CCW);
     rp.pushGLDisable(GL_CULL_FACE);
@@ -160,8 +165,6 @@ void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scal
     rp.pushGLEnable(GL_CULL_FACE);
     rp.pushGLFaceWinding(GL_CW);
 
-    // rp.pushInstruction<RenderingOpcode::DISABLE_VAO_ATTRIBUTE, 0>();
-    // rp.pushInstruction<RenderingOpcode::BIND_VAO, 0>();
     rp.pushDisableBufferDescriptor(_bufferDescriptor);
     rp.pushUnbindTexture(_chars[0].texture.get(), 0);
     rp.pushActivateShaderProgram(0);
@@ -176,11 +179,9 @@ void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scal
 
     glActiveTexture(GL_TEXTURE0);
 
-    // glBindVertexArray(_vao);
     _bufferDescriptor->bind();
     _bufferDescriptor->enableAttributes();
-    // glEnableVertexAttribArray(0);
-    // glDisable(GL_CULL_FACE);
+
     glFrontFace(GL_CCW);
 
     for(char c = *str; c != '\0'; c = *(++str))
@@ -214,13 +215,24 @@ void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scal
 
         x += (gc->advance >> 6) * scale;
     }
-    // glEnable(GL_CULL_FACE);
 
-    // glDisableVertexAttribArray(0);
-    // glBindVertexArray(0);
     _bufferDescriptor->disableAttributes();
     _bufferDescriptor->unbind();
     _chars[0].texture->unbind(0);
-    // glBindTexture(GL_TEXTURE_2D, 0);
     GLProgram::deactivate();
+}
+
+
+GLfloat TextHandler::computeLength(const char* str, GLfloat scale) const noexcept
+{
+    GLfloat length = 0.0f;
+
+    for(char c = *str; c != '\0'; c = *(++str))
+    {
+        if(c < 32 || c > 126) { continue; }
+        const GlyphCharacter* gc = &_chars[c - 32];
+        length += (gc->advance >> 6) * scale;
+    }
+
+    return length;
 }
