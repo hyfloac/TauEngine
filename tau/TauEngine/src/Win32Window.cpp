@@ -240,7 +240,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             if(window && window->_eventHandler)
             {
                 WindowActiveEvent evt(window, wParam != WA_INACTIVE);
-                window->_eventHandler(evt);
+                window->_eventHandler(window->_userContainer, evt);
             }
             break;
         case WM_SIZE:
@@ -260,7 +260,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                         const u32 height = HIWORD(lParam);
 
                         WindowResizeEvent evt(window, window->_width, window->_height, width, height);
-                        window->_eventHandler(evt);
+                        window->_eventHandler(window->_userContainer, evt);
 
                         window->_width = width;
                         window->_height = height;
@@ -309,12 +309,12 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 if(lParam & (1 << 30))
                 {
                     WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam);
-                    window->_eventHandler(evt);
+                    window->_eventHandler(window->_userContainer, evt);
                 }
                 else
                 {
                     WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam);
-                    window->_eventHandler(evt);
+                    window->_eventHandler(window->_userContainer, evt);
                 }
             }
             break;
@@ -323,14 +323,14 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             if(window && window->_eventHandler)
             {
                 WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam);
-                window->_eventHandler(evt);
+                window->_eventHandler(window->_userContainer, evt);
             }
             break;
         case WM_CHAR:
             if(window && window->_eventHandler)
             {
                 WindowAsciiKeyEvent evt(window, static_cast<wchar_t>(wParam), static_cast<char>(wParam));
-                window->_eventHandler(evt);
+                window->_eventHandler(window->_userContainer, evt);
             }
             break;
         case WM_MOVE:
@@ -345,7 +345,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
     return 0;
 }
 
-Window::Window(u32 width, u32 height, Nullable const char* title, Nullable const void* userContainer, Nullable const Window* parent) noexcept
+Window::Window(u32 width, u32 height, Nullable const char* title, Nullable void* userContainer, Nullable const Window* parent) noexcept
     : _width(width), _height(height), 
       _xPos(0), _yPos(0),
       _title(title),

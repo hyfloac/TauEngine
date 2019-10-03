@@ -20,6 +20,7 @@
 #include <system/Mouse.hpp>
 #include <Safeties.hpp>
 #include <RenderingMode.hpp>
+#include "events/WindowEvent.hpp"
 
 class Window;
 class Event;
@@ -83,7 +84,7 @@ static Nullable Window* getWindowFromHandle(HWND) noexcept;
 class TAU_DLL Window
 {
 public:
-    typedef void(*onEvent_f)(Event&);
+    typedef void(*onEvent_f)(void*, WindowEvent&);
 private:
     /**
      *   The current width of the window. This can change by 
@@ -124,7 +125,7 @@ private:
      *   A pointer to a user dependent structure. This can be
      * anything, it is up to the developer.
      */
-    const void* _userContainer;
+    void* _userContainer;
     /**
      * The parent window. This cannot be modified.
      */
@@ -151,7 +152,7 @@ public:
      */
     static void unloadCurrentContext() noexcept;
 public:
-    Window(u32 width, u32 height, Nullable const char* title, Nullable const void* userContainer = null, Nullable const Window* parent = null) noexcept;
+    Window(u32 width, u32 height, Nullable const char* title, Nullable void* userContainer = null, Nullable const Window* parent = null) noexcept;
 
     ~Window() noexcept;
 
