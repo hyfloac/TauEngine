@@ -1,7 +1,11 @@
 #pragma once
 
 #ifndef LAYER_GEN_NAMES
-  #define LAYER_GEN_NAMES !defined(TAU_PRODUCTION)
+  #if defined(TAU_PRODUCTION)
+    #define LAYER_GEN_NAMES 0
+  #else
+    #define LAYER_GEN_NAMES 1
+  #endif
 #endif
 
 #define LAYER_IMPL_BASE(_TYPE) private: \
@@ -10,13 +14,13 @@
                                    _TYPE& operator=(const _TYPE& copy) = delete;          \
                                    _TYPE& operator=(_TYPE&& move) noexcept = delete;
 
-#if EVENT_GEN_NAMES
-#define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE); \
-                          public: \
-                              [[nodiscard]] virtual const char* getName() const noexcept override \
-                              { return #_TYPE; }
+#if LAYER_GEN_NAMES
+  #define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE); \
+                            public: \
+                                [[nodiscard]] virtual const char* getName() const noexcept override \
+                                { return #_TYPE; }
 #else
-#define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE)
+  #define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE)
 #endif
 
 class Event;
@@ -36,7 +40,8 @@ public:
 
     virtual void onAttach() noexcept { }
     virtual void onDetach() noexcept { }
-    virtual void onUpdate(float delta) noexcept { }
+    virtual void onUpdate(float fixedDelta) noexcept { }
+    virtual void onRender(float delta) noexcept { }
     virtual void onEvent(Event& e) noexcept { }
 
 #if LAYER_GEN_NAMES

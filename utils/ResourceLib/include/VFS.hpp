@@ -30,8 +30,38 @@ class VFS final
 {
 public:
     static VFS& Instance() noexcept;
-    using Container = std::pair<DynString, Ref<IFileLoader>>;
-    using MountMap = std::unordered_multimap<DynString, Container>;
+
+    struct Container final
+    {
+        DynString path;
+        Ref<IFileLoader> fileLoader;
+        bool canCreateFile;
+        bool canWriteFile;
+
+        Container(DynString path, Ref<IFileLoader> fileLoader, const bool canCreateFile, const bool canWriteFile)
+            : path(std::move(path)), fileLoader(std::move(fileLoader)),
+              canCreateFile(canCreateFile), canWriteFile(canWriteFile)
+        { }
+
+        static Container Dynamic(const DynString& path, const Ref<IFileLoader>& fileLoader)
+        { return Container(path, fileLoader, true, true); }
+
+        static Container Static(const DynString& path, const  Ref<IFileLoader>& fileLoader)
+        { return Container(path, fileLoader, false, false); }
+
+        ~Container() = default;
+
+        Container(const Container& copy) noexcept = default;
+        Container(Container&& move) noexcept = default;
+
+        Container& operator=(const Container& copy) noexcept = default;
+        Container& operator=(Container&& move) noexcept = default;
+
+        bool canCreateAndWriteFile() const noexcept { return canCreateFile && canWriteFile; }
+    };
+
+    // using Container = Triplet<DynString, Ref<IFileLoader>, bool>;
+    using MountMap = std::unordered_multimap<DynString, VFS::Container>;
 private:
 
     Ref<IFileLoader> _defaultLoader;
@@ -49,7 +79,13 @@ public:
     VFS& operator=(const VFS& copy) noexcept = default;
     VFS& operator=(VFS&& move) noexcept = default;
 
-    void mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader) noexcept;
+    void mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader, bool canCreateFile, bool canWriteFile);
+    
+    void mountDynamic(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader)
+    { mount(mountPoint, path, loader, true, true); }
+
+    void mountStatic(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader)
+    { mount(mountPoint, path, loader, false, false); }
 
     void unmount(const DynString& mountPoint) noexcept;
 
@@ -63,5 +99,7 @@ public:
      */
     VFS::Container resolvePath(const char* path) const noexcept;
 
-    Ref<IFile> openFile(const char* path) const noexcept;
+    bool fileExists(const char* path) const noexcept;
+
+    Ref<IFile> openFile(const char* path, FileProps props) const noexcept;
 };

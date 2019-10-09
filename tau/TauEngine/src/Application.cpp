@@ -1,11 +1,10 @@
-#include <Application.hpp>
+#include "Application.hpp"
+#include "TauEngine.hpp"
 #include "Timings.hpp"
 
 Application::Application(const u32 targetUPS) noexcept
     : _targetUPS(targetUPS)
-{
-    // _instance = this;
-}
+{ }
 
 Application::~Application() noexcept = default;
 
@@ -50,5 +49,11 @@ void Application::startGameLoop() noexcept
             ups = 0;
             fps = 0;
         }
+    }
+
+    Exception* ex = tauGetException();
+    if(ex)
+    {
+        onException(*ex);
     }
 }

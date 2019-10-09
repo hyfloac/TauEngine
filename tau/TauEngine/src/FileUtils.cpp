@@ -89,7 +89,7 @@ FileMode getFileMode(const char* fileMode) noexcept
 
 void loadResourceFile(int name, int type, int* size, const char** data) noexcept
 {
-    static const HMODULE handle = tauGetDLLModule();
+    static const HMODULE handle = GetModuleHandleA(NULL);
     const HRSRC rc = FindResource(handle, MAKEINTRESOURCE(name), MAKEINTRESOURCE(type));
     const HGLOBAL rcData = LoadResource(handle, rc);
     *size = SizeofResource(handle, rc);

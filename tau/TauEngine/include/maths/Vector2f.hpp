@@ -50,36 +50,12 @@ public:
 
     RAW_VEC_FUNC(Vector2f&, add, noexcept);
     RAW_VEC_FUNC(Vector2f&, sub, noexcept);
+    RAW_VEC_FUNC(Vector2f&, mul, noexcept);
+    RAW_VEC_FUNC(Vector2f&, div, noexcept);
     RAW_VEC_FUNC(Vector2f, addC, const noexcept);
     RAW_VEC_FUNC(Vector2f, subC, const noexcept);
-
-    inline Vector2f& add(Vector2f&& data) noexcept
-    {
-        this->_x += data._x;
-        this->_y += data._y;
-        return *this;
-    }
-
-    inline Vector2f& sub(Vector2f&& data) noexcept
-    {
-        this->_x -= data._x;
-        this->_y -= data._y;
-        return *this;
-    }
-
-    inline Vector2f addC(Vector2f&& data) const noexcept
-    {
-        const float x = this->_x + data._x;
-        const float y = this->_y + data._y;
-        return Vector2f(x, y);
-    }
-
-    inline Vector2f subC(Vector2f&& data) const noexcept
-    {
-        const float x = this->_x - data._x;
-        const float y = this->_y - data._y;
-        return Vector2f(x, y);
-    }
+    RAW_VEC_FUNC(Vector2f, mulC, const noexcept);
+    RAW_VEC_FUNC(Vector2f, divC, const noexcept);
 
     inline Vector2f& add(const Vector2f& data) noexcept
     {
@@ -92,6 +68,20 @@ public:
     {
         this->_x -= data._x;
         this->_y -= data._y;
+        return *this;
+    }
+
+    inline Vector2f& mul(const Vector2f& data) noexcept
+    {
+        this->_x *= data._x;
+        this->_y *= data._y;
+        return *this;
+    }
+
+    inline Vector2f& div(const Vector2f& data) noexcept
+    {
+        this->_x /= data._x;
+        this->_y /= data._y;
         return *this;
     }
 
@@ -109,15 +99,71 @@ public:
         return Vector2f(x, y);
     }
 
-#define SCALAR_MATH(_NAME) Vector2f& _NAME(const float scalar) noexcept; \
-                           Vector2f _NAME##C(const float scalar) const noexcept;
+    inline Vector2f mulC(const Vector2f& data) const noexcept
+    {
+        const float x = this->_x * data._x;
+        const float y = this->_y * data._y;
+        return Vector2f(x, y);
+    }
 
-    SCALAR_MATH(add)
-    SCALAR_MATH(sub)
-    SCALAR_MATH(mul)
-    SCALAR_MATH(div)
+    inline Vector2f divC(const Vector2f& data) const noexcept
+    {
+        const float x = this->_x / data._x;
+        const float y = this->_y / data._y;
+        return Vector2f(x, y);
+    }
 
-#undef SCALAR_MATH
+    Vector2f& add(const float scalar) noexcept
+    {
+        this->_x += scalar;
+        this->_y += scalar;
+        return *this;
+    }
+    [[nodiscard]] Vector2f addC(const float scalar) const noexcept
+    {
+        const float x = this->_x + scalar;
+        const float y = this->_y + scalar;
+        return Vector2f(x, y);
+    }
+
+    Vector2f& sub(const float scalar) noexcept
+    {
+        this->_x -= scalar;
+        this->_y -= scalar;
+        return *this;
+    }
+    [[nodiscard]] Vector2f subC(const float scalar) const noexcept
+    {
+        const float x = this->_x - scalar;
+        const float y = this->_y - scalar;
+        return Vector2f(x, y);
+    }
+
+    Vector2f& mul(const float scalar) noexcept
+    {
+        this->_x *= scalar;
+        this->_y *= scalar;
+        return *this;
+    }
+    [[nodiscard]] Vector2f mulC(const float scalar) const noexcept
+    {
+        const float x = this->_x * scalar;
+        const float y = this->_y * scalar;
+        return Vector2f(x, y);
+    }
+
+    Vector2f& div(const float scalar) noexcept
+    {
+        this->_x /= scalar;
+        this->_y /= scalar;
+        return *this;
+    }
+    [[nodiscard]] Vector2f divC(const float scalar) const noexcept
+    {
+        const float x = this->_x / scalar;
+        const float y = this->_y / scalar;
+        return Vector2f(x, y);
+    }
 
     inline Vector2f& scale(const float scalar)       noexcept { return mul(scalar); }
     inline Vector2f scaleC(const float scalar) const noexcept { return mulC(scalar); }
@@ -193,21 +239,21 @@ public:
 #define OPERATOR(_RET, _OP, _PARAM, _MODS, _FUNC) inline _RET operator _OP(const _PARAM o) _MODS { return this->_FUNC(o); }
 #define SCALAR_OPERATOR(_RET, _OP, _MODS, _FUNC) OPERATOR(_RET, _OP, float, _MODS, _FUNC);
 
-    OPERATOR(Vector2f, +, Vector2f&&, const noexcept, addC);
-    OPERATOR(Vector2f, -, Vector2f&&, const noexcept, subC);
+    OPERATOR(Vector2f, +, Vector2f&, const noexcept, addC);
+    OPERATOR(Vector2f, -, Vector2f&, const noexcept, subC);
 
-    OPERATOR(Vector2f&, +=, Vector2f&&, noexcept, add);
-    OPERATOR(Vector2f&, -=, Vector2f&&, noexcept, sub);
+    OPERATOR(Vector2f&, +=, Vector2f&, noexcept, add);
+    OPERATOR(Vector2f&, -=, Vector2f&, noexcept, sub);
 
-    OPERATOR(Vector2f, +, float, const noexcept, addC);;
-    OPERATOR(Vector2f, -, float, const noexcept, subC);;
-    OPERATOR(Vector2f, *, float, const noexcept, mulC);;
-    OPERATOR(Vector2f, /, float, const noexcept, divC);;
+    OPERATOR(Vector2f, +, float, const noexcept, addC);
+    OPERATOR(Vector2f, -, float, const noexcept, subC);
+    OPERATOR(Vector2f, *, float, const noexcept, mulC);
+    OPERATOR(Vector2f, /, float, const noexcept, divC);
 
-    OPERATOR(Vector2f&, +=, float, noexcept, add);;
-    OPERATOR(Vector2f&, -=, float, noexcept, sub);;
-    OPERATOR(Vector2f&, *=, float, noexcept, mul);;
-    OPERATOR(Vector2f&, /=, float, noexcept, div);;
+    OPERATOR(Vector2f&, +=, float, noexcept, add);
+    OPERATOR(Vector2f&, -=, float, noexcept, sub);
+    OPERATOR(Vector2f&, *=, float, noexcept, mul);
+    OPERATOR(Vector2f&, /=, float, noexcept, div);
 
 #undef OPERATOR
 #undef SCALAR_OPERATOR

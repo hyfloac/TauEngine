@@ -1,3 +1,6 @@
+#define APP_MAIN
+#include "Application.hpp"
+
 #include "EditorApplication.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <VFS.hpp>
@@ -8,9 +11,12 @@
 #include "events/WindowEvent.hpp"
 #include "GL/glew.h"
 #include "GL/wglew.h"
+#include <shlobj.h>
+
+static void setupGameFolders() noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
-    : Application(32), _window(null), _renderer(null)
+    : Application(32), _window(null), _renderer(null), _config{ false, 800, 600 }
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
@@ -28,9 +34,10 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _logger->set_level(spdlog::level::trace);
     _logger->set_pattern("%^[%H:%M:%S:%e] [%n] [%l]%$: %v");
 
-    VFS::Instance().mount("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+    setupGameFolders();
+    setupConfig();
 
-    _window = new Window(800, 600, "Tau Editor", this);
+    _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
 #if !defined(TAU_PRODUCTION)
     ContextSettings& contextSettings = _window->contextSettings();
     contextSettings.debug = true;
@@ -43,8 +50,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     if(WGLEW_EXT_swap_control)
     {
-        constexpr bool vsync = false;
-        if(vsync)
+        if(_config.vsync)
         {
             wglSwapIntervalEXT(1);
         }
@@ -61,11 +67,6 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     _renderer = new TERenderer(*_window);
 
-    _renderer->renderingPipeline().pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    _renderer->renderingPipeline().pushFinishRender();
-    _renderer->renderingPipeline().pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    _renderer->renderingPipeline().pushFinishRender();
-
     return true;
 }
 
@@ -73,15 +74,19 @@ void TauEditorApplication::finalize() noexcept
 {
 }
 
+void TauEditorApplication::onException(Exception& ex) noexcept
+{
+    ExceptionDispatcher dispatcher(ex);
+    dispatcher.dispatch<IncorrectContextException>(this, &TauEditorApplication::onIncorrectContext);
+}
+
 void TauEditorApplication::render(const float delta) noexcept
 {
-    // UNUSED(delta);
     _renderer->render(delta);
 }
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
-    // UNUSED(fixedDelta);
     _renderer->update(fixedDelta);
 }
 
@@ -107,6 +112,37 @@ void TauEditorApplication::runMessageLoop() noexcept
     }
 }
 
+void TauEditorApplication::setupConfig() noexcept
+{
+    if(VFS::Instance().fileExists(CONFIG_PATH))
+    {
+        Ref<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
+        Config tmp = { false, 0, 0 };
+        const i32 read = configFile->readBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
+        if(read != sizeof(tmp))
+        {
+            writeConfig();
+        }
+        else
+        {
+            _config = tmp;
+        }
+    }
+    else
+    {
+        writeConfig();
+    }
+}
+
+void TauEditorApplication::writeConfig() noexcept
+{
+    Ref<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
+    if(file)
+    {
+        file->writeBytes(reinterpret_cast<u8*>(&_config), sizeof(_config));
+    }
+}
+
 void TauEditorApplication::onWindowEvent(WindowEvent& e) noexcept
 {
     EventDispatcher dispatcher(e);
@@ -114,44 +150,13 @@ void TauEditorApplication::onWindowEvent(WindowEvent& e) noexcept
     dispatcher.dispatch<WindowKeyEvent>(this, &TauEditorApplication::onKeyPress);
 }
 
-// ReSharper disable once CppMemberFunctionMayBeConst
 bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) noexcept
 {
     switch(e.c())
     {
-        // case 'p':
-        // {
-        //     _renderer->addTextSpeed(0.5f);
-        //     break;
-        // }
-        // case 'o':
-        // {
-        //     _renderer->addTextSpeed(-0.5f);
-        //     break;
-        // }
-        // case 'l':
-        // {
-        //     _renderer->addTextScale(0.05f);
-        //     break;
-        // }
-        // case 'k':
-        // {
-        //     _renderer->addTextScale(-0.05f);
-        //     break;
-        // }
-        // case 'e':
-        // {
-        //     _renderer->randomReset();
-        //     break;
-        // }
-        // case 'r':
-        // {
-        //     _renderer->screenReset();
-        //     break;
-        // }
         case 'v':
         {
-            static bool vsync = false;
+            static bool vsync = _config.vsync;
 
             if(WGLEW_EXT_swap_control)
             {
@@ -170,12 +175,8 @@ bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) noexcept
         }
         default: return false;
     }
-
-    return false;
 }
 
-
-// ReSharper disable once CppMemberFunctionMayBeStatic
 bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
 {
     if(e.event() == KeyboardEvent::KE_KEY_PRESSED)
@@ -194,13 +195,66 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
     return false;
 }
 
+
+void TauEditorApplication::onIncorrectContext(IncorrectContextException& ex)
+{
+    UNUSED(ex);
+    _logger->trace("Incorrect Context Detected, Exiting.");
+}
+
 Application* startGame() noexcept
 {
-    return new TauEditorApplication;
+    return new(std::nothrow) TauEditorApplication;
 }
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept
 {
     auto* app = reinterpret_cast<TauEditorApplication*>(param);
     app->onWindowEvent(e);
+}
+
+static bool setupWinFolder(int dir, const char* subPath, const char* mountPoint) noexcept
+{
+    CHAR folderPath[MAX_PATH];
+    const HRESULT result = SHGetFolderPathA(NULL, dir, NULL, SHGFP_TYPE_CURRENT, folderPath);
+
+    if(SUCCEEDED(result))
+    {
+        DynString folder(folderPath);
+        if(subPath)
+        {
+            folder.append(subPath);
+        }
+        if(!Win32FileLoader::Instance()->fileExists(folder))
+        {
+            if(!Win32FileLoader::Instance()->createFolder(folder))
+            {
+                return false;
+            }
+        }
+
+        VFS::Instance().mountDynamic(mountPoint, folder, Win32FileLoader::Instance());
+        return true;
+    }
+
+    return false;
+}
+
+static void setupGameFolders() noexcept
+{
+    // if(!setupWinFolder(CSIDL_MYDOCUMENTS, "\\My Games\\TauEditor", "game"))
+    // {
+    //     VFS::Instance().mount("game", "C:\\TauEditor", Win32FileLoader::Instance());
+    // }
+    if(!setupWinFolder(CSIDL_LOCAL_APPDATA, "/TauEditor", "game"))
+    {
+        VFS::Instance().mountDynamic("game", "C:/TauEditor", Win32FileLoader::Instance());
+        if(!Win32FileLoader::Instance()->fileExists("C:/TauEditor"))
+        {
+            if(!Win32FileLoader::Instance()->createFolder("C:/TauEditor"))
+            {
+            }
+        }
+    }
+    VFS::Instance().mountDynamic("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 }

@@ -71,7 +71,7 @@ bool GLShader::loadShader(const char* src) noexcept
     }
     else
     {
-        data = VFS::Instance().openFile(this->_shaderPath)->readFile();
+        data = VFS::Instance().openFile(this->_shaderPath, FileProps::Read)->readFile();
         shaderSrc = reinterpret_cast<GLchar*>(data.arr());
     }
 

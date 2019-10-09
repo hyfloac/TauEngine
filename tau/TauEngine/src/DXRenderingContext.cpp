@@ -50,13 +50,13 @@ void DXRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
     _dx9Device->Clear(0, null, flags, D3DCOLOR_RGBA(color.r, color.g, color.b, color.a), depthValue, stencilValue);
 }
 
-IRenderingContext* createDXContext() noexcept
-{
-    return new DXRenderingContext;
-}
+// IRenderingContext* createDXContext() noexcept
+// {
+//     return new DXRenderingContext;
+// }
 #else
-IRenderingContext* createDXContext() noexcept
-{
-    return null;
-}
+// IRenderingContext* createDXContext() noexcept
+// {
+//     return null;
+// }
 #endif

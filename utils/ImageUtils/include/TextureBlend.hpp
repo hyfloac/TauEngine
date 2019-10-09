@@ -53,7 +53,7 @@ TextureBlend* mix(const _Img0* const img0, const _Img1* const img1, const double
         ret[i] = fastRound<double, u8>(mixed);
     }
 
-    return new TextureBlend(new Texture(img0->width, img1->width, ret, 32));
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }
 
 template<typename _Img0, typename _Img1, u32 _RatioNum, u32 _RatioDen>
@@ -78,7 +78,7 @@ TextureBlend* mix(const _Img0* const img0, const _Img1* const img1) noexcept
         ret[i] = fastRound<double, u8>(mixed);
     }
 
-    return new TextureBlend(new Texture(img0->width, img1->width, ret, 32));
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }
 
 template<typename _Img0, typename _Img1>
@@ -98,7 +98,7 @@ TextureBlend* avg(const _Img0* const img0, const _Img1* const img1) noexcept
         ret[i] = fastRound<double, u8>(mixed);
     }
 
-    return new TextureBlend(new Texture(img0->width, img1->width, ret, 32));
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }
 
 template<typename _Img0, typename _Img1>
@@ -118,7 +118,7 @@ TextureBlend* mulImages(const _Img0* const img0, const _Img1* const img1) noexce
         ret[i] = fastRound<double, u8>(multiplied / 255.0);
     }
 
-    return new TextureBlend(new Texture(img0->width, img1->width, ret, 32));
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }
 
 template<typename _Img0, typename _Img1>
@@ -140,7 +140,7 @@ TextureBlend* xorImages(const _Img0* const img0, const _Img1* const img1) noexce
         ret[i] = pix0[i] ^ pix1[i];
     }
 
-    return new TextureBlend(new Texture(img0->width, img1->width, ret, 32));
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }
 
 template<typename _Img0, typename _Img1>
@@ -164,5 +164,26 @@ TextureBlend* xorImagesSIMD(const _Img0* const img0, const _Img1* const img1) no
         map[i] |= 0xFF000000;
     }
 
-    return new TextureBlend(new Texture(img0->width, img1->width, ret, 32));
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
+}
+
+template<typename _Img0>
+TextureBlend* filterImage(const _Img0* const img0) noexcept
+{
+    const u32* const pix0 = reinterpret_cast<u32*>(img0->pixels);
+    const u32 len = img0->width * img0->height;
+    u8* const ret = new u8[len * 4];
+
+    u32* ret0 = reinterpret_cast<u32*>(ret);
+
+    for(u32 i = 0; i < len; ++i)
+    {
+        ret0[i] = pix0[i];
+        if((pix0[i] & 0x00FFFFFF) == 0x00FFFFFF || (pix0[i] & 0x00FFFFFF) == 0x00000000)
+        {
+            ret0[i] = 0x00000000;
+        }
+    }
+
+    return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }

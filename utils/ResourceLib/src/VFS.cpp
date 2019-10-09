@@ -9,11 +9,10 @@ VFS& VFS::Instance() noexcept
     return instance;
 }
 
-void VFS::mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader) noexcept
+void VFS::mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader, bool canCreateFile, bool canWriteFile)
 {
-    _mountPoints.insert(MountMap::value_type(mountPoint, VFS::Container(path, loader)));
+    _mountPoints.insert(MountMap::value_type(mountPoint, VFS::Container(path, loader, canCreateFile, canWriteFile)));
 }
-
 
 void VFS::unmount(const DynString& mountPoint) noexcept
 {
@@ -52,75 +51,65 @@ static std::pair<DynString, DynString> split(const char* str, char separator, bo
     return { DynString(begin), DynString("") };
 }
 
-
 VFS::Container VFS::resolvePath(const char* path) const noexcept
 {
-    if(!path) { return { "", null }; }
+    if(!path) { return VFS::Container::Static("", null); }
 
     const std::size_t len = std::strlen(path);
-    if(!len) { return { "", null }; }
+    if(!len) { return VFS::Container::Static("", null); }
 
     if(path[0] != '|')
     {
-        if(_defaultLoader->fileExists(path))
-        {
-            return { path, null };
-        }
-        return { "", null };
+        // if(_defaultLoader->fileExists(path))
+        // {
+        //     return VFS::Container::Dynamic(path, _defaultLoader);
+        // }
+        return VFS::Container::Dynamic(path, _defaultLoader);
     }
 
     const auto splitStr = split(path + 1, '/', true);
 
     if(splitStr.second.length() == 0)
     {
-        return { "", null };
+        return VFS::Container::Static("", null);
     }
 
     for(auto it = _mountPoints.find(splitStr.first); it != _mountPoints.end(); ++it)
     {
         const VFS::Container cont = it->second;
-        DynString compound = it->second.first.concat(splitStr.second);
-        if(cont.second->fileExists(compound.c_str()))
+        DynString compound = it->second.path.concat(splitStr.second);
+        if(cont.fileLoader->fileExists(compound.c_str()))
         {
-            return { compound, cont.second };
+            return { compound, cont.fileLoader, cont.canCreateFile, cont.canWriteFile };
+        }
+        else if(cont.canCreateFile)
+        {
+            return { compound, cont.fileLoader, cont.canCreateFile, cont.canWriteFile };
         }
     }
 
-    return { "", null };
+    return VFS::Container::Static("", null);
 }
 
-Ref<IFile> VFS::openFile(const char* path) const noexcept
+
+bool VFS::fileExists(const char* path) const noexcept
 {
-    // if(!path) { return null; }
-    //
-    // const std::size_t len = std::strlen(path);
-    // if(!len) { return null; }
-    //
-    // if(path[0] != '|')
-    // {
-    //     return _defaultLoader->load(path);
-    // }
-    //
-    // const auto splitStr = split(path + 1, '/', true);
-    //
-    // if(splitStr.second.length() == 0)
-    // { return null; }
-    //
-    // for(auto it = _mountPoints.find(splitStr.first); it != _mountPoints.end(); ++it)
-    // {
-    //     const VFS::Container cont = it->second;
-    //     DynString compound = it->second.first.concat(splitStr.second);
-    //     if(cont.second->fileExists(compound.c_str()))
-    //     {
-    //         return cont.second->load(compound.c_str());
-    //     }
-    // }
+    const Container c = resolvePath(path);
+    if(!c.fileLoader) { return false; }
+    return c.fileLoader->fileExists(c.path);
+}
 
-    VFS::Container physPath = resolvePath(path);
+Ref<IFile> VFS::openFile(const char* path, FileProps props) const noexcept
+{
+    const VFS::Container physPath = resolvePath(path);
 
-    if(physPath.first.length() == 0)
+    if(physPath.fileLoader == null || physPath.path.length() == 0)
     { return null; }
 
+    if(props != FileProps::Read && !physPath.canCreateAndWriteFile())
+    {
+        return null;
+    }
 
-    return physPath.second->load(physPath.first);
+    return physPath.fileLoader->load(physPath.path, props);
 }

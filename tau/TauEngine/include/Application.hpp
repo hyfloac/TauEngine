@@ -1,8 +1,9 @@
 #pragma once
 
 #include <NumTypes.hpp>
-#include "TauEngine.hpp"
 #include "DLL.hpp"
+
+class Exception;
 
 class TAU_DLL Application
 {
@@ -11,10 +12,10 @@ private:
 protected:
     Application(const u32 targetUPS) noexcept;
 public:
+    virtual ~Application() noexcept;
+
     Application(const Application& copy) noexcept = delete;
     Application(Application&& move) noexcept = delete;
-
-    virtual ~Application() noexcept;
 
     Application& operator =(const Application& copy) noexcept = delete;
     Application& operator =(Application&& move) noexcept = delete;
@@ -22,6 +23,8 @@ public:
     virtual bool init(int argCount, char* args[]) noexcept = 0;
 
     virtual void finalize() noexcept = 0;
+
+    virtual void onException(Exception& ex) noexcept { }
 protected:
     virtual void update(const float fixedDelta) noexcept = 0;
 
@@ -37,6 +40,8 @@ public:
 #if defined(APP_MAIN)
 Application* startGame() noexcept;
 
+void tauMain() noexcept;
+
 int main(int argCount, char* args[]) noexcept
 {
 #ifndef TAU_DLL_LINK
@@ -44,6 +49,8 @@ int main(int argCount, char* args[]) noexcept
 #endif
 
     Application* app = startGame();
+
+    if(!app) { return -2; }
 
     if(!app->init(argCount, args))
     {

@@ -6,17 +6,8 @@
 #pragma once
 
 #include <NumTypes.hpp>
-
-#pragma warning(push, 0)
-#include <spdlog/spdlog.h>
-#include <memory>
-#pragma warning(pop)
-
-#include <DLL.hpp>
-
-std::shared_ptr<spdlog::logger> getEngineLogger() noexcept;
-
-TAU_DLL void setEngineLoggerLevel(spdlog::level::level_enum level) noexcept;
+#include "DLL.hpp"
+#include "events/Exception.hpp"
 
 /**
  * @return
@@ -24,7 +15,11 @@ TAU_DLL void setEngineLoggerLevel(spdlog::level::level_enum level) noexcept;
  */
 bool tauInit() noexcept;
 
-void tauMain();
+void tauMain() noexcept;
+
+TAU_DLL void tauThrowException(Exception& e) noexcept;
+
+TAU_DLL Exception* tauGetException() noexcept;
 
 // /**
 //  *   Gets up to `NUM_MESSAGES_TO_READ` [default `8`] messages 
@@ -65,7 +60,3 @@ class Window;
  *    A function to render the current FPS.
  */
 TAU_DLL void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, renderFPS_f renderFPS) noexcept;
-
-#ifdef _WIN32
-HMODULE tauGetDLLModule() noexcept;
-#endif

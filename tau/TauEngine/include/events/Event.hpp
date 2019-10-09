@@ -5,8 +5,8 @@
 #pragma warning(pop)
 
 #include <DLL.hpp>
-#include <NumTypes.hpp>
 #include <String.hpp>
+#include <RunTimeType.hpp>
 
 #ifndef EVENT_GEN_NAMES
   #ifndef TAU_PRODUCTION
@@ -29,18 +29,14 @@
                                    { return _TYPE::getStaticType(); }
 
 #if EVENT_GEN_NAMES
-#define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE); \
-                          [[nodiscard]] virtual const char* getName() const noexcept override \
-                          { return #_TYPE; }
-#define EVENT_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
+  #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE); \
+                            [[nodiscard]] virtual const char* getName() const noexcept override \
+                            { return #_TYPE; }
+  #define EVENT_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
 #else
-#define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE)
-#defube EVENT_GET_NAME(_EVENT_PTR) ""
+  #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE)
+  #define EVENT_GET_NAME(_EVENT_PTR) ""
 #endif
-
-// #define EVENT_IMPL_INTERCEPTABLE(_TYPE) EVENT_IMPL(_TYPE); \
-//                                         [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
-//                                         { return true;  }
 
 #define EVENT_INTERCEPTABLE(_STATE) [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
                                     { return _STATE;  }
@@ -50,39 +46,7 @@ class TAU_DLL Event
 public:
     friend class EventDispatcher;
 
-    class EventType final
-    {
-    public:
-        static EventType define() noexcept
-        {
-            static u64 currentUID = 0;
-            return EventType(++currentUID);
-        }
-    private:
-        u64 _uid;
-
-        inline EventType(u64 uid) noexcept
-            : _uid(uid)
-        { }
-    public:
-        inline ~EventType() noexcept = default;
-
-        EventType(const EventType& copy) = default;
-        EventType(EventType&& move) noexcept = default;
-
-        EventType& operator=(const EventType& copy) = default;
-        EventType& operator=(EventType&& move) noexcept = default;
-
-        [[nodiscard]] inline u64 uid() const noexcept { return _uid; }
-        inline operator u64() const noexcept { return _uid; }
-        inline u64 operator ()() const noexcept { return _uid; }
-
-        inline bool operator ==(const EventType& other) const noexcept { return _uid == other._uid; }
-        inline bool operator !=(const EventType& other) const noexcept { return _uid != other._uid; }
-
-        inline bool operator ==(const u64 uid) const noexcept { return _uid == uid; }
-        inline bool operator !=(const u64 uid) const noexcept { return _uid != uid; }
-    };
+    using EventType = RunTimeType<Event>;
 private:
     bool _intercepted;
 private:
@@ -100,10 +64,11 @@ public:
 
     [[nodiscard]] inline bool intercepted() const noexcept { return _intercepted; }
     [[nodiscard]] virtual bool canBeIntercepted() const noexcept { return false; }
+    [[nodiscard]] bool interceptable() const noexcept { return canBeIntercepted(); }
 
-    [[nodiscard]] virtual EventType getEventType() const noexcept = 0;
+    [[nodiscard]] virtual Event::EventType getEventType() const noexcept = 0;
 
-#if defined(TAU_PRODUCTION) || 1
+#if EVENT_GEN_NAMES
     [[nodiscard]] virtual const char* getName() const noexcept = 0;
     [[nodiscard]] virtual DynString toString() const noexcept { return DynString(getName()); }
 #endif

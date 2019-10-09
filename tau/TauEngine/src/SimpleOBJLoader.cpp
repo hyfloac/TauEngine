@@ -585,12 +585,12 @@ namespace objl
 
         VFS::Container physPath = VFS::Instance().resolvePath(path);
 
-        if(physPath.first.length() == 0)
+        if(physPath.path.length() == 0)
         {
             return false;
         }
 
-        path = physPath.first.c_str();
+        path = physPath.path.c_str();
 
         FILE* cFile;
         if(fopen_s(&cFile, path, "r")) { return false; }

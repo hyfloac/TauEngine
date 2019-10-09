@@ -1,14 +1,9 @@
-#pragma warning(push, 0)
-#include <spdlog/sinks/stdout_color_sinks.h>
-#pragma warning(pop)
-
-#include <TauEngine.hpp>
+#include "TauEngine.hpp"
 #include <NumTypes.hpp>
 #include <Utils.hpp>
-#include <Timings.hpp>
-#include <system/Window.hpp>
-
-static std::shared_ptr<spdlog::logger> engineLogger;
+#include "Timings.hpp"
+#include "system/Window.hpp"
+#include "maths/Maths.hpp"
 
 bool tauInit() noexcept
 {
@@ -17,24 +12,34 @@ bool tauInit() noexcept
     if(!_initializationComplete)
     {
         _initializationComplete = true;
-        spdlog::set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
-        engineLogger = spdlog::stdout_color_mt("TauEngine");
-        engineLogger->set_level(spdlog::level::trace);
-        engineLogger->set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
+        // spdlog::set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
+        // engineLogger = spdlog::stdout_color_mt("TauEngine");
+        // engineLogger->set_level(spdlog::level::trace);
+        // engineLogger->set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
     }
 
     return true;
 }
 
-std::shared_ptr<spdlog::logger> getEngineLogger() noexcept
+void initProgramStartTimes() noexcept;
+
+void tauMain() noexcept
 {
-    return engineLogger;
+    tauInit();
+    initSinTable();
+    initProgramStartTimes();
 }
 
-void setEngineLoggerLevel(spdlog::level::level_enum level) noexcept
+static Exception* ex = nullptr;
+
+void tauThrowException(Exception& e) noexcept
 {
-    engineLogger->set_level(level);
+    ex = &e;
+    tauExit(-1);
 }
+
+Exception* tauGetException() noexcept
+{ return ex; }
 
 volatile static bool should_exit = false;
 

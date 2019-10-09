@@ -89,7 +89,7 @@ void GLRenderingContext::createContext()
 { }
 #endif
 
-IRenderingContext* createGLContext(GLContextSettings settings) noexcept
-{
-    return new GLRenderingContext(settings);
-}
+// IRenderingContext* createGLContext(GLContextSettings settings) noexcept
+// {
+//     return new GLRenderingContext(settings);
+// }

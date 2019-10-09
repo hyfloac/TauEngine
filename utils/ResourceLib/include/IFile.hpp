@@ -11,6 +11,15 @@
 #include <NumTypes.hpp>
 #include <DynArray.hpp>
 
+enum class FileProps : u8
+{
+    Read = 0,
+    WriteNew,
+    WriteOverwrite,
+    WriteAppend,
+    ReadWrite
+};
+
 /**
  * An interface used to represent an abstract file handle.
  *
@@ -90,5 +99,11 @@ public:
 
     virtual bool fileExists(const char* path) const noexcept = 0;
 
-    virtual Ref<IFile> load(const char* path) const noexcept = 0;
+    virtual Ref<IFile> load(const char* path, FileProps props) const noexcept = 0;
+
+    virtual bool createFolder(const char* path) const noexcept = 0;
+
+    virtual bool deleteFolder(const char* path) const noexcept = 0;
+
+    virtual bool deleteFile(const char* path) const noexcept = 0;
 };

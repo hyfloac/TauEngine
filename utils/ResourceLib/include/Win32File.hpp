@@ -31,6 +31,7 @@ class Win32File final : public IFile
 private:
     HANDLE _file;
     const char* _name;
+    FileProps _props;
 private:
     Win32File(const Win32File& copy) noexcept = delete;
     Win32File(Win32File&& move) noexcept = delete;
@@ -38,8 +39,8 @@ private:
     Win32File& operator=(const Win32File& copy) noexcept = delete;
     Win32File& operator=(Win32File&& move) noexcept = delete;
 public:
-    Win32File(HANDLE file, const char* name) noexcept
-        : _file(file), _name(name)
+    Win32File(HANDLE file, const char* name, FileProps props) noexcept
+        : _file(file), _name(name), _props(props)
     { }
 
     ~Win32File() noexcept override
@@ -86,10 +87,16 @@ public:
 
     bool fileExists(const char* path) const noexcept override;
 
-    Ref<IFile> load(const char* path) const noexcept override;
+    Ref<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    Ref<Win32File> load2(const char* path) const noexcept
-    { return RefCast<Win32File>(load(path)); }
+    Ref<Win32File> load2(const char* path, FileProps props) const noexcept
+    { return RefCast<Win32File>(load(path, props)); }
+
+    bool createFolder(const char* path) const noexcept override;
+
+    bool deleteFolder(const char* path) const noexcept override;
+
+    bool deleteFile(const char* path) const noexcept override;
 };
 
 #endif

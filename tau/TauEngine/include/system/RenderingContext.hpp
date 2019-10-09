@@ -1,27 +1,74 @@
 #pragma once
 
 #include <NumTypes.hpp>
-#include <Color.hpp>
-#include <DLL.hpp>
+#include <RunTimeType.hpp>
+#include "Color.hpp"
+#include "DLL.hpp"
+#include "events/Exception.hpp"
+#include "RenderingMode.hpp"
+
+#define RC_IMPL_BASE(_TYPE) private: \
+                                _TYPE(const _TYPE& copy) noexcept = delete;            \
+                                _TYPE(_TYPE&& move) noexcept = delete;                 \
+                                _TYPE& operator=(const _TYPE& copy) noexcept = delete; \
+                                _TYPE& operator=(_TYPE&& move) noexcept = delete;      \
+                            public: \
+                                [[nodiscard]] static _TYPE::ContextType getStaticType() noexcept \
+                                { static IRenderingContext::ContextType type = IRenderingContext::ContextType::define(); \
+                                  return type; } \
+                                [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept override \
+                                { return _TYPE::getStaticType(); }
+
+#define RC_IMPL(_TYPE) RC_IMPL_BASE(_TYPE)
+
+struct GLContextSettings;
 
 class TAU_DLL IRenderingContext
 {
 public:
-    IRenderingContext() = default;
+    static IRenderingContext* create(const RenderingMode& mode, GLContextSettings) noexcept;
 
-    virtual ~IRenderingContext() = default;
-
+    using ContextType = RunTimeType<IRenderingContext>;
+private:
     IRenderingContext(const IRenderingContext& copy) = delete;
     IRenderingContext(IRenderingContext&& move) = delete;
 
     IRenderingContext& operator =(const IRenderingContext& copy) = delete;
     IRenderingContext& operator =(IRenderingContext&& move) = delete;
+protected:
+    IRenderingContext() = default;
+public:
+    virtual ~IRenderingContext() = default;
+
+    [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept = 0;
 
     virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) = 0;
 
     virtual void createContext(void* param) = 0;
 
     virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) = 0;
+    
+    template<typename _T>
+    [[nodiscard]] bool isEventType() const noexcept
+    { return _T::getStaticType() == getContextType(); }
+};
+
+class NullContextException final : public Exception
+{
+public:
+    NullContextException() noexcept = default;
+    ~NullContextException() noexcept = default;
+
+    EXCEPTION_IMPL(NullContextException);
+};
+
+class IncorrectContextException final : public Exception
+{
+public:
+    IncorrectContextException() noexcept = default;
+    ~IncorrectContextException() noexcept = default;
+
+    EXCEPTION_IMPL(IncorrectContextException);
 };
 
 struct GLContextSettings final
@@ -42,6 +89,6 @@ struct GLContextSettings final
     };
 };
 
-TAU_DLL IRenderingContext* createGLContext(GLContextSettings settings) noexcept;
+// TAU_DLL IRenderingContext* createGLContext(GLContextSettings settings) noexcept;
 
-TAU_DLL IRenderingContext* createDXContext() noexcept;
+// TAU_DLL IRenderingContext* createDXContext() noexcept;

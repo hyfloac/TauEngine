@@ -69,7 +69,7 @@ FT_Error TextHandler::loadTTFFile(const char* fileName) noexcept
     //
     // const FT_Error error = FT_New_Face(_ft, path.first.c_str(), 0, &_face);
 
-    Ref<IFile> file = VFS::Instance().openFile(fileName);
+    Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
     
     if(!file)
     {

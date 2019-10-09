@@ -55,12 +55,55 @@ int main0(u32 argCount, char* args[])
     return 0;
 }
 
+int main1(int argCount, char* args[])
+{
+    if(argCount < 3)
+    {
+        return 1;
+    }
+
+    const char* img0 = args[1];
+    const char* outImg = args[2];
+
+    printf("Img0: %s\n", img0);
+    printf("Out: %s\n", outImg);
+
+    TextureLoadError error;
+
+    std::shared_ptr<FITexture> tex0 = loadTexture(img0, &error);
+
+    if(error != TextureLoadError::NONE)
+    {
+        return 2;
+    }
+
+    TextureBlend* blend = filterImage(&(*tex0));
+
+    FIBITMAP* fiBitmap = FreeImage_Allocate(blend->texture->width, blend->texture->height, blend->texture->bitsPerPixel);
+
+    memcpy(FreeImage_GetBits(fiBitmap), blend->texture->pixels, static_cast<u64>(blend->texture->width) * static_cast<u64>(blend->texture->height) * 4);
+
+    const bool success = saveTexture(fiBitmap, outImg);
+
+    if(!success)
+    {
+        printf("Failed to save image.\n");
+        return 4;
+    }
+
+    delete blend;
+
+    FreeImage_Unload(fiBitmap);
+
+    return 0;
+}
+
 int main(int argCount, char* args[])
 {
     int ret = -1;
     try
     {
-        ret = main0(argCount, args);
+        ret = main1(argCount, args);
     }
     catch(...)
     {

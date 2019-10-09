@@ -1,16 +1,17 @@
-#include <texture/Texture.hpp>
-#include <texture/GLTexture.hpp>
-#include <texture/DXTexture.hpp>
-#include <RenderingMode.hpp>
-#include <Utils.hpp>
+#include "system/RenderingContext.hpp"
+#include "gl/GLRenderingContext.hpp"
 
-ITexture* ITexture::create(const RenderingMode& mode, const TextureType textureType) noexcept
+#ifdef _WIN32
+#include "dx/DXRenderingContext.hpp"
+#endif
+
+IRenderingContext* IRenderingContext::create(const RenderingMode& mode, GLContextSettings settings) noexcept
 {
     switch(mode.currentMode())
     {
         case RenderingMode::Mode::DirectX9:
 #ifdef _WIN32
-            return new(std::nothrow) D3D9Texture(textureType);
+            return new(std::nothrow) DXRenderingContext;
 #else
             return null;
 #endif
@@ -35,7 +36,7 @@ ITexture* ITexture::create(const RenderingMode& mode, const TextureType textureT
         case RenderingMode::Mode::OpenGL4_4:
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return new(std::nothrow) GLTexture(textureType);
+            return new(std::nothrow) GLRenderingContext(settings);
         default: return null;
     }
 }

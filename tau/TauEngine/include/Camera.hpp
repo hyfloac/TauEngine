@@ -3,6 +3,7 @@
 #include <maths/Maths.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Matrix4x4f.hpp>
+#include <events/WindowEvent.hpp>
 
 class Camera final
 {
@@ -16,6 +17,7 @@ private:
     float _pitch;
     float _yaw;
     Matrix4x4f _viewMatrix;
+    Matrix4x4f _projectionMatrix;
 public:
     inline Camera(Vector3f position = { 0.0f, 0.0f, 0.0f }, float pitch = 0.0f, float yaw = 0.0f) noexcept
         : _position(position), _velocity(0.0f), _pitch(pitch), _yaw(yaw)
@@ -98,4 +100,7 @@ public:
 private:
     void recomputeViewMatrix() noexcept
     { _viewMatrix.fpsD(_position, _pitch, _yaw); }
+
+    void recomputeProjectionMatrix(WindowResizeEvent& e) noexcept
+    { _projectionMatrix = Matrix4x4f::perspective(DEG_2_RAD(90), static_cast<float>(e.newWidth()) / static_cast<float>(e.newHeight()), 0.0001f, 1000.0f); }
 };

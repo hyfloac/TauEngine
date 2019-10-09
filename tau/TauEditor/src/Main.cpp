@@ -1,6 +1,3 @@
-#define APP_MAIN
-#include "Application.hpp"
-
 #pragma warning(push, 0)
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <imgui/imgui.h>
@@ -119,7 +116,7 @@ int EXPORT initGame() noexcept
     
     clientLogger->info("Starting Tau Engine Editor.");
 
-    VFS::Instance().mount("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+    VFS::Instance().mountDynamic("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 
     Window window(800, 600, "Tau Editor");
 #if !defined(TAU_PRODUCTION)
@@ -660,7 +657,7 @@ bool onKeyPress(WindowKeyEvent& e) noexcept
             inCommand = false;
             lockMouse = false;
             changeCursorState = -1;
-            setEngineLoggerLevel(spdlog::level::level_enum::debug);
+            // setEngineLoggerLevel(spdlog::level::level_enum::debug);
             clientLogger->set_level(spdlog::level::level_enum::debug);
         }
         else if(e.key() == 0x08) // Backspace
@@ -669,7 +666,7 @@ bool onKeyPress(WindowKeyEvent& e) noexcept
             {
                 printf("\n");
                 inCommand = false;
-                setEngineLoggerLevel(spdlog::level::level_enum::debug);
+                // setEngineLoggerLevel(spdlog::level::level_enum::debug);
                 clientLogger->set_level(spdlog::level::level_enum::debug);
             }
             else
@@ -710,7 +707,7 @@ bool onCharPress(WindowAsciiKeyEvent& e) noexcept
         inCommand = true;
         lockMouse = false;
         changeCursorState = 1;
-        setEngineLoggerLevel(spdlog::level::level_enum::off);
+        // setEngineLoggerLevel(spdlog::level::level_enum::off);
         clientLogger->set_level(spdlog::level::level_enum::off);
         printf("/");
     }

@@ -14,9 +14,9 @@ ITexture* loadTexture(const char* RESTRICT filename, const bool smooth, TextureL
 
     const VFS::Container physPath = VFS::Instance().resolvePath(filename);
 
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.first.length() == 0);
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.path.length() == 0);
 
-    filename = physPath.first.c_str();
+    filename = physPath.path.c_str();
 
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename);
 
@@ -92,9 +92,9 @@ ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRIC
 
     const VFS::Container physPath = VFS::Instance().resolvePath(filename);
 
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.first.length() == 0);
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.path.length() == 0);
 
-    filename = physPath.first.c_str();
+    filename = physPath.path.c_str();
 
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename);
 

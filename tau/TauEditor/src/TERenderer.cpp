@@ -1,7 +1,8 @@
 #include "TERenderer.hpp"
 #include <system/Window.hpp>
 #include <gl/GLUtils.hpp>
-#include <maths/Vector2f.hpp>
+#include <FastRand.hpp>
+#include <PhysWordLayer.hpp>
 
 static void __cdecl setupParams(void) noexcept;
 
@@ -9,7 +10,7 @@ TERenderer::TERenderer(Window& window) noexcept
     : _th("|TERes/TextVertexShader.glsl", "|TERes/TextFragmentShader.glsl"),
       _rp(window, setupParams, false),
       _ortho(Matrix4f::orthographic(0.0f, static_cast<float>(window.width()), 0.0f, static_cast<float>(window.height()))),
-      _window(window)
+      _window(window), _layerStack()
 {
     FT_Error thError = _th.init();
     if(thError)
@@ -23,29 +24,26 @@ TERenderer::TERenderer(Window& window) noexcept
     }
     _th.generateBitmapCharacters();
     _th.finishLoad();
-    fast_srand(time(NULL));
+    seedFastRand(time(NULL));
 
-    for(int i = 0; i < 150; ++i)
-    {
-        _physWords.emplace_back("test", _window, _th, _rp);
-    }
+    _layerStack.pushLayer(new PhysWordLayer(150, "O", window, _th, _rp, _ortho));
 }
 
 void TERenderer::render(const float delta) noexcept
 {
     _rp.pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for(PhysWord& pw : _physWords)
+    for(auto* layer : _layerStack)
     {
-        pw.render(delta, _ortho);
+        layer->onRender(delta);
     }
     _rp.pushFinishRender();
 }
 
 void TERenderer::update(const float fixedDelta) noexcept
 {
-    for(PhysWord& pw : _physWords)
+    for(auto* layer : _layerStack)
     {
-        pw.update(fixedDelta);
+        layer->onUpdate(fixedDelta);
     }
 }
 

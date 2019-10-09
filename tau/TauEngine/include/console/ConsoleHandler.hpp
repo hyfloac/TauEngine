@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <String.hpp>
 #include <DLL.hpp>
+#include <cstdarg>
 
 class ConsoleHandler;
 

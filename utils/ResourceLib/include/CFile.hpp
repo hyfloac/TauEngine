@@ -25,6 +25,7 @@ class CFile final : public IFile
 private:
     FILE* _file;
     const char* _name;
+    FileProps _props;
 private:
     CFile(const CFile& copy) noexcept = delete;
     CFile(CFile&& move) noexcept = delete;
@@ -32,8 +33,8 @@ private:
     CFile& operator=(const CFile& copy) noexcept = delete;
     CFile& operator=(CFile&& move) noexcept = delete;
 public:
-    CFile(FILE* file, const char* name) noexcept
-        : _file(file), _name(name)
+    CFile(FILE* file, const char* name, FileProps props) noexcept
+        : _file(file), _name(name), _props(props)
     { }
 
     ~CFile() noexcept override
@@ -79,8 +80,14 @@ public:
 
     bool fileExists(const char* path) const noexcept override;
 
-    Ref<IFile> load(const char* path) const noexcept override;
+    Ref<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    Ref<CFile> load2(const char* path) const noexcept
-    { return RefCast<CFile>(load(path)); }
+    Ref<CFile> load2(const char* path, FileProps props) const noexcept
+    { return RefCast<CFile>(load(path, props)); }
+
+    bool createFolder(const char* path) const noexcept override;
+
+    bool deleteFolder(const char* path) const noexcept override;
+
+    bool deleteFile(const char* path) const noexcept override;
 };

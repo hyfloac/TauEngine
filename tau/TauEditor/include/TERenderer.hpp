@@ -1,8 +1,7 @@
 #pragma once
 
 #include <TextHandler.hpp>
-#include "PhysWord.hpp"
-#include <vector>
+#include <layer/LayerStack.hpp>
 
 class Window;
 class Vector2f;
@@ -17,7 +16,7 @@ private:
     Matrix4x4f _ortho;
     Window& _window;
 
-    std::vector<PhysWord> _physWords;
+    LayerStack _layerStack;
 public:
     TERenderer(Window& window) noexcept;
 
