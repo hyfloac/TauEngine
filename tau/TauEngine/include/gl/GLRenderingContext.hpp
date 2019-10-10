@@ -17,9 +17,9 @@ public:
     GLRenderingContext(GLContextSettings contextSettings) noexcept;
     ~GLRenderingContext() noexcept override final = default;
 
-    void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) override final;
-
     void createContext(void* param) override final;
+
+    void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) override final;
 
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) override final;
 

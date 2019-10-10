@@ -8,12 +8,6 @@ GLRenderingContext::GLRenderingContext(GLContextSettings contextSettings) noexce
     : _context(null), _contextSettings(contextSettings)
 { }
 
-
-void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ)
-{
-    glViewport(x, y, width, height);
-}
-
 #ifdef _WIN32
 void GLRenderingContext::createContext(void* param)
 {
@@ -67,12 +61,21 @@ void GLRenderingContext::createContext(void* param)
         this->_context = tmpContext;
     }
 }
+#else
+void GLRenderingContext::createContext()
+{ }
+#endif
+
+void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ)
+{
+    glViewport(x, y, width, height);
+}
 
 void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue)
 {
     GLbitfield flags = 0;
-    if(clearColorBuffer)   { flags  = GL_COLOR_BUFFER_BIT;   }
-    if(clearDepthBuffer)   { flags |= GL_DEPTH_BUFFER_BIT;   }
+    if(clearColorBuffer) { flags = GL_COLOR_BUFFER_BIT; }
+    if(clearDepthBuffer) { flags |= GL_DEPTH_BUFFER_BIT; }
     if(clearStencilBuffer) { flags |= GL_STENCIL_BUFFER_BIT; }
 
     glClearDepth(depthValue);
@@ -83,11 +86,6 @@ void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
                  static_cast<float>(color.a) / 255.0f);
     glClear(flags);
 }
-
-#else
-void GLRenderingContext::createContext()
-{ }
-#endif
 
 // IRenderingContext* createGLContext(GLContextSettings settings) noexcept
 // {

@@ -1,3 +1,6 @@
+/**
+ * @file 
+ */
 #pragma once
 
 #include <NumTypes.hpp>
@@ -42,24 +45,15 @@ public:
 
     [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept = 0;
 
-    virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) = 0;
-
     virtual void createContext(void* param) = 0;
+
+    virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) = 0;
 
     virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) = 0;
     
     template<typename _T>
     [[nodiscard]] bool isEventType() const noexcept
     { return _T::getStaticType() == getContextType(); }
-};
-
-class NullContextException final : public Exception
-{
-public:
-    NullContextException() noexcept = default;
-    ~NullContextException() noexcept = default;
-
-    EXCEPTION_IMPL(NullContextException);
 };
 
 class IncorrectContextException final : public Exception
