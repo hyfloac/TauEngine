@@ -50,11 +50,13 @@ private:
 
     void onWindowEvent(WindowEvent& e) noexcept;
 
-    bool onCharPress(WindowAsciiKeyEvent& e) noexcept;
+    bool onCharPress(WindowAsciiKeyEvent& e) const noexcept;
 
     bool onKeyPress(WindowKeyEvent& e) noexcept;
 
-    void onIncorrectContext(IncorrectContextException& ex);
+    bool onWindowResize(WindowResizeEvent& e) const noexcept;
+
+    void onIncorrectContext(IncorrectContextException& ex) const noexcept;
 public:
     friend void onWindowEvent(void* param, WindowEvent& e) noexcept;
 };

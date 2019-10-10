@@ -148,9 +148,10 @@ void TauEditorApplication::onWindowEvent(WindowEvent& e) noexcept
     EventDispatcher dispatcher(e);
     dispatcher.dispatch<WindowAsciiKeyEvent>(this, &TauEditorApplication::onCharPress);
     dispatcher.dispatch<WindowKeyEvent>(this, &TauEditorApplication::onKeyPress);
+    dispatcher.dispatch<WindowResizeEvent>(this, &TauEditorApplication::onWindowResize);
 }
 
-bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) noexcept
+bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
 {
     switch(e.c())
     {
@@ -196,7 +197,15 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
 }
 
 
-void TauEditorApplication::onIncorrectContext(IncorrectContextException& ex)
+bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
+{
+    e.window().updateViewPort(0, 0, e.newWidth(), e.newHeight());
+    // _renderer->renderingPipeline().pushResizeViewport(0, 0, e.newWidth(), e.newHeight());
+    _renderer->ortho() = Matrix4f::orthographic(0.0f, static_cast<float>(e.newWidth()), 0.0f, static_cast<float>(e.newHeight()));
+    return false;
+}
+
+void TauEditorApplication::onIncorrectContext(IncorrectContextException& ex) const noexcept
 {
     UNUSED(ex);
     _logger->trace("Incorrect Context Detected, Exiting.");
