@@ -32,19 +32,24 @@ void PhysWord::update(const float fixedDelta, const Window& window) noexcept
     i32 mouseX, mouseY;
     window.getMousePos(mouseX, mouseY);
 
-    const Vector2f mousePos(mouseX, static_cast<i32>(window.height()) - mouseY);
-    const float distance = sqrtf(mousePos.dot(_textPos));
-
-    _textAcc = mousePos - _textPos;
-    _textAcc *= 0.0000005f * distance;
+    // const Vector2f mousePos(mouseX, static_cast<i32>(window.height()) - mouseY);
+    // const float distance = sqrtf(mousePos.dot(_textPos));
+    //
+    // _textAcc = mousePos - _textPos;
+    // _textAcc *= 0.0000005f * distance;
 
     phaseColor();
-    // constexpr float gravity = -0.01f;
+    constexpr float gravity = -0.01f;
     constexpr float energyFactor = 0.8f;
 
     const float fixedDeltaMS = fixedDelta / 1000.0f;
     constexpr float hEnergyFactor = 0.99995f;
     constexpr float hFrictionFactor = 0.8f;
+
+    const float mass = _length / 32.0f;
+    const float forceY = mass * gravity;
+
+    _textAcc.y() = forceY / mass;
 
     // _textVel.y() += gravity * fixedDeltaMS;
     _textVel += _textAcc * fixedDeltaMS;
