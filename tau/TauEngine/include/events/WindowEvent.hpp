@@ -9,16 +9,16 @@ class Window;
 class WindowEvent : public Event
 {
 protected:
-    Window* _window;
+    Window& _window;
 protected:
-    inline WindowEvent(Window* window) noexcept
+    inline WindowEvent(Window& window) noexcept
         : _window(window)
     { }
 public:
     inline virtual ~WindowEvent() noexcept = default;
 
-    [[nodiscard]] Window* window() noexcept { return  _window; }
-    [[nodiscard]] const Window* window() const noexcept { return  _window; }
+    [[nodiscard]] Window& window() noexcept { return  _window; }
+    [[nodiscard]] const Window& window() const noexcept { return  _window; }
 
     EVENT_IMPL(WindowEvent)
 };
@@ -31,7 +31,7 @@ private:
     u32 _newWidth;
     u32 _newHeight;
 public:
-    WindowResizeEvent(Window* const window, const u32 oldWidth, const u32 oldHeight, const u32 newWidth, const u32 newHeight) noexcept
+    WindowResizeEvent(Window& window, const u32 oldWidth, const u32 oldHeight, const u32 newWidth, const u32 newHeight) noexcept
         : WindowEvent(window),
           _oldWidth(oldWidth), _oldHeight(oldHeight),
           _newWidth(newWidth), _newHeight(newHeight)
@@ -52,7 +52,7 @@ class WindowActiveEvent final : public WindowEvent
 private:
     bool _active;
 public:
-    WindowActiveEvent(Window* const window, const bool active) noexcept
+    WindowActiveEvent(Window& window, const bool active) noexcept
         : WindowEvent(window), _active(active)
     { }
 
@@ -70,7 +70,7 @@ private:
     KeyboardFlags _flags;
     u64 _key;
 public:
-    WindowKeyEvent(Window* const window, const KeyboardEvent event, const KeyboardFlags flags, const u64 key) noexcept
+    WindowKeyEvent(Window& window, const KeyboardEvent event, const KeyboardFlags flags, const u64 key) noexcept
         : WindowEvent(window), _event(event), _flags(flags), _key(key)
     { }
 
@@ -88,7 +88,7 @@ private:
     wchar_t _wideChar;
     char _c;
 public:
-    WindowAsciiKeyEvent(Window* const window, const wchar_t wideChar, const char c) noexcept
+    WindowAsciiKeyEvent(Window& window, const wchar_t wideChar, const char c) noexcept
         : WindowEvent(window), _wideChar(wideChar), _c(c)
     { }
 

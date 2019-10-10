@@ -81,6 +81,8 @@ static void removeWindow(NotNull<const Window>) noexcept;
 static Nullable Window* getWindowFromHandle(HWND) noexcept;
 #endif
 
+static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
+
 class TAU_DLL Window
 {
 public:
@@ -114,7 +116,7 @@ private:
      *   The title of the window. The string can change, the 
      * contents cannot.
      */
-    const char* _title;
+    DynString _title;
     /**
      * A system dependent container of information.
      * 
@@ -152,7 +154,7 @@ public:
      */
     static void unloadCurrentContext() noexcept;
 public:
-    Window(u32 width, u32 height, Nullable const char* title, Nullable void* userContainer = null, Nullable const Window* parent = null) noexcept;
+    Window(u32 width, u32 height, DynString title, Nullable void* userContainer = null, Nullable const Window* parent = null) noexcept;
 
     ~Window() noexcept;
 
@@ -210,7 +212,7 @@ public:
      */
     void moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept;
 
-    void setTitle(const char* title) noexcept;
+    void setTitle(const DynString& title) noexcept;
 
     inline void setEventHandler(Nullable onEvent_f eventHandler) noexcept { _eventHandler = eventHandler;  }
 
@@ -247,9 +249,10 @@ public:
     void getMousePos(i32& x, i32& y) const noexcept;
     void setMousePos(i32 x, i32 y) const noexcept;
 public:
-#ifdef _MSVC_LANG
+#ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;
     friend void removeWindow(NotNull<const Window>) noexcept;
     friend Nullable Window* getWindowFromHandle(HWND) noexcept;
 #endif
+    friend void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
 };

@@ -1,7 +1,7 @@
 /**
  * @file
  * 
- * The windows implementation of {@link Window @endlink}.
+ * The Win32 implementation of {@link Window @endlink}.
  */
 #ifdef _WIN32
 #pragma warning(push, 0)
@@ -15,6 +15,7 @@
 #include <system/Window.hpp>
 #include <EnumBitFields.hpp>
 #include <events/WindowEvent.hpp>
+#include <utility>
 
 #ifndef MAX_WINDOW_COUNT
 /**
@@ -33,7 +34,7 @@
  *   This is the name of a Windows class. This is used for 
  * interfacing with the OS.
  */
-static const char* CLASS_NAME = "TauEngineWindowClass";
+// static constexpr const char* CLASS_NAME = "TauEngineWindowClass";
 
 /**
  *   When we get a message for a window we only receive the
@@ -57,11 +58,11 @@ static u32 currentWindowHandleIndex = 0;
  *      Returns true if the `systemWindowContainer` was 
  *    successfully added to {@link windowHandles @endlink}.
  */
-static bool addWindow(NonNull Window* systemWindowContainer) noexcept
+static bool addWindow(Window& systemWindowContainer) noexcept
 {
     if(currentWindowHandleIndex < MAX_WINDOW_COUNT)
     {
-        windowHandles[currentWindowHandleIndex++] = systemWindowContainer;
+        windowHandles[currentWindowHandleIndex++] = &systemWindowContainer;
         return true;
     }
     return false;
@@ -82,7 +83,7 @@ static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
         if(systemWindowContainer->_windowContainer.windowHandle == windowHandles[i]->_windowContainer.windowHandle)
         {
             memcpy(windowHandles + i, windowHandles + i + 1, --currentWindowHandleIndex - i);
-#if _DEBUG
+#if !defined(TAU_PRODUCTION)
             //   If in debug mode zero out the location, this is useful
             // for debugging. In practice, this is actually useless for 
             // the system and requires a memory write.
@@ -228,6 +229,20 @@ static KeyboardFlags getKeyboardFlags() noexcept
     return ret;
 }
 
+static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept
+{
+    if(!window._eventHandler) { return; }
+
+    const u32 width  = LOWORD(lParam);
+    const u32 height = HIWORD(lParam);
+
+    WindowResizeEvent evt(window, window._width, window._height, width, height);
+    window._eventHandler(window._userContainer, evt);
+
+    window._width  = width;
+    window._height = height;
+}
+
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
     Window* window = getWindowFromHandle(windowHandle);
@@ -239,7 +254,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
         case WM_ACTIVATE:
             if(window && window->_eventHandler)
             {
-                WindowActiveEvent evt(window, wParam != WA_INACTIVE);
+                WindowActiveEvent evt(*window, wParam != WA_INACTIVE);
                 window->_eventHandler(window->_userContainer, evt);
             }
             break;
@@ -247,32 +262,17 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             if(window)
             {
                 if(wParam == SIZE_MINIMIZED)
-                {
-                    window->_windowState = WindowState::MINIMIZED;
-                } 
+                { window->_windowState = WindowState::MINIMIZED; } 
                 else if(wParam == SIZE_MAXIMIZED)
                 {
-                    window->_windowState = WindowState::MAXIMIZED; 
-                    CALL_WINDOW_RESIZE_HANDLER:
-                    if(window->_eventHandler)
-                    {
-                        const u32 width = LOWORD(lParam);
-                        const u32 height = HIWORD(lParam);
-
-                        WindowResizeEvent evt(window, window->_width, window->_height, width, height);
-                        window->_eventHandler(window->_userContainer, evt);
-
-                        window->_width = width;
-                        window->_height = height;
-                    }
+                    window->_windowState = WindowState::MAXIMIZED;
+                    callWindowResizeHandler(*window, lParam);
                 }
                 else if(wParam == SIZE_RESTORED)
                 {
                     if(window->_windowState == WindowState::MINIMIZED || window->_windowState == WindowState::MAXIMIZED)
-                    {
-                        window->_windowState = WindowState::NEITHER;
-                    }
-                    goto CALL_WINDOW_RESIZE_HANDLER;  // NOLINT(cppcoreguidelines-avoid-goto, hicpp-avoid-goto)
+                    { window->_windowState = WindowState::NEITHER; }
+                    callWindowResizeHandler(*window, lParam);
                 }
             }
             break;
@@ -308,12 +308,12 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             {
                 if(lParam & (1 << 30))
                 {
-                    WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam);
+                    WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam);
                     window->_eventHandler(window->_userContainer, evt);
                 }
                 else
                 {
-                    WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam);
+                    WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam);
                     window->_eventHandler(window->_userContainer, evt);
                 }
             }
@@ -322,14 +322,14 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
         case WM_SYSKEYUP:
             if(window && window->_eventHandler)
             {
-                WindowKeyEvent evt(window, KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam);
+                WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam);
                 window->_eventHandler(window->_userContainer, evt);
             }
             break;
         case WM_CHAR:
             if(window && window->_eventHandler)
             {
-                WindowAsciiKeyEvent evt(window, static_cast<wchar_t>(wParam), static_cast<char>(wParam));
+                WindowAsciiKeyEvent evt(*window, static_cast<wchar_t>(wParam), static_cast<char>(wParam));
                 window->_eventHandler(window->_userContainer, evt);
             }
             break;
@@ -340,24 +340,21 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
                 window->_yPos = yPos;
             }
             break;
-        default: return DefWindowProc(windowHandle, uMsg, wParam, lParam);
+        default: return DefWindowProcA(windowHandle, uMsg, wParam, lParam);
     }
     return 0;
 }
 
-Window::Window(u32 width, u32 height, Nullable const char* title, Nullable void* userContainer, Nullable const Window* parent) noexcept
-    : _width(width), _height(height), 
-      _xPos(0), _yPos(0),
-      _title(title),
+Window::Window(u32 width, u32 height, DynString title, Nullable void* userContainer, Nullable const Window* parent) noexcept
+    : _width(width), _height(height), _xPos(0), _yPos(0),
+      _title(std::move(title)),
       _windowContainer({ { }, null, null, null }),
       _userContainer(userContainer),
       _parent(parent),
       _contextSettings({ 3, 1, { { false, false, true, false, 0,0,0,0 } } }),
       _renderingMode(RenderingMode::getGlobalMode()),
       _windowState(WindowState::NEITHER),
-      _eventHandler(null),
-      _mouseEventHandler(null),
-      _mouseMoveHandler(null)
+      _eventHandler(null), _mouseEventHandler(null), _mouseMoveHandler(null)
 { }
 
 Window::~Window() noexcept
@@ -390,7 +387,7 @@ void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, cons
     updateViewPort(0, 0, width, height);
 }
 
-void Window::setTitle(const char* title) noexcept
+void Window::setTitle(const DynString& title) noexcept
 {
     this->_title = title;
     SetWindowTextA(_windowContainer.windowHandle, title);
@@ -398,13 +395,13 @@ void Window::setTitle(const char* title) noexcept
 
 bool Window::createWindow() noexcept
 {
-    addWindow(this);
+    addWindow(*this);
 
     WNDCLASSA* windowClass = &this->_windowContainer.windowClass;
 
     windowClass->lpfnWndProc = WindowProc;
     windowClass->hInstance = GetModuleHandleA(null);
-    windowClass->lpszClassName = CLASS_NAME;
+    windowClass->lpszClassName = "TauEngineWindowClass";
     windowClass->style = CS_DBLCLKS;
 
     RegisterClassA(windowClass);
@@ -443,7 +440,7 @@ void Window::closeWindow() const noexcept
     if(this->_windowContainer.renderingContext)
     {
         unloadCurrentContext();
-        wglDeleteContext(this->_windowContainer.renderingContext);      // TODO: Fix crash
+        wglDeleteContext(this->_windowContainer.renderingContext);
     }
     if(this->_windowContainer.windowHandle)
     {
