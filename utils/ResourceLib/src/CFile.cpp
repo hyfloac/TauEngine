@@ -1,6 +1,8 @@
 // #include "pch.h"
 #include "CFile.hpp"
+#ifdef _WIN32
 #include "Win32File.hpp"
+#endif
 
 i64 CFile::size() noexcept
 {
@@ -73,12 +75,20 @@ Ref<IFile> CFileLoader::load(const char* path, FileProps props) const noexcept
 
 bool CFileLoader::createFolder(const char* path) const noexcept
 {
+#ifdef _WIN32
     return Win32FileLoader::Instance()->createFolder(path);
+#else
+    return false;
+#endif
 }
 
 bool CFileLoader::deleteFolder(const char* path) const noexcept
 {
+#ifdef _WIN32
     return Win32FileLoader::Instance()->deleteFolder(path);
+#else
+    return false;
+#endif
 }
 
 bool CFileLoader::deleteFile(const char* path) const noexcept
