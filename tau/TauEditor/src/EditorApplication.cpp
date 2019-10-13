@@ -184,7 +184,7 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
     {
         switch(e.key())
         {
-            case 0x1B:
+            case Key::Esc:
             {
                 tauExit(0);
                 break;

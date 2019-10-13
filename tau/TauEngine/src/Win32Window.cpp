@@ -243,6 +243,8 @@ static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcep
     window._height = height;
 }
 
+static Key convertFromWin32VKey(int key) noexcept;
+
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
     Window* window = getWindowFromHandle(windowHandle);
@@ -308,12 +310,12 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             {
                 if(lParam & (1 << 30))
                 {
-                    WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), wParam);
+                    WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_HELD, getKeyboardFlags(), convertFromWin32VKey(wParam));
                     window->_eventHandler(window->_userContainer, evt);
                 }
                 else
                 {
-                    WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), wParam);
+                    WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_PRESSED, getKeyboardFlags(), convertFromWin32VKey(wParam));
                     window->_eventHandler(window->_userContainer, evt);
                 }
             }
@@ -322,7 +324,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
         case WM_SYSKEYUP:
             if(window && window->_eventHandler)
             {
-                WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), wParam);
+                WindowKeyEvent evt(*window, KeyboardEvent::KE_KEY_RELEASED, getKeyboardFlags(), convertFromWin32VKey(wParam));
                 window->_eventHandler(window->_userContainer, evt);
             }
             break;
@@ -687,4 +689,195 @@ void Window::setMousePos(i32 x, i32 y) const noexcept
     SetCursorPos(p.x, p.y);
 }
 
+static int convertToWin32VKey(Key key) noexcept
+{
+    constexpr int ka = static_cast<int>(Key::A);
+    const int k = static_cast<int>(key) - ka;
+
+    constexpr int VK_A = 0x41;
+    constexpr int VK_0 = 0x30;
+    constexpr int VK_N0 = VK_NUMPAD0;
+    constexpr int _VK_F1 = VK_F1;
+
+    if(key >= Key::A && key <= Key::Z)
+    { return k + VK_A; }
+    if(key >= Key::K0 && key <= Key::K9)
+    { return k + VK_0; }
+    if(key >= Key::N0 && key <= Key::N9)
+    { return k + VK_N0; }
+    if(key >= Key::F1 && key <= Key::F24)
+    { return k + _VK_F1; }
+
+    switch(key)
+    {
+        case Key::Space: return VK_SPACE;
+        case Key::Minus: return VK_OEM_MINUS;
+        case Key::Equals: return VK_OEM_PLUS;
+        case Key::Comma: return VK_OEM_COMMA;
+        case Key::Dot: return VK_OEM_PERIOD;
+        case Key::ForwardSlash: return VK_OEM_2;
+        case Key::LBracket: return VK_OEM_4;
+        case Key::RBracket: return VK_OEM_6;
+        case Key::SemiColon: return VK_OEM_1;
+        case Key::Quote: return VK_OEM_7;
+        case Key::NDivide: return VK_DIVIDE;
+        case Key::NSubtract: return VK_SUBTRACT;
+        case Key::NMultiply: return VK_MULTIPLY;
+        case Key::NAdd: return VK_ADD;
+        case Key::NDot: return VK_DECIMAL;
+        case Key::Enter: return VK_RETURN;
+        case Key::NumLock: return VK_NUMLOCK;
+        case Key::BackTick: return VK_OEM_3;
+        case Key::Esc: return VK_ESCAPE;
+        case Key::Tab: return VK_TAB;
+        case Key::CapsLock: return VK_CAPITAL;
+        case Key::Shift: return VK_SHIFT;
+        case Key::LShift: return VK_LSHIFT;
+        case Key::RShift: return VK_RSHIFT;
+        case Key::Ctrl: return VK_CONTROL;
+        case Key::LCtrl: return VK_LCONTROL;
+        case Key::RCtrl: return VK_RCONTROL;
+        case Key::Alt: return VK_MENU;
+        case Key::LAlt: return VK_LMENU;
+        case Key::RAlt: return VK_RMENU;
+        case Key::LWin: return VK_LWIN;
+        case Key::RWin: return VK_RWIN;
+        case Key::BackSpace: return VK_BACK;
+        case Key::Up: return VK_UP;
+        case Key::Down: return VK_DOWN;
+        case Key::Left: return VK_LEFT;
+        case Key::Right: return VK_RIGHT;
+        case Key::PrintScreen: return VK_SNAPSHOT;
+        case Key::ScrollLock: return VK_SCROLL;
+        case Key::PauseBreak: return VK_PAUSE;
+        case Key::Insert: return VK_INSERT;
+        case Key::Delete: return VK_DELETE;
+        case Key::Home: return VK_HOME;
+        case Key::End: return VK_END;
+        case Key::PageUp: return VK_PRIOR;
+        case Key::PageDown: return VK_NEXT;
+        default: return -1;
+    }
+}
+
+static Key convertFromWin32VKey(int key) noexcept
+{
+    constexpr int ka = static_cast<int>(Key::A);
+    const int k = key + ka;
+
+    constexpr int VK_A = 0x41;
+    constexpr int VK_Z = 0x5A;
+    constexpr int VK_0 = 0x30;
+    constexpr int VK_9 = 0x39;
+    constexpr int VK_N0 = VK_NUMPAD0;
+    constexpr int VK_N9 = VK_NUMPAD9;
+    constexpr int _VK_F1 = VK_F1;
+    constexpr int _VK_F24 = VK_F24;
+
+    if(key >= VK_A && key <= VK_Z)
+    {
+        return static_cast<Key>(k - VK_A);
+    }
+    if(key >= VK_0 && key <= VK_9)
+    {
+        return static_cast<Key>(k - VK_0);
+    }
+    if(key >= VK_N0 && key <= VK_N9)
+    {
+        return static_cast<Key>(k - VK_N0);
+    }
+    if(key >= _VK_F1 && key <= _VK_F24)
+    {
+        return static_cast<Key>(k - _VK_F1);
+    }
+
+    switch(key)
+    {
+        case VK_SPACE: return Key::Space;
+        case VK_OEM_MINUS: return Key::Minus;
+        case VK_OEM_PLUS: return Key::Equals;
+        case VK_OEM_COMMA: return Key::Comma;
+        case VK_OEM_PERIOD: return Key::Dot;
+        case VK_OEM_2: return Key::ForwardSlash;
+        case VK_OEM_4: return Key::LBracket;
+        case VK_OEM_6: return Key::RBracket;
+        case VK_OEM_1: return Key::SemiColon;
+        case VK_OEM_7: return Key::Quote;
+        case VK_DIVIDE: return Key::NDivide;
+        case VK_SUBTRACT: return Key::NSubtract;
+        case VK_MULTIPLY: return Key::NMultiply;
+        case VK_ADD: return Key::NAdd;
+        case VK_DECIMAL: return Key::NDot;
+        case VK_RETURN: return Key::Enter;
+        case VK_NUMLOCK: return Key::NumLock;
+        case VK_OEM_3: return Key::BackTick;
+        case VK_ESCAPE: return Key::Esc;
+        case VK_TAB: return Key::Tab;
+        case VK_CAPITAL: return Key::CapsLock;
+        case VK_SHIFT: return Key::Shift;
+        case VK_LSHIFT: return Key::LShift;
+        case VK_RSHIFT: return Key::RShift;
+        case VK_CONTROL: return Key::Ctrl;
+        case VK_LCONTROL: return Key::LCtrl;
+        case VK_RCONTROL: return Key::RCtrl;
+        case VK_MENU: return Key::Alt;
+        case VK_LMENU: return Key::LAlt;
+        case VK_RMENU: return Key::RAlt;
+        case VK_LWIN: return Key::LWin;
+        case VK_RWIN: return Key::RWin;
+        case VK_BACK: return Key::BackSpace;
+        case VK_UP: return Key::Up;
+        case VK_DOWN: return Key::Down;
+        case VK_LEFT: return Key::Left;
+        case VK_RIGHT: return Key::Right;
+        case VK_SNAPSHOT: return Key::PrintScreen;
+        case VK_SCROLL: return Key::ScrollLock;
+        case VK_PAUSE: return Key::PauseBreak;
+        case VK_INSERT: return Key::Insert;
+        case VK_DELETE: return Key::Delete;
+        case VK_HOME: return Key::Home;
+        case VK_END: return Key::End;
+        case VK_PRIOR: return Key::PageUp;
+        case VK_NEXT: return Key::PageDown;
+        default: return Key::Unknown;
+    }
+}
+
+bool Window::isKeyPressed(Key key) const noexcept
+{
+    if(key == Key::Win)
+    {
+        return GetKeyState(VK_LWIN) & 0x8000 || GetKeyState(VK_RWIN) & 0x8000;
+    }
+    const int keyCode = convertToWin32VKey(key);
+    return keyCode == -1 ? false : GetKeyState(keyCode) & 0x8000;
+}
+
+i32 Window::isKeyLocked(Key key) const noexcept
+{
+    switch(key)
+    {
+        case Key::NumLock:
+        case Key::CapsLock:
+        case Key::ScrollLock: return (GetKeyState(convertToWin32VKey(key)) & 0x0001) ? 1 : 0;
+        default: return -1;
+    }
+}
+
+bool Window::isKeyActive(Key key) const noexcept
+{
+    const int keyCode = convertToWin32VKey(key);
+    switch(key)
+    {
+        case Key::NumLock:
+        case Key::CapsLock:
+        case Key::ScrollLock: return GetKeyState(keyCode) & 0x0001;
+        default: break;
+    }
+    if(key == Key::Win)
+    {
+        return GetKeyState(VK_LWIN) & 0x8000 || GetKeyState(VK_RWIN) & 0x8000;
+    }
+    return keyCode == -1 ? false : GetKeyState(keyCode) & 0x8000;
+}
 #endif

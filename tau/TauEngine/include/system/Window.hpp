@@ -248,6 +248,29 @@ public:
 
     void getMousePos(i32& x, i32& y) const noexcept;
     void setMousePos(i32 x, i32 y) const noexcept;
+
+    /**
+     * Returns whether or not a key is actively pressed.
+     */
+    [[nodiscard]] bool isKeyPressed(Key key) const noexcept;
+
+    /**
+     *   Returns whether a toggleable key (like CapsLock) is
+     * currently in the active state.
+     *
+     * @return
+     *     0 - Key is not locked
+     *     1 - Key is Locked
+     *    -1 - Key is not valid for locking
+     */
+    [[nodiscard]] i32 isKeyLocked(Key key) const noexcept;
+
+    /**
+     *   If the key is a toggleable key returns if its in
+     * the active state, if it is not a toggleable key,
+     * returns if it is currently pressed.
+     */
+    [[nodiscard]] bool isKeyActive(Key key) const noexcept;
 public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;

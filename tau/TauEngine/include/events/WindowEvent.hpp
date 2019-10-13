@@ -68,15 +68,17 @@ class WindowKeyEvent final : public WindowEvent
 private:
     KeyboardEvent _event;
     KeyboardFlags _flags;
-    u64 _key;
+    Key _key;
 public:
-    WindowKeyEvent(Window& window, const KeyboardEvent event, const KeyboardFlags flags, const u64 key) noexcept
+    WindowKeyEvent(Window& window, const KeyboardEvent event, const KeyboardFlags flags, const Key key) noexcept
         : WindowEvent(window), _event(event), _flags(flags), _key(key)
     { }
 
+    inline ~WindowKeyEvent() noexcept = default;
+
     [[nodiscard]] KeyboardEvent event() const noexcept { return _event; }
     [[nodiscard]] KeyboardFlags flags() const noexcept { return _flags; }
-    [[nodiscard]] u64 key() const noexcept { return _key; }
+    [[nodiscard]] Key key() const noexcept { return _key; }
 
     EVENT_IMPL(WindowKeyEvent)
     EVENT_INTERCEPTABLE(true)

@@ -628,12 +628,12 @@ bool onKeyPress(WindowKeyEvent& e) noexcept
     if(e.event() == KeyboardEvent::KE_KEY_PRESSED)
     {
         // clientLogger->debug("Key Pressed: {}", key);
-        if(e.key() == 0x1B) // Esc
+        if(e.key() == Key::Esc) // Esc
         {
             clientLogger->debug("Escape Pressed, Exiting.");
             tauExit(0);
         }
-        else if(e.key() == 0x12) // Alt
+        else if(e.key() == Key::Alt) // Alt
         {
             lockMouse = !lockMouse;
             if(lockMouse)
@@ -649,7 +649,7 @@ bool onKeyPress(WindowKeyEvent& e) noexcept
                 changeCursorState = 1;
             }
         }
-        else if(e.key() == 0x0D) // Enter
+        else if(e.key() == Key::Enter) // Enter
         {
             printf("\n");
             ch.runCommand(commandBuffer.c_str());
@@ -660,7 +660,7 @@ bool onKeyPress(WindowKeyEvent& e) noexcept
             // setEngineLoggerLevel(spdlog::level::level_enum::debug);
             clientLogger->set_level(spdlog::level::level_enum::debug);
         }
-        else if(e.key() == 0x08) // Backspace
+        else if(e.key() == Key::BackSpace) // Backspace
         {
             if(commandBuffer.length() == 0)
             {
