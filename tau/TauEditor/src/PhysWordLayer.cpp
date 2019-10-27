@@ -1,6 +1,6 @@
 #include "PhysWordLayer.hpp"
 
-PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, Matrix4x4f& ortho) noexcept
+PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, glm::mat4& ortho) noexcept
     : _window(window), _th(th), _rp(rp), _ortho(ortho),
       _physWords()
 {

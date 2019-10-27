@@ -18,10 +18,10 @@ PhysWord::PhysWord(const char* str, const Window& window, const TextHandler& th)
     randomReset(window);
 }
 
-void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, Matrix4x4f& ortho) noexcept
+void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, glm::mat4& ortho) noexcept
 {
     UNUSED(delta);
-    rp.pushRenderText(&th, _str, _textPos.x(), _textPos.y(), _textScale, _color, ortho);
+    rp.pushRenderText(&th, _str, _textPos.x(), _textPos.y(), _textScale, static_cast<u8>(_color.x() * 255), static_cast<u8>(_color.y() * 255), static_cast<u8>(_color.z() * 255), ortho);
 }
 
 void PhysWord::update(const float fixedDelta, const Window& window) noexcept
@@ -29,8 +29,7 @@ void PhysWord::update(const float fixedDelta, const Window& window) noexcept
     const float maxX = static_cast<float>(window.width() - _length);
     const float maxY = static_cast<float>(window.height() - 15 * _offsetFactor);
 
-    i32 mouseX, mouseY;
-    window.getMousePos(mouseX, mouseY);
+    [[maybe_unused]] Mouse::Pos pos = Mouse::mousePos();
 
     // const Vector2f mousePos(mouseX, static_cast<i32>(window.height()) - mouseY);
     // const float distance = sqrtf(mousePos.dot(_textPos));

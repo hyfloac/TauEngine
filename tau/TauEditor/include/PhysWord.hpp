@@ -22,7 +22,7 @@ private:
 public:
     PhysWord(const char* str, const Window& window, const TextHandler& th) noexcept;
 
-    void render(const float delta, RenderingPipeline& rp, TextHandler& th, Matrix4x4f& ortho) noexcept;
+    void render(const float delta, RenderingPipeline& rp, TextHandler& th, glm::mat4& ortho) noexcept;
 
     void update(const float fixedDelta, const Window& window) noexcept;
 

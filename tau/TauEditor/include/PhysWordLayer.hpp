@@ -9,11 +9,11 @@ private:
     Window& _window;
     TextHandler& _th;
     RenderingPipeline& _rp;
-    Matrix4x4f& _ortho;
+    glm::mat4& _ortho;
 
     std::vector<PhysWord> _physWords;
 public:
-    PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, Matrix4x4f& ortho) noexcept;
+    PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, glm::mat4& ortho) noexcept;
 
     ~PhysWordLayer() noexcept override = default;
 
