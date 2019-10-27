@@ -1,10 +1,10 @@
 #pragma once
 
 #pragma warning(push, 0)
-#include <GL/glew.h>
 #include <NumTypes.hpp>
 #include <Utils.hpp>
 #include <DLL.hpp>
+#include <Objects.hpp>
 #pragma warning(pop)
 
 #include <texture/Texture.hpp>
@@ -25,7 +25,7 @@ enum class TextureLoadError : u8
 
 class ITexture;
 
-TAU_DLL ITexture* loadTexture(const char* RESTRICT filename, const bool smooth = true, TextureLoadError* RESTRICT const error = null, i32 mipmapLevel = -1) noexcept;
+TAU_DLL ITexture* loadTexture(const char* RESTRICT filename, bool smooth = true, TextureLoadError* RESTRICT error = null, i32 mipmapLevel = -1) noexcept;
 
 enum class FilterType : u8
 {
@@ -35,27 +35,20 @@ enum class FilterType : u8
 
 struct GPUTextureSettings final
 {
+    DEFAULT_DESTRUCT(GPUTextureSettings);
+    DEFAULT_COPY(GPUTextureSettings);
+
     TextureType textureType;
+    i32 mipmapLevel;
     FilterType magnificationFilter;
     FilterType  minificationFilter;
-    i32 mipmapLevel;
 
     GPUTextureSettings() noexcept = default;
 
-    GPUTextureSettings(TextureType _textureType, FilterType _magFilter, FilterType _minFilter, i32 _mipmapLevel) noexcept
-        : textureType(_textureType), 
-          magnificationFilter(_magFilter),
-          minificationFilter(_minFilter),
-          mipmapLevel(_mipmapLevel)
+    GPUTextureSettings(const TextureType _textureType, const FilterType _magFilter, const FilterType _minFilter, const i32 _mipmapLevel) noexcept
+        : textureType(_textureType), mipmapLevel(_mipmapLevel),
+          magnificationFilter(_magFilter), minificationFilter(_minFilter)
     { }
-
-    GPUTextureSettings(const GPUTextureSettings& copy) noexcept = default;
-    GPUTextureSettings(GPUTextureSettings&& move) noexcept = default;
-
-    ~GPUTextureSettings() noexcept = default;
-
-    GPUTextureSettings& operator =(const GPUTextureSettings& copy) noexcept = default;
-    GPUTextureSettings& operator =(GPUTextureSettings&& move) noexcept = default;
 };
 
-TAU_DLL ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRICT const error, GPUTextureSettings&& settings) noexcept;
+TAU_DLL ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRICT error, GPUTextureSettings&& settings) noexcept;

@@ -3,11 +3,11 @@
 #include <DLL.hpp>
 #include <Objects.hpp>
 #include <String.hpp>
+#include <glm/mat4x4.hpp>
 
 class Vector3f;
 class Vector3i;
 class Vector4f;
-class Matrix4x4f;
 
 enum class ShaderType
 {
@@ -19,13 +19,17 @@ enum class ShaderType
 /**
  * Represents an abstract, library independent shader.
  */
-interface_c TAU_DLL IShader
+class TAU_DLL IShader
 {
+    DEFAULT_DESTRUCT_VI(IShader);
+    DELETE_COPY(IShader);
 protected:
     ShaderType _shaderType;
+protected:
+    IShader(const ShaderType shaderType) noexcept
+        : _shaderType(shaderType)
+    { }
 public:
-    virtual ~IShader() noexcept = default;
-
     [[nodiscard]] ShaderType shaderType() const noexcept { return _shaderType; }
 
     virtual bool loadShader(const char* src = nullptr) noexcept = 0;
@@ -46,7 +50,7 @@ public:
     virtual void setUniform(i32 location, const Vector3f& value)   const noexcept = 0;
     virtual void setUniform(i32 location, const Vector3i& value)   const noexcept = 0;
     virtual void setUniform(i32 location, const Vector4f& value)   const noexcept = 0;
-    virtual void setUniform(i32 location, const Matrix4x4f& value) const noexcept = 0;
+    virtual void setUniform(i32 location, const glm::mat4& value)  const noexcept = 0;
     virtual void setUniform(i32 location, const bool value)        const noexcept = 0;
 
     virtual void setUniform(String& name, const i8 value)          const noexcept = 0;
@@ -62,16 +66,6 @@ public:
     virtual void setUniform(String& name, const Vector3f& value)   const noexcept = 0;
     virtual void setUniform(String& name, const Vector3i& value)   const noexcept = 0;
     virtual void setUniform(String& name, const Vector4f& value)   const noexcept = 0;
-    virtual void setUniform(String& name, const Matrix4x4f& value) const noexcept = 0;
+    virtual void setUniform(String& name, const glm::mat4& value)  const noexcept = 0;
     virtual void setUniform(String& name, const bool value)        const noexcept = 0;
-protected:
-    IShader(ShaderType shaderType) noexcept
-        : _shaderType(shaderType)
-    { }
-private:
-    IShader(const IShader& copy) noexcept = delete;
-    IShader(IShader&& move) noexcept = delete;
-
-    IShader& operator =(const IShader& copy) noexcept = delete;
-    IShader& operator =(IShader&& move) noexcept = delete;
 };

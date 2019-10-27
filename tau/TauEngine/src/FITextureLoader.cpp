@@ -1,5 +1,6 @@
 #pragma warning(push, 0)
 #include <FreeImage.h>
+#include <GL/glew.h>
 #pragma warning(pop)
 
 #include <texture/FITextureLoader.hpp>
@@ -42,10 +43,6 @@ ITexture* loadTexture(const char* RESTRICT filename, const bool smooth, TextureL
     ERR_EXIT(TextureLoadError::NULL_HEIGHT, !height);
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_SMALL, bitsPerPixel < 8);
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_LARGE, bitsPerPixel > 32);
-
-    // GLuint texID = 0;
-    // glGenTextures(1, &texID);
-    // glBindTexture(GL_TEXTURE_2D, texID);
 
     RenderingMode rm(RenderingMode::Mode::OpenGL4);
     ITexture* ret = ITexture::create(rm);
@@ -136,11 +133,7 @@ ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRIC
             break;
     }
 
-    // GLuint texID = 0;
-    // glGenTextures(1, &texID);
-    // glBindTexture(textureTarget, texID);
-
-    RenderingMode rm(RenderingMode::Mode::OpenGL4);
+    const RenderingMode rm(RenderingMode::Mode::OpenGL4);
     ITexture* ret = ITexture::create(rm, settings.textureType);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

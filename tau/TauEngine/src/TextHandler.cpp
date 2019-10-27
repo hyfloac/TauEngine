@@ -3,17 +3,14 @@
 #include <texture/Texture.hpp>
 #include <RenderingMode.hpp>
 #include <model/BufferDescriptor.hpp>
+#include <utility>
 #include "VFS.hpp"
 
-// GlyphCharacter::~GlyphCharacter() noexcept
-// {
-//     delete texture;
-// }
-
-TextHandler::TextHandler(const char* vertexPath, const char* fragmentPath) noexcept
-    : _ft(null), _face(null), _chars(new GlyphCharacter[95]), 
+TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
+    : _ready(false), _ft(null), _face(null), _data(), _chars(new GlyphCharacter[95]),
       _vertexShader(ShaderType::VERTEX, vertexPath, &_program), _fragmentShader(ShaderType::FRAGMENT, fragmentPath, &_program),
-      _bufferDescriptor(IBufferDescriptor::create(RenderingMode::getGlobalMode())), _vbo(0),
+      _bufferDescriptor(context.createBufferDescriptor(1)),
+      _vertexBuffer(IVertexBuffer::create(context, IVertexBuffer::Type::ArrayBuffer, IVertexBuffer::UsageType::DynamicDraw)), //_vbo(0),
       _projUni(0), _texUni(0), _colorUni(0)
 { 
     _vertexShader.loadShader();
@@ -24,30 +21,16 @@ TextHandler::TextHandler(const char* vertexPath, const char* fragmentPath) noexc
     _texUni = _fragmentShader.createUniform("textBMP");
     _colorUni = _fragmentShader.createUniform("textColor");
 
-    // glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    _vertexBuffer->bind(context);
+    _vertexBuffer->fillBuffer(context, 6, sizeof(GLfloat) * 6 * 4, null);
 
-    // glBindVertexArray(_vao);
-    _bufferDescriptor->bind();
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, null, GL_DYNAMIC_DRAW);
+    _bufferDescriptor->addAttribute(_vertexBuffer, 4, DataType::Float, false, 4 * sizeof(float), null);
 
-    _bufferDescriptor->addAttribute(4, DataType::Float, false, 4 * sizeof(float), null);
-
-    // glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), null);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
-    _bufferDescriptor->unbind();
+    _vertexBuffer->unbind(context);
 }
 
 TextHandler::~TextHandler() noexcept
 {
-    glDeleteBuffers(1, &_vbo);
-    delete _bufferDescriptor;
-    // glDeleteVertexArrays(1, &_vao);
     delete[] _chars;
     FT_Done_FreeType(_ft);
 }
@@ -60,15 +43,6 @@ FT_Error TextHandler::init() noexcept
 
 FT_Error TextHandler::loadTTFFile(const char* fileName) noexcept
 {
-    // const VFS::Container path = VFS::Instance().resolvePath(fileName);
-    //
-    // if(path.first.length() == 0)
-    // {
-    //     return -1;
-    // }
-    //
-    // const FT_Error error = FT_New_Face(_ft, path.first.c_str(), 0, &_face);
-
     Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
     
     if(!file)
@@ -83,6 +57,29 @@ FT_Error TextHandler::loadTTFFile(const char* fileName) noexcept
     FT_Set_Pixel_Sizes(_face, 0, 48);
 
     return error;
+}
+
+int TextHandler::loadTTFFile(const char* fileName, ResourceLoader& rl, ResourceLoader::finalizeLoad_f finalizeLoad) noexcept
+{
+    const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
+
+    if(!file)
+    {
+        return -1;
+    }
+
+    rl.loadFile(file, TextHandler::load2, this, finalizeLoad, this);
+    return 0;
+}
+
+void* TextHandler::load2(RefDynArray<u8> file, void* parseParam) noexcept
+{
+    TextHandler* th = reinterpret_cast<TextHandler*>(parseParam);
+    th->_data = new RefDynArray<u8>(std::move(file));
+    const FT_Error error = FT_New_Memory_Face(th->_ft, th->_data->arr(), th->_data->size() - 1, 0, &th->_face);
+    FT_Set_Pixel_Sizes(th->_face, 0, 48);
+    const intptr_t ret = error;
+    return reinterpret_cast<void*>(ret);
 }
 
 void TextHandler::generateBitmapCharacters() const noexcept
@@ -112,66 +109,17 @@ void TextHandler::generateBitmapCharacters() const noexcept
     }
 }
 
-void TextHandler::finishLoad() const noexcept
+void TextHandler::finishLoad() noexcept
 {
     FT_Done_Face(_face);
     delete _data;
+    _data = null;
+    _ready = true;
 }
 
-void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj, RenderingPipeline& rp) const noexcept
+void TextHandler::renderText(IRenderingContext& context, const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const glm::mat4& proj) const noexcept
 {
-    rp.pushActivateShaderProgram(_program.programId());
-    rp.pushLoadUni(_projUni, proj);
-    rp.pushLoadUni(_texUni, 0);
-    rp.pushLoadUni(_colorUni, color);
-
-    rp.pushEnableBufferDescriptor(_bufferDescriptor);
-
-    rp.pushGLFaceWinding(GL_CCW);
-    rp.pushGLDisable(GL_CULL_FACE);
-
-    for(char c = *str; c != '\0'; c = *(++str))
-    {
-        if(c < 32 || c > 126) { continue; }
-        const GlyphCharacter* gc = &_chars[c - 32]; 
-        
-        const GLfloat xpos = x + gc->bearing.x() * scale;
-        const GLfloat ypos = y - (gc->size.y() - gc->bearing.y()) * scale;
-
-        const GLfloat w = gc->size.x() * scale;
-        const GLfloat h = gc->size.y() * scale;
-        // Update VBO for each character
-        GLfloat vertices[6][4] = {
-            { xpos,     ypos + h,   0.0, 0.0 },
-            { xpos,     ypos,       0.0, 1.0 },
-            { xpos + w, ypos,       1.0, 1.0 },
-
-            { xpos,     ypos + h,   0.0, 0.0 },
-            { xpos + w, ypos,       1.0, 1.0 },
-            { xpos + w, ypos + h,   1.0, 0.0 }
-        };
-
-        rp.pushBindTexture(gc->texture.get(), 0);
-        
-        rp.pushBindVBO(GL_ARRAY_BUFFER, _vbo);
-        rp.pushModifyBufferData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-        rp.pushBindVBO(GL_ARRAY_BUFFER, 0);
-
-        rp.pushGLDrawArrays(GL_TRIANGLES, 0, 6);
-
-        x += (gc->advance >> 6) * scale;
-    }
-
-    rp.pushGLEnable(GL_CULL_FACE);
-    rp.pushGLFaceWinding(GL_CW);
-
-    rp.pushDisableBufferDescriptor(_bufferDescriptor);
-    rp.pushUnbindTexture(_chars[0].texture.get(), 0);
-    rp.pushActivateShaderProgram(0);
-}
-
-void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj) const noexcept
-{
+    if(!_ready) { return; }
     _program.activate();
     _vertexShader.setUniform(_projUni, proj);
     _vertexShader.setUniform(_texUni, 0);
@@ -179,8 +127,8 @@ void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scal
 
     glActiveTexture(GL_TEXTURE0);
 
-    _bufferDescriptor->bind();
-    _bufferDescriptor->enableAttributes();
+    _bufferDescriptor->bind(context);
+    _bufferDescriptor->enableAttributes(context);
 
     glFrontFace(GL_CCW);
 
@@ -207,24 +155,24 @@ void TextHandler::renderText(const char* str, GLfloat x, GLfloat y, GLfloat scal
 
         gc->texture->bind(0);
 
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        _vertexBuffer->bind(context);
+        _vertexBuffer->modifyBuffer(context, 6, 0, sizeof(vertices), vertices);
+        _vertexBuffer->unbind(context);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        _vertexBuffer->draw(context);
 
         x += (gc->advance >> 6) * scale;
     }
 
-    _bufferDescriptor->disableAttributes();
-    _bufferDescriptor->unbind();
+    _bufferDescriptor->disableAttributes(context);
+    _bufferDescriptor->unbind(context);
     _chars[0].texture->unbind(0);
     GLProgram::deactivate();
 }
 
-
 GLfloat TextHandler::computeLength(const char* str, GLfloat scale) const noexcept
 {
+    if(!_ready) { return 0.0f; }
     GLfloat length = 0.0f;
 
     for(char c = *str; c != '\0'; c = *(++str))

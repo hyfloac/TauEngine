@@ -1,8 +1,9 @@
 #pragma once
 
-#include <DLL.hpp>
 #include <String.hpp>
 #include <RunTimeType.hpp>
+#include <Objects.hpp>
+#include "DLL.hpp"
 
 #ifndef EXCEPTION_GEN_NAMES
   #ifndef TAU_PRODUCTION
@@ -12,11 +13,7 @@
   #endif
 #endif
 
-#define EXCEPTION_IMPL_BASE(_TYPE) private: \
-                                       _TYPE(const _TYPE& copy) = delete;                     \
-                                       _TYPE(_TYPE&& move) noexcept = delete;                 \
-                                       _TYPE& operator=(const _TYPE& copy) = delete;          \
-                                       _TYPE& operator=(_TYPE&& move) noexcept = delete;      \
+#define EXCEPTION_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                    public: \
                                        [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
                                        { static Exception::ExceptionType type = Exception::ExceptionType::define(); \
@@ -36,21 +33,12 @@
 
 class TAU_DLL Exception
 {
+    DEFAULT_CONSTRUCT_PO(Exception);
+    DEFAULT_DESTRUCT_VI(Exception);
+    DELETE_COPY(Exception);
 public:
-    friend class ExceptionDispatcher;
-
     using ExceptionType = RunTimeType<Exception>;
-private:
-    Exception(const Exception& copy) = delete;
-    Exception(Exception&& move) noexcept = delete;
-    
-    Exception& operator=(const Exception& copy) = delete;
-    Exception& operator=(Exception&& move) noexcept = delete;
-protected:
-    inline Exception() noexcept = default;
 public:
-    inline virtual ~Exception() noexcept = default;
-
     [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept = 0;
 
 #if EXCEPTION_GEN_NAMES
@@ -61,10 +49,14 @@ public:
     template<typename _T>
     [[nodiscard]] bool isExceptionType() const noexcept
     { return _T::getStaticType() == getExceptionType(); }
+private:
+    friend class ExceptionDispatcher;
 };
 
 class ExceptionDispatcher final
 {
+    DEFAULT_DESTRUCT(ExceptionDispatcher);
+    DEFAULT_COPY(ExceptionDispatcher);
 private:
     Exception& _ex;
     Exception::ExceptionType _cache;

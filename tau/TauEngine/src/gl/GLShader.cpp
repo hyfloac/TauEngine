@@ -5,12 +5,12 @@
 #include <shader/GLShader.hpp>
 #include <file/FileHandling.hpp>
 #include <Utils.hpp>
-#include <maths/Matrix4x4f.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Vector3i.hpp>
 #include <maths/Vector4f.hpp>
 #include <cstdio>
 #include "VFS.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 GLShader::GLShader(ShaderType shaderType, NotNull<const char> shaderPath, NotNull<GLProgram> glProgram) noexcept
     : IShader(shaderType), _shaderPath(shaderPath), _glProgram(glProgram), _shaderId(0)
@@ -190,9 +190,9 @@ void GLShader::setUniform(i32 location, const Vector4f& value) const noexcept
     glUniform4f(location, value.x(), value.y(), value.z(), value.w());
 }
 
-void GLShader::setUniform(i32 location, const Matrix4x4f& value) const noexcept
+void GLShader::setUniform(i32 location, const glm::mat4& value) const noexcept
 {
-    glUniformMatrix4fv(location, 1, GL_FALSE, (float*) value.data().m);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void GLShader::setUniform(i32 location, const bool value) const noexcept
@@ -304,11 +304,11 @@ void GLShader::setUniform(String& name, const Vector4f& value) const noexcept
     }
 }
 
-void GLShader::setUniform(String& name, const Matrix4x4f& value) const noexcept
+void GLShader::setUniform(String& name, const glm::mat4& value) const noexcept
 {
     if(_uniforms.count(name) > 0)
     {
-        this->setUniform(_uniforms.at(name), value);
+        this->setUniform(_uniforms.at(name), glm::value_ptr(value));
     }
 }
 

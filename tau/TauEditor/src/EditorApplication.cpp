@@ -14,14 +14,16 @@
 #include <shlobj.h>
 
 static void setupGameFolders() noexcept;
+static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
-    : Application(32), _window(null), _renderer(null), _config{ false, 800, 600 }
+    : Application(32), _config { false, 800, 600 },
+      _window(null), _logger(null), _rl(null), _renderer(null)
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
 {
-    stopDebugOutput();
+    delete _renderer;
     delete _window;
 }
 
@@ -38,15 +40,15 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     setupConfig();
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
-#if !defined(TAU_PRODUCTION)
-    ContextSettings& contextSettings = _window->contextSettings();
-    contextSettings.debug = true;
-#endif
     _window->createWindow();
     _window->showWindow();
     if(!_window->createContext()) { return false; }
-    _window->makeContextCurrent();
+
+    _window->renderingContext()->activateContext();
+
     _window->setEventHandler(::onWindowEvent);
+
+    setupDebugCallback(this);
 
     if(WGLEW_EXT_swap_control)
     {
@@ -60,18 +62,31 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         }
     }
 
-    glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
+    // glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
+    
+    // enableGLBlend();
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    enableGLBlend();
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    bool async = false;
 
-    _renderer = new TERenderer(*_window);
+    for(int i = 0; i < argCount; ++i)
+    {
+        if(strcmp(args[i], "-async") == 0)
+        {
+            async = true;
+        }
+    }
+
+    _rl = new ResourceLoader;
+
+    _renderer = new TERenderer(*_window, *_rl, async);
 
     return true;
 }
 
 void TauEditorApplication::finalize() noexcept
 {
+    stopDebugOutput();
 }
 
 void TauEditorApplication::onException(Exception& ex) noexcept
@@ -87,6 +102,7 @@ void TauEditorApplication::render(const float delta) noexcept
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
+    _rl->update();
     _renderer->update(fixedDelta);
 }
 
@@ -161,17 +177,29 @@ bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
 
             if(WGLEW_EXT_swap_control)
             {
-                _renderer->renderingPipeline().takeControlOfContext();
+                // _renderer->renderingPipeline().takeControlOfContext();
                 vsync = !vsync;
-                if(vsync)
+                _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window&, void* param)
                 {
-                    wglSwapIntervalEXT(1);
-                }
-                else
-                {
-                    wglSwapIntervalEXT(0);
-                }
-                _renderer->renderingPipeline().returnControlOfContext();
+                    const bool vsync = param != nullptr;
+                    if(vsync)
+                    {
+                        wglSwapIntervalEXT(1);
+                    }
+                    else
+                    {
+                        wglSwapIntervalEXT(0);
+                    }
+                }, vsync ? reinterpret_cast<void*>(static_cast<intptr_t>(1)) : nullptr);
+                // if(vsync)
+                // {
+                //     wglSwapIntervalEXT(1);
+                // }
+                // else
+                // {
+                //     wglSwapIntervalEXT(0);
+                // }
+                // _renderer->renderingPipeline().returnControlOfContext();
             }
         }
         default: return false;
@@ -180,11 +208,11 @@ bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
 
 bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
 {
-    if(e.event() == KeyboardEvent::KE_KEY_PRESSED)
+    if(e.event() == Keyboard::Event::Pressed)
     {
         switch(e.key())
         {
-            case Key::Esc:
+            case Keyboard::Key::Esc:
             {
                 tauExit(0);
                 break;
@@ -199,9 +227,9 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
 
 bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
 {
-    e.window().updateViewPort(0, 0, e.newWidth(), e.newHeight());
-    // _renderer->renderingPipeline().pushResizeViewport(0, 0, e.newWidth(), e.newHeight());
-    _renderer->ortho() = Matrix4f::orthographic(0.0f, static_cast<float>(e.newWidth()), 0.0f, static_cast<float>(e.newHeight()));
+    _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window& window, void*)
+    { window.renderingContext()->updateViewport(0, 0, window.width(), window.height()); }, nullptr, true);
+    _renderer->ortho() = glm::ortho(0.0f, static_cast<float>(e.newWidth()), 0.0f, static_cast<float>(e.newHeight()));
     return false;
 }
 
@@ -266,4 +294,84 @@ static void setupGameFolders() noexcept
         }
     }
     VFS::Instance().mountDynamic("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+}
+
+void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) noexcept
+{
+    UNUSED2(length, userParam);
+    UNUSED2(id, message);
+
+    const TauEditorApplication* tea = reinterpret_cast<const TauEditorApplication*>(userParam);
+
+#define STR_CASE(__ENUM, __STR) case __ENUM: str = __STR; break
+#define DEFAULT_CASE default: str = "Unknown"; break
+
+    tea->logger()->error("--OpenGL Error Callback--");
+    tea->logger()->error("Message: {0}", message);
+    const char* str;
+    switch(source)
+    {
+        STR_CASE(GL_DEBUG_SOURCE_API, "API");
+        STR_CASE(GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window System");
+        STR_CASE(GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler");
+        STR_CASE(GL_DEBUG_SOURCE_THIRD_PARTY, "Third Party");
+        STR_CASE(GL_DEBUG_SOURCE_APPLICATION, "Application");
+        STR_CASE(GL_DEBUG_SOURCE_OTHER, "Other");
+        DEFAULT_CASE;
+    }
+    tea->logger()->error("Source [0x{0:X}] {1}", source, str);
+
+    switch(type)
+    {
+        STR_CASE(GL_DEBUG_TYPE_ERROR, "Error");
+        STR_CASE(GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior");
+        STR_CASE(GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior");
+        STR_CASE(GL_DEBUG_TYPE_PORTABILITY, "Portability");
+        STR_CASE(GL_DEBUG_TYPE_PERFORMANCE, "Performance");
+        STR_CASE(GL_DEBUG_TYPE_OTHER, "Other");
+        STR_CASE(GL_DEBUG_TYPE_MARKER, "Marker");
+        DEFAULT_CASE;
+    }
+    tea->logger()->error("Type: [0x{0:X}] {1}", type, str);
+    tea->logger()->error("Id: 0x{0:X} // {0:d}", id);
+
+    switch(severity)
+    {
+        STR_CASE(GL_DEBUG_SEVERITY_MEDIUM, "Medium");
+        STR_CASE(GL_DEBUG_SEVERITY_HIGH, "High");
+        STR_CASE(GL_DEBUG_SEVERITY_LOW, "Low");
+        STR_CASE(GL_DEBUG_SEVERITY_NOTIFICATION, "Notification");
+        DEFAULT_CASE;
+    }
+    tea->logger()->error("Severity: [0x{0:X}] {1}", severity, str);
+    tea->logger()->error("-------------------------");
+#if _DEBUG && 0
+    if(severity != GL_DEBUG_SEVERITY_NOTIFICATION && renderData && renderData->rp)
+    {
+        FILE* fileData = fopen("CommandBuffer.txt", "w");
+        renderData->rp->dumpCommandBufferToFile(fileData);
+        fclose(fileData);
+
+        // char* fileName = new char[1024];
+        // GetFullPathNameA("CommandBuffer.txt", 1024, fileName, NULL);
+        // fprintf(stderr, "Command Dump: %s\n", fileName);
+        // delete[] fileName;
+        __debugbreak();
+    }
+#else
+    // getchar();
+#endif
+
+#undef DEFAULT_CASE
+#undef STR_CASE
+}
+
+static bool setupDebugCallback(TauEditorApplication* tea) noexcept
+{
+#ifndef TAU_PRODUCTION
+    setupDebugMessageCallback(openGLDebugErrorCallback, tea, true);
+    return true;
+#else
+    return false;
+#endif
 }

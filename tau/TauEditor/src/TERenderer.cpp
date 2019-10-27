@@ -4,39 +4,64 @@
 #include <FastRand.hpp>
 #include <PhysWordLayer.hpp>
 
-static void __cdecl setupParams(void) noexcept;
+static void __cdecl setupParams(RenderingPipeline&, Window&, void*) noexcept;
 
-TERenderer::TERenderer(Window& window) noexcept
-    : _th("|TERes/TextVertexShader.glsl", "|TERes/TextFragmentShader.glsl"),
-      _rp(window, setupParams, false),
-      _ortho(Matrix4f::orthographic(0.0f, static_cast<float>(window.width()), 0.0f, static_cast<float>(window.height()))),
-      _window(window), _layerStack()
+static void finalizeLoad(void* file, void* finalizeParam) noexcept
 {
-    FT_Error thError = _th.init();
+    const intptr_t errorPtr = reinterpret_cast<intptr_t>(file);
+    const FT_Error error = errorPtr;
+    if(error)
+    {
+        
+    }
+    TextHandler* th = reinterpret_cast<TextHandler*>(finalizeParam);
+    th->generateBitmapCharacters();
+    th->finishLoad();
+}
+
+TERenderer::TERenderer(Window& window, ResourceLoader& rl, bool async) noexcept
+    : _window(window), _rl(rl),
+      _th(nullptr), _rp(nullptr),
+      _ortho(glm::ortho(0.0f, static_cast<float>(window.width()), 0.0f, static_cast<float>(window.height()))),
+      _layerStack()
+{
+    _rp = new RenderingPipeline(window, setupParams, nullptr, async);
+    _th = new TextHandler(*window.renderingContext(), "|TERes/TextVertexShader.glsl", "|TERes/TextFragmentShader.glsl");
+    const FT_Error thError = _th->init();
     if(thError)
     {
         // clientLogger->error("FreeType Initialization Error: {0}", thError);
     }
-    thError = _th.loadTTFFile("|TERes/MonoConsole.ttf");
-    if(thError)
+    const int fileError = _th->loadTTFFile("|TERes/MonoConsole.ttf", rl, finalizeLoad);
+    if(fileError)
     {
-        // clientLogger->error("FreeType TTF Loading Error: {0}", thError);
+        
     }
-    _th.generateBitmapCharacters();
-    _th.finishLoad();
-    seedFastRand(time(NULL));
 
-    _layerStack.pushLayer(new PhysWordLayer(150, "O", window, _th, _rp, _ortho));
+
+    // if(thError)
+    // {
+    //     // clientLogger->error("FreeType TTF Loading Error: {0}", thError);
+    // }
+    // _th->generateBitmapCharacters();
+    // _th->finishLoad();
+    // seedFastRand(time(NULL));
+
+    // window.renderingContext()->activateContext();
+    // setupParams(*_rp, window, null);
+
+    _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _ortho));
 }
 
 void TERenderer::render(const float delta) noexcept
 {
-    _rp.pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _rp->pushLoadContext(*_window.renderingContext());
+    _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(auto* layer : _layerStack)
     {
         layer->onRender(delta);
     }
-    _rp.pushFinishRender();
+    _rp->pushFinishRender();
 }
 
 void TERenderer::update(const float fixedDelta) noexcept
@@ -47,7 +72,15 @@ void TERenderer::update(const float fixedDelta) noexcept
     }
 }
 
-static void __cdecl setupParams(void) noexcept
+void TERenderer::onEvent(Event& e) noexcept
+{
+    for(auto* layer : _layerStack)
+    {
+        layer->onEvent(e);
+    }
+}
+
+static void __cdecl setupParams(RenderingPipeline&, Window& window, void*) noexcept
 {
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
 
@@ -60,4 +93,6 @@ static void __cdecl setupParams(void) noexcept
 
     setGLBlend(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    window.renderingContext()->updateViewport(0, 0, window.width(), window.height());
 }

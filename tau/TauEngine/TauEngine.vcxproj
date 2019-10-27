@@ -30,11 +30,14 @@
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\FITextureLoader.cpp" />
+    <ClCompile Include="src\gl\GLBufferDescriptor.cpp" />
     <ClCompile Include="src\gl\GLProgram.cpp" />
     <ClCompile Include="src\gl\GLRenderingContext.cpp" />
     <ClCompile Include="src\gl\GLShader.cpp" />
     <ClCompile Include="src\gl\GLTexture.cpp" />
     <ClCompile Include="src\gl\GLUtils.cpp" />
+    <ClCompile Include="src\gl\GLVertexBuffer.cpp" />
+    <ClCompile Include="src\gl\win32\GLRenderingContext.Win32.cpp" />
     <ClCompile Include="src\I18n.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\ImGuiGLImpl.cpp" />
@@ -49,6 +52,7 @@
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\RenderingContext.cpp" />
     <ClCompile Include="src\RenderingPipeline.cpp" />
+    <ClCompile Include="src\ResourceLoader.cpp" />
     <ClCompile Include="src\SimpleOBJLoader.cpp" />
     <ClCompile Include="src\TauEngine.cpp" />
     <ClCompile Include="src\TextHandler.cpp" />
@@ -57,10 +61,12 @@
     <ClCompile Include="src\TUID.cpp" />
     <ClCompile Include="src\maths\Vector3i.cpp" />
     <ClCompile Include="src\maths\Vector4f.cpp" />
-    <ClCompile Include="src\VertexArray.cpp" />
+    <ClCompile Include="src\ui\UIButton.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\VirtualIO.cpp" />
-    <ClCompile Include="src\Win32Window.cpp" />
+    <ClCompile Include="src\win32\Win32Mouse.cpp" />
+    <ClCompile Include="src\win32\Win32Keyboard.cpp" />
+    <ClCompile Include="src\win32\Win32Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Application.hpp" />
@@ -77,11 +83,11 @@
     <ClInclude Include="include\file\FileHandling.hpp" />
     <ClInclude Include="include\file\FileUtils.hpp" />
     <ClInclude Include="include\file\VirtualIO.hpp" />
-    <ClInclude Include="include\GameBase.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
     <ClInclude Include="include\gl\GLProgram.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
     <ClInclude Include="include\gl\GLUtils.hpp" />
+    <ClInclude Include="include\gl\GLVertexBuffer.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
@@ -112,6 +118,7 @@
     <ClInclude Include="include\Renderer.hpp" />
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\RenderingPipeline.hpp" />
+    <ClInclude Include="include\ResourceLoader.hpp" />
     <ClInclude Include="include\system\Keyboard.hpp" />
     <ClInclude Include="include\system\Mouse.hpp" />
     <ClInclude Include="include\shader\GLShader.hpp" />
@@ -130,6 +137,9 @@
     <ClInclude Include="include\TUID.hpp" />
     <ClInclude Include="include\system\Window.hpp" />
     <ClInclude Include="include\system\_SysWindowContainer.hpp" />
+    <ClInclude Include="include\ui\UIButton.hpp" />
+    <ClInclude Include="include\ui\UIElement.hpp" />
+    <ClInclude Include="include\ui\UILayer.hpp" />
     <ClInclude Include="include\WorldObject.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -213,7 +223,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
@@ -221,7 +231,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
@@ -229,7 +239,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
@@ -237,7 +247,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>

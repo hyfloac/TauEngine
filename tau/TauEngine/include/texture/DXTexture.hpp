@@ -4,9 +4,9 @@
 #include <texture/Texture.hpp>
 #include <d3d9.h>
 
-class TAU_DLL D3D9Texture final
-    : public ITexture
+class TAU_DLL D3D9Texture final : public ITexture
 {
+    DELETE_COPY(D3D9Texture);
 private:
     IDirect3DTexture9* _texture;
 public:
@@ -25,11 +25,6 @@ public:
         }
     }
 
-    D3D9Texture(const D3D9Texture& copy) noexcept = delete;
-    D3D9Texture(D3D9Texture&& move) noexcept = delete;
-
-    D3D9Texture& operator=(const D3D9Texture& copy) noexcept = delete;
-    D3D9Texture& operator=(D3D9Texture&& move) noexcept = delete;
 
     void bind(u8 textureUnit) noexcept override final
     { }

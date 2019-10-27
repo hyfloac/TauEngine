@@ -5,9 +5,12 @@
 #pragma warning(pop)
 
 #include <NumTypes.hpp>
+#include <Objects.hpp>
 
 class RenderingMode final
 {
+    DEFAULT_DESTRUCT(RenderingMode);
+    DEFAULT_COPY(RenderingMode);
 public:
     /**
      * Describes the various possible rendering modes.
@@ -52,13 +55,6 @@ public:
         : _currentMode(initialMode), _debugMode(debugMode)
     { }
 
-    ~RenderingMode() noexcept = default;
-
-    RenderingMode(const RenderingMode& copy) noexcept = delete;
-    RenderingMode(RenderingMode&& move) noexcept = delete;
-    RenderingMode& operator=(const RenderingMode& copy) noexcept = delete;
-    RenderingMode& operator=(RenderingMode&& move) noexcept = delete;
-
     [[nodiscard]] inline Mode currentMode() const noexcept { return _currentMode; }
     inline operator Mode() const noexcept { return _currentMode; }
 
@@ -66,31 +62,24 @@ public:
 
     void setMode(Mode mode) noexcept
     {
-
-        for(modeChange_f handler : _changeHandlers)
-        {
-            handler(_currentMode, _debugMode, mode, _debugMode);
-        }
+        for(auto handler : _changeHandlers)
+        { handler(_currentMode, _debugMode, mode, _debugMode); }
 
         _currentMode = mode;
     }
 
     void setDebugMode(bool debugMode) noexcept
     {
-        for(modeChange_f handler : _changeHandlers)
-        {
-            handler(_currentMode, _debugMode, _currentMode, debugMode);
-        }
+        for(auto handler : _changeHandlers)
+        { handler(_currentMode, _debugMode, _currentMode, debugMode); }
 
         _debugMode = debugMode;
     }
 
     void setMode(Mode mode, bool debugMode) noexcept
     {
-        for(modeChange_f handler : _changeHandlers)
-        {
-            handler(_currentMode, _debugMode, mode, debugMode);
-        }
+        for(auto handler : _changeHandlers)
+        { handler(_currentMode, _debugMode, mode, debugMode); }
 
         _currentMode = mode;
         _debugMode = debugMode;
@@ -105,9 +94,7 @@ public:
     {
         const auto it = std::find(_changeHandlers.begin(), _changeHandlers.end(), handler);
         if(it != _changeHandlers.end())
-        {
-            _changeHandlers.erase(it);
-        }
+        { _changeHandlers.erase(it); }
     }
 };
 

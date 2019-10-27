@@ -8,6 +8,10 @@
 #pragma warning(push, 0)
 #include <cmath>
 #include <immintrin.h>
+#include <type_traits>
+#ifdef _WIN32
+#include <intrin.h>
+#endif
 #pragma warning(pop)
 
 #include <NumTypes.hpp>
@@ -257,3 +261,63 @@ constexpr _T maxT(const _T a, const _T b, const _T c, const _T d)
 {
     return maxT(maxT(a, b), maxT(c, d));
 }
+
+template<typename _Int>
+static inline constexpr _Int rotL(const _Int n, unsigned int c) noexcept
+{
+    static_assert(std::is_unsigned<_Int>::value, "Rotate Left only makes sense for unsigned types");
+
+    constexpr _Int mask = 8 * sizeof(n) - 1;
+    c &= mask;
+    signed int cTmp = reinterpret_cast<signed int&>(c);
+    cTmp = -cTmp;
+    const unsigned int negC = reinterpret_cast<unsigned&>(cTmp)& mask;
+    return (n << c) | (n >> negC);
+}
+
+template<typename _Int>
+static inline constexpr _Int rotR(const _Int n, unsigned int c) noexcept
+{
+    static_assert(std::is_unsigned<_Int>::value, "Rotate Left only makes sense for unsigned types");
+
+    constexpr _Int mask = 8 * sizeof(n) - 1;
+    c &= mask;
+    signed int cTmp = reinterpret_cast<signed int&>(c);
+    cTmp = -cTmp;
+    const unsigned int negC = reinterpret_cast<unsigned&>(cTmp)& mask;
+    return (n >> c) | (n << negC);
+}
+
+#if defined(_WIN32)
+template<>
+inline u8 rotL<u8>(const u8 n, unsigned int c) noexcept
+{ return _rotl8(n, static_cast<unsigned char>(c)); }
+
+template<>
+inline u8 rotR<u8>(const u8 n, unsigned int c) noexcept
+{ return _rotr8(n, static_cast<unsigned char>(c)); }
+
+template<>
+inline u16 rotL<u16>(const u16 n, unsigned int c) noexcept
+{ return _rotl16(n, static_cast<unsigned char>(c)); }
+
+template<>
+inline u16 rotR<u16>(const u16 n, unsigned int c) noexcept
+{ return _rotr16(n, static_cast<unsigned char>(c)); }
+#endif
+
+template<>
+inline u32 rotL<u32>(const u32 n, unsigned int c) noexcept
+{ return _rotl(n, static_cast<int>(c)); }
+
+template<>
+inline u32 rotR<u32>(const u32 n, unsigned int c) noexcept
+{ return _rotr(n, static_cast<int>(c)); }
+
+template<>
+inline u64 rotL<u64>(const u64 n, unsigned int c) noexcept
+{ return _rotl64(n, static_cast<int>(c)); }
+
+template<>
+inline u64 rotR<u64>(const u64 n, unsigned int c) noexcept
+{ return _rotr64(n, static_cast<int>(c)); }

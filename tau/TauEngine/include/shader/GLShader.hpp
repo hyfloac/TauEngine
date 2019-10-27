@@ -13,6 +13,7 @@
  */
 class TAU_DLL GLShader final : public IShader
 {
+    DELETE_COPY(GLShader);
 private:
     // ShaderType _shaderType;
     const char* _shaderPath;
@@ -44,7 +45,7 @@ public:
     void setUniform(i32 location, const Vector3f& value)   const noexcept override final;
     void setUniform(i32 location, const Vector3i& value)   const noexcept override final;
     void setUniform(i32 location, const Vector4f& value)   const noexcept override final;
-    void setUniform(i32 location, const Matrix4x4f& value) const noexcept override final;
+    void setUniform(i32 location, const glm::mat4& value)  const noexcept override final;
     void setUniform(i32 location, const bool value)        const noexcept override final;
 
     void setUniform(String& name, const i8 value)          const noexcept override final;
@@ -60,12 +61,6 @@ public:
     void setUniform(String& name, const Vector3f& value)   const noexcept override final;
     void setUniform(String& name, const Vector3i& value)   const noexcept override final;
     void setUniform(String& name, const Vector4f& value)   const noexcept override final;
-    void setUniform(String& name, const Matrix4x4f& value) const noexcept override final;
+    void setUniform(String& name, const glm::mat4& value)  const noexcept override final;
     void setUniform(String& name, const bool value)        const noexcept override final;
-private:
-    GLShader(const GLShader& copy) noexcept = delete;
-    GLShader(GLShader&& move) noexcept = delete;
-
-    GLShader& operator =(const GLShader& copy) noexcept = delete;
-    GLShader& operator =(GLShader&& move) noexcept = delete;
 };

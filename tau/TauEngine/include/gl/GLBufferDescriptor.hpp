@@ -4,61 +4,42 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include <model/BufferDescriptor.hpp>
+#include <Objects.hpp>
+
+#include "model/BufferDescriptor.hpp"
+#include "model/VertexBuffer.hpp"
 
 class TAU_DLL GLBufferDescriptor final : public IBufferDescriptor
 {
+    DEFAULT_DESTRUCT(GLBufferDescriptor);
+    DELETE_COPY(GLBufferDescriptor);
 private:
-    GLuint _array;
-    GLuint _maxVertexAttrib;
+    GLuint _currAttrib;
 public:
-    GLBufferDescriptor() noexcept
-        : _array(), _maxVertexAttrib(0)
-    {
-        glGenVertexArrays(1, &_array);
-    }
+    static GLuint generate() noexcept;
 
-    ~GLBufferDescriptor() noexcept
-    {
-        glDeleteVertexArrays(1, &_array);
-    }
+    static GLenum getGLType(const DataType type) noexcept;
 
-    void addAttribute(u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept override
-    {
-        glVertexAttribPointer(_maxVertexAttrib++, size, getGLType(type), normalized, stride, pointer);
-    }
+    static DataType getType(const GLenum type) noexcept;
 
-    void initialize() noexcept override { /* NO-OP */ }
+    static void _bind(GLuint vao) noexcept;
 
-    void bind() const noexcept override final
-    {
-        glBindVertexArray(_array);
-    }
+    static void destroy(GLuint vao) noexcept;
 
-    void unbind() const noexcept override final
-    {
-        glBindVertexArray(0);
-    }
+    static void attribPointer(GLuint index, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept;
+public:
+    GLBufferDescriptor(const u64 uid, const std::size_t attribCount) noexcept
+        : IBufferDescriptor(uid, attribCount),
+          _currAttrib(0)
+    { }
 
-    void enableAttributes() const noexcept override final
-    {
-        for(GLuint attrib = 0; attrib < _maxVertexAttrib; ++attrib)
-        {
-            glEnableVertexAttribArray(attrib);
-        }
-    }
+    void addAttribute(Ref<IVertexBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept override final;
 
-    void disableAttributes() const noexcept override final
-    {
-        for(GLuint attrib = _maxVertexAttrib; attrib > 0; --attrib)
-        {
-            glDisableVertexAttribArray(attrib - 1);
-        }
-    }
-private:
-    GLBufferDescriptor(const GLBufferDescriptor& copy) noexcept = delete;
-    GLBufferDescriptor(GLBufferDescriptor&& move) noexcept = delete;
+    void bind(IRenderingContext& context) noexcept override final;
 
-    GLBufferDescriptor& operator=(const GLBufferDescriptor& copy) noexcept = delete;
-    GLBufferDescriptor& operator=(GLBufferDescriptor&& move) noexcept = delete;
+    void unbind(IRenderingContext& context) noexcept override final;
+
+    void enableAttributes(IRenderingContext& context) noexcept override final;
+
+    void disableAttributes(IRenderingContext& context) noexcept override final;
 };

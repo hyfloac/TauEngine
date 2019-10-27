@@ -6,66 +6,63 @@
 #include <model/OBJLoader.hpp>
 #include <RenderingPipeline.hpp>
 #include <DLL.hpp>
+#include <DynArray.hpp>
+#include <Objects.hpp>
 
-struct VerticeSet final
-{
-    VertexBufferShared positions;
-    VertexBufferShared normals;
-    VertexBufferShared textures;
-    VertexBufferShared indices;
+// struct VerticeSet final
+// {
+//     VertexBufferShared positions;
+//     VertexBufferShared normals;
+//     VertexBufferShared textures;
+//     VertexBufferShared indices;
+//
+//     VerticeSet(const VertexBufferShared& _positions, 
+//                const VertexBufferShared& _normals, 
+//                const VertexBufferShared& _textures, 
+//                const VertexBufferShared& _indices) noexcept;
+//
+//     VerticeSet(VertexBufferShared&& _positions,
+//                VertexBufferShared&& _normals,
+//                VertexBufferShared&& _textures,
+//                VertexBufferShared&& _indices) noexcept;
+//
+//     VerticeSet(const VerticeSet& copy) noexcept = default;
+//     VerticeSet(VerticeSet&& move) noexcept = default;
+//
+//     ~VerticeSet() noexcept = default;
+//
+//     VerticeSet& operator =(const VerticeSet& copy) noexcept = default;
+//     VerticeSet& operator =(VerticeSet&& move) noexcept = default;
+// };
 
-    VerticeSet(const VertexBufferShared& _positions, 
-               const VertexBufferShared& _normals, 
-               const VertexBufferShared& _textures, 
-               const VertexBufferShared& _indices) noexcept;
-
-    VerticeSet(VertexBufferShared&& _positions,
-               VertexBufferShared&& _normals,
-               VertexBufferShared&& _textures,
-               VertexBufferShared&& _indices) noexcept;
-
-    VerticeSet(const VerticeSet& copy) noexcept = default;
-    VerticeSet(VerticeSet&& move) noexcept = default;
-
-    ~VerticeSet() noexcept = default;
-
-    VerticeSet& operator =(const VerticeSet& copy) noexcept = default;
-    VerticeSet& operator =(VerticeSet&& move) noexcept = default;
-};
+class IRenderingContext;
 
 class TAU_DLL RenderableObject final
 {
+    DEFAULT_DESTRUCT(RenderableObject);
+    DEFAULT_COPY(RenderableObject);
 private:
     // VertexArrayShared _vao;
-    Ref<IBufferDescriptor> _vao;
-    VerticeSet _vertices;
+    Ref<IBufferDescriptor> _bufferDescriptor;
+    // VerticeSet _vertices;
+    RefDynArray<Ref<IVertexBuffer>> _buffers;
+
 public:
-    RenderableObject(objl::Mesh mesh) noexcept;
-    RenderableObject(const RenderableObject& copy) noexcept = default;
-    RenderableObject(RenderableObject&& move) noexcept = default;
+    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh) noexcept;
 
-    ~RenderableObject() noexcept;
+    void preRender(IRenderingContext& context) const noexcept;
+    void render(IRenderingContext& context) const noexcept;
+    void postRender(IRenderingContext& context) const noexcept;
+    
+    // void preRender(RenderingPipeline& rp) const noexcept;
+    // void render(RenderingPipeline& rp) const noexcept;
+    // void postRender(RenderingPipeline& rp) const noexcept;
 
-    RenderableObject& operator =(const RenderableObject& copy) noexcept = default;
-    RenderableObject& operator =(RenderableObject&& move) noexcept = default;
-
-    void preRender() const noexcept;
-
-    void render() const noexcept;
-
-    void postRender() const noexcept;
-
-    void preRender(RenderingPipeline& rp) const noexcept;
-
-    void render(RenderingPipeline& rp) const noexcept;
-
-    void postRender(RenderingPipeline& rp) const noexcept;
-
-    inline size_t hashCode() const noexcept { return (size_t) _vao.get(); }
+    inline size_t hashCode() const noexcept { return reinterpret_cast<size_t>(_bufferDescriptor.get()); }
     // inline GLuint getVAO() const noexcept { return _vao.array(); }
-    inline const VerticeSet& getVerticeSet() const noexcept { return _vertices; }
+    // inline const VerticeSet& getVerticeSet() const noexcept { return _vertices; }
 
-    inline bool operator ==(const RenderableObject& other) const noexcept { return _vao.get() == other._vao.get(); }
+    inline bool operator ==(const RenderableObject& other) const noexcept { return _bufferDescriptor.get() == other._bufferDescriptor.get(); }
     inline bool operator !=(const RenderableObject& other) const noexcept { return !(*this == other); }
 };
 

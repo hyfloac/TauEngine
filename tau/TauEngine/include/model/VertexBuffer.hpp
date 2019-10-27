@@ -1,125 +1,66 @@
 #pragma once
 
-#pragma warning(push, 0)
-#include <GL/glew.h>
-#pragma warning(pop)
-
-#include <RenderingPipeline.hpp>
 #include <NumTypes.hpp>
 #include <DLL.hpp>
+#include "system/RenderingContext.hpp"
+#include <Objects.hpp>
 
-enum class BufferType : u8
+class TAU_DLL IVertexBuffer
 {
-    ArrayBuffer = 0,
-    AtomicCounterBuffer,
-    CopyReadBuffer,
-    CopyWriteBuffer,
-    DispatchIndirectBuffer,
-    DrawIndirectBuffer,
-    ElementArrayBuffer,
-    PixelPackBuffer,
-    PixelUnpackBuffer,
-    QueryBuffer,
-    ShaderStorageBuffer,
-    TextureBuffer,
-    TransformFeedbackBuffer,
-    UniformBuffer
-};
-
-enum class BufferUsageType : u8
-{
-    StreamDraw = 0,
-    StreamRead,
-    StreamCopy,
-    StaticDraw,
-    StaticRead,
-    StaticCopy,
-    DynamicDraw,
-    DynamicRead,
-    DynamicCopy
-};
-
-TAU_DLL GLenum getGLBufferType(const BufferType bt) noexcept;
-
-TAU_DLL BufferType getBufferType(const GLenum bt) noexcept;
-
-TAU_DLL GLenum getGLBufferUsageType(const BufferUsageType usage) noexcept;
-
-TAU_DLL BufferUsageType getBufferUsageType(const GLenum usage) noexcept;
-
-class TAU_DLL VertexBuffer final
-{
-private:
-    GLuint  _buffer;
-    GLenum  _glType;
-    GLenum  _glUsage;
-    GLsizei _count;
+    DEFAULT_DESTRUCT_VI(IVertexBuffer);
+    DELETE_COPY(IVertexBuffer);
 public:
-    VertexBuffer(const BufferType type, const BufferUsageType usage = BufferUsageType::StaticDraw) noexcept;
-    VertexBuffer(const VertexBuffer& copy) noexcept = delete;
-    VertexBuffer(VertexBuffer&& move) noexcept = delete;
+    enum class UsageType : u8
+    {
+        StreamDraw = 0,
+        StreamRead,
+        StreamCopy,
+        StaticDraw,
+        StaticRead,
+        StaticCopy,
+        DynamicDraw,
+        DynamicRead,
+        DynamicCopy
+    };
 
-    ~VertexBuffer() noexcept;
-
-    VertexBuffer& operator=(const VertexBuffer& copy) noexcept = delete;
-    VertexBuffer& operator=(VertexBuffer&& move) noexcept = delete;
-
-    inline GLuint buffer()     const noexcept { return _buffer; }
-    inline operator GLuint()   const noexcept { return _buffer; }
-    inline GLuint operator()() const noexcept { return _buffer; }
-
-    inline GLsizei count() const noexcept { return _count; }
-
-    void bind() const noexcept;
-
-    void unbind() const noexcept;
-
-    void fillBuffer(const GLsizei renderCount, const GLsizeiptr size, const GLvoid* data) noexcept;
-
-    void draw() const noexcept;
-
-    void drawIndexed() const noexcept;
-
-    void draw(RenderingPipeline& rp) const noexcept;
-
-    void drawIndexed(RenderingPipeline& rp) const noexcept;
-};
-
-class TAU_DLL VertexBufferShared final
-{
-private:
-    GLuint  _buffer;
-    GLenum  _glType;
-    GLenum  _glUsage;
-    GLsizei _count;
-    u32*    _refCount;
+    enum class Type : u8
+    {
+        ArrayBuffer = 0,
+        AtomicCounterBuffer,
+        CopyReadBuffer,
+        CopyWriteBuffer,
+        DispatchIndirectBuffer,
+        DrawIndirectBuffer,
+        ElementArrayBuffer,
+        PixelPackBuffer,
+        PixelUnpackBuffer,
+        QueryBuffer,
+        ShaderStorageBuffer,
+        TextureBuffer,
+        TransformFeedbackBuffer,
+        UniformBuffer
+    };
 public:
-    VertexBufferShared(const BufferType type, const BufferUsageType usage = BufferUsageType::StaticDraw) noexcept;
-    VertexBufferShared(const VertexBufferShared& copy) noexcept;
-    VertexBufferShared(VertexBufferShared&& move) noexcept;
+    static Ref<IVertexBuffer> create(IRenderingContext& context, Type type, UsageType usage = UsageType::StaticDraw) noexcept;
+protected:
+    Type _type;
+    UsageType _usage;
+protected:
+    IVertexBuffer(Type type, UsageType usage) noexcept
+        : _type(type), _usage(usage)
+    { }
+public:
+    [[nodiscard]] inline Type type() const noexcept { return _type; }
+    [[nodiscard]] inline UsageType usage() const noexcept { return _usage; }
 
-    ~VertexBufferShared() noexcept;
+    virtual void bind(IRenderingContext& context) noexcept = 0;
 
-    VertexBufferShared& operator=(const VertexBufferShared& copy) noexcept;
-    VertexBufferShared& operator=(VertexBufferShared&& move) noexcept;
+    virtual void unbind(IRenderingContext& context) noexcept = 0;
 
-    inline GLuint buffer()     const noexcept { return _buffer; }
-    inline operator GLuint()   const noexcept { return _buffer; }
-    inline GLuint operator()() const noexcept { return _buffer; }
+    virtual void fillBuffer(IRenderingContext& context, std::size_t renderCount, std::ptrdiff_t size, const void* data) noexcept = 0;
+    virtual void modifyBuffer(IRenderingContext& context, std::size_t renderCount, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
 
-    inline GLsizei count() const noexcept { return _count; }
+    virtual void draw(IRenderingContext& context) noexcept = 0;
 
-    void bind() const noexcept;
-
-    void unbind() const noexcept;
-
-    void fillBuffer(const GLsizei renderCount, const GLsizeiptr size, const GLvoid* data) noexcept;
-
-    void draw() const noexcept;
-
-    void drawIndexed() const noexcept;
-
-    void draw(RenderingPipeline& rp) const noexcept;
-
-    void drawIndexed(RenderingPipeline& rp) const noexcept;
+    virtual void drawIndexed(IRenderingContext& context) noexcept = 0;
 };

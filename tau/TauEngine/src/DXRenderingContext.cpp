@@ -3,11 +3,12 @@
 
 #ifdef _WIN32
 
-DXRenderingContext::DXRenderingContext() noexcept
-    : _d3d(null), _dx9Device(null)
+DXRenderingContext::DXRenderingContext(const RenderingMode& mode, const bool debug) noexcept
+    : IRenderingContext(mode, debug),
+      _d3d(null), _dx9Device(null)
 { }
 
-void DXRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ)
+void DXRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
     D3DVIEWPORT9 viewport { x, y, width, height, minZ, maxZ };
 
@@ -19,7 +20,7 @@ struct D3D9ContextSettings
     HWND hwnd;
 };
 
-void DXRenderingContext::createContext(void* param)
+bool DXRenderingContext::createContext(void* param) noexcept
 {
     D3D9ContextSettings* settings = reinterpret_cast<D3D9ContextSettings*>(param);
 
@@ -38,9 +39,10 @@ void DXRenderingContext::createContext(void* param)
     _d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, settings->hwnd,
                        D3DCREATE_SOFTWARE_VERTEXPROCESSING,
                        &d3dPP, &_dx9Device);
+    return true;
 }
 
-void DXRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue)
+void DXRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue) noexcept
 {
     DWORD flags = 0;
     if(clearColorBuffer)   { flags  = D3DCLEAR_TARGET;  }
@@ -49,14 +51,4 @@ void DXRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
 
     _dx9Device->Clear(0, null, flags, D3DCOLOR_RGBA(color.r, color.g, color.b, color.a), depthValue, stencilValue);
 }
-
-// IRenderingContext* createDXContext() noexcept
-// {
-//     return new DXRenderingContext;
-// }
-#else
-// IRenderingContext* createDXContext() noexcept
-// {
-//     return null;
-// }
 #endif

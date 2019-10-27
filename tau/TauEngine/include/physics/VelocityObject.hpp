@@ -1,6 +1,5 @@
 #pragma once
 
-#include <maths/Maths.hpp>
 #include <maths/Vector3f.hpp>
 
 class VelocityObject final

@@ -1,27 +1,9 @@
 #pragma warning(push, 0)
-#include <climits>
 #include <cstdio>
 #pragma warning(pop)
 #include <TUID.hpp>
 #include <FastRand.hpp>
-
-// static inline u32 rotL32(u32 n, u32 c)
-// {
-//     const u32 mask = (CHAR_BIT * sizeof(n) - 1);  // assumes width is a power of 2.
-//
-//     c &= mask;
-//     const u32 negC = static_cast<u32>(-static_cast<i32>(c));
-//     return (n << c) | (n >> (negC & mask));
-// }
-
-static inline u32 rotR32(u32 n, u32 c)
-{
-    const u32 mask = (CHAR_BIT * sizeof(n) - 1);
-
-    c &= mask;
-    const u32 negC = static_cast<u32>(-static_cast<i32>(c));
-    return (n >> c) | (n << (negC & mask));
-}
+#include "maths/Maths.hpp"
 
 TUID TUID::generate() noexcept 
 {
@@ -39,7 +21,7 @@ TUID TUID::generate() noexcept
 
     b0 &= 0xFFFF00FF;
     b0 |= inc & 0x0000FF00;
-    b3 = rotR32(b3, 9);
+    b3 = rotR<u32>(b3, 9);
 
     b2 &= 0xFF00FF00;
     b2 |= inc & 0x00FF00FF;
@@ -51,7 +33,7 @@ TUID TUID::generate() noexcept
     return TUID((b0 << 32) | b1, (b2 << 32) | b3);
 }
 
-TUID::TUID(u64 highBits, u64 lowBits) noexcept
+TUID::TUID(const u64 highBits, const u64 lowBits) noexcept
     : _highBits(highBits), _lowBits(lowBits)
 { }
 

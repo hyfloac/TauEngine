@@ -7,6 +7,7 @@
 #include <DLL.hpp>
 #include <String.hpp>
 #include <RunTimeType.hpp>
+#include <Objects.hpp>
 
 #ifndef EVENT_GEN_NAMES
   #ifndef TAU_PRODUCTION
@@ -16,11 +17,7 @@
   #endif
 #endif
 
-#define EVENT_IMPL_BASE(_TYPE) private: \
-                                   _TYPE(const _TYPE& copy) = delete;                     \
-                                   _TYPE(_TYPE&& move) noexcept = delete;                 \
-                                   _TYPE& operator=(const _TYPE& copy) = delete;          \
-                                   _TYPE& operator=(_TYPE&& move) noexcept = delete;      \
+#define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                public: \
                                    [[nodiscard]] static Event::EventType getStaticType() noexcept \
                                    { static Event::EventType type = Event::EventType::define(); \
@@ -43,25 +40,17 @@
 
 class TAU_DLL Event
 {
+    DEFAULT_DESTRUCT_VI(Event);
+    DELETE_COPY(Event);
 public:
-    friend class EventDispatcher;
-
     using EventType = RunTimeType<Event>;
 private:
     bool _intercepted;
-private:
-    Event(const Event& copy) = delete;
-    Event(Event&& move) noexcept = delete;
-
-    Event& operator=(const Event& copy) = delete;
-    Event& operator=(Event&& move) noexcept = delete;
 protected:
     inline Event() noexcept
         : _intercepted(false)
     { }
 public:
-    inline virtual ~Event() noexcept = default;
-
     [[nodiscard]] inline bool intercepted() const noexcept { return _intercepted; }
     [[nodiscard]] virtual bool canBeIntercepted() const noexcept { return false; }
     [[nodiscard]] bool interceptable() const noexcept { return canBeIntercepted(); }
@@ -76,18 +65,19 @@ public:
     template<typename _T>
     [[nodiscard]] bool isEventType() const noexcept
     { return _T::getStaticType() == getEventType(); }
+private:
+    friend class EventDispatcher;
 };
 
 class ExampleEvent final : public Event
 {
+    DEFAULT_DESTRUCT(ExampleEvent);
 private:
     int _x;
 public:
     inline ExampleEvent(int x = 42) noexcept
         : _x(x)
     { }
-
-    inline virtual ~ExampleEvent() noexcept = default;
 
     [[nodiscard]] int x() const noexcept { return _x; }
 
@@ -107,6 +97,8 @@ public:
 
 class EventDispatcher final
 {
+    DEFAULT_DESTRUCT(EventDispatcher);
+    DEFAULT_COPY(EventDispatcher);
 private:
     Event& _event;
     Event::EventType _cache;

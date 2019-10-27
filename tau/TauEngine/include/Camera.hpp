@@ -4,6 +4,8 @@
 #include <maths/Vector3f.hpp>
 #include <maths/Matrix4x4f.hpp>
 #include <events/WindowEvent.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class Camera final
 {
@@ -16,8 +18,8 @@ private:
     Vector3f _velocity;
     float _pitch;
     float _yaw;
-    Matrix4x4f _viewMatrix;
-    Matrix4x4f _projectionMatrix;
+    glm::mat4 _viewMatrix;
+    glm::mat4 _projectionMatrix;
 public:
     inline Camera(Vector3f position = { 0.0f, 0.0f, 0.0f }, float pitch = 0.0f, float yaw = 0.0f) noexcept
         : _position(position), _velocity(0.0f), _pitch(pitch), _yaw(yaw)
@@ -43,7 +45,7 @@ public:
     [[nodiscard]] inline Vector3f velocity() const noexcept { return _velocity; }
     [[nodiscard]] inline float pitch() const noexcept { return _pitch; }
     [[nodiscard]] inline float yaw() const noexcept { return _yaw; }
-    [[nodiscard]] inline const Matrix4x4f& viewMatrix() const noexcept { return _viewMatrix; }
+    [[nodiscard]] inline const glm::mat4& viewMatrix() const noexcept { return _viewMatrix; }
 
     void pos(const Vector3f position) noexcept
     {
@@ -99,8 +101,16 @@ public:
     }
 private:
     void recomputeViewMatrix() noexcept
-    { _viewMatrix.fpsD(_position, _pitch, _yaw); }
+    {
+        const glm::vec3 pos = glm::vec3(_position.x(), _position.y(), _position.z());
+        _viewMatrix = glm::translate(glm::mat4(1.0f), pos);
+        _viewMatrix = glm::rotate(_viewMatrix, DEG_2_RAD(_pitch), glm::vec3(-1.0f, 0.0f, 0.0f));
+        _viewMatrix = glm::rotate(_viewMatrix, DEG_2_RAD(_yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+        // _viewMatrix.fpsD(_position, _pitch, _yaw);
+    }
 
     void recomputeProjectionMatrix(WindowResizeEvent& e) noexcept
-    { _projectionMatrix = Matrix4x4f::perspective(DEG_2_RAD(90), static_cast<float>(e.newWidth()) / static_cast<float>(e.newHeight()), 0.0001f, 1000.0f); }
+    {
+        _projectionMatrix = glm::perspective(DEG_2_RAD(90), static_cast<float>(e.newWidth()) / static_cast<float>(e.newHeight()), 0.0001f, 1000.0f);
+    }
 };

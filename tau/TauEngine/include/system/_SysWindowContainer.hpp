@@ -10,6 +10,5 @@ struct _SysWindowContainer
     WNDCLASSA windowClass;
     HWND      windowHandle;
     HDC       hdc;
-    HGLRC     renderingContext;
 };
 #endif

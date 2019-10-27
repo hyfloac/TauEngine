@@ -3,75 +3,120 @@
 #pragma warning(pop)
 #include <gl/GLRenderingContext.hpp>
 #include <Utils.hpp>
+#include "gl/GLBufferDescriptor.hpp"
 
-GLRenderingContext::GLRenderingContext(GLContextSettings contextSettings) noexcept
-    : _context(null), _contextSettings(contextSettings)
+GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
+    : IRenderingContext(mode, debug),
+      _device(null), _context(null),
+      _vaos(),
+      _majorVersion(majorVersion),
+      _minorVersion(minorVersion),
+      _compat(core),
+      _forwardCompatible(forwardCompatible)
 { }
 
-#ifdef _WIN32
-void GLRenderingContext::createContext(void* param)
+Ref<IBufferDescriptor> GLRenderingContext::createBufferDescriptor(std::size_t attribCount) noexcept
 {
-    PIXELFORMATDESCRIPTOR pfd;
-    memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+    return Ref<IBufferDescriptor>(new(std::nothrow) GLBufferDescriptor(getBDUid(), attribCount));
+}
 
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-    pfd.iLayerType = PFD_MAIN_PLANE;
+void* GLRenderingContext::getBufferDescriptorHandle(IBufferDescriptor* bufferDescriptor) noexcept
+{
+    const auto iter = _vaos.find(bufferDescriptor);
 
-    HDC hdc = *reinterpret_cast<HDC*>(param);
-
-    const int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-
-    if(!pixelFormat) { return; }
-
-    const BOOL res = SetPixelFormat(hdc, pixelFormat, &pfd);
-
-    if(!res) { return; }
-
-    HGLRC tmpContext = wglCreateContext(hdc);
-    wglMakeCurrent(hdc, tmpContext);
-
-    if(glewInit() != GLEW_OK) { return; }
-
-    if(WGLEW_ARB_create_context)
+    if(iter == _vaos.end())
     {
-        const int attribs[] =
+        GLuint vao = GLBufferDescriptor::generate();
+        _vaos.insert(std::make_pair(bufferDescriptor, vao));
+
+        GLBufferDescriptor::_bind(vao);
+
+        for(GLuint i = 0; i < bufferDescriptor->attribs().count(); ++i)
         {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, this->_contextSettings.majorVersion,
-            WGL_CONTEXT_MINOR_VERSION_ARB, this->_contextSettings.minorVersion,
-            WGL_CONTEXT_FLAGS_ARB,        (this->_contextSettings.debug             ? WGL_CONTEXT_DEBUG_BIT_ARB                 : 0) |
-                                          (this->_contextSettings.forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB    : 0),
-            WGL_CONTEXT_PROFILE_MASK_ARB, (this->_contextSettings.coreProfile       ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB          : 0) |
-                                          (this->_contextSettings.compatProfile     ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
-            0
-        };
-
-        this->_context = wglCreateContextAttribsARB(hdc, null, attribs);
-        wglMakeCurrent(null, null);
-        wglDeleteContext(tmpContext);
-        wglMakeCurrent(hdc, this->_context);
+            const auto attrib = bufferDescriptor->attribs()[i];
+            // glBindBuffer(GL_ARRAY_BUFFER, attrib.buffer);
+            attrib.buffer->bind(*this);
+            GLBufferDescriptor::attribPointer(i, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.pointer);
+            attrib.buffer->unbind(*this);
+            // glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
     }
-    else
+
+    return &_vaos[bufferDescriptor];
+}
+
+// void GLRenderingContext::initBufferDescriptor(IBufferDescriptor* bufferDescriptor) noexcept
+// {
+//     const auto iter = _vaos.find(bufferDescriptor);
+//
+//     if(iter == _vaos.end())
+//     {
+//         GLuint vao = GLBufferDescriptor::generate();
+//         _vaos.insert(std::make_pair(bufferDescriptor, vao));
+//
+//         GLBufferDescriptor::_bind(vao);
+//
+//         for(GLuint i = 0; i < bufferDescriptor->attribs().count(); ++i)
+//         {
+//             const auto attrib = bufferDescriptor->attribs()[i];
+//             glBindBuffer(GL_ARRAY_BUFFER, attrib.vbo);
+//             GLBufferDescriptor::attribPointer(i, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.pointer);
+//             glBindBuffer(GL_ARRAY_BUFFER, 0);
+//         }
+//     }
+// }
+//
+// void GLRenderingContext::bindBD(IBufferDescriptor* bufferDescriptor) noexcept
+// {
+//     const auto iter = _vaos.find(bufferDescriptor);
+//     
+//     if(iter == _vaos.end())
+//     {
+//         GLuint vao = GLBufferDescriptor::generate();
+//         _vaos.insert(std::make_pair(bufferDescriptor, vao));
+//
+//         GLBufferDescriptor::_bind(vao);
+//
+//         for(GLuint i = 0; i < bufferDescriptor->attribs().count(); ++i)
+//         {
+//             const auto attrib = bufferDescriptor->attribs()[i];
+//             glBindBuffer(GL_ARRAY_BUFFER, attrib.vbo);
+//             GLBufferDescriptor::attribPointer(i, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.pointer);
+//             glBindBuffer(GL_ARRAY_BUFFER, 0);
+//         }
+//     }
+//     else
+//     {
+//         GLBufferDescriptor::_bind(_vaos[bufferDescriptor]);
+//     }
+// }
+//
+// void GLRenderingContext::unbindBD(IBufferDescriptor* bufferDescriptor) noexcept
+// {
+//     GLBufferDescriptor::_unbind(0);
+// }
+
+void GLRenderingContext::destroyBD(IBufferDescriptor* bufferDescriptor) noexcept
+{
+    const auto iter = _vaos.find(bufferDescriptor);
+
+    if(iter != _vaos.end())
     {
-        this->_context = tmpContext;
+        GLBufferDescriptor::destroy(_vaos[bufferDescriptor]);
     }
 }
-#else
-void GLRenderingContext::createContext()
-{ }
-#endif
 
-void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ)
+void GLRenderingContext::clearBDs() noexcept
+{
+    _vaos.clear();
+}
+
+void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
     glViewport(x, y, width, height);
 }
 
-void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue)
+void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue) noexcept
 {
     GLbitfield flags = 0;
     if(clearColorBuffer) { flags = GL_COLOR_BUFFER_BIT; }
@@ -87,7 +132,8 @@ void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
     glClear(flags);
 }
 
-// IRenderingContext* createGLContext(GLContextSettings settings) noexcept
-// {
-//     return new GLRenderingContext(settings);
-// }
+u32 GLRenderingContext::getBDUid() noexcept
+{
+    static u32 uid = 0;
+    return ++uid;
+}

@@ -1,15 +1,13 @@
 #pragma once
 
-#pragma warning(push, 0)
-#include <GL/glew.h>
-#include <unordered_map>
-#pragma warning(pop)
-
 #include <DLL.hpp>
 #include <NumTypes.hpp>
-#include <Utils.hpp>
+#include <Objects.hpp>
+#include <DynArray.hpp>
+#include <Safeties.hpp>
 
-class RenderingMode;
+class IRenderingContext;
+class IVertexBuffer;
 
 enum class DataType : u8
 {
@@ -28,130 +26,38 @@ enum class DataType : u8
     UInt10F_11F_11F_Rev
 };
 
-TAU_DLL GLenum getGLType(const DataType type) noexcept;
-
-TAU_DLL DataType getType(const GLenum type) noexcept;
-
 class TAU_DLL IBufferDescriptor
 {
+    DEFAULT_DESTRUCT_VI(IBufferDescriptor);
+    DELETE_COPY(IBufferDescriptor);
 public:
-    static IBufferDescriptor* create(const RenderingMode& mode) noexcept;
-public:
-    virtual ~IBufferDescriptor() noexcept = default;
-
-    virtual void addAttribute(u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept = 0;
-
-    virtual void initialize() noexcept = 0;
-
-    virtual void bind() const noexcept = 0;
-
-    virtual void unbind() const noexcept = 0;
-
-    virtual void enableAttributes() const noexcept = 0;
-
-    virtual void disableAttributes() const noexcept = 0;
-
+    struct AttributeDescriptor final
+    {
+        Ref<IVertexBuffer> buffer;
+        u32 size;
+        DataType type;
+        bool normalized;
+        i32 stride;
+        const void* pointer;
+    };
 protected:
-    IBufferDescriptor() noexcept = default;
-private:
-    IBufferDescriptor(const IBufferDescriptor& copy) noexcept = delete;
-    IBufferDescriptor(IBufferDescriptor&& move) noexcept = delete;
-    
-    IBufferDescriptor& operator=(const IBufferDescriptor& copy) noexcept = delete;
-    IBufferDescriptor& operator=(IBufferDescriptor&& move) noexcept = delete;
+    u64 _uid;
+    DynArray<AttributeDescriptor> _attribs;
+protected:
+    IBufferDescriptor(const u64 uid, const std::size_t attribCount) noexcept
+        : _uid(uid), _attribs(attribCount)
+    { }
+public:
+    virtual void addAttribute(Ref<IVertexBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept = 0;
+
+    virtual void bind(IRenderingContext& context) noexcept = 0;
+
+    virtual void unbind(IRenderingContext& context) noexcept = 0;
+
+    virtual void enableAttributes(IRenderingContext& context) noexcept = 0;
+
+    virtual void disableAttributes(IRenderingContext& context) noexcept = 0;
+
+    [[nodiscard]] u64 uid() const noexcept { return _uid; }
+    [[nodiscard]] DynArray<AttributeDescriptor>& attribs() noexcept { return _attribs; }
 };
-
-class TAU_DLL VertexArray final
-{
-private:
-    GLuint _array;
-public:
-    inline static void unbind() noexcept { glBindVertexArray(0); }
-
-    static void setAttribute(GLuint index, GLuint size, DataType type, GLboolean normalized, GLsizei stride, const GLvoid* pointer) noexcept
-    { glVertexAttribPointer(index, size, getGLType(type), normalized, stride, pointer); }
-
-    static void enableAttribute(GLuint index) noexcept { glEnableVertexAttribArray(index); }
-
-    static void disableAttribute(GLuint index) noexcept { glDisableVertexAttribArray(index); }
-public:
-    VertexArray() noexcept
-        : _array()
-    { glGenVertexArrays(1, &_array); }
-
-    VertexArray(const VertexArray& copy) noexcept = delete;
-    VertexArray(VertexArray&& move) noexcept = delete;
-
-    ~VertexArray() noexcept { glDeleteVertexArrays(1, &_array); }
-
-    VertexArray& operator=(const VertexArray& copy) noexcept = delete;
-    VertexArray& operator=(VertexArray&& move) noexcept = delete;
-
-    inline GLuint array()      const noexcept { return _array; }
-    inline operator GLuint()   const noexcept { return _array; }
-    inline GLuint operator()() const noexcept { return _array; }
-
-    inline void bind() const noexcept { glBindVertexArray(this->_array); }
-
-    inline bool operator ==(const VertexArray& other) const noexcept { return _array == other._array; }
-    inline bool operator !=(const VertexArray& other) const noexcept { return _array != other._array; }
-};
-
-class TAU_DLL VertexArrayShared final
-{
-private:
-    GLuint _array;
-    u32* _refCount;
-public:
-    inline static void unbind() noexcept { VertexArray::unbind(); }
-
-    inline static void setAttribute(GLuint index, GLuint size, DataType type, GLboolean normalized, GLsizei stride, const GLvoid* pointer) noexcept { VertexArray::setAttribute(index, size, type, normalized, stride, pointer); }
-
-    inline static void  enableAttribute(GLuint index) noexcept { VertexArray::enableAttribute(index);  }
-
-    inline static void disableAttribute(GLuint index) noexcept { VertexArray::disableAttribute(index); }
-public:
-    VertexArrayShared() noexcept;
-    VertexArrayShared(const VertexArrayShared& copy) noexcept;
-    VertexArrayShared(VertexArrayShared&& move) noexcept;
-
-    ~VertexArrayShared() noexcept;
-
-    VertexArrayShared& operator=(const VertexArrayShared& copy) noexcept;
-    VertexArrayShared& operator=(VertexArrayShared&& move) noexcept;
-
-    inline GLuint array()      const noexcept { return _array; }
-    inline operator GLuint()   const noexcept { return _array; }
-    inline GLuint operator()() const noexcept { return _array; }
-
-    void bind() const noexcept { glBindVertexArray(this->_array); }
-
-    inline bool operator ==(const VertexArrayShared& other) const noexcept { return _array == other._array;  }
-    inline bool operator !=(const VertexArrayShared& other) const noexcept { return _array != other._array;  }
-    inline bool operator ==(const VertexArray&       other) const noexcept { return _array == other.array(); }
-    inline bool operator !=(const VertexArray&       other) const noexcept { return _array != other.array(); }
-};
-
-static inline bool operator ==(const VertexArray& RESTRICT left, const VertexArrayShared& RESTRICT right) noexcept { return left.array() == right.array(); }
-static inline bool operator !=(const VertexArray& RESTRICT left, const VertexArrayShared& RESTRICT right) noexcept { return left.array() != right.array(); }
-
-namespace std
-{
-    template<>
-    struct hash<VertexArray>
-    {
-        inline size_t operator()(const VertexArray& arr) const noexcept
-        {
-            return static_cast<size_t>(arr.array());
-        }
-    };
-
-    template<>
-    struct hash<VertexArrayShared>
-    {
-        inline size_t operator()(const VertexArrayShared& arr) const noexcept
-        {
-            return static_cast<size_t>(arr.array());
-        }
-    };
-}

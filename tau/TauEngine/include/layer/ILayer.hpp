@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Objects.hpp>
+
 #ifndef LAYER_GEN_NAMES
   #if defined(TAU_PRODUCTION)
     #define LAYER_GEN_NAMES 0
@@ -8,36 +10,27 @@
   #endif
 #endif
 
-#define LAYER_IMPL_BASE(_TYPE) private: \
-                                   _TYPE(const _TYPE& copy) = delete;                     \
-                                   _TYPE(_TYPE&& move) noexcept = delete;                 \
-                                   _TYPE& operator=(const _TYPE& copy) = delete;          \
-                                   _TYPE& operator=(_TYPE&& move) noexcept = delete;
+#define LAYER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE)
 
 #if LAYER_GEN_NAMES
   #define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE); \
                             public: \
                                 [[nodiscard]] virtual const char* getName() const noexcept override \
                                 { return #_TYPE; }
+  #define LAYER_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
 #else
   #define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE)
+  #define LAYER_GET_NAME(_EVENT_PTR) ""
 #endif
 
 class Event;
 
 class ILayer
 {
-protected:
-    inline ILayer() noexcept = default;
-private:
-    ILayer(const ILayer& copy) noexcept = delete;
-    ILayer(ILayer&& move) noexcept = delete;
-
-    ILayer& operator=(const ILayer& copy) noexcept = delete;
-    ILayer& operator=(ILayer&& move) noexcept = delete;
+    DEFAULT_CONSTRUCT_PO(ILayer);
+    DEFAULT_DESTRUCT_VI(ILayer);
+    DELETE_COPY(ILayer);
 public:
-    virtual ~ILayer() noexcept = default;
-
     virtual void onAttach() noexcept { }
     virtual void onDetach() noexcept { }
     virtual void onUpdate(float fixedDelta) noexcept { }

@@ -1,9 +1,14 @@
+/**
+ * @file
+ */
 #pragma once
 
 #pragma warning(push, 0)
 #include <thread>
+#include <GL/glew.h>
 #pragma warning(pop)
 
+#include <Objects.hpp>
 #include <maths/Vector2f.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Vector4f.hpp>
@@ -12,15 +17,19 @@
 #include <NumTypes.hpp>
 #include <system/Window.hpp>
 #include <system/Win32Event.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class TextHandler;
 class ITexture;
 class IBufferDescriptor;
 struct ImDrawData;
+class IRenderingContext;
 
-enum class RenderingOpcode : u8
+enum class RenderingOpcode : u16
 {
     FINISH_RENDER = 1,
+    LOAD_CONTEXT,
     LOAD_SHADER_UNIFORM,
     ACTIVATE_SHADER_PROGRAM,
     BIND_TEXTURE,
@@ -53,32 +62,26 @@ enum class ShaderUniformType : u8
     MAT4F
 };
 
-#define PACK_FLOAT(__F)  (reinterpret_cast<u32&>(__F))
-#define PACK_DOUBLE(__D) (reinterpret_cast<u64&>(__F))
-#define PACK_PTR(__P)    (reinterpret_cast<u64 >(__P))
-
-struct ParameterPack final
-{
-    u64 p0, p1, p2, p3, p4, p5, p6, p7;
-
-    ParameterPack(u64 _p0 = 0, u64 _p1 = 0, u64 _p2 = 0, u64 _p3 = 0, 
-                  u64 _p4 = 0, u64 _p5 = 0, u64 _p6 = 0, u64 _p7 = 0) noexcept
-        : p0(_p0), p1(_p1), p2(_p2), p3(_p3), p4(_p4), p5(_p5), p6(_p6), p7(_p7)
-    { }
-
-    ~ParameterPack() noexcept = default;
-
-    ParameterPack(const ParameterPack&) noexcept = default;
-    ParameterPack(ParameterPack&&) noexcept = default;
-
-    ParameterPack& operator =(const ParameterPack&) noexcept = default;
-    ParameterPack& operator =(ParameterPack&&) noexcept = default;
-};
-
-typedef void (*__cdecl setupParams_f)(void);
-
 class TAU_DLL RenderingPipeline final
 {
+    DELETE_COPY(RenderingPipeline);
+public:
+    /**
+     *   A handle to function which runs some code on the
+     * rendering thread. This is intended supersede the context
+     * switching methods.
+     *
+     *   The function receives a reference to the rendering
+     * pipeline, a reference to the window, and a void* to a user
+     * set parameter. This can be anything that fits in an
+     * intptr_t, or a pointer to any object. The lifetime of this
+     * object is decided by the caller. It is recommended that it
+     * is heap allocated and freed within the function pointed to
+     * by this handle.
+     */
+    typedef void (*__cdecl ctxCtrl_f)(RenderingPipeline&, Window&, void*);
+
+    using CtxCtrlObj = std::pair<ctxCtrl_f, void*>;
 private:
     Window& _window;
 
@@ -86,28 +89,31 @@ private:
     u8* _backBuffer;
     volatile u32 _instPtr;
     volatile u32 _insertPtr;
+
+    CtxCtrlObj* _ctxCtrlsFront;
+    CtxCtrlObj* _ctxCtrlsBack;
+    u32 _ctxCtrlsInsertPtr;
+    u32 _ctxCtrlsSize;
 private:
     bool _async;
     std::thread* _renderThread;
     Win32Event   _insertSignal;
     Win32Event   _renderSignal;
-    Win32Event   _possession0Signal;
-    Win32Event   _possession1Signal;
-    Win32Event   _possession2Signal;
     Win32Event   _exitSignal;
 public:
-    RenderingPipeline(Window& window, setupParams_f setupParams, const bool async, const u32 bufferSize = 16384) noexcept;
-    
+    RenderingPipeline(Window& window, ctxCtrl_f setupParams, void* setupParam, bool async, u32 bufferSize = (16*1024*1024), u32 ctxControlsSize = 512) noexcept;
     ~RenderingPipeline() noexcept;
-
-    RenderingPipeline(const RenderingPipeline& copy) noexcept = delete;
-    RenderingPipeline(RenderingPipeline&& move) noexcept = delete;
-
-    RenderingPipeline& operator =(const RenderingPipeline& copy) noexcept = delete;
-    RenderingPipeline& operator =(RenderingPipeline&& move) noexcept = delete;
 
 #define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(&(__VAR)), sizeof(__VAR)); \
                           _insertPtr += sizeof(__VAR);
+
+    void pushLoadContext(const IRenderingContext& context) noexcept
+    {
+        prePushInst<RenderingOpcode::LOAD_CONTEXT>();
+        const IRenderingContext* contextPtr = &context;
+        LOAD_VALUE(contextPtr);
+        postPushInst();
+    }
 
     void pushActivateShaderProgram(const GLuint shaderProgramID) noexcept
     {
@@ -228,7 +234,7 @@ public:
         postPushInst();
     }
 
-    void pushRenderText(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4x4f& proj) noexcept;
+    void pushRenderText(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const glm::mat4& proj) noexcept;
 
     void pushImGuiRender(const ImDrawData* data) noexcept
     {
@@ -241,22 +247,28 @@ public:
     {
         prePushInst<RenderingOpcode::FINISH_RENDER>();
         _insertPtr = 0;
+        _ctxCtrlsInsertPtr = 0;
         postPushInst();
         if(_async)
         {
             (void) _insertSignal.waitUntilSignaled();
         }
+
         u8* tmp = _instBuffer;
         _instBuffer = _backBuffer;
         _backBuffer = tmp;
+
+        CtxCtrlObj* tmp0 = _ctxCtrlsFront;
+        _ctxCtrlsFront = _ctxCtrlsBack;
+        _ctxCtrlsBack = tmp0;
+
         if(_async)
         {
             _renderSignal.signal();
         }
         else
         {
-            runRenderingCycleSync();
-            _window.swapBuffers();
+            runRenderingCycle();
         }
     }
 
@@ -320,12 +332,12 @@ public:
         postPushInst();
     }
 
-    void pushLoadUniMat4f(GLint uniformID, const Matrix4x4f& param) noexcept
+    void pushLoadUniMat4f(GLint uniformID, const glm::mat4& param) noexcept
     {
         prePushInst<RenderingOpcode::LOAD_SHADER_UNIFORM>();
         _backBuffer[_insertPtr++] = static_cast<u8>(ShaderUniformType::MAT4F);
         LOAD_VALUE(uniformID);
-        std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(param.data().m), sizeof(float) * 16);
+        std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(glm::value_ptr(param)), sizeof(float) * 16);
         _insertPtr += sizeof(float) * 16;
         postPushInst();
     }
@@ -336,38 +348,51 @@ public:
     void pushLoadUni(GLint uniformID, Vector2f param) noexcept { pushLoadUniVec2f(uniformID, param); }
     void pushLoadUni(GLint uniformID, Vector3f param) noexcept { pushLoadUniVec3f(uniformID, param); }
     void pushLoadUni(GLint uniformID, Vector4f param) noexcept { pushLoadUniVec4f(uniformID, param); }
-    void pushLoadUni(GLint uniformID, const Matrix4x4f& param) noexcept { pushLoadUniMat4f(uniformID, param); }
+    void pushLoadUni(GLint uniformID, const glm::mat4& param) noexcept { pushLoadUniMat4f(uniformID, param); }
 
-#undef LOAD_VALUE
-
-    void runRenderingCycleSync() noexcept
+    /**
+     *   Add a function to the pipeline to run before the
+     * rendering cycle.
+     *
+     * @param [in] func
+     *   The function to be called.
+     * @param [in] data
+     *   An arbitrary set of data to pass to func.
+     * @param [in] replace
+     *   Replace the last entry if the function pointer matches.
+     */
+    bool addCtxCtrl(ctxCtrl_f func, void* data, bool replace = false) noexcept
     {
-        if(!_async) { runRenderingCycle(); }
+        if(_ctxCtrlsInsertPtr >= _ctxCtrlsSize) 
+        { return false; }
+        if(replace && _ctxCtrlsInsertPtr && 
+           _ctxCtrlsBack[_ctxCtrlsInsertPtr - 1].first == func)
+        { --_ctxCtrlsInsertPtr; }
+
+        _ctxCtrlsBack[_ctxCtrlsInsertPtr].first = func;
+        _ctxCtrlsBack[_ctxCtrlsInsertPtr].second = data;
+        ++_ctxCtrlsInsertPtr;
+        return true;
     }
 
-    // void dumpCommandBufferToFile(FILE* file) const noexcept;
-
-    void takeControlOfContext() const noexcept;
-
-    void returnControlOfContext() const noexcept;
+    template<typename _T>
+    bool addCtxCtrlT(void(*__cdecl func)(RenderingPipeline&, Window&, _T*), _T* data, bool replace = false) noexcept
+    {
+        return addCtxCtrl(reinterpret_cast<ctxCtrl_f>(func), reinterpret_cast<void*>(data), replace);
+    }
 private:
-    void prePushInst(const RenderingOpcode opcode)
-    {
-        _backBuffer[_insertPtr++] = static_cast<u8>(opcode);
-    }
-
     template<RenderingOpcode _Opcode>
     void prePushInst() noexcept
     {
-        prePushInst(_Opcode);
+        const u16 op = static_cast<u16>(_Opcode);
+        LOAD_VALUE(op);
     }
 
-    // ReSharper disable once CppMemberFunctionMayBeStatic
     void postPushInst() const noexcept { }
 
-    void _passContext() const noexcept;
+#undef LOAD_VALUE
 
     void runRenderingCycle() noexcept;
 
-    void renderThreadFunc(setupParams_f setupParams) noexcept;
+    void renderThreadFunc(ctxCtrl_f setupParams, void* setupParam) noexcept;
 };

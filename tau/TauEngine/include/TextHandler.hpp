@@ -15,7 +15,9 @@
 #include <RenderingPipeline.hpp>
 #include <shader/GLShader.hpp>
 #include <DynArray.hpp>
-// #include <texture/Texture.hpp>
+#include <glm/mat4x4.hpp>
+#include "ResourceLoader.hpp"
+#include "model/VertexBuffer.hpp"
 
 class ITexture;
 class IBufferDescriptor;
@@ -46,7 +48,9 @@ struct GlyphCharacter final
 
 class TAU_DLL TextHandler final
 {
+    DELETE_COPY(TextHandler);
 private:
+    bool _ready;
     FT_Library _ft;
     FT_Face    _face;
     RefDynArray<u8>* _data;
@@ -54,32 +58,28 @@ private:
     GLProgram _program;
     GLShader  _vertexShader;
     GLShader  _fragmentShader;
-    IBufferDescriptor* _bufferDescriptor;
-    GLuint _vbo;
+    Ref<IBufferDescriptor> _bufferDescriptor;
+    Ref<IVertexBuffer> _vertexBuffer;
     GLuint _projUni;
     GLuint _texUni;
     GLuint _colorUni;
 public:
-    TextHandler(const char* vertexPath, const char* fragmentPath) noexcept;
+    TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept;
 
     ~TextHandler() noexcept;
-
-    TextHandler(const TextHandler& copy) noexcept = delete;
-    TextHandler(TextHandler&& move) noexcept = delete;
-
-    TextHandler& operator =(const TextHandler& copy) noexcept = delete;
-    TextHandler& operator =(TextHandler&& move) noexcept = delete;
 
     FT_Error init() noexcept;
 
     FT_Error loadTTFFile(const char* fileName) noexcept;
+    int loadTTFFile(const char* fileName, ResourceLoader& rl, ResourceLoader::finalizeLoad_f finalizeLoad) noexcept;
 
     void generateBitmapCharacters() const noexcept;
 
-    void finishLoad() const noexcept;
+    void finishLoad() noexcept;
 
-    void renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj, RenderingPipeline& rp) const noexcept;
-    void renderText(const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const Matrix4f& proj) const noexcept;
+    void renderText(IRenderingContext& context, const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const glm::mat4& proj) const noexcept;
 
     GLfloat computeLength(const char* str, GLfloat scale) const noexcept;
+private:
+    static void* __cdecl load2(RefDynArray<u8> file, void* parseParam) noexcept;
 };

@@ -1,8 +1,9 @@
 #include <texture/GLTexture.hpp>
+#include <gl/GLUtils.hpp>
 
 GLTexture::GLTexture(const TextureType textureType) noexcept
     : ITexture(textureType),
-    _texture(0)
+      _texture(0)
 {
     glGenTextures(1, &_texture);
 
