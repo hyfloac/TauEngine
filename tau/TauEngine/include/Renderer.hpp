@@ -13,8 +13,10 @@ struct ShaderBundle final
 {
     const GLProgram* program;
     std::vector<const GLShader*> shaders;
-    std::unordered_multimap<const RenderableObject*, WorldObject> models;
+    std::unordered_multimap<RenderableObject, WorldObject> models;
 };
+
+class IRenderingContext;
 
 class TAU_DLL Renderer
 {
@@ -25,9 +27,9 @@ public:
 
     void exchangeShaders(const GLProgram* old, const GLProgram* RESTRICT replacement, std::vector<const GLShader*>& RESTRICT shaders) noexcept;
 
-    void addObject(const GLProgram* shaderProgram, const RenderableObject* RESTRICT obj, const WorldObject& RESTRICT loc) noexcept;
+    void addObject(const GLProgram* shaderProgram, RenderableObject obj, WorldObject loc) noexcept;
 
-    void addObject(const GLProgram* shaderProgram, const RenderableObject* obj) noexcept;
+    void addObject(const GLProgram* shaderProgram, RenderableObject obj) noexcept;
 
-    void render() const noexcept;
+    void render(IRenderingContext& context) const noexcept;
 };

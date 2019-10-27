@@ -62,6 +62,7 @@ bool __internal__logGLCall(const char* glFunc, const char* file, u32 line) noexc
         if(error != GL_NO_ERROR)
         {
             noErrors = false;
+            printf("[OpenGL Error] (0x%X): %s %s %d\n", error, glFunc, file, line);
             // getEngineLogger()->trace("[OpenGL Error] (0x{0:X}): {1} {2} {3:d}", error, glFunc, file, line);
         }
         else

@@ -19,7 +19,7 @@ TAU_DLL bool __internal__logGLCall(const char* glFunc, const char* file, u32 lin
 
 #define ___ASSERT(__TEST) if(!(__TEST)) { DEBUG_BREAK; }
 
-#ifdef _DEBUG
+#if !defined(TAU_PRODUCTION)
   #define CALL_GL_FUNC(__CALL) __internal__clearGLErrors(), __CALL; ___ASSERT(__internal__logGLCall(#__CALL, __FILE__, __LINE__))
 #else
   #define CALL_GL_FUNC(__CALL)

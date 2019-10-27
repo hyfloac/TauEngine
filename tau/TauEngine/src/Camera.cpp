@@ -9,8 +9,8 @@ void Camera::update(const float fixedDelta) noexcept
 
     _position.y() += deltaVelocity.y();
 
-    SinCos<float> pitchSC = fastSinCosD(_pitch);
-    SinCos<float> yawSC   = fastSinCosD(_yaw);
+    // SinCos<float> pitchSC = fastSinCosD(_pitch);
+    const SinCos<float> yawSC   = fastSinCosD(_yaw);
 
     if(deltaVelocity.x() != 0.0f)
     {
@@ -24,10 +24,11 @@ void Camera::update(const float fixedDelta) noexcept
         _position.x() += deltaVelocity.z() * yawSC.cos;
     }
 
-    pitchSC.negate();
-    yawSC.negate();
+    // pitchSC.negate();
+    // yawSC.negate();
 
-    _viewMatrix.fps(_position, pitchSC, yawSC);
+    // _viewMatrix.fps(_position, pitchSC, yawSC);
+    recomputeViewMatrix();
 }
 
 void Camera::updateRotation(const float delta, const i32 dMouseX, const i32 dMouseY) noexcept
@@ -48,7 +49,8 @@ void Camera::updateRotation(const float delta, const i32 dMouseX, const i32 dMou
             _yaw = 360.0f - _yaw;
         }
 
-        _viewMatrix.fpsD(_position,_pitch, _yaw);
+        // _viewMatrix.fpsD(_position, _pitch, _yaw);
+        recomputeViewMatrix();
     }
 }
 

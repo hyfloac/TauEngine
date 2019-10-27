@@ -18,10 +18,10 @@ private:
 public:
     static TUID generate() noexcept;
 public:
-    TUID(u64 highBits, u64 lowBits) noexcept;
+    TUID(const u64 highBits, const u64 lowBits) noexcept;
 
-    inline u64 highBits() const noexcept { return _highBits; }
-    inline u64 lowBits()  const noexcept { return _lowBits;  }
+    [[nodiscard]] inline u64 highBits() const noexcept { return _highBits; }
+    [[nodiscard]] inline u64 lowBits()  const noexcept { return _lowBits;  }
 
     void toString(char str[38]) const noexcept;
 };

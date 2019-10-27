@@ -1,7 +1,6 @@
 #pragma once
 
 #include <WorldObject.hpp>
-#include <TauEngine.hpp>
 
 class PhysicsObject final
 {
