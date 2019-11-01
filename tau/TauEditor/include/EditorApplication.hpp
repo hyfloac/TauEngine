@@ -9,28 +9,25 @@
 #include "Config.h"
 #include <system/RenderingContext.hpp>
 #include <ResourceLoader.hpp>
+#include <Objects.hpp>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
 class TauEditorApplication final : public Application
 {
+    DELETE_COPY(TauEditorApplication);
 private:
     static constexpr const char* CONFIG_PATH = "|game/config.bin";
     Config _config;
     Window* _window;
     Ref<spdlog::logger> _logger;
-    ResourceLoader* _rl;
+    ResourceLoader _rl;
     TERenderer* _renderer;
+    State _gameState;
 public:
     TauEditorApplication() noexcept;
 
-    TauEditorApplication(const TauEditorApplication& copy) noexcept = delete;
-    TauEditorApplication(TauEditorApplication&& move) noexcept = delete;
-
     ~TauEditorApplication() noexcept override final;
-
-    TauEditorApplication& operator =(const TauEditorApplication& copy) noexcept = delete;
-    TauEditorApplication& operator =(TauEditorApplication&& move) noexcept = delete;
 
     [[nodiscard]] Ref<spdlog::logger> logger() const noexcept { return _logger; }
 

@@ -30,7 +30,16 @@ class ILayer
     DEFAULT_CONSTRUCT_PO(ILayer);
     DEFAULT_DESTRUCT_VI(ILayer);
     DELETE_COPY(ILayer);
+protected:
+    bool _visible;
+protected:
+    ILayer(bool visible = true) noexcept
+        : _visible(visible)
+    { }
 public:
+    [[nodiscard]] bool visible() const noexcept { return _visible; }
+    virtual bool visible(bool vis) noexcept { return _visible = vis; }
+
     virtual void onAttach() noexcept { }
     virtual void onDetach() noexcept { }
     virtual void onUpdate(float fixedDelta) noexcept { }

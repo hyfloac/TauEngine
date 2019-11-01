@@ -41,6 +41,8 @@ TAU_DLL bool tauShouldExit() noexcept;
  */
 TAU_DLL void tauExit(i32 code) noexcept;
 
+TAU_DLL i32 tauExitCode() noexcept;
+
 typedef void (* update_f)(float);
 typedef void (* render_f)(float);
 typedef void (* renderFPS_f)(u32, u32);

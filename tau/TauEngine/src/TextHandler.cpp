@@ -10,7 +10,7 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     : _ready(false), _ft(null), _face(null), _data(), _chars(new GlyphCharacter[95]),
       _vertexShader(ShaderType::VERTEX, vertexPath, &_program), _fragmentShader(ShaderType::FRAGMENT, fragmentPath, &_program),
       _bufferDescriptor(context.createBufferDescriptor(1)),
-      _vertexBuffer(IVertexBuffer::create(context, IVertexBuffer::Type::ArrayBuffer, IVertexBuffer::UsageType::DynamicDraw)), //_vbo(0),
+      _vertexBuffer(IBuffer::create(context, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)), //_vbo(0),
       _projUni(0), _texUni(0), _colorUni(0)
 { 
     _vertexShader.loadShader();
@@ -117,15 +117,13 @@ void TextHandler::finishLoad() noexcept
     _ready = true;
 }
 
-void TextHandler::renderText(IRenderingContext& context, const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const glm::mat4& proj) const noexcept
+void TextHandler::renderText(IRenderingContext& context, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept
 {
     if(!_ready) { return; }
     _program.activate();
     _vertexShader.setUniform(_projUni, proj);
     _vertexShader.setUniform(_texUni, 0);
     _vertexShader.setUniform(_colorUni, color);
-
-    glActiveTexture(GL_TEXTURE0);
 
     _bufferDescriptor->bind(context);
     _bufferDescriptor->enableAttributes(context);
@@ -137,20 +135,20 @@ void TextHandler::renderText(IRenderingContext& context, const char* str, GLfloa
         if(c < 32 || c > 126) { continue; }
         const GlyphCharacter* gc = &_chars[c - 32];
 
-        const GLfloat xpos = x + gc->bearing.x() * scale;
-        const GLfloat ypos = y - (gc->size.y() - gc->bearing.y()) * scale;
+        const float xpos = x + gc->bearing.x() * scale;
+        const float ypos = y - (gc->size.y() - gc->bearing.y()) * scale;
 
-        const GLfloat w = gc->size.x() * scale;
-        const GLfloat h = gc->size.y() * scale;
+        const float w = gc->size.x() * scale;
+        const float h = gc->size.y() * scale;
         // Update VBO for each character
-        GLfloat vertices[6][4] = {
-            { xpos,     ypos + h,   0.0, 0.0 },
-            { xpos,     ypos,       0.0, 1.0 },
-            { xpos + w, ypos,       1.0, 1.0 },
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
 
-            { xpos,     ypos + h,   0.0, 0.0 },
-            { xpos + w, ypos,       1.0, 1.0 },
-            { xpos + w, ypos + h,   1.0, 0.0 }
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
         };
 
         gc->texture->bind(0);
@@ -170,10 +168,76 @@ void TextHandler::renderText(IRenderingContext& context, const char* str, GLfloa
     GLProgram::deactivate();
 }
 
-GLfloat TextHandler::computeLength(const char* str, GLfloat scale) const noexcept
+float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept
 {
     if(!_ready) { return 0.0f; }
-    GLfloat length = 0.0f;
+    _program.activate();
+    _vertexShader.setUniform(_projUni, proj);
+    _vertexShader.setUniform(_texUni, 0);
+    _vertexShader.setUniform(_colorUni, color);
+
+    _bufferDescriptor->bind(context);
+    _bufferDescriptor->enableAttributes(context);
+
+    glFrontFace(GL_CCW);
+
+    float height = lineHeight;
+
+    const float initialX = x;
+    const float maxX = static_cast<float>(window.width());
+
+    for(char c = *str; c != '\0'; c = *(++str))
+    {
+        if(c < 32 || c > 126) { continue; }
+        const GlyphCharacter* gc = &_chars[c - 32];
+
+        const float advance = (gc->advance >> 6)* scale;
+        if(x + advance > maxX)
+        {
+            x = initialX;
+            y += lineHeight;
+            height += lineHeight;
+        }
+
+        const float xpos = x + gc->bearing.x() * scale;
+        const float ypos = y - (gc->size.y() - gc->bearing.y()) * scale;
+
+        const float w = gc->size.x() * scale;
+        const float h = gc->size.y() * scale;
+        // Update VBO for each character
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }
+        };
+
+        gc->texture->bind(0);
+
+        _vertexBuffer->bind(context);
+        _vertexBuffer->modifyBuffer(context, 6, 0, sizeof(vertices), vertices);
+        _vertexBuffer->unbind(context);
+
+        _vertexBuffer->draw(context);
+
+        x += advance;
+    }
+
+    _bufferDescriptor->disableAttributes(context);
+    _bufferDescriptor->unbind(context);
+    _chars[0].texture->unbind(0);
+    GLProgram::deactivate();
+
+    return height;
+}
+
+float TextHandler::computeLength(const char* str, float scale) const noexcept
+{
+    if(!_ready) { return 0.0f; }
+    float length = 0.0f;
 
     for(char c = *str; c != '\0'; c = *(++str))
     {
@@ -184,3 +248,29 @@ GLfloat TextHandler::computeLength(const char* str, GLfloat scale) const noexcep
 
     return length;
 }
+
+float TextHandler::computeHeight(const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept
+{
+    if(!_ready) { return 0.0f; }
+    float height = lineHeight;
+
+    const float initialX = x;
+    const float maxX = static_cast<float>(window.width());
+
+    for(char c = *str; c != '\0'; c = *(++str))
+    {
+        if(c < 32 || c > 126) { continue; }
+        const GlyphCharacter* gc = &_chars[c - 32];
+
+        const float advance = (gc->advance >> 6)* scale;
+        if(x + advance > maxX)
+        {
+            x = initialX;
+            height += lineHeight;
+        }
+
+        x += advance;
+    }
+    return height;
+}
+

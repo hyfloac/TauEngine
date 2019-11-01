@@ -47,6 +47,7 @@ enum class RenderingOpcode : u16
     GL_FACE_WINDING,
     RESIZE_VIEWPORT,
     RENDER_TEXT,
+    RENDER_TEXT_LINE_WRAPPED,
     IMGUI_RENDER,
     LAST = IMGUI_RENDER
 };
@@ -235,6 +236,8 @@ public:
     }
 
     void pushRenderText(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const glm::mat4& proj) noexcept;
+
+    GLfloat pushRenderTextLineWrapped(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const Window* window, float lineHeight, const glm::mat4& proj) noexcept;
 
     void pushImGuiRender(const ImDrawData* data) noexcept
     {

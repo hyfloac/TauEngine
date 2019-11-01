@@ -18,7 +18,7 @@ PhysWord::PhysWord(const char* str, const Window& window, const TextHandler& th)
     randomReset(window);
 }
 
-void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, glm::mat4& ortho) noexcept
+void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, const glm::mat4& ortho) noexcept
 {
     UNUSED(delta);
     rp.pushRenderText(&th, _str, _textPos.x(), _textPos.y(), _textScale, static_cast<u8>(_color.x() * 255), static_cast<u8>(_color.y() * 255), static_cast<u8>(_color.z() * 255), ortho);

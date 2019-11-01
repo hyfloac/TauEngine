@@ -17,7 +17,7 @@
 #include <DynArray.hpp>
 #include <glm/mat4x4.hpp>
 #include "ResourceLoader.hpp"
-#include "model/VertexBuffer.hpp"
+#include "model/IBuffer.hpp"
 
 class ITexture;
 class IBufferDescriptor;
@@ -59,7 +59,7 @@ private:
     GLShader  _vertexShader;
     GLShader  _fragmentShader;
     Ref<IBufferDescriptor> _bufferDescriptor;
-    Ref<IVertexBuffer> _vertexBuffer;
+    Ref<IBuffer> _vertexBuffer;
     GLuint _projUni;
     GLuint _texUni;
     GLuint _colorUni;
@@ -68,18 +68,20 @@ public:
 
     ~TextHandler() noexcept;
 
-    FT_Error init() noexcept;
+    [[nodiscard]] FT_Error init() noexcept;
 
-    FT_Error loadTTFFile(const char* fileName) noexcept;
-    int loadTTFFile(const char* fileName, ResourceLoader& rl, ResourceLoader::finalizeLoad_f finalizeLoad) noexcept;
+    [[nodiscard]] FT_Error loadTTFFile(const char* fileName) noexcept;
+    [[nodiscard]] int loadTTFFile(const char* fileName, ResourceLoader& rl, ResourceLoader::finalizeLoad_f finalizeLoad) noexcept;
 
     void generateBitmapCharacters() const noexcept;
 
     void finishLoad() noexcept;
 
-    void renderText(IRenderingContext& context, const char* str, GLfloat x, GLfloat y, GLfloat scale, Vector3f color, const glm::mat4& proj) const noexcept;
+    void renderText(IRenderingContext& context, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept;
+    float renderTextLineWrapped(IRenderingContext& context, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept;
 
-    GLfloat computeLength(const char* str, GLfloat scale) const noexcept;
+    float computeLength(const char* str, float scale) const noexcept;
+    float computeHeight(const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept;
 private:
     static void* __cdecl load2(RefDynArray<u8> file, void* parseParam) noexcept;
 };

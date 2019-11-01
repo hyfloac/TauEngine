@@ -1,8 +1,8 @@
 #include "TERenderer.hpp"
 #include <system/Window.hpp>
 #include <gl/GLUtils.hpp>
-#include <FastRand.hpp>
 #include <PhysWordLayer.hpp>
+#include "ConsoleLayer.hpp"
 
 static void __cdecl setupParams(RenderingPipeline&, Window&, void*) noexcept;
 
@@ -19,45 +19,30 @@ static void finalizeLoad(void* file, void* finalizeParam) noexcept
     th->finishLoad();
 }
 
-TERenderer::TERenderer(Window& window, ResourceLoader& rl, bool async) noexcept
+TERenderer::TERenderer(Window& window, ResourceLoader& rl, State& state, bool async) noexcept
     : _window(window), _rl(rl),
-      _th(nullptr), _rp(nullptr),
-      _ortho(glm::ortho(0.0f, static_cast<float>(window.width()), 0.0f, static_cast<float>(window.height()))),
+      _th(nullptr), _rp(nullptr), _state(state),
+      _camera(window, 800.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Q, Keyboard::Key::E),
       _layerStack()
 {
     _rp = new RenderingPipeline(window, setupParams, nullptr, async);
     _th = new TextHandler(*window.renderingContext(), "|TERes/TextVertexShader.glsl", "|TERes/TextFragmentShader.glsl");
-    const FT_Error thError = _th->init();
-    if(thError)
-    {
-        // clientLogger->error("FreeType Initialization Error: {0}", thError);
-    }
-    const int fileError = _th->loadTTFFile("|TERes/MonoConsole.ttf", rl, finalizeLoad);
-    if(fileError)
-    {
-        
-    }
+    (void) _th->init();
+    (void) _th->loadTTFFile("|TERes/MonoConsole.ttf", rl, finalizeLoad);
 
-
-    // if(thError)
-    // {
-    //     // clientLogger->error("FreeType TTF Loading Error: {0}", thError);
-    // }
-    // _th->generateBitmapCharacters();
-    // _th->finishLoad();
-    // seedFastRand(time(NULL));
-
-    // window.renderingContext()->activateContext();
-    // setupParams(*_rp, window, null);
-
-    _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _ortho));
+    _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
+    _layerStack.pushOverlay(new ConsoleLayer(window, *_th, _camera->projectionMatrix(), *_rp, state, _camera, 0.6f));
 }
 
 void TERenderer::render(const float delta) noexcept
 {
     _rp->pushLoadContext(*_window.renderingContext());
     _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for(auto* layer : _layerStack)
+    for(auto* overlay : _layerStack.overlays())
+    {
+        overlay->onRender(delta);
+    }
+    for(auto* layer : _layerStack.layers())
     {
         layer->onRender(delta);
     }
@@ -66,17 +51,30 @@ void TERenderer::render(const float delta) noexcept
 
 void TERenderer::update(const float fixedDelta) noexcept
 {
-    for(auto* layer : _layerStack)
+    if(_state == State::Game)
+    {
+        _camera.update(fixedDelta);
+    }
+
+    for(auto* layer : _layerStack.layers())
     {
         layer->onUpdate(fixedDelta);
+    }
+    for(auto* overlay : _layerStack.overlays())
+    {
+        overlay->onUpdate(fixedDelta);
     }
 }
 
 void TERenderer::onEvent(Event& e) noexcept
 {
-    for(auto* layer : _layerStack)
+    for(auto* layer : _layerStack.layers())
     {
         layer->onEvent(e);
+    }
+    for(auto* overlay : _layerStack.overlays())
+    {
+        overlay->onEvent(e);
     }
 }
 

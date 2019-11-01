@@ -330,6 +330,7 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ConsoleLayer.cpp" />
     <ClCompile Include="src\EditorApplication.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\PhysWord.cpp" />
@@ -339,10 +340,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Config.h" />
+    <ClInclude Include="include\ConsoleLayer.hpp" />
     <ClInclude Include="include\EditorApplication.hpp" />
     <ClInclude Include="include\Item.hpp" />
     <ClInclude Include="include\PhysWord.hpp" />
     <ClInclude Include="include\PhysWordLayer.hpp" />
+    <ClInclude Include="include\State.hpp" />
     <ClInclude Include="include\TERenderer.hpp" />
     <ClInclude Include="include\UILayer.hpp" />
   </ItemGroup>

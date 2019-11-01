@@ -1,7 +1,8 @@
 #include "PhysWordLayer.hpp"
 
-PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, glm::mat4& ortho) noexcept
-    : _window(window), _th(th), _rp(rp), _ortho(ortho),
+PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, const glm::mat4& ortho, State& state) noexcept
+    : ILayer(true),
+      _window(window), _th(th), _rp(rp), _ortho(ortho), _state(state),
       _physWords()
 {
     for(size_t i = 0; i < wordCount; ++i)
@@ -12,17 +13,23 @@ PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window,
 
 void PhysWordLayer::onUpdate(float fixedDelta) noexcept
 {
-    for(auto& physWord : _physWords)
+    if(_state == State::Game)
     {
-        physWord.update(fixedDelta, _window);
+        for(auto& physWord : _physWords)
+        {
+            physWord.update(fixedDelta, _window);
+        }
     }
 }
 
 void PhysWordLayer::onRender(float delta) noexcept
 {
-    for(auto& physWord : _physWords)
+    if(_state != State::ConsoleExclusive)
     {
-        physWord.render(delta, _rp, _th, _ortho);
+        for(auto& physWord : _physWords)
+        {
+            physWord.render(delta, _rp, _th, _ortho);
+        }
     }
 }
 

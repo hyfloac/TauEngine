@@ -18,7 +18,7 @@ static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
     : Application(32), _config { false, 800, 600 },
-      _window(null), _logger(null), _rl(null), _renderer(null)
+      _window(null), _logger(null), _rl(), _renderer(null), _gameState(State::Game)
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
@@ -52,20 +52,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     if(WGLEW_EXT_swap_control)
     {
-        if(_config.vsync)
-        {
-            wglSwapIntervalEXT(1);
-        }
-        else
-        {
-            wglSwapIntervalEXT(0);
-        }
+        wglSwapIntervalEXT(_config.vsync ? 1 : 0);
     }
-
-    // glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
-    
-    // enableGLBlend();
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     bool async = false;
 
@@ -77,9 +65,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         }
     }
 
-    _rl = new ResourceLoader;
-
-    _renderer = new TERenderer(*_window, *_rl, async);
+    _renderer = new TERenderer(*_window, _rl, _gameState, async);
 
     return true;
 }
@@ -102,7 +88,7 @@ void TauEditorApplication::render(const float delta) noexcept
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
-    _rl->update();
+    _rl.update();
     _renderer->update(fixedDelta);
 }
 
@@ -113,12 +99,12 @@ void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
     _window->setTitle(buf);
 }
 
+void TauEditorApplication::runMessageLoop() noexcept
+{
 #ifndef NUM_MESSAGES_TO_READ
   #define NUM_MESSAGES_TO_READ 64
 #endif
 
-void TauEditorApplication::runMessageLoop() noexcept
-{
     MSG msg;
     u32 cnt = 0;
     while(cnt++ < NUM_MESSAGES_TO_READ && PeekMessageA(&msg, null, 0, 0, PM_REMOVE))
@@ -165,6 +151,8 @@ void TauEditorApplication::onWindowEvent(WindowEvent& e) noexcept
     dispatcher.dispatch<WindowAsciiKeyEvent>(this, &TauEditorApplication::onCharPress);
     dispatcher.dispatch<WindowKeyEvent>(this, &TauEditorApplication::onKeyPress);
     dispatcher.dispatch<WindowResizeEvent>(this, &TauEditorApplication::onWindowResize);
+
+    _renderer->onEvent(e);
 }
 
 bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
@@ -177,29 +165,11 @@ bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
 
             if(WGLEW_EXT_swap_control)
             {
-                // _renderer->renderingPipeline().takeControlOfContext();
                 vsync = !vsync;
                 _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window&, void* param)
                 {
-                    const bool vsync = param != nullptr;
-                    if(vsync)
-                    {
-                        wglSwapIntervalEXT(1);
-                    }
-                    else
-                    {
-                        wglSwapIntervalEXT(0);
-                    }
+                    wglSwapIntervalEXT(param != nullptr ? 1 : 0);
                 }, vsync ? reinterpret_cast<void*>(static_cast<intptr_t>(1)) : nullptr);
-                // if(vsync)
-                // {
-                //     wglSwapIntervalEXT(1);
-                // }
-                // else
-                // {
-                //     wglSwapIntervalEXT(0);
-                // }
-                // _renderer->renderingPipeline().returnControlOfContext();
             }
         }
         default: return false;
@@ -224,12 +194,11 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
     return false;
 }
 
-
 bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
 {
     _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window& window, void*)
     { window.renderingContext()->updateViewport(0, 0, window.width(), window.height()); }, nullptr, true);
-    _renderer->ortho() = glm::ortho(0.0f, static_cast<float>(e.newWidth()), 0.0f, static_cast<float>(e.newHeight()));
+    _renderer->camera()->setProjection(e.newHeight(), e.newWidth(), 0.0f, 0.0f);
     return false;
 }
 

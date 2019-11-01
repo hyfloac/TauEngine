@@ -77,6 +77,34 @@ void RenderingPipeline::pushRenderText(const TextHandler* th, const char* str, G
     postPushInst();
 }
 
+GLfloat RenderingPipeline::pushRenderTextLineWrapped(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const Window* window, float lineHeight, const glm::mat4& proj) noexcept
+{
+    prePushInst<RenderingOpcode::RENDER_TEXT_LINE_WRAPPED>();
+    LOAD_VALUE(th);
+    LOAD_VALUE(x);
+    LOAD_VALUE(y);
+    LOAD_VALUE(scale);
+    LOAD_VALUE(cr);
+    LOAD_VALUE(cg);
+    LOAD_VALUE(cb);
+    LOAD_VALUE(window);
+    LOAD_VALUE(lineHeight);
+
+    const float* const mat = reinterpret_cast<const float*>(glm::value_ptr(proj));
+    std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(mat), sizeof(float) * 16);
+    _insertPtr += sizeof(float) * 16;
+
+    const u32 len = static_cast<u32>(strlen(str) + 1);
+    LOAD_VALUE(len);
+
+    (void) std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(str), sizeof(char)* len);
+    _insertPtr += sizeof(char) * len;
+
+    postPushInst();
+
+    return th->computeHeight(str, scale, x, *window, lineHeight);
+}
+
 #define GET_VALUE0(__TYPE, __VAR, __PTR) __TYPE __VAR = *reinterpret_cast<__TYPE*>(_instBuffer + (__PTR)); /* NOLINT(bugprone-macro-parentheses) */ \
                                          (__PTR) += sizeof(__VAR);
 
@@ -236,6 +264,32 @@ DECL_HANDLER(rpRenderText)
     th->renderText(context, str, x, y, scale, color, mat);
 }
 
+DECL_HANDLER(rpRenderTextLineWrapped)
+{
+    GET_VALUE(TextHandler*, th);
+    GET_VALUE(GLfloat, x);
+    GET_VALUE(GLfloat, y);
+    GET_VALUE(GLfloat, scale);
+    GET_VALUE(u8, r);
+    GET_VALUE(u8, g);
+    GET_VALUE(u8, b);
+    GET_VALUE(const Window*, window);
+    GET_VALUE(float, lineHeight);
+    Vector3f color(static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f);
+
+    float* matPtr = reinterpret_cast<float*>(_instBuffer + _instPtr);
+    _instPtr += sizeof(float) * 16;
+    glm::mat4 mat;
+    (void) std::memcpy(reinterpret_cast<void*>(glm::value_ptr(mat)), reinterpret_cast<void*>(matPtr), sizeof(float) * 16);
+
+    GET_VALUE(u32, len);
+
+    char* str = reinterpret_cast<char*>(_instBuffer + _instPtr);
+    _instPtr += sizeof(char) * len;
+
+    th->renderTextLineWrapped(context, str, x, y, scale, color, mat, *window, lineHeight);
+}
+
 void RenderingPipeline::runRenderingCycle() noexcept
 {
     for(u32 ctxIndex = 0; _ctxCtrlsFront[ctxIndex].first && ctxIndex < _ctxCtrlsSize; ++ctxIndex)
@@ -343,6 +397,7 @@ void RenderingPipeline::runRenderingCycle() noexcept
             RP_FUNC_HANDLER(GL_FACE_WINDING, rpGLFaceWinding);
             RP_FUNC_HANDLER(RESIZE_VIEWPORT, rpResizeViewport);
             RP_FUNC_HANDLER(RENDER_TEXT, rpRenderText);
+            RP_FUNC_HANDLER(RENDER_TEXT_LINE_WRAPPED, rpRenderTextLineWrapped);
             RP_FUNC_HANDLER(IMGUI_RENDER, rpImGuiRender);
             default: break;
         }

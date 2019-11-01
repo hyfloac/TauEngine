@@ -41,6 +41,7 @@ public:
 Application* startGame() noexcept;
 
 void tauMain() noexcept;
+i32 tauExitCode() noexcept;
 
 int main(int argCount, char* args[]) noexcept
 {
@@ -62,6 +63,6 @@ int main(int argCount, char* args[]) noexcept
 
     delete app;
 
-    return 0;
+    return tauExitCode();
 }
 #endif

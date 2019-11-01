@@ -42,6 +42,7 @@ Exception* tauGetException() noexcept
 { return ex; }
 
 volatile static bool should_exit = false;
+volatile static i32 exit_code = 0;
 
 bool tauShouldExit() noexcept
 {
@@ -71,6 +72,7 @@ static void runMessageLoop() noexcept
 void tauExit(i32 code) noexcept
 {
     should_exit = true;
+    exit_code = code;
     PostQuitMessage(code);
 }
 #else
@@ -83,6 +85,11 @@ void tauExit(int code) noexcept
     should_exit = true;
 }
 #endif
+
+i32 tauExitCode() noexcept
+{
+    return exit_code;
+}
 
 void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, renderFPS_f renderFPS) noexcept
 {
