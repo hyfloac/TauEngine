@@ -7,7 +7,7 @@
 #include <Safeties.hpp>
 
 class IRenderingContext;
-class IVertexBuffer;
+class IBuffer;
 
 enum class DataType : u8
 {
@@ -33,7 +33,7 @@ class TAU_DLL IBufferDescriptor
 public:
     struct AttributeDescriptor final
     {
-        Ref<IVertexBuffer> buffer;
+        Ref<IBuffer> buffer;
         u32 size;
         DataType type;
         bool normalized;
@@ -48,7 +48,7 @@ protected:
         : _uid(uid), _attribs(attribCount)
     { }
 public:
-    virtual void addAttribute(Ref<IVertexBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept = 0;
+    virtual void addAttribute(Ref<IBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept = 0;
 
     virtual void bind(IRenderingContext& context) noexcept = 0;
 

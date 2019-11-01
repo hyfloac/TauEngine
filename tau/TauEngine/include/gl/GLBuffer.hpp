@@ -4,11 +4,11 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include "model/VertexBuffer.hpp"
+#include "model/IBuffer.hpp"
 
-class TAU_DLL GLVertexBuffer final : public IVertexBuffer
+class TAU_DLL GLBuffer final : public IBuffer
 {
-    DELETE_COPY(GLVertexBuffer);
+    DELETE_COPY(GLBuffer);
 public:
     static GLenum getGLType(Type bt) noexcept;
 
@@ -23,9 +23,9 @@ private:
     GLenum _glUsage;
     GLsizei _count;
 public:
-    GLVertexBuffer(Type type, UsageType usage) noexcept;
+    GLBuffer(Type type, UsageType usage) noexcept;
 
-    ~GLVertexBuffer() noexcept override;
+    ~GLBuffer() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
 

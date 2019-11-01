@@ -23,7 +23,7 @@ void GLBufferDescriptor::attribPointer(const GLuint index, const u32 size, const
     glVertexAttribPointer(index, size, getGLType(type), normalized, stride, pointer);
 }
 
-void GLBufferDescriptor::addAttribute(const Ref<IVertexBuffer> buffer, const u32 size, const DataType type, const bool normalized, const i32 stride, const void* const pointer) noexcept
+void GLBufferDescriptor::addAttribute(const Ref<IBuffer> buffer, const u32 size, const DataType type, const bool normalized, const i32 stride, const void* const pointer) noexcept
 {
     _attribs[_currAttrib++] = { buffer, size, type, normalized, stride, pointer };
 }

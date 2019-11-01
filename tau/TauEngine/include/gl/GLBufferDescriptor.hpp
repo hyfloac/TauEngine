@@ -7,7 +7,7 @@
 #include <Objects.hpp>
 
 #include "model/BufferDescriptor.hpp"
-#include "model/VertexBuffer.hpp"
+#include "model/IBuffer.hpp"
 
 class TAU_DLL GLBufferDescriptor final : public IBufferDescriptor
 {
@@ -33,7 +33,7 @@ public:
           _currAttrib(0)
     { }
 
-    void addAttribute(Ref<IVertexBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept override final;
+    void addAttribute(Ref<IBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept override final;
 
     void bind(IRenderingContext& context) noexcept override final;
 

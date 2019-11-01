@@ -53,10 +53,10 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
         texturesLoaded[vec2Index++] = vertex.textureCoordinate.y();
     }
 
-    _buffers[0] = IVertexBuffer::create(context, IVertexBuffer::Type::ArrayBuffer);
-    _buffers[1] = IVertexBuffer::create(context, IVertexBuffer::Type::ArrayBuffer);
-    _buffers[2] = IVertexBuffer::create(context, IVertexBuffer::Type::ArrayBuffer);
-    _buffers[3] = IVertexBuffer::create(context, IVertexBuffer::Type::ElementArrayBuffer);
+    _buffers[0] = IBuffer::create(context, IBuffer::Type::ArrayBuffer);
+    _buffers[1] = IBuffer::create(context, IBuffer::Type::ArrayBuffer);
+    _buffers[2] = IBuffer::create(context, IBuffer::Type::ArrayBuffer);
+    _buffers[3] = IBuffer::create(context, IBuffer::Type::ElementArrayBuffer);
 
     _buffers[0]->bind(context);
     _buffers[0]->fillBuffer(context, cnt1, cnt3 * sizeof(float), positionsLoaded);

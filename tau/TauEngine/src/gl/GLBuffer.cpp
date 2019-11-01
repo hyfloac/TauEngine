@@ -1,7 +1,7 @@
-#include "gl/GLVertexBuffer.hpp"
+#include "gl/GLBuffer.hpp"
 
-GLVertexBuffer::GLVertexBuffer(const Type type, const UsageType usage) noexcept
-    : IVertexBuffer(type, usage),
+GLBuffer::GLBuffer(const Type type, const UsageType usage) noexcept
+    : IBuffer(type, usage),
       _buffer(),
       _glType(getGLType(type)), _glUsage(getGLUsageType(usage)),
       _count(0)
@@ -9,44 +9,44 @@ GLVertexBuffer::GLVertexBuffer(const Type type, const UsageType usage) noexcept
     glGenBuffers(1, &_buffer);
 }
 
-GLVertexBuffer::~GLVertexBuffer() noexcept
+GLBuffer::~GLBuffer() noexcept
 {
     glDeleteBuffers(1, &_buffer);
 }
 
-void GLVertexBuffer::bind(IRenderingContext& context) noexcept
+void GLBuffer::bind(IRenderingContext& context) noexcept
 {
     glBindBuffer(this->_glType, this->_buffer);
 }
 
-void GLVertexBuffer::unbind(IRenderingContext& context) noexcept
+void GLBuffer::unbind(IRenderingContext& context) noexcept
 {
     glBindBuffer(this->_glType, 0);
 }
 
-void GLVertexBuffer::fillBuffer(IRenderingContext& context, const std::size_t renderCount, const std::ptrdiff_t size, const void* const data) noexcept
+void GLBuffer::fillBuffer(IRenderingContext& context, const std::size_t renderCount, const std::ptrdiff_t size, const void* const data) noexcept
 {
     this->_count = renderCount;
     glBufferData(this->_glType, size, data, this->_glUsage);
 }
 
-void GLVertexBuffer::modifyBuffer(IRenderingContext& context, const std::size_t renderCount, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
+void GLBuffer::modifyBuffer(IRenderingContext& context, const std::size_t renderCount, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
 {
     this->_count = renderCount;
     glBufferSubData(this->_glType, offset, size, data);
 }
 
-void GLVertexBuffer::draw(IRenderingContext& context) noexcept
+void GLBuffer::draw(IRenderingContext& context) noexcept
 {
     glDrawArrays(GL_TRIANGLES, 0, this->_count);
 }
 
-void GLVertexBuffer::drawIndexed(IRenderingContext& context) noexcept
+void GLBuffer::drawIndexed(IRenderingContext& context) noexcept
 {
     glDrawElements(GL_TRIANGLES, this->_count, GL_UNSIGNED_INT, nullptr);
 }
 
-GLenum GLVertexBuffer::getGLType(const Type bt) noexcept
+GLenum GLBuffer::getGLType(const Type bt) noexcept
 {
     switch(bt)
     {
@@ -68,7 +68,7 @@ GLenum GLVertexBuffer::getGLType(const Type bt) noexcept
     }
 }
 
-IVertexBuffer::Type GLVertexBuffer::getType(const GLenum bt) noexcept
+IBuffer::Type GLBuffer::getType(const GLenum bt) noexcept
 {
     switch(bt)
     {
@@ -90,7 +90,7 @@ IVertexBuffer::Type GLVertexBuffer::getType(const GLenum bt) noexcept
     }
 }
 
-GLenum GLVertexBuffer::getGLUsageType(const UsageType usage) noexcept
+GLenum GLBuffer::getGLUsageType(const UsageType usage) noexcept
 {
     switch(usage)
     {
@@ -107,7 +107,7 @@ GLenum GLVertexBuffer::getGLUsageType(const UsageType usage) noexcept
     }
 }
 
-IVertexBuffer::UsageType GLVertexBuffer::getUsageType(const GLenum usage) noexcept
+IBuffer::UsageType GLBuffer::getUsageType(const GLenum usage) noexcept
 {
     switch(usage)
     {

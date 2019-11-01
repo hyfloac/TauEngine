@@ -2,7 +2,7 @@
 
 #include <TauEngine.hpp>
 #include <model/BufferDescriptor.hpp>
-#include <model/VertexBuffer.hpp>
+#include <model/IBuffer.hpp>
 #include <model/OBJLoader.hpp>
 #include <RenderingPipeline.hpp>
 #include <DLL.hpp>
@@ -45,7 +45,7 @@ private:
     // VertexArrayShared _vao;
     Ref<IBufferDescriptor> _bufferDescriptor;
     // VerticeSet _vertices;
-    RefDynArray<Ref<IVertexBuffer>> _buffers;
+    RefDynArray<Ref<IBuffer>> _buffers;
 
 public:
     RenderableObject(IRenderingContext& context, const objl::Mesh& mesh) noexcept;
