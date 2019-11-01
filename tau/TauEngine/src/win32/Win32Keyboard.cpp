@@ -166,7 +166,7 @@ Keyboard::Key Keyboard::convertFromSysVKey(int key) noexcept
     }
     if(key >= _VK_F1 && key <= _VK_F24)
     {
-        return static_cast<Keyboard::Key>(k - _VK_F1);
+        return static_cast<Keyboard::Key>(key - _VK_F1 + static_cast<int>(Keyboard::Key::F1));
     }
 
     switch(key)
