@@ -21,7 +21,8 @@
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\astdio.cpp" />
-    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\camera\Camera.cpp" />
+    <ClCompile Include="src\camera\Camera2D.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\ConsoleHandler.cpp" />
     <ClCompile Include="src\DXRenderingContext.cpp" />
@@ -36,7 +37,7 @@
     <ClCompile Include="src\gl\GLShader.cpp" />
     <ClCompile Include="src\gl\GLTexture.cpp" />
     <ClCompile Include="src\gl\GLUtils.cpp" />
-    <ClCompile Include="src\gl\GLVertexBuffer.cpp" />
+    <ClCompile Include="src\gl\GLBuffer.cpp" />
     <ClCompile Include="src\gl\win32\GLRenderingContext.Win32.cpp" />
     <ClCompile Include="src\I18n.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -62,7 +63,7 @@
     <ClCompile Include="src\maths\Vector3i.cpp" />
     <ClCompile Include="src\maths\Vector4f.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
-    <ClCompile Include="src\VertexBuffer.cpp" />
+    <ClCompile Include="src\IBuffer.cpp" />
     <ClCompile Include="src\VirtualIO.cpp" />
     <ClCompile Include="src\win32\Win32Mouse.cpp" />
     <ClCompile Include="src\win32\Win32Keyboard.cpp" />
@@ -71,7 +72,8 @@
   <ItemGroup>
     <ClInclude Include="include\Application.hpp" />
     <ClInclude Include="include\astdio.h" />
-    <ClInclude Include="include\Camera.hpp" />
+    <ClInclude Include="include\camera\Camera.hpp" />
+    <ClInclude Include="include\camera\Camera2D.hpp" />
     <ClInclude Include="include\Color.hpp" />
     <ClInclude Include="include\console\ConsoleHandler.hpp" />
     <ClInclude Include="include\DLL.hpp" />
@@ -87,7 +89,7 @@
     <ClInclude Include="include\gl\GLProgram.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
     <ClInclude Include="include\gl\GLUtils.hpp" />
-    <ClInclude Include="include\gl\GLVertexBuffer.hpp" />
+    <ClInclude Include="include\gl\GLBuffer.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
@@ -100,6 +102,7 @@
     <ClInclude Include="include\layer\ImGuiLayer.hpp" />
     <ClInclude Include="include\layer\LayerStack.hpp" />
     <ClInclude Include="include\Material.hpp" />
+    <ClInclude Include="include\maths\GlmMatrixTransformExt.hpp" />
     <ClInclude Include="include\maths\Maths.hpp" />
     <ClInclude Include="include\maths\ComponentVector4.hpp" />
     <ClInclude Include="include\maths\Matrix4x4f.hpp" />
@@ -110,7 +113,7 @@
     <ClInclude Include="include\maths\Vector4f.hpp" />
     <ClInclude Include="include\model\BufferDescriptor.hpp" />
     <ClInclude Include="include\model\ModelLoader.hpp" />
-    <ClInclude Include="include\model\VertexBuffer.hpp" />
+    <ClInclude Include="include\model\IBuffer.hpp" />
     <ClInclude Include="include\model\OBJLoader.hpp" />
     <ClInclude Include="include\model\RenderableObject.hpp" />
     <ClInclude Include="include\PhysicsObject.hpp" />
@@ -141,14 +144,10 @@
     <ClInclude Include="include\ui\UIElement.hpp" />
     <ClInclude Include="include\ui\UILayer.hpp" />
     <ClInclude Include="include\WorldObject.hpp" />
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Vector.natvis" />
     <Natvis Include="natvis\Window.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="TauEngine.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\imgui_fragment.glsl" />

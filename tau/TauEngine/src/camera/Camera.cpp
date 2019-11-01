@@ -1,4 +1,4 @@
-#include <Camera.hpp>
+#include "camera/Camera.hpp"
 #include <Windows.h>
 
 void Camera::update(const float fixedDelta) noexcept

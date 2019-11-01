@@ -3,7 +3,6 @@
 #include <gl/GLProgram.hpp>
 #include <shader/GLShader.hpp>
 #include <file/FileUtils.hpp>
-#include "../resource.h"
 #pragma warning(pop)
 
 static GLProgram* _program;
