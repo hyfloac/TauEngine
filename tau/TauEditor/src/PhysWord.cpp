@@ -10,8 +10,8 @@ _T sgn(_T val)
     return (_T(0) < val) - (val < _T(0));
 }
 
-PhysWord::PhysWord(const char* str, const Window& window, const TextHandler& th) noexcept
-    : _str(str), _length(th.computeLength(str, _textScale)),
+PhysWord::PhysWord(const char* str, const Window& window) noexcept
+    : _str(str), _length(0.0f),
       _textPos(0.0f), _textVel(0.0f), _textAcc(0.0f, 0.0f),
       _color(0.0f), _colorVel(0.0f)
 {
@@ -21,6 +21,10 @@ PhysWord::PhysWord(const char* str, const Window& window, const TextHandler& th)
 void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, const glm::mat4& ortho) noexcept
 {
     UNUSED(delta);
+    if(_length == 0.0f)
+    {
+        _length = th.computeLength(_str, _textScale);
+    }
     rp.pushRenderText(&th, _str, _textPos.x(), _textPos.y(), _textScale, static_cast<u8>(_color.x() * 255), static_cast<u8>(_color.y() * 255), static_cast<u8>(_color.z() * 255), ortho);
 }
 

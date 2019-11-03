@@ -29,23 +29,17 @@ public:
 
     // [[nodiscard]] void* getBDHandle(IBufferDescriptor* bufferDescriptor) noexcept override { return null; }
 
-    [[nodiscard]] Ref<IBufferDescriptor> createBufferDescriptor(std::size_t attribCount) noexcept override final { return null; }
+    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount) noexcept override final { return null; }
 
-    [[nodiscard]] void* getBufferDescriptorHandle(IBufferDescriptor* bufferDescriptor) noexcept override { return null; }
+    [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final { return null; }
 
+    void destroyVA(IVertexArray* vertexArray) noexcept override final { }
 
-    // void bindBD(IBufferDescriptor* bufferDescriptor) noexcept override final { }
-    // void unbindBD(IBufferDescriptor* bufferDescriptor) noexcept override final { }
-
-    void destroyBD(IBufferDescriptor* bufferDescriptor) noexcept override final { }
-
-    void clearBDs() noexcept override final { }
+    void clearVAs() noexcept override final { }
 
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept override final;
 protected:
-    bool createContextsShared(void* param, IRenderingContext * *sharers, std::size_t count) noexcept override final { return false; }
-
-    // void initBufferDescriptor(IBufferDescriptor* bufferDescriptor) noexcept override final { }
+    bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 
     RC_IMPL(DXRenderingContext);
 };

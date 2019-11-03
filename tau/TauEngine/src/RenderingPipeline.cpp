@@ -8,11 +8,11 @@
 #include <RenderingPipeline.hpp>
 #include <gl/GLUtils.hpp>
 #include <texture/Texture.hpp>
-#include <model/BufferDescriptor.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Matrix4x4f.hpp>
 #include <imgui/ImGuiGLImpl.hpp>
 #include "system/RenderingContext.hpp"
+#include "model/IVertexArray.hpp"
 
 RenderingPipeline::RenderingPipeline(Window& window, ctxCtrl_f setupParams, void* setupParam, const bool async, const u32 bufferSize, const u32 ctxControlsSize) noexcept
     : _window(window),
@@ -136,18 +136,18 @@ DECL_HANDLER(rpUnbindTexture)
 
 DECL_HANDLER(rpEnableBufferDescriptor)
 {
-    GET_VALUE(IBufferDescriptor*, bufferDescriptor);
+    GET_VALUE(IVertexArray*, vertexArray);
 
-    bufferDescriptor->bind(context);
-    bufferDescriptor->enableAttributes(context);
+    vertexArray->bind(context);
+    vertexArray->preDraw(context);
 }
 
 DECL_HANDLER(rpDisableBufferDescriptor)
 {
-    GET_VALUE(IBufferDescriptor*, bufferDescriptor);
+    GET_VALUE(IVertexArray*, vertexArray);
 
-    bufferDescriptor->disableAttributes(context);
-    bufferDescriptor->unbind(context);
+    vertexArray->postDraw(context);
+    vertexArray->unbind(context);
 }
 
 DECL_HANDLER(rpBindVBO)

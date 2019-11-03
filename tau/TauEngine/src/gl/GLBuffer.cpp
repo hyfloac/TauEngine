@@ -1,10 +1,10 @@
 #include "gl/GLBuffer.hpp"
 
-GLBuffer::GLBuffer(const Type type, const UsageType usage) noexcept
-    : IBuffer(type, usage),
+GLBuffer::GLBuffer(const Type type, const UsageType usage, const std::size_t descriptorCount) noexcept
+    : IBuffer(type, usage, descriptorCount),
       _buffer(),
-      _glType(getGLType(type)), _glUsage(getGLUsageType(usage)),
-      _count(0)
+      _glType(getGLType(type)), _glUsage(getGLUsageType(usage))
+      // _count(0)
 {
     glGenBuffers(1, &_buffer);
 }
@@ -24,26 +24,46 @@ void GLBuffer::unbind(IRenderingContext& context) noexcept
     glBindBuffer(this->_glType, 0);
 }
 
-void GLBuffer::fillBuffer(IRenderingContext& context, const std::size_t renderCount, const std::ptrdiff_t size, const void* const data) noexcept
+void GLBuffer::fillBuffer(IRenderingContext& context, const std::ptrdiff_t size, const void* const data) noexcept
 {
-    this->_count = renderCount;
     glBufferData(this->_glType, size, data, this->_glUsage);
 }
 
-void GLBuffer::modifyBuffer(IRenderingContext& context, const std::size_t renderCount, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
+void GLBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
 {
-    this->_count = renderCount;
     glBufferSubData(this->_glType, offset, size, data);
 }
 
-void GLBuffer::draw(IRenderingContext& context) noexcept
+GLIndexBuffer::GLIndexBuffer(const IBuffer::UsageType usage) noexcept
+    : IIndexBuffer(usage),
+    _buffer(),  _glUsage(GLBuffer::getGLUsageType(usage))
 {
-    glDrawArrays(GL_TRIANGLES, 0, this->_count);
+    glGenBuffers(1, &_buffer);
 }
 
-void GLBuffer::drawIndexed(IRenderingContext& context) noexcept
+GLIndexBuffer::~GLIndexBuffer() noexcept
 {
-    glDrawElements(GL_TRIANGLES, this->_count, GL_UNSIGNED_INT, nullptr);
+    glDeleteBuffers(1, &_buffer);
+}
+
+void GLIndexBuffer::bind(IRenderingContext& context) noexcept
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_buffer);
+}
+
+void GLIndexBuffer::unbind(IRenderingContext& context) noexcept
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void GLIndexBuffer::fillBuffer(IRenderingContext& context, const std::ptrdiff_t size, const void* const data) noexcept
+{
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, this->_glUsage);
+}
+
+void GLIndexBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
+{
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 
 GLenum GLBuffer::getGLType(const Type bt) noexcept

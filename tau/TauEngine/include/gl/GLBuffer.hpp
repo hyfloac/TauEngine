@@ -21,9 +21,8 @@ private:
     GLuint _buffer;
     GLenum _glType;
     GLenum _glUsage;
-    GLsizei _count;
 public:
-    GLBuffer(Type type, UsageType usage) noexcept;
+    GLBuffer(Type type, UsageType usage, std::size_t descriptorCount) noexcept;
 
     ~GLBuffer() noexcept override;
 
@@ -31,11 +30,27 @@ public:
 
     void unbind(IRenderingContext& context) noexcept override;
 
-    void fillBuffer(IRenderingContext& context, std::size_t renderCount, std::ptrdiff_t size, const void* data) noexcept override;
+    void fillBuffer(IRenderingContext& context, std::ptrdiff_t size, const void* data) noexcept override;
 
-    void modifyBuffer(IRenderingContext& context, std::size_t renderCount, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+};
 
-    void draw(IRenderingContext& context) noexcept override;
+class TAU_DLL GLIndexBuffer final : public IIndexBuffer
+{
+    DELETE_COPY(GLIndexBuffer);
+private:
+    GLuint _buffer;
+    GLenum _glUsage;
+public:
+    GLIndexBuffer(IBuffer::UsageType usage) noexcept;
 
-    void drawIndexed(IRenderingContext& context) noexcept override;
+    ~GLIndexBuffer() noexcept override;
+
+    void bind(IRenderingContext& context) noexcept override;
+
+    void unbind(IRenderingContext& context) noexcept override;
+
+    void fillBuffer(IRenderingContext& context, std::ptrdiff_t size, const void* data) noexcept override;
+
+    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 };

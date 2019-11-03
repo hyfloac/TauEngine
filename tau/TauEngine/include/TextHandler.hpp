@@ -24,6 +24,10 @@ class IBufferDescriptor;
 
 struct GlyphCharacter final
 {
+    DEFAULT_COPY(GlyphCharacter);
+    DEFAULT_DESTRUCT(GlyphCharacter);
+public:
+
     Ref<ITexture> texture;
     Vector2f size;
     Vector2f bearing;   // Offset from baseline to left/top of glyph
@@ -36,14 +40,6 @@ struct GlyphCharacter final
     GlyphCharacter(ITexture* _texture, Vector2f _size, Vector2f _bearing, GLuint _advance) noexcept
         : texture(_texture), size(_size), bearing(_bearing), advance(_advance)
     { }
-
-    ~GlyphCharacter() noexcept = default;
-
-    GlyphCharacter(const GlyphCharacter& copy) noexcept = default;
-    GlyphCharacter(GlyphCharacter&& move) noexcept = default;
-
-    GlyphCharacter& operator =(const GlyphCharacter& copy) noexcept = default;
-    GlyphCharacter& operator =(GlyphCharacter&& move) noexcept = default;
 };
 
 class TAU_DLL TextHandler final
@@ -58,7 +54,7 @@ private:
     GLProgram _program;
     GLShader  _vertexShader;
     GLShader  _fragmentShader;
-    Ref<IBufferDescriptor> _bufferDescriptor;
+    Ref<IVertexArray> _va;
     Ref<IBuffer> _vertexBuffer;
     GLuint _projUni;
     GLuint _texUni;

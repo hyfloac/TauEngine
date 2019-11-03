@@ -97,10 +97,10 @@ bool SharedRenderingContexts::createContexts(void* param) noexcept
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void SharedRenderingContexts::destroyBD(IBufferDescriptor* bufferDescriptor) noexcept
+void SharedRenderingContexts::destroyBD(IVertexArray* vertexArray) noexcept
 {
     for(std::size_t i = 0; i < _count; ++i)
     {
-        _contexts[i]->destroyBD(bufferDescriptor);
+        _contexts[i]->destroyVA(vertexArray);
     }
 }

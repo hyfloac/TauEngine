@@ -21,7 +21,7 @@
 
 #define RC_IMPL(_TYPE) RC_IMPL_BASE(_TYPE)
 
-class IBufferDescriptor;
+class IVertexArray;
 
 class SharedRenderingContexts;
 class SharedRenderingContextsContainer;
@@ -57,16 +57,13 @@ public:
 
     virtual void activateContext() noexcept = 0;
 
-    [[nodiscard]] virtual Ref<IBufferDescriptor> createBufferDescriptor(std::size_t attribCount) noexcept = 0;
+    [[nodiscard]] virtual Ref<IVertexArray> createVertexArray(std::size_t attribCount) noexcept = 0;
 
-    [[nodiscard]] virtual void* getBufferDescriptorHandle(IBufferDescriptor* bufferDescriptor) noexcept = 0;
+    [[nodiscard]] virtual void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept = 0;
 
-    // virtual void bindBD(IBufferDescriptor* bufferDescriptor) noexcept = 0;
-    // virtual void unbindBD(IBufferDescriptor* bufferDescriptor) noexcept = 0;
+    virtual void destroyVA(IVertexArray* vertexArray) noexcept = 0;
 
-    virtual void destroyBD(IBufferDescriptor* bufferDescriptor) noexcept = 0;
-
-    virtual void clearBDs() noexcept = 0;
+    virtual void clearVAs() noexcept = 0;
 
     virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) noexcept = 0;
 
@@ -77,12 +74,10 @@ public:
     { return _T::getStaticType() == getContextType(); }
 
     template<typename _T>
-    [[nodiscard]] _T* getBufferDescriptorHandle(IBufferDescriptor* bufferDescriptor) noexcept
-    { return reinterpret_cast<_T*>(getBufferDescriptorHandle(bufferDescriptor)); }
+    [[nodiscard]] _T* getVertexArrayHandle(IVertexArray* vertexArray) noexcept
+    { return reinterpret_cast<_T*>(getVertexArrayHandle(vertexArray)); }
 protected:
     virtual bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept = 0;
-
-    // virtual void initBufferDescriptor(IBufferDescriptor* bufferDescriptor) noexcept = 0;
 private:
     friend class SharedRenderingContexts;
 };
@@ -117,7 +112,7 @@ public:
 
     [[nodiscard]] bool createContexts(void* param) noexcept;
 
-    void destroyBD(IBufferDescriptor* bufferDescriptor) noexcept;
+    void destroyBD(IVertexArray* vertexArray) noexcept;
 };
 
 class TAU_DLL SharedRenderingContextsContainer

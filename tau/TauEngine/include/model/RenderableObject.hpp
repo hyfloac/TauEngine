@@ -43,9 +43,9 @@ class TAU_DLL RenderableObject final
     DEFAULT_COPY(RenderableObject);
 private:
     // VertexArrayShared _vao;
-    Ref<IBufferDescriptor> _bufferDescriptor;
+    Ref<IVertexArray> _va;
     // VerticeSet _vertices;
-    RefDynArray<Ref<IBuffer>> _buffers;
+    // RefDynArray<Ref<IBuffer>> _buffers;
 
 public:
     RenderableObject(IRenderingContext& context, const objl::Mesh& mesh) noexcept;
@@ -58,11 +58,11 @@ public:
     // void render(RenderingPipeline& rp) const noexcept;
     // void postRender(RenderingPipeline& rp) const noexcept;
 
-    inline size_t hashCode() const noexcept { return reinterpret_cast<size_t>(_bufferDescriptor.get()); }
+    inline size_t hashCode() const noexcept { return reinterpret_cast<size_t>(_va.get()); }
     // inline GLuint getVAO() const noexcept { return _vao.array(); }
     // inline const VerticeSet& getVerticeSet() const noexcept { return _vertices; }
 
-    inline bool operator ==(const RenderableObject& other) const noexcept { return _bufferDescriptor.get() == other._bufferDescriptor.get(); }
+    inline bool operator ==(const RenderableObject& other) const noexcept { return _va.get() == other._va.get(); }
     inline bool operator !=(const RenderableObject& other) const noexcept { return !(*this == other); }
 };
 

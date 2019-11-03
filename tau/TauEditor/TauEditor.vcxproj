@@ -342,7 +342,6 @@
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\ConsoleLayer.hpp" />
     <ClInclude Include="include\EditorApplication.hpp" />
-    <ClInclude Include="include\Item.hpp" />
     <ClInclude Include="include\PhysWord.hpp" />
     <ClInclude Include="include\PhysWordLayer.hpp" />
     <ClInclude Include="include\State.hpp" />

@@ -22,7 +22,7 @@
 
 class TextHandler;
 class ITexture;
-class IBufferDescriptor;
+class IVertexArray;
 struct ImDrawData;
 class IRenderingContext;
 
@@ -139,17 +139,17 @@ public:
         postPushInst();
     }
 
-    void pushEnableBufferDescriptor(const IBufferDescriptor* bufferDescriptor) noexcept
+    void pushEnableBufferDescriptor(const IVertexArray* vertexArray) noexcept
     {
         prePushInst<RenderingOpcode::ENABLE_BUFFER_DESCRIPTOR>();
-        LOAD_VALUE(bufferDescriptor);
+        LOAD_VALUE(vertexArray);
         postPushInst();
     }
     
-    void pushDisableBufferDescriptor(const IBufferDescriptor* bufferDescriptor) noexcept
+    void pushDisableBufferDescriptor(const IVertexArray* vertexArray) noexcept
     {
         prePushInst<RenderingOpcode::DISABLE_BUFFER_DESCRIPTOR>();
-        LOAD_VALUE(bufferDescriptor);
+        LOAD_VALUE(vertexArray);
         postPushInst();
     }
     

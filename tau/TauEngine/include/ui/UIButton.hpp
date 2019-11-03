@@ -4,6 +4,7 @@
 #include "maths/Vector3f.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "model/IBuffer.hpp"
+#include "model/IVertexArray.hpp"
 #include "system/RenderingContext.hpp"
 
 class Window;
@@ -38,13 +39,13 @@ protected:
     u32 _height;
     Vector3f _color;
     Ref<IBuffer> _vbo;
-    Ref<IBufferDescriptor> _vao;
+    Ref<IVertexArray> _vao;
 protected:
     [[nodiscard]] virtual bool isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept override;
 public:
     UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent = nullptr, bool visible = true) noexcept
         : UIButton(clickHandler, x, y, parent, visible), _width(width), _height(height), _color(color),
-          _vbo(IBuffer::create(context, IBuffer::Type::ArrayBuffer)), _vao(context.createBufferDescriptor(1))
+          _vbo(IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer)), _vao(context.createVertexArray(1))
     {
         const float xx = static_cast<float>(x);
         const float yy = static_cast<float>(y);
@@ -61,8 +62,11 @@ public:
             xx + ww, yy + hh
         };
 
-        _vbo->fillBuffer(context, 6, 12 * sizeof(float), model);
-        _vao->addAttribute(_vbo, 2, DataType::Float, false, 0, nullptr);
+        _vbo->fillBuffer(context, 12 * sizeof(float), model);
+        _vbo->descriptor().addDescriptor({ ShaderDataType::Vector2Float });
+        _vao->addVertexBuffer(context, _vbo);
+        _vao->drawCount() = 6;
+        // _vao->addAttribute(_vbo, 2, DataType::Float, false, 0, nullptr);
     }
 
     [[nodiscard]] u32 width() const noexcept { return _width; }

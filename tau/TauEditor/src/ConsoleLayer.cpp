@@ -26,6 +26,7 @@ void ConsoleLayer::print(const DynString& str) noexcept
 
 void ConsoleLayer::onRender(const float delta) noexcept
 {
+    UNUSED(delta);
     if(_visible)
     {
         const float textOffset = 40.0f * _textScale;
@@ -33,20 +34,20 @@ void ConsoleLayer::onRender(const float delta) noexcept
         float y = static_cast<float>(_window.height() - textOffset);
 
         if(_columnMarker)
-        {
-            _inputBuilder.append('|');
-        }
+        { _inputBuilder.append('|'); }
+        else
+        { _inputBuilder.append(' '); }
         y += _rp.pushRenderTextLineWrapped(&_th, _inputBuilder.c_str(), 0.0f, y, _textScale, 0, 255, 255, &_window, -textOffset, _ortho);
-        if(_columnMarker)
-        {
-            _inputBuilder.backspace();
-        }
+        _inputBuilder.backspace();
+
         if(_lineBuilder.length() > 0)
         {
             y += _rp.pushRenderTextLineWrapped(&_th, _lineBuilder.c_str(), 0.0f, y, _textScale, 0, 120, 255, &_window, -textOffset, _ortho);
         }
 
-        for(auto it = _strings.rbegin(); it != _strings.rend(); ++it)
+        auto it = _strings.rbegin();
+
+        for(; it != _strings.rend(); ++it)
         {
             y += _rp.pushRenderTextLineWrapped(&_th, *it, 0.0f, y, _textScale, 255, 255, 255, &_window, -textOffset, _ortho);
             if(y - textOffset < maxY)
@@ -59,6 +60,7 @@ void ConsoleLayer::onRender(const float delta) noexcept
 
 void ConsoleLayer::onUpdate(const float fixedDelta) noexcept
 {
+    UNUSED(fixedDelta);
     static u64 _count = 0;
     ++_count;
     if(_count >= 16)
@@ -96,8 +98,12 @@ bool ConsoleLayer::onKeyPress(WindowKeyEvent& e) noexcept
             if(_inputBuilder.length() > 0)
             {
                 const DynString command = _inputBuilder.toString();
-                _ch.runCommand(command.c_str());
                 _strings.push_back(command);
+                const i32 ret = _ch.runCommand(command.c_str());
+                if(ret == NO_COMMAND_FOUND)
+                {
+                    _ch.println("Command not found.");
+                }
                 _inputBuilder.reset();
             }
         }
@@ -148,6 +154,7 @@ void ConsoleLayer::cPrintF(ConsoleLayer* cLayer, const char* fmt, va_list args) 
 
 i32 SetTextScaleCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
 {
+    UNUSED(commandName);
     if(argCount == 1)
     {
         ParseIntError error;
@@ -160,6 +167,7 @@ i32 SetTextScaleCommand::execute(const char* commandName, const char* args[], u3
 
 i32 SetExclusiveCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
 {
+    UNUSED(commandName);
     if(argCount == 1)
     {
         const BoolFromStr exclusive = consoleHandler->parseBool(args[0]);
@@ -176,6 +184,7 @@ i32 SetExclusiveCommand::execute(const char* commandName, const char* args[], u3
 
 i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
 {
+    UNUSED(commandName);
     if(argCount >= 1)
     {
         if(strcmp(args[0], "reset") == 0)

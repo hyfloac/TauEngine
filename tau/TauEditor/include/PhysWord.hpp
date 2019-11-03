@@ -20,7 +20,7 @@ private:
     Vector3f _color;
     Vector3f _colorVel;
 public:
-    PhysWord(const char* str, const Window& window, const TextHandler& th) noexcept;
+    PhysWord(const char* str, const Window& window) noexcept;
 
     void render(const float delta, RenderingPipeline& rp, TextHandler& th, const glm::mat4& ortho) noexcept;
 

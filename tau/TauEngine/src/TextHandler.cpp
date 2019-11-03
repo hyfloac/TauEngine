@@ -5,12 +5,13 @@
 #include <model/BufferDescriptor.hpp>
 #include <utility>
 #include "VFS.hpp"
+#include "model/IVertexArray.hpp"
 
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
-    : _ready(false), _ft(null), _face(null), _data(), _chars(new GlyphCharacter[95]),
+    : _ready(false), _ft(null), _face(null), _data(), _chars(new GlyphCharacter[95]), _program(),
       _vertexShader(ShaderType::VERTEX, vertexPath, &_program), _fragmentShader(ShaderType::FRAGMENT, fragmentPath, &_program),
-      _bufferDescriptor(context.createBufferDescriptor(1)),
-      _vertexBuffer(IBuffer::create(context, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)), //_vbo(0),
+      _va(context.createVertexArray(1)),
+      _vertexBuffer(IBuffer::create(context, 2, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
       _projUni(0), _texUni(0), _colorUni(0)
 { 
     _vertexShader.loadShader();
@@ -22,11 +23,19 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     _colorUni = _fragmentShader.createUniform("textColor");
 
     _vertexBuffer->bind(context);
-    _vertexBuffer->fillBuffer(context, 6, sizeof(GLfloat) * 6 * 4, null);
-
-    _bufferDescriptor->addAttribute(_vertexBuffer, 4, DataType::Float, false, 4 * sizeof(float), null);
-
+    _vertexBuffer->fillBuffer(context, sizeof(GLfloat) * 4 * 6, null);
+    _vertexBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    _vertexBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
     _vertexBuffer->unbind(context);
+    _va->addVertexBuffer(context, _vertexBuffer);
+    _va->drawCount() = 6;
+
+    // _vertexBuffer->bind(context);
+    // _vertexBuffer->fillBuffer(context, 6, sizeof(GLfloat) * 6 * 4, null);
+
+    // _bufferDescriptor->addAttribute(_vertexBuffer, 4, DataType::Float, false, 4 * sizeof(float), null);
+    //
+    // _vertexBuffer->unbind(context);
 }
 
 TextHandler::~TextHandler() noexcept
@@ -125,8 +134,11 @@ void TextHandler::renderText(IRenderingContext& context, const char* str, float 
     _vertexShader.setUniform(_texUni, 0);
     _vertexShader.setUniform(_colorUni, color);
 
-    _bufferDescriptor->bind(context);
-    _bufferDescriptor->enableAttributes(context);
+    _va->bind(context);
+    _va->preDraw(context);
+
+    // _bufferDescriptor->bind(context);
+    // _bufferDescriptor->enableAttributes(context);
 
     glFrontFace(GL_CCW);
 
@@ -154,17 +166,21 @@ void TextHandler::renderText(IRenderingContext& context, const char* str, float 
         gc->texture->bind(0);
 
         _vertexBuffer->bind(context);
-        _vertexBuffer->modifyBuffer(context, 6, 0, sizeof(vertices), vertices);
+        _vertexBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
         _vertexBuffer->unbind(context);
 
-        _vertexBuffer->draw(context);
+        _va->draw(context);
+
+        gc->texture->unbind(0);
 
         x += (gc->advance >> 6) * scale;
     }
 
-    _bufferDescriptor->disableAttributes(context);
-    _bufferDescriptor->unbind(context);
-    _chars[0].texture->unbind(0);
+    // _bufferDescriptor->disableAttributes(context);
+    // _bufferDescriptor->unbind(context);
+    _va->postDraw(context);
+    _va->unbind(context);
+    // _chars[0].texture->unbind(0);
     GLProgram::deactivate();
 }
 
@@ -176,8 +192,11 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char*
     _vertexShader.setUniform(_texUni, 0);
     _vertexShader.setUniform(_colorUni, color);
 
-    _bufferDescriptor->bind(context);
-    _bufferDescriptor->enableAttributes(context);
+    _va->bind(context);
+    _va->preDraw(context);
+
+    // _bufferDescriptor->bind(context);
+    // _bufferDescriptor->enableAttributes(context);
 
     glFrontFace(GL_CCW);
 
@@ -191,7 +210,7 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char*
         if(c < 32 || c > 126) { continue; }
         const GlyphCharacter* gc = &_chars[c - 32];
 
-        const float advance = (gc->advance >> 6)* scale;
+        const float advance = (gc->advance >> 6) * scale;
         if(x + advance > maxX)
         {
             x = initialX;
@@ -218,17 +237,21 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char*
         gc->texture->bind(0);
 
         _vertexBuffer->bind(context);
-        _vertexBuffer->modifyBuffer(context, 6, 0, sizeof(vertices), vertices);
+        _vertexBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
         _vertexBuffer->unbind(context);
 
-        _vertexBuffer->draw(context);
+        _va->draw(context);
+
+        gc->texture->unbind(0);
 
         x += advance;
     }
 
-    _bufferDescriptor->disableAttributes(context);
-    _bufferDescriptor->unbind(context);
-    _chars[0].texture->unbind(0);
+    // _bufferDescriptor->disableAttributes(context);
+    // _bufferDescriptor->unbind(context);
+
+    _va->postDraw(context);
+    _va->unbind(context);
     GLProgram::deactivate();
 
     return height;
@@ -262,7 +285,7 @@ float TextHandler::computeHeight(const char* str, float scale, float x, const Wi
         if(c < 32 || c > 126) { continue; }
         const GlyphCharacter* gc = &_chars[c - 32];
 
-        const float advance = (gc->advance >> 6)* scale;
+        const float advance = (gc->advance >> 6) * scale;
         if(x + advance > maxX)
         {
             x = initialX;

@@ -7,7 +7,7 @@ PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window,
 {
     for(size_t i = 0; i < wordCount; ++i)
     {
-        _physWords.emplace_back(word, _window, _th);
+        _physWords.emplace_back(word, _window);
     }
 }
 

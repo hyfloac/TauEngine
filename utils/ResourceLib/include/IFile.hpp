@@ -76,6 +76,14 @@ public:
 
     virtual i64 writeString(const char* str) noexcept
     { return writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str)); }
+
+    template<typename _T>
+    i64 readType(_T* t) noexcept
+    { return readBytes(reinterpret_cast<u8*>(t), sizeof(_T)); }
+
+    template<typename _T>
+    i64 writeType(const _T& t) noexcept
+    { return writeBytes(reinterpret_cast<u8*>(&t), sizeof(_T)); }
 };
 
 /**
