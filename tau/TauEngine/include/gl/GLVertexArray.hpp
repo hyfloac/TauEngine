@@ -6,8 +6,6 @@
 class TAU_DLL GLVertexArray final : public IVertexArray
 {
     DELETE_COPY(GLVertexArray);
-private:
-    u32 _uid;
 public:
     static GLuint generate() noexcept;
 
@@ -17,7 +15,7 @@ public:
     
     static GLenum getGLType(ShaderDataType::Type type) noexcept;
 public:
-    GLVertexArray(std::size_t bufferCount, u32 uid);
+    GLVertexArray(std::size_t bufferCount);
 
     ~GLVertexArray() noexcept override;
 

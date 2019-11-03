@@ -17,8 +17,8 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const std::size_t bufferCount, const u32 uid)
-    : IVertexArray(bufferCount), _uid(uid)
+GLVertexArray::GLVertexArray(const std::size_t bufferCount)
+    : IVertexArray(bufferCount)
 { }
 
 GLVertexArray::~GLVertexArray() noexcept = default;

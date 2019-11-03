@@ -18,7 +18,7 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool deb
 
 Ref<IVertexArray> GLRenderingContext::createVertexArray(std::size_t attribCount) noexcept
 {
-    return Ref<IVertexArray>(new(std::nothrow) GLVertexArray(getVAUid(), attribCount));
+    return Ref<IVertexArray>(new(std::nothrow) GLVertexArray(attribCount));
 }
 
 void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexcept
@@ -133,10 +133,4 @@ void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
                  static_cast<float>(color.b) / 255.0f,
                  static_cast<float>(color.a) / 255.0f);
     glClear(flags);
-}
-
-u32 GLRenderingContext::getVAUid() noexcept
-{
-    static u32 uid = 0;
-    return ++uid;
 }

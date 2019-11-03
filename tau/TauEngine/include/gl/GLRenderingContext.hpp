@@ -53,7 +53,5 @@ protected:
 private:
     void handleCtxError(int profileMask) const noexcept;
 
-    static u32 getVAUid() noexcept;
-
     RC_IMPL(GLRenderingContext);
 };
