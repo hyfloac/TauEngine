@@ -9,101 +9,69 @@
 #include <RenderingMode.hpp>
 #include "VFS.hpp"
 
-ITexture* loadTexture(const char* RESTRICT filename, const bool smooth, TextureLoadError* RESTRICT const error, i32 mipmapLevel) noexcept
+static ITexture* _missingTexture = null;
+
+void TextureLoader::setMissingTexture(ITexture* missingTexture) noexcept
 {
-#define ERR_EXIT(__ERR, __CHECK) if((__CHECK)) { *error = __ERR; return nullptr; }
+    _missingTexture = missingTexture;
+}
 
-    const VFS::Container physPath = VFS::Instance().resolvePath(filename);
+ITexture* TextureLoader::generateMissingTexture() noexcept
+{
+    u8* const textureData = new u8[2 * 2 * 3];
 
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.path.length() == 0);
+    textureData[0 * 3 + 0] = 0xFF;
+    textureData[0 * 3 + 1] = 0x00;
+    textureData[0 * 3 + 2] = 0xFF;
 
-    filename = physPath.path.c_str();
+    textureData[1 * 3 + 0] = 0x00;
+    textureData[1 * 3 + 1] = 0x00;
+    textureData[1 * 3 + 2] = 0x00;
 
-    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename);
+    textureData[2 * 3 + 0] = 0xFF;
+    textureData[2 * 3 + 1] = 0x00;
+    textureData[2 * 3 + 2] = 0xFF;
 
-    if(format == FIF_UNKNOWN)
-    {
-        format = FreeImage_GetFIFFromFilename(filename);
-        ERR_EXIT(TextureLoadError::UNKNOWN_FORMAT, format == FIF_UNKNOWN)
-    }
+    textureData[3 * 3 + 0] = 0x00;
+    textureData[3 * 3 + 1] = 0x00;
+    textureData[3 * 3 + 2] = 0x00;
 
-    FIBITMAP* texture = null;
-
-    if(FreeImage_FIFSupportsReading(format)) { texture = FreeImage_Load(format, filename); }
-
-    ERR_EXIT(TextureLoadError::TEXTURE_FAILED_TO_LOAD, !texture);
-
-    BYTE*     textureData  = FreeImage_GetBits(texture);
-    const u32 width        = FreeImage_GetWidth(texture);
-    const u32 height       = FreeImage_GetHeight(texture);
-    const u32 bitsPerPixel = FreeImage_GetBPP(texture);
-
-    ERR_EXIT(TextureLoadError::NULL_TEXTURE_DATA, !textureData);
-    ERR_EXIT(TextureLoadError::NULL_WIDTH, !width);
-    ERR_EXIT(TextureLoadError::NULL_HEIGHT, !height);
-    ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_SMALL, bitsPerPixel < 8);
-    ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_LARGE, bitsPerPixel > 32);
-
-    RenderingMode rm(RenderingMode::Mode::OpenGL4);
-    ITexture* ret = ITexture::create(rm);
+    const RenderingMode rm(RenderingMode::Mode::OpenGL4);
+    ITexture* const ret = ITexture::create(rm, TextureType::TEXTURE_2D);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if(smooth)
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    }
-    else
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    bool genMipmaps = false;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
 
-    if(mipmapLevel < 0)
-    {
-        genMipmaps = true;
-        mipmapLevel = 0;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, mipmapLevel, GL_RGBA8, width, height, 0, bitsPerPixel > 24 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, textureData);
-
-    if(genMipmaps)
-    {
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-
-    FreeImage_Unload(texture);
-
-    *error = TextureLoadError::NONE;
+    delete[] textureData;
 
     return ret;
-#undef ERR_EXIT
 }
 
-ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRICT const error, GPUTextureSettings&& settings) noexcept
+ITexture* TextureLoader::loadTextureEx(const char* RESTRICT fileName, GPUTextureSettings&& settings, TextureLoadError* RESTRICT const error) noexcept
 {
-#define ERR_EXIT(__ERR, __CHECK) if((__CHECK)) { *error = __ERR; return nullptr; }
+#define ERR_EXIT(__ERR, __CHECK) if((__CHECK)) { if(error) { *error = __ERR; } return _missingTexture; }
 
-    const VFS::Container physPath = VFS::Instance().resolvePath(filename);
+    const VFS::Container physPath = VFS::Instance().resolvePath(fileName);
 
     ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.path.length() == 0);
 
-    filename = physPath.path.c_str();
+    fileName = physPath.path.c_str();
 
-    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename);
+    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName);
 
     if(format == FIF_UNKNOWN)
     {
-        format = FreeImage_GetFIFFromFilename(filename);
+        format = FreeImage_GetFIFFromFilename(fileName);
         ERR_EXIT(TextureLoadError::UNKNOWN_FORMAT, format == FIF_UNKNOWN)
     }
 
     FIBITMAP* texture = null;
 
-    if(FreeImage_FIFSupportsReading(format)) { texture = FreeImage_Load(format, filename); }
+    if(FreeImage_FIFSupportsReading(format)) { texture = FreeImage_Load(format, fileName); }
 
     ERR_EXIT(TextureLoadError::TEXTURE_FAILED_TO_LOAD, !texture);
 
@@ -134,7 +102,7 @@ ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRIC
     }
 
     const RenderingMode rm(RenderingMode::Mode::OpenGL4);
-    ITexture* ret = ITexture::create(rm, settings.textureType);
+    ITexture* const ret = ITexture::create(rm, settings.textureType);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -150,7 +118,7 @@ ITexture* loadTextureEx(const char* RESTRICT filename, TextureLoadError* RESTRIC
 
     FreeImage_Unload(texture);
 
-    *error = TextureLoadError::NONE;
+    if(error) { *error = TextureLoadError::NONE; }
 
     return ret;
 #undef ERR_EXIT
