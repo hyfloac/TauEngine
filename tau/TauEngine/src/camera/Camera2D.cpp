@@ -1,7 +1,7 @@
 #include "camera/Camera2D.hpp"
-#include <glm/gtc/matrix_transform.hpp>
 #include "maths/GlmMatrixTransformExt.hpp"
-#include <system/Window.hpp>
+#include "system/Window.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 Camera2D::Camera2D(const Window& window, float bottom, float left) noexcept
     : _position(0.0f), _rotation(0.0f),

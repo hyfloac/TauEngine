@@ -5,7 +5,7 @@
 #include <model/RenderableObject.hpp>
 #include <gl/GLProgram.hpp>
 #include <WorldObject.hpp>
-#include <shader/GLShader.hpp>
+#include <gl/GLShader.hpp>
 #include <vector>
 #include <Utils.hpp>
 

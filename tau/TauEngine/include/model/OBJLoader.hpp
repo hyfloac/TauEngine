@@ -147,8 +147,8 @@ namespace objl
 
         Mesh() noexcept = default;
 
-        Mesh(std::vector<Vertex>& _vertices, std::vector<u32> _indices) noexcept
-            : vertices(_vertices), indices(std::move(_indices))
+        Mesh(std::vector<Vertex>& _vertices, std::vector<u32>& _indices) noexcept
+            : vertices(_vertices), indices(_indices)
         { }
     };
 

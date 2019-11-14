@@ -4,31 +4,10 @@
 #include "system/RenderingContext.hpp"
 #include "model/IVertexArray.hpp"
 
-// VerticeSet::VerticeSet(const VertexBufferShared& _positions,
-//                        const VertexBufferShared& _normals,
-//                        const VertexBufferShared& _textures,
-//                        const VertexBufferShared& _indices) noexcept
-//     : positions(_positions),
-//       normals(_normals),
-//       textures(_textures),
-//       indices(_indices)
-// { }
-//
-// VerticeSet::VerticeSet(VertexBufferShared&& _positions,
-//                        VertexBufferShared&& _normals,
-//                        VertexBufferShared&& _textures,
-//                        VertexBufferShared&& _indices) noexcept
-//     : positions(_positions),
-//       normals(_normals),
-//       textures(_textures),
-//       indices(_indices)
-// { }
 
 RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh) noexcept
-    : _va(context.createVertexArray(3))//, _buffers(4)//, _vertices(BufferType::ArrayBuffer, BufferType::ArrayBuffer, BufferType::ArrayBuffer, BufferType::ElementArrayBuffer)
+    : _va(context.createVertexArray(3))
 {
-    // _vao->bind(null);
-
     const size_t cnt1 = mesh.vertices.size();
     const size_t cnt2 = cnt1 + cnt1;
     const size_t cnt3 = cnt2 + cnt1;
@@ -37,20 +16,22 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     DynArray<float> normalsLoaded(cnt3);
     DynArray<float> texturesLoaded(cnt2);
 
-    u32 vec3Index = 0;
-    u32 vec2Index = 0;
+    u32 posIndex = 0;
+    u32 normIndex = 0;
+    u32 texIndex = 0;
 
     for(objl::Vertex vertex : mesh.vertices)
     {
-        normalsLoaded[vec3Index]     = vertex.normal.x();
-        positionsLoaded[vec3Index++] = vertex.position.x();
-        normalsLoaded[vec3Index]     = vertex.normal.y();
-        positionsLoaded[vec3Index++] = vertex.position.y();
-        normalsLoaded[vec3Index]     = vertex.normal.z();
-        positionsLoaded[vec3Index++] = vertex.position.z();
+        positionsLoaded[posIndex++] = vertex.position.x();
+        positionsLoaded[posIndex++] = vertex.position.y();
+        positionsLoaded[posIndex++] = vertex.position.z();
 
-        texturesLoaded[vec2Index++] = vertex.textureCoordinate.x();
-        texturesLoaded[vec2Index++] = vertex.textureCoordinate.y();
+        normalsLoaded[normIndex++] = vertex.normal.x();
+        normalsLoaded[normIndex++] = vertex.normal.y();
+        normalsLoaded[normIndex++] = vertex.normal.z();
+
+        texturesLoaded[texIndex++] = vertex.textureCoordinate.x();
+        texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
     }
 
     Ref<IBuffer> positions = IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer);
@@ -122,7 +103,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
 
 void RenderableObject::preRender(IRenderingContext& context) const noexcept
 {
-    glFrontFace(GL_CW);
+    glFrontFace(GL_CCW);
     _va->bind(context);
     _va->preDraw(context);
     // _bufferDescriptor->bind(context);
@@ -140,7 +121,7 @@ void RenderableObject::postRender(IRenderingContext& context) const noexcept
     // _bufferDescriptor->unbind(context);
     _va->postDraw(context);
     _va->unbind(context);
-    glFrontFace(GL_CCW);
+    glFrontFace(GL_CW);
 }
 
 // void RenderableObject::preRender(RenderingPipeline& rp) const noexcept
