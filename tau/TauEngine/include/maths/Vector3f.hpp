@@ -130,14 +130,36 @@ public:
         return *this;
     }
 
-    Vector3f addC(const Vector3f vec) const noexcept
+    Vector3f& mul(const Vector3f vec) noexcept
+    {
+        this->_data.vec = _mm_mul_ps(this->_data.vec, vec._data.vec);
+        return *this;
+    }
+
+    Vector3f& div(const Vector3f vec) noexcept
+    {
+        this->_data.vec = _mm_div_ps(this->_data.vec, vec._data.vec);
+        return *this;
+    }
+
+    [[nodiscard]] Vector3f addC(const Vector3f vec) const noexcept
     {
         return Vector3f(_mm_add_ps(this->_data.vec, vec._data.vec));
     }
 
-    Vector3f subC(const Vector3f vec) const noexcept
+    [[nodiscard]] Vector3f subC(const Vector3f vec) const noexcept
     {
         return Vector3f(_mm_sub_ps(this->_data.vec, vec._data.vec));
+    }
+
+    [[nodiscard]] Vector3f mulC(const Vector3f vec) const noexcept
+    {
+        return Vector3f(_mm_mul_ps(this->_data.vec, vec._data.vec));
+    }
+
+    [[nodiscard]] Vector3f divC(const Vector3f vec) const noexcept
+    {
+        return Vector3f(_mm_div_ps(this->_data.vec, vec._data.vec));
     }
 
     Vector3f& add(const float scalar) noexcept
