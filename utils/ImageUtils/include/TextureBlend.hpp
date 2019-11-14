@@ -187,3 +187,27 @@ TextureBlend* filterImage(const _Img0* const img0) noexcept
 
     return new TextureBlend(new Texture(img0->width, img0->height, ret, 32));
 }
+
+template<int _Size>
+TextureBlend* createDebug() noexcept
+{
+    const u32 len = _Size * _Size;
+    u8* const ret = new u8[len * 4];
+    // u32* ret0 = reinterpret_cast<u32*>(ret);
+
+    for(u32 i = 0; i < len; ++i)
+    {
+        const u32 x = i / _Size;
+        const u32 y = i % _Size;
+        const char r = static_cast<char>((255 * x) / _Size);
+        const char g = static_cast<char>((255 * y) / _Size);
+        const char b = static_cast<char>((255 * i) / len);
+
+        ret[i * 4 + 0] = 255 - b;
+        ret[i * 4 + 1] = g;
+        ret[i * 4 + 2] = r;
+        ret[i * 4 + 3] = 0xFF;
+    }
+
+    return new TextureBlend(new Texture(_Size, _Size, ret, 32));
+}
