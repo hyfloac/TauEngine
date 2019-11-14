@@ -19,6 +19,8 @@ void tauMain() noexcept;
 
 TAU_DLL void tauThrowException(Exception& e) noexcept;
 
+#define TAU_THROW(_TYPE, ...) tauThrowException(*new _TYPE(__VA_ARGS__))
+
 TAU_DLL Exception* tauGetException() noexcept;
 
 // /**

@@ -19,19 +19,17 @@ void ResourceLoader::update() noexcept
     }
 }
 
-ResourceLoader::FutureData loadFileAsync(Ref<IFile> file, ResourceLoader::parseFile_f parseFile, void* parseParam, ResourceLoader::finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
+static ResourceLoader::FutureData loadFileAsync(const Ref<IFile>& file, ResourceLoader::parseFile_f parseFile, void* parseParam, ResourceLoader::finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
 {
     const RefDynArray<u8> fileData = file->readFile();
     void* fileParse = parseFile(fileData, parseParam);
     return { fileParse, finalizeParam, finalizeLoad };
 }
 
-void ResourceLoader::loadFile(Ref<IFile> file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
+void ResourceLoader::loadFile(const Ref<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
 {
     if(!file || !parseFile || !finalizeLoad)
-    {
-        return;
-    }
+    { return; }
 
     _futures.push_back(std::async(std::launch::async, loadFileAsync, file, parseFile, parseParam, finalizeLoad, finalizeParam));
 }

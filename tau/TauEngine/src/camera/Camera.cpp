@@ -10,7 +10,7 @@ void Camera::update(const float fixedDelta) noexcept
     _position.y() += deltaVelocity.y();
 
     // SinCos<float> pitchSC = fastSinCosD(_pitch);
-    const SinCos<float> yawSC   = fastSinCosD(_yaw);
+    const SinCos<float> yawSC = fastSinCosD(_yaw);
 
     if(deltaVelocity.x() != 0.0f)
     {
@@ -40,7 +40,7 @@ void Camera::updateRotation(const float delta, const i32 dMouseX, const i32 dMou
         _yaw += dMouseX * speed;
 
         if(_pitch > 80.0f)  { _pitch = 80.0f; }
-        if(_pitch < -87.0f) { _pitch = -87.0f; }
+        else if(_pitch < -87.0f) { _pitch = -87.0f; }
 
         if(_yaw > 360.0f) { _yaw = fmod(_yaw, 360.0f); }
         else if(_yaw < 0.0f)

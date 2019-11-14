@@ -185,4 +185,5 @@ public:
     friend Nullable Window* getWindowFromHandle(HWND) noexcept;
     friend void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
 #endif
+    friend class Mouse;
 };
