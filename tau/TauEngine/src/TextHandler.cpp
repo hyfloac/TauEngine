@@ -1,46 +1,70 @@
-#include <TextHandler.hpp>
-#include <Utils.hpp>
-#include <texture/Texture.hpp>
-#include <RenderingMode.hpp>
-#include <model/BufferDescriptor.hpp>
+#pragma warning(push, 0)
 #include <utility>
-#include "VFS.hpp"
+#pragma warning(pop)
+
+#include <Utils.hpp>
+#include <VFS.hpp>
+
+#include "TextHandler.hpp"
+#include "texture/Texture.hpp"
+#include "RenderingMode.hpp"
+#include "model/BufferDescriptor.hpp"
 #include "model/IVertexArray.hpp"
+#include "shader/IShaderProgram.hpp"
+#include "shader/IShader.hpp"
+#include "RenderingPipeline.hpp"
+#include <Windows.h>
+#include <winreg.h>
 
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
-    : _ready(false), _ft(null), _face(null), _data(), _chars(new GlyphCharacter[95]), _program(),
-      _vertexShader(ShaderType::VERTEX, vertexPath, &_program), _fragmentShader(ShaderType::FRAGMENT, fragmentPath, &_program),
-      _va(context.createVertexArray(1)),
-      _vertexBuffer(IBuffer::create(context, 2, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
-      _projUni(0), _texUni(0), _colorUni(0)
-{ 
-    _vertexShader.loadShader();
-    _fragmentShader.loadShader();
-    _program.linkAndValidate();
+    : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
+      _va(context.createVertexArray(2)),
+      _positionBuffer(IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
+      _projUni(null), _texUni(null), _colorUni(null)
+{
+    Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexPath);
+    Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, fragmentPath);
 
-    _projUni = _vertexShader.createUniform("projection");
-    _texUni = _fragmentShader.createUniform("textBMP");
-    _colorUni = _fragmentShader.createUniform("textColor");
+    vertexShader->loadShader();
+    pixelShader->loadShader();
+    _shader->setVertexShader(context, vertexShader);
+    _shader->setPixelShader(context, pixelShader);
 
-    _vertexBuffer->bind(context);
-    _vertexBuffer->fillBuffer(context, sizeof(GLfloat) * 4 * 6, null);
-    _vertexBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    _vertexBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    _vertexBuffer->unbind(context);
-    _va->addVertexBuffer(context, _vertexBuffer);
+    _shader->link(context);
+
+    _projUni = _shader->getUniformMatrix4x4Float("projectionMatrix", false);
+    _texUni = _shader->getUniformInt("textBMP");
+    _colorUni = _shader->getUniformVector3f("textColor");
+
+    Ref<IBuffer> textureCoordBuffer = IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer);
+
+    _positionBuffer->bind(context);
+    _positionBuffer->fillBuffer(context, sizeof(float) * 2 * 6, null);
+    _positionBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    _positionBuffer->unbind(context);
+
+    float textureCoords[6][2] = {
+        { 0.0f, 0.0f },
+        { 0.0f, 1.0f },
+        { 1.0f, 1.0f },
+          
+        { 0.0f, 0.0f },
+        { 1.0f, 1.0f },
+        { 1.0f, 0.0f }
+    };
+
+    textureCoordBuffer->bind(context);
+    textureCoordBuffer->fillBuffer(context, sizeof(float) * 2 * 6, textureCoords);
+    textureCoordBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    textureCoordBuffer->unbind(context);
+
+    _va->addVertexBuffer(context, _positionBuffer);
+    _va->addVertexBuffer(context, textureCoordBuffer);
     _va->drawCount() = 6;
-
-    // _vertexBuffer->bind(context);
-    // _vertexBuffer->fillBuffer(context, 6, sizeof(GLfloat) * 6 * 4, null);
-
-    // _bufferDescriptor->addAttribute(_vertexBuffer, 4, DataType::Float, false, 4 * sizeof(float), null);
-    //
-    // _vertexBuffer->unbind(context);
 }
 
 TextHandler::~TextHandler() noexcept
 {
-    delete[] _chars;
     FT_Done_FreeType(_ft);
 }
 
@@ -50,102 +74,112 @@ FT_Error TextHandler::init() noexcept
     return error;
 }
 
-FT_Error TextHandler::loadTTFFile(const char* fileName) noexcept
+TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight) noexcept
 {
-    Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
+    const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
     
-    if(!file)
-    {
-        return -1;
-    }
+    if(!file) { return null; }
     
-    _data = new RefDynArray<u8>(file->readFile());
-    
-    const FT_Error error = FT_New_Memory_Face(_ft, _data->arr(), _data->size() - 1, 0, &_face);
-    
-    FT_Set_Pixel_Sizes(_face, 0, 48);
+    RefDynArray<u8> data = file->readFile();
 
-    return error;
+    FT_Face face;
+    const FT_Error error = FT_New_Memory_Face(_ft, data.arr(), data.size() - 1, 0, &face);
+
+    if(error) { return null; }
+
+    FT_Set_Pixel_Sizes(face, pixelWidth, pixelHeight);
+
+    return new FileData { face, data };
 }
 
-int TextHandler::loadTTFFile(const char* fileName, ResourceLoader& rl, ResourceLoader::finalizeLoad_f finalizeLoad) noexcept
+struct LoadData final
+{
+    TextHandler& th;
+    FT_UInt pixelWidth;
+    FT_UInt pixelHeight;
+};
+
+int TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight, ResourceLoader& rl, const ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* const userParam) noexcept
 {
     const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
 
     if(!file)
-    {
-        return -1;
-    }
+    { return -1; }
 
-    rl.loadFile(file, TextHandler::load2, this, finalizeLoad, this);
+    rl.loadFileT(file, TextHandler::load2, new LoadData { *this, pixelWidth, pixelHeight }, finalizeLoad, new FinalizeData { *this, userParam });
     return 0;
 }
 
-void* TextHandler::load2(RefDynArray<u8> file, void* parseParam) noexcept
+TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) noexcept
 {
-    TextHandler* th = reinterpret_cast<TextHandler*>(parseParam);
-    th->_data = new RefDynArray<u8>(std::move(file));
-    const FT_Error error = FT_New_Memory_Face(th->_ft, th->_data->arr(), th->_data->size() - 1, 0, &th->_face);
-    FT_Set_Pixel_Sizes(th->_face, 0, 48);
-    const intptr_t ret = error;
-    return reinterpret_cast<void*>(ret);
+    TextHandler& th = ld->th;
+
+    FT_Face face;
+    const FT_Error error = FT_New_Memory_Face(th._ft, file.arr(), file.size() - 1, 0, &face);
+
+    if(error)
+    {
+        delete ld;
+        return nullptr;
+    }
+
+    FT_Set_Pixel_Sizes(face, ld->pixelWidth, ld->pixelHeight);
+
+    delete ld;
+
+    return new FileData { face, file };
 }
 
-void TextHandler::generateBitmapCharacters() const noexcept
+GlyphSetHandle TextHandler::generateBitmapCharacters(const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
 {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    for(GLchar c = 32; c <= 126; ++c)
+    GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
+
+    const GLint filterType = smooth ? GL_LINEAR : GL_NEAREST;
+
+    for(GLchar c = minChar; c <= maxChar; ++c)
     {
-        if(FT_Load_Char(_face, c, FT_LOAD_RENDER)) { continue; }
+        if(FT_Load_Char(face, c, FT_LOAD_RENDER)) { continue; }
 
         ITexture* texture = ITexture::create(RenderingMode::getGlobalMode());
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterType);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterType);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
-                     _face->glyph->bitmap.width, _face->glyph->bitmap.rows,
-                     0, GL_RED, GL_UNSIGNED_BYTE, _face->glyph->bitmap.buffer);
+                     face->glyph->bitmap.width, face->glyph->bitmap.rows,
+                     0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
 
-        _chars[c - 32] = GlyphCharacter(texture,
-                                     Vector2f(static_cast<float>(_face->glyph->bitmap.width), static_cast<float>(_face->glyph->bitmap.rows)),
-                                     Vector2f(static_cast<float>(_face->glyph->bitmap_left), static_cast<float>(_face->glyph->bitmap_top)),
-                                     _face->glyph->advance.x);
-
+        gs.glyphs[c - gs.minGlyph] = GlyphCharacter(texture,
+                                     Vector2f(static_cast<float>(face->glyph->bitmap.width), static_cast<float>(face->glyph->bitmap.rows)),
+                                     Vector2f(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top)),
+                                     face->glyph->advance.x);
     }
+
+    return _glyphSets.size() - 1;
 }
 
-void TextHandler::finishLoad() noexcept
+void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept
 {
-    FT_Done_Face(_face);
-    delete _data;
-    _data = null;
-    _ready = true;
-}
+    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
-void TextHandler::renderText(IRenderingContext& context, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept
-{
-    if(!_ready) { return; }
-    _program.activate();
-    _vertexShader.setUniform(_projUni, proj);
-    _vertexShader.setUniform(_texUni, 0);
-    _vertexShader.setUniform(_colorUni, color);
+    _shader->bind(context);
+    _projUni->set(proj);
+    _texUni->set(0);
+    _colorUni->set(color);
 
     _va->bind(context);
     _va->preDraw(context);
-
-    // _bufferDescriptor->bind(context);
-    // _bufferDescriptor->enableAttributes(context);
 
     glFrontFace(GL_CCW);
 
     for(char c = *str; c != '\0'; c = *(++str))
     {
-        if(c < 32 || c > 126) { continue; }
-        const GlyphCharacter* gc = &_chars[c - 32];
+        if(c < glyphSet.minGlyph || c > glyphSet.maxGlyph) { continue; }
+        const GlyphCharacter* gc = &glyphSet.glyphs[c - glyphSet.minGlyph];
 
         const float xpos = x + gc->bearing.x() * scale;
         const float ypos = y - (gc->size.y() - gc->bearing.y()) * scale;
@@ -153,21 +187,21 @@ void TextHandler::renderText(IRenderingContext& context, const char* str, float 
         const float w = gc->size.x() * scale;
         const float h = gc->size.y() * scale;
         // Update VBO for each character
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
+        float vertices[6][2] = {
+            { xpos,     ypos + h },
+            { xpos,     ypos,    },
+            { xpos + w, ypos,    },
 
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }
+            { xpos,     ypos + h },
+            { xpos + w, ypos,    },
+            { xpos + w, ypos + h }
         };
 
         gc->texture->bind(0);
 
-        _vertexBuffer->bind(context);
-        _vertexBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
-        _vertexBuffer->unbind(context);
+        _positionBuffer->bind(context);
+        _positionBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
+        _positionBuffer->unbind(context);
 
         _va->draw(context);
 
@@ -176,27 +210,22 @@ void TextHandler::renderText(IRenderingContext& context, const char* str, float 
         x += (gc->advance >> 6) * scale;
     }
 
-    // _bufferDescriptor->disableAttributes(context);
-    // _bufferDescriptor->unbind(context);
     _va->postDraw(context);
     _va->unbind(context);
-    // _chars[0].texture->unbind(0);
-    GLProgram::deactivate();
+    _shader->unbind(context);
 }
 
-float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept
+float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept
 {
-    if(!_ready) { return 0.0f; }
-    _program.activate();
-    _vertexShader.setUniform(_projUni, proj);
-    _vertexShader.setUniform(_texUni, 0);
-    _vertexShader.setUniform(_colorUni, color);
+    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+
+    _shader->bind(context);
+    _projUni->set(proj);
+    _texUni->set(0);
+    _colorUni->set(color);
 
     _va->bind(context);
     _va->preDraw(context);
-
-    // _bufferDescriptor->bind(context);
-    // _bufferDescriptor->enableAttributes(context);
 
     glFrontFace(GL_CCW);
 
@@ -207,8 +236,8 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char*
 
     for(char c = *str; c != '\0'; c = *(++str))
     {
-        if(c < 32 || c > 126) { continue; }
-        const GlyphCharacter* gc = &_chars[c - 32];
+        if(c < glyphSet.minGlyph || c > glyphSet.maxGlyph) { continue; }
+        const GlyphCharacter* gc = &glyphSet.glyphs[c - glyphSet.minGlyph];
 
         const float advance = (gc->advance >> 6) * scale;
         if(x + advance > maxX)
@@ -224,21 +253,21 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char*
         const float w = gc->size.x() * scale;
         const float h = gc->size.y() * scale;
         // Update VBO for each character
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
+        float vertices[6][2] = {
+            { xpos,     ypos + h },
+            { xpos,     ypos,    },
+            { xpos + w, ypos,    },
 
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }
+            { xpos,     ypos + h },
+            { xpos + w, ypos,    },
+            { xpos + w, ypos + h }
         };
 
         gc->texture->bind(0);
 
-        _vertexBuffer->bind(context);
-        _vertexBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
-        _vertexBuffer->unbind(context);
+        _positionBuffer->bind(context);
+        _positionBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
+        _positionBuffer->unbind(context);
 
         _va->draw(context);
 
@@ -247,34 +276,33 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, const char*
         x += advance;
     }
 
-    // _bufferDescriptor->disableAttributes(context);
-    // _bufferDescriptor->unbind(context);
-
     _va->postDraw(context);
     _va->unbind(context);
-    GLProgram::deactivate();
+    _shader->unbind(context);
 
     return height;
 }
 
-float TextHandler::computeLength(const char* str, float scale) const noexcept
+float TextHandler::computeLength(GlyphSetHandle glyphSetHandle, const char* str, float scale) const noexcept
 {
-    if(!_ready) { return 0.0f; }
+    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+
     float length = 0.0f;
 
     for(char c = *str; c != '\0'; c = *(++str))
     {
-        if(c < 32 || c > 126) { continue; }
-        const GlyphCharacter* gc = &_chars[c - 32];
+        if(c < glyphSet.minGlyph || c > glyphSet.maxGlyph) { continue; }
+        const GlyphCharacter* gc = &glyphSet.glyphs[c - glyphSet.minGlyph];
         length += (gc->advance >> 6) * scale;
     }
 
     return length;
 }
 
-float TextHandler::computeHeight(const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept
+float TextHandler::computeHeight(GlyphSetHandle glyphSetHandle, const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept
 {
-    if(!_ready) { return 0.0f; }
+    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+
     float height = lineHeight;
 
     const float initialX = x;
@@ -282,8 +310,8 @@ float TextHandler::computeHeight(const char* str, float scale, float x, const Wi
 
     for(char c = *str; c != '\0'; c = *(++str))
     {
-        if(c < 32 || c > 126) { continue; }
-        const GlyphCharacter* gc = &_chars[c - 32];
+        if(c < glyphSet.minGlyph || c > glyphSet.maxGlyph) { continue; }
+        const GlyphCharacter* gc = &glyphSet.glyphs[c - glyphSet.minGlyph];
 
         const float advance = (gc->advance >> 6) * scale;
         if(x + advance > maxX)
@@ -297,3 +325,67 @@ float TextHandler::computeHeight(const char* str, float scale, float x, const Wi
     return height;
 }
 
+#ifdef _WIN32
+DynString findSystemFont(const char* fontName) noexcept
+{
+    static const LPCSTR fontRegistryPath = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
+
+    HKEY hKey;
+    LONG result = RegOpenKeyExA(HKEY_LOCAL_MACHINE, fontRegistryPath, 0, KEY_READ, &hKey);
+    if(result != ERROR_SUCCESS)
+    { return ""; }
+
+    DWORD maxValueNameSize, maxValueDataSize;
+    result = RegQueryInfoKey(hKey, 
+                             NULL, NULL, NULL, 
+                             NULL, NULL, NULL, NULL, 
+                             &maxValueNameSize, &maxValueDataSize, 
+                             NULL, NULL);
+    if(result != ERROR_SUCCESS)
+    { return ""; }
+
+    DWORD valueIndex = 0;
+    LPSTR  valueName = new CHAR[maxValueNameSize];
+    LPBYTE valueData = new BYTE[maxValueDataSize];
+    DWORD valueNameSize, valueDataSize, valueType;
+
+    do
+    {
+        valueNameSize = maxValueNameSize;
+        valueDataSize = maxValueDataSize;
+
+        result = RegEnumValueA(hKey, valueIndex++, valueName, &valueNameSize, 0, &valueType, valueData, &valueDataSize);
+        if(result != ERROR_SUCCESS && valueType != REG_SZ)
+        { continue; }
+
+        valueName[valueNameSize] = '\0';
+
+        if(strcmp(fontName, valueName) == 0)
+        {
+            valueData[valueDataSize] = '\0';
+            break;
+        }
+    }
+    while(result != ERROR_NO_MORE_ITEMS);
+
+    delete[] valueName;
+
+    RegCloseKey(hKey);
+
+    CHAR winDir[MAX_PATH];
+    GetWindowsDirectory(winDir, MAX_PATH);
+
+    DynString ret(winDir);
+
+    ret.append("\\Fonts\\").append(reinterpret_cast<char*>(valueData));
+
+    delete[] valueData;
+
+    return ret;
+}
+#else
+DynString findSystemFont(const char* fontName) noexcept
+{
+    return "";
+}
+#endif

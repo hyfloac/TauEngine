@@ -6,6 +6,7 @@
 #pragma warning(push, 0)
 #include <thread>
 #include <GL/glew.h>
+#include <type_traits>
 #pragma warning(pop)
 
 #include <Objects.hpp>
@@ -19,8 +20,8 @@
 #include <system/Win32Event.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <TextHandler.hpp>
 
-class TextHandler;
 class ITexture;
 class IVertexArray;
 struct ImDrawData;
@@ -49,6 +50,7 @@ enum class RenderingOpcode : u16
     RENDER_TEXT,
     RENDER_TEXT_LINE_WRAPPED,
     IMGUI_RENDER,
+    EXECUTE_COMMAND,
     LAST = IMGUI_RENDER
 };
 
@@ -81,6 +83,7 @@ public:
      * by this handle.
      */
     typedef void (*__cdecl ctxCtrl_f)(RenderingPipeline&, Window&, void*);
+    typedef void (*__cdecl command_f)(RenderingPipeline&, Window&, IRenderingContext&, void*);
 
     using CtxCtrlObj = std::pair<ctxCtrl_f, void*>;
 private:
@@ -235,9 +238,9 @@ public:
         postPushInst();
     }
 
-    void pushRenderText(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const glm::mat4& proj) noexcept;
+    void pushRenderText(const TextHandler* th, GlyphSetHandle glyphSetHandle, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const glm::mat4& proj) noexcept;
 
-    GLfloat pushRenderTextLineWrapped(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const Window* window, float lineHeight, const glm::mat4& proj) noexcept;
+    GLfloat pushRenderTextLineWrapped(const TextHandler* th, GlyphSetHandle glyphSetHandle, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const Window* window, float lineHeight, const glm::mat4& proj) noexcept;
 
     void pushImGuiRender(const ImDrawData* data) noexcept
     {
@@ -353,6 +356,17 @@ public:
     void pushLoadUni(GLint uniformID, Vector4f param) noexcept { pushLoadUniVec4f(uniformID, param); }
     void pushLoadUni(GLint uniformID, const glm::mat4& param) noexcept { pushLoadUniMat4f(uniformID, param); }
 
+    void* pushExecuteCommand(command_f func, std::size_t dataSize) noexcept
+    {
+        prePushInst<RenderingOpcode::EXECUTE_COMMAND>();
+        LOAD_VALUE(func);
+        LOAD_VALUE(dataSize);
+        void* ret = _backBuffer + _insertPtr;
+        _insertPtr += dataSize;
+        postPushInst();
+        return ret;
+    }
+
     /**
      *   Add a function to the pipeline to run before the
      * rendering cycle.
@@ -399,3 +413,209 @@ private:
 
     void renderThreadFunc(ctxCtrl_f setupParams, void* setupParam) noexcept;
 };
+
+
+/*
+ *   Credit where credit is due, this comes from Yan Chernikov's
+ * game engine series "Hazel". The relevant files are:
+ * https://github.com/TheCherno/Hazel-dev/blob/master/Hazel/src/Hazel/Renderer/RenderCommandQueue.h
+ * https://github.com/TheCherno/Hazel-dev/blob/master/Hazel/src/Hazel/Renderer/RenderCommandQueue.cpp
+ * https://github.com/TheCherno/Hazel-dev/blob/master/Hazel/src/Hazel/Renderer/Renderer.h
+ * https://github.com/TheCherno/Hazel-dev/blob/master/Hazel/src/Hazel/Renderer/Renderer.cpp
+ *
+ *   The code was copied from the repository at commit
+ * f11ef9a4de752f9655bab5e775c26e92bbbd1d30, it can be viewed
+ * in full here (assuming you have access to the repo):
+ * https://github.com/TheCherno/Hazel-dev/tree/f11ef9a4de752f9655bab5e775c26e92bbbd1d30
+ *
+ *   Because this comes from Hazel-Dev it is subject to its
+ * license, which can be found here:
+ * https://github.com/TheCherno/Hazel-dev/blob/master/LICENSE
+ *
+ *   At the time of writing this is Apache License 2.0. Because
+ * of how licenses work it will indefinitely be under this
+ * license, unless their license changes _and_ I use update code
+ * from after the license change.
+ *
+ * Apache License 2.0 Perma-Link:
+ * https://choosealicense.com/licenses/apache-2.0/
+ */
+#define TAU_RENDER_PASTE2(_A, _B) _A ## _B
+#define TAU_RENDER_PASTE(_A, _B) TAU_RENDER_PASTE2(_A, _B)
+#define TAU_RENDER_UNIQUE(_X) TAU_RENDER_PASTE(_X, __LINE__)
+
+#define TAU_RENDER_ARG(_ARG) \
+    typename ::std::remove_const< \
+        typename ::std::remove_reference< \
+            decltype(_ARG) \
+        >::type \
+    >::type _ARG
+    
+#define TAU_RENDER(_RP, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void*) { \
+                UNUSED3(rp, window, context); \
+                _CODE \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_1(_RP, _ARG0, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            TAU_RENDER_ARG(_ARG0); \
+            TAU_RENDER_UNIQUE(TauRenderCommand)(TAU_RENDER_ARG(_ARG0)) \
+                : _ARG0(_ARG0) { } \
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer) { \
+                UNUSED3(rp, window, context); \
+                auto& _ARG0 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG0;\
+               { _CODE; } \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand)(_ARG0); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_2(_RP, _ARG0, _ARG1, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            TAU_RENDER_ARG(_ARG0); \
+            TAU_RENDER_ARG(_ARG1); \
+            TAU_RENDER_UNIQUE(TauRenderCommand)(TAU_RENDER_ARG(_ARG0), TAU_RENDER_ARG(_ARG1)) \
+                : _ARG0(_ARG0), _ARG1(_ARG1) { } \
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer) { \
+                UNUSED3(rp, window, context); \
+                auto& _ARG0 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG0;\
+                auto& _ARG1 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG1;\
+               { _CODE; } \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand)(_ARG0, _ARG1); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_3(_RP, _ARG0, _ARG1, _ARG2, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            TAU_RENDER_ARG(_ARG0); \
+            TAU_RENDER_ARG(_ARG1); \
+            TAU_RENDER_ARG(_ARG2); \
+            TAU_RENDER_UNIQUE(TauRenderCommand)(TAU_RENDER_ARG(_ARG0), TAU_RENDER_ARG(_ARG1), TAU_RENDER_ARG(_ARG2)) \
+                : _ARG0(_ARG0), _ARG1(_ARG1), _ARG2(_ARG2) { } \
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer) { \
+                UNUSED3(rp, window, context); \
+                auto& _ARG0 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG0;\
+                auto& _ARG1 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG1;\
+                auto& _ARG2 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG2;\
+               { _CODE; } \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand)(_ARG0, _ARG1, _ARG2); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_4(_RP, _ARG0, _ARG1, _ARG2, _ARG3, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            TAU_RENDER_ARG(_ARG0); \
+            TAU_RENDER_ARG(_ARG1); \
+            TAU_RENDER_ARG(_ARG2); \
+            TAU_RENDER_ARG(_ARG3); \
+            TAU_RENDER_UNIQUE(TauRenderCommand)(TAU_RENDER_ARG(_ARG0), TAU_RENDER_ARG(_ARG1), TAU_RENDER_ARG(_ARG2), TAU_RENDER_ARG(_ARG3)) \
+                : _ARG0(_ARG0), _ARG1(_ARG1), _ARG3(_ARG2), _ARG3(_ARG3) { } \
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer) { \
+                UNUSED3(rp, window, context); \
+                auto& _ARG0 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG0;\
+                auto& _ARG1 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG1;\
+                auto& _ARG2 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG2;\
+                auto& _ARG3 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG3;\
+               { _CODE; } \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand)(_ARG0, _ARG1, _ARG2, _ARG3); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_5(_RP, _ARG0, _ARG1, _ARG2, _ARG3, _ARG4, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            TAU_RENDER_ARG(_ARG0); \
+            TAU_RENDER_ARG(_ARG1); \
+            TAU_RENDER_ARG(_ARG2); \
+            TAU_RENDER_ARG(_ARG3); \
+            TAU_RENDER_ARG(_ARG4); \
+            TAU_RENDER_UNIQUE(TauRenderCommand)(TAU_RENDER_ARG(_ARG0), TAU_RENDER_ARG(_ARG1), TAU_RENDER_ARG(_ARG2), TAU_RENDER_ARG(_ARG3), \
+                                                TAU_RENDER_ARG(_ARG4)) \
+                : _ARG0(_ARG0), _ARG1(_ARG1), _ARG3(_ARG2), _ARG3(_ARG3), \
+                  _ARG4(_ARG4) { } \
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer) { \
+                UNUSED3(rp, window, context); \
+                auto& _ARG0 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG0;\
+                auto& _ARG1 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG1;\
+                auto& _ARG2 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG2;\
+                auto& _ARG3 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG3;\
+                auto& _ARG4 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG4;\
+               { _CODE; } \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand)(_ARG0, _ARG1, _ARG2, _ARG3, _ARG4); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_6(_RP, _ARG0, _ARG1, _ARG2, _ARG3, _ARG4, _ARG5, _CODE) \
+    do { \
+        struct TAU_RENDER_UNIQUE(TauRenderCommand) {\
+            TAU_RENDER_ARG(_ARG0); \
+            TAU_RENDER_ARG(_ARG1); \
+            TAU_RENDER_ARG(_ARG2); \
+            TAU_RENDER_ARG(_ARG3); \
+            TAU_RENDER_ARG(_ARG4); \
+            TAU_RENDER_ARG(_ARG5); \
+            TAU_RENDER_UNIQUE(TauRenderCommand)(TAU_RENDER_ARG(_ARG0), TAU_RENDER_ARG(_ARG1), TAU_RENDER_ARG(_ARG2), TAU_RENDER_ARG(_ARG3), \
+                                                TAU_RENDER_ARG(_ARG4), TAU_RENDER_ARG(_ARG5)) \
+                : _ARG0(_ARG0), _ARG1(_ARG1), _ARG3(_ARG2), _ARG3(_ARG3), \
+                  _ARG4(_ARG4), _ARG5(_ARG5) { } \
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer) { \
+                UNUSED3(rp, window, context); \
+                auto& _ARG0 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG0;\
+                auto& _ARG1 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG1;\
+                auto& _ARG2 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG2;\
+                auto& _ARG3 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG3;\
+                auto& _ARG4 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG4;\
+                auto& _ARG5 = reinterpret_cast<TAU_RENDER_UNIQUE(TauRenderCommand)*>(argBuffer)->_ARG5;\
+               { _CODE; } \
+            } \
+        }; \
+        { \
+            void* mem = (_RP).pushExecuteCommand(TAU_RENDER_UNIQUE(TauRenderCommand)::execute, sizeof(TAU_RENDER_UNIQUE(TauRenderCommand))); \
+            new(mem) TAU_RENDER_UNIQUE(TauRenderCommand)(_ARG0, _ARG1, _ARG2, _ARG3, _ARG4, _ARG5); \
+        } \
+    } while(0);
+
+#define TAU_RENDER_S(_RP,   _CODE) auto self = this; \
+    TAU_RENDER_1(_RP, self, _CODE)
+#define TAU_RENDER_S1(_RP,  _ARG0, _CODE) auto self = this; \
+    TAU_RENDER_2(_RP, self, _ARG0, _CODE)
+#define TAU_RENDER_S2(_RP,  _ARG0, _ARG1, _CODE) auto self = this; \
+    TAU_RENDER_3(_RP, self, _ARG0, _ARG1, _CODE)
+#define TAU_RENDER_S3(_RP,  _ARG0, _ARG1, _ARG2, _CODE) auto self = this; \
+    TAU_RENDER_4(_RP, self, _ARG0, _ARG1, _ARG2, _CODE)
+#define TAU_RENDER_S4(_RP,  _ARG0, _ARG1, _ARG2, _ARG3, _CODE) auto self = this; \
+    TAU_RENDER_5(_RP, self, _ARG0, _ARG1, _ARG2, _ARG3, _CODE)
+#define TAU_RENDER_S5(_RP,  _ARG0, _ARG1, _ARG2, _ARG3, _ARG4, _CODE) auto self = this; \
+    TAU_RENDER_6(_RP, self, _ARG0, _ARG1, _ARG2, _ARG3, _ARG4, _CODE)

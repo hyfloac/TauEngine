@@ -53,10 +53,11 @@ RenderingPipeline::~RenderingPipeline() noexcept
 #define LOAD_VALUE(__VAR) std::memcpy(reinterpret_cast<void*>(_backBuffer + _insertPtr), reinterpret_cast<const void*>(&(__VAR)), sizeof(__VAR)); \
                           _insertPtr += sizeof(__VAR);
 
-void RenderingPipeline::pushRenderText(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const glm::mat4& proj) noexcept
+void RenderingPipeline::pushRenderText(const TextHandler* th, GlyphSetHandle glyphSetHandle, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const glm::mat4& proj) noexcept
 {
     prePushInst<RenderingOpcode::RENDER_TEXT>();
     LOAD_VALUE(th);
+    LOAD_VALUE(glyphSetHandle);
     LOAD_VALUE(x);
     LOAD_VALUE(y);
     LOAD_VALUE(scale);
@@ -77,10 +78,11 @@ void RenderingPipeline::pushRenderText(const TextHandler* th, const char* str, G
     postPushInst();
 }
 
-GLfloat RenderingPipeline::pushRenderTextLineWrapped(const TextHandler* th, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const Window* window, float lineHeight, const glm::mat4& proj) noexcept
+GLfloat RenderingPipeline::pushRenderTextLineWrapped(const TextHandler* th, GlyphSetHandle glyphSetHandle, const char* str, GLfloat x, GLfloat y, GLfloat scale, u8 cr, u8 cg, u8 cb, const Window* window, float lineHeight, const glm::mat4& proj) noexcept
 {
     prePushInst<RenderingOpcode::RENDER_TEXT_LINE_WRAPPED>();
     LOAD_VALUE(th);
+    LOAD_VALUE(glyphSetHandle);
     LOAD_VALUE(x);
     LOAD_VALUE(y);
     LOAD_VALUE(scale);
@@ -102,7 +104,7 @@ GLfloat RenderingPipeline::pushRenderTextLineWrapped(const TextHandler* th, cons
 
     postPushInst();
 
-    return th->computeHeight(str, scale, x, *window, lineHeight);
+    return th->computeHeight(glyphSetHandle, str, scale, x, *window, lineHeight);
 }
 
 #define GET_VALUE0(__TYPE, __VAR, __PTR) __TYPE __VAR = *reinterpret_cast<__TYPE*>(_instBuffer + (__PTR)); /* NOLINT(bugprone-macro-parentheses) */ \
@@ -243,6 +245,7 @@ DECL_HANDLER(rpImGuiRender)
 DECL_HANDLER(rpRenderText)
 {
     GET_VALUE(TextHandler*, th);
+    GET_VALUE(GlyphSetHandle, glyphSetHandle);
     GET_VALUE(GLfloat, x);
     GET_VALUE(GLfloat, y);
     GET_VALUE(GLfloat, scale);
@@ -261,12 +264,13 @@ DECL_HANDLER(rpRenderText)
     char* str = reinterpret_cast<char*>(_instBuffer + _instPtr);
     _instPtr += sizeof(char) * len;
 
-    th->renderText(context, str, x, y, scale, color, mat);
+    th->renderText(context, glyphSetHandle, str, x, y, scale, color, mat);
 }
 
 DECL_HANDLER(rpRenderTextLineWrapped)
 {
     GET_VALUE(TextHandler*, th);
+    GET_VALUE(GlyphSetHandle, glyphSetHandle);
     GET_VALUE(GLfloat, x);
     GET_VALUE(GLfloat, y);
     GET_VALUE(GLfloat, scale);
@@ -287,7 +291,17 @@ DECL_HANDLER(rpRenderTextLineWrapped)
     char* str = reinterpret_cast<char*>(_instBuffer + _instPtr);
     _instPtr += sizeof(char) * len;
 
-    th->renderTextLineWrapped(context, str, x, y, scale, color, mat, *window, lineHeight);
+    th->renderTextLineWrapped(context, glyphSetHandle, str, x, y, scale, color, mat, *window, lineHeight);
+}
+
+static inline void rpExecuteCommand(RenderingPipeline& rp, Window& window, IRenderingContext& context, u8* _instBuffer, volatile u32& _instPtr) noexcept
+{
+    GET_VALUE(RenderingPipeline::command_f, command);
+    GET_VALUE(std::size_t, dataSize);
+
+    command(rp, window, context, _instBuffer + _instPtr);
+
+    _instPtr += dataSize;
 }
 
 void RenderingPipeline::runRenderingCycle() noexcept
@@ -303,7 +317,7 @@ void RenderingPipeline::runRenderingCycle() noexcept
 
     _instPtr = 0;
 
-    IRenderingContext* currentContext = null;
+    IRenderingContext* currentContext = _window.renderingContext();
 
     while(true)
     {
@@ -399,6 +413,7 @@ void RenderingPipeline::runRenderingCycle() noexcept
             RP_FUNC_HANDLER(RENDER_TEXT, rpRenderText);
             RP_FUNC_HANDLER(RENDER_TEXT_LINE_WRAPPED, rpRenderTextLineWrapped);
             RP_FUNC_HANDLER(IMGUI_RENDER, rpImGuiRender);
+            case RenderingOpcode::EXECUTE_COMMAND: rpExecuteCommand(*this, this->_window, *currentContext, _instBuffer, _instPtr); break;
             default: break;
         }
     }
