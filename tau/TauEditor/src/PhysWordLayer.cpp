@@ -1,8 +1,8 @@
 #include "PhysWordLayer.hpp"
 
-PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, const glm::mat4& ortho, State& state) noexcept
+PhysWordLayer::PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, const GlyphSetHandle& glyphSetHandle, RenderingPipeline& rp, const glm::mat4& ortho, State& state) noexcept
     : ILayer(true),
-      _window(window), _th(th), _rp(rp), _ortho(ortho), _state(state),
+      _window(window), _th(th), _glyphSetHandle(glyphSetHandle), _rp(rp), _ortho(ortho), _state(state),
       _physWords()
 {
     for(size_t i = 0; i < wordCount; ++i)
@@ -28,7 +28,10 @@ void PhysWordLayer::onRender(float delta) noexcept
     {
         for(auto& physWord : _physWords)
         {
-            physWord.render(delta, _rp, _th, _ortho);
+            if(_glyphSetHandle != -1)
+            {
+                physWord.render(delta, _rp, _th, _glyphSetHandle, _ortho);
+            }
         }
     }
 }

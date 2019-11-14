@@ -2,6 +2,7 @@
 #include "Application.hpp"
 
 #include "EditorApplication.hpp"
+#include <TauEngine.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <VFS.hpp>
 #include <Win32File.hpp>
@@ -10,8 +11,9 @@
 #include <events/Event.hpp>
 #include "events/WindowEvent.hpp"
 #include "GL/glew.h"
-#include "GL/wglew.h"
 #include <shlobj.h>
+#include <texture/FITextureLoader.hpp>
+#include "RenderingPipeline.hpp"
 
 static void setupGameFolders() noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
@@ -47,13 +49,12 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _window->renderingContext()->activateContext();
 
     _window->setEventHandler(::onWindowEvent);
+    Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
+    Mouse::setVisible(false);
 
     setupDebugCallback(this);
 
-    if(WGLEW_EXT_swap_control)
-    {
-        wglSwapIntervalEXT(_config.vsync ? 1 : 0);
-    }
+    _window->renderingContext()->setVSync(_config.vsync);
 
     bool async = false;
 
@@ -64,6 +65,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
             async = true;
         }
     }
+
+    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture());
 
     _renderer = new TERenderer(*_window, _rl, _gameState, async);
 
@@ -163,14 +166,10 @@ bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
         {
             static bool vsync = _config.vsync;
 
-            if(WGLEW_EXT_swap_control)
-            {
-                vsync = !vsync;
-                _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window&, void* param)
-                {
-                    wglSwapIntervalEXT(param != nullptr ? 1 : 0);
-                }, vsync ? reinterpret_cast<void*>(static_cast<intptr_t>(1)) : nullptr);
-            }
+            vsync = !vsync;
+            TAU_RENDER_1(_renderer->renderingPipeline(), vsync, {
+                context.setVSync(vsync);
+            });
         }
         default: return false;
     }
@@ -196,9 +195,15 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
 
 bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
 {
-    _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window& window, void*)
-    { window.renderingContext()->updateViewport(0, 0, window.width(), window.height()); }, nullptr, true);
-    _renderer->camera()->setProjection(e.newHeight(), e.newWidth(), 0.0f, 0.0f);
+    UNUSED(e);
+    TAU_RENDER_S(_renderer->renderingPipeline(), {
+        context.updateViewport(0, 0, window.width(), window.height());
+        self->_renderer->camera()->setProjection(window.height(), window.width(), 0.0f, 0.0f);
+        Mouse::mousePos(window.width() >> 1, window.height() >> 1);
+    });
+    // _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window& window, void*)
+    // { window.renderingContext()->updateViewport(0, 0, window.width(), window.height()); }, nullptr, true);
+    // _renderer->camera()->setProjection(e.newHeight(), e.newWidth(), 0.0f, 0.0f);
     return false;
 }
 
@@ -269,6 +274,11 @@ void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, 
 {
     UNUSED2(length, userParam);
     UNUSED2(id, message);
+
+    if(severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+    {
+        return;
+    }
 
     const TauEditorApplication* tea = reinterpret_cast<const TauEditorApplication*>(userParam);
 

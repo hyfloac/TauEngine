@@ -36,6 +36,12 @@
     <ClCompile Include="src\ConsoleLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Layer3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LineLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EditorApplication.hpp">
@@ -62,13 +68,39 @@
     <ClInclude Include="include\State.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Layer3D.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LineLayer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TextDescriptor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\SimpleVertexShader.glsl" />
-    <None Include="resources\SimpleFragmentShader.glsl" />
     <None Include="resources\CBFillerVertexShader.glsl" />
     <None Include="resources\CBFillerFragmentShader.glsl" />
-    <None Include="resources\TextFragmentShader.glsl" />
-    <None Include="resources\TextVertexShader.glsl" />
+    <None Include="resources\line\LineVertex.glsl" />
+    <None Include="resources\line\LineGeometry.glsl" />
+    <None Include="resources\line\LinePixel.glsl" />
+    <None Include="resources\shader\CompletePixelShader.glsl" />
+    <None Include="resources\shader\CompleteVertexShader.glsl" />
+    <None Include="resources\shader\DebugPixelShader.glsl" />
+    <None Include="resources\shader\DebugVertexShader.glsl" />
+    <None Include="resources\shader\OutlinePixelShader.glsl" />
+    <None Include="resources\shader\SimpleFragmentShader.glsl" />
+    <None Include="resources\shader\SimplePixelShader.glsl" />
+    <None Include="resources\shader\SimpleVertexShader.glsl" />
+    <None Include="resources\shader\Text\TextPixelShader.glsl" />
+    <None Include="resources\shader\Text\TextVertexShader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\Default\DebugTexture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\Default\MissingTexture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

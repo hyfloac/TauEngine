@@ -1,16 +1,25 @@
 #include "ConsoleLayer.hpp"
 #include <astdio.h>
 #include <camera/Camera2D.hpp>
+#include <TextHandler.hpp>
+#include <EnumBitFields.hpp>
+#include <Windows.h>
 
-ConsoleLayer::ConsoleLayer(Window& window, TextHandler& th, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, float textScale) noexcept
+ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, ResourceLoader& rl, float textScale) noexcept
     : ILayer(false),
-      _window(window), _th(th), _ortho(ortho), _rp(rp), _state(state), _camera(camera), _textScale(textScale),
+      _window(window), _th(th),
+      _consolas(consolas), _consolasBold(consolasBold), _consolasItalic(consolasItalic), _consolasBoldItalic(consolasBoldItalic),
+      _ortho(ortho), _rp(rp), _state(state), _camera(camera), _textScale(textScale),
       _ch({ ccPrint, ccPrintLn, ccPrintNL, ccPrintF }, this),
       _strings(), _lineBuilder(), _inputBuilder(), _columnMarker(true)
 {
+    UNUSED(rl);
+
     _ch.addCommand(new SetTextScaleCommand(this));
     _ch.addCommand(new SetExclusiveCommand(state));
     _ch.addCommand(new SetCameraCommand(this));
+    _ch.addCommand(new GameRecorderCommand(gr));
+    // _ch.addCommand(new LoadFontCommand(th, rl));
     _ch.addCommand(new dc::BoolAliasCommand);
     _ch.addCommand(new dc::ExitCommand);
     _ch.addCommand(new dc::ParseNumCommand);
@@ -27,9 +36,9 @@ void ConsoleLayer::print(const DynString& str) noexcept
 void ConsoleLayer::onRender(const float delta) noexcept
 {
     UNUSED(delta);
-    if(_visible)
+    if(_visible && _consolas != -1)
     {
-        const float textOffset = 40.0f * _textScale;
+        const float textOffset = 50.0f * _textScale;
         const float maxY = 0.0f;
         float y = static_cast<float>(_window.height() - textOffset);
 
@@ -37,23 +46,19 @@ void ConsoleLayer::onRender(const float delta) noexcept
         { _inputBuilder.append('|'); }
         else
         { _inputBuilder.append(' '); }
-        y += _rp.pushRenderTextLineWrapped(&_th, _inputBuilder.c_str(), 0.0f, y, _textScale, 0, 255, 255, &_window, -textOffset, _ortho);
+        y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _inputBuilder.c_str(), 0.0f, y, _textScale, 0, 255, 255, &_window, -textOffset, _ortho);
         _inputBuilder.backspace();
 
         if(_lineBuilder.length() > 0)
         {
-            y += _rp.pushRenderTextLineWrapped(&_th, _lineBuilder.c_str(), 0.0f, y, _textScale, 0, 120, 255, &_window, -textOffset, _ortho);
+            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _lineBuilder.c_str(), 0.0f, y, _textScale, 0, 120, 255, &_window, -textOffset, _ortho);
         }
 
-        auto it = _strings.rbegin();
-
-        for(; it != _strings.rend(); ++it)
+        for(auto it = _strings.rbegin(); it != _strings.rend(); ++it)
         {
-            y += _rp.pushRenderTextLineWrapped(&_th, *it, 0.0f, y, _textScale, 255, 255, 255, &_window, -textOffset, _ortho);
+            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, *it, 0.0f, y, _textScale, 255, 255, 255, &_window, -textOffset, _ortho);
             if(y - textOffset < maxY)
-            {
-                break;
-            }
+            { break; }
         }
     }
 }
@@ -77,6 +82,28 @@ void ConsoleLayer::onEvent(Event& e) noexcept
     dispatcher.dispatch<WindowAsciiKeyEvent>(this, &ConsoleLayer::onCharPress);
 }
 
+static char* getClipboard() noexcept
+{
+    if(!OpenClipboard(NULL))
+    { }
+
+    HANDLE hData = GetClipboardData(CF_TEXT);
+    if(!hData)
+    { }
+
+    char* pszText = reinterpret_cast<char*>(GlobalLock(hData));
+    if(!pszText)
+    { }
+
+    // DynString ret(pszText);
+
+    GlobalUnlock(hData);
+
+    CloseClipboard();
+
+    return pszText;
+}
+
 bool ConsoleLayer::onKeyPress(WindowKeyEvent& e) noexcept
 {
     if(e.key() == Keyboard::Key::F1 && e.event() == Keyboard::Event::Pressed)
@@ -84,10 +111,12 @@ bool ConsoleLayer::onKeyPress(WindowKeyEvent& e) noexcept
         _visible = !_visible;
         if(_visible)
         {
+            Mouse::setVisible(true);
             _state = State::Console;
         }
         else
         {
+            Mouse::setVisible(false);
             _state = State::Game;
         }
     }
@@ -110,6 +139,12 @@ bool ConsoleLayer::onKeyPress(WindowKeyEvent& e) noexcept
         else if(e.key() == Keyboard::Key::BackSpace && (e.event() == Keyboard::Event::Pressed || e.event() == Keyboard::Event::Held))
         {
             _inputBuilder.backspace();
+        }
+        else if(e.key() == Keyboard::Key::V && 
+               (e.event() == Keyboard::Event::Pressed || e.event() == Keyboard::Event::Held) && 
+               (e.flags() & Keyboard::Flags::Ctrl) != static_cast<Keyboard::Flags>(0))
+        {
+            _inputBuilder.append(getClipboard());
         }
         return true;
     }
@@ -181,7 +216,6 @@ i32 SetExclusiveCommand::execute(const char* commandName, const char* args[], u3
     return 1;
 }
 
-
 i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
 {
     UNUSED(commandName);
@@ -212,5 +246,33 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
             return -1;
         }
     }
+    return 0;
+}
+
+
+i32 GameRecorderCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
+{
+    UNUSED(commandName);
+    if(argCount != 1)
+    {
+        consoleHandler->printf("Usage: %s", usage());
+        return 1;
+    }
+
+    if(strcmp(args[0], "start") == 0)
+    {
+        _gr.startRecording();
+        consoleHandler->println("Started recording.");
+    }
+    else if(strcmp(args[0], "stop") == 0)
+    {
+        _gr.stopRecording();
+        consoleHandler->println("Stopped recording.");
+    }
+    else if(strcmp(args[0], "play") == 0)
+    {
+        _gr.beginPlayBack();
+    }
+
     return 0;
 }

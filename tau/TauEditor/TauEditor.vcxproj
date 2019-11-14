@@ -146,7 +146,7 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;FreeImaged.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;FreeImaged.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -209,7 +209,7 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -272,7 +272,7 @@
       <LargeAddressAware>true</LargeAddressAware>
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -314,7 +314,7 @@
       <WarningLevel>Level4</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;FreeImage.lib;freetype.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>
@@ -332,6 +332,8 @@
   <ItemGroup>
     <ClCompile Include="src\ConsoleLayer.cpp" />
     <ClCompile Include="src\EditorApplication.cpp" />
+    <ClCompile Include="src\Layer3D.cpp" />
+    <ClCompile Include="src\LineLayer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\PhysWord.cpp" />
     <ClCompile Include="src\PhysWordLayer.cpp" />
@@ -342,19 +344,35 @@
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\ConsoleLayer.hpp" />
     <ClInclude Include="include\EditorApplication.hpp" />
+    <ClInclude Include="include\Layer3D.hpp" />
+    <ClInclude Include="include\LineLayer.hpp" />
     <ClInclude Include="include\PhysWord.hpp" />
     <ClInclude Include="include\PhysWordLayer.hpp" />
     <ClInclude Include="include\State.hpp" />
     <ClInclude Include="include\TERenderer.hpp" />
+    <ClInclude Include="include\TextDescriptor.hpp" />
     <ClInclude Include="include\UILayer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\CBFillerFragmentShader.glsl" />
     <None Include="resources\CBFillerVertexShader.glsl" />
-    <None Include="resources\SimpleFragmentShader.glsl" />
-    <None Include="resources\SimpleVertexShader.glsl" />
-    <None Include="resources\TextFragmentShader.glsl" />
-    <None Include="resources\TextVertexShader.glsl" />
+    <None Include="resources\line\LineGeometry.glsl" />
+    <None Include="resources\line\LinePixel.glsl" />
+    <None Include="resources\line\LineVertex.glsl" />
+    <None Include="resources\shader\CompletePixelShader.glsl" />
+    <None Include="resources\shader\CompleteVertexShader.glsl" />
+    <None Include="resources\shader\DebugPixelShader.glsl" />
+    <None Include="resources\shader\DebugVertexShader.glsl" />
+    <None Include="resources\shader\OutlinePixelShader.glsl" />
+    <None Include="resources\shader\SimpleFragmentShader.glsl" />
+    <None Include="resources\shader\SimplePixelShader.glsl" />
+    <None Include="resources\shader\SimpleVertexShader.glsl" />
+    <None Include="resources\shader\Text\TextPixelShader.glsl" />
+    <None Include="resources\shader\Text\TextVertexShader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\Default\DebugTexture.png" />
+    <Image Include="resources\Default\MissingTexture.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

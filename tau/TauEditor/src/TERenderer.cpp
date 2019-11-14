@@ -3,48 +3,85 @@
 #include <gl/GLUtils.hpp>
 #include <PhysWordLayer.hpp>
 #include "ConsoleLayer.hpp"
+#include "Layer3D.hpp"
 
 static void __cdecl setupParams(RenderingPipeline&, Window&, void*) noexcept;
 
-static void finalizeLoad(void* file, void* finalizeParam) noexcept
+void __cdecl TERenderer::finalizeLoadConsolas(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept
 {
-    const intptr_t errorPtr = reinterpret_cast<intptr_t>(file);
-    const FT_Error error = errorPtr;
-    if(error)
-    {
-        
-    }
-    TextHandler* th = reinterpret_cast<TextHandler*>(finalizeParam);
-    th->generateBitmapCharacters();
-    th->finishLoad();
+    TextHandler& th = finalizeParam->th;
+    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolas = th.generateBitmapCharacters("Consolas", 32, 126, false, file->face);
+    delete file;
+}
+
+void TERenderer::finalizeLoadConsolasBold(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept
+{
+    TextHandler& th = finalizeParam->th;
+    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolasBold = th.generateBitmapCharacters("ConsolasBold", 32, 126, false, file->face);
+    delete file;
+}
+
+void TERenderer::finalizeLoadConsolasItalic(TextHandler::FileData* file,TextHandler::FinalizeData* finalizeParam) noexcept
+{
+    TextHandler& th = finalizeParam->th;
+    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolasItalic = th.generateBitmapCharacters("ConsolasItalic", 32, 126, false, file->face);
+    delete file;
+}
+
+void TERenderer::finalizeLoadConsolasBoldItalic(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept
+{
+    TextHandler& th = finalizeParam->th;
+    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolasBoldItalic = th.generateBitmapCharacters("ConsolasBoldItalic", 32, 126, false, file->face);
+    delete file;
 }
 
 TERenderer::TERenderer(Window& window, ResourceLoader& rl, State& state, bool async) noexcept
     : _window(window), _rl(rl),
+      _consolas(-1), _consolasBold(-1), _consolasItalic(-1), _consolasBoldItalic(-1),
       _th(nullptr), _rp(nullptr), _state(state),
       _camera(window, 800.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Q, Keyboard::Key::E),
-      _layerStack()
+      _recorder(), _layerStack()
 {
     _rp = new RenderingPipeline(window, setupParams, nullptr, async);
-    _th = new TextHandler(*window.renderingContext(), "|TERes/TextVertexShader.glsl", "|TERes/TextFragmentShader.glsl");
+    _th = new TextHandler(*window.renderingContext(), "|TERes/shader/Text/TextVertexShader.glsl", "|TERes/shader/Text/TextPixelShader.glsl");
     (void) _th->init();
-    (void) _th->loadTTFFile("|TERes/MonoConsole.ttf", rl, finalizeLoad);
+    // (void) _th->loadTTFFile("|TERes/Sansation_Regular.ttf", 0, 48, rl, finalizeLoadSansation, this);
+    // (void) _th->loadTTFFile("|TERes/MonoConsole.ttf",  0, 48, rl, finalizeLoadMono, this);
+    DynString path = findSystemFont("Consolas (TrueType)");
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolas, this);
+    path = findSystemFont("Consolas Bold (TrueType)");
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolasBold, this);
+    path = findSystemFont("Consolas Italic (TrueType)");
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolasItalic, this);
+    path = findSystemFont("Consolas Bold Italic (TrueType)");
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolasBoldItalic, this);
 
-    _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
-    _layerStack.pushOverlay(new ConsoleLayer(window, *_th, _camera->projectionMatrix(), *_rp, state, _camera, 0.6f));
+    // _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
+    _layerStack.pushLayer(new Layer3D(window, *_rp, _rl, &_recorder, state));
+    _layerStack.pushOverlay(new ConsoleLayer(window, _recorder, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), *_rp, state, _camera, rl, 0.5f));
+}
+
+TERenderer::~TERenderer() noexcept
+{
+    delete _rp;
+    delete _th;
 }
 
 void TERenderer::render(const float delta) noexcept
 {
     _rp->pushLoadContext(*_window.renderingContext());
-    _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for(auto* overlay : _layerStack.overlays())
-    {
-        overlay->onRender(delta);
-    }
+    _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    TAU_RENDER(*_rp, {
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+    });
     for(auto* layer : _layerStack.layers())
     {
         layer->onRender(delta);
+    }
+    for(auto* overlay : _layerStack.overlays())
+    {
+        overlay->onRender(delta);
     }
     _rp->pushFinishRender();
 }
@@ -91,6 +128,9 @@ static void __cdecl setupParams(RenderingPipeline&, Window& window, void*) noexc
 
     setGLBlend(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     window.renderingContext()->updateViewport(0, 0, window.width(), window.height());
 }

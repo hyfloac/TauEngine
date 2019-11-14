@@ -8,6 +8,9 @@
 #include <console/ConsoleHandler.hpp>
 #include <events/WindowEvent.hpp>
 #include "State.hpp"
+#include "ResourceLoader.hpp"
+#include "TextHandler.hpp"
+#include "GameRecorder.hpp"
 
 class Camera2DController;
 class ConsoleLayer;
@@ -19,6 +22,10 @@ class ConsoleLayer final : public ILayer
 private:
     Window& _window;
     TextHandler& _th;
+    const GlyphSetHandle& _consolas;
+    const GlyphSetHandle& _consolasBold;
+    const GlyphSetHandle& _consolasItalic;
+    const GlyphSetHandle& _consolasBoldItalic;
     const glm::mat4& _ortho;
     RenderingPipeline& _rp;
     State& _state;
@@ -31,7 +38,7 @@ private:
     StringBuilder _inputBuilder;
     bool _columnMarker;
 public:
-    ConsoleLayer(Window& window, TextHandler& th, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, float textScale = 1.0f) noexcept;
+    ConsoleLayer(Window& window, GameRecorder& gc, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, ResourceLoader& rl, float textScale = 1.0f) noexcept;
 
     void print(const DynString& str) noexcept;
 
@@ -68,8 +75,8 @@ class SetTextScaleCommand final : public ConsoleHandler::Command
 private:
     ConsoleLayer* _cl;
 public:
-    SetTextScaleCommand(ConsoleLayer* _cl) noexcept
-        : _cl(_cl)
+    SetTextScaleCommand(ConsoleLayer* cl) noexcept
+        : _cl(cl)
     { }
 
     [[nodiscard]] const char* name() const noexcept override { return "setTextScale"; }
@@ -98,8 +105,8 @@ class SetCameraCommand final : public ConsoleHandler::Command
 private:
     ConsoleLayer* _cl;
 public:
-    SetCameraCommand(ConsoleLayer* _cl) noexcept
-        : _cl(_cl)
+    SetCameraCommand(ConsoleLayer* cl) noexcept
+        : _cl(cl)
     { }
 
     [[nodiscard]] const char* name() const noexcept override { return "setCamera"; }
@@ -108,3 +115,17 @@ public:
     [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept override;
 };
 
+class GameRecorderCommand final : public ConsoleHandler::Command
+{
+private:
+    GameRecorder& _gr;
+public:
+    GameRecorderCommand(GameRecorder& gr) noexcept
+        : _gr(gr)
+    { }
+
+    [[nodiscard]] const char* name() const noexcept override { return "gr"; }
+    [[nodiscard]] const char* usage() const noexcept override { return "gr <cmd{enum{start|stop|play}}>"; }
+    [[nodiscard]] const char* info() const noexcept override { return "Controls the game recorder."; }
+    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept override;
+};

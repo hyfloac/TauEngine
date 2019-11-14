@@ -49,9 +49,12 @@ struct SpotLight
 
 #define POINT_LIGHTS 4
 
-in vec3 fPos;
-in vec3 fNormal;
-in vec2 fTexCoords;
+in VertexData 
+{
+    vec3 position;
+    vec3 color;
+    vec2 texCoord;
+} vIn;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -123,21 +126,21 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 viewDir, vec3 diffusePixel
 
 void main(void)
 {
-    vec3 viewDir = normalize(viewPos - fPos);
-    vec3 diffusePixel = vec3(texture(material.diffuseTexture, fTexCoords));
-    vec3 specularPixel = vec3(texture(material.specularMap, fTexCoords));
+    vec3 viewDir = normalize(viewPos - vIn.position);
+    vec3 diffusePixel = vec3(texture(material.diffuseTexture, vIn.texCoords));
+    vec3 specularPixel = vec3(texture(material.specularMap, vIn.texCoords));
 
-    vec3 normal = texture(normalMap, fTexCoords).rgb;
+    vec3 normal = texture(normalMap, vIn.texCoords).rgb;
     normal = normalize(normal * 2.0 - 1.0);
 
-    vec3 result = calcDirLight(dirLight, fNormal, viewDir, diffusePixel, specularPixel);
+    vec3 result = calcDirLight(dirLight, vIn.normal, viewDir, diffusePixel, specularPixel);
 
     for(int i = 0; i < POINT_LIGHTS; ++i)
     {
-        result += calcPointLight(pointLights[i], fNormal, viewdir, diffusePixel, specularPixel);
+        result += calcPointLight(pointLights[i], vIn.normal, viewdir, diffusePixel, specularPixel);
     }
 
-    result += calcSpotLight(spotLight, fNormal, viewdir, diffusePixel, specularPixel);
+    result += calcSpotLight(spotLight, vIn.normal, viewdir, diffusePixel, specularPixel);
 
     fragColor = vec4(result, 1.0);
 }

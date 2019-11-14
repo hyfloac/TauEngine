@@ -11,13 +11,14 @@ class PhysWordLayer final : public ILayer
 private:
     Window& _window;
     TextHandler& _th;
+    const GlyphSetHandle& _glyphSetHandle;
     RenderingPipeline& _rp;
     const glm::mat4& _ortho;
     State& _state;
 
     std::vector<PhysWord> _physWords;
 public:
-    PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, RenderingPipeline& rp, const glm::mat4& ortho, State& state) noexcept;
+    PhysWordLayer(size_t wordCount, const char* word, Window& window, TextHandler& th, const GlyphSetHandle& glyphSetHandle, RenderingPipeline& rp, const glm::mat4& ortho, State& state) noexcept;
 
     void onUpdate(float fixedDelta) noexcept override;
 

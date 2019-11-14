@@ -2,13 +2,17 @@
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 texCoords;
+layout(location = 2) in vec2 texCoord;
 
-out vec3 fPos;
-out vec3 fNormal;
-out vec2 fTexCoords;
+out VertexData 
+{
+    vec3 position;
+    vec3 normal;
+    vec2 texCoord;
+} vOut;
 
-uniform mat4 projMatrix;
+uniform mat4 compoundMatrix;
+uniform mat4 projectionMatrix;
 uniform mat4 cameraViewMatrix;
 uniform mat4 modelViewMatrix;
 
@@ -20,5 +24,5 @@ void main(void)
 
     fPos = vec3(model * pos4D);
     fNormal = normalize(normal);
-    fTexCoords = texCoords;
+    fTexCoords = texCoord;
 }

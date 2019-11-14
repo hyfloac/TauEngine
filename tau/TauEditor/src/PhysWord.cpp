@@ -3,6 +3,9 @@
 #include <cmath>
 #include <Utils.hpp>
 #include <FastRand.hpp>
+#include <system/Mouse.hpp>
+#include <system/Window.hpp>
+#include <RenderingPipeline.hpp>
 
 template<typename _T>
 _T sgn(_T val)
@@ -18,14 +21,14 @@ PhysWord::PhysWord(const char* str, const Window& window) noexcept
     randomReset(window);
 }
 
-void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, const glm::mat4& ortho) noexcept
+void PhysWord::render(const float delta, RenderingPipeline& rp, TextHandler& th, const GlyphSetHandle& glyphSetHandle, const glm::mat4& ortho) noexcept
 {
     UNUSED(delta);
     if(_length == 0.0f)
     {
-        _length = th.computeLength(_str, _textScale);
+        _length = th.computeLength(glyphSetHandle, _str, _textScale);
     }
-    rp.pushRenderText(&th, _str, _textPos.x(), _textPos.y(), _textScale, static_cast<u8>(_color.x() * 255), static_cast<u8>(_color.y() * 255), static_cast<u8>(_color.z() * 255), ortho);
+    rp.pushRenderText(&th, glyphSetHandle, _str, _textPos.x(), _textPos.y(), _textScale, static_cast<u8>(_color.x() * 255), static_cast<u8>(_color.y() * 255), static_cast<u8>(_color.z() * 255), ortho);
 }
 
 void PhysWord::update(const float fixedDelta, const Window& window) noexcept

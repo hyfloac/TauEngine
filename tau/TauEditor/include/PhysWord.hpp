@@ -4,6 +4,8 @@
 #include <maths/Vector3f.hpp>
 #include <TextHandler.hpp>
 
+class RenderingPipeline;
+
 class PhysWord final
 {
 private:
@@ -22,7 +24,7 @@ private:
 public:
     PhysWord(const char* str, const Window& window) noexcept;
 
-    void render(const float delta, RenderingPipeline& rp, TextHandler& th, const glm::mat4& ortho) noexcept;
+    void render(const float delta, RenderingPipeline& rp, TextHandler& th, const GlyphSetHandle& glyphSetHandle, const glm::mat4& ortho) noexcept;
 
     void update(const float fixedDelta, const Window& window) noexcept;
 
