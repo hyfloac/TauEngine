@@ -68,7 +68,9 @@ public:
     virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) noexcept = 0;
 
     virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept = 0;
-    
+
+    virtual void setVSync(bool vsync) noexcept = 0;
+
     template<typename _T>
     [[nodiscard]] bool isContextType() const noexcept
     { return _T::getStaticType() == getContextType(); }
@@ -86,7 +88,7 @@ class IncorrectContextException final : public Exception
 {
 public:
     IncorrectContextException() noexcept = default;
-    ~IncorrectContextException() noexcept = default;
+    ~IncorrectContextException() noexcept override final = default;
 
     EXCEPTION_IMPL(IncorrectContextException);
 };

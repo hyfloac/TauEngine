@@ -262,4 +262,12 @@ void GLRenderingContext::activateContext() noexcept
     wglMakeCurrent(this->_device, this->_context);
 }
 
+void GLRenderingContext::setVSync(bool vsync) noexcept
+{
+    if(WGLEW_EXT_swap_control)
+    {
+        wglSwapIntervalEXT(vsync ? TRUE : FALSE);
+    }
+}
+
 #endif

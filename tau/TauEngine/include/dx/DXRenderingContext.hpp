@@ -38,6 +38,8 @@ public:
     void clearVAs() noexcept override final { }
 
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept override final;
+
+    void setVSync(bool vsync) noexcept override final { }
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 
