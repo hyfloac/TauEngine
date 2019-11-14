@@ -85,6 +85,7 @@ void GLVertexArray::draw(IRenderingContext& context) noexcept
 
 void GLVertexArray::drawIndexed(IRenderingContext& context) noexcept
 {
+    _indexBuffer->bind(context);
     glDrawElements(GL_TRIANGLES, this->_drawCount, GL_UNSIGNED_INT, nullptr);
 }
 

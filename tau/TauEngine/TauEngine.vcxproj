@@ -23,6 +23,7 @@
     <ClCompile Include="src\astdio.cpp" />
     <ClCompile Include="src\camera\Camera.cpp" />
     <ClCompile Include="src\camera\Camera2D.cpp" />
+    <ClCompile Include="src\camera\Camera3D.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\ConsoleHandler.cpp" />
     <ClCompile Include="src\DXRenderingContext.cpp" />
@@ -31,11 +32,15 @@
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\FITextureLoader.cpp" />
+    <ClCompile Include="src\GameRecorder.cpp" />
     <ClCompile Include="src\gl\GLBufferDescriptor.cpp" />
     <ClCompile Include="src\gl\GLProgram.cpp" />
     <ClCompile Include="src\gl\GLRenderingContext.cpp" />
     <ClCompile Include="src\gl\GLShader.cpp" />
+    <ClCompile Include="src\gl\GLShaderProgram.cpp" />
     <ClCompile Include="src\gl\GLTexture.cpp" />
+    <ClCompile Include="src\gl\GLUniform.cpp" />
+    <ClCompile Include="src\gl\GLUniform.glm.cpp" />
     <ClCompile Include="src\gl\GLUtils.cpp" />
     <ClCompile Include="src\gl\GLBuffer.cpp" />
     <ClCompile Include="src\gl\GLVertexArray.cpp" />
@@ -46,6 +51,8 @@
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\IShader.cpp" />
+    <ClCompile Include="src\IShaderProgram.cpp" />
     <ClCompile Include="src\LayerStack.cpp" />
     <ClCompile Include="src\maths\Maths.cpp" />
     <ClCompile Include="src\maths\Matrix4x4f.cpp" />
@@ -77,6 +84,7 @@
     <ClInclude Include="include\astdio.h" />
     <ClInclude Include="include\camera\Camera.hpp" />
     <ClInclude Include="include\camera\Camera2D.hpp" />
+    <ClInclude Include="include\camera\Camera3D.hpp" />
     <ClInclude Include="include\Color.hpp" />
     <ClInclude Include="include\console\ConsoleHandler.hpp" />
     <ClInclude Include="include\DLL.hpp" />
@@ -88,9 +96,12 @@
     <ClInclude Include="include\file\FileHandling.hpp" />
     <ClInclude Include="include\file\FileUtils.hpp" />
     <ClInclude Include="include\file\VirtualIO.hpp" />
+    <ClInclude Include="include\GameRecorder.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
     <ClInclude Include="include\gl\GLProgram.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
+    <ClInclude Include="include\gl\GLShaderProgram.hpp" />
+    <ClInclude Include="include\gl\GLUniform.hpp" />
     <ClInclude Include="include\gl\GLUtils.hpp" />
     <ClInclude Include="include\gl\GLBuffer.hpp" />
     <ClInclude Include="include\gl\GLVertexArray.hpp" />
@@ -127,9 +138,11 @@
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\RenderingPipeline.hpp" />
     <ClInclude Include="include\ResourceLoader.hpp" />
+    <ClInclude Include="include\shader\IShaderProgram.hpp" />
+    <ClInclude Include="include\shader\IUniform.hpp" />
     <ClInclude Include="include\system\Keyboard.hpp" />
     <ClInclude Include="include\system\Mouse.hpp" />
-    <ClInclude Include="include\shader\GLShader.hpp" />
+    <ClInclude Include="include\gl\GLShader.hpp" />
     <ClInclude Include="include\shader\IShader.hpp" />
     <ClInclude Include="include\system\Mutex.hpp" />
     <ClInclude Include="include\system\RenderingContext.hpp" />
@@ -277,7 +290,7 @@
       <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -303,7 +316,7 @@
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <PrecompiledHeaderOutputFile>$(IntDir)pch\$(TargetName).pch</PrecompiledHeaderOutputFile>
       <ExpandAttributedSource>false</ExpandAttributedSource>
-      <AssemblerOutput>All</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
@@ -361,10 +374,10 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
-      <Optimization>Full</Optimization>
+      <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -390,7 +403,7 @@
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <PrecompiledHeaderOutputFile>$(IntDir)pch\$(TargetName).pch</PrecompiledHeaderOutputFile>
       <ExpandAttributedSource>false</ExpandAttributedSource>
-      <AssemblerOutput>All</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
@@ -453,7 +466,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -471,7 +484,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AssemblerOutput>All</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <ProgramDataBaseFileName>$(IntDir)pdb\vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
@@ -538,7 +551,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
@@ -556,7 +569,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AssemblerOutput>All</AssemblerOutput>
+      <AssemblerOutput>NoListing</AssemblerOutput>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <ProgramDataBaseFileName>$(IntDir)pdb\vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>

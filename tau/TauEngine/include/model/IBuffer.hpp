@@ -2,8 +2,8 @@
 
 #include <NumTypes.hpp>
 #include <DLL.hpp>
-#include "system/RenderingContext.hpp"
 #include <Objects.hpp>
+#include "system/RenderingContext.hpp"
 #include "model/BufferDescriptor.hpp"
 
 class TAU_DLL IBuffer
@@ -33,6 +33,7 @@ public:
         DispatchIndirectBuffer,
         DrawIndirectBuffer,
         ElementArrayBuffer,
+        IndexBuffer = ElementArrayBuffer,
         PixelPackBuffer,
         PixelUnpackBuffer,
         QueryBuffer,
