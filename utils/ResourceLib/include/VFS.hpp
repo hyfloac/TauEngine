@@ -5,10 +5,14 @@
 
 // #include "pch.h"
 
+#pragma warning(push, 0)
 #include <utility>
 #include <unordered_map>
-#include "IFile.hpp"
+#pragma warning(pop)
+
 #include <String.hpp>
+
+#include "IFile.hpp"
 
 /**
  * Implements a Virtual File System.

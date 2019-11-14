@@ -213,6 +213,7 @@
     <ClInclude Include="include\CFile.hpp" />
     <ClInclude Include="include\IFile.hpp" />
     <ClInclude Include="include\VFS.hpp" />
+    <ClInclude Include="include\WavefrontObj.hpp" />
     <ClInclude Include="include\Win32File.hpp" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
