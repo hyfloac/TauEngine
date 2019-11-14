@@ -1,5 +1,6 @@
 #pragma once
 
+#include "maths/GlmMatrixTransformExt.hpp"
 #include <maths/Maths.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Matrix4x4f.hpp>
@@ -104,8 +105,8 @@ private:
     {
         const glm::vec3 pos = glm::vec3(_position.x(), _position.y(), _position.z());
         _viewMatrix = glm::translate(glm::mat4(1.0f), pos);
-        _viewMatrix = glm::rotate(_viewMatrix, DEG_2_RAD(_pitch), glm::vec3(-1.0f, 0.0f, 0.0f));
-        _viewMatrix = glm::rotate(_viewMatrix, DEG_2_RAD(_yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+        _viewMatrix = glmExt::rotateDegrees(_viewMatrix, _pitch, glm::vec3(-1.0f, 0.0f, 0.0f));
+        _viewMatrix = glmExt::rotateDegrees(_viewMatrix, _yaw, glm::vec3(0.0f, 1.0f, 0.0f));
         // _viewMatrix.fpsD(_position, _pitch, _yaw);
     }
 

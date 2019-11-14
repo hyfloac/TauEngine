@@ -31,11 +31,8 @@ public:
     [[nodiscard]] float rotation() const noexcept { return _rotation; }
     [[nodiscard]] const glm::mat4& projectionMatrix() const noexcept { return _projectionMatrix; }
     [[nodiscard]] const glm::mat4& viewMatrix() const noexcept { return _viewMatrix; }
-    /**
-     * _projectionMatrix * _viewMatrix
-     */
+    /** _projectionMatrix * _viewMatrix */
     [[nodiscard]] const glm::mat4& compoundedMatrix() const noexcept { return _compoundedMatrix; }
-
 
     void setProjection(const Window& window, float bottom = 0.0f, float left = 0.0f) noexcept;
     void setProjection(float top, float right, float bottom = 0.0f, float left = 0.0f) noexcept;
@@ -91,10 +88,10 @@ public:
           _keyRotateCounterClockwise(keyRotateCounterClockwise)
     { }
 
+    void update(float fixedDelta) noexcept;
+
     [[nodiscard]] const Camera2D& camera() const noexcept { return _camera; }
     [[nodiscard]] Camera2D& camera() noexcept { return _camera; }
-
-    void update(float fixedDelta) noexcept;
 
     [[nodiscard]] Camera2D* operator->() noexcept { return &_camera; }
     [[nodiscard]] const Camera2D* operator->() const noexcept { return &_camera; }
