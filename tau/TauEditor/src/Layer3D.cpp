@@ -1,6 +1,5 @@
 #include "Layer3D.hpp"
 #include <RenderingPipeline.hpp>
-#include <ResourceLoader.hpp>
 #include <system/Window.hpp>
 #include <model/RenderableObject.hpp>
 #include <model/OBJLoader.hpp>
@@ -10,9 +9,9 @@
 
 static Vector3f fromPolar(Vector3f polar) noexcept;
 
-Layer3D::Layer3D(Window& window, RenderingPipeline& rp, ResourceLoader& rl, GameRecorder* recorder, State& state) noexcept
+Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept
     : ILayer(true),
-      _window(window), _rp(rp), _rl(rl), _state(state),
+      _window(window), _rp(rp), _state(state),
       _camera(window, 90, 0.0001f, 1000.0f, 10.0f, 20.0f, 0.03f, false,
               Keyboard::Key::Shift, Keyboard::Key::W, Keyboard::Key::S,
               Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Space, Keyboard::Key::Ctrl,

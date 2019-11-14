@@ -38,7 +38,7 @@ private:
     StringBuilder _inputBuilder;
     bool _columnMarker;
 public:
-    ConsoleLayer(Window& window, GameRecorder& gc, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, ResourceLoader& rl, float textScale = 1.0f) noexcept;
+    ConsoleLayer(Window& window, GameRecorder& gc, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, float textScale = 1.0f) noexcept;
 
     void print(const DynString& str) noexcept;
 

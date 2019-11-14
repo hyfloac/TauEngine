@@ -23,7 +23,6 @@ class Layer3D final : public ILayer
 private:
     Window& _window;
     RenderingPipeline& _rp;
-    ResourceLoader& _rl;
     State& _state;
     FreeCamCamera3DController _camera;
     GameRecorder& _gr;
@@ -54,7 +53,7 @@ private:
 
     std::vector<Ref<RenderableObject>> _objects;
 public:
-    Layer3D(Window& window, RenderingPipeline& rp, ResourceLoader& rl, GameRecorder* recorder, State& state) noexcept;
+    Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept;
 
     void onUpdate(float fixedDelta) noexcept override;
 

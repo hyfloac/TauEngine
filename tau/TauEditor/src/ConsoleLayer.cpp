@@ -5,7 +5,7 @@
 #include <EnumBitFields.hpp>
 #include <Windows.h>
 
-ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, ResourceLoader& rl, float textScale) noexcept
+ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, float textScale) noexcept
     : ILayer(false),
       _window(window), _th(th),
       _consolas(consolas), _consolasBold(consolasBold), _consolasItalic(consolasItalic), _consolasBoldItalic(consolasBoldItalic),
@@ -13,8 +13,6 @@ ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, co
       _ch({ ccPrint, ccPrintLn, ccPrintNL, ccPrintF }, this),
       _strings(), _lineBuilder(), _inputBuilder(), _columnMarker(true)
 {
-    UNUSED(rl);
-
     _ch.addCommand(new SetTextScaleCommand(this));
     _ch.addCommand(new SetExclusiveCommand(state));
     _ch.addCommand(new SetCameraCommand(this));

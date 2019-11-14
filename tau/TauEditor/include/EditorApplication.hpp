@@ -8,7 +8,6 @@
 #include <events/WindowEvent.hpp>
 #include "Config.h"
 #include <system/RenderingContext.hpp>
-#include <ResourceLoader.hpp>
 #include <Objects.hpp>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
@@ -21,7 +20,6 @@ private:
     Config _config;
     Window* _window;
     Ref<spdlog::logger> _logger;
-    ResourceLoader _rl;
     TERenderer* _renderer;
     State _gameState;
 public:

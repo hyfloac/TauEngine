@@ -9,18 +9,19 @@
 #include <Utils.hpp>
 #include <gl/GLUtils.hpp>
 #include <events/Event.hpp>
-#include "events/WindowEvent.hpp"
-#include "GL/glew.h"
+#include <events/WindowEvent.hpp>
+#include <GL/glew.h>
 #include <shlobj.h>
 #include <texture/FITextureLoader.hpp>
-#include "RenderingPipeline.hpp"
+#include <RenderingPipeline.hpp>
+#include <ResourceLoader.hpp>
 
 static void setupGameFolders() noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
     : Application(32), _config { false, 800, 600 },
-      _window(null), _logger(null), _rl(), _renderer(null), _gameState(State::Game)
+      _window(null), _logger(null), _renderer(null), _gameState(State::Game)
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
@@ -68,7 +69,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture());
 
-    _renderer = new TERenderer(*_window, _rl, _gameState, async);
+    _renderer = new TERenderer(*_window, _gameState, async);
 
     return true;
 }
@@ -91,7 +92,7 @@ void TauEditorApplication::render(const float delta) noexcept
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
-    _rl.update();
+    ResourceLoader::update();
     _renderer->update(fixedDelta);
 }
 

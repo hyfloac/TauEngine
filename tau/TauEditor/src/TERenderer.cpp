@@ -35,8 +35,8 @@ void TERenderer::finalizeLoadConsolasBoldItalic(TextHandler::FileData* file, Tex
     delete file;
 }
 
-TERenderer::TERenderer(Window& window, ResourceLoader& rl, State& state, bool async) noexcept
-    : _window(window), _rl(rl),
+TERenderer::TERenderer(Window& window, State& state, bool async) noexcept
+    : _window(window),
       _consolas(-1), _consolasBold(-1), _consolasItalic(-1), _consolasBoldItalic(-1),
       _th(nullptr), _rp(nullptr), _state(state),
       _camera(window, 800.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Q, Keyboard::Key::E),
@@ -48,17 +48,17 @@ TERenderer::TERenderer(Window& window, ResourceLoader& rl, State& state, bool as
     // (void) _th->loadTTFFile("|TERes/Sansation_Regular.ttf", 0, 48, rl, finalizeLoadSansation, this);
     // (void) _th->loadTTFFile("|TERes/MonoConsole.ttf",  0, 48, rl, finalizeLoadMono, this);
     DynString path = findSystemFont("Consolas (TrueType)");
-    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolas, this);
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, finalizeLoadConsolas, this);
     path = findSystemFont("Consolas Bold (TrueType)");
-    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolasBold, this);
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, finalizeLoadConsolasBold, this);
     path = findSystemFont("Consolas Italic (TrueType)");
-    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolasItalic, this);
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, finalizeLoadConsolasItalic, this);
     path = findSystemFont("Consolas Bold Italic (TrueType)");
-    (void) _th->loadTTFFile(path.c_str(),  0, 48, rl, finalizeLoadConsolasBoldItalic, this);
+    (void) _th->loadTTFFile(path.c_str(),  0, 48, finalizeLoadConsolasBoldItalic, this);
 
     // _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
-    _layerStack.pushLayer(new Layer3D(window, *_rp, _rl, &_recorder, state));
-    _layerStack.pushOverlay(new ConsoleLayer(window, _recorder, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), *_rp, state, _camera, rl, 0.5f));
+    _layerStack.pushLayer(new Layer3D(window, *_rp, &_recorder, state));
+    _layerStack.pushOverlay(new ConsoleLayer(window, _recorder, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), *_rp, state, _camera, 0.5f));
 }
 
 TERenderer::~TERenderer() noexcept

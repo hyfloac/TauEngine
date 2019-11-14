@@ -103,7 +103,7 @@ public:
     [[nodiscard]] FT_Error init() noexcept;
 
     [[nodiscard]] FileData* loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight) noexcept;
-    [[nodiscard]] int loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight, ResourceLoader& rl, ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* userParam) noexcept;
+    [[nodiscard]] int loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight, ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* userParam) noexcept;
 
     GlyphSetHandle generateBitmapCharacters(const DynString& glyphSetName, char minChar, char maxChar, bool smooth, FT_Face face) noexcept;
 

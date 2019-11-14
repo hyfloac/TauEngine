@@ -18,7 +18,6 @@ private:
     static constexpr float textScaleConverter = 2.8571428571428571428571428571429f;
 
     Window& _window;
-    ResourceLoader& _rl;
     GlyphSetHandle _consolas;
     GlyphSetHandle _consolasBold;
     GlyphSetHandle _consolasItalic;
@@ -31,7 +30,7 @@ private:
 
     LayerStack _layerStack;
 public:
-    TERenderer(Window& window, ResourceLoader& _rl, State& state, bool async) noexcept;
+    TERenderer(Window& window, State& state, bool async) noexcept;
 
     ~TERenderer() noexcept;
 

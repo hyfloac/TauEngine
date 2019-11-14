@@ -1,12 +1,14 @@
 #pragma once
 
-#include <future>
-#include <DynArray.hpp>
 #include <IFile.hpp>
-#include <list>
+#include <DynArray.hpp>
+#include <Objects.hpp>
 
 class ResourceLoader final
 {
+    DELETE_CONSTRUCT(ResourceLoader);
+    DELETE_DESTRUCT(ResourceLoader);
+    DELETE_COPY(ResourceLoader);
 public:
     typedef void* (*__cdecl parseFile_f)(RefDynArray<u8> file, void* parseParam);
     typedef void (*__cdecl finalizeLoad_f)(void* file, void* finalizeParam);
@@ -23,15 +25,13 @@ public:
         void* finalizeParam;
         finalizeLoad_f finalizeLoad;
     };
-private:
-    std::list<std::future<FutureData>> _futures;
 public:
-    void update() noexcept;
+    static void update() noexcept;
 
-    void loadFile(const Ref<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
+    static void loadFile(const Ref<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
 
     template<typename _TParse, typename _TFinalize, typename _F>
-    void loadFileT(const Ref<IFile>& file, parseFileT_f<_TParse, _F> parseFile, _TParse* parseParam, finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* finalizeParam) noexcept
+    static void loadFileT(const Ref<IFile>& file, parseFileT_f<_TParse, _F> parseFile, _TParse* parseParam, finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* finalizeParam) noexcept
     {
         loadFile(file,
                  reinterpret_cast<parseFile_f>(parseFile), reinterpret_cast<void*>(parseParam),

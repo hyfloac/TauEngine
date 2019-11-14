@@ -1,5 +1,12 @@
 #include "ResourceLoader.hpp"
 
+#pragma warning(push, 0)
+#include <list>
+#include <future>
+#pragma warning(pop)
+
+static std::list<std::future<ResourceLoader::FutureData>> _futures;
+
 void ResourceLoader::update() noexcept
 {
     auto it = _futures.begin();
