@@ -8,7 +8,7 @@
 #include <cstddef>
 #pragma warning(pop)
 
-#include <CVersion.hpp>
+#include "CVersion.hpp"
 
 typedef int8_t   i8;
 typedef int16_t  i16;

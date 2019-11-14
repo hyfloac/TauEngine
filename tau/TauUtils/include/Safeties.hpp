@@ -349,6 +349,4 @@ using Ref = std::shared_ptr<_T>;
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline Ref<_Out> RefCast(const Ref<_In>& in) noexcept
-{
-    return std::static_pointer_cast<_Out>(in);
-}
+{ return std::static_pointer_cast<_Out>(in); }

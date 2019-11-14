@@ -1,7 +1,9 @@
 #pragma once
 
+#pragma warning(push, 0)
 #include <cstring>
 #include <cstddef>
+#pragma warning(pop)
 #include "NumTypes.hpp"
 
 template<typename _T>
@@ -100,12 +102,6 @@ public:
 
     RefDynArray& operator =(const RefDynArray<_T>& copy)
     {
-        // if(--(*_refCount))
-        // {
-        //     delete[] _arr;
-        //     delete _refCount;
-        // }
-
         _arr = copy._arr;
         _size = copy._size;
         _refCount = copy._refCount;
@@ -117,12 +113,6 @@ public:
 
     RefDynArray& operator =(RefDynArray<_T>&& move) noexcept
     {
-        // if(--(*_refCount))
-        // {
-        //     delete[] _arr;
-        //     delete _refCount;
-        // }
-
         _arr = move._arr;
         _size = move._size;
         _refCount = move._refCount;
