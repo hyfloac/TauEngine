@@ -5,7 +5,7 @@
 #include <RenderingPipeline.hpp>
 #include <vector>
 #include <String.hpp>
-#include <console/ConsoleHandler.hpp>
+#include <console/ConsoleController.hpp>
 #include <events/WindowEvent.hpp>
 #include "State.hpp"
 #include "ResourceLoader.hpp"
@@ -32,7 +32,7 @@ private:
     Camera2DController& _camera;
     float _textScale;
 
-    ConsoleHandler _ch;
+    Console::Controller _ch;
     std::vector<DynString> _strings;
     StringBuilder _lineBuilder;
     StringBuilder _inputBuilder;
@@ -70,7 +70,7 @@ private:
     friend class SetCameraCommand;
 };
 
-class SetTextScaleCommand final : public ConsoleHandler::Command
+class SetTextScaleCommand final : public Console::Command
 {
 private:
     ConsoleLayer* _cl;
@@ -82,10 +82,10 @@ public:
     [[nodiscard]] const char* name() const noexcept override { return "setTextScale"; }
     [[nodiscard]] const char* usage() const noexcept override { return "setTextScale <scale{f32}>"; }
     [[nodiscard]] const char* info() const noexcept override { return "Sets the text scale for the console."; }
-    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler * consoleHandler) noexcept override;
+    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };
 
-class SetExclusiveCommand final : public ConsoleHandler::Command
+class SetExclusiveCommand final : public Console::Command
 {
 private:
     State& _state;
@@ -97,10 +97,10 @@ public:
     [[nodiscard]] const char* name() const noexcept override { return "setExclusive"; }
     [[nodiscard]] const char* usage() const noexcept override { return "setExclusive <exclusive{boolean}>"; }
     [[nodiscard]] const char* info() const noexcept override { return "Sets the console as the exclusive renderer."; }
-    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept override;
+    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };
 
-class SetCameraCommand final : public ConsoleHandler::Command
+class SetCameraCommand final : public Console::Command
 {
 private:
     ConsoleLayer* _cl;
@@ -112,10 +112,10 @@ public:
     [[nodiscard]] const char* name() const noexcept override { return "setCamera"; }
     [[nodiscard]] const char* usage() const noexcept override { return "setCamera <cmd{enum{reset|pos|rot}}> <(pos)<x{f32}> <y{f32}> <z{f32}>> <(rot)degrees{f32}>"; }
     [[nodiscard]] const char* info() const noexcept override { return "Sets various camera properties."; }
-    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept override;
+    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };
 
-class GameRecorderCommand final : public ConsoleHandler::Command
+class GameRecorderCommand final : public Console::Command
 {
 private:
     GameRecorder& _gr;
@@ -127,5 +127,5 @@ public:
     [[nodiscard]] const char* name() const noexcept override { return "gr"; }
     [[nodiscard]] const char* usage() const noexcept override { return "gr <cmd{enum{start|stop|play}}>"; }
     [[nodiscard]] const char* info() const noexcept override { return "Controls the game recorder."; }
-    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept override;
+    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };

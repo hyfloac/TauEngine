@@ -18,12 +18,12 @@ ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, co
     _ch.addCommand(new SetCameraCommand(this));
     _ch.addCommand(new GameRecorderCommand(gr));
     // _ch.addCommand(new LoadFontCommand(th, rl));
-    _ch.addCommand(new dc::BoolAliasCommand);
-    _ch.addCommand(new dc::ExitCommand);
-    _ch.addCommand(new dc::ParseNumCommand);
-    _ch.addCommand(new dc::AliasCommand);
-    _ch.addCommand(new dc::HelpCommand);
-    _ch.addCommand(new dc::InfoCommand);
+    _ch.addCommand(new Console::dc::BoolAliasCommand);
+    _ch.addCommand(new Console::dc::ExitCommand);
+    _ch.addCommand(new Console::dc::ParseNumCommand);
+    _ch.addCommand(new Console::dc::AliasCommand);
+    _ch.addCommand(new Console::dc::HelpCommand);
+    _ch.addCommand(new Console::dc::InfoCommand);
 }
 
 void ConsoleLayer::print(const DynString& str) noexcept
@@ -185,12 +185,12 @@ void ConsoleLayer::cPrintF(ConsoleLayer* cLayer, const char* fmt, va_list args) 
     asfreepf(str);
 }
 
-i32 SetTextScaleCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
+i32 SetTextScaleCommand::execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept
 {
     UNUSED(commandName);
     if(argCount == 1)
     {
-        ParseIntError error;
+        Console::ParseIntError error;
         const float scale = consoleHandler->parseF32(args[0], &error);
         _cl->_textScale = scale;
         return 0;
@@ -198,15 +198,15 @@ i32 SetTextScaleCommand::execute(const char* commandName, const char* args[], u3
     return 1;
 }
 
-i32 SetExclusiveCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
+i32 SetExclusiveCommand::execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept
 {
     UNUSED(commandName);
     if(argCount == 1)
     {
-        const BoolFromStr exclusive = consoleHandler->parseBool(args[0]);
-        if(exclusive == BoolFromStr::BFS_TRUE)
+        const Console::BoolFromStr exclusive = consoleHandler->parseBool(args[0]);
+        if(exclusive == Console::BoolFromStr::True)
         { _state = State::ConsoleExclusive; }
-        else if(exclusive == BoolFromStr::BFS_FALSE)
+        else if(exclusive == Console::BoolFromStr::False)
         { _state = State::Console; }
         else { return -1; }
         return 0;
@@ -214,7 +214,7 @@ i32 SetExclusiveCommand::execute(const char* commandName, const char* args[], u3
     return 1;
 }
 
-i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
+i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept
 {
     UNUSED(commandName);
     if(argCount >= 1)
@@ -225,13 +225,13 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
         }
         else if(argCount == 2 && strcmp(args[0], "rot") == 0)
         {
-            ParseIntError error;
+            Console::ParseIntError error;
             const float rot = consoleHandler->parseF32(args[1], &error);
             _cl->_camera->rotation(rot);
         }
         else if(argCount == 4 && strcmp(args[0], "pos") == 0)
         {
-            ParseIntError error;
+            Console::ParseIntError error;
             const float x = consoleHandler->parseF32(args[1], &error);
             const float y = consoleHandler->parseF32(args[2], &error);
             const float z = consoleHandler->parseF32(args[3], &error);
@@ -248,7 +248,7 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
 }
 
 
-i32 GameRecorderCommand::execute(const char* commandName, const char* args[], u32 argCount, ConsoleHandler* consoleHandler) noexcept
+i32 GameRecorderCommand::execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept
 {
     UNUSED(commandName);
     if(argCount != 1)
