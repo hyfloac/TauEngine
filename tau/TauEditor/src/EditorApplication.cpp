@@ -15,6 +15,7 @@
 #include <texture/FITextureLoader.hpp>
 #include <RenderingPipeline.hpp>
 #include <ResourceLoader.hpp>
+#include <Timings.hpp>
 
 static void setupGameFolders() noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
@@ -41,6 +42,9 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     setupGameFolders();
     setupConfig();
+
+    TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfInit.json");
+    PERF();
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
@@ -71,11 +75,14 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     _renderer = new TERenderer(*_window, _gameState, async);
 
+    TimingsWriter::end();
+    TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfRuntime.json");
     return true;
 }
 
 void TauEditorApplication::finalize() noexcept
 {
+    TimingsWriter::end();
     stopDebugOutput();
 }
 
@@ -87,17 +94,20 @@ void TauEditorApplication::onException(Exception& ex) noexcept
 
 void TauEditorApplication::render(const float delta) noexcept
 {
+    PERF();
     _renderer->render(delta);
 }
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
+    PERF();
     ResourceLoader::update();
     _renderer->update(fixedDelta);
 }
 
 void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
 {
+    PERF();
     char buf[256];
     snprintf(buf, 256, "Tau Editor: UPS / FPS: %u / %u", ups, fps);
     _window->setTitle(buf);
@@ -105,6 +115,7 @@ void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
 
 void TauEditorApplication::runMessageLoop() noexcept
 {
+    PERF();
 #ifndef NUM_MESSAGES_TO_READ
   #define NUM_MESSAGES_TO_READ 64
 #endif
@@ -120,6 +131,7 @@ void TauEditorApplication::runMessageLoop() noexcept
 
 void TauEditorApplication::setupConfig() noexcept
 {
+    PERF();
     if(VFS::Instance().fileExists(CONFIG_PATH))
     {
         Ref<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
@@ -142,6 +154,7 @@ void TauEditorApplication::setupConfig() noexcept
 
 void TauEditorApplication::writeConfig() noexcept
 {
+    PERF();
     Ref<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
     if(file)
     {

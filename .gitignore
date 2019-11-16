@@ -1,6 +1,10 @@
 # Created by https://www.gitignore.io/api/c,c++,cmake,gradle,csharp,windows,sublimetext,intellij+all,visualstudio,premake-gmake,jetbrains+all,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=c,c++,cmake,gradle,csharp,windows,sublimetext,intellij+all,visualstudio,premake-gmake,jetbrains+all,visualstudiocode
 
+# Performance
+/tau/TauEditor/resources/perfInit.json
+/tau/TauEditor/resources/perfRuntime.json
+
 # GLEW stuff
 glewinfo.txt
 visualinfo.txt

@@ -6,6 +6,7 @@
 #include <maths/GlmMatrixTransformExt.hpp>
 #include <shader/IShader.hpp>
 #include "texture/FITextureLoader.hpp"
+#include "Timings.hpp"
 
 static Vector3f fromPolar(Vector3f polar) noexcept;
 
@@ -22,6 +23,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
       _texture(TextureLoader::loadTexture("|TERes/TestTexture.png", TextureLoader::FilterType::Linear)), _overlay(TextureLoader::loadTexture("|TERes/Overlay.png", TextureLoader::FilterType::Linear)),
       _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _cubePolarPos(3, -3, 0), _cubeViewMatrix(1.0f), _objects()
 {
+    PERF();
     objl::Loader loader;
     bool loaded = loader.loadFile("|TERes/nanosuit/nanosuit.obj");
 
@@ -77,6 +79,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
 void Layer3D::onUpdate(float fixedDelta) noexcept
 {
+    PERF();
     static const glm::mat4 identity(1.0f);
 
     if(_state == State::Game)
@@ -102,6 +105,7 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
 
 void Layer3D::onRender(float delta) noexcept
 {
+    PERF();
     if(_state == State::Game)
     {
         if(_gr.playing())

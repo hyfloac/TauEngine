@@ -6,6 +6,7 @@
 #include <model/OBJLoader.hpp>
 #include <memory>
 #include "VFS.hpp"
+#include "Timings.hpp"
 
 namespace objl
 {
@@ -466,6 +467,7 @@ namespace objl
 
     bool Loader::loadMaterials(const char* path) noexcept
     {
+        PERF();
         const size_t pathLen = strlen(path);
 
         if(!(pathLen > 4 && path[pathLen - 4] == '.' && path[pathLen - 3] == 'm' && path[pathLen - 2] == 't' && path[pathLen - 1] == 'l')) { return false; }
@@ -580,6 +582,7 @@ namespace objl
 
     bool Loader::loadFile(const char* path) noexcept
     {
+        PERF();
         const size_t pathLen = strlen(path);
         if(!(pathLen > 4 && path[pathLen - 4] == '.' && path[pathLen - 3] == 'o' && path[pathLen - 2] == 'b' && path[pathLen - 1] == 'j')) { return false; }
 

@@ -1,7 +1,12 @@
 /** @file */
 #include <Timings.hpp>
+#include "system/Mutex.hpp"
+
+#include <Win32File.hpp>
+#include <VFS.hpp>
 
 #pragma warning(push, 0)
+#include <thread>
 #ifdef _WIN32
   #include <intrin.h>
   #include <Windows.h>
@@ -13,6 +18,7 @@
 
 #include <chrono>
 #include <thread>
+#include <string>
 #pragma warning(pop)
 
 u64 rdtsc() noexcept
@@ -170,4 +176,98 @@ void computeClockCyclesFromRuntime() noexcept
 const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept
 {
     return &clockCycles;
+}
+
+static Ref<IFile> _profileFile = null;
+static u32 _profileCount = 0;
+static SRWMutex _mutex;
+
+void TimingsWriter::begin(const char* name, const char* fileName) noexcept
+{
+    _mutex.lock();
+    if(!_profileFile)
+    {
+        _profileFile = VFS::Instance().openFile(fileName, FileProps::WriteNew);
+        _profileCount = 0;
+        TimingsWriter::writeHeader(name);
+    }
+    _mutex.unlock();
+}
+
+void TimingsWriter::end() noexcept
+{
+    _mutex.lock();
+    if(_profileFile)
+    {
+        writeFooter();
+        _profileFile = null;
+    }
+    _mutex.unlock();
+}
+
+void TimingsWriter::write(const ProfileResult& pr) noexcept
+{
+    _mutex.lock();
+    if(_profileFile)
+    {
+        if(_profileCount++ > 0)
+        {
+            _profileFile->writeString(R"(,)");
+        }
+
+        const u64 duration = pr.end - pr.start;
+
+        _profileFile->writeString(R"({)");
+        _profileFile->writeString(R"("cat":"function",)");
+        _profileFile->writeString(R"("dur":)");
+        {
+            const std::string durString = std::to_string(duration);
+            _profileFile->writeString(durString.c_str());
+        }
+        _profileFile->writeString(R"(,)");
+        _profileFile->writeString(R"("name":")");
+        _profileFile->writeString(pr.name);
+        _profileFile->writeString(R"(",)");
+        _profileFile->writeString(R"("ph":"X",)");
+        _profileFile->writeString(R"("pid":"0",)");
+        _profileFile->writeString(R"("tid":)");
+        {
+            const std::string threadIDString = std::to_string(pr.threadID);
+            _profileFile->writeString(threadIDString.c_str());
+        }
+        _profileFile->writeString(R"(,)");
+        _profileFile->writeString(R"("ts":)");
+        {
+            const std::string startString = std::to_string(pr.start);
+            _profileFile->writeString(startString.c_str());
+        }
+        _profileFile->writeString(R"(})");
+    }
+    _mutex.unlock();
+}
+
+void TimingsWriter::writeHeader(const char* name) noexcept
+{
+    if(_profileFile)
+    {
+        _profileFile->writeString(R"({"otherData:":{"name": ")");
+        _profileFile->writeString(name);
+        _profileFile->writeString(R"("},"traceEvents":[)");
+    }
+}
+
+void TimingsWriter::writeFooter() noexcept
+{
+    if(_profileFile)
+    {
+        _profileFile->writeString(R"(]})");
+    }
+}
+
+void PerfTimer::stop() noexcept
+{
+    const u64 end = microTime();
+    const u32 threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    TimingsWriter::write(TimingsWriter::ProfileResult(_name, threadID, _start, end));
+    _stopped = true;
 }

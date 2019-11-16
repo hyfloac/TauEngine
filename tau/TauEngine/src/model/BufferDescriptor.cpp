@@ -1,4 +1,5 @@
 #include "model/BufferDescriptor.hpp"
+#include "Timings.hpp"
 
 u32 ShaderDataType::size(Type type) noexcept
 {

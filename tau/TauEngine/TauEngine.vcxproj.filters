@@ -36,9 +36,6 @@
     <ClCompile Include="src\FastRand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ConsoleHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\I18n.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -192,6 +189,9 @@
     <ClCompile Include="src\GameRecorder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\console\ConsoleController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DLL.hpp">
@@ -237,9 +237,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\maths\ComponentVector4.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\console\ConsoleHandler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\maths\Vector4f.hpp">
@@ -438,6 +435,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\GameRecorder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\console\ConsoleController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\console\ConsoleCommand.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,6 +8,7 @@
 #include <texture/Texture.hpp>
 #include <RenderingMode.hpp>
 #include "VFS.hpp"
+#include "Timings.hpp"
 
 static ITexture* _missingTexture = null;
 
@@ -18,6 +19,7 @@ void TextureLoader::setMissingTexture(ITexture* missingTexture) noexcept
 
 ITexture* TextureLoader::generateMissingTexture() noexcept
 {
+    PERF();
     u8* const textureData = new u8[2 * 2 * 3];
 
     textureData[0 * 3 + 0] = 0xFF;
@@ -53,6 +55,7 @@ ITexture* TextureLoader::generateMissingTexture() noexcept
 
 ITexture* TextureLoader::loadTextureEx(const char* RESTRICT fileName, GPUTextureSettings&& settings, TextureLoadError* RESTRICT const error) noexcept
 {
+    PERF();
 #define ERR_EXIT(__ERR, __CHECK) if((__CHECK)) { if(error) { *error = __ERR; } return _missingTexture; }
 
     const VFS::Container physPath = VFS::Instance().resolvePath(fileName);

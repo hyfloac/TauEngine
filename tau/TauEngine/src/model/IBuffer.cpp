@@ -1,5 +1,6 @@
 #include "model/IBuffer.hpp"
 #include "gl/GLBuffer.hpp"
+#include "Timings.hpp"
 
 Ref<IBuffer> IBuffer::create(IRenderingContext& context, const std::size_t descriptorCount, const Type type, const UsageType usage) noexcept
 {

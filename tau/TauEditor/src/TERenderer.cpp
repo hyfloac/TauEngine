@@ -4,6 +4,7 @@
 #include <PhysWordLayer.hpp>
 #include "ConsoleLayer.hpp"
 #include "Layer3D.hpp"
+#include "Timings.hpp"
 
 static void __cdecl setupParams(RenderingPipeline&, Window&, void*) noexcept;
 
@@ -42,11 +43,12 @@ TERenderer::TERenderer(Window& window, State& state, bool async) noexcept
       _camera(window, 800.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Q, Keyboard::Key::E),
       _recorder(), _layerStack()
 {
+    PERF();
     _rp = new RenderingPipeline(window, setupParams, nullptr, async);
     _th = new TextHandler(*window.renderingContext(), "|TERes/shader/Text/TextVertexShader.glsl", "|TERes/shader/Text/TextPixelShader.glsl");
     (void) _th->init();
-    // (void) _th->loadTTFFile("|TERes/Sansation_Regular.ttf", 0, 48, rl, finalizeLoadSansation, this);
-    // (void) _th->loadTTFFile("|TERes/MonoConsole.ttf",  0, 48, rl, finalizeLoadMono, this);
+    // (void) _th->loadTTFFile("|TERes/Sansation_Regular.ttf", 0, 48, finalizeLoadSansation, this);
+    // (void) _th->loadTTFFile("|TERes/MonoConsole.ttf",  0, 48, finalizeLoadMono, this);
     DynString path = findSystemFont("Consolas (TrueType)");
     (void) _th->loadTTFFile(path.c_str(),  0, 48, finalizeLoadConsolas, this);
     path = findSystemFont("Consolas Bold (TrueType)");
@@ -69,6 +71,7 @@ TERenderer::~TERenderer() noexcept
 
 void TERenderer::render(const float delta) noexcept
 {
+    PERF();
     _rp->pushLoadContext(*_window.renderingContext());
     _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     TAU_RENDER(*_rp, {
@@ -88,6 +91,7 @@ void TERenderer::render(const float delta) noexcept
 
 void TERenderer::update(const float fixedDelta) noexcept
 {
+    PERF();
     if(_state == State::Game)
     {
         _camera.update(fixedDelta);
@@ -105,6 +109,7 @@ void TERenderer::update(const float fixedDelta) noexcept
 
 void TERenderer::onEvent(Event& e) noexcept
 {
+    PERF();
     for(auto* layer : _layerStack.layers())
     {
         layer->onEvent(e);

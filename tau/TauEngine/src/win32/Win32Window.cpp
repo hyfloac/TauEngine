@@ -16,6 +16,7 @@
 #include "TauEngine.hpp"
 #include "system/Window.hpp"
 #include "events/WindowEvent.hpp"
+#include "Timings.hpp"
 
 #include <EnumBitFields.hpp>
 
@@ -347,6 +348,7 @@ Window::~Window() noexcept
 
 void Window::resize(const u32 width, const u32 height) noexcept
 {
+    PERF();
     this->_width = width;
     this->_height = height;
     SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
@@ -355,6 +357,7 @@ void Window::resize(const u32 width, const u32 height) noexcept
 
 void Window::move(const u32 xPos, const u32 yPos) noexcept
 {
+    PERF();
     this->_xPos = xPos;
     this->_yPos = yPos;
     SetWindowPos(_windowContainer.windowHandle, null, static_cast<int>(xPos), static_cast<int>(yPos), 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
@@ -362,6 +365,7 @@ void Window::move(const u32 xPos, const u32 yPos) noexcept
 
 void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept
 {
+    PERF();
     this->_xPos = xPos;
     this->_yPos = yPos;
     this->_width = width;
@@ -372,12 +376,14 @@ void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, cons
 
 void Window::setTitle(const DynString& title) noexcept
 {
+    PERF();
     this->_title = title;
     SetWindowTextA(_windowContainer.windowHandle, title);
 }
 
 bool Window::createWindow() noexcept
 {
+    PERF();
     addWindow(*this);
 
     WNDCLASSA* windowClass = &this->_windowContainer.windowClass;
@@ -413,6 +419,7 @@ bool Window::createWindow() noexcept
 
 void Window::closeWindow() const noexcept
 {
+    PERF();
     removeWindow(this);
     if(this->_windowContainer.windowHandle)
     {
@@ -422,6 +429,7 @@ void Window::closeWindow() const noexcept
 
 void Window::showWindow() const noexcept
 {
+    PERF();
     ShowWindow(this->_windowContainer.windowHandle, SW_SHOWNA);
     UpdateWindow(this->_windowContainer.windowHandle);
 
@@ -430,11 +438,13 @@ void Window::showWindow() const noexcept
 
 void Window::hideWindow() const noexcept
 {
+    PERF();
     ShowWindow(this->_windowContainer.windowHandle, SW_HIDE);
 }
 
 bool Window::createContext() noexcept
 {
+    PERF();
     _context = IRenderingContext::create(this->_renderingMode);
 
     if(!_context) { return false; }
@@ -445,6 +455,7 @@ bool Window::createContext() noexcept
 
 void Window::swapBuffers() const noexcept
 {
+    PERF();
     if(this->_windowContainer.hdc)
     {
         SwapBuffers(this->_windowContainer.hdc);

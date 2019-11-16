@@ -15,6 +15,7 @@
 #include "RenderingPipeline.hpp"
 #include <Windows.h>
 #include <winreg.h>
+#include "Timings.hpp"
 
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
@@ -22,6 +23,7 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
       _positionBuffer(IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
       _projUni(null), _texUni(null), _colorUni(null)
 {
+    PERF();
     Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexPath);
     Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, fragmentPath);
 
@@ -76,6 +78,7 @@ FT_Error TextHandler::init() noexcept
 
 TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight) noexcept
 {
+    PERF();
     const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
     
     if(!file) { return null; }
@@ -101,6 +104,7 @@ struct LoadData final
 
 int TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight, const ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* const userParam) noexcept
 {
+    PERF();
     const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
 
     if(!file)
@@ -112,6 +116,7 @@ int TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidt
 
 TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) noexcept
 {
+    PERF();
     TextHandler& th = ld->th;
 
     FT_Face face;
@@ -132,6 +137,7 @@ TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) no
 
 GlyphSetHandle TextHandler::generateBitmapCharacters(const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
 {
+    PERF();
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
@@ -328,6 +334,7 @@ float TextHandler::computeHeight(GlyphSetHandle glyphSetHandle, const char* str,
 #ifdef _WIN32
 DynString findSystemFont(const char* fontName) noexcept
 {
+    PERF();
     static const LPCSTR fontRegistryPath = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
 
     HKEY hKey;

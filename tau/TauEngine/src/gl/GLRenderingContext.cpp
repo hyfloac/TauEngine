@@ -5,6 +5,7 @@
 #include <Utils.hpp>
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLVertexArray.hpp"
+#include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
     : IRenderingContext(mode, debug),
@@ -33,16 +34,6 @@ void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexce
         GLVertexArray::_bind(vao);
 
         vertexArray->internalSetup(*this);
-
-        // for(GLuint i = 0; i < vertexArray->attribs().count(); ++i)
-        // {
-        //     const auto attrib = vertexArray->attribs()[i];
-        //     // glBindBuffer(GL_ARRAY_BUFFER, attrib.buffer);
-        //     attrib.buffer->bind(*this);
-        //     GLBufferDescriptor::attribPointer(i, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.pointer);
-        //     attrib.buffer->unbind(*this);
-        //     // glBindBuffer(GL_ARRAY_BUFFER, 0);
-        // }
     }
 
     return &_vaos[vertexArray];
@@ -101,6 +92,7 @@ void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexce
 
 void GLRenderingContext::destroyVA(IVertexArray* vertexArray) noexcept
 {
+    PERF();
     const auto iter = _vaos.find(vertexArray);
 
     if(iter != _vaos.end())
@@ -111,6 +103,7 @@ void GLRenderingContext::destroyVA(IVertexArray* vertexArray) noexcept
 
 void GLRenderingContext::clearVAs() noexcept
 {
+    PERF();
     _vaos.clear();
 }
 

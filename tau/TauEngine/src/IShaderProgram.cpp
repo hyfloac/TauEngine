@@ -3,6 +3,7 @@
 #include "RenderingMode.hpp"
 #include "system/RenderingContext.hpp"
 #include "gl/GLShaderProgram.hpp"
+#include "Timings.hpp"
 
 Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
 {

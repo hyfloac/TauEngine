@@ -1,10 +1,10 @@
 #include "gl/GLBuffer.hpp"
+#include "Timings.hpp"
 
 GLBuffer::GLBuffer(const Type type, const UsageType usage, const std::size_t descriptorCount) noexcept
     : IBuffer(type, usage, descriptorCount),
       _buffer(),
       _glType(getGLType(type)), _glUsage(getGLUsageType(usage))
-      // _count(0)
 {
     glGenBuffers(1, &_buffer);
 }

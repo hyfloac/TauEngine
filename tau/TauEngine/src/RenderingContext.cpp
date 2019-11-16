@@ -1,5 +1,6 @@
 #include "system/RenderingContext.hpp"
 #include "gl/GLRenderingContext.hpp"
+#include "Timings.hpp"
 
 #ifdef _WIN32
 #include "dx/DXRenderingContext.hpp"
@@ -53,6 +54,7 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
 
 SharedRenderingContextsContainer IRenderingContext::createShared(const RenderingMode& mode, std::size_t count) noexcept
 {
+    PERF();
     if(count < 2) { return null; }
     IRenderingContext** contexts = new(std::nothrow) IRenderingContext*[count];
     if(!contexts) { return null; }
@@ -97,7 +99,7 @@ bool SharedRenderingContexts::createContexts(void* param) noexcept
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void SharedRenderingContexts::destroyBD(IVertexArray* vertexArray) noexcept
+void SharedRenderingContexts::destroyVA(IVertexArray* vertexArray) noexcept
 {
     for(std::size_t i = 0; i < _count; ++i)
     {

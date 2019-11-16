@@ -114,7 +114,7 @@ public:
 
     [[nodiscard]] bool createContexts(void* param) noexcept;
 
-    void destroyBD(IVertexArray* vertexArray) noexcept;
+    void destroyVA(IVertexArray* vertexArray) noexcept;
 };
 
 class TAU_DLL SharedRenderingContextsContainer

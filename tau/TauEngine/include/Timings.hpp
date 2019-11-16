@@ -6,8 +6,10 @@
 #pragma once
 
 #include <NumTypes.hpp>
-#include <DLL.hpp>
 #include <Safeties.hpp>
+#include <Objects.hpp>
+#include <IFile.hpp>
+#include "DLL.hpp"
 
 /**
  *   This retrieves the number of clock cycles that has passed
@@ -74,3 +76,67 @@ TAU_DLL void computeClockCyclesFromRuntime() noexcept;
  *    A pointer to the current clock speed information.
  */
 TAU_DLL NonNull const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept;
+
+class TAU_DLL TimingsWriter final
+{
+    DELETE_CONSTRUCT(TimingsWriter);
+    DELETE_DESTRUCT(TimingsWriter);
+    DELETE_COPY(TimingsWriter);
+public:
+    struct ProfileResult final
+    {
+        DEFAULT_DESTRUCT(ProfileResult);
+        DEFAULT_COPY(ProfileResult);
+    public:
+        const char* name;
+        u32 threadID;
+        u64 start;
+        u64 end;
+    public:
+        ProfileResult(const char* const name, const u32 threadId, const u64 start, const u64 end) noexcept
+            : name(name), threadID(threadId), start(start), end(end)
+        { }
+    };
+public:
+    static void begin(const char* name, const char* fileName = "results.json") noexcept;
+
+    static void end() noexcept;
+
+    static void write(const ProfileResult& pr) noexcept;
+private:
+    static void writeHeader(const char* name) noexcept;
+    static void writeFooter() noexcept;
+};
+
+class TAU_DLL PerfTimer final
+{
+    DEFAULT_COPY(PerfTimer);
+private:
+    const char* _name;
+    u64 _start;
+    bool _stopped;
+public:
+    PerfTimer(const char* const name) noexcept
+        : _name(name), _start(microTime()), _stopped(false)
+    { }
+
+    ~PerfTimer() noexcept
+    {
+        if(!_stopped)
+        { stop(); }
+    }
+
+    void stop() noexcept;
+};
+
+#ifndef TAU_PERF_MONITOR
+  #define TAU_PERF_MONITOR 0
+#endif
+
+#if TAU_PERF_MONITOR
+  #define PERF_NAMED(_NAME) PerfTimer _x_timer##__LINE__(_NAME)
+  #define PERF() PERF_NAMED(__FUNCSIG__)
+#else
+  #define PERF_NAMED(_NAME)
+  #define PERF()
+#endif

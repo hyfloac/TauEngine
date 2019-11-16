@@ -13,6 +13,7 @@
 #include <imgui/ImGuiGLImpl.hpp>
 #include "system/RenderingContext.hpp"
 #include "model/IVertexArray.hpp"
+#include "Timings.hpp"
 
 RenderingPipeline::RenderingPipeline(Window& window, ctxCtrl_f setupParams, void* setupParam, const bool async, const u32 bufferSize, const u32 ctxControlsSize) noexcept
     : _window(window),
@@ -306,6 +307,7 @@ static inline void rpExecuteCommand(RenderingPipeline& rp, Window& window, IRend
 
 void RenderingPipeline::runRenderingCycle() noexcept
 {
+    PERF();
     for(u32 ctxIndex = 0; _ctxCtrlsFront[ctxIndex].first && ctxIndex < _ctxCtrlsSize; ++ctxIndex)
     {
         CtxCtrlObj& obj = _ctxCtrlsFront[ctxIndex];
@@ -438,6 +440,7 @@ void RenderingPipeline::runRenderingCycle() noexcept
 
 void RenderingPipeline::renderThreadFunc(ctxCtrl_f setupParams, void* setupParam) noexcept
 {
+    PERF();
     // Re-assign OpenGL rendering context to this rendering thread.
     _window.renderingContext()->activateContext();
 

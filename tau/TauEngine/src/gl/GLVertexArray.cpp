@@ -1,4 +1,5 @@
 #include "gl/GLVertexArray.hpp"
+#include "Timings.hpp"
 
 GLuint GLVertexArray::generate() noexcept
 {
@@ -25,6 +26,7 @@ GLVertexArray::~GLVertexArray() noexcept = default;
 
 void GLVertexArray::internalSetup(IRenderingContext& context) noexcept
 {
+    PERF();
     u32 attribIndex = 0;
     for(std::size_t i = 0; i < _buffers.size(); ++i)
     {

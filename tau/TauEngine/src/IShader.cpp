@@ -2,6 +2,7 @@
 #include "RenderingMode.hpp"
 #include "gl/GLShader.hpp"
 #include "system/RenderingContext.hpp"
+#include "Timings.hpp"
 
 Ref<IShader> IShader::create(IRenderingContext& context, Type shaderType, NotNull<const char> shaderPath) noexcept
 {

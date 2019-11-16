@@ -5,6 +5,7 @@
 #include "gl/GLUniform.hpp"
 #include <Safeties.hpp>
 #include <VariableLengthArray.hpp>
+#include "Timings.hpp"
 
 GLShaderProgram::GLShaderProgram(IRenderingContext& context) noexcept
     : IShaderProgram(), _programID(glCreateProgram())
@@ -49,6 +50,7 @@ void GLShaderProgram::unbind(IRenderingContext& context) noexcept
 
 static bool validateFail(GLuint& programId, const char* type) noexcept
 {
+    PERF();
     GLint length;
 
     glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &length);
@@ -79,6 +81,7 @@ static bool validateFail(GLuint& programId, const char* type) noexcept
 
 bool GLShaderProgram::link(IRenderingContext& context) noexcept
 {
+    PERF();
     glLinkProgram(_programID);
 
     GLint result;

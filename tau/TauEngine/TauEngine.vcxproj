@@ -25,7 +25,7 @@
     <ClCompile Include="src\camera\Camera2D.cpp" />
     <ClCompile Include="src\camera\Camera3D.cpp" />
     <ClCompile Include="src\Color.cpp" />
-    <ClCompile Include="src\ConsoleHandler.cpp" />
+    <ClCompile Include="src\console\ConsoleController.cpp" />
     <ClCompile Include="src\DXRenderingContext.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FastRand.cpp" />
@@ -86,7 +86,8 @@
     <ClInclude Include="include\camera\Camera2D.hpp" />
     <ClInclude Include="include\camera\Camera3D.hpp" />
     <ClInclude Include="include\Color.hpp" />
-    <ClInclude Include="include\console\ConsoleHandler.hpp" />
+    <ClInclude Include="include\console\ConsoleCommand.hpp" />
+    <ClInclude Include="include\console\ConsoleController.hpp" />
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\dx\DXRenderingContext.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
