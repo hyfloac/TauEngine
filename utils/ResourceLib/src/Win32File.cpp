@@ -40,10 +40,10 @@ i64 Win32File::writeBytes(const u8* buffer, u64 len) noexcept
 {
     if(_props == FileProps::Read)
     { return -1; }
-    OVERLAPPED ol;
-    ZeroMemory(&ol, sizeof(ol));
+    // OVERLAPPED ol;
+    // ZeroMemory(&ol, sizeof(ol));
     DWORD written;
-    WriteFile(_file, buffer, len, &written, &ol);
+    WriteFile(_file, buffer, len, &written, NULL);
     return written;
 }
 
