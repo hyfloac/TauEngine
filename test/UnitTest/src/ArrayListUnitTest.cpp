@@ -1,6 +1,6 @@
 #include "ArrayListUnitTest.hpp"
+#include "UnitTest.hpp"
 #include <ArrayList.hpp>
-#include <cstdio>
 
 namespace ArrayListUnitTest
 {
@@ -17,7 +17,7 @@ struct TestStruct final
 
 void addTest() noexcept
 {
-    printf("Beginning ArrayListUnitTest::addTest\n");
+    UNIT_TEST();
     ArrayList<TestStruct> list;
 
     for(int i = 0; i < 65000; ++i)
@@ -33,12 +33,11 @@ void addTest() noexcept
             printf("Match failed: %zu\n", i);
         }
     }
-    printf("Finished ArrayListUnitTest::addTest\n");
 }
 
 void emplaceTest() noexcept
 {
-    printf("Beginning ArrayListUnitTest::emplaceTest\n");
+    UNIT_TEST();
     ArrayList<TestStruct> list;
 
     for(int i = 0; i < 1000; ++i)
@@ -54,12 +53,11 @@ void emplaceTest() noexcept
             printf("Match failed: %zu\n", i);
         }
     }
-    printf("Finished ArrayListUnitTest::emplaceTest\n");
 }
 
 void copyTest() noexcept
 {
-    printf("Beginning ArrayListUnitTest::copyTest\n");
+    UNIT_TEST();
     ArrayList<TestStruct> list;
 
     for(int i = 0; i < 1000; ++i)
@@ -77,6 +75,5 @@ void copyTest() noexcept
             printf("Match failed: %zu\n", i);
         }
     }
-    printf("Finished ArrayListUnitTest::copyTest\n");
 }
 }

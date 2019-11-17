@@ -13,9 +13,12 @@
   <ItemGroup>
     <ClCompile Include="src\ArrayListUnitTest.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\StringTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ArrayListUnitTest.hpp" />
+    <ClInclude Include="include\StringTest.hpp" />
+    <ClInclude Include="include\UnitTest.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
