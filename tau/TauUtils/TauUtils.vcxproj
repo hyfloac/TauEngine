@@ -260,6 +260,7 @@
     <ClInclude Include="include\RunTimeType.hpp" />
     <ClInclude Include="include\String.hpp" />
     <ClInclude Include="include\Triplet.hpp" />
+    <ClInclude Include="include\TUMaths.hpp" />
     <ClInclude Include="include\VariableLengthArray.hpp" />
     <ClInclude Include="include\DynArray.hpp" />
     <ClInclude Include="include\Endian.hpp" />
