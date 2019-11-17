@@ -10,6 +10,7 @@
 #include "CVersion.hpp"
 #include "Safeties.hpp"
 #include "Objects.hpp"
+#include "TUMaths.hpp"
 #include "Utils.hpp"
 
 static inline bool equalsIgnoreCase(const char* RESTRICT lhs, const char* RESTRICT rhs) noexcept
@@ -140,6 +141,12 @@ namespace cexpr
     }
 }
 
+class String;
+class StringView;
+class DynString;
+class DynStringView;
+class StringBuilder;
+
 class StringIterator final
 {
     DEFAULT_DESTRUCT(StringIterator);
@@ -210,8 +217,27 @@ public:
     inline String(const String& copy) noexcept = default;
     inline String(String&& move) noexcept = default;
 
-    inline String& operator =(const String& copy) noexcept = default;
-    inline String& operator =(String&& move) noexcept = default;
+    [[nodiscard]] inline String& operator =(const String& copy) noexcept = default;
+    [[nodiscard]] inline String& operator =(String&& move) noexcept = default;
+
+    [[nodiscard]] inline String& operator =(const char* str) noexcept
+    {
+        if(str)
+        {
+            _string = str;
+            _length = strlen(str);
+            _hash = findHashCode(str);
+        }
+        return *this;
+    }
+
+    [[nodiscard]] inline String& operator =(const NotNull<const char>& str) noexcept
+    {
+        _string = str;
+        _length = strlen(str);
+        _hash = findHashCode(str);
+        return *this;
+    }
 
     [[nodiscard]] inline NonNull const char* c_str() const noexcept { return _string; }
     [[nodiscard]] inline std::size_t length() const noexcept { return _length; }
@@ -231,28 +257,81 @@ public:
         return false;
     }
 
+    [[nodiscard]] inline bool equals(const StringView& other) const noexcept;
+    [[nodiscard]] inline bool equals(const DynStringView& other) const noexcept;
+    [[nodiscard]] inline bool equals(const DynString& other) const noexcept;
+
+    [[nodiscard]] inline bool equals(const char* str) const noexcept
+    {
+        if(_string == str) { return true; }
+        return strcmp(this->_string, str) == 0;
+    }
+
     [[nodiscard]] inline i32 compareTo(const String& other) const noexcept
     {
         if(this == &other || _string == other._string) { return 0; }
         return strcmp(this->_string, other._string);
     }
 
+    [[nodiscard]] inline i32 compareTo(const StringView& other) const noexcept;
+    [[nodiscard]] inline i32 compareTo(const DynString& other) const noexcept;
+    [[nodiscard]] inline i32 compareTo(const DynStringView& other) const noexcept;
+
+    [[nodiscard]] inline i32 compareTo(const char* str) const noexcept
+    {
+        if(_string == str) { return 0; }
+        return strcmp(this->_string, str);
+    }
+
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
     [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
 
 #if __has_feature(__cpp_impl_three_way_comparison)
-    inline i32 operator <=>(const String& other) const noexcept { return compareTo(other); }
+    [[nodiscard]] inline i32 operator <=>(const String& other) const noexcept { return compareTo(other); }
+    [[nodiscard]] inline i32 operator <=>(const StringView& other) const noexcept { return compareTo(other); }
+    [[nodiscard]] inline i32 operator <=>(const DynString& other) const noexcept { return compareTo(other); }
+    [[nodiscard]] inline i32 operator <=>(const DynStringView& other) const noexcept { return compareTo(other); }
+    [[nodiscard]] inline i32 operator <=>(const char* str) const noexcept { return compareTo(str); }
 #endif
 
-    inline bool operator ==(const String& other) const noexcept { return  equals(other); }
-    inline bool operator !=(const String& other) const noexcept { return !equals(other); }
-    inline bool operator < (const String& other) const noexcept { return compareTo(other) <  0; }
-    inline bool operator > (const String& other) const noexcept { return compareTo(other) >  0; }
-    inline bool operator <=(const String& other) const noexcept { return compareTo(other) <= 0; }
-    inline bool operator >=(const String& other) const noexcept { return compareTo(other) >= 0; }
+    [[nodiscard]] inline bool operator ==(const String& other) const noexcept { return  equals(other); }
+    [[nodiscard]] inline bool operator !=(const String& other) const noexcept { return !equals(other); }
+    [[nodiscard]] inline bool operator < (const String& other) const noexcept { return compareTo(other) <  0; }
+    [[nodiscard]] inline bool operator > (const String& other) const noexcept { return compareTo(other) >  0; }
+    [[nodiscard]] inline bool operator <=(const String& other) const noexcept { return compareTo(other) <= 0; }
+    [[nodiscard]] inline bool operator >=(const String& other) const noexcept { return compareTo(other) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const StringView& other) const noexcept { return  equals(other); }
+    [[nodiscard]] inline bool operator !=(const StringView& other) const noexcept { return !equals(other); }
+    [[nodiscard]] inline bool operator < (const StringView& other) const noexcept { return compareTo(other) <  0; }
+    [[nodiscard]] inline bool operator > (const StringView& other) const noexcept { return compareTo(other) >  0; }
+    [[nodiscard]] inline bool operator <=(const StringView& other) const noexcept { return compareTo(other) <= 0; }
+    [[nodiscard]] inline bool operator >=(const StringView& other) const noexcept { return compareTo(other) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const DynString& other) const noexcept { return  equals(other); }
+    [[nodiscard]] inline bool operator !=(const DynString& other) const noexcept { return !equals(other); }
+    [[nodiscard]] inline bool operator < (const DynString& other) const noexcept { return compareTo(other) <  0; }
+    [[nodiscard]] inline bool operator > (const DynString& other) const noexcept { return compareTo(other) >  0; }
+    [[nodiscard]] inline bool operator <=(const DynString& other) const noexcept { return compareTo(other) <= 0; }
+    [[nodiscard]] inline bool operator >=(const DynString& other) const noexcept { return compareTo(other) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const DynStringView& other) const noexcept { return  equals(other); }
+    [[nodiscard]] inline bool operator !=(const DynStringView& other) const noexcept { return !equals(other); }
+    [[nodiscard]] inline bool operator < (const DynStringView& other) const noexcept { return compareTo(other) <  0; }
+    [[nodiscard]] inline bool operator > (const DynStringView& other) const noexcept { return compareTo(other) >  0; }
+    [[nodiscard]] inline bool operator <=(const DynStringView& other) const noexcept { return compareTo(other) <= 0; }
+    [[nodiscard]] inline bool operator >=(const DynStringView& other) const noexcept { return compareTo(other) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const char* str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const char* str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const char* str) const noexcept { return compareTo(str) <  0; }
+    [[nodiscard]] inline bool operator > (const char* str) const noexcept { return compareTo(str) >  0; }
+    [[nodiscard]] inline bool operator <=(const char* str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const char* str) const noexcept { return compareTo(str) >= 0; }
 private:
-    friend class DynString;
     friend class StringView;
+    friend class DynString;
+    friend class DynStringView;
     friend class StringBuilder;
 };
 
@@ -280,12 +359,100 @@ public:
 
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
     [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
+
+    [[nodiscard]] inline bool equals(const String& other) const noexcept
+    {
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, this->_length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const StringView& other) const noexcept
+    {
+        if(this == &other) { return true; }
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, this->_length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const DynString& other) const noexcept;
+    [[nodiscard]] inline bool equals(const DynStringView& other) const noexcept;
+
+    [[nodiscard]] inline bool equals(const char* str) const noexcept
+    {
+        return strncmp(this->_string, str, this->_length) == 0;
+    }
+
+    [[nodiscard]] inline i32 compareTo(const StringView& other) const noexcept
+    {
+        if(this == &other) { return 0; }
+        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+    }
+
+    [[nodiscard]] inline i32 compareTo(const String& other) const noexcept
+    {
+        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+    }
+
+    [[nodiscard]] inline i32 compareTo(const DynStringView& other) const noexcept;
+    [[nodiscard]] inline i32 compareTo(const DynString& other) const noexcept;
+    [[nodiscard]] inline i32 compareTo(const char* str) const noexcept
+    {
+        return strncmp(this->_string, str, this->_length);
+    }
+
+#if __has_feature(__cpp_impl_three_way_comparison)
+    inline i32 operator <=>(const String& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const StringView& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const DynString& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const DynStringView& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const char* other) const noexcept { return compareTo(other); }
+#endif
+
+    [[nodiscard]] inline bool operator ==(const String& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const String& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const String& str) const noexcept { return compareTo(str) <  0; }
+    [[nodiscard]] inline bool operator > (const String& str) const noexcept { return compareTo(str) >  0; }
+    [[nodiscard]] inline bool operator <=(const String& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const String& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const StringView& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const StringView& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const StringView& str) const noexcept { return compareTo(str) <  0; }
+    [[nodiscard]] inline bool operator > (const StringView& str) const noexcept { return compareTo(str) >  0; }
+    [[nodiscard]] inline bool operator <=(const StringView& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const StringView& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const DynString& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const DynString& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const DynString& str) const noexcept { return compareTo(str) <  0; }
+    [[nodiscard]] inline bool operator > (const DynString& str) const noexcept { return compareTo(str) >  0; }
+    [[nodiscard]] inline bool operator <=(const DynString& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const DynString& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const DynStringView& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const DynStringView& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const DynStringView& str) const noexcept { return compareTo(str) <  0; }
+    [[nodiscard]] inline bool operator > (const DynStringView& str) const noexcept { return compareTo(str) >  0; }
+    [[nodiscard]] inline bool operator <=(const DynStringView& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const DynStringView& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const char* str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const char* str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const char* str) const noexcept { return compareTo(str) <  0; }
+    [[nodiscard]] inline bool operator > (const char* str) const noexcept { return compareTo(str) >  0; }
+    [[nodiscard]] inline bool operator <=(const char* str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const char* str) const noexcept { return compareTo(str) >= 0; }
 private:
+    friend class String;
     friend class DynString;
+    friend class DynStringView;
     friend class StringBuilder;
 };
-
-class DynStringView;
 
 class DynString final
 {
@@ -331,9 +498,9 @@ public:
 
     [[nodiscard]] inline u32 hashCode() const noexcept { return _hash; }
 
-    [[nodiscard]] inline bool equals(const DynString& other) const noexcept
+    [[nodiscard]] inline bool equals(const String& other) const noexcept
     {
-        if(this == &other || _string == other._string) { return true; }
+        if(_string == other._string) { return true; }
         if(this->_length == other._length && this->_hash == other._hash)
         {
             return strcmp(this->_string, other._string) == 0;
@@ -341,10 +508,57 @@ public:
         return false;
     }
 
+    [[nodiscard]] inline bool equals(const StringView& other) const noexcept
+    {
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, other._length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const DynString& other) const noexcept
+    {
+        if(this == &other || this->_string == other._string) { return true; }
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strcmp(this->_string, other._string) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const DynStringView& other) const noexcept;
+
+    [[nodiscard]] inline bool equals(const char* str) const noexcept
+    {
+        if(this->_string == str) { return true; }
+        return strcmp(this->_string, str) == 0;
+    }
+
+    [[nodiscard]] inline i32 compareTo(const String& other) const noexcept
+    {
+        if(this->_string == other._string) { return 0; }
+        return strcmp(this->_string, other._string);
+    }
+
+    [[nodiscard]] inline i32 compareTo(const StringView& other) const noexcept
+    {
+        if(this->_string == other._string) { return 0; }
+        return strncmp(this->_string, other._string, other._length);
+    }
+
     [[nodiscard]] inline i32 compareTo(const DynString& other) const noexcept
     {
-        if(this == &other || _string == other._string) { return 0; }
+        if(this == &other || this->_string == other._string) { return 0; }
         return strcmp(this->_string, other._string);
+    }
+
+    [[nodiscard]] inline i32 compareTo(const DynStringView& other) const noexcept;
+
+    [[nodiscard]] inline i32 compareTo(const char* str) const noexcept
+    {
+        if(this->_string == str) { return 0; }
+        return strcmp(this->_string, str);
     }
 
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
@@ -391,15 +605,47 @@ public:
     }
 
 #if __has_feature(__cpp_impl_three_way_comparison)
+    inline i32 operator <=> (const String& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=> (const StringView& other) const noexcept { return compareTo(other); }
     inline i32 operator <=> (const DynString& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=> (const DynStringView& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=> (const char* other) const noexcept { return compareTo(other); }
 #endif
+
+    inline bool operator ==(const String& other) const noexcept { return  equals(other); }
+    inline bool operator !=(const String& other) const noexcept { return !equals(other); }
+    inline bool operator < (const String& other) const noexcept { return compareTo(other) <  0; }
+    inline bool operator > (const String& other) const noexcept { return compareTo(other) >  0; }
+    inline bool operator <=(const String& other) const noexcept { return compareTo(other) <= 0; }
+    inline bool operator >=(const String& other) const noexcept { return compareTo(other) >= 0; }
+
+    inline bool operator ==(const StringView& other) const noexcept { return  equals(other); }
+    inline bool operator !=(const StringView& other) const noexcept { return !equals(other); }
+    inline bool operator < (const StringView& other) const noexcept { return compareTo(other) <  0; }
+    inline bool operator > (const StringView& other) const noexcept { return compareTo(other) >  0; }
+    inline bool operator <=(const StringView& other) const noexcept { return compareTo(other) <= 0; }
+    inline bool operator >=(const StringView& other) const noexcept { return compareTo(other) >= 0; }
 
     inline bool operator ==(const DynString& other) const noexcept { return  equals(other); }
     inline bool operator !=(const DynString& other) const noexcept { return !equals(other); }
-    inline bool operator < (const DynString& other) const noexcept { return compareTo(other) < 0; }
-    inline bool operator > (const DynString& other) const noexcept { return compareTo(other) > 0; }
+    inline bool operator < (const DynString& other) const noexcept { return compareTo(other) <  0; }
+    inline bool operator > (const DynString& other) const noexcept { return compareTo(other) >  0; }
     inline bool operator <=(const DynString& other) const noexcept { return compareTo(other) <= 0; }
     inline bool operator >=(const DynString& other) const noexcept { return compareTo(other) >= 0; }
+
+    inline bool operator ==(const DynStringView& other) const noexcept { return  equals(other); }
+    inline bool operator !=(const DynStringView& other) const noexcept { return !equals(other); }
+    inline bool operator < (const DynStringView& other) const noexcept { return compareTo(other) <  0; }
+    inline bool operator > (const DynStringView& other) const noexcept { return compareTo(other) >  0; }
+    inline bool operator <=(const DynStringView& other) const noexcept { return compareTo(other) <= 0; }
+    inline bool operator >=(const DynStringView& other) const noexcept { return compareTo(other) >= 0; }
+
+    inline bool operator ==(const char* other) const noexcept { return  equals(other); }
+    inline bool operator !=(const char* other) const noexcept { return !equals(other); }
+    inline bool operator < (const char* other) const noexcept { return compareTo(other) < 0; }
+    inline bool operator > (const char* other) const noexcept { return compareTo(other) > 0; }
+    inline bool operator <=(const char* other) const noexcept { return compareTo(other) <= 0; }
+    inline bool operator >=(const char* other) const noexcept { return compareTo(other) >= 0; }
 
     [[nodiscard]] inline DynString operator +(const String&        other) const noexcept { return concat(other); }
     [[nodiscard]] inline DynString operator +(const StringView&    other) const noexcept { return concat(other); }
@@ -418,8 +664,9 @@ public:
     }
 private:
     friend class String;
-    friend class StringBuilder;
+    friend class StringView;
     friend class DynStringView;
+    friend class StringBuilder;
 };
 
 class DynStringView final
@@ -447,7 +694,120 @@ public:
 
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
     [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
+
+    [[nodiscard]] inline bool equals(const String& other) const noexcept
+    {
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, this->_length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const StringView& other) const noexcept
+    {
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, this->_length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const DynString& other) const noexcept
+    {
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, this->_length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const DynStringView& other) const noexcept
+    {
+        if(this == &other) { return true; }
+        if(this->_length == other._length && this->_hash == other._hash)
+        {
+            return strncmp(this->_string, other._string, this->_length) == 0;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool equals(const char* str) const noexcept
+    {
+        return strncmp(this->_string, str, this->_length) == 0;
+    }
+
+    [[nodiscard]] inline i32 compareTo(const StringView& other) const noexcept
+    {
+        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+    }
+
+    [[nodiscard]] inline i32 compareTo(const String& other) const noexcept
+    {
+        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+    }
+
+    [[nodiscard]] inline i32 compareTo(const DynStringView& other) const noexcept
+    {
+        if(this == &other) { return 0; }
+        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+    }
+
+    [[nodiscard]] inline i32 compareTo(const DynString& other) const noexcept
+    {
+        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+    }
+
+    [[nodiscard]] inline i32 compareTo(const char* str) const noexcept
+    {
+        return strncmp(this->_string, str, this->_length);
+    }
+
+#if __has_feature(__cpp_impl_three_way_comparison)
+    inline i32 operator <=>(const String& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const StringView& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const DynString& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const DynStringView& other) const noexcept { return compareTo(other); }
+    inline i32 operator <=>(const char* other) const noexcept { return compareTo(other); }
+#endif
+
+    [[nodiscard]] inline bool operator ==(const String& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const String& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const String& str) const noexcept { return compareTo(str) < 0; }
+    [[nodiscard]] inline bool operator > (const String& str) const noexcept { return compareTo(str) > 0; }
+    [[nodiscard]] inline bool operator <=(const String& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const String& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const StringView& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const StringView& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const StringView& str) const noexcept { return compareTo(str) < 0; }
+    [[nodiscard]] inline bool operator > (const StringView& str) const noexcept { return compareTo(str) > 0; }
+    [[nodiscard]] inline bool operator <=(const StringView& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const StringView& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const DynString& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const DynString& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const DynString& str) const noexcept { return compareTo(str) < 0; }
+    [[nodiscard]] inline bool operator > (const DynString& str) const noexcept { return compareTo(str) > 0; }
+    [[nodiscard]] inline bool operator <=(const DynString& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const DynString& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const DynStringView& str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const DynStringView& str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const DynStringView& str) const noexcept { return compareTo(str) < 0; }
+    [[nodiscard]] inline bool operator > (const DynStringView& str) const noexcept { return compareTo(str) > 0; }
+    [[nodiscard]] inline bool operator <=(const DynStringView& str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const DynStringView& str) const noexcept { return compareTo(str) >= 0; }
+
+    [[nodiscard]] inline bool operator ==(const char* str) const noexcept { return  equals(str); }
+    [[nodiscard]] inline bool operator !=(const char* str) const noexcept { return !equals(str); }
+    [[nodiscard]] inline bool operator < (const char* str) const noexcept { return compareTo(str) < 0; }
+    [[nodiscard]] inline bool operator > (const char* str) const noexcept { return compareTo(str) > 0; }
+    [[nodiscard]] inline bool operator <=(const char* str) const noexcept { return compareTo(str) <= 0; }
+    [[nodiscard]] inline bool operator >=(const char* str) const noexcept { return compareTo(str) >= 0; }
 private:
+    friend class String;
+    friend class StringView;
     friend class DynString;
     friend class StringBuilder;
 };
@@ -739,4 +1099,86 @@ struct hash<DynStringView>
     inline std::size_t operator()(const DynStringView& str) const noexcept
     { return static_cast<std::size_t>(str.hashCode()); }
 };
+}
+
+[[nodiscard]] inline bool String::equals(const StringView& other) const noexcept
+{
+    if(this->_length == other._length && this->_hash == other._hash)
+    {
+        return strcmp(this->_string, other._string) == 0;
+    }
+    return false;
+}
+
+[[nodiscard]] inline bool String::equals(const DynString& other) const noexcept
+{
+    if(_string == other._string) { return true; }
+    if(this->_length == other._length && this->_hash == other._hash)
+    {
+        return strcmp(this->_string, other._string) == 0;
+    }
+    return false;
+}
+
+[[nodiscard]] inline bool String::equals(const DynStringView& other) const noexcept
+{
+    if(this->_length == other._length && this->_hash == other._hash)
+    {
+        return strcmp(this->_string, other._string) == 0;
+    }
+    return false;
+}
+
+[[nodiscard]] inline i32 String::compareTo(const StringView& other) const noexcept
+{
+    return strncmp(this->_string, other._string, minT(this->_length, other._length));
+}
+
+[[nodiscard]] inline i32 String::compareTo(const DynString& other) const noexcept
+{
+    if(_string == other._string) { return 0; }
+    return strcmp(this->_string, other._string);
+}
+
+[[nodiscard]] inline i32 String::compareTo(const DynStringView& other) const noexcept
+{
+    return strncmp(this->_string, other._string, other._length);
+}
+
+[[nodiscard]] inline bool StringView::equals(const DynString& other) const noexcept
+{
+    if(this->_length == other._length && this->_hash == other._hash)
+    {
+        return strncmp(this->_string, other._string, this->_length) == 0;
+    }
+    return false;
+}
+
+[[nodiscard]] inline bool StringView::equals(const DynStringView& other) const noexcept
+{
+    if(this->_length == other._length && this->_hash == other._hash)
+    {
+        return strncmp(this->_string, other._string, minT(this->_length, other._length)) == 0;
+    }
+    return false;
+}
+
+[[nodiscard]] inline i32 StringView::compareTo(const DynString& other) const noexcept
+{
+    return strncmp(this->_string, other._string, other._length);
+}
+
+[[nodiscard]] inline i32 StringView::compareTo(const DynStringView& other) const noexcept
+{
+    return strncmp(this->_string, other._string, minT(this->_length, other._length));
+}
+
+[[nodiscard]] inline bool DynString::equals(const DynStringView& other) const noexcept
+{
+    return strncmp(this->_string, other._string, other._length) == 0;
+}
+
+[[nodiscard]] inline i32 DynString::compareTo(const DynStringView& other) const noexcept
+{
+    return strncmp(this->_string, other._string, other._length);
 }
