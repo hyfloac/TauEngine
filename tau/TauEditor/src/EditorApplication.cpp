@@ -248,7 +248,7 @@ static bool setupWinFolder(int dir, const char* subPath, const char* mountPoint)
         DynString folder(folderPath);
         if(subPath)
         {
-            folder.append(subPath);
+            folder = folder.concat(subPath);
         }
         if(!Win32FileLoader::Instance()->fileExists(folder))
         {

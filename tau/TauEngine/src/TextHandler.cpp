@@ -384,7 +384,7 @@ DynString findSystemFont(const char* fontName) noexcept
 
     DynString ret(winDir);
 
-    ret.append("\\Fonts\\").append(reinterpret_cast<char*>(valueData));
+    ret = ret.concat("\\Fonts\\").concat(reinterpret_cast<char*>(valueData));
 
     delete[] valueData;
 

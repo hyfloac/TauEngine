@@ -88,9 +88,7 @@ public:
     {
         char buf[12];
         _itoa_s(_x, buf, 10);
-        DynString ret(getName());
-        ret.append(buf);
-        return ret;
+        return DynString(getName()).concat(buf);
     }
 #endif
 };
