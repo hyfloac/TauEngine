@@ -29,6 +29,11 @@ void Camera3D::recomputeMatrices() noexcept
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 }
 
+static float largeLerp(const float v0, const float v1, const float t, const float max_t) noexcept
+{
+    return ((max_t - t) * v0 + t * v1) / max_t;
+}
+
 void FPSCamera3DController::update(float fixedDelta) noexcept
 {
     const Vector3f velocitySquared = _velocity.mulC(_velocity);
@@ -40,7 +45,6 @@ void FPSCamera3DController::update(float fixedDelta) noexcept
         _acceleration.y() = forceForward / PLAYER_MASS_G;
     }
 
-
     const float forceY = FORCE_GRAVITY - forceAir.y();
 
     _acceleration.y() = forceY / PLAYER_MASS;
@@ -50,85 +54,107 @@ void FPSCamera3DController::update(float fixedDelta) noexcept
     _camera._position += _velocity * fixedDelta / 1000000.0f;
 }
 
-void FreeCamCamera3DController::update(float fixedDelta, Vector3f velocity) noexcept
+void FreeCamCamera3DController::update(const float fixedDelta, const Vector3f velocity, const i32 dMouseX, const i32 dMouseY) noexcept
 {
+    _lerp = 0.0f;
+    _maxLerp = fixedDelta;
+
+    if(_nextYaw > 180.0f) { _nextYaw -= 360.0f; }
+    else if(_nextYaw < -180.0f) { _nextYaw += 360.0f; }
+
+    _camera._pitch = _nextPitch;
+    _camera._yaw = _nextYaw;
+
+    _lastPitch = _nextPitch;
+    _lastYaw = _nextYaw;
+
+    if(dMouseX != 0 || dMouseY != 0)
+    {
+        const float speed = _rotateSpeed * fixedDelta / 1000.0f;
+
+        _nextPitch += dMouseY * speed;
+        _nextYaw += dMouseX * speed;
+
+        if(_nextPitch > 80.0f) { _nextPitch = 80.0f; }
+        else if(_nextPitch < -87.0f) { _nextPitch = -87.0f; }
+
+        _camera._viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_camera._pitch), DEG_2_RAD_F(_camera._yaw), 0.0f));
+    }
+
     const Vector3f deltaVelocity = (velocity * fixedDelta) / 1000000.0f;
 
-    _camera._position.y() += deltaVelocity.y();
-
-    const SinCos<float> yawSC = fastSinCosD(_camera._yaw);
-
     const bool dvx = deltaVelocity.x() != 0.0f;
+    const bool dvy = deltaVelocity.y() != 0.0f;
     const bool dvz = deltaVelocity.z() != 0.0f;
 
-    if(_lookY)
+    _camera._position = _nextPos;
+    _lastPos = _nextPos;
+
+    if(dvx || dvy || dvz)
     {
-        // const SinCos<float> pitchSC = fastSinCosD(_camera._pitch);
+        _nextPos.y() += deltaVelocity.y();
 
-        if(dvx)
+        const SinCos<float> yawSC = fastSinCosD(_nextYaw);
+
+        if(_lookY)
         {
-            _camera._position.x() -= deltaVelocity.x() * -yawSC.sin;
-            _camera._position.z() += deltaVelocity.x() * yawSC.cos;
+            // const SinCos<float> pitchSC = fastSinCosD(_nextPitch);
+
+            if(dvx)
+            {
+                _nextPos.x() -= deltaVelocity.x() * -yawSC.sin;
+                _nextPos.z() += deltaVelocity.x() * yawSC.cos;
+            }
+
+            if(dvz)
+            {
+                _nextPos.z() -= deltaVelocity.z() * yawSC.sin;
+                _nextPos.x() += deltaVelocity.z() * yawSC.cos;
+            }
         }
-
-        if(dvz)
+        else
         {
-            _camera._position.z() -= deltaVelocity.z() * yawSC.sin;
-            _camera._position.x() += deltaVelocity.z() * yawSC.cos;
+            if(dvx)
+            {
+                _nextPos.x() -= deltaVelocity.x() * -yawSC.sin;
+                _nextPos.z() += deltaVelocity.x() * yawSC.cos;
+            }
+
+            if(dvz)
+            {
+                _nextPos.z() -= deltaVelocity.z() * yawSC.sin;
+                _nextPos.x() += deltaVelocity.z() * yawSC.cos;
+            }
         }
     }
-    else
-    {
-        if(dvx)
-        {
-            _camera._position.x() -= deltaVelocity.x() * -yawSC.sin;
-            _camera._position.z() += deltaVelocity.x() * yawSC.cos;
-        }
-
-        if(dvz)
-        {
-            _camera._position.z() -= deltaVelocity.z() * yawSC.sin;
-            _camera._position.x() += deltaVelocity.z() * yawSC.cos;
-        }
-    }
-
-    if(deltaVelocity.y() != 0.0f || dvx || dvz)
-    {
-        _camera.recomputeMatrices();
-    }
+    _camera.recomputeMatrices();
 }
 
-void FreeCamCamera3DController::update(float fixedDelta) noexcept
+void FreeCamCamera3DController::update(const float fixedDelta, const i32 dMouseX, const i32 dMouseY) noexcept
 {
     checkKeys();
     if(_recorder && _recorder->recording())
     {
-        _recorder->addBlip(GameRecorder::Blip { GameRecorder::BlipType::Update, cameraBlip(), new BlipDataUpdate{ fixedDelta, _velocity } });
+        _recorder->addBlip(GameRecorder::Blip { GameRecorder::BlipType::Update, cameraBlip(), new BlipDataUpdate{ fixedDelta, _velocity, dMouseX, dMouseY } });
     }
-    update(fixedDelta, _velocity);
+    update(fixedDelta, _velocity, dMouseX, dMouseY);
 }
 
-void FreeCamCamera3DController::updateRotation(float delta, i32 dMouseX, i32 dMouseY) noexcept
+void FreeCamCamera3DController::lerp(float delta) noexcept
 {
-    if(dMouseX != 0 && dMouseY != 0)
+    _lerp = minT(_lerp + delta, _maxLerp);
+
     {
-        if(_recorder && _recorder->recording())
-        {
-            _recorder->addBlip(GameRecorder::Blip { GameRecorder::BlipType::Render, cameraBlip(), new BlipDataRender{ delta, dMouseX, dMouseY} });
-        }
-
-        const float speed = _rotateSpeed * delta / 1000.0f;
-        _camera._pitch += dMouseY * speed;
-        _camera._yaw += dMouseX * speed;
-
-        if(_camera._pitch > 80.0f) { _camera._pitch = 80.0f; }
-        else if(_camera._pitch < -87.0f) { _camera._pitch = -87.0f; }
-
-        if(_camera._yaw > 180.0f) { _camera._yaw -= 360.0f; }
-        else if(_camera._yaw < 180.0f) { _camera._yaw += 360.0f; }
+        _camera._pitch = largeLerp(_lastPitch, _nextPitch, _lerp, _maxLerp);
+        _camera._yaw = largeLerp(_lastYaw, _nextYaw, _lerp, _maxLerp);
         _camera._viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_camera._pitch), DEG_2_RAD_F(_camera._yaw), 0.0f));
-        _camera.recomputeMatrices();
     }
+
+    {
+        _camera._position = Vector3f::largeLerp(_lastPos, _nextPos, _lerp, _maxLerp);
+    }
+
+    _camera.recomputeMatrices();
 }
 
 void FreeCamCamera3DController::checkKeys() noexcept
@@ -154,13 +180,13 @@ bool FreeCamCamera3DController::blipHandler(GameRecorder::Blip& blip, void* user
     if(blip.type == GameRecorder::BlipType::Update)
     {
         BlipDataUpdate* data = reinterpret_cast<BlipDataUpdate*>(blip.data);
-        controller.update(data->delta, data->velocity);
+        controller.update(data->delta, data->velocity, data->dMouseX, data->dMouseY);
     }
-    else if(blip.type == GameRecorder::BlipType::Render)
-    {
-        BlipDataRender* data = reinterpret_cast<BlipDataRender*>(blip.data);
-        controller.updateRotation(data->delta, data->dMouseX, data->dMouseY);
-    }
+    // else if(blip.type == GameRecorder::BlipType::Render)
+    // {
+    //     BlipDataRender* data = reinterpret_cast<BlipDataRender*>(blip.data);
+    //     controller.updateRotation(data->delta, data->dMouseX, data->dMouseY);
+    // }
     else if(blip.type == GameRecorder::BlipType::Initial)
     {
         BlipDataInitial* data = reinterpret_cast<BlipDataInitial*>(blip.data);

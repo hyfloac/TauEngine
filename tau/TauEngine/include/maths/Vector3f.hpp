@@ -452,6 +452,36 @@ public:
     inline Vector3f& operator -()       noexcept { return neg();     }
     inline Vector3f  operator -() const noexcept { return negCopy(); }
 #pragma endregion
+public:
+    static Vector3f lerp(const Vector3f v0, const Vector3f v1, const float t) noexcept
+    {
+        const float invT = 1.0f - t;
+        const __m128 tV = _mm_set1_ps(t);
+        const __m128 invTV = _mm_set1_ps(invT);
+
+        const __m128 v0Frac = _mm_mul_ps(v0._data.vec, invTV);
+        const __m128 v1Frac = _mm_mul_ps(v0._data.vec, tV);
+
+        CompVec4 ret = _mm_add_ps(v0Frac, v1Frac);
+        ret.w = 0.0f;
+        return Vector3f(ret.vec);
+    }
+
+    static Vector3f largeLerp(const Vector3f v0, const Vector3f v1, const float t, const float max_t) noexcept
+    {
+        const float invT = max_t - t;
+        const __m128 tV = _mm_set1_ps(t);
+        const __m128 invTV = _mm_set1_ps(invT);
+        const __m128 maxTV = _mm_set1_ps(max_t);
+
+        const __m128 v0Frac = _mm_mul_ps(v0._data.vec, invTV);
+        const __m128 v1Frac = _mm_mul_ps(v0._data.vec, tV);
+
+        const __m128 compound = _mm_add_ps(v0Frac, v1Frac);
+        CompVec4 ret = _mm_div_ps(compound, maxTV);
+        ret.w = 0.0f;
+        return Vector3f(ret.vec);
+    }
 };
 
 typedef Vector3f vec3f;

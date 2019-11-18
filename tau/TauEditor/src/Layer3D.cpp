@@ -95,7 +95,15 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
                 _gr.addBeginUpdate();
             }
 
-            _camera.update(fixedDelta);
+
+            const u32 screenCenterW = _window.width() >> 1;
+            const u32 screenCenterH = _window.height() >> 1;
+            const Mouse::Pos pos = Mouse::mousePos(_window);
+            Mouse::mousePos(_window, screenCenterW, screenCenterH);
+            const i32 mouseDifX = static_cast<i32>(screenCenterW) - static_cast<i32>(pos.x);
+            const i32 mouseDifY = static_cast<i32>(screenCenterH) - static_cast<i32>(pos.y);
+            // _camera.updateRotation(fixedDelta, mouseDifX, mouseDifY);
+            _camera.update(fixedDelta, mouseDifX, mouseDifY);
 
             _cubePolarPos.z() += 100 * fixedDelta / 1000000.0f;
             _cubeViewMatrix = glmExt::translate(glmExt::translate(identity, _camera->position()), fromPolar(_cubePolarPos));
@@ -119,13 +127,7 @@ void Layer3D::onRender(float delta) noexcept
                 _gr.addBeginRender();
             }
 
-            const u32 screenCenterW = _window.width() >> 1;
-            const u32 screenCenterH = _window.height() >> 1;
-            const Mouse::Pos pos = Mouse::mousePos(_window);
-            Mouse::mousePos(_window, screenCenterW, screenCenterH);
-            const i32 mouseDifX = static_cast<i32>(screenCenterW) - static_cast<i32>(pos.x);
-            const i32 mouseDifY = static_cast<i32>(screenCenterH) - static_cast<i32>(pos.y);
-            _camera.updateRotation(delta, mouseDifX, mouseDifY);
+            _camera.lerp(delta);
         }
     }
 

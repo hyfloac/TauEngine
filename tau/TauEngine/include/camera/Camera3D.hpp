@@ -162,10 +162,6 @@ public:
     {
         float delta;
         Vector3f velocity;
-    };
-    struct BlipDataRender final
-    {
-        float delta;
         i32 dMouseX;
         i32 dMouseY;
     };
@@ -192,6 +188,14 @@ private:
      * changes.
      */
     bool _lookY;
+    Vector3f _lastPos;
+    Vector3f _nextPos;
+    float _lastPitch;
+    float _lastYaw;
+    float _nextPitch;
+    float _nextYaw;
+    float _lerp;
+    float _maxLerp;
     Vector3f _velocity;
     Keyboard::Key _keyAccelerate;
     Keyboard::Key _keyForwards;
@@ -212,6 +216,10 @@ public:
         : _camera(window, fov, zNear, zFar),
           _normalSpeed(normalSpeed), _fastSpeed(fastSpeed),
           _rotateSpeed(rotateSpeed), _lookY(lookY),
+          _lastPos(0.0f), _nextPos(0.0f),
+          _lastPitch(0.0f), _lastYaw(0.0f),
+          _nextPitch(0.0f), _nextYaw(0.0f),
+          _lerp(0.0f), _maxLerp(1.0f),
           _velocity(0.0f),
           _keyAccelerate(keyAccelerate),
           _keyForwards(keyForwards), _keyBackwards(keyBackwards),
@@ -225,10 +233,10 @@ public:
         }
     }
 private:
-    void update(float fixedDelta, Vector3f velocity) noexcept;
+    void update(float fixedDelta, Vector3f velocity, i32 dMouseX, i32 dMouseY) noexcept;
 public:
-    void update(float fixedDelta) noexcept;
-    void updateRotation(float delta, i32 dMouseX, i32 dMouseY) noexcept;
+    void update(float fixedDelta, i32 dMouseX, i32 dMouseY) noexcept;
+    void lerp(float delta) noexcept;
 
     [[nodiscard]] const Camera3D& camera() const noexcept { return _camera; }
     [[nodiscard]] Camera3D& camera() noexcept { return _camera; }
