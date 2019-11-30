@@ -1,7 +1,9 @@
 #ifdef BUILD_EXE
 #include <TextureLoader.h>
 #include <TextureBlend.hpp>
+#include "Mandelbrot.hpp"
 #include <cstdio>
+#include <string>
 
 int main0(u32 argCount, char* args[])
 {
@@ -130,12 +132,46 @@ int main2(int argCount, char* args[])
     return 0;
 }
 
+int main3(int argCount, char* args[])
+{
+    if(argCount < 3)
+    {
+        return 1;
+    }
+
+    const char* outImg = args[1];
+    std::string iterStr = args[2];
+    const u32 iters = std::stoi(iterStr);
+
+    printf("Out: %s\n", outImg);
+
+    TextureBlend* blend = mandelbrot(1024, 1024, iters);
+
+    FIBITMAP* fiBitmap = FreeImage_Allocate(blend->texture->width, blend->texture->height, blend->texture->bitsPerPixel);
+
+    memcpy(FreeImage_GetBits(fiBitmap), blend->texture->pixels, static_cast<u64>(blend->texture->width)* static_cast<u64>(blend->texture->height) * 4);
+
+    const bool success = saveTexture(fiBitmap, outImg);
+
+    if(!success)
+    {
+        printf("Failed to save image.\n");
+        return 4;
+    }
+
+    delete blend;
+
+    FreeImage_Unload(fiBitmap);
+
+    return 0;
+}
+
 int main(int argCount, char* args[])
 {
     int ret = -1;
     try
     {
-        ret = main2(argCount, args);
+        ret = main3(argCount, args);
     }
     catch(...)
     {

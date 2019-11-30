@@ -185,11 +185,13 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Mandelbrot.hpp" />
     <ClInclude Include="include\Texture.hpp" />
     <ClInclude Include="include\TextureBlend.hpp" />
     <ClInclude Include="include\TextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Mandelbrot.cpp" />
     <ClCompile Include="src\Test.cpp" />
     <ClCompile Include="src\TextureBlend.cpp" />
     <ClCompile Include="src\TextureLoader.cpp" />
