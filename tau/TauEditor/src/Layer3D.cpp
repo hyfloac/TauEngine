@@ -20,7 +20,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
       _gr(*recorder),
       _shader(IShaderProgram::create(*window.renderingContext())),
       _o_shader(IShaderProgram::create(*window.renderingContext())),
-      _texture(TextureLoader::loadTexture("|TERes/TestTexture.png", TextureLoader::FilterType::Linear)), _overlay(TextureLoader::loadTexture("|TERes/Overlay.png", TextureLoader::FilterType::Linear)),
+      _texture(TextureLoader::loadTexture("|TERes/TestTexture.png", ETexture::Filter::Linear)), _overlay(TextureLoader::loadTexture("|TERes/Overlay.png", ETexture::Filter::Linear)),
       _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _cubePolarPos(3, -3, 0), _cubeViewMatrix(1.0f), _objects()
 {
     PERF();
@@ -39,7 +39,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
     if(loaded)
     {
-        _cube = std::make_shared<RenderableObject>(*window.renderingContext(), loader.meshes()[0]);
+        _cube = std::make_shared<RenderableObject>(*window.renderingContext(), loader.meshes()[0], DrawType::SeparatedTriangles);
     }
 
     Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/shader/SimpleVertexShader.glsl");
@@ -61,17 +61,17 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _shader->link(*window.renderingContext());
     _o_shader->link(*window.renderingContext());
 
-    _compoundMatrixUni = _shader->getUniformMatrix4x4Float("compoundMatrix", false);
-    _projMatrixUni = _shader->getUniformMatrix4x4Float("projectionMatrix", false);
-    _viewMatrixUni = _shader->getUniformMatrix4x4Float("cameraViewMatrix", false);
-    _modelViewMatrixUni = _shader->getUniformMatrix4x4Float("modelViewMatrix", false);
-    _textureUni = _shader->getUniformInt("textureSampler");
-    _overlayUni = _shader->getUniformInt("textureOverlay");
+    _compoundMatrixUni = _shader->getUniform<glm::mat4>("compoundMatrix", false);
+    _projMatrixUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
+    _viewMatrixUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    _modelViewMatrixUni = _shader->getUniform<glm::mat4>("modelViewMatrix", false);
+    _textureUni = _shader->getUniform<int>("textureSampler");
+    _overlayUni = _shader->getUniform<int>("textureOverlay");
 
-    _o_projMatrixUni = _o_shader->getUniformMatrix4x4Float("projectionMatrix", false);
-    _o_viewMatrixUni = _o_shader->getUniformMatrix4x4Float("cameraViewMatrix", false);
-    _o_modelViewMatrixUni = _o_shader->getUniformMatrix4x4Float("modelViewMatrix", false);
-    _o_scaleFactorUni = _o_shader->getUniformFloat("scaleFactor");
+    _o_projMatrixUni = _o_shader->getUniform<glm::mat4>("projectionMatrix", false);
+    _o_viewMatrixUni = _o_shader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    _o_modelViewMatrixUni = _o_shader->getUniform<glm::mat4>("modelViewMatrix", false);
+    _o_scaleFactorUni = _o_shader->getUniform<float>("scaleFactor");
 
     _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _cubeViewMatrix = glmExt::translate(glmExt::translate(glm::mat4(1.0f), _camera->position()), fromPolar(_cubePolarPos));
@@ -95,7 +95,6 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
                 _gr.addBeginUpdate();
             }
 
-
             const u32 screenCenterW = _window.width() >> 1;
             const u32 screenCenterH = _window.height() >> 1;
             const Mouse::Pos pos = Mouse::mousePos(_window);
@@ -114,6 +113,7 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
 void Layer3D::onRender(float delta) noexcept
 {
     PERF();
+
     if(_state == State::Game)
     {
         if(_gr.playing())

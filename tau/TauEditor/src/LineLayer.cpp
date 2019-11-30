@@ -5,7 +5,7 @@
 
 LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ortho) noexcept
     : ILayer(true), _window(window), _rp(rp), _ortho(ortho),
-      _vao(window.renderingContext()->createVertexArray(2)), _shader(IShaderProgram::create(*window.renderingContext()))
+      _vao(window.renderingContext()->createVertexArray(2, DrawType::SeparatedTriangles)), _shader(IShaderProgram::create(*window.renderingContext()))
 {
     Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/line/LineVertex.glsl");
     Ref<IShader> geometryShader = IShader::create(*window.renderingContext(), IShader::Type::Geometry, "|TERes/line/LineGeometry.glsl");
@@ -26,7 +26,7 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     _viewportUni = _shader->getUniformVector4Float("viewport");
     _miterLimitUni = _shader->getUniformFloat("miterLimit");
 
-    Ref<IBuffer> lineData = IBuffer::create(*window.renderingContext(), 2, IBuffer::Type::ArrayBuffer);
+    Ref<IBuffer> lineData = window.renderingContext()->createBuffer(2, IBuffer::Type::ArrayBuffer);
     float bufferData[] = {
         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,

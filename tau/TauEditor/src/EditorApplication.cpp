@@ -46,10 +46,18 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfInit.json");
     PERF();
 
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX9);
+
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
     _window->showWindow();
     if(!_window->createContext()) { return false; }
+
+    // while(true)
+    // {
+    //     _window->renderingContext()->clearScreen(true, true, false, RGBAColor { 255, 0, 0, 255 });
+    //     _window->renderingContext()->swapFrame();
+    // }
 
     _window->renderingContext()->activateContext();
 

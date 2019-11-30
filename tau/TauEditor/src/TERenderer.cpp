@@ -61,6 +61,7 @@ TERenderer::TERenderer(Window& window, State& state, bool async) noexcept
     // _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
     _layerStack.pushLayer(new Layer3D(window, *_rp, &_recorder, state));
     _layerStack.pushOverlay(new ConsoleLayer(window, _recorder, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), *_rp, state, _camera, 0.5f));
+    
 }
 
 TERenderer::~TERenderer() noexcept
@@ -73,8 +74,10 @@ void TERenderer::render(const float delta) noexcept
 {
     PERF();
     _rp->pushLoadContext(*_window.renderingContext());
-    _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    // _rp->pushGLClearBuffers(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     TAU_RENDER(*_rp, {
+        context.clearScreen(true, true, true, { 127, 127, 255, 255 });
+        context.beginFrame();
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
     });
@@ -86,6 +89,9 @@ void TERenderer::render(const float delta) noexcept
     {
         overlay->onRender(delta);
     }
+    TAU_RENDER(*_rp, {
+        context.endFrame();
+    });
     _rp->pushFinishRender();
 }
 
