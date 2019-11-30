@@ -13,14 +13,14 @@ private:
     ::std::size_t _size;
 public:
     explicit DynArray(::std::size_t size)
-        : _arr(new(std::nothrow) _T[size]), _size(size)
+        : _arr(new(::std::nothrow) _T[size]), _size(size)
     { }
 
     ~DynArray()
     { delete[] _arr; }
 
     DynArray(const DynArray<_T>& copy)
-        : _arr(new(std::nothrow) _T[copy._size]), _size(copy._size)
+        : _arr(new(::std::nothrow) _T[copy._size]), _size(copy._size)
     {
         memcpy(_arr, copy._arr, copy._size);
     }
@@ -36,7 +36,7 @@ public:
     {
         delete[] _arr;
 
-        _arr = new(std::nothrow) _T[copy._size];
+        _arr = new(::std::nothrow) _T[copy._size];
         _size = copy._size;
 
         memcpy(_arr, copy._arr, copy._size);
@@ -79,7 +79,7 @@ private:
     ::std::size_t* _refCount;
 public:
     explicit RefDynArray(::std::size_t size)
-        : _arr(new(std::nothrow) _T[size]), _size(size), _refCount(new(std::nothrow) ::std::size_t(1))
+        : _arr(new(::std::nothrow) _T[size]), _size(size), _refCount(new(::std::nothrow) ::std::size_t(1))
     { }
 
     ~RefDynArray()
