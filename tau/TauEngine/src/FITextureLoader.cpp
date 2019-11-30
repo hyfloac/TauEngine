@@ -39,14 +39,18 @@ ITexture* TextureLoader::generateMissingTexture() noexcept
     textureData[3 * 3 + 2] = 0x00;
 
     const RenderingMode rm(RenderingMode::Mode::OpenGL4);
-    ITexture* const ret = ITexture::create(rm, TextureType::TEXTURE_2D);
+    ITexture* const ret = ITexture::create(rm, 2, 2, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::TEXTURE_2D);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    ret->set(textureData);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
+
 
     delete[] textureData;
 
@@ -78,6 +82,11 @@ ITexture* TextureLoader::loadTextureEx(const char* RESTRICT fileName, GPUTexture
 
     ERR_EXIT(TextureLoadError::TEXTURE_FAILED_TO_LOAD, !texture);
 
+
+    FIBITMAP* tmp = FreeImage_ConvertTo32Bits(texture);
+    FreeImage_Unload(texture);
+    texture = tmp;
+
     BYTE*     textureData  = FreeImage_GetBits(texture);
     const u32 width        = FreeImage_GetWidth(texture);
     const u32 height       = FreeImage_GetHeight(texture);
@@ -93,26 +102,29 @@ ITexture* TextureLoader::loadTextureEx(const char* RESTRICT fileName, GPUTexture
 
     switch(settings.textureType)
     {
-        case TextureType::TEXTURE_2D:
+        case ETexture::Type::TEXTURE_2D:
             textureTarget = GL_TEXTURE_2D;
             break;
-        case TextureType::TEXTURE_3D:
+        case ETexture::Type::TEXTURE_3D:
             textureTarget = GL_TEXTURE_3D;
             break;
-        case TextureType::TEXTURE_CUBE:
+        case ETexture::Type::TEXTURE_CUBE:
             textureTarget = GL_TEXTURE_CUBE_MAP;
             break;
     }
 
     const RenderingMode rm(RenderingMode::Mode::OpenGL4);
-    ITexture* const ret = ITexture::create(rm, settings.textureType);
+    ITexture* const ret = ITexture::create(rm, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt, settings.textureType);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
+    ret->set(textureData);
 
-    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, settings.magnificationFilter == FilterType::Linear ? GL_LINEAR : GL_NEAREST);
-    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, settings. minificationFilter == FilterType::Linear ? GL_LINEAR : GL_NEAREST);
+    // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexImage2D(textureTarget, maxT(settings.mipmapLevel, 0), GL_RGBA8, width, height, 0, bitsPerPixel > 24 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, textureData);
+    // glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, settings.magnificationFilter == FilterType::Linear ? GL_LINEAR : GL_NEAREST);
+    // glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, settings. minificationFilter == FilterType::Linear ? GL_LINEAR : GL_NEAREST);
+
+    // glTexImage2D(textureTarget, maxT(settings.mipmapLevel, 0), GL_RGBA8, width, height, 0, bitsPerPixel > 24 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, textureData);
 
     if(settings.mipmapLevel < 0)
     {

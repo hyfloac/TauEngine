@@ -22,7 +22,7 @@ struct D3D9ContextSettings
 
 bool DXRenderingContext::createContext(void* param) noexcept
 {
-    D3D9ContextSettings* settings = reinterpret_cast<D3D9ContextSettings*>(param);
+    HWND hWnd = *reinterpret_cast<HWND*>(param);
 
     _d3d = Direct3DCreate9(D3D_SDK_VERSION);
 
@@ -34,10 +34,10 @@ bool DXRenderingContext::createContext(void* param) noexcept
     d3dPP.SwapEffect = D3DSWAPEFFECT::D3DSWAPEFFECT_DISCARD;
     d3dPP.EnableAutoDepthStencil = TRUE;
     d3dPP.AutoDepthStencilFormat = D3DFMT_D16;
-    d3dPP.hDeviceWindow = settings->hwnd;
+    d3dPP.hDeviceWindow = hWnd;
 
-    _d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, settings->hwnd,
-                       D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+    _d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWnd,
+                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
                        &d3dPP, &_dx9Device);
     return true;
 }
@@ -50,5 +50,20 @@ void DXRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
     if(clearStencilBuffer) { flags |= D3DCLEAR_STENCIL; }
 
     _dx9Device->Clear(0, null, flags, D3DCOLOR_RGBA(color.r, color.g, color.b, color.a), depthValue, stencilValue);
+}
+
+void DXRenderingContext::beginFrame() noexcept
+{
+    _dx9Device->BeginScene();
+}
+
+void DXRenderingContext::endFrame() noexcept
+{
+    _dx9Device->EndScene();
+}
+
+void DXRenderingContext::swapFrame() noexcept
+{
+    _dx9Device->Present(NULL, NULL, NULL, NULL);
 }
 #endif

@@ -7,18 +7,27 @@
 #include "system/RenderingContext.hpp"
 #include "model/IBuffer.hpp"
 
+enum class DrawType : u8
+{
+    SeparatedTriangles,
+    ConnectedTriangles,
+    PointConnectedTriangles
+};
+
 class TAU_DLL IVertexArray
 {
     DEFAULT_DESTRUCT_VI(IVertexArray);
     DELETE_COPY(IVertexArray);
+public:
 protected:
     std::size_t _currentIndex;
     std::size_t _attribCount;
     DynArray<Ref<IBuffer>> _buffers;
     Ref<IIndexBuffer> _indexBuffer;
     u32 _drawCount;
+    DrawType _drawType;
 protected:
-    IVertexArray(const std::size_t bufferCount) noexcept;
+    IVertexArray(std::size_t bufferCount, DrawType drawType) noexcept;
 public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
 
@@ -39,4 +48,6 @@ public:
 
     [[nodiscard]] const u32& drawCount() const noexcept { return _drawCount; }
     [[nodiscard]] u32& drawCount() noexcept { return _drawCount; }
+    [[nodiscard]] DrawType drawType() const noexcept { return _drawType; }
+    virtual void drawType(const DrawType drawType) noexcept { _drawType = drawType; }
 };

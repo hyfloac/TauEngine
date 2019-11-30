@@ -176,7 +176,8 @@ bool GLRenderingContext::createContextsShared(void* param, IRenderingContext** s
     pfd.iLayerType = PFD_MAIN_PLANE;
 
     // ReSharper disable once CppLocalVariableMayBeConst
-    this->_device = *reinterpret_cast<HDC*>(param);
+    // this->_device = *reinterpret_cast<HDC*>(param);
+    this->_device = GetDC(*reinterpret_cast<HWND*>(param));
 
     const int pixelFormat = ChoosePixelFormat(this->_device, &pfd);
 
@@ -270,4 +271,11 @@ void GLRenderingContext::setVSync(bool vsync) noexcept
     }
 }
 
+void GLRenderingContext::swapFrame() noexcept
+{
+    if(this->_device)
+    {
+        SwapBuffers(this->_device);
+    }
+}
 #endif

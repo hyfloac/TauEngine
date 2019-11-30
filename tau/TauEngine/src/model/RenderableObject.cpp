@@ -6,8 +6,8 @@
 #include "Timings.hpp"
 
 
-RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh) noexcept
-    : _va(context.createVertexArray(3))
+RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const DrawType drawType) noexcept
+    : _va(context.createVertexArray(3, drawType))
 {
     PERF();
     const size_t cnt1 = mesh.vertices.size();
@@ -36,10 +36,10 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
         texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
     }
 
-    Ref<IBuffer> positions = IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer);
-    Ref<IBuffer> normals = IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer);
-    Ref<IBuffer> textures = IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer);
-    Ref<IIndexBuffer> indices = IIndexBuffer::create(context);
+    Ref<IBuffer> positions = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
+    Ref<IBuffer> normals = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
+    Ref<IBuffer> textures = context.createBuffer( 1, IBuffer::Type::ArrayBuffer);
+    Ref<IIndexBuffer> indices = context.createIndexBuffer();
 
     positions->bind(context);
     positions->fillBuffer(context, cnt3 * sizeof(float), positionsLoaded);

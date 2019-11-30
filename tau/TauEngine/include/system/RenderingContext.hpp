@@ -10,6 +10,7 @@
 #include "DLL.hpp"
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
+#include "model/IBuffer.hpp"
 
 #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                             public: \
@@ -22,6 +23,8 @@
 #define RC_IMPL(_TYPE) RC_IMPL_BASE(_TYPE)
 
 class IVertexArray;
+enum class DrawType : u8;
+class IBuffer;
 
 class SharedRenderingContexts;
 class SharedRenderingContextsContainer;
@@ -57,7 +60,7 @@ public:
 
     virtual void activateContext() noexcept = 0;
 
-    [[nodiscard]] virtual Ref<IVertexArray> createVertexArray(std::size_t attribCount) noexcept = 0;
+    [[nodiscard]] virtual Ref<IVertexArray> createVertexArray(std::size_t attribCount, DrawType drawType) noexcept = 0;
 
     [[nodiscard]] virtual void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept = 0;
 
@@ -70,6 +73,16 @@ public:
     virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept = 0;
 
     virtual void setVSync(bool vsync) noexcept = 0;
+
+    virtual void beginFrame() noexcept = 0;
+
+    virtual void endFrame() noexcept = 0;
+
+    virtual void swapFrame() noexcept = 0;
+
+    virtual Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
+
+    virtual Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
 
     template<typename _T>
     [[nodiscard]] bool isContextType() const noexcept

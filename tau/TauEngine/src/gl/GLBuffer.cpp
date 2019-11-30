@@ -1,13 +1,10 @@
 #include "gl/GLBuffer.hpp"
-#include "Timings.hpp"
 
-GLBuffer::GLBuffer(const Type type, const UsageType usage, const std::size_t descriptorCount) noexcept
+GLBuffer::GLBuffer(const Type type, const UsageType usage, const std::size_t descriptorCount, GLuint buffer) noexcept
     : IBuffer(type, usage, descriptorCount),
-      _buffer(),
+      _buffer(buffer),
       _glType(getGLType(type)), _glUsage(getGLUsageType(usage))
-{
-    glGenBuffers(1, &_buffer);
-}
+{ }
 
 GLBuffer::~GLBuffer() noexcept
 {
@@ -34,12 +31,10 @@ void GLBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, c
     glBufferSubData(this->_glType, offset, size, data);
 }
 
-GLIndexBuffer::GLIndexBuffer(const IBuffer::UsageType usage) noexcept
+GLIndexBuffer::GLIndexBuffer(const IBuffer::UsageType usage, const GLuint buffer) noexcept
     : IIndexBuffer(usage),
-    _buffer(),  _glUsage(GLBuffer::getGLUsageType(usage))
-{
-    glGenBuffers(1, &_buffer);
-}
+      _buffer(buffer),  _glUsage(GLBuffer::getGLUsageType(usage))
+{ }
 
 GLIndexBuffer::~GLIndexBuffer() noexcept
 {
@@ -64,6 +59,13 @@ void GLIndexBuffer::fillBuffer(IRenderingContext& context, const std::ptrdiff_t 
 void GLIndexBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
 {
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+}
+
+GLuint GLBuffer::createBuffer() noexcept
+{
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    return buffer;
 }
 
 GLenum GLBuffer::getGLType(const Type bt) noexcept

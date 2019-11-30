@@ -45,7 +45,7 @@ protected:
 public:
     UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent = nullptr, bool visible = true) noexcept
         : UIButton(clickHandler, x, y, parent, visible), _width(width), _height(height), _color(color),
-          _vbo(IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer)), _vao(context.createVertexArray(1))
+          _vbo(context.createBuffer(1, IBuffer::Type::ArrayBuffer)), _vao(context.createVertexArray(1, DrawType::SeparatedTriangles))
     {
         const float xx = static_cast<float>(x);
         const float yy = static_cast<float>(y);
@@ -63,7 +63,7 @@ public:
         };
 
         _vbo->fillBuffer(context, 12 * sizeof(float), model);
-        _vbo->descriptor().addDescriptor({ ShaderDataType::Vector2Float });
+        _vbo->descriptor().addDescriptor(ShaderDataType::Vector2Float);
         _vao->addVertexBuffer(context, _vbo);
         _vao->drawCount() = 6;
         // _vao->addAttribute(_vbo, 2, DataType::Float, false, 0, nullptr);

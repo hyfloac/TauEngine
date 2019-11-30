@@ -5,6 +5,7 @@
 #include <Utils.hpp>
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLVertexArray.hpp"
+#include "gl/GLBuffer.hpp"
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
@@ -17,9 +18,9 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool deb
       _forwardCompatible(forwardCompatible)
 { }
 
-Ref<IVertexArray> GLRenderingContext::createVertexArray(std::size_t attribCount) noexcept
+Ref<IVertexArray> GLRenderingContext::createVertexArray(const std::size_t attribCount, const DrawType drawType) noexcept
 {
-    return Ref<IVertexArray>(new(std::nothrow) GLVertexArray(attribCount));
+    return Ref<IVertexArray>(new(std::nothrow) GLVertexArray(attribCount, drawType));
 }
 
 void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexcept
@@ -38,57 +39,6 @@ void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexce
 
     return &_vaos[vertexArray];
 }
-
-// void GLRenderingContext::initBufferDescriptor(IBufferDescriptor* bufferDescriptor) noexcept
-// {
-//     const auto iter = _vaos.find(bufferDescriptor);
-//
-//     if(iter == _vaos.end())
-//     {
-//         GLuint vao = GLBufferDescriptor::generate();
-//         _vaos.insert(std::make_pair(bufferDescriptor, vao));
-//
-//         GLBufferDescriptor::_bind(vao);
-//
-//         for(GLuint i = 0; i < bufferDescriptor->attribs().count(); ++i)
-//         {
-//             const auto attrib = bufferDescriptor->attribs()[i];
-//             glBindBuffer(GL_ARRAY_BUFFER, attrib.vbo);
-//             GLBufferDescriptor::attribPointer(i, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.pointer);
-//             glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         }
-//     }
-// }
-//
-// void GLRenderingContext::bindBD(IBufferDescriptor* bufferDescriptor) noexcept
-// {
-//     const auto iter = _vaos.find(bufferDescriptor);
-//     
-//     if(iter == _vaos.end())
-//     {
-//         GLuint vao = GLBufferDescriptor::generate();
-//         _vaos.insert(std::make_pair(bufferDescriptor, vao));
-//
-//         GLBufferDescriptor::_bind(vao);
-//
-//         for(GLuint i = 0; i < bufferDescriptor->attribs().count(); ++i)
-//         {
-//             const auto attrib = bufferDescriptor->attribs()[i];
-//             glBindBuffer(GL_ARRAY_BUFFER, attrib.vbo);
-//             GLBufferDescriptor::attribPointer(i, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.pointer);
-//             glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         }
-//     }
-//     else
-//     {
-//         GLBufferDescriptor::_bind(_vaos[bufferDescriptor]);
-//     }
-// }
-//
-// void GLRenderingContext::unbindBD(IBufferDescriptor* bufferDescriptor) noexcept
-// {
-//     GLBufferDescriptor::_unbind(0);
-// }
 
 void GLRenderingContext::destroyVA(IVertexArray* vertexArray) noexcept
 {
@@ -126,4 +76,16 @@ void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
                  static_cast<float>(color.b) / 255.0f,
                  static_cast<float>(color.a) / 255.0f);
     glClear(flags);
+}
+
+Ref<IBuffer> GLRenderingContext::createBuffer(const std::size_t descriptorCount, const IBuffer::Type type, const IBuffer::UsageType usage) noexcept
+{
+    const GLuint buffer = GLBuffer::createBuffer();
+    return Ref<GLBuffer>(new(std::nothrow) GLBuffer(type, usage, descriptorCount, buffer));
+}
+
+Ref<IIndexBuffer> GLRenderingContext::createIndexBuffer(const IBuffer::UsageType usage) noexcept
+{
+    const GLuint buffer = GLBuffer::createBuffer();
+    return Ref<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(usage, buffer));
 }

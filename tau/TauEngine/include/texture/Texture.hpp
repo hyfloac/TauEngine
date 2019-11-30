@@ -3,31 +3,33 @@
 #include <DLL.hpp>
 #include <NumTypes.hpp>
 #include <Objects.hpp>
+#include "TextureEnums.hpp"
 
 class RenderingMode;
-
-enum class TextureType : u8
-{
-    TEXTURE_2D = 1,
-    TEXTURE_3D,
-    TEXTURE_CUBE
-};
 
 class TAU_DLL ITexture
 {
     DEFAULT_DESTRUCT_VI(ITexture);
     DELETE_COPY(ITexture);
 public:
-    static ITexture* create(const RenderingMode& mode, TextureType textureType = TextureType::TEXTURE_2D) noexcept;
+    static ITexture* create(const RenderingMode& mode, u32 width, u32 height, ETexture::Format format, ETexture::Type textureType = ETexture::Type::TEXTURE_2D) noexcept;
 protected:
-    TextureType _textureType;
+    u32 _width;
+    u32 _height;
+    ETexture::Format _dataFormat;
 protected:
-    ITexture(const TextureType textureType) noexcept
-        : _textureType(textureType)
-    { }
+    ITexture(u32 width, u32 height, ETexture::Format dataFormat) noexcept;
 public:
-    [[nodiscard]] inline TextureType textureType() const noexcept { return _textureType; }
-    inline operator TextureType() const noexcept { return _textureType; }
+    [[nodiscard]] u32 width() const noexcept { return _width; }
+    [[nodiscard]] u32 height() const noexcept { return _height; }
+
+    [[nodiscard]] ETexture::Format dataFormat() const noexcept { return _dataFormat; }
+
+    [[nodiscard]] virtual inline ETexture::Type textureType() const noexcept = 0;
+
+    virtual void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept = 0;
+
+    virtual void set(const void* data) noexcept = 0;
 
     virtual void bind(u8 textureUnit) noexcept = 0;
 

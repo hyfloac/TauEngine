@@ -448,17 +448,17 @@ bool Window::createContext() noexcept
     _context = IRenderingContext::create(this->_renderingMode);
 
     if(!_context) { return false; }
-    if(!_context->createContext(&this->_windowContainer.hdc)) { return false; }
+    if(!_context->createContext(&this->_windowContainer.windowHandle)) { return false; }
 
     return true;
 }
 
-void Window::swapBuffers() const noexcept
-{
-    PERF();
-    if(this->_windowContainer.hdc)
-    {
-        SwapBuffers(this->_windowContainer.hdc);
-    }
-}
+// void Window::swapBuffers() const noexcept
+// {
+//     PERF();
+//     if(this->_windowContainer.hdc)
+//     {
+//         SwapBuffers(this->_windowContainer.hdc);
+//     }
+// }
 #endif

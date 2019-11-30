@@ -14,8 +14,10 @@ public:
     static void destroy(GLuint vao) noexcept;
     
     static GLenum getGLType(ShaderDataType::Type type) noexcept;
+private:
+    GLenum _glDrawType;
 public:
-    GLVertexArray(std::size_t bufferCount);
+    GLVertexArray(std::size_t bufferCount, DrawType drawType);
 
     ~GLVertexArray() noexcept override;
 
@@ -32,4 +34,6 @@ public:
     void draw(IRenderingContext& context) noexcept override;
 
     void drawIndexed(IRenderingContext& context) noexcept override;
+
+    void drawType(DrawType drawType) noexcept override;
 };

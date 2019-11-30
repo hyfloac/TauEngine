@@ -27,9 +27,7 @@ public:
     void deactivateContext() noexcept override final { }
     void activateContext() noexcept override final { }
 
-    // [[nodiscard]] void* getBDHandle(IBufferDescriptor* bufferDescriptor) noexcept override { return null; }
-
-    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount) noexcept override final { return null; }
+    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount, DrawType drawType) noexcept override final { return null; }
 
     [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final { return null; }
 
@@ -40,6 +38,16 @@ public:
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept override final;
 
     void setVSync(bool vsync) noexcept override final { }
+
+    void beginFrame() noexcept override final;
+
+    void endFrame() noexcept override final;
+
+    void swapFrame() noexcept override final;
+
+    Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final { return nullptr; }
+
+    Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage) noexcept override { return nullptr; }
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 

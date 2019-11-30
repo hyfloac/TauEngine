@@ -5,6 +5,7 @@
 #include <RenderingPipeline.hpp>
 #include <DLL.hpp>
 #include <Objects.hpp>
+#include "IVertexArray.hpp"
 
 class IRenderingContext;
 
@@ -15,11 +16,13 @@ class TAU_DLL RenderableObject final
 private:
     Ref<IVertexArray> _va;
 public:
-    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh) noexcept;
+    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
 
     void preRender(IRenderingContext& context) const noexcept;
     void render(IRenderingContext& context) const noexcept;
     void postRender(IRenderingContext& context) const noexcept;
+
+    [[nodiscard]] Ref<IVertexArray> vertexArray() noexcept { return _va; }
 
     [[nodiscard]] inline size_t hashCode() const noexcept { return reinterpret_cast<size_t>(_va.get()); }
 

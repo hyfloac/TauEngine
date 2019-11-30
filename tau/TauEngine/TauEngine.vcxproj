@@ -38,7 +38,7 @@
     <ClCompile Include="src\gl\GLRenderingContext.cpp" />
     <ClCompile Include="src\gl\GLShader.cpp" />
     <ClCompile Include="src\gl\GLShaderProgram.cpp" />
-    <ClCompile Include="src\gl\GLTexture.cpp" />
+    <ClCompile Include="src\gl\GLTexture2D.cpp" />
     <ClCompile Include="src\gl\GLUniform.cpp" />
     <ClCompile Include="src\gl\GLUniform.glm.cpp" />
     <ClCompile Include="src\gl\GLUtils.cpp" />
@@ -73,7 +73,6 @@
     <ClCompile Include="src\maths\Vector3i.cpp" />
     <ClCompile Include="src\maths\Vector4f.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
-    <ClCompile Include="src\model\IBuffer.cpp" />
     <ClCompile Include="src\VirtualIO.cpp" />
     <ClCompile Include="src\win32\Win32Mouse.cpp" />
     <ClCompile Include="src\win32\Win32Keyboard.cpp" />
@@ -88,7 +87,9 @@
     <ClInclude Include="include\Color.hpp" />
     <ClInclude Include="include\console\ConsoleCommand.hpp" />
     <ClInclude Include="include\console\ConsoleController.hpp" />
+    <ClInclude Include="include\console\ConsoleLexer.hpp" />
     <ClInclude Include="include\DLL.hpp" />
+    <ClInclude Include="include\dx\DXBuffer.hpp" />
     <ClInclude Include="include\dx\DXRenderingContext.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
@@ -151,10 +152,11 @@
     <ClInclude Include="include\system\Win32Event.hpp" />
     <ClInclude Include="include\TauEngine.hpp" />
     <ClInclude Include="include\TextHandler.hpp" />
-    <ClInclude Include="include\texture\DXTexture.hpp" />
+    <ClInclude Include="include\dx\DXTexture.hpp" />
     <ClInclude Include="include\texture\FITextureLoader.hpp" />
-    <ClInclude Include="include\texture\GLTexture.hpp" />
+    <ClInclude Include="include\gl\GLTexture.hpp" />
     <ClInclude Include="include\texture\Texture.hpp" />
+    <ClInclude Include="include\texture\TextureEnums.hpp" />
     <ClInclude Include="include\Timings.hpp" />
     <ClInclude Include="include\TUID.hpp" />
     <ClInclude Include="include\system\Window.hpp" />

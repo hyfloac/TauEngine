@@ -423,7 +423,8 @@ void RenderingPipeline::runRenderingCycle() noexcept
 #undef RP_FUNC_HANDLER
 
     std::memset(_instBuffer, 0, _instPtr);
-    _window.swapBuffers();
+    // _window.swapBuffers();
+    currentContext->swapFrame();
 }
 #undef GET_VALUE
 

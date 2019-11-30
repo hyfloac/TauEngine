@@ -3,8 +3,9 @@
 #include <NumTypes.hpp>
 #include <DLL.hpp>
 #include <Objects.hpp>
-#include "system/RenderingContext.hpp"
+// #include "system/RenderingContext.hpp"
 #include "model/BufferDescriptor.hpp"
+#include "Safeties.hpp"
 
 class TAU_DLL IBuffer
 {
@@ -42,14 +43,12 @@ public:
         TransformFeedbackBuffer,
         UniformBuffer
     };
-public:
-    static Ref<IBuffer> create(IRenderingContext& context, std::size_t descriptorCount, Type type, UsageType usage = UsageType::StaticDraw) noexcept;
 protected:
     Type _type;
     UsageType _usage;
     BufferDescriptor _descriptor;
 protected:
-    IBuffer(Type type, UsageType usage, const std::size_t descriptorCount) noexcept
+    IBuffer(const Type type, const UsageType usage, const std::size_t descriptorCount) noexcept
         : _type(type), _usage(usage), _descriptor(descriptorCount)
     { }
 public:
@@ -71,8 +70,6 @@ class TAU_DLL IIndexBuffer
 {
     DEFAULT_DESTRUCT_VI(IIndexBuffer);
     DELETE_COPY(IIndexBuffer);
-public:
-    static Ref<IIndexBuffer> create(IRenderingContext& context, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept;
 protected:
     IBuffer::UsageType _usage;
 protected:

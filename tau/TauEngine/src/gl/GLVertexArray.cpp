@@ -1,6 +1,8 @@
 #include "gl/GLVertexArray.hpp"
 #include "Timings.hpp"
 
+static GLenum glDrawType(DrawType drawType) noexcept;
+
 GLuint GLVertexArray::generate() noexcept
 {
     GLuint vao;
@@ -18,8 +20,8 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const std::size_t bufferCount)
-    : IVertexArray(bufferCount)
+GLVertexArray::GLVertexArray(const std::size_t bufferCount, DrawType drawType)
+    : IVertexArray(bufferCount, drawType), _glDrawType(glDrawType(drawType))
 { }
 
 GLVertexArray::~GLVertexArray() noexcept = default;
@@ -82,13 +84,19 @@ void GLVertexArray::postDraw(IRenderingContext& context) noexcept
 
 void GLVertexArray::draw(IRenderingContext& context) noexcept
 {
-    glDrawArrays(GL_TRIANGLES, 0, this->_drawCount);
+    glDrawArrays(_glDrawType, 0, this->_drawCount);
 }
 
 void GLVertexArray::drawIndexed(IRenderingContext& context) noexcept
 {
     _indexBuffer->bind(context);
-    glDrawElements(GL_TRIANGLES, this->_drawCount, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(_glDrawType, this->_drawCount, GL_UNSIGNED_INT, nullptr);
+}
+
+void GLVertexArray::drawType(DrawType drawType) noexcept
+{
+    IVertexArray::drawType(drawType);
+    _glDrawType = glDrawType(drawType);
 }
 
 GLenum GLVertexArray::getGLType(const ShaderDataType::Type type) noexcept
@@ -141,4 +149,15 @@ GLenum GLVertexArray::getGLType(const ShaderDataType::Type type) noexcept
         default: break;
     }
     return 0;
+}
+
+static GLenum glDrawType(const DrawType drawType) noexcept
+{
+    switch(drawType)
+    {
+        case DrawType::SeparatedTriangles: return GL_TRIANGLES;
+        case DrawType::ConnectedTriangles: return GL_TRIANGLE_STRIP;
+        case DrawType::PointConnectedTriangles: return GL_TRIANGLE_FAN;
+        default: return 0;
+    }
 }

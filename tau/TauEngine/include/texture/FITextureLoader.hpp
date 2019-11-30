@@ -7,7 +7,7 @@
 #include <Objects.hpp>
 #pragma warning(pop)
 
-#include <texture/Texture.hpp>
+#include "texture/Texture.hpp"
 
 class TAU_DLL TextureLoader final
 {
@@ -28,25 +28,20 @@ public:
         BITS_PER_PIXEL_TOO_LARGE,
     };
 
-    enum class FilterType : u8
-    {
-        Nearest,
-        Linear
-    };
-
     struct GPUTextureSettings final
     {
         DEFAULT_DESTRUCT(GPUTextureSettings);
         DEFAULT_COPY(GPUTextureSettings);
 
-        TextureType textureType;
+        
+        ETexture::Type textureType;
         i32 mipmapLevel;
-        FilterType magnificationFilter;
-        FilterType  minificationFilter;
+        ETexture::Filter magnificationFilter;
+        ETexture::Filter  minificationFilter;
 
         GPUTextureSettings() noexcept = default;
 
-        GPUTextureSettings(const TextureType _textureType, const FilterType _magFilter, const FilterType _minFilter, const i32 _mipmapLevel) noexcept
+        GPUTextureSettings(const ETexture::Type _textureType, const ETexture::Filter _magFilter, const ETexture::Filter _minFilter, const i32 _mipmapLevel) noexcept
             : textureType(_textureType), mipmapLevel(_mipmapLevel),
               magnificationFilter(_magFilter), minificationFilter(_minFilter)
         { }
@@ -58,6 +53,6 @@ public:
 
     static ITexture* loadTextureEx(const char* RESTRICT fileName, GPUTextureSettings&& settings, TextureLoadError* RESTRICT error = null) noexcept;
 
-    static ITexture* loadTexture(const char* RESTRICT fileName, FilterType smooth = FilterType::Linear, i32 mipmapLevel = -1, TextureLoadError* RESTRICT error = null) noexcept
-    { return TextureLoader::loadTextureEx(fileName, GPUTextureSettings(TextureType::TEXTURE_2D, smooth, smooth, mipmapLevel)); }
+    static ITexture* loadTexture(const char* RESTRICT fileName, ETexture::Filter smooth = ETexture::Filter::Linear, i32 mipmapLevel = -1, TextureLoadError* RESTRICT error = null) noexcept
+    { return TextureLoader::loadTextureEx(fileName, GPUTextureSettings(ETexture::Type::TEXTURE_2D, smooth, smooth, mipmapLevel)); }
 };

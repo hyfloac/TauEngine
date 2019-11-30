@@ -19,8 +19,8 @@
 
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
-      _va(context.createVertexArray(2)),
-      _positionBuffer(IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
+      _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
+      _positionBuffer(context.createBuffer(1, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
       _projUni(null), _texUni(null), _colorUni(null)
 {
     PERF();
@@ -34,11 +34,11 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
 
     _shader->link(context);
 
-    _projUni = _shader->getUniformMatrix4x4Float("projectionMatrix", false);
-    _texUni = _shader->getUniformInt("textBMP");
-    _colorUni = _shader->getUniformVector3f("textColor");
+    _projUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
+    _texUni = _shader->getUniform<int>("textBMP");
+    _colorUni = _shader->getUniformVector<Vector3f>("textColor");
 
-    Ref<IBuffer> textureCoordBuffer = IBuffer::create(context, 1, IBuffer::Type::ArrayBuffer);
+    Ref<IBuffer> textureCoordBuffer = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
 
     _positionBuffer->bind(context);
     _positionBuffer->fillBuffer(context, sizeof(float) * 2 * 6, null);
@@ -142,22 +142,28 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(const DynString& glyphSetNa
 
     GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
 
-    const GLint filterType = smooth ? GL_LINEAR : GL_NEAREST;
+    // const GLint filterType = smooth ? GL_LINEAR : GL_NEAREST;
+    const ETexture::Filter filterType = smooth ? ETexture::Filter::Linear : ETexture::Filter::Nearest;
 
     for(GLchar c = minChar; c <= maxChar; ++c)
     {
         if(FT_Load_Char(face, c, FT_LOAD_RENDER)) { continue; }
 
-        ITexture* texture = ITexture::create(RenderingMode::getGlobalMode());
+        ITexture* texture = ITexture::create(RenderingMode::getGlobalMode(), face->glyph->bitmap.width, face->glyph->bitmap.rows, ETexture::Format::Red8UnsignedInt);
+
+        texture->setFilterMode(filterType, filterType);
+
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterType);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterType);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterType);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterType);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
-                     face->glyph->bitmap.width, face->glyph->bitmap.rows,
-                     0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+        texture->set(face->glyph->bitmap.buffer);
+
+        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
+        //              face->glyph->bitmap.width, face->glyph->bitmap.rows,
+        //              0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
 
         gs.glyphs[c - gs.minGlyph] = GlyphCharacter(texture,
                                      Vector2f(static_cast<float>(face->glyph->bitmap.width), static_cast<float>(face->glyph->bitmap.rows)),

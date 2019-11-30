@@ -17,12 +17,14 @@ public:
     static GLenum getGLUsageType(UsageType usage) noexcept;
 
     static UsageType getUsageType(GLenum usage) noexcept;
+
+    static GLuint createBuffer() noexcept;
 private:
     GLuint _buffer;
     GLenum _glType;
     GLenum _glUsage;
 public:
-    GLBuffer(Type type, UsageType usage, std::size_t descriptorCount) noexcept;
+    GLBuffer(Type type, UsageType usage, std::size_t descriptorCount, GLuint buffer) noexcept;
 
     ~GLBuffer() noexcept override;
 
@@ -42,7 +44,7 @@ private:
     GLuint _buffer;
     GLenum _glUsage;
 public:
-    GLIndexBuffer(IBuffer::UsageType usage) noexcept;
+    GLIndexBuffer(IBuffer::UsageType usage, GLuint buffer) noexcept;
 
     ~GLIndexBuffer() noexcept override;
 

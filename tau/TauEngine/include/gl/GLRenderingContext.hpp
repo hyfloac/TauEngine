@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <system/RenderingContext.hpp>
-#include "model/IVertexArray.hpp"
 #include <GL/glew.h>
 #ifdef _WIN32
 #include <GL/wglew.h>
@@ -38,7 +37,7 @@ public:
     void deactivateContext() noexcept override final;
     void activateContext() noexcept override final;
 
-    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount) noexcept override;
+    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount, DrawType drawType) noexcept override;
     [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final;
 
     void destroyVA(IVertexArray* vertexArray) noexcept override final;
@@ -50,6 +49,16 @@ public:
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept override final;
 
     void setVSync(bool vsync) noexcept override final;
+
+    void beginFrame() noexcept override final { }
+
+    void endFrame() noexcept override final { }
+
+    void swapFrame() noexcept override final;
+
+    Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final;
+
+    Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override;
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final;
 private:

@@ -1,16 +1,16 @@
 #include <texture/Texture.hpp>
-#include <texture/GLTexture.hpp>
-#include <texture/DXTexture.hpp>
+#include <gl/GLTexture.hpp>
+#include <dx/DXTexture.hpp>
 #include <RenderingMode.hpp>
 #include <Utils.hpp>
 
-ITexture* ITexture::create(const RenderingMode& mode, const TextureType textureType) noexcept
+ITexture* ITexture::create(const RenderingMode& mode, const u32 width, const u32 height, const ETexture::Format format, const ETexture::Type textureType) noexcept
 {
     switch(mode.currentMode())
     {
         case RenderingMode::Mode::DirectX9:
 #ifdef _WIN32
-            return new(std::nothrow) D3D9Texture(textureType);
+            return new(std::nothrow) D3D9Texture2D(width, height, format);
 #else
             return null;
 #endif
@@ -35,7 +35,11 @@ ITexture* ITexture::create(const RenderingMode& mode, const TextureType textureT
         case RenderingMode::Mode::OpenGL4_4:
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return new(std::nothrow) GLTexture(textureType);
+            return new(std::nothrow) GLTexture2D(width, height, format);
         default: return null;
     }
 }
+
+ITexture::ITexture(const u32 width, const u32 height, const ETexture::Format dataFormat) noexcept
+    : _width(width), _height(height), _dataFormat(dataFormat)
+{ }
