@@ -72,6 +72,13 @@ public:
         return arr;
     }
 
+    virtual int readChar() noexcept
+    {
+        char ret;
+        const int cnt = readBytes(reinterpret_cast<u8*>(&ret), 1);
+        return cnt ? ret : -1;
+    }
+
     virtual i64 writeBytes(const u8* buffer, u64 len) noexcept = 0;
 
     virtual i64 writeString(const char* str) noexcept
