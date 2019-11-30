@@ -1,0 +1,32 @@
+<num> ::= [0-9]
+<alpha> ::= [a-zA-Z]
+<alpha-num> ::= <alpha> | <num>
+<alpha-u> ::= <alpha> | '_'
+<alpha-u-num> ::= <alpha-num> | '_'
+<all-chars> ::= [^\n\r\t]
+<ws-chars> ::= ' ' | '\t' | '\n' | '\r'
+<ws> ::= { <ws-chars> }
+<opt-ws> ::= [ <ws> ]
+
+<int> ::= [ '-' | '+' ] { <num> }
+<float> ::= <int> | <int> '.' { <num> }
+<number> ::= <int> | <float>
+
+<string> ::= '"' <all-chars> '"'
+<char> ::= '\'' <all-chars> '\''
+
+<bool> ::= "true" | "false"
+
+<ident> ::= <alpha-u> [ { <alpha-u-num> } ]
+
+<expression> ::= <call> | <math-exp> | <number>
+
+<param> ::= <int> | <float> | <string> | <char> | <ident> 
+<params> ::= <param> [ { <opt-ws>  ',' <opt-ws> <param> } ]
+<call> ::= <opt-ws> <ident> <opt-ws> '.' <opt-ws> <ident> <opt-ws> '(' <opt-ws> [ <params> ] <opt-ws> ')' <opt-ws>
+
+<number-exp> ::= <int> | <float>
+<single-op-math-exp> ::= '-' <opt-ws> <number-exp>
+<single-op-int-exp> ::= '~' <opt-ws> <int>
+<math-exp> ::= ( <number> | <expression> ) ( '+' | '-' | '*' | '/' | '%' ) ( <number> | <expression> )
+<logic-exp> ::= 
