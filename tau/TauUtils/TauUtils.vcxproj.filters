@@ -51,9 +51,6 @@
     <ClInclude Include="include\VariableLengthArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\CoreFuncs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\String.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -66,10 +63,10 @@
     <ClInclude Include="include\ArrayList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ReferenceCounter.hpp">
+    <ClInclude Include="include\TUMaths.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\TUMaths.hpp">
+    <ClInclude Include="include\ReferenceCountingPointer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

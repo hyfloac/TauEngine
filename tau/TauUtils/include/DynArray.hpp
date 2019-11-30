@@ -4,24 +4,23 @@
 #include <cstring>
 #include <cstddef>
 #pragma warning(pop)
-#include "NumTypes.hpp"
 
 template<typename _T>
 class DynArray final
 {
 private:
     _T* _arr;
-    size_t _size;
+    ::std::size_t _size;
 public:
-    explicit DynArray(size_t size)
-        : _arr(new _T[size]), _size(size)
+    explicit DynArray(::std::size_t size)
+        : _arr(new(std::nothrow) _T[size]), _size(size)
     { }
 
     ~DynArray()
     { delete[] _arr; }
 
     DynArray(const DynArray<_T>& copy)
-        : _arr(new _T[copy._size]), _size(copy._size)
+        : _arr(new(std::nothrow) _T[copy._size]), _size(copy._size)
     {
         memcpy(_arr, copy._arr, copy._size);
     }
@@ -33,11 +32,11 @@ public:
         move._size = 0;
     }
 
-    DynArray& operator =(const DynArray<_T>& copy)
+    DynArray<_T>& operator =(const DynArray<_T>& copy)
     {
         delete[] _arr;
 
-        _arr = new _T[copy._size];
+        _arr = new(std::nothrow) _T[copy._size];
         _size = copy._size;
 
         memcpy(_arr, copy._arr, copy._size);
@@ -45,7 +44,7 @@ public:
         return *this;
     }
 
-    DynArray& operator =(DynArray<_T>&& move) noexcept
+    DynArray<_T>& operator =(DynArray<_T>&& move) noexcept
     {
         delete[] _arr;
 
@@ -64,11 +63,11 @@ public:
     [[nodiscard]] const _T* arr() const noexcept { return _arr; }
     [[nodiscard]]       _T* arr()       noexcept { return _arr; }
 
-    [[nodiscard]] size_t size()   const noexcept { return _size; }
-    [[nodiscard]] size_t length() const noexcept { return _size; }
-    [[nodiscard]] size_t count()  const noexcept { return _size; }
+    [[nodiscard]] ::std::size_t size()   const noexcept { return _size; }
+    [[nodiscard]] ::std::size_t length() const noexcept { return _size; }
+    [[nodiscard]] ::std::size_t count()  const noexcept { return _size; }
 
-    [[nodiscard]] operator size_t() const { return _size; }
+    [[nodiscard]] operator ::std::size_t() const { return _size; }
 };
 
 template<typename _T>
@@ -76,47 +75,63 @@ class RefDynArray final
 {
 private:
     _T* _arr;
-    size_t _size;
-    i32* _refCount;
+    ::std::size_t _size;
+    ::std::size_t* _refCount;
 public:
-    explicit RefDynArray(size_t size)
-        : _arr(new _T[size]), _size(size), _refCount(new i32(1))
+    explicit RefDynArray(::std::size_t size)
+        : _arr(new(std::nothrow) _T[size]), _size(size), _refCount(new(std::nothrow) ::std::size_t(1))
     { }
 
     ~RefDynArray()
     {
-        if(--(*_refCount) <= 0)
+        if(--(*_refCount) == 0)
         {
             delete[] _arr;
             delete _refCount;
         }
     }
 
-    RefDynArray(const RefDynArray<_T>& copy)
+    inline RefDynArray(const RefDynArray<_T>& copy) noexcept
         : _arr(copy._arr), _size(copy._size), _refCount(copy._refCount)
     { ++(*_refCount); }
 
-    RefDynArray(RefDynArray<_T>&& move) noexcept
+    inline RefDynArray(RefDynArray<_T>&& move) noexcept
         : _arr(move._arr), _size(move._size), _refCount(move._refCount)
     { ++(*_refCount); }
 
-    RefDynArray& operator =(const RefDynArray<_T>& copy)
+    inline RefDynArray<_T>& operator =(const RefDynArray<_T>& copy) noexcept
     {
+        if(this == &copy)
+        { return *this; }
+
+        if(--(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+
         _arr = copy._arr;
         _size = copy._size;
         _refCount = copy._refCount;
-
         ++(*_refCount);
 
         return *this;
     }
 
-    RefDynArray& operator =(RefDynArray<_T>&& move) noexcept
+    inline RefDynArray<_T>& operator =(RefDynArray<_T>&& move) noexcept
     {
+        if(this == &move)
+        { return *this; }
+
+        if(--(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+
         _arr = move._arr;
         _size = move._size;
         _refCount = move._refCount;
-
         ++(*_refCount);
 
         return *this;
@@ -128,9 +143,9 @@ public:
     [[nodiscard]] const _T* arr() const noexcept { return _arr; }
     [[nodiscard]]       _T* arr()       noexcept { return _arr; }
 
-    [[nodiscard]] size_t size()   const noexcept { return _size; }
-    [[nodiscard]] size_t length() const noexcept { return _size; }
-    [[nodiscard]] size_t count()  const noexcept { return _size; }
+    [[nodiscard]] ::std::size_t size()   const noexcept { return _size; }
+    [[nodiscard]] ::std::size_t length() const noexcept { return _size; }
+    [[nodiscard]] ::std::size_t count()  const noexcept { return _size; }
 
-    [[nodiscard]] operator size_t() const { return _size; }
+    [[nodiscard]] operator ::std::size_t() const { return _size; }
 };

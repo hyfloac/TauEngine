@@ -254,9 +254,8 @@
   <ItemGroup>
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\ArrayList.hpp" />
-    <ClInclude Include="include\CoreFuncs.h" />
     <ClInclude Include="include\CVersion.hpp" />
-    <ClInclude Include="include\ReferenceCounter.hpp" />
+    <ClInclude Include="include\ReferenceCountingPointer.hpp" />
     <ClInclude Include="include\RunTimeType.hpp" />
     <ClInclude Include="include\String.hpp" />
     <ClInclude Include="include\Triplet.hpp" />
