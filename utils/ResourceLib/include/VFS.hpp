@@ -103,6 +103,10 @@ public:
      */
     VFS::Container resolvePath(const char* path) const noexcept;
 
+    VFS::Container resolvePath(const char* path, const char* subPath0) const noexcept;
+    VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept;
+    VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept;
+
     bool fileExists(const char* path) const noexcept;
 
     Ref<IFile> openFile(const char* path, FileProps props) const noexcept;

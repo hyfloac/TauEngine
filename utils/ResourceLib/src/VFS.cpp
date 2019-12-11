@@ -91,6 +91,44 @@ VFS::Container VFS::resolvePath(const char* path) const noexcept
     return VFS::Container::Static("", null);
 }
 
+VFS::Container VFS::resolvePath(const char* path, const char* subPath0) const noexcept
+{
+    if(!path) { return VFS::Container::Static("", null); }
+
+    const std::size_t len = std::strlen(path);
+    if(!len) { return VFS::Container::Static("", null); }
+
+    DynString pathCompound(path);
+    pathCompound = pathCompound.concat(subPath0);
+
+    return resolvePath(pathCompound);
+}
+
+VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept
+{
+    if(!path) { return VFS::Container::Static("", null); }
+
+    const std::size_t len = std::strlen(path);
+    if(!len) { return VFS::Container::Static("", null); }
+
+    DynString pathCompound(path);
+    pathCompound = pathCompound.concat(subPath0).concat(subPath1);
+
+    return resolvePath(pathCompound);
+}
+
+VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept
+{
+    if(!path) { return VFS::Container::Static("", null); }
+
+    const std::size_t len = std::strlen(path);
+    if(!len) { return VFS::Container::Static("", null); }
+
+    DynString pathCompound(path);
+    pathCompound = pathCompound.concat(subPath0).concat(subPath1).concat(subPath2);
+
+    return resolvePath(pathCompound);
+}
 
 bool VFS::fileExists(const char* path) const noexcept
 {

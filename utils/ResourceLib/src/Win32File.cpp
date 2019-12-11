@@ -98,6 +98,7 @@ Ref<IFile> Win32FileLoader::load(const char* path, FileProps props) const noexce
     if(file == INVALID_HANDLE_VALUE)
     {
         HRESULT error = GetLastError();
+        UNUSED(error);
         return nullptr;
     }
 
