@@ -1,11 +1,12 @@
 #pragma warning(push, 0)
 #include <GL/glew.h>
 #pragma warning(pop)
-#include <gl/GLRenderingContext.hpp>
 #include <Utils.hpp>
+#include "gl/GLRenderingContext.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLVertexArray.hpp"
 #include "gl/GLBuffer.hpp"
+#include "gl/GLFrameBuffer.hpp"
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
@@ -78,6 +79,16 @@ void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
     glClear(flags);
 }
 
+void GLRenderingContext::setFaceWinding(const bool clockwise) noexcept
+{
+    glFrontFace(clockwise ? GL_CW : GL_CCW);
+}
+
+void GLRenderingContext::enableDepthWriting(bool writing) noexcept
+{
+    glDepthMask(writing ? GL_TRUE : GL_FALSE);
+}
+
 Ref<IBuffer> GLRenderingContext::createBuffer(const std::size_t descriptorCount, const IBuffer::Type type, const IBuffer::UsageType usage) noexcept
 {
     const GLuint buffer = GLBuffer::createBuffer();
@@ -88,4 +99,9 @@ Ref<IIndexBuffer> GLRenderingContext::createIndexBuffer(const IBuffer::UsageType
 {
     const GLuint buffer = GLBuffer::createBuffer();
     return Ref<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(usage, buffer));
+}
+
+Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
+{
+    return Ref<GLFrameBufferBuilder>(new(std::nothrow) GLFrameBufferBuilder);
 }

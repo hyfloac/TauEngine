@@ -24,6 +24,7 @@
     <ClCompile Include="src\camera\Camera.cpp" />
     <ClCompile Include="src\camera\Camera2D.cpp" />
     <ClCompile Include="src\camera\Camera3D.cpp" />
+    <ClCompile Include="src\camera\Skybox.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
     <ClCompile Include="src\DXRenderingContext.cpp" />
@@ -31,9 +32,11 @@
     <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
-    <ClCompile Include="src\FITextureLoader.cpp" />
+    <ClCompile Include="src\gl\GLTextureCube.cpp" />
+    <ClCompile Include="src\texture\FITextureLoader.cpp" />
     <ClCompile Include="src\GameRecorder.cpp" />
     <ClCompile Include="src\gl\GLBufferDescriptor.cpp" />
+    <ClCompile Include="src\gl\GLFrameBuffer.cpp" />
     <ClCompile Include="src\gl\GLProgram.cpp" />
     <ClCompile Include="src\gl\GLRenderingContext.cpp" />
     <ClCompile Include="src\gl\GLShader.cpp" />
@@ -67,7 +70,8 @@
     <ClCompile Include="src\model\SimpleOBJLoader.cpp" />
     <ClCompile Include="src\TauEngine.cpp" />
     <ClCompile Include="src\TextHandler.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\texture\Texture.cpp" />
+    <ClCompile Include="src\texture\FrameBuffer.cpp" />
     <ClCompile Include="src\Timings.cpp" />
     <ClCompile Include="src\TUID.cpp" />
     <ClCompile Include="src\maths\Vector3i.cpp" />
@@ -84,6 +88,7 @@
     <ClInclude Include="include\camera\Camera.hpp" />
     <ClInclude Include="include\camera\Camera2D.hpp" />
     <ClInclude Include="include\camera\Camera3D.hpp" />
+    <ClInclude Include="include\camera\Skybox.hpp" />
     <ClInclude Include="include\Color.hpp" />
     <ClInclude Include="include\console\ConsoleCommand.hpp" />
     <ClInclude Include="include\console\ConsoleController.hpp" />
@@ -100,6 +105,7 @@
     <ClInclude Include="include\file\VirtualIO.hpp" />
     <ClInclude Include="include\GameRecorder.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
+    <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLProgram.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
@@ -155,6 +161,7 @@
     <ClInclude Include="include\dx\DXTexture.hpp" />
     <ClInclude Include="include\texture\FITextureLoader.hpp" />
     <ClInclude Include="include\gl\GLTexture.hpp" />
+    <ClInclude Include="include\texture\FrameBuffer.hpp" />
     <ClInclude Include="include\texture\Texture.hpp" />
     <ClInclude Include="include\texture\TextureEnums.hpp" />
     <ClInclude Include="include\Timings.hpp" />

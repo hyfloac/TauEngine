@@ -11,28 +11,32 @@ static void __cdecl setupParams(RenderingPipeline&, Window&, void*) noexcept;
 void __cdecl TERenderer::finalizeLoadConsolas(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept
 {
     TextHandler& th = finalizeParam->th;
-    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolas = th.generateBitmapCharacters("Consolas", 32, 126, false, file->face);
+    TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
+    renderer->_consolas = th.generateBitmapCharacters(*renderer->_window.renderingContext(), "Consolas", 32, 126, false, file->face);
     delete file;
 }
 
 void TERenderer::finalizeLoadConsolasBold(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept
 {
     TextHandler& th = finalizeParam->th;
-    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolasBold = th.generateBitmapCharacters("ConsolasBold", 32, 126, false, file->face);
+    TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
+    renderer->_consolasBold = th.generateBitmapCharacters(*renderer->_window.renderingContext(), "ConsolasBold", 32, 126, false, file->face);
     delete file;
 }
 
 void TERenderer::finalizeLoadConsolasItalic(TextHandler::FileData* file,TextHandler::FinalizeData* finalizeParam) noexcept
 {
     TextHandler& th = finalizeParam->th;
-    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolasItalic = th.generateBitmapCharacters("ConsolasItalic", 32, 126, false, file->face);
+    TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
+    renderer->_consolasItalic = th.generateBitmapCharacters(*renderer->_window.renderingContext(), "ConsolasItalic", 32, 126, false, file->face);
     delete file;
 }
 
 void TERenderer::finalizeLoadConsolasBoldItalic(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept
 {
     TextHandler& th = finalizeParam->th;
-    reinterpret_cast<TERenderer*>(finalizeParam->param)->_consolasBoldItalic = th.generateBitmapCharacters("ConsolasBoldItalic", 32, 126, false, file->face);
+    TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
+    renderer->_consolasBoldItalic = th.generateBitmapCharacters(*renderer->_window.renderingContext(), "ConsolasBoldItalic", 32, 126, false, file->face);
     delete file;
 }
 

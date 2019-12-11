@@ -16,7 +16,7 @@ private:
     IDirect3DDevice9* _dx9Device;
 public:
     DXRenderingContext(const RenderingMode& mode, const bool debug) noexcept;
-    ~DXRenderingContext() noexcept override final = default;
+    ~DXRenderingContext() noexcept override final;
 
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override final;
 
@@ -39,15 +39,21 @@ public:
 
     void setVSync(bool vsync) noexcept override final { }
 
+    void setFaceWinding(bool clockwise) noexcept override final { }
+
+    void enableDepthWriting(bool writing) noexcept override final { }
+
     void beginFrame() noexcept override final;
 
     void endFrame() noexcept override final;
 
     void swapFrame() noexcept override final;
 
-    Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final { return nullptr; }
+    [[nodiscard]] Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final { return nullptr; }
 
-    Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage) noexcept override { return nullptr; }
+    [[nodiscard]] Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage) noexcept override { return nullptr; }
+
+    [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return nullptr; }
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 

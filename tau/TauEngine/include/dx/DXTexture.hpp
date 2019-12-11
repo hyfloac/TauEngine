@@ -25,8 +25,11 @@ public:
         }
     }
 
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::TEXTURE_2D; }
+    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
+    void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override { }
+
+    void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override { }
 
     void set(const void* data) noexcept override final { }
 
@@ -36,6 +39,6 @@ public:
     void unbind(u8 textureUnit) noexcept override final
     { }
 
-    void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override { }
+    void generateMipmaps() noexcept override final { }
 };
 #endif

@@ -79,7 +79,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         }
     }
 
-    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture());
+    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_window->renderingContext()));
 
     _renderer = new TERenderer(*_window, _gameState, async);
 

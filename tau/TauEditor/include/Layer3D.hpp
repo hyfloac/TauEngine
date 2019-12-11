@@ -7,8 +7,12 @@
 #include <shader/IShaderProgram.hpp>
 #include <shader/IUniform.hpp>
 #include <texture/Texture.hpp>
+#include <texture/FrameBuffer.hpp>
 #include <glm/mat4x4.hpp>
 #include <maths/Vector3f.hpp>
+#include <events/WindowEvent.hpp>
+#include <model/IVertexArray.hpp>
+#include <camera/Skybox.hpp>
 #include "State.hpp"
 
 class Window;
@@ -25,6 +29,7 @@ private:
     RenderingPipeline& _rp;
     State& _state;
     FreeCamCamera3DController _camera;
+    Skybox _skybox;
     GameRecorder& _gr;
 
     Ref<IShaderProgram> _shader;
@@ -41,8 +46,27 @@ private:
     Ref<IUniform<const glm::mat4&>> _o_modelViewMatrixUni;
     Ref<IUniform<float>> _o_scaleFactorUni;
 
+    Ref<IShaderProgram> _reflectionShader;
+    Ref<IUniform<const glm::mat4&>> _reflectionProjMatrixUni;
+    Ref<IUniform<const glm::mat4&>> _reflectionViewMatrixUni;
+    Ref<IUniform<const glm::mat4&>> _reflectionModelViewMatrixUni;
+    Ref<IUniform<const Vector3f&>> _reflectionCameraPosUni;
+    Ref<IUniform<int>> _reflectionTexture;
+
+    Ref<IShaderProgram> _refractionShader;
+    Ref<IUniform<const glm::mat4&>> _refractionProjMatrixUni;
+    Ref<IUniform<const glm::mat4&>> _refractionViewMatrixUni;
+    Ref<IUniform<const glm::mat4&>> _refractionModelViewMatrixUni;
+    Ref<IUniform<const Vector3f&>> _refractionCameraPosUni;
+    Ref<IUniform<int>> _refractionTexture;
+
+    Ref<IShaderProgram> _frameBufferShader;
+    Ref<IUniform<int>> _frameBufferUni;
+
     Ref<ITexture> _texture;
     Ref<ITexture> _overlay;
+    Ref<IFrameBuffer> _frameBuffer;
+    Ref<IVertexArray> _frameBufferVA;
 
     Vector3f _modelPos;
     glm::mat4 _modelViewMatrix;
@@ -60,4 +84,6 @@ public:
     void onRender(float delta) noexcept override;
 
     void onEvent(Event& e) noexcept override;
+
+    bool onWindowResize(WindowResizeEvent& e) noexcept;
 };

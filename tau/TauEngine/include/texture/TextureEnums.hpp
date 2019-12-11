@@ -11,9 +11,10 @@ class ETexture final
 public:
     enum class Type : u8
     {
-        TEXTURE_2D = 1,
-        TEXTURE_3D,
-        TEXTURE_CUBE
+        T2D = 1,
+        T3D,
+        Cube,
+        Depth
     };
 
     enum class Filter : u8
@@ -22,9 +23,30 @@ public:
         Linear
     };
 
+    enum class WrapMode : u8
+    {
+        ClampToEdge = 1,
+        ClampToBorder,
+        MirroredRepeat,
+        Repeat,
+        MirrorClampToEdge
+    };
+
+    enum class DepthCompareFunc : u8
+    {
+        LessThanOrEqual = 1,
+        GreaterThanOrEqual,
+        LessThan,
+        GreaterThan,
+        Equal,
+        NotEqual,
+        Always,
+        Never
+    };
+
     enum class Format : u16
     {
-        Red8UnsignedInt,
+        Red8UnsignedInt = 1,
         Red16UnsignedInt,
         Red32UnsignedInt,
         RedGreen8UnsignedInt,
@@ -43,6 +65,23 @@ public:
         RedGreenBlue16Float,
         RedGreenBlue32Float,
         RedGreenBlueAlpha16Float,
-        RedGreenBlueAlpha32Float
+        RedGreenBlueAlpha32Float,
+        Depth16UnsignedInt,
+        Depth32UnsignedInt,
+        Depth32Float,
+        Stencil8UnsignedInt,
+        Stencil16UnsignedInt,
+        Depth24Stencil8,
+        Depth32FloatStencil8UnsignedInt,
+    };
+
+    enum class CubeSide : u8
+    {
+        Front = 1,
+        Back,
+        Left,
+        Right,
+        Top,
+        Bottom
     };
 };

@@ -22,6 +22,7 @@ private:
     glm::quat _viewQuaternion;
     glm::mat4 _projectionMatrix;
     glm::mat4 _viewMatrix;
+    glm::mat4 _viewRotMatrix; // A matrix that doesn't include position
     glm::mat4 _compoundedMatrix;
 public:
     Camera3D(const Window& window, float fov, float zNear, float zFar) noexcept;
@@ -32,6 +33,7 @@ public:
     [[nodiscard]] glm::quat viewQuaterion() const noexcept { return _viewQuaternion; }
     [[nodiscard]] glm::mat4 projectionMatrix() const noexcept { return _projectionMatrix; }
     [[nodiscard]] const glm::mat4& viewMatrix() const noexcept { return _viewMatrix; }
+    [[nodiscard]] const glm::mat4& viewRotMatrix() const noexcept { return _viewRotMatrix; }
     /** _projectionMatrix * _viewMatrix */
     [[nodiscard]] const glm::mat4& compoundedMatrix() const noexcept { return _compoundedMatrix; }
 
@@ -48,7 +50,8 @@ public:
         if(pitch > 89.0f) { pitch = 89.0f; }
         else if(pitch < -89.0f) { pitch = -89.0f; }
         _pitch = pitch;
-        _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
+        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
         recomputeMatrices();
     }
 
@@ -61,7 +64,8 @@ public:
             yaw = 360.0f - yaw;
         }
         _yaw = yaw;
-        _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
+        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
         recomputeMatrices();
     }
 
@@ -78,7 +82,8 @@ public:
         }
         _pitch = pitch;
         _yaw = yaw;
-        _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
+        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
         recomputeMatrices();
     }
 
@@ -102,6 +107,8 @@ public:
     }
 private:
     void recomputeMatrices() noexcept;
+
+    void computeQuat() noexcept;
 private:
     friend class FPSCamera3DController;
     friend class FreeCamCamera3DController;

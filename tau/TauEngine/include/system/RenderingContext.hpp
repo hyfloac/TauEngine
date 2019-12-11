@@ -25,6 +25,7 @@
 class IVertexArray;
 enum class DrawType : u8;
 class IBuffer;
+class IFrameBufferBuilder;
 
 class SharedRenderingContexts;
 class SharedRenderingContextsContainer;
@@ -74,15 +75,21 @@ public:
 
     virtual void setVSync(bool vsync) noexcept = 0;
 
+    virtual void setFaceWinding(bool clockwise) noexcept = 0;
+
+    virtual void enableDepthWriting(bool writing) noexcept = 0;
+
     virtual void beginFrame() noexcept = 0;
 
     virtual void endFrame() noexcept = 0;
 
     virtual void swapFrame() noexcept = 0;
 
-    virtual Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
+    [[nodiscard]] virtual Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
 
-    virtual Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
+    [[nodiscard]] virtual Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
+
+    [[nodiscard]] virtual Ref<IFrameBufferBuilder> createFrameBuffer() noexcept = 0;
 
     template<typename _T>
     [[nodiscard]] bool isContextType() const noexcept

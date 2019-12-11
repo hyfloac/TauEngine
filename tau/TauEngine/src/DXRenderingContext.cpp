@@ -8,6 +8,10 @@ DXRenderingContext::DXRenderingContext(const RenderingMode& mode, const bool deb
       _d3d(null), _dx9Device(null)
 { }
 
+DXRenderingContext::~DXRenderingContext() noexcept
+{ }
+
+
 void DXRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
     D3DVIEWPORT9 viewport { x, y, width, height, minZ, maxZ };

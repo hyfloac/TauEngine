@@ -135,7 +135,7 @@ TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) no
     return new FileData { face, file };
 }
 
-GlyphSetHandle TextHandler::generateBitmapCharacters(const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
+GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context, const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
 {
     PERF();
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -149,7 +149,7 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(const DynString& glyphSetNa
     {
         if(FT_Load_Char(face, c, FT_LOAD_RENDER)) { continue; }
 
-        ITexture* texture = ITexture::create(RenderingMode::getGlobalMode(), face->glyph->bitmap.width, face->glyph->bitmap.rows, ETexture::Format::Red8UnsignedInt);
+        ITexture* texture = ITexture::create(context, face->glyph->bitmap.width, face->glyph->bitmap.rows, ETexture::Format::Red8UnsignedInt);
 
         texture->setFilterMode(filterType, filterType);
 
@@ -176,6 +176,7 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(const DynString& glyphSetNa
 
 void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept
 {
+    context.setFaceWinding(false);
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);
@@ -229,6 +230,7 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
 
 float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept
 {
+    context.setFaceWinding(false);
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);

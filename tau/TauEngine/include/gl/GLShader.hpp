@@ -20,9 +20,9 @@ private:
     GLuint _shaderID;
     std::unordered_map<String, GLint> _uniforms;
 private:
-    GLShader(IShader::Type shaderType, NotNull<const char> shaderPath, GLuint shaderID) noexcept;
+    GLShader(IShader::Type shaderType, const NotNull<const char>& shaderPath, GLuint shaderID) noexcept;
 public:
-    static Ref<GLShader> create(IShader::Type shaderType, NotNull<const char> shaderPath) noexcept;
+    static Ref<GLShader> create(IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept;
 public:
     ~GLShader() noexcept override final;
 

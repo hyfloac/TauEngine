@@ -4,7 +4,7 @@
 #include "system/RenderingContext.hpp"
 #include "Timings.hpp"
 
-Ref<IShader> IShader::create(IRenderingContext& context, Type shaderType, NotNull<const char> shaderPath) noexcept
+Ref<IShader> IShader::create(IRenderingContext& context, Type shaderType, const NotNull<const char>& shaderPath) noexcept
 {
     switch(context.mode().currentMode())
     {

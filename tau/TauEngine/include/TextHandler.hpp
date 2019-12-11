@@ -105,7 +105,7 @@ public:
     [[nodiscard]] FileData* loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight) noexcept;
     [[nodiscard]] int loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight, ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* userParam) noexcept;
 
-    GlyphSetHandle generateBitmapCharacters(const DynString& glyphSetName, char minChar, char maxChar, bool smooth, FT_Face face) noexcept;
+    GlyphSetHandle generateBitmapCharacters(IRenderingContext& context, const DynString& glyphSetName, char minChar, char maxChar, bool smooth, FT_Face face) noexcept;
 
     void renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept;
     float renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept;

@@ -1,23 +1,21 @@
 #pragma warning(push, 0)
 #include <GL/glew.h>
 #include <vector>
+#include <cstring>
 #pragma warning(pop)
 #include <gl/GLShader.hpp>
 #include <Utils.hpp>
 #include <maths/Vector2f.hpp>
 #include <maths/Vector3f.hpp>
-#include <maths/Vector3i.hpp>
-#include <maths/Vector4f.hpp>
 #include <cstdio>
 #include "VFS.hpp"
-#include <glm/gtc/type_ptr.hpp>
 #include "Timings.hpp"
 
-GLShader::GLShader(const IShader::Type shaderType, const NotNull<const char> shaderPath, const GLuint shaderID) noexcept
+GLShader::GLShader(const IShader::Type shaderType, const NotNull<const char>& shaderPath, const GLuint shaderID) noexcept
     : IShader(shaderType), _shaderPath(shaderPath), _shaderID(shaderID)
 { }
 
-Ref<GLShader> GLShader::create(const IShader::Type shaderType, const NotNull<const char> shaderPath) noexcept
+Ref<GLShader> GLShader::create(const IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept
 {
     PERF();
     GLenum glShaderType;
@@ -77,6 +75,73 @@ GLShader::~GLShader() noexcept
     }
 }
 
+static void clearWhiteSpace(uSys& index, uSys length, const u8* const arr) noexcept
+{
+    for(; index < length && isspace(arr[index]); ++index);
+}
+
+static void clearLine(uSys& index, uSys length, const u8* const arr) noexcept
+{
+    for(; index < length && arr[index] != '\n'; ++index);
+}
+
+static uSys readInclude(uSys index, uSys length, const u8* const arr) noexcept
+{
+    uSys i;
+    for(i = index; i < length && arr[i] != '>'; ++i);
+    return i - index;
+}
+
+static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
+{
+    RefDynArray<u8> ret = shader;
+    // const uSys len = shader.count();
+    // u8* arr = shader.arr();
+    for(uSys i = 0; i < ret.count(); ++i)
+    {
+        clearWhiteSpace(i, ret.count(), ret.arr());
+        if(ret.arr()[i] == '#')
+        {
+            const u32 includeBegin = i;
+            ++i;
+            if(i + 7 < ret.count())
+            {
+                if(strncmp(reinterpret_cast<const char*>(ret.arr() + i), "include", 7) == 0)
+                {
+                    i += 7;
+                    clearWhiteSpace(i, ret.count(), ret.arr());
+                    if(ret.arr()[i] == '<')
+                    {
+                        ++i;
+                        const uSys includeLen = readInclude(i, ret.count(), ret.arr());
+                        char* includePath = new char[includeLen + 1];
+                        includePath[includeLen] = '\0';
+                        memcpy(includePath, ret.arr() + i, includeLen);
+
+                        i += includeLen + 1;
+
+                        const uSys includeLineLen = i - includeBegin;
+
+                        RefDynArray<u8> includeFileData = VFS::Instance().openFile(includePath, FileProps::Read)->readFile();
+
+                        delete[] includePath;
+
+                        RefDynArray<u8> includedFileData(ret.count() - includeLineLen + includeFileData.count());
+
+                        memcpy(includedFileData.arr(), ret.arr(), includeBegin);
+                        memcpy(includedFileData.arr() + includeBegin, includeFileData.arr(), includeFileData.count() - 1);
+                        memcpy(includedFileData.arr() + includeBegin + includeFileData.count() - 1, ret.arr() + i, ret.count() - i);
+
+                        ret = includedFileData;
+                    }
+                }
+            }
+        }
+        clearLine(i, ret.count(), ret.arr());
+    }
+    return ret;
+}
+
 bool GLShader::loadShader(const char* src) noexcept
 {
     PERF();
@@ -91,6 +156,9 @@ bool GLShader::loadShader(const char* src) noexcept
     else
     {
         data = VFS::Instance().openFile(this->_shaderPath, FileProps::Read)->readFile();
+
+        data = handleIncludes(data);
+
         shaderSrc = reinterpret_cast<GLchar*>(data.arr());
     }
 

@@ -50,15 +50,21 @@ public:
 
     void setVSync(bool vsync) noexcept override final;
 
+    void setFaceWinding(bool clockwise) noexcept override final;
+
+    void enableDepthWriting(bool writing) noexcept override final;
+
     void beginFrame() noexcept override final { }
 
     void endFrame() noexcept override final { }
 
     void swapFrame() noexcept override final;
 
-    Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final;
+    [[nodiscard]] Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final;
 
-    Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override;
+    [[nodiscard]] Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override;
+
+    [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final;
 private:
