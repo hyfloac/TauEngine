@@ -62,44 +62,44 @@ static inline void toUpper(const char* str, char* store) noexcept
     }
 }
 
-static inline ::std::size_t findHashCode(NonNull const char* str) noexcept
+static inline uSys findHashCode(NonNull const char* str) noexcept
 {
-    ::std::size_t hash = 0;
-    for(::std::size_t i = 0; str[i]; ++i)
+    uSys hash = 0;
+    for(uSys i = 0; str[i]; ++i)
     {
-        hash = 31u * hash + static_cast<::std::size_t>(str[i]);
+        hash = 31u * hash + static_cast<uSys>(str[i]);
     }
     return hash;
 }
 
-static inline ::std::size_t findHashCode(NonNull const char* str, const ::std::size_t len) noexcept
+static inline uSys findHashCode(NonNull const char* str, const uSys len) noexcept
 {
-    ::std::size_t hash = 0;
-    for(::std::size_t i = 0; i < len; ++i)
+    uSys hash = 0;
+    for(uSys i = 0; i < len; ++i)
     {
-        hash = 31u * hash + static_cast<::std::size_t>(str[i]);
+        hash = 31u * hash + static_cast<uSys>(str[i]);
     }
     return hash;
 }
 
 namespace cexpr
 {
-    template<::std::size_t _Len>
-    constexpr inline ::std::size_t strlen(const char(&str)[_Len]) noexcept { return _Len - 1; }
+    template<uSys _Len>
+    constexpr inline uSys strlen(const char(&str)[_Len]) noexcept { return _Len - 1; }
 
-    template<::std::size_t _Len>
-    constexpr inline ::std::size_t strlen(const wchar_t(&str)[_Len]) noexcept { return _Len - 1; }
+    template<uSys _Len>
+    constexpr inline uSys strlen(const wchar_t(&str)[_Len]) noexcept { return _Len - 1; }
 
-    template<::std::size_t _Len>
-    constexpr inline ::std::size_t strlen(const char16_t(&str)[_Len]) noexcept { return _Len - 1; }
+    template<uSys _Len>
+    constexpr inline uSys strlen(const char16_t(&str)[_Len]) noexcept { return _Len - 1; }
 
-    template<::std::size_t _Len>
-    constexpr inline ::std::size_t strlen(const char32_t(&str)[_Len]) noexcept { return _Len - 1; }
+    template<uSys _Len>
+    constexpr inline uSys strlen(const char32_t(&str)[_Len]) noexcept { return _Len - 1; }
 
-    template<typename _Type, ::std::size_t _Len>
-    constexpr inline ::std::size_t arrlen(const _Type(&arr)[_Len]) noexcept { return _Len - 1; }
+    template<typename _Type, uSys _Len>
+    constexpr inline uSys arrlen(const _Type(&arr)[_Len]) noexcept { return _Len - 1; }
 
-    template<::std::size_t _Len>
+    template<uSys _Len>
     constexpr bool streq(const char(&RESTRICT lhs)[_Len], const char(&RESTRICT rhs)[_Len])
     {
         while(*lhs != '\0' && *rhs != '\0')
@@ -127,13 +127,13 @@ namespace cexpr
         return *lhs == '\0' && *rhs == '\0';
     }
 
-    template<::std::size_t _Len>
-    constexpr ::std::size_t findHashCode(NonNull const char(&str)[_Len]) noexcept
+    template<uSys _Len>
+    constexpr uSys findHashCode(NonNull const char(&str)[_Len]) noexcept
     {
-        ::std::size_t hash = 0;
-        for(::std::size_t i = 0; str[i]; ++i)
+        uSys hash = 0;
+        for(uSys i = 0; str[i]; ++i)
         {
-            hash = 31u * hash + static_cast<::std::size_t>(str[i]);
+            hash = 31u * hash + static_cast<uSys>(str[i]);
         }
         return hash;
     }
@@ -151,16 +151,16 @@ class StringIterator final
     DEFAULT_COPY(StringIterator);
 private:
     const char* _string;
-    ::std::size_t _length;
-    ::std::size_t _index;
+    uSys _length;
+    uSys _index;
 public:
-    StringIterator(const char* const string, const ::std::size_t length, const ::std::size_t index)
+    inline StringIterator(const char* const string, const uSys length, const uSys index)
         : _string(string), _length(length), _index(index)
     { }
 
     inline StringIterator& operator++() noexcept
     {
-        if(_index - 1 < _length)
+        if(_index < _length - 1)
         { ++_index; }
         return *this;
     }
@@ -192,15 +192,15 @@ public:
     [[nodiscard]] inline bool operator ==(const StringIterator& other) const noexcept
     { return _index == other._index; }
     [[nodiscard]] inline bool operator !=(const StringIterator& other) const noexcept
-    { return !this->operator==(other); }
+    { return _index != other._index; }
 };
 
 class String final
 {
 private:
     const char*   _string;
-    ::std::size_t _length;
-    ::std::size_t _hash;
+    uSys _length;
+    uSys _hash;
 public:
     inline String(const NotNull<const char>& string) noexcept
         : _string(string), _length(strlen(string)), _hash(findHashCode(string))
@@ -238,12 +238,12 @@ public:
     }
 
     [[nodiscard]] inline NonNull const char* c_str() const noexcept { return _string; }
-    [[nodiscard]] inline ::std::size_t length() const noexcept { return _length; }
+    [[nodiscard]] inline uSys length() const noexcept { return _length; }
 
     [[nodiscard]] inline operator const char*() const noexcept { return _string; }
-    [[nodiscard]] inline ::std::size_t operator()() const noexcept { return _hash; }
+    [[nodiscard]] inline uSys operator()() const noexcept { return _hash; }
 
-    [[nodiscard]] inline ::std::size_t hashCode() const noexcept { return _hash; }
+    [[nodiscard]] inline uSys hashCode() const noexcept { return _hash; }
 
     [[nodiscard]] inline bool equals(const String& other) const noexcept
     {
@@ -337,23 +337,23 @@ class StringView final
 {
 private:
     const char*   _string;
-    ::std::size_t _length;
-    ::std::size_t _hash;
+    uSys _length;
+    uSys _hash;
 private:
-    inline StringView(const ::std::size_t begin, const ::std::size_t length, const String& str) noexcept
+    inline StringView(const uSys begin, const uSys length, const String& str) noexcept
         : _string(str._string + begin), _length(length), _hash(findHashCode(_string, length))
     { }
 public:
-    inline StringView(const String& str, const ::std::size_t begin, const ::std::size_t end) noexcept
+    inline StringView(const String& str, const uSys begin, const uSys end) noexcept
         : _string(str._string + begin), _length(end - begin), _hash(findHashCode(_string, _length))
     { }
 
-    [[nodiscard]] static inline StringView create(const String& str, const ::std::size_t begin, const ::std::size_t length) noexcept
+    [[nodiscard]] static inline StringView create(const String& str, const uSys begin, const uSys length) noexcept
     { return StringView(begin, length, str); }
 
     [[nodiscard]] inline const char* c_str() const noexcept { return _string; }
-    [[nodiscard]] inline ::std::size_t length() const noexcept { return _length; }
-    [[nodiscard]] inline ::std::size_t hashCode() const noexcept { return _hash; }
+    [[nodiscard]] inline uSys length() const noexcept { return _length; }
+    [[nodiscard]] inline uSys hashCode() const noexcept { return _hash; }
 
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
     [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
@@ -456,16 +456,16 @@ class DynString final
 {
 private:
     const char*    _string;
-    ::std::size_t* _refCount;
-    ::std::size_t  _length;
-    ::std::size_t  _hash;
+    uSys* _refCount;
+    uSys  _length;
+    uSys  _hash;
 private:
-    DynString(const char* string, ::std::size_t length) noexcept
-        : _string(string), _refCount(new(::std::nothrow) ::std::size_t(1)), _length(length), _hash(findHashCode(string))
+    DynString(const char* string, uSys length) noexcept
+        : _string(string), _refCount(new(::std::nothrow) uSys(1)), _length(length), _hash(findHashCode(string))
     { }
 public:
     inline DynString(const NotNull<const char>& string) noexcept
-        : _string(nullptr), _refCount(new(::std::nothrow) ::std::size_t(1)), _length(strlen(string)), _hash(findHashCode(string))
+        : _string(nullptr), _refCount(new(::std::nothrow) uSys(1)), _length(strlen(string)), _hash(findHashCode(string))
     {
         char* str = new(::std::nothrow) char[_length + 1];
         memcpy(str, string, _length + 1);
@@ -473,7 +473,7 @@ public:
     }
 
     inline DynString(const char* string) noexcept
-        : _string(nullptr), _refCount(new(::std::nothrow) ::std::size_t(1)), _length(strlen(string)), _hash(findHashCode(string))
+        : _string(nullptr), _refCount(new(::std::nothrow) uSys(1)), _length(strlen(string)), _hash(findHashCode(string))
     {
         Ensure(string != nullptr);
         char* str = new(::std::nothrow) char[_length + 1];
@@ -541,7 +541,7 @@ public:
     }
 
     [[nodiscard]] inline NonNull const char* c_str() const noexcept { return _string; }
-    [[nodiscard]] inline ::std::size_t length() const noexcept { return _length; }
+    [[nodiscard]] inline uSys length() const noexcept { return _length; }
 
     inline operator const char*() const noexcept { return _string; }
     [[nodiscard]] inline u32 operator()() const noexcept { return _hash; }
@@ -614,7 +614,7 @@ public:
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
     [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
 
-#define CONCAT(__OTHER_LEN, __OTHER_STR) const ::std::size_t newLen = this->_length + (__OTHER_LEN); \
+#define CONCAT(__OTHER_LEN, __OTHER_STR) const uSys newLen = this->_length + (__OTHER_LEN); \
                                          char* newStr = new(::std::nothrow) char[newLen + 1]; \
                                          newStr[newLen] = '\0'; \
                                          memcpy(newStr, this->_string, this->_length); \
@@ -642,14 +642,14 @@ public:
 
     [[nodiscard]] inline DynString concat(const NotNull<const char>& other) const noexcept
     {
-        const ::std::size_t otherLen = strlen(other);
+        const uSys otherLen = strlen(other);
         CONCAT(otherLen, other);
         return DynString(newStr, newLen);
     }
 
     [[nodiscard]] inline DynString concat(const char* other) const noexcept
     {
-        const ::std::size_t otherLen = strlen(other);
+        const uSys otherLen = strlen(other);
         CONCAT(otherLen, other);
         return DynString(newStr, newLen);
     }
@@ -704,10 +704,10 @@ public:
     [[nodiscard]] inline DynString operator +(const char*          other) const noexcept { return concat(other); }
     [[nodiscard]] inline DynString operator +(const NotNull<const char>& other) const noexcept { return concat(other); }
 
-    [[nodiscard]] inline char operator [](::std::size_t index) const noexcept
+    [[nodiscard]] inline char operator [](uSys index) const noexcept
     { return _string[index]; }
 
-    [[nodiscard]] inline char at(::std::size_t index) const noexcept
+    [[nodiscard]] inline char at(uSys index) const noexcept
     {
         if(index >= _length) { return '\0'; }
         return _string[index];
@@ -723,15 +723,15 @@ class DynStringView final
 {
 private:
     const char*    _string;
-    ::std::size_t* _refCount;
-    ::std::size_t  _length;
-    ::std::size_t  _hash;
+    uSys* _refCount;
+    uSys  _length;
+    uSys  _hash;
 private:
-    inline DynStringView(const ::std::size_t begin, const ::std::size_t length, const DynString& str) noexcept
+    inline DynStringView(const uSys begin, const uSys length, const DynString& str) noexcept
         : _string(str._string + begin), _refCount(str._refCount), _length(length), _hash(findHashCode(_string, length))
     { ++(*_refCount); }
 public:
-    inline DynStringView(const DynString& str, const ::std::size_t begin, const ::std::size_t end) noexcept
+    inline DynStringView(const DynString& str, const uSys begin, const uSys end) noexcept
         : _string(str._string + begin), _refCount(str._refCount), _length(end - begin), _hash(findHashCode(_string, _length))
     { ++(*_refCount); }
 
@@ -794,11 +794,11 @@ public:
         return *this;
     }
 
-    [[nodiscard]] static inline DynStringView create(const DynString& str, const ::std::size_t begin, const ::std::size_t length) noexcept
+    [[nodiscard]] static inline DynStringView create(const DynString& str, const uSys begin, const uSys length) noexcept
     { return DynStringView(begin, length, str); }
 
     [[nodiscard]] inline const char* c_str() const noexcept { return _string; }
-    [[nodiscard]] inline ::std::size_t length() const noexcept { return _length; }
+    [[nodiscard]] inline uSys length() const noexcept { return _length; }
     [[nodiscard]] inline u32 hashCode() const noexcept { return _hash; }
 
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
@@ -931,8 +931,8 @@ class StringBuilder final
 {
 private:
     char*         _string;
-    ::std::size_t _length;
-    ::std::size_t _size;
+    uSys _length;
+    uSys _size;
 public:
     inline StringBuilder() noexcept
         : _string(new(::std::nothrow) char[64]), _length(0), _size(64)
@@ -997,8 +997,8 @@ public:
     }
 
     [[nodiscard]] const char* c_str() const noexcept { return _string; }
-    [[nodiscard]] ::std::size_t length() const noexcept { return _length; }
-    [[nodiscard]] ::std::size_t size() const noexcept { return _size; }
+    [[nodiscard]] uSys length() const noexcept { return _length; }
+    [[nodiscard]] uSys size() const noexcept { return _size; }
 
     [[nodiscard]] inline bool equals(const StringBuilder& other) const noexcept
     {
@@ -1075,7 +1075,7 @@ public:
         return *this;
     }
 
-    inline StringBuilder& reset(const ::std::size_t newSize) noexcept
+    inline StringBuilder& reset(const uSys newSize) noexcept
     {
         if(newSize == 0) { return *this; }
         delete[] _string;
@@ -1086,7 +1086,7 @@ public:
         return *this;
     }
 
-    inline StringBuilder& resetIf(const ::std::size_t maxSize, const ::std::size_t newSize) noexcept
+    inline StringBuilder& resetIf(const uSys maxSize, const uSys newSize) noexcept
     {
         if(newSize == 0) { return *this; }
         if(maxSize <= newSize) { return *this; }
@@ -1111,11 +1111,11 @@ public:
         return *this;
     }
 
-    inline StringBuilder& backspace(const ::std::size_t count) noexcept
+    inline StringBuilder& backspace(const uSys count) noexcept
     {
         if(_length > 0)
         {
-            const ::std::size_t newLen = _length - count;
+            const uSys newLen = _length - count;
             if(newLen > _length)
             { return *this; }
             _length = newLen;
@@ -1153,10 +1153,10 @@ public:
 
     [[nodiscard]] inline DynString toString() const noexcept { return DynString(_string); }
 
-    [[nodiscard]] inline char operator [](::std::size_t index) const noexcept
+    [[nodiscard]] inline char operator [](uSys index) const noexcept
     { return _string[index]; }
 
-    [[nodiscard]] inline char at(::std::size_t index) const noexcept
+    [[nodiscard]] inline char at(uSys index) const noexcept
     {
         if(index >= _length) { return '\0'; }
         return _string[index];
@@ -1164,10 +1164,10 @@ public:
 private:
     void append(const char* string, const std::size_t length) noexcept
     {
-        const ::std::size_t newLen = _length + length;
+        const uSys newLen = _length + length;
         if(newLen >= _size)
         {
-            const ::std::size_t newSize = newLen + (newLen >> 1);
+            const uSys newSize = newLen + (newLen >> 1);
             char* newStr = new(::std::nothrow) char[newSize];
             memcpy(newStr, _string, _length + 1);
             _string = newStr;
@@ -1184,28 +1184,28 @@ namespace std
 template<>
 struct hash<String>
 {
-    inline ::std::size_t operator()(const String& str) const noexcept
+    inline uSys operator()(const String& str) const noexcept
     { return str.hashCode(); }
 };
 
 template<>
 struct hash<StringView>
 {
-    inline ::std::size_t operator()(const StringView& str) const noexcept
+    inline uSys operator()(const StringView& str) const noexcept
     { return str.hashCode(); }
 };
 
 template<>
 struct hash<DynString>
 {
-    inline ::std::size_t operator()(const DynString& str) const noexcept
+    inline uSys operator()(const DynString& str) const noexcept
     { return str.hashCode(); }
 };
 
 template<>
 struct hash<DynStringView>
 {
-    inline ::std::size_t operator()(const DynStringView& str) const noexcept
+    inline uSys operator()(const DynStringView& str) const noexcept
     { return str.hashCode(); }
 };
 }

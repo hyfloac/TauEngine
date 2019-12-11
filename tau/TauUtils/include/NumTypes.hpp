@@ -8,17 +8,15 @@
 #include <cstddef>
 #pragma warning(pop)
 
-#include "CVersion.hpp"
+typedef ::std::int8_t   i8;
+typedef ::std::int16_t  i16;
+typedef ::std::int32_t  i32;
+typedef ::std::int64_t  i64;
 
-typedef int8_t   i8;
-typedef int16_t  i16;
-typedef int32_t  i32;
-typedef int64_t  i64;
-
-typedef uint8_t  u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
+typedef ::std::uint8_t  u8;
+typedef ::std::uint16_t u16;
+typedef ::std::uint32_t u32;
+typedef ::std::uint64_t u64;
 
 #if !defined(__cpp_char8_t)
 enum char8_t : unsigned char { };
@@ -29,9 +27,22 @@ typedef char16_t c16;
 typedef char32_t c32;
 typedef wchar_t  cUnicode;
 
-typedef float    single;
-typedef float    f32;
-typedef double   f64;
+typedef float  single;
+typedef float  f32;
+typedef double f64;
+
+#ifdef _MSVC_LANG
+  #ifdef _WIN64
+    typedef i64 iSys;
+    typedef u64 uSys;
+  #else
+    typedef i32 iSys;
+    typedef u32 uSys;
+  #endif
+#else
+  typedef i64 iSys;
+  typedef ::std::size_t uSys;
+#endif
 
 template<typename _T>
 struct IntMaxMin final
