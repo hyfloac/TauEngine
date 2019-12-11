@@ -21,8 +21,16 @@
     <ClCompile Include="src\VulkanApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VulkanExtensions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\VulkanApplication.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\VulkanExtensions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

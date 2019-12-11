@@ -21,9 +21,13 @@
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\VulkanApplication.cpp" />
+    <ClCompile Include="src\VulkanExtensions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\VulkanApplication.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\VulkanExtensions.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -112,7 +116,7 @@
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>false</OmitFramePointers>
       <ExceptionHandling>false</ExceptionHandling>
