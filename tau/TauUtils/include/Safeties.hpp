@@ -15,10 +15,12 @@
 
 #define RUNTIME_ERROR(__TEXT) do { fprintf(stderr, __TEXT "\nOccured at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; } while(0)
 
-#define ERROR_CODE(_ERR)         do { if(error) { *error = _ERR; } return;      } while(0)
-#define ERROR_CODE_V(_ERR, _VAL) do { if(error) { *error = _ERR; } return _VAL; } while(0)
-#define ERROR_CODE_COND(_COND, _ERR)         do { if((_COND)) { if(error) { *error = _ERR; } return; }      } while(0)
-#define ERROR_CODE_COND_V(_COND, _ERR, _VAL) do { if((_COND)) { if(error) { *error = _ERR; } return _VAL; } } while(0)
+#define ERROR_CODE(_ERR)         do { if(error) { *error = _ERR; } return;         } while(0)
+#define ERROR_CODE_V(_ERR, _VAL) do { if(error) { *error = _ERR; } return _VAL;    } while(0)
+#define ERROR_CODE_N(_ERR)       do { if(error) { *error = _ERR; } return nullptr; } while(0)
+#define ERROR_CODE_COND(_COND, _ERR)         do { if((_COND)) { if(error) { *error = _ERR; } return;         } } while(0)
+#define ERROR_CODE_COND_V(_COND, _ERR, _VAL) do { if((_COND)) { if(error) { *error = _ERR; } return _VAL;    } } while(0)
+#define ERROR_CODE_COND_N(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return nullptr; } } while(0)
 
 #ifdef _DEBUG
   #define Ensure(__STATE) Assert(__STATE)
