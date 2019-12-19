@@ -56,11 +56,11 @@
 
 // Dummy implementations of strerror_r and strerror_s called if corresponding
 // system functions are not available.
-inline fmt::internal::null<> strerror_r(int, char*, ...) {
-  return fmt::internal::null<>();
+inline fmt::internal::null_s<> strerror_r(int, char*, ...) {
+  return fmt::internal::null_s<>();
 }
-inline fmt::internal::null<> strerror_s(char*, std::size_t, ...) {
-  return fmt::internal::null<>();
+inline fmt::internal::null_s<> strerror_s(char*, std::size_t, ...) {
+  return fmt::internal::null_s<>();
 }
 
 FMT_BEGIN_NAMESPACE
@@ -119,7 +119,7 @@ FMT_FUNC int safe_strerror(int error_code, char*& buffer,
     }
 
     // Handle the case when strerror_r is not available.
-    int handle(internal::null<>) {
+    int handle(internal::null_s<>) {
       return fallback(strerror_s(buffer_, buffer_size_, error_code_));
     }
 

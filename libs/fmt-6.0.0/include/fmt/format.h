@@ -934,7 +934,11 @@ FMT_API void format_windows_error(fmt::internal::buffer<char>& out,
                                   fmt::string_view message) FMT_NOEXCEPT;
 #endif
 
-template <typename T = void> struct null {};
+// #ifdef null
+//   #undef null
+// #endif
+
+template <typename T = void> struct null_s {};
 
 // Workaround an array initialization issue in gcc 4.8.
 template <typename Char> struct fill_t {
