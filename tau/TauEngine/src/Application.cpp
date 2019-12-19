@@ -18,6 +18,8 @@ void Application::startGameLoop() noexcept
     u32 fps = 0;
     u32 ups = 0;
 
+    DeltaTime deltaTime;
+
     while(!tauShouldExit())
     {
         const u64 currentTime = microTime();
@@ -27,6 +29,7 @@ void Application::startGameLoop() noexcept
 
         while(lag >= Mu_PER_UPDATE)
         {
+            deltaTime.onUpdate();
             runMessageLoop();
 
             update(Mu_PER_UPDATE);
@@ -36,7 +39,8 @@ void Application::startGameLoop() noexcept
 
         if(elapsed != 0)
         {
-            render(static_cast<float>(elapsed));
+            deltaTime.setDeltaMicro(elapsed);
+            render(deltaTime);
             ++fps;
         }
 

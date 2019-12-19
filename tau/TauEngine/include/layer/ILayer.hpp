@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Objects.hpp>
+#include "Timings.hpp"
 
 #ifndef LAYER_GEN_NAMES
   #if defined(TAU_PRODUCTION)
@@ -43,7 +44,7 @@ public:
     virtual void onAttach() noexcept { }
     virtual void onDetach() noexcept { }
     virtual void onUpdate(float fixedDelta) noexcept { }
-    virtual void onRender(float delta) noexcept { }
+    virtual void onRender(const DeltaTime& delta) noexcept { }
     virtual void onEvent(Event& e) noexcept { }
 
 #if LAYER_GEN_NAMES

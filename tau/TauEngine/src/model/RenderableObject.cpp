@@ -4,10 +4,11 @@
 #include "system/RenderingContext.hpp"
 #include "model/IVertexArray.hpp"
 #include "Timings.hpp"
+#include "texture/FITextureLoader.hpp"
+#include "VFS.hpp"
 
-
-RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const DrawType drawType) noexcept
-    : _va(context.createVertexArray(3, drawType))
+RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const DrawType drawType) noexcept
+    : _va(context.createVertexArray(5, drawType))
 {
     PERF();
     const size_t cnt1 = mesh.vertices.size();
@@ -17,10 +18,14 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     DynArray<float> positionsLoaded(cnt3);
     DynArray<float> normalsLoaded(cnt3);
     DynArray<float> texturesLoaded(cnt2);
+    DynArray<float> tangentsLoaded(cnt3);
+    DynArray<float> bitangentsLoaded(cnt3);
 
     u32 posIndex = 0;
     u32 normIndex = 0;
     u32 texIndex = 0;
+    u32 tanIndex = 0;
+    u32 biTanIndex = 0;
 
     for(objl::Vertex vertex : mesh.vertices)
     {
@@ -32,39 +37,107 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
         normalsLoaded[normIndex++] = vertex.normal.y();
         normalsLoaded[normIndex++] = vertex.normal.z();
 
+        tangentsLoaded[tanIndex++] = vertex.tangent.x();
+        tangentsLoaded[tanIndex++] = vertex.tangent.y();
+        tangentsLoaded[tanIndex++] = vertex.tangent.z();
+
+        bitangentsLoaded[biTanIndex++] = vertex.bitangent.x();
+        bitangentsLoaded[biTanIndex++] = vertex.bitangent.y();
+        bitangentsLoaded[biTanIndex++] = vertex.bitangent.z();
+
         texturesLoaded[texIndex++] = vertex.textureCoordinate.x();
         texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
     }
 
-    Ref<IBuffer> positions = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
-    Ref<IBuffer> normals = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
-    Ref<IBuffer> textures = context.createBuffer( 1, IBuffer::Type::ArrayBuffer);
-    Ref<IIndexBuffer> indices = context.createIndexBuffer();
+    Ref<IBufferBuilder> pnBuilder = context.createBuffer(1);
+    // Ref<IBufferBuilder> normalsBuilder = context.createBuffer(1);
+    Ref<IBufferBuilder> texturesBuilder = context.createBuffer(1);
+    Ref<IIndexBufferBuilder> indicesBuilder = context.createIndexBuffer();
+
+    pnBuilder->type(EBuffer::Type::ArrayBuffer);
+    pnBuilder->usage(EBuffer::UsageType::StaticDraw);
+    pnBuilder->bufferSize(cnt3 * sizeof(float));
+    pnBuilder->descriptor().addDescriptor(ShaderDataType::Vector3Float);
+
+    texturesBuilder->type(EBuffer::Type::ArrayBuffer);
+    texturesBuilder->usage(EBuffer::UsageType::StaticDraw);
+    texturesBuilder->bufferSize(cnt2 * sizeof(float));
+    texturesBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+
+    indicesBuilder->usage(EBuffer::UsageType::StaticDraw);
+    indicesBuilder->bufferSize(mesh.indices.size() * sizeof(u32));
+
+    Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> bitangents = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
+    Ref<IIndexBuffer> indices = Ref<IIndexBuffer>(indicesBuilder->build(nullptr));
 
     positions->bind(context);
-    positions->fillBuffer(context, cnt3 * sizeof(float), positionsLoaded);
-    positions->descriptor().addDescriptor(ShaderDataType::Vector3Float);
+    positions->fillBuffer(context, positionsLoaded);
     positions->unbind(context);
 
     normals->bind(context);
-    normals->fillBuffer(context, cnt3 * sizeof(float), normalsLoaded);
-    normals->descriptor().addDescriptor(ShaderDataType::Vector3Float);
+    normals->fillBuffer(context, normalsLoaded);
     normals->unbind(context);
 
+    tangents->bind(context);
+    tangents->fillBuffer(context, tangentsLoaded);
+    tangents->unbind(context);
+
+    bitangents->bind(context);
+    bitangents->fillBuffer(context, bitangentsLoaded);
+    bitangents->unbind(context);
+
     textures->bind(context);
-    textures->fillBuffer(context, cnt2 * sizeof(float), texturesLoaded);
-    textures->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    textures->fillBuffer(context, texturesLoaded);
     textures->unbind(context);
 
     indices->bind(context);
-    indices->fillBuffer(context, mesh.indices.size() * sizeof(u32), mesh.indices.data());
+    indices->fillBuffer(context, mesh.indices.data());
     indices->unbind(context);
 
     _va->addVertexBuffer(context, positions);
     _va->addVertexBuffer(context, normals);
+    _va->addVertexBuffer(context, tangents);
+    _va->addVertexBuffer(context, bitangents);
     _va->addVertexBuffer(context, textures);
     _va->setIndexBuffer(context, indices);
     _va->drawCount() = mesh.indices.size();
+
+    if(!mesh.material.map_Kd.empty())
+    {
+        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Kd.c_str());
+        _material.diffuseTexture() = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+    }
+    if(!mesh.material.map_Ks.empty())
+    {
+        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ks.c_str());
+        _material.specularTexture() = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+    }
+    else
+    {
+        _material.specularTexture() = Ref<ITexture>(TextureLoader::generateBlackTexture(context));
+    }
+    if(!mesh.material.map_Ka.empty())
+    {
+        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ka.c_str());
+        _reflectiveTexture = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+    }
+    if(!mesh.material.map_bump.empty())
+    {
+        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
+        _normalTexture = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+    }
+    // const auto ka = mesh.material.Ka;
+    // const auto kd = mesh.material.Kd;
+    // const auto ks = mesh.material.Ks;
+    // _ambientColor = glm::vec3(ka.x(), ka.y(), ka.z());
+    // _diffuseColor = glm::vec3(kd.x(), kd.y(), kd.z());
+    // _specularColor = glm::vec3(ks.x(), ks.y(), ks.z());
+    _material.specularExponent() = mesh.material.Ns;
+    _illumination = mesh.material.illum;
 }
 
 void RenderableObject::preRender(IRenderingContext& context) const noexcept

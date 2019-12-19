@@ -60,9 +60,9 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override final;
+    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override final;
 
-    [[nodiscard]] Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept override;
+    [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override;
 
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
 protected:

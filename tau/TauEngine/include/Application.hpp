@@ -2,6 +2,7 @@
 
 #include <NumTypes.hpp>
 #include "DLL.hpp"
+#include "Timings.hpp"
 
 class Exception;
 
@@ -10,7 +11,7 @@ class TAU_DLL Application
 private:
     u32 _targetUPS;
 protected:
-    Application(const u32 targetUPS) noexcept;
+    Application(u32 targetUPS) noexcept;
 public:
     virtual ~Application() noexcept;
 
@@ -26,11 +27,11 @@ public:
 
     virtual void onException(Exception& ex) noexcept { }
 protected:
-    virtual void update(const float fixedDelta) noexcept = 0;
+    virtual void update(float fixedDelta) noexcept = 0;
 
-    virtual void render(const float delta) noexcept = 0;
+    virtual void render(const DeltaTime& delta) noexcept = 0;
 
-    virtual void renderFPS(const u32 ups, const u32 fps) noexcept = 0;
+    virtual void renderFPS(u32 ups, u32 fps) noexcept = 0;
 
     virtual void runMessageLoop() noexcept = 0;
 public:

@@ -67,7 +67,7 @@ class TAU_DLL GLFrameBufferDepthStencilAttachment final : public IFrameBufferAtt
     DELETE_COPY(GLFrameBufferDepthStencilAttachment);
 public:
     GLFrameBufferDepthStencilAttachment(u32 width, u32 height) noexcept;
-
+    
     [[nodiscard]] Type type() const noexcept override final { return Type::DepthStencil; }
 
     void attach() noexcept override;

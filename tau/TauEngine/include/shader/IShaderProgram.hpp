@@ -6,6 +6,7 @@
 #include <glm/matrix.hpp>
 #include <Safeties.hpp>
 #include <type_traits>
+#include <String.hpp>
 
 class IShader;
 class IRenderingContext;
@@ -90,15 +91,31 @@ public:
     Ref<IUniform<_T>> getUniform(const char* name) noexcept;
 
     template<typename _T>
+    Ref<IUniform<_T>> getUniform(const DynString& name) noexcept
+    { return getUniform<_T>(name.c_str()); }
+
+    template<typename _T>
     Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniform(const char* name, bool transpose) noexcept;
 
     template<typename _T>
+    Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniform(const DynString& name, bool transpose) noexcept
+    { return getUniform<_T>(name.c_str(), transpose); }
+
+    template<typename _T>
     Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniformVector(const char* name) noexcept
-    { return getUniform<const _T&>(name); }
+    { return getUniformVector<const _T&>(name); }
+
+    template<typename _T>
+    Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniformVector(const DynString& name) noexcept
+    { return getUniformVector<_T>(name.c_str()); }
 
     template<typename _T>
     Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniformMatrix(const char* name, bool transpose) noexcept
     { return getUniform<const _T&>(name, transpose); }
+
+    template<typename _T>
+    Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniformMatrix(const DynString& name, bool transpose) noexcept
+    { return getUniformMatrix<_T>(name.c_str(), transpose); }
 protected:
     virtual void attach(IRenderingContext& context, Ref<IShader> shader) noexcept = 0;
     virtual void detach(IRenderingContext& context, Ref<IShader> shader) noexcept = 0;

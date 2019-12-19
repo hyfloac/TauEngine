@@ -33,6 +33,9 @@
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\gl\GLTextureCube.cpp" />
+    <ClCompile Include="src\model\Material.cpp" />
+    <ClCompile Include="src\shader\PointLight.cpp" />
+    <ClCompile Include="src\shader\SpotLight.cpp" />
     <ClCompile Include="src\texture\FITextureLoader.cpp" />
     <ClCompile Include="src\GameRecorder.cpp" />
     <ClCompile Include="src\gl\GLBufferDescriptor.cpp" />
@@ -54,8 +57,8 @@
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\IShader.cpp" />
-    <ClCompile Include="src\IShaderProgram.cpp" />
+    <ClCompile Include="src\shader\IShader.cpp" />
+    <ClCompile Include="src\shader\IShaderProgram.cpp" />
     <ClCompile Include="src\LayerStack.cpp" />
     <ClCompile Include="src\maths\Maths.cpp" />
     <ClCompile Include="src\maths\Matrix4x4f.cpp" />
@@ -124,7 +127,6 @@
     <ClInclude Include="include\layer\ILayer.hpp" />
     <ClInclude Include="include\layer\ImGuiLayer.hpp" />
     <ClInclude Include="include\layer\LayerStack.hpp" />
-    <ClInclude Include="include\Material.hpp" />
     <ClInclude Include="include\maths\GlmMatrixTransformExt.hpp" />
     <ClInclude Include="include\maths\Maths.hpp" />
     <ClInclude Include="include\maths\ComponentVector4.hpp" />
@@ -135,6 +137,7 @@
     <ClInclude Include="include\maths\Vector3i.hpp" />
     <ClInclude Include="include\maths\Vector4f.hpp" />
     <ClInclude Include="include\model\BufferDescriptor.hpp" />
+    <ClInclude Include="include\model\BufferEnums.hpp" />
     <ClInclude Include="include\model\ModelLoader.hpp" />
     <ClInclude Include="include\model\IBuffer.hpp" />
     <ClInclude Include="include\model\OBJLoader.hpp" />
@@ -148,6 +151,8 @@
     <ClInclude Include="include\ResourceLoader.hpp" />
     <ClInclude Include="include\shader\IShaderProgram.hpp" />
     <ClInclude Include="include\shader\IUniform.hpp" />
+    <ClInclude Include="include\shader\PointLight.hpp" />
+    <ClInclude Include="include\shader\SpotLight.hpp" />
     <ClInclude Include="include\system\Keyboard.hpp" />
     <ClInclude Include="include\system\Mouse.hpp" />
     <ClInclude Include="include\gl\GLShader.hpp" />
@@ -170,8 +175,10 @@
     <ClInclude Include="include\system\_SysWindowContainer.hpp" />
     <ClInclude Include="include\ui\UIButton.hpp" />
     <ClInclude Include="include\ui\UIElement.hpp" />
-    <ClInclude Include="include\ui\UILayer.hpp" />
+    <ClInclude Include="include\ui\UIPanel.hpp" />
+    <ClInclude Include="include\ui\UIText.hpp" />
     <ClInclude Include="include\WorldObject.hpp" />
+    <ClInclude Include="include\model\Material.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Vector.natvis" />

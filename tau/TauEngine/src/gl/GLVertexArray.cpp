@@ -33,7 +33,7 @@ void GLVertexArray::internalSetup(IRenderingContext& context) noexcept
     for(std::size_t i = 0; i < _buffers.size(); ++i)
     {
         auto& buffer = _buffers[i];
-        BufferDescriptor& descriptor = buffer->descriptor();
+        const BufferDescriptor& descriptor = buffer->descriptor();
 
         buffer->bind(context);
 

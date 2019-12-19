@@ -120,15 +120,12 @@ void GLFrameBufferDepthStencilAttachment::attach() noexcept
 
 IFrameBuffer* GLFrameBufferBuilder::build(Error* error) const noexcept
 {
-    GLuint buffer;
-    glGenFramebuffers(1, &buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+    ERROR_CODE_COND_N(!_attachment, NoAttachment);
+    ERROR_CODE_COND_N(_attachment->type() != IFrameBufferAttachment::Color, NoColorAttachment);
 
-    if(!_attachment)
-    { return nullptr; }
-
-    if(_attachment->type() != IFrameBufferAttachment::Color)
-    { return nullptr; }
+    GLuint bufferHandle;
+    glGenFramebuffers(1, &bufferHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
 
     for(IFrameBufferAttachment* curr = _attachment; curr; curr = curr->next())
     {
@@ -143,5 +140,13 @@ IFrameBuffer* GLFrameBufferBuilder::build(Error* error) const noexcept
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    return new(std::nothrow) GLFrameBuffer(buffer, _attachment);
+    GLFrameBuffer* frameBuffer = new(std::nothrow) GLFrameBuffer(bufferHandle, _attachment);
+
+    if(!frameBuffer)
+    {
+        glDeleteFramebuffers(1, &bufferHandle);
+        ERROR_CODE_N(MemoryAllocationFailure);
+    }
+
+    ERROR_CODE_V(NoError, frameBuffer);
 }

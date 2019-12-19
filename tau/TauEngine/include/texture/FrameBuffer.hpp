@@ -94,15 +94,18 @@ class TAU_DLL IFrameBufferBuilder
 public:
     enum Error : u8
     {
+        NoError = 0,
+        NoAttachment,
         NoColorAttachment,
         DepthAlreadyExists,
         StencilAlreadyExists,
         DS_DepthAlreadyExists,
         DS_StencilAlreadyExists,
-        DSAlreadyExists
+        DSAlreadyExists,
+        MemoryAllocationFailure
     };
 public:
-    static IFrameBufferBuilder* create(IRenderingContext& context) noexcept;
+    // static IFrameBufferBuilder* create(IRenderingContext& context) noexcept;
 protected:
     IFrameBufferAttachment* _attachment;
     u32 _colorCount;

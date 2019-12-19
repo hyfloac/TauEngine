@@ -16,7 +16,6 @@
 #include "maths/Vector3f.hpp"
 #include "shader/IUniform.hpp"
 #include "ResourceLoader.hpp"
-#include "system/Mutex.hpp"
 
 struct LoadData;
 class Window;

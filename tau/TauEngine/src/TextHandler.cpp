@@ -7,7 +7,6 @@
 
 #include "TextHandler.hpp"
 #include "texture/Texture.hpp"
-#include "RenderingMode.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "model/IVertexArray.hpp"
 #include "shader/IShaderProgram.hpp"
@@ -20,7 +19,7 @@
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
       _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
-      _positionBuffer(context.createBuffer(1, IBuffer::Type::ArrayBuffer, IBuffer::UsageType::DynamicDraw)),
+      _positionBuffer(null),
       _projUni(null), _texUni(null), _colorUni(null)
 {
     PERF();
@@ -38,11 +37,16 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     _texUni = _shader->getUniform<int>("textBMP");
     _colorUni = _shader->getUniformVector<Vector3f>("textColor");
 
-    Ref<IBuffer> textureCoordBuffer = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
+    Ref<IBufferBuilder> bufferBuilder = context.createBuffer(1);
+    bufferBuilder->type(EBuffer::Type::ArrayBuffer);
+    bufferBuilder->usage(EBuffer::UsageType::DynamicDraw);
+    bufferBuilder->bufferSize(sizeof(float) * 2 * 6);
+    bufferBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+
+    _positionBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
 
     _positionBuffer->bind(context);
-    _positionBuffer->fillBuffer(context, sizeof(float) * 2 * 6, null);
-    _positionBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    _positionBuffer->fillBuffer(context, null);
     _positionBuffer->unbind(context);
 
     float textureCoords[6][2] = {
@@ -55,9 +59,12 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
         { 1.0f, 0.0f }
     };
 
+    bufferBuilder->usage(EBuffer::UsageType::StaticDraw);
+
+    Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
+
     textureCoordBuffer->bind(context);
-    textureCoordBuffer->fillBuffer(context, sizeof(float) * 2 * 6, textureCoords);
-    textureCoordBuffer->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    textureCoordBuffer->fillBuffer(context, textureCoords);
     textureCoordBuffer->unbind(context);
 
     _va->addVertexBuffer(context, _positionBuffer);

@@ -248,6 +248,7 @@ namespace objl
         delete[] cTail;
 
         bool noNormal = false;
+        bool noTexture = false;
 
         enum VerticeTypes : u8
         {
@@ -287,6 +288,7 @@ namespace objl
                     vertex.position = algorithm::getElement(positions, vertexSplit[0]);
                     vertex.textureCoordinate = Vector2();
                     noNormal = true;
+                    noTexture = true;
                     vertices.push_back(vertex);
                     break;
                 case PosTex: // P/T
@@ -299,6 +301,7 @@ namespace objl
                     vertex.position = algorithm::getElement(positions, vertexSplit[0]);
                     vertex.textureCoordinate = Vector2();
                     vertex.normal = algorithm::getElement(normals, vertexSplit[2]);
+                    noTexture = true;
                     vertices.push_back(vertex);
                     break;
                 case PosTexNorm: // P/T/N
@@ -325,6 +328,35 @@ namespace objl
             {
                 vertice.normal = normal;
             }
+        }
+
+        if(!noTexture)
+        {
+            Vector3 v0 = vertices[0].position;
+            Vector3 v1 = vertices[1].position;
+            Vector3 v2 = vertices[2].position;
+
+            Vector2 t0 = vertices[0].textureCoordinate;
+            Vector2 t1 = vertices[1].textureCoordinate;
+            Vector2 t2 = vertices[2].textureCoordinate;
+
+            Vector3 dPos1 = v1 - v0;
+            Vector3 dPos2 = v2 - v0;
+
+            Vector2 dTex1 = t1 - t0;
+            Vector2 dTex2 = t2 - t0;
+
+            const float r = 1.0f / (dTex1.x() * dTex2.y() - dTex1.y() * dTex2.x());
+            Vector3 tangent = (dPos1 * dTex2.y() - dPos2 * dTex1.y()) * r;
+            Vector3 bitangent = (dPos2 * dTex1.x() - dPos1 * dTex2.x()) * r;
+
+            vertices[0].tangent = tangent;
+            vertices[1].tangent = tangent;
+            vertices[2].tangent = tangent;
+
+            vertices[0].bitangent = bitangent;
+            vertices[1].bitangent = bitangent;
+            vertices[2].bitangent = bitangent;
         }
     }
 

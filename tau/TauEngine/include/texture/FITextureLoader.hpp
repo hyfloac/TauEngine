@@ -44,6 +44,10 @@ public:
 
     static ITexture* generateMissingTexture(IRenderingContext& context) noexcept;
 
+    static ITexture* generateWhiteTexture(IRenderingContext& context) noexcept;
+
+    static ITexture* generateBlackTexture(IRenderingContext& context) noexcept;
+
     static ITexture* loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const GPUTextureSettings& settings, TextureLoadError* RESTRICT error = null) noexcept;
 
     static ITexture* loadTexture(IRenderingContext& context, const char* RESTRICT fileName, ETexture::Filter smooth = ETexture::Filter::Linear, i32 mipmapLevel = -1, TextureLoadError* RESTRICT error = null) noexcept

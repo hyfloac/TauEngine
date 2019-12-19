@@ -56,6 +56,46 @@ ITexture* TextureLoader::generateMissingTexture(IRenderingContext& context) noex
     return ret;
 }
 
+ITexture* TextureLoader::generateWhiteTexture(IRenderingContext& context) noexcept
+{
+    u8* const textureData = new u8[1 * 1 * 3];
+
+    textureData[0] = 0xFF;
+    textureData[1] = 0xFF;
+    textureData[2] = 0xFF;
+
+    ITexture* const ret = ITexture::create(context, 1, 1, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
+
+    ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    ret->set(textureData);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
+
+    delete[] textureData;
+
+    return ret;
+}
+
+ITexture* TextureLoader::generateBlackTexture(IRenderingContext& context) noexcept
+{
+    u8* const textureData = new u8[1 * 1 * 3];
+
+    textureData[0] = 0x00;
+    textureData[1] = 0x00;
+    textureData[2] = 0x00;
+
+    ITexture* const ret = ITexture::create(context, 1, 1, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
+
+    ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    ret->set(textureData);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
+
+    delete[] textureData;
+
+    return ret;
+}
+
 ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const GPUTextureSettings& settings, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();

@@ -37,8 +37,6 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     };
     _skybox = Ref<ITextureCube>(TextureLoader::loadTextureCubeEx(context, skyboxPath, fileExtension, settings));
 
-    Ref<IBuffer> skyboxCube = context.createBuffer(1, IBuffer::Type::ArrayBuffer);
-
     float skyboxVertices[] = {
         // back
         -1.0f,  1.0f, -1.0f,
@@ -89,9 +87,17 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
          1.0f, -1.0f,  1.0f
     };
 
+    Ref<IBufferBuilder> skyboxCubeBuilder = context.createBuffer(1);
+
+    skyboxCubeBuilder->type(EBuffer::Type::ArrayBuffer);
+    skyboxCubeBuilder->usage(EBuffer::UsageType::StaticDraw);
+    skyboxCubeBuilder->bufferSize(sizeof(skyboxVertices));
+    skyboxCubeBuilder->descriptor().addDescriptor(ShaderDataType::Type::Vector3Float);
+
+    Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
+
     skyboxCube->bind(context);
-    skyboxCube->fillBuffer(context, sizeof(skyboxVertices), skyboxVertices);
-    skyboxCube->descriptor().addDescriptor(ShaderDataType::Type::Vector3Float);
+    skyboxCube->fillBuffer(context, skyboxVertices);
     skyboxCube->unbind(context);
 
     _cubeVA->addVertexBuffer(context, skyboxCube);

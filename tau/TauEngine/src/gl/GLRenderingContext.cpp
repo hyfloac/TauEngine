@@ -89,16 +89,14 @@ void GLRenderingContext::enableDepthWriting(bool writing) noexcept
     glDepthMask(writing ? GL_TRUE : GL_FALSE);
 }
 
-Ref<IBuffer> GLRenderingContext::createBuffer(const std::size_t descriptorCount, const IBuffer::Type type, const IBuffer::UsageType usage) noexcept
+Ref<IBufferBuilder> GLRenderingContext::createBuffer(const std::size_t descriptorCount) noexcept
 {
-    const GLuint buffer = GLBuffer::createBuffer();
-    return Ref<GLBuffer>(new(std::nothrow) GLBuffer(type, usage, descriptorCount, buffer));
+    return Ref<GLBufferBuilder>(new(std::nothrow) GLBufferBuilder(descriptorCount));
 }
 
-Ref<IIndexBuffer> GLRenderingContext::createIndexBuffer(const IBuffer::UsageType usage) noexcept
+Ref<IIndexBufferBuilder> GLRenderingContext::createIndexBuffer() noexcept
 {
-    const GLuint buffer = GLBuffer::createBuffer();
-    return Ref<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(usage, buffer));
+    return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBufferBuilder());
 }
 
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept

@@ -43,31 +43,8 @@ protected:
 protected:
     [[nodiscard]] virtual bool isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept override;
 public:
-    UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent = nullptr, bool visible = true) noexcept
-        : UIButton(clickHandler, x, y, parent, visible), _width(width), _height(height), _color(color),
-          _vbo(context.createBuffer(1, IBuffer::Type::ArrayBuffer)), _vao(context.createVertexArray(1, DrawType::SeparatedTriangles))
-    {
-        const float xx = static_cast<float>(x);
-        const float yy = static_cast<float>(y);
-        const float ww = static_cast<float>(width);
-        const float hh = static_cast<float>(height);
-
-        float model[] = {
-            xx,      yy + hh,
-            xx,      yy,
-            xx + ww, yy,
-
-            xx,      yy + hh,
-            xx + ww, yy,
-            xx + ww, yy + hh
-        };
-
-        _vbo->fillBuffer(context, 12 * sizeof(float), model);
-        _vbo->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-        _vao->addVertexBuffer(context, _vbo);
-        _vao->drawCount() = 6;
-        // _vao->addAttribute(_vbo, 2, DataType::Float, false, 0, nullptr);
-    }
+    UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height,
+                 Vector3f color, UIElement* parent = nullptr, bool visible = true) noexcept;
 
     [[nodiscard]] u32 width() const noexcept { return _width; }
     [[nodiscard]] u32& width() noexcept { return _width; }

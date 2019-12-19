@@ -121,7 +121,7 @@ class TAU_DLL BufferDescriptor final
 {
 private:
     u32 _currentIndex;
-    DynArray<BufferElementDescriptor> _elementDescriptors;
+    RefDynArray<BufferElementDescriptor> _elementDescriptors;
     u32 _stride;
     u32 _offsetCache;
 public:
@@ -129,7 +129,7 @@ public:
         : _currentIndex(0), _elementDescriptors(descriptorCount), _stride(0), _offsetCache(0)
     { }
 
-    [[nodiscard]] const DynArray<BufferElementDescriptor>& elements() const noexcept { return _elementDescriptors; }
+    [[nodiscard]] const RefDynArray<BufferElementDescriptor>& elements() const noexcept { return _elementDescriptors; }
     [[nodiscard]] u32 stride() const noexcept { return _stride; }
 
     void addDescriptor(BufferElementDescriptor bed) noexcept;

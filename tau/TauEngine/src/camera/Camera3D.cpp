@@ -20,8 +20,8 @@ void Camera3D::setProjection(const Window& window, float fov, float zNear, float
 void Camera3D::recomputeMatrices() noexcept
 {
     static const glm::mat4 identity(1.0f);
-    static const glm::vec3 xAxis(-1.0f, 0.0f, 0.0f);
-    static const glm::vec3 yAxis(0.0f, -1.0f, 0.0f);
+    // static const glm::vec3 xAxis(-1.0f, 0.0f, 0.0f);
+    // static const glm::vec3 yAxis(0.0f, -1.0f, 0.0f);
 
     const glm::mat4 rotMat = glm::toMat4(_viewQuaternion);
 
@@ -46,6 +46,14 @@ void Camera3D::computeQuat() noexcept
     const glm::quat q0 = glm::rotate(identity, DEG_2_RAD_F(_yaw), yAxis);
     const glm::quat q1 = glm::rotate(q0, DEG_2_RAD_F(pitch), xAxis);
     _viewQuaternion = q1;
+
+    const SinCos<float> pitchSC = fastSinCosD(-_pitch);
+    const SinCos<float> yawSC = fastSinCosD(-_yaw);
+
+    _front.x() = yawSC.sin * pitchSC.cos;
+    _front.y() = pitchSC.sin;
+    _front.z() = yawSC.cos * pitchSC.cos;
+    _front.normalize();
 }
 
 static float largeLerp(const float v0, const float v1, const float t, const float max_t) noexcept
@@ -160,9 +168,9 @@ void FreeCamCamera3DController::update(const float fixedDelta, const i32 dMouseX
     update(fixedDelta, _velocity, dMouseX, dMouseY);
 }
 
-void FreeCamCamera3DController::lerp(float delta) noexcept
+void FreeCamCamera3DController::lerp(const DeltaTime& delta) noexcept
 {
-    _lerp = minT(_lerp + delta, _maxLerp);
+    _lerp = minT(_lerp + delta.microseconds(), _maxLerp);
 
     {
         _camera._pitch = largeLerp(_lastPitch, _nextPitch, _lerp, _maxLerp);

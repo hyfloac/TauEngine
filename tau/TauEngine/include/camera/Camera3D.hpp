@@ -5,6 +5,7 @@
 
 #include "maths/Vector3f.hpp"
 #include "system/Keyboard.hpp"
+#include "Timings.hpp"
 
 #include <Objects.hpp>
 #include <GameRecorder.hpp>
@@ -17,6 +18,7 @@ class Camera3D final
     DEFAULT_COPY(Camera3D);
 private:
     Vector3f _position;
+    Vector3f _front;
     float _pitch; // Degrees
     float _yaw; // Degrees
     glm::quat _viewQuaternion;
@@ -28,6 +30,7 @@ public:
     Camera3D(const Window& window, float fov, float zNear, float zFar) noexcept;
 
     [[nodiscard]] Vector3f position() const noexcept { return _position; }
+    [[nodiscard]] Vector3f front() const noexcept { return _front; }
     [[nodiscard]] float pitch() const noexcept { return _pitch; }
     [[nodiscard]] float yaw() const noexcept { return _yaw; }
     [[nodiscard]] glm::quat viewQuaterion() const noexcept { return _viewQuaternion; }
@@ -51,7 +54,8 @@ public:
         else if(pitch < -89.0f) { pitch = -89.0f; }
         _pitch = pitch;
         // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
-        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        computeQuat();
         recomputeMatrices();
     }
 
@@ -65,7 +69,8 @@ public:
         }
         _yaw = yaw;
         // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
-        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        computeQuat();
         recomputeMatrices();
     }
 
@@ -83,7 +88,8 @@ public:
         _pitch = pitch;
         _yaw = yaw;
         // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
-        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        computeQuat();
         recomputeMatrices();
     }
 
@@ -102,7 +108,8 @@ public:
         }
         _pitch = pitch;
         _yaw = yaw;
-        _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        computeQuat();
         recomputeMatrices();
     }
 private:
@@ -243,7 +250,7 @@ private:
     void update(float fixedDelta, Vector3f velocity, i32 dMouseX, i32 dMouseY) noexcept;
 public:
     void update(float fixedDelta, i32 dMouseX, i32 dMouseY) noexcept;
-    void lerp(float delta) noexcept;
+    void lerp(const DeltaTime& delta) noexcept;
 
     [[nodiscard]] const Camera3D& camera() const noexcept { return _camera; }
     [[nodiscard]] Camera3D& camera() noexcept { return _camera; }

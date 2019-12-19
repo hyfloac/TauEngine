@@ -85,9 +85,9 @@ public:
 
     virtual void swapFrame() noexcept = 0;
 
-    [[nodiscard]] virtual Ref<IBuffer> createBuffer(std::size_t descriptorCount, IBuffer::Type type, IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
+    [[nodiscard]] virtual Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept = 0;
 
-    [[nodiscard]] virtual Ref<IIndexBuffer> createIndexBuffer(IBuffer::UsageType usage = IBuffer::UsageType::StaticDraw) noexcept = 0;
+    [[nodiscard]] virtual Ref<IIndexBufferBuilder> createIndexBuffer() noexcept = 0;
 
     [[nodiscard]] virtual Ref<IFrameBufferBuilder> createFrameBuffer() noexcept = 0;
 
