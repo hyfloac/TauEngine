@@ -100,7 +100,7 @@ void TauEditorApplication::onException(Exception& ex) noexcept
     dispatcher.dispatch<IncorrectContextException>(this, &TauEditorApplication::onIncorrectContext);
 }
 
-void TauEditorApplication::render(const float delta) noexcept
+void TauEditorApplication::render(const DeltaTime& delta) noexcept
 {
     PERF();
     _renderer->render(delta);
@@ -221,6 +221,7 @@ bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
     TAU_RENDER_S(_renderer->renderingPipeline(), {
         context.updateViewport(0, 0, window.width(), window.height());
         self->_renderer->camera()->setProjection(window.height(), window.width(), 0.0f, 0.0f);
+        self->_renderer->camera3D().setProjection(window, 90, 0.0001f, 1000.0f);
         Mouse::mousePos(window.width() >> 1, window.height() >> 1);
     });
     // _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window& window, void*)

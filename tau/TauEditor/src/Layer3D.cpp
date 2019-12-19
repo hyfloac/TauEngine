@@ -13,7 +13,7 @@ static Vector3f fromPolar(Vector3f polar) noexcept;
 Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept
     : ILayer(true),
       _window(window), _rp(rp), _state(state),
-      _camera(window, 90, 0.0001f, 1000.0f, 10.0f, 20.0f, 0.03f, false,
+      _camera(window, 90, 0.0001f, 1000.0f, 10.0f, 40.0f, 0.03f, false,
               Keyboard::Key::Shift, Keyboard::Key::W, Keyboard::Key::S,
               Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Space, Keyboard::Key::Ctrl,
               recorder),
@@ -37,7 +37,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     {
         for(const objl::Mesh& mesh : loader.meshes())
         {
-            _objects.emplace_back(std::make_shared<RenderableObject>(*window.renderingContext(), mesh));
+            _objects.emplace_back(std::make_shared<RenderableObject>(*window.renderingContext(), mesh, "|TERes/nanosuit/"));
         }
     }
 
@@ -45,11 +45,12 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
     if(loaded)
     {
-        _cube = std::make_shared<RenderableObject>(*window.renderingContext(), loader.meshes()[0], DrawType::SeparatedTriangles);
+        _cube = std::make_shared<RenderableObject>(*window.renderingContext(), loader.meshes()[0], "|TERes/", DrawType::SeparatedTriangles);
     }
 
     Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/shader/SimpleVertexShader.glsl");
-    Ref<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/shader/SimplePixelShader.glsl");
+    // Ref<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/shader/SimplePixelShader.glsl");
+    Ref<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/nanosuit/NanosuitPixel.glsl");
     Ref<IShader> outlineVertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/shader/OutlineVertexShader.glsl");
     Ref<IShader> outlinePixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/shader/OutlinePixelShader.glsl");
     Ref<IShader> refVertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/shader/CubeMap/RefVertexShader.glsl");
@@ -93,8 +94,10 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _projMatrixUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
     _viewMatrixUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
     _modelViewMatrixUni = _shader->getUniform<glm::mat4>("modelViewMatrix", false);
-    _textureUni = _shader->getUniform<int>("textureSampler");
-    _overlayUni = _shader->getUniform<int>("textureOverlay");
+    _materialUniforms = Ref<MaterialUniforms>(new(std::nothrow) MaterialUniforms(_shader, "material."));
+    _pointLightUniforms = Ref<PointLightUniforms>(new(std::nothrow) PointLightUniforms(_shader, "pointLight."));
+    _spotLightUniforms = Ref<SpotLightUniforms>(new(std::nothrow) SpotLightUniforms(_shader, "spotLight."));
+    _cameraPosUni = _shader->getUniformVector<Vector3f>("viewPos");
 
     _o_projMatrixUni = _o_shader->getUniform<glm::mat4>("projectionMatrix", false);
     _o_viewMatrixUni = _o_shader->getUniform<glm::mat4>("cameraViewMatrix", false);
@@ -115,23 +118,17 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
     _frameBufferUni = _frameBufferShader->getUniform<int>("frameBufferSampler");
 
-    IFrameBufferBuilder* builder = IFrameBufferBuilder::create(*window.renderingContext());
+    Ref<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
 
     IFrameBufferAttachment* colorBuffer   = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Color, window.width(), window.height());
-    // IFrameBufferAttachment* depthBuffer   = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Depth, window.width(), window.height());
-    // IFrameBufferAttachment* stencilBuffer = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Stencil, window.width(), window.height());
     IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::DepthStencil, window.width(), window.height());
 
     builder->attach(colorBuffer, nullptr);
-    // builder->attach(depthBuffer, nullptr);
-    // builder->attach(stencilBuffer, nullptr);
     builder->attach(depthStencilBuffer, nullptr);
 
     _frameBuffer = Ref<IFrameBuffer>(builder->build(nullptr));
 
-    delete builder;
-
-    Ref<IBuffer> positions = window.renderingContext()->createBuffer(2, IBuffer::Type::ArrayBuffer);
+    // delete builder;
 
     float quadVertices[] = {
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -143,10 +140,17 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
          1.0f,  1.0f,  1.0f, 1.0f
     };
 
+    Ref<IBufferBuilder> positionsBuilder = window.renderingContext()->createBuffer(2);
+    positionsBuilder->type(EBuffer::Type::ArrayBuffer);
+    positionsBuilder->usage(EBuffer::UsageType::StaticDraw);
+    positionsBuilder->bufferSize(sizeof(quadVertices));
+    positionsBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    positionsBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+
+    Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
+
     positions->bind(*window.renderingContext());
-    positions->fillBuffer(*window.renderingContext(), 4 * 6 * sizeof(float), quadVertices);
-    positions->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    positions->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    positions->fillBuffer(*window.renderingContext(), quadVertices);
     positions->unbind(*window.renderingContext());
 
     _frameBufferVA->addVertexBuffer(*window.renderingContext(), positions);
@@ -155,6 +159,25 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     _cubeViewMatrix = glmExt::translate(glmExt::translate(glm::mat4(1.0f), _camera->position()), fromPolar(_cubePolarPos));
+
+    _pointLight.position() = Vector3f(0.0f, -3.0f, -3.0f);
+    _pointLight.ambient({ 255, 255, 255 });
+    _pointLight.diffuse({ 255, 255, 255 });
+    _pointLight.specular({ 255, 255, 255 });
+    _pointLight.constant() = 1.0f;
+    _pointLight.linear() = 0.09f;
+    _pointLight.quadratic() = 0.032f;
+
+    _spotLight.position() = Vector3f(0.0f);
+    _spotLight.direction() = Vector3f(0.0f);
+    _spotLight.ambient({ 255, 255, 255 });
+    _spotLight.diffuse({ 255, 255, 255 });
+    _spotLight.specular({ 255, 255, 255 });
+    _spotLight.constant() = 1.0f;
+    _spotLight.linear() = 0.09f;
+    _spotLight.quadratic() = 0.032f;
+    _spotLight.cutOff() = fastCosD(30.0f);
+    _spotLight.outerCutOff() = fastCosD(35.0f);
 }
 
 void Layer3D::onUpdate(float fixedDelta) noexcept
@@ -190,7 +213,7 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
     }
 }
 
-void Layer3D::onRender(float delta) noexcept
+void Layer3D::onRender(const DeltaTime& delta) noexcept
 {
     PERF();
 
@@ -210,103 +233,106 @@ void Layer3D::onRender(float delta) noexcept
             _camera.lerp(delta);
         }
     }
-
+    
     TAU_RENDER_S(_rp, {
         self->_frameBuffer->bind(context);
         context.clearScreen(true, true, true, { 127, 127, 255, 255 });
     
-        // self->_shader->bind(context);
+        self->_shader->bind(context);
         // self->_refractionShader->bind(context);
-        self->_reflectionShader->bind(context);
-
-        // self->_compoundMatrixUni->set(self->_camera->compoundedMatrix());
-        // self->_projMatrixUni->set(self->_camera->projectionMatrix());
-        // self->_viewMatrixUni->set(self->_camera->viewMatrix());
-        // self->_modelViewMatrixUni->set(self->_modelViewMatrix);
-        // self->_textureUni->set(0);
+        // self->_reflectionShader->bind(context);
+        
+        self->_spotLight.position() = self->_camera.camera().position();
+        self->_spotLight.direction() = self->_camera.camera().front();
+    
+        self->_compoundMatrixUni->set(self->_camera->compoundedMatrix());
+        self->_projMatrixUni->set(self->_camera->projectionMatrix());
+        self->_viewMatrixUni->set(self->_camera->viewMatrix());
+        self->_modelViewMatrixUni->set(self->_modelViewMatrix);
+        self->_cameraPosUni->set(self->_camera.camera().position());
+        self->_pointLight.set(*self->_pointLightUniforms.get());
+        self->_spotLight.set(*self->_spotLightUniforms.get());
         // self->_overlayUni->set(1);
-        self->_reflectionProjMatrixUni->set(self->_camera->projectionMatrix());
-        self->_reflectionViewMatrixUni->set(self->_camera->viewMatrix());
-        self->_reflectionModelViewMatrixUni->set(self->_modelViewMatrix);
+        // self->_reflectionProjMatrixUni->set(self->_camera->projectionMatrix());
+        // self->_reflectionViewMatrixUni->set(self->_camera->viewMatrix());
+        // self->_reflectionModelViewMatrixUni->set(self->_modelViewMatrix);
         // self->_refractionProjMatrixUni->set(self->_camera->projectionMatrix());
         // self->_refractionViewMatrixUni->set(self->_camera->viewMatrix());
         // self->_refractionModelViewMatrixUni->set(self->_modelViewMatrix);
-        self->_reflectionCameraPosUni->set(self->_camera->position());
+        // self->_reflectionCameraPosUni->set(self->_camera->position());
         // self->_refractionCameraPosUni->set(self->_camera->position());
-        self->_reflectionTexture->set(0);
+        // self->_reflectionTexture->set(0);
         // self->_refractionTexture->set(0);
-    
-        // self->_texture->bind(0);
-        // self->_overlay->bind(1);
-        self->_skybox.skybox()->bind(0);
+
+        // self->_skybox.skybox()->bind(0);
         for(const Ref<RenderableObject>& ro : self->_objects)
         {
+            ro->material().set(*self->_materialUniforms.get(), 0);
             ro->preRender(context);
             ro->render(context);
             ro->postRender(context);
+            ro->material().unbind(0);
         }
-        self->_skybox.skybox()->unbind(0);
-        // self->_overlay->unbind(1);
-        // self->_texture->unbind(0);
+        // self->_skybox.skybox()->unbind(0);
         // glStencilMask(0x00);
     
         // self->_modelViewMatrixUni->set(self->_cubeViewMatrix);
-        self->_reflectionModelViewMatrixUni->set(self->_cubeViewMatrix);
+        // self->_reflectionModelViewMatrixUni->set(self->_cubeViewMatrix);
         // self->_refractionModelViewMatrixUni->set(self->_cubeViewMatrix);
     
         // self->_texture->bind(1);
         // self->_overlay->bind(0);
-        self->_skybox.skybox()->bind(0);
+        // self->_skybox.skybox()->bind(0);
     
-        self->_cube->preRender(context);
-        self->_cube->render(context);
-        self->_cube->postRender(context);
-
-        self->_skybox.skybox()->unbind(0);
+        // self->_cube->preRender(context);
+        // self->_cube->render(context);
+        // self->_cube->postRender(context);
+    
+        // self->_skybox.skybox()->unbind(0);
         // self->_overlay->unbind(0);
         // self->_texture->unbind(1);
     
-        self->_reflectionShader->unbind(context);
+        // self->_reflectionShader->unbind(context);
         // self->_refractionShader->unbind(context);
-        // self->_shader->unbind(context);
+        self->_shader->unbind(context);
     
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
+        // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        // glStencilMask(0x00);
+        // glDisable(GL_DEPTH_TEST);
+        //
+        // self->_o_shader->bind(context);
+        //
+        // self->_o_projMatrixUni->set(self->_camera->projectionMatrix());
+        // self->_o_viewMatrixUni->set(self->_camera->viewMatrix());
+        // self->_o_scaleFactorUni->set(0.1f);
+        //
+        // self->_o_modelViewMatrixUni->set(self->_cubeViewMatrix);
+        // self->_cube->preRender(context);
+        // self->_cube->render(context);
+        // self->_cube->postRender(context);
+        //
+        // self->_o_modelViewMatrixUni->set(self->_modelViewMatrix);
+        // for(const Ref<RenderableObject>& ro : self->_objects)
+        // {
+        //     ro->preRender(context);
+        //     ro->render(context);
+        //     ro->postRender(context);
+        // }
+        //
+        // self->_o_shader->unbind(context);
+        // glStencilMask(0x00);
+        // glEnable(GL_DEPTH_TEST);
     
-        self->_o_shader->bind(context);
-    
-        self->_o_projMatrixUni->set(self->_camera->projectionMatrix());
-        self->_o_viewMatrixUni->set(self->_camera->viewMatrix());
-        self->_o_scaleFactorUni->set(0.1f);
-    
-        self->_o_modelViewMatrixUni->set(self->_cubeViewMatrix);
-        self->_cube->preRender(context);
-        self->_cube->render(context);
-        self->_cube->postRender(context);
-    
-        self->_o_modelViewMatrixUni->set(self->_modelViewMatrix);
-        for(const Ref<RenderableObject>& ro : self->_objects)
-        {
-            ro->preRender(context);
-            ro->render(context);
-            ro->postRender(context);
-        }
-    
-        self->_o_shader->unbind(context);
-        glStencilMask(0x00);
-        glEnable(GL_DEPTH_TEST);
-
         self->_skybox.render(context, self->_camera.camera());
-
+    
         self->_frameBuffer->unbind(context);
         context.clearScreen(true, true, true, { 0, 160, 0, 255 });
-
+    
         glDisable(GL_DEPTH_TEST);
-
+    
         self->_frameBufferShader->bind(context);
         self->_frameBufferUni->set(0);
-
+    
         context.setFaceWinding(false);
         self->_frameBuffer->color()->texture()->bind(0);
         self->_frameBufferVA->bind(context);
@@ -315,9 +341,9 @@ void Layer3D::onRender(float delta) noexcept
         self->_frameBufferVA->postDraw(context);
         self->_frameBufferVA->unbind(context);
         self->_frameBuffer->color()->texture()->unbind(0);
-
+    
         self->_frameBufferShader->unbind(context);
-
+    
         glEnable(GL_DEPTH_TEST);
     });
 }
@@ -330,21 +356,16 @@ void Layer3D::onEvent(Event& e) noexcept
 
 bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
 {
-    IFrameBufferBuilder* builder = IFrameBufferBuilder::create(*_window.renderingContext());
+    Ref<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
 
     IFrameBufferAttachment* colorBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Color, e.newWidth(), e.newHeight());
-    // IFrameBufferAttachment* depthBuffer   = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Depth, e.newWidth(), e.newHeight());
-    // IFrameBufferAttachment* stencilBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Stencil, e.newWidth(), e.newHeight());
     IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::DepthStencil, e.newWidth(), e.newHeight());
 
     builder->attach(colorBuffer);
-    // builder->attach(depthBuffer);
-    // builder->attach(stencilBuffer);
     builder->attach(depthStencilBuffer);
 
     _frameBuffer = Ref<IFrameBuffer>(builder->build());
 
-    delete builder;
     return true;
 }
 

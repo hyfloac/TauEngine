@@ -2,6 +2,8 @@
 
 in vec3 fPosition;
 in vec3 fNormal;
+in vec3 fTangent;
+in vec3 fBiTangent;
 in vec2 fTexCoord;
 
 // in VertexData 
@@ -20,5 +22,5 @@ void main(void)
 {
     vec4 texColor = texture(textureSampler, fTexCoord);
     vec4 overlayColor = texture(textureOverlay, fTexCoord);
-    fragColor = mix(texColor, overlayColor, 0.3);
+    fragColor = mix(texColor, overlayColor, 0.0);
 }

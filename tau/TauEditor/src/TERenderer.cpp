@@ -62,9 +62,12 @@ TERenderer::TERenderer(Window& window, State& state, bool async) noexcept
     path = findSystemFont("Consolas Bold Italic (TrueType)");
     (void) _th->loadTTFFile(path.c_str(),  0, 48, finalizeLoadConsolasBoldItalic, this);
 
+    Layer3D* layer3D = new Layer3D(window, *_rp, &_recorder, state);
+    _camera3D = &layer3D->camera().camera();
+
     // _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
-    _layerStack.pushLayer(new Layer3D(window, *_rp, &_recorder, state));
-    _layerStack.pushOverlay(new ConsoleLayer(window, _recorder, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), *_rp, state, _camera, 0.5f));
+    _layerStack.pushLayer(layer3D);
+    _layerStack.pushOverlay(new ConsoleLayer(window, _recorder, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), *_rp, state, layer3D->camera().camera(), 0.5f));
     
 }
 
@@ -74,7 +77,7 @@ TERenderer::~TERenderer() noexcept
     delete _th;
 }
 
-void TERenderer::render(const float delta) noexcept
+void TERenderer::render(const DeltaTime& delta) noexcept
 {
     PERF();
     _rp->pushLoadContext(*_window.renderingContext());

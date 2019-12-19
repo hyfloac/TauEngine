@@ -13,7 +13,10 @@
 #include <events/WindowEvent.hpp>
 #include <model/IVertexArray.hpp>
 #include <camera/Skybox.hpp>
+#include <shader/PointLight.hpp>
+#include <model/Material.hpp>
 #include "State.hpp"
+#include "shader/SpotLight.hpp"
 
 class Window;
 class RenderingPipeline;
@@ -37,8 +40,12 @@ private:
     Ref<IUniform<const glm::mat4&>> _projMatrixUni;
     Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
     Ref<IUniform<const glm::mat4&>> _modelViewMatrixUni;
-    Ref<IUniform<int>> _textureUni;
-    Ref<IUniform<int>> _overlayUni;
+    Ref<MaterialUniforms> _materialUniforms;
+    Ref<PointLightUniforms> _pointLightUniforms;
+    Ref<SpotLightUniforms> _spotLightUniforms;
+    PointLight _pointLight;
+    SpotLight _spotLight;
+    Ref<IUniform<const Vector3f&>> _cameraPosUni;
 
     Ref<IShaderProgram> _o_shader;
     Ref<IUniform<const glm::mat4&>> _o_projMatrixUni;
@@ -79,9 +86,12 @@ private:
 public:
     Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept;
 
+    [[nodiscard]] FreeCamCamera3DController& camera() noexcept { return _camera; }
+    [[nodiscard]] const FreeCamCamera3DController& camera() const noexcept { return _camera; }
+
     void onUpdate(float fixedDelta) noexcept override;
 
-    void onRender(float delta) noexcept override;
+    void onRender(const DeltaTime& delta) noexcept override;
 
     void onEvent(Event& e) noexcept override;
 

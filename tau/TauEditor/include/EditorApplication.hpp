@@ -35,11 +35,11 @@ public:
 
     void onException(Exception& ex) noexcept override;
 protected:
-    void update(const float fixedDelta) noexcept override final;
+    void update(float fixedDelta) noexcept override final;
 
-    void render(const float delta) noexcept override final;
+    void render(const DeltaTime& delta) noexcept override final;
 
-    void renderFPS(const u32 ups, const u32 fps) noexcept override final;
+    void renderFPS(u32 ups, u32 fps) noexcept override final;
 
     void runMessageLoop() noexcept override final;
 private:

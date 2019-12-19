@@ -10,6 +10,7 @@ uniform sampler2D frameBufferSampler;
 #include <|TERes/shader/include/Common.glsl>
 #include <|TERes/shader/include/Kernel.glsl>
 #include <|TERes/shader/include/Grayscale.glsl>
+#include <|TERes/shader/include/HSV.glsl>
 
 const float luminanceThreshold = 0.2;
 const float colorAmplification = 4.0;
@@ -34,16 +35,29 @@ vec3 nightVision(sampler2D sampler, vec2 texCoord)
 
 vec4 postProcess(sampler2D sampler, vec2 texCoord)
 {
+#if 0
     vec4 edge = kernelEdgeDetect(sampler, texCoord);
     vec4 grayEdge = grayscaleWeighted(edge) * 0.4;
     vec3 invEdge = 1.0 - grayEdge.rgb;
     // invEdge *= when_ge(gl_FragCoord.x, 400);
     // invEdge += 1.0 * when_eq(invEdge, vec3(0.0));
     return vec4(nightVision(sampler, texCoord) * invEdge, 1.0);
+#else
+    return kernelEdgeDetect(sampler, texCoord);
+#endif
+}
+
+vec4 vibrancyPP(sampler2D sampler, vec2 texCoord)
+{
+    vec3 color = texture(sampler, texCoord).rgb;
+    vec3 hsv = rgb2hsv(color);
+    hsv.g = saturate(hsv.g * 2);
+    return vec4(hsv2rgb(hsv), 1.0);
 }
 
 void main(void)
 {
     // fragColor = postProcess(frameBufferSampler, fTexCoord);
+    // fragColor = vibrancyPP(frameBufferSampler, fTexCoord);
     fragColor = texture(frameBufferSampler, fTexCoord);
 }

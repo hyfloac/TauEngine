@@ -1,11 +1,11 @@
 #include "UILayer.hpp"
 
 
-void UILayer::onUpdate(float fixedDelta) noexcept
+void UILayer::onUpdate(const float fixedDelta) noexcept
 {
 }
 
-void UILayer::onRender(float delta) noexcept
+void UILayer::onRender(const DeltaTime& delta) noexcept
 {
 }
 

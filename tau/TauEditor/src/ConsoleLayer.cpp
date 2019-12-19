@@ -5,7 +5,7 @@
 #include <EnumBitFields.hpp>
 #include <Windows.h>
 
-ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, float textScale) noexcept
+ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera3D& camera, float textScale) noexcept
     : ILayer(false),
       _window(window), _th(th),
       _consolas(consolas), _consolasBold(consolasBold), _consolasItalic(consolasItalic), _consolasBoldItalic(consolasBoldItalic),
@@ -31,7 +31,7 @@ void ConsoleLayer::print(const DynString& str) noexcept
     _strings.push_back(str);
 }
 
-void ConsoleLayer::onRender(const float delta) noexcept
+void ConsoleLayer::onRender(const DeltaTime& delta) noexcept
 {
     UNUSED(delta);
     if(_visible && _consolas != -1)
@@ -221,13 +221,14 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
     {
         if(strcmp(args[0], "reset") == 0)
         {
-            _cl->_camera->set({ 0.0f, 0.0f, 0.0f }, 0.0f);
+            _cl->_camera.set({ 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f);
         }
         else if(argCount == 2 && strcmp(args[0], "rot") == 0)
         {
             Console::ParseIntError error;
-            const float rot = consoleHandler->parseF32(args[1], &error);
-            _cl->_camera->rotation(rot);
+            const float pitch = consoleHandler->parseF32(args[1], &error);
+            const float yaw = consoleHandler->parseF32(args[2], &error);
+            _cl->_camera.set(pitch, yaw);
         }
         else if(argCount == 4 && strcmp(args[0], "pos") == 0)
         {
@@ -235,7 +236,7 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
             const float x = consoleHandler->parseF32(args[1], &error);
             const float y = consoleHandler->parseF32(args[2], &error);
             const float z = consoleHandler->parseF32(args[3], &error);
-            _cl->_camera->position({ x, y, z });
+            _cl->_camera.position({ x, y, z });
         }
         else
         {

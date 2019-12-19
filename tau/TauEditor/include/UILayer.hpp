@@ -50,7 +50,7 @@ public:
 
     void onUpdate(float fixedDelta) noexcept override;
 
-    void onRender(float delta) noexcept override;
+    void onRender(const DeltaTime& delta) noexcept override;
 
     void onEvent(Event& e) noexcept override;
 };

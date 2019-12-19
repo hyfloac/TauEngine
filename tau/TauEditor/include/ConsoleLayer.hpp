@@ -7,8 +7,8 @@
 #include <String.hpp>
 #include <console/ConsoleController.hpp>
 #include <events/WindowEvent.hpp>
+#include <camera/Camera3D.hpp>
 #include "State.hpp"
-#include "ResourceLoader.hpp"
 #include "TextHandler.hpp"
 #include "GameRecorder.hpp"
 
@@ -29,7 +29,7 @@ private:
     const glm::mat4& _ortho;
     RenderingPipeline& _rp;
     State& _state;
-    Camera2DController& _camera;
+    Camera3D& _camera;
     float _textScale;
 
     Console::Controller _ch;
@@ -38,11 +38,11 @@ private:
     StringBuilder _inputBuilder;
     bool _columnMarker;
 public:
-    ConsoleLayer(Window& window, GameRecorder& gc, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera2DController& camera, float textScale = 1.0f) noexcept;
+    ConsoleLayer(Window& window, GameRecorder& gc, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera3D& camera, float textScale = 1.0f) noexcept;
 
     void print(const DynString& str) noexcept;
 
-    void onRender(float delta) noexcept override;
+    void onRender(const DeltaTime& delta) noexcept override;
     void onUpdate(float fixedDelta) noexcept override;
     void onEvent(Event& e) noexcept override;
 private:
@@ -110,7 +110,7 @@ public:
     { }
 
     [[nodiscard]] const char* name() const noexcept override { return "setCamera"; }
-    [[nodiscard]] const char* usage() const noexcept override { return "setCamera <cmd{enum{reset|pos|rot}}> <(pos)<x{f32}> <y{f32}> <z{f32}>> <(rot)degrees{f32}>"; }
+    [[nodiscard]] const char* usage() const noexcept override { return "setCamera <cmd{enum{reset|pos|rot}}> <(pos)<x{f32}> <y{f32}> <z{f32}>> <(rot degrees)<pitch{f32}> <yaw{f32}>>"; }
     [[nodiscard]] const char* info() const noexcept override { return "Sets various camera properties."; }
     [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };

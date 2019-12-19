@@ -22,7 +22,7 @@ void PhysWordLayer::onUpdate(float fixedDelta) noexcept
     }
 }
 
-void PhysWordLayer::onRender(float delta) noexcept
+void PhysWordLayer::onRender(const DeltaTime& delta) noexcept
 {
     if(_state != State::ConsoleExclusive)
     {
@@ -30,7 +30,7 @@ void PhysWordLayer::onRender(float delta) noexcept
         {
             if(_glyphSetHandle != -1)
             {
-                physWord.render(delta, _rp, _th, _glyphSetHandle, _ortho);
+                physWord.render(delta.microseconds(), _rp, _th, _glyphSetHandle, _ortho);
             }
         }
     }

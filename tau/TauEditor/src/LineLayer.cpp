@@ -26,14 +26,23 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     _viewportUni = _shader->getUniformVector4Float("viewport");
     _miterLimitUni = _shader->getUniformFloat("miterLimit");
 
-    Ref<IBuffer> lineData = window.renderingContext()->createBuffer(2, IBuffer::Type::ArrayBuffer);
     float bufferData[] = {
         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
     };
-    lineData->fillBuffer(*window.renderingContext(), sizeof(float) * 2 * 6, bufferData);
-    lineData->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    lineData->descriptor().addDescriptor(ShaderDataType::Vector4Float);
+
+    Ref<IBufferBuilder> lineDataBuilder = window.renderingContext()->createBuffer(2);
+    lineDataBuilder->type(EBuffer::Type::ArrayBuffer);
+    lineDataBuilder->usage(EBuffer::UsageType::StaticDraw);
+    lineDataBuilder->bufferSize(sizeof(bufferData));
+    lineDataBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    lineDataBuilder->descriptor().addDescriptor(ShaderDataType::Vector4Float);
+
+    Ref<IBuffer> lineData = Ref<IBuffer>(lineDataBuilder->build(nullptr));
+
+    lineData->bind(*window.renderingContext());
+    lineData->fillBuffer(*window.renderingContext(), bufferData);
+    lineData->unbind(*window.renderingContext());
 
     _vao->addVertexBuffer(*window.renderingContext(), lineData);
     _vao->drawCount() = 2;
@@ -44,7 +53,7 @@ void LineLayer::onUpdate(float fixedDelta) noexcept
     UNUSED(fixedDelta);
 }
 
-void LineLayer::onRender(float delta) noexcept
+void LineLayer::onRender(const DeltaTime& delta) noexcept
 {
     UNUSED(delta);
     TAU_RENDER_S(_rp, {
