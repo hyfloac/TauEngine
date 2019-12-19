@@ -13,10 +13,13 @@
   <ItemGroup>
     <ClCompile Include="src\ArrayListUnitTest.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\RefPtrTest.cpp" />
     <ClCompile Include="src\StringTest.cpp" />
+    <ClCompile Include="src\UnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ArrayListUnitTest.hpp" />
+    <ClInclude Include="include\RefUnitTest.hpp" />
     <ClInclude Include="include\StringTest.hpp" />
     <ClInclude Include="include\UnitTest.hpp" />
   </ItemGroup>
@@ -80,7 +83,7 @@
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -116,7 +119,7 @@
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
