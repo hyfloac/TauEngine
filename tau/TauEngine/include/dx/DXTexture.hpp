@@ -1,7 +1,8 @@
 #pragma once
 #ifdef _WIN32
 
-#include <texture/Texture.hpp>
+#include "texture/Texture.hpp"
+#include "dx/DX9RenderingContext.hpp"
 #include <d3d9.h>
 
 class TAU_DLL D3D9Texture2D final : public ITexture
@@ -10,11 +11,11 @@ class TAU_DLL D3D9Texture2D final : public ITexture
 private:
     IDirect3DTexture9* _texture;
 public:
-    D3D9Texture2D(const u32 width, const u32 height, const ETexture::Format dataFormat) noexcept
+    D3D9Texture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, DX9RenderingContext& context) noexcept
         : ITexture(width, height, dataFormat),
           _texture(nullptr)
     {
-        ((IDirect3DDevice9*) nullptr)->CreateTexture(0, 0, 0, 0, D3DFORMAT::D3DFMT_A8R8G8B8, D3DPOOL::D3DPOOL_DEFAULT, &_texture, nullptr);
+        context.d3d9Device()->CreateTexture(width, height, 0, 0, D3DFORMAT::D3DFMT_A8R8G8B8, D3DPOOL::D3DPOOL_DEFAULT, &_texture, nullptr);
     }
 
     ~D3D9Texture2D() noexcept override final

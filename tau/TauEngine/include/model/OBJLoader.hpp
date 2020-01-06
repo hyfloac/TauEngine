@@ -88,6 +88,8 @@ namespace objl
         float midAngleCos(const Vector3& other) const noexcept;
 
         Vector3 projection(const Vector3& other) const noexcept;
+
+        Vector3 normalize() const noexcept;
     };
 
     struct Vertex
@@ -95,7 +97,7 @@ namespace objl
         Vector3 position;
         Vector3 normal;
         Vector3 tangent;
-        Vector3 bitangent;
+        // Vector3 bitangent;
         Vector2 textureCoordinate;
     };
 

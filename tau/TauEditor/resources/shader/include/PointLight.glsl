@@ -20,7 +20,7 @@ vec3 computePointLight(PointLight light, vec3 cameraPos, vec3 pos, vec3 normal, 
                                light.linear    * distance + 
                                light.quadratic * distance * distance);
 
-    vec3 norm = normalize(normal);
+    // vec3 norm = normalize(normal);
     vec3 lightDir = normalize(lightPosDelta);
 
     vec3 viewDir = normalize(cameraPos - pos);

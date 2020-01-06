@@ -8,7 +8,7 @@
 #pragma warning(pop)
 
 #include "texture/Texture.hpp"
-#include <array>
+#include "Color.hpp"
 
 class TAU_DLL TextureLoader final
 {
@@ -44,9 +44,16 @@ public:
 
     static ITexture* generateMissingTexture(IRenderingContext& context) noexcept;
 
-    static ITexture* generateWhiteTexture(IRenderingContext& context) noexcept;
+    static ITexture* generateColorTexture(IRenderingContext& context, RGBColor color) noexcept;
 
-    static ITexture* generateBlackTexture(IRenderingContext& context) noexcept;
+    static ITexture* generateWhiteTexture(IRenderingContext& context) noexcept
+    { return generateColorTexture(context, { 255, 255, 255 }); }
+
+    static ITexture* generateBlackTexture(IRenderingContext& context) noexcept
+    { return generateColorTexture(context, { 0, 0, 0 }); }
+
+    static ITexture* generateNormalTexture(IRenderingContext& context) noexcept
+    { return generateColorTexture(context, { 127, 127, 255 }); }
 
     static ITexture* loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const GPUTextureSettings& settings, TextureLoadError* RESTRICT error = null) noexcept;
 

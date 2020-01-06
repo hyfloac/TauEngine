@@ -26,6 +26,13 @@ namespace objl
         return bn * this->dot(other);
     }
 
+    Vector3 Vector3::normalize() const noexcept
+    {
+        const float recip = rSqrt(this->magnitudeSquared());
+        return *this * recip;
+    }
+
+
     namespace algorithm
     {
         bool strEmpty(const char* str) noexcept { return !(str && strlen(str)); }
@@ -347,16 +354,18 @@ namespace objl
             Vector2 dTex2 = t2 - t0;
 
             const float r = 1.0f / (dTex1.x() * dTex2.y() - dTex1.y() * dTex2.x());
-            Vector3 tangent = (dPos1 * dTex2.y() - dPos2 * dTex1.y()) * r;
-            Vector3 bitangent = (dPos2 * dTex1.x() - dPos1 * dTex2.x()) * r;
+            Vector3 tangent   = (dPos1 * dTex2.y() - dPos2 * dTex1.y()) * r;
+            // Vector3 bitangent = (dPos2 * dTex1.x() - dPos1 * dTex2.x()) * r;
+            tangent = tangent.normalize();
+            // bitangent = bitangent.normalize();
 
             vertices[0].tangent = tangent;
             vertices[1].tangent = tangent;
             vertices[2].tangent = tangent;
 
-            vertices[0].bitangent = bitangent;
-            vertices[1].bitangent = bitangent;
-            vertices[2].bitangent = bitangent;
+            // vertices[0].bitangent = bitangent;
+            // vertices[1].bitangent = bitangent;
+            // vertices[2].bitangent = bitangent;
         }
     }
 

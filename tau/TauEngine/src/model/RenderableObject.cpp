@@ -8,7 +8,7 @@
 #include "VFS.hpp"
 
 RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const DrawType drawType) noexcept
-    : _va(context.createVertexArray(5, drawType))
+    : _va(context.createVertexArray(4, drawType))
 {
     PERF();
     const size_t cnt1 = mesh.vertices.size();
@@ -19,13 +19,13 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     DynArray<float> normalsLoaded(cnt3);
     DynArray<float> texturesLoaded(cnt2);
     DynArray<float> tangentsLoaded(cnt3);
-    DynArray<float> bitangentsLoaded(cnt3);
+    // DynArray<float> bitangentsLoaded(cnt3);
 
     u32 posIndex = 0;
     u32 normIndex = 0;
     u32 texIndex = 0;
     u32 tanIndex = 0;
-    u32 biTanIndex = 0;
+    // u32 biTanIndex = 0;
 
     for(objl::Vertex vertex : mesh.vertices)
     {
@@ -41,16 +41,15 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
         tangentsLoaded[tanIndex++] = vertex.tangent.y();
         tangentsLoaded[tanIndex++] = vertex.tangent.z();
 
-        bitangentsLoaded[biTanIndex++] = vertex.bitangent.x();
-        bitangentsLoaded[biTanIndex++] = vertex.bitangent.y();
-        bitangentsLoaded[biTanIndex++] = vertex.bitangent.z();
+        // bitangentsLoaded[biTanIndex++] = vertex.bitangent.x();
+        // bitangentsLoaded[biTanIndex++] = vertex.bitangent.y();
+        // bitangentsLoaded[biTanIndex++] = vertex.bitangent.z();
 
         texturesLoaded[texIndex++] = vertex.textureCoordinate.x();
         texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
     }
 
     Ref<IBufferBuilder> pnBuilder = context.createBuffer(1);
-    // Ref<IBufferBuilder> normalsBuilder = context.createBuffer(1);
     Ref<IBufferBuilder> texturesBuilder = context.createBuffer(1);
     Ref<IIndexBufferBuilder> indicesBuilder = context.createIndexBuffer();
 
@@ -70,7 +69,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
     Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
     Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
-    Ref<IBuffer> bitangents = Ref<IBuffer>(pnBuilder->build(nullptr));
+    // Ref<IBuffer> bitangents = Ref<IBuffer>(pnBuilder->build(nullptr));
     Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
     Ref<IIndexBuffer> indices = Ref<IIndexBuffer>(indicesBuilder->build(nullptr));
 
@@ -86,9 +85,9 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     tangents->fillBuffer(context, tangentsLoaded);
     tangents->unbind(context);
 
-    bitangents->bind(context);
-    bitangents->fillBuffer(context, bitangentsLoaded);
-    bitangents->unbind(context);
+    // bitangents->bind(context);
+    // bitangents->fillBuffer(context, bitangentsLoaded);
+    // bitangents->unbind(context);
 
     textures->bind(context);
     textures->fillBuffer(context, texturesLoaded);
@@ -101,7 +100,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     _va->addVertexBuffer(context, positions);
     _va->addVertexBuffer(context, normals);
     _va->addVertexBuffer(context, tangents);
-    _va->addVertexBuffer(context, bitangents);
+    // _va->addVertexBuffer(context, bitangents);
     _va->addVertexBuffer(context, textures);
     _va->setIndexBuffer(context, indices);
     _va->drawCount() = mesh.indices.size();
@@ -128,7 +127,11 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     if(!mesh.material.map_bump.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
-        _normalTexture = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+        _material.normalTexture() = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+    }
+    else
+    {
+        _material.normalTexture() = Ref<ITexture>(TextureLoader::generateNormalTexture(context));
     }
     // const auto ka = mesh.material.Ka;
     // const auto kd = mesh.material.Kd;

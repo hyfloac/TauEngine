@@ -13,6 +13,7 @@ private:
     Ref<IUniform<float>> _specularExponentUni;
     Ref<IUniform<int>> _diffuseSamplerUni;
     Ref<IUniform<int>> _specularSamplerUni;
+    Ref<IUniform<int>> _normalSamplerUni;
 public:
     MaterialUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
 private:
@@ -28,6 +29,7 @@ private:
     float _specularExponent;
     Ref<ITexture> _diffuseTexture;
     Ref<ITexture> _specularTexture;
+    Ref<ITexture> _normalTexture;
 public:
     [[nodiscard]] inline float specularExponent() const noexcept { return _specularExponent; }
     [[nodiscard]] inline float& specularExponent() noexcept { return _specularExponent; }
@@ -37,6 +39,9 @@ public:
 
     [[nodiscard]] inline const Ref<ITexture>& specularTexture() const noexcept { return _specularTexture; }
     [[nodiscard]] inline Ref<ITexture>& specularTexture() noexcept { return _specularTexture; }
+
+    [[nodiscard]] inline const Ref<ITexture>& normalTexture() const noexcept { return _normalTexture; }
+    [[nodiscard]] inline Ref<ITexture>& normalTexture() noexcept { return _normalTexture; }
 
     void set(const MaterialUniforms& uniforms, int textureBeginIndex) const noexcept;
 

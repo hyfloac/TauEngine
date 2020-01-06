@@ -51,9 +51,6 @@
     <ClCompile Include="src\gl\GLRenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DXRenderingContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\imgui\imgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -210,6 +207,12 @@
     <ClCompile Include="src\shader\SpotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\DX9RenderingContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\terrain\TerrainTile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DLL.hpp">
@@ -288,9 +291,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\GLRenderingContext.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dx\DXRenderingContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\imgui\imconfig.h">
@@ -489,6 +489,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\SpotLight.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\DX9RenderingContext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\terrain\TerrainTile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

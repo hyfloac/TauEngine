@@ -20,7 +20,7 @@ private:
     // Ref<ITexture> _diffuseTexture;
     // Ref<ITexture> _specularTexture;
     Ref<ITexture> _reflectiveTexture;
-    Ref<ITexture> _normalTexture;
+    // Ref<ITexture> _normalTexture;
     // glm::vec3 _ambientColor;
     // glm::vec3 _diffuseColor;
     // glm::vec3 _specularColor;
@@ -38,7 +38,7 @@ public:
     // [[nodiscard]] Ref<ITexture> diffuseTexture() const noexcept { return _diffuseTexture; }
     // [[nodiscard]] Ref<ITexture> specularTexture() const noexcept { return _specularTexture; }
     [[nodiscard]] Ref<ITexture> reflectiveTexture() const noexcept { return _reflectiveTexture; }
-    [[nodiscard]] Ref<ITexture> normalTexture() const noexcept { return _normalTexture; }
+    // [[nodiscard]] Ref<ITexture> normalTexture() const noexcept { return _normalTexture; }
     // [[nodiscard]] glm::vec3 ambientColor() const noexcept { return _ambientColor; }
     // [[nodiscard]] glm::vec3 diffuseColor() const noexcept { return _diffuseColor; }
     // [[nodiscard]] glm::vec3 specularColor() const noexcept { return _specularColor; }

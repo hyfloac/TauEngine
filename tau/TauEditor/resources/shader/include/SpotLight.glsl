@@ -31,7 +31,7 @@ vec3 computeSpotLight(SpotLight light, vec3 cameraPos, vec3 pos, vec3 normal, ve
                                    light.linear    * distance + 
                                    light.quadratic * distance * distance);
 
-        vec3 norm = normalize(normal);
+        // vec3 norm = normalize(normal);
 
         vec3 viewDir = normalize(cameraPos - pos);
         vec3 reflectDir = reflect(-lightDir, normal);

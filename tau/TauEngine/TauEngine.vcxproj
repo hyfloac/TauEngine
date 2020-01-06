@@ -27,7 +27,7 @@
     <ClCompile Include="src\camera\Skybox.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
-    <ClCompile Include="src\DXRenderingContext.cpp" />
+    <ClCompile Include="src\DX9RenderingContext.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
@@ -36,6 +36,7 @@
     <ClCompile Include="src\model\Material.cpp" />
     <ClCompile Include="src\shader\PointLight.cpp" />
     <ClCompile Include="src\shader\SpotLight.cpp" />
+    <ClCompile Include="src\terrain\TerrainTile.cpp" />
     <ClCompile Include="src\texture\FITextureLoader.cpp" />
     <ClCompile Include="src\GameRecorder.cpp" />
     <ClCompile Include="src\gl\GLBufferDescriptor.cpp" />
@@ -98,7 +99,7 @@
     <ClInclude Include="include\console\ConsoleLexer.hpp" />
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\dx\DXBuffer.hpp" />
-    <ClInclude Include="include\dx\DXRenderingContext.hpp" />
+    <ClInclude Include="include\dx\DX9RenderingContext.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
     <ClInclude Include="include\events\WindowEvent.hpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="include\system\Semaphore.hpp" />
     <ClInclude Include="include\system\Win32Event.hpp" />
     <ClInclude Include="include\TauEngine.hpp" />
+    <ClInclude Include="include\terrain\TerrainTile.hpp" />
     <ClInclude Include="include\TextHandler.hpp" />
     <ClInclude Include="include\dx\DXTexture.hpp" />
     <ClInclude Include="include\texture\FITextureLoader.hpp" />
