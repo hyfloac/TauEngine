@@ -54,7 +54,7 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override final { return nullptr; }
+    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override final;
 
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return nullptr; }
 

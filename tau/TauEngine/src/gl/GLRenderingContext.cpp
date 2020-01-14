@@ -96,7 +96,7 @@ Ref<IBufferBuilder> GLRenderingContext::createBuffer(const std::size_t descripto
 
 Ref<IIndexBufferBuilder> GLRenderingContext::createIndexBuffer() noexcept
 {
-    return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBufferBuilder());
+    return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBufferBuilder);
 }
 
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept

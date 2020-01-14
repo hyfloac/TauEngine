@@ -1,7 +1,8 @@
-#include <dx/DX9RenderingContext.hpp>
-#include <Utils.hpp>
+#include "dx/DX9RenderingContext.hpp"
 
 #ifdef _WIN32
+#include <Utils.hpp>
+#include "dx/DXBuffer.hpp"
 
 DX9RenderingContext::DX9RenderingContext(const RenderingMode& mode, const bool debug) noexcept
     : IRenderingContext(mode, debug),
@@ -79,5 +80,10 @@ void DX9RenderingContext::endFrame() noexcept
 void DX9RenderingContext::swapFrame() noexcept
 {
     _d3d9Device->Present(NULL, NULL, NULL, NULL);
+}
+
+Ref<IBufferBuilder> DX9RenderingContext::createBuffer(const std::size_t descriptorCount) noexcept
+{
+    return Ref<DXBufferBuilder>(new(std::nothrow) DXBufferBuilder(descriptorCount, *this));
 }
 #endif

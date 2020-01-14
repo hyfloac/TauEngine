@@ -4,6 +4,8 @@
 #include <system/RenderingContext.hpp>
 #include <Utils.hpp>
 
+class DX9RenderingContext;
+
 ITexture* ITexture::create(IRenderingContext& context, const u32 width, const u32 height, const ETexture::Format format, const ETexture::Type textureType) noexcept
 {
     switch(context.mode().currentMode())
@@ -13,7 +15,7 @@ ITexture* ITexture::create(IRenderingContext& context, const u32 width, const u3
 #ifdef _WIN32
             if(textureType == ETexture::Type::T2D)
             {
-                return new(std::nothrow) D3D9Texture2D(width, height, format);
+                return new(std::nothrow) D3D9Texture2D(width, height, format, (DX9RenderingContext&) context);
             }
             else
             { return null; }

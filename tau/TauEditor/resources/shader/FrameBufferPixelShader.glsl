@@ -43,7 +43,8 @@ vec4 postProcess(sampler2D sampler, vec2 texCoord)
     // invEdge += 1.0 * when_eq(invEdge, vec3(0.0));
     return vec4(nightVision(sampler, texCoord) * invEdge, 1.0);
 #else
-    return kernelEdgeDetect(sampler, texCoord);
+    // return kernelEdgeDetect(sampler, texCoord);
+    return kernelTest(sampler, texCoord);
 #endif
 }
 
@@ -59,5 +60,6 @@ void main(void)
 {
     // fragColor = postProcess(frameBufferSampler, fTexCoord);
     // fragColor = vibrancyPP(frameBufferSampler, fTexCoord);
-    fragColor = texture(frameBufferSampler, fTexCoord);
+     fragColor = texture(frameBufferSampler, fTexCoord);
+    // fragColor = vec4(nightVision(frameBufferSampler, fTexCoord), 1.0);
 }

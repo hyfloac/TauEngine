@@ -14,44 +14,35 @@ class TAU_DLL DXBuffer final : public IBuffer
 private:
     IDirect3DVertexBuffer9* _buffer;
 public:
-    DXBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, DX9RenderingContext& context)
-        : IBuffer(type, usage, bufferSize, descriptor)
-    {
-        context.d3d9Device()->CreateVertexBuffer(bufferSize, 0, 0, D3DPOOL_MANAGED, &_buffer, null);
-    }
+    DXBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, IDirect3DVertexBuffer9* buffer)
+        : IBuffer(type, usage, bufferSize, descriptor),
+          _buffer(buffer)
+    { }
 
-    ~DXBuffer() noexcept override final
-    {
-        if(_buffer)
-        {
-            _buffer->Release();
-        }
-    }
+    ~DXBuffer() noexcept override final;
 
 
     void bind(IRenderingContext& context) noexcept override
-    {    
-    }
+    { /* No-Op */ }
 
     void unbind(IRenderingContext& context) noexcept override
-    {
-        
-    }
+    { /* No-Op */ }
 
-    void fillBuffer(IRenderingContext& context, const void* data) noexcept override
-    {
-        void* storeHandle;
-        _buffer->Lock(0, 0, &storeHandle, 0);
-        ::std::memcpy(storeHandle, data, _bufferSize);
-        _buffer->Unlock();
-    }
+    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override
-    {
-        void* storeHandle;
-        _buffer->Lock(offset, size, &storeHandle, 0);
-        ::std::memcpy(storeHandle, data, size);
-        _buffer->Unlock();
-    }
+    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size,
+                      const void* data) noexcept override;
+};
+
+class TAU_DLL DXBufferBuilder final : public IBufferBuilder
+{
+    DEFAULT_DESTRUCT(DXBufferBuilder);
+    DELETE_COPY(DXBufferBuilder);
+private:
+    DX9RenderingContext& _context;
+public:
+    DXBufferBuilder(uSys descriptorCount, DX9RenderingContext& context) noexcept;
+
+    [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override;
 };
 #endif

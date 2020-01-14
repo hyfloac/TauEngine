@@ -207,10 +207,13 @@
     <ClCompile Include="src\shader\SpotLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DX9RenderingContext.cpp">
+    <ClCompile Include="src\terrain\TerrainTile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\terrain\TerrainTile.cpp">
+    <ClCompile Include="src\dx\DX9RenderingContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\DXBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

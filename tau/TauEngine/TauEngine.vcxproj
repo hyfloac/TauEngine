@@ -27,7 +27,8 @@
     <ClCompile Include="src\camera\Skybox.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
-    <ClCompile Include="src\DX9RenderingContext.cpp" />
+    <ClCompile Include="src\dx\DX9RenderingContext.cpp" />
+    <ClCompile Include="src\dx\DXBuffer.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />

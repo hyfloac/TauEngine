@@ -100,7 +100,7 @@ IBuffer* GLBufferBuilder::build(Error* error) const noexcept
     if(!buffer)
     {
         GLBuffer::destroyBuffer(bufferHandle);
-        ERROR_CODE_N(Error::MemoryAllocationFailure);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
     ERROR_CODE_V(Error::NoError, buffer);

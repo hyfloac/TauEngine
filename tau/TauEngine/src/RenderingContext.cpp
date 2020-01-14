@@ -3,7 +3,7 @@
 #include "Timings.hpp"
 
 #ifdef _WIN32
-#include "dx/DXRenderingContext.hpp"
+#include "dx/DX9RenderingContext.hpp"
 #endif
 
 IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
@@ -12,7 +12,7 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
     {
         case RenderingMode::Mode::DirectX9:
 #ifdef _WIN32
-            return new(std::nothrow) DXRenderingContext(mode, mode.debugMode());
+            return new(std::nothrow) DX9RenderingContext(mode, mode.debugMode());
 #else
             return null;
 #endif
@@ -39,7 +39,7 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
         case RenderingMode::Mode::OpenGL4:
             return new(std::nothrow) GLRenderingContext(mode, mode.debugMode(), 4, 0, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_2:
-            return new(std::nothrow) GLRenderingContext(mode, mode.debugMode(), 4, 1, GLRenderingContext::GLProfile::Compat, true);
+            return new(std::nothrow) GLRenderingContext(mode, mode.debugMode(), 4, 2, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_3:
             return new(std::nothrow) GLRenderingContext(mode, mode.debugMode(), 4, 3, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_4:
