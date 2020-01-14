@@ -63,7 +63,7 @@ private:
     friend class GLIndexBufferBuilder;
 };
 
-class TAU_DLL GLBufferBuilder final : public IBufferBuilder
+class TAU_DLL GLBufferBuilder : public IBufferBuilder
 {
     DEFAULT_DESTRUCT(GLBufferBuilder);
     DELETE_COPY(GLBufferBuilder);
@@ -73,13 +73,16 @@ private:
 public:
     GLBufferBuilder(uSys descriptorCount) noexcept;
 
-    void type(const EBuffer::Type type) noexcept override;
-    void usage(const EBuffer::UsageType usage) noexcept override;
+    void type(const EBuffer::Type type) noexcept override final;
+    void usage(const EBuffer::UsageType usage) noexcept override final;
 
-    [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override final;
+protected:
+    virtual GLuint createBuffer() const noexcept
+    { return GLBuffer::createBuffer(); }
 };
 
-class TAU_DLL GLIndexBufferBuilder final : public IIndexBufferBuilder
+class TAU_DLL GLIndexBufferBuilder : public IIndexBufferBuilder
 {
     DEFAULT_DESTRUCT(GLIndexBufferBuilder);
     DELETE_COPY(GLIndexBufferBuilder);
@@ -88,7 +91,10 @@ private:
 public:
     GLIndexBufferBuilder() noexcept;
 
-    void usage(const EBuffer::UsageType usage) noexcept override;
+    void usage(const EBuffer::UsageType usage) noexcept override final;
 
-    [[nodiscard]] IIndexBuffer* build([[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] IIndexBuffer* build([[tau::out]] Error* error) const noexcept override final;
+protected:
+    virtual GLuint createBuffer() const noexcept
+    { return GLBuffer::createBuffer(); }
 };

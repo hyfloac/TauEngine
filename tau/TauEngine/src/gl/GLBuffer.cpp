@@ -1,4 +1,5 @@
 #include "gl/GLBuffer.hpp"
+#include "gl/gl4_5/GLBuffer4_5.hpp"
 #include <Safeties.hpp>
 
 GLBuffer::GLBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, const GLuint buffer, const GLenum glType, const GLenum glUsage) noexcept
@@ -93,7 +94,7 @@ IBuffer* GLBufferBuilder::build(Error* error) const noexcept
     ERROR_CODE_COND_N(_type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
     ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
 
-    const GLuint bufferHandle = GLBuffer::createBuffer();
+    const GLuint bufferHandle = createBuffer();
 
     GLBuffer* const buffer = new(std::nothrow) GLBuffer(_type, _usage, _bufferSize, _descriptor, bufferHandle, _glType, _glUsage);
 
@@ -121,17 +122,31 @@ IIndexBuffer* GLIndexBufferBuilder::build(Error* error) const noexcept
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
 
-    const GLuint bufferHandle = GLBuffer::createBuffer();
+    const GLuint bufferHandle = createBuffer();
 
-    GLIndexBuffer* buffer =  new(std::nothrow) GLIndexBuffer(_usage, _bufferSize, bufferHandle, _glUsage);
+    GLIndexBuffer* const buffer = new(std::nothrow) GLIndexBuffer(_usage, _bufferSize, bufferHandle, _glUsage);
 
     if(!buffer)
     {
         GLBuffer::destroyBuffer(bufferHandle);
-        ERROR_CODE_N(Error::MemoryAllocationFailure);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
     ERROR_CODE_V(Error::NoError, buffer);
+}
+
+GLuint GLBuffer4_5Builder::createBuffer() const noexcept
+{
+    GLuint bufferHandle;
+    glCreateBuffers(1, &bufferHandle);
+    return bufferHandle;
+}
+
+GLuint GLIndexBuffer4_5Builder::createBuffer() const noexcept
+{
+    GLuint bufferHandle;
+    glCreateBuffers(1, &bufferHandle);
+    return bufferHandle;
 }
 
 GLenum GLBuffer::getGLType(const EBuffer::Type bt) noexcept

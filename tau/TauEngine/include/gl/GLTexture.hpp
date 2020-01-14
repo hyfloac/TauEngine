@@ -20,7 +20,7 @@ protected:
     GLint _wrapS;
     GLint _wrapT;
 public:
-    GLTexture2D(u32 width, u32 height, ETexture::Format dataFormat) noexcept;
+    GLTexture2D(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
 
     virtual ~GLTexture2D() noexcept override;
 
@@ -34,7 +34,7 @@ public:
 
     void generateMipmaps() noexcept override;
 
-    void set(const void* data) noexcept override;
+    void set(u32 level, const void* data) noexcept override;
 
     void bind(u8 textureUnit) noexcept override final;
 
@@ -53,7 +53,7 @@ public:
 
     void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final;
 
-    void set(const void* data) noexcept override final;
+    void set(u32 level, const void* data) noexcept override final;
 };
 
 class TAU_DLL GLTextureCube final : public ITextureCube
@@ -77,7 +77,7 @@ public:
 
     void setWrapModeCube(ETexture::WrapMode s, ETexture::WrapMode t, ETexture::WrapMode r) noexcept override;
 
-    virtual void setCube(ETexture::CubeSide side, const void* data) noexcept override final;
+    virtual void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept override final;
 
     void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final;
 
@@ -85,9 +85,19 @@ public:
 
     void generateMipmaps() noexcept override;
 
-    virtual void set(const void*) noexcept override final { }
+    virtual void set(u32 level, const void*) noexcept override final { }
 
     virtual void bind(u8 textureUnit) noexcept override final;
 
     virtual void unbind(u8 textureUnit) noexcept override final;
+};
+
+class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder
+{
+    DEFAULT_CONSTRUCT_PU(GLTexture2DBuilder);
+    DEFAULT_DESTRUCT(GLTexture2DBuilder);
+    DELETE_COPY(GLTexture2DBuilder);
+private:
+public:
+    [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
 };

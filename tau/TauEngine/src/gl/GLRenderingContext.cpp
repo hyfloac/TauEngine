@@ -7,6 +7,8 @@
 #include "gl/GLVertexArray.hpp"
 #include "gl/GLBuffer.hpp"
 #include "gl/GLFrameBuffer.hpp"
+#include "gl/gl4_5/GLBuffer4_5.hpp"
+#include "gl/GLTexture.hpp"
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
@@ -91,15 +93,64 @@ void GLRenderingContext::enableDepthWriting(bool writing) noexcept
 
 Ref<IBufferBuilder> GLRenderingContext::createBuffer(const std::size_t descriptorCount) noexcept
 {
-    return Ref<GLBufferBuilder>(new(std::nothrow) GLBufferBuilder(descriptorCount));
+    switch(_mode.currentMode())
+    {
+        case RenderingMode::Mode::DirectX9:
+        case RenderingMode::Mode::DirectX11:
+        case RenderingMode::Mode::DirectX12:
+        case RenderingMode::Mode::DirectX12_1:
+        case RenderingMode::Mode::Vulkan:
+            return null;
+        case RenderingMode::Mode::OpenGL2:
+        case RenderingMode::Mode::OpenGL3:
+        case RenderingMode::Mode::OpenGL3_1:
+        case RenderingMode::Mode::OpenGL3_2:
+        case RenderingMode::Mode::OpenGL3_3:
+        case RenderingMode::Mode::OpenGL4:
+        case RenderingMode::Mode::OpenGL4_2:
+        case RenderingMode::Mode::OpenGL4_3:
+        case RenderingMode::Mode::OpenGL4_4:
+            return Ref<GLBufferBuilder>(new(std::nothrow) GLBufferBuilder(descriptorCount));
+        case RenderingMode::Mode::OpenGL4_5:
+        case RenderingMode::Mode::OpenGL4_6:
+            return Ref<GLBufferBuilder>(new(std::nothrow) GLBuffer4_5Builder(descriptorCount));
+        default: return null;
+    }
 }
 
 Ref<IIndexBufferBuilder> GLRenderingContext::createIndexBuffer() noexcept
 {
-    return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBufferBuilder);
+    switch(_mode.currentMode())
+    {
+        case RenderingMode::Mode::DirectX9:
+        case RenderingMode::Mode::DirectX11:
+        case RenderingMode::Mode::DirectX12:
+        case RenderingMode::Mode::DirectX12_1:
+        case RenderingMode::Mode::Vulkan:
+            return null;
+        case RenderingMode::Mode::OpenGL2:
+        case RenderingMode::Mode::OpenGL3:
+        case RenderingMode::Mode::OpenGL3_1:
+        case RenderingMode::Mode::OpenGL3_2:
+        case RenderingMode::Mode::OpenGL3_3:
+        case RenderingMode::Mode::OpenGL4:
+        case RenderingMode::Mode::OpenGL4_2:
+        case RenderingMode::Mode::OpenGL4_3:
+        case RenderingMode::Mode::OpenGL4_4:
+            return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBufferBuilder());
+        case RenderingMode::Mode::OpenGL4_5:
+        case RenderingMode::Mode::OpenGL4_6:
+            return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBuffer4_5Builder());
+        default: return null;
+    }
 }
 
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
 {
     return Ref<GLFrameBufferBuilder>(new(std::nothrow) GLFrameBufferBuilder);
+}
+
+Ref<ITextureBuilder> GLRenderingContext::createTexture2D() noexcept
+{
+    return Ref<GLTexture2DBuilder>(new(std::nothrow) GLTexture2DBuilder);
 }

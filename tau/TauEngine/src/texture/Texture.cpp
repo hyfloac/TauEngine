@@ -47,7 +47,7 @@ ITexture* ITexture::create(IRenderingContext& context, const u32 width, const u3
         {
             if(textureType == ETexture::Type::T2D)
             {
-                return new(std::nothrow) GLTexture2D(width, height, format);
+                return new(std::nothrow) GLTexture2D(width, height, format, 0);
             }
             else if(textureType == ETexture::Type::Depth)
             {

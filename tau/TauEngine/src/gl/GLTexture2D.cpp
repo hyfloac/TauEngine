@@ -1,20 +1,18 @@
 #include "gl/GLTexture.hpp"
 #include "gl/GLUtils.hpp"
 
-GLTexture2D::GLTexture2D(const u32 width, const u32 height, const ETexture::Format dataFormat) noexcept
+GLTexture2D::GLTexture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
     : ITexture(width, height, dataFormat),
-      _texture(0), _minFilter(GL_LINEAR), _magFilter(GL_LINEAR),
+      _texture(texture), _minFilter(GL_LINEAR), _magFilter(GL_LINEAR),
       _wrapS(GL_REPEAT), _wrapT(GL_REPEAT)
-{
-    glGenTextures(1, &_texture);
-}
+{ }
 
 GLTexture2D::~GLTexture2D() noexcept
 {
     glDeleteTextures(1, &_texture);
 }
 
-void GLTexture2D::set(const void* data) noexcept
+void GLTexture2D::set(const u32 level, const void* data) noexcept
 {
     const GLint internalFormat = glInternalFormat(_dataFormat);
     const GLenum inputFormat = glInputFormat(_dataFormat);
@@ -29,7 +27,7 @@ void GLTexture2D::set(const void* data) noexcept
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _wrapS);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _wrapT);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
+    glTexImage2D(GL_TEXTURE_2D, level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
 
 void GLTexture2D::bind(u8 textureUnit) noexcept
@@ -55,12 +53,12 @@ void GLDepthTexture::setDepthComparison(bool enableDepthTest, ETexture::DepthCom
     _depthCompareFunc = glDepthCompareFunc(compareFunc);
 }
 
-void GLDepthTexture::set(const void* data) noexcept
+void GLDepthTexture::set(const u32 level, const void* data) noexcept
 {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, _depthCompareMode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, _depthCompareFunc);
 
-    GLTexture2D::set(data);
+    GLTexture2D::set(level , data);
 }
 
 void GLTexture2D::setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept
@@ -78,6 +76,27 @@ void GLTexture2D::setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexce
 void GLTexture2D::generateMipmaps() noexcept
 {
     glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+ITexture* GLTexture2DBuilder::build([[tau::out]] Error* error) const noexcept
+{
+    ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
+    ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
+    ERROR_CODE_COND_N(_mipmapLevels < 0, Error::MipMapLevelsIsUnset);
+    ERROR_CODE_COND_N(_dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+
+    GLuint textureHandle;
+    glGenTextures(1, &textureHandle);
+
+    GLTexture2D* const texture = new(std::nothrow) GLTexture2D(_width, _height, _dataFormat, textureHandle);
+
+    if(!textureHandle)
+    {
+        glDeleteTextures(1, &textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    ERROR_CODE_V(Error::NoError, texture);
 }
 
 GLint GLTexture2D::glFilterType(const ETexture::Filter filterType) noexcept

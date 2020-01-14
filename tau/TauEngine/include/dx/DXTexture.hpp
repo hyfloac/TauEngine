@@ -32,7 +32,7 @@ public:
 
     void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override { }
 
-    void set(const void* data) noexcept override final { }
+    void set(u32 level, const void* data) noexcept override final { }
 
     void bind(u8 textureUnit) noexcept override final
     { }

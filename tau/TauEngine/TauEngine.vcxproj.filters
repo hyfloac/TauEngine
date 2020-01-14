@@ -500,6 +500,9 @@
     <ClInclude Include="include\terrain\TerrainTile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Window.natvis" />

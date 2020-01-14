@@ -11,6 +11,7 @@
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
 #include "model/IBuffer.hpp"
+#include "texture/Texture.hpp"
 
 #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                             public: \
@@ -90,6 +91,8 @@ public:
     [[nodiscard]] virtual Ref<IIndexBufferBuilder> createIndexBuffer() noexcept = 0;
 
     [[nodiscard]] virtual Ref<IFrameBufferBuilder> createFrameBuffer() noexcept = 0;
+
+    [[nodiscard]] virtual Ref<ITextureBuilder> createTexture2D() noexcept = 0;
 
     template<typename _T>
     [[nodiscard]] bool isContextType() const noexcept

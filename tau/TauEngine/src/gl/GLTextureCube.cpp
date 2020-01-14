@@ -26,7 +26,7 @@ void GLTextureCube::setWrapModeCube(const ETexture::WrapMode s, const ETexture::
     _wrapR = GLTexture2D::glWrapMode(r);
 }
 
-void GLTextureCube::setCube(ETexture::CubeSide side, const void* data) noexcept
+void GLTextureCube::setCube(const u32 level, ETexture::CubeSide side, const void* data) noexcept
 {
     const GLint internalFormat = GLTexture2D::glInternalFormat(_dataFormat);
     const GLenum inputFormat = GLTexture2D::glInputFormat(_dataFormat);
@@ -42,7 +42,7 @@ void GLTextureCube::setCube(ETexture::CubeSide side, const void* data) noexcept
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, _wrapT);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, _wrapR);
 
-    glTexImage2D(glCubeMapFace(side), 0, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
+    glTexImage2D(glCubeMapFace(side), level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
 
 void GLTextureCube::bind(u8 textureUnit) noexcept

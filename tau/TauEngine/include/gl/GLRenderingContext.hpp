@@ -65,6 +65,8 @@ public:
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override;
 
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
+
+    [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override;
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final;
 private:
