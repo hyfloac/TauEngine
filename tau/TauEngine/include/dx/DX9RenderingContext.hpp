@@ -61,6 +61,10 @@ public:
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return nullptr; }
 
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override { return null; }
+
+    [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }
+
+    [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override { return null; }
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 

@@ -21,7 +21,7 @@ public:
     void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final { }
     void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override final { }
     void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final { }
-    void set(const void* data) noexcept override final { }
+    void set(u32 level, const void* data) noexcept override final { }
     void generateMipmaps() noexcept override final { }
 };
 

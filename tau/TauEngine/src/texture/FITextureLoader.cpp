@@ -9,6 +9,7 @@
 #include <RenderingMode.hpp>
 #include "VFS.hpp"
 #include "Timings.hpp"
+#include "system/RenderingContext.hpp"
 
 static ITexture* _missingTexture = null;
 
@@ -38,10 +39,16 @@ ITexture* TextureLoader::generateMissingTexture(IRenderingContext& context) noex
     textureData[3 * 3 + 1] = 0x00;
     textureData[3 * 3 + 2] = 0x00;
 
-    ITexture* const ret = ITexture::create(context, 2, 2, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(2);
+    builder->height(2);
+    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+    builder->mipmapLevels(0);
+
+    ITexture* const ret = builder->build(null); //ITexture::create(context, 2, 2, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
 
     ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    ret->set(textureData);
+    ret->set(0, textureData);
 
     // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -64,10 +71,16 @@ ITexture* TextureLoader::generateColorTexture(IRenderingContext& context, RGBCol
     textureData[1] = color.g;
     textureData[2] = color.b;
 
-    ITexture* const ret = ITexture::create(context, 1, 1, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(1);
+    builder->height(1);
+    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+    builder->mipmapLevels(0);
+
+    ITexture* const ret = builder->build(null); //ITexture::create(context, 1, 1, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
 
     ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    ret->set(textureData);
+    ret->set(0, textureData);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
 
@@ -121,11 +134,17 @@ ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* R
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_SMALL, bitsPerPixel < 8);
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_LARGE, bitsPerPixel > 32);
 
-    ITexture* const ret = ITexture::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt, ETexture::Type::T2D);
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(width);
+    builder->height(height);
+    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+    builder->mipmapLevels(0);
+
+    ITexture* const ret = builder->build(null); //ITexture::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt, ETexture::Type::T2D);
 
     ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
     ret->setWrapMode(settings.wrapS, settings.wrapT);
-    ret->set(textureData);
+    ret->set(0, textureData);
 
     if(settings.mipmapLevel < 0)
     {
@@ -224,7 +243,7 @@ ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const
             ret->setWrapModeCube(settings.wrapS, settings.wrapT, settings.wrapR);
         }
 
-        ret->setCube(static_cast<ETexture::CubeSide>(i + 1), textureData);
+        ret->setCube(0, static_cast<ETexture::CubeSide>(i + 1), textureData);
 
         FreeImage_Unload(texture);
     }

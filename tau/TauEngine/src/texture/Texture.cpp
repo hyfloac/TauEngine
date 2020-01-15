@@ -51,7 +51,7 @@ ITexture* ITexture::create(IRenderingContext& context, const u32 width, const u3
             }
             else if(textureType == ETexture::Type::Depth)
             {
-                return new(std::nothrow) GLDepthTexture(width, height, format);
+                return new(std::nothrow) GLDepthTexture(width, height, format, 0);
             }
             else if(textureType == ETexture::Type::Cube)
             {

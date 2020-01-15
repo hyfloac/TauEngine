@@ -3,6 +3,31 @@
 #include <texture/Texture.hpp>
 #include <GL/glew.h>
 
+class TAU_DLL GLNullTexture final : public ITexture
+{
+    DEFAULT_DESTRUCT(GLNullTexture);
+    DELETE_COPY(GLNullTexture);
+public:
+    GLNullTexture() noexcept
+        : ITexture(0, 0, ETexture::Format::Red8UnsignedInt)
+    { }
+
+    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
+    void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override { }
+    void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override { }
+    void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override { }
+    void set(u32 level, const void* data) noexcept override { }
+
+    void bind(u8 textureUnit) noexcept override
+    {
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    void unbind(u8 textureUnit) noexcept override { }
+    void generateMipmaps() noexcept override { }
+};
+
 class TAU_DLL GLTexture2D : public ITexture
 {
     DELETE_COPY(GLTexture2D);
@@ -49,7 +74,7 @@ private:
     GLint _depthCompareMode;
     GLint _depthCompareFunc;
 public:
-    GLDepthTexture(u32 width, u32 height, ETexture::Format dataFormat) noexcept;
+    GLDepthTexture(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
 
     void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final;
 
@@ -97,6 +122,26 @@ class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder
     DEFAULT_CONSTRUCT_PU(GLTexture2DBuilder);
     DEFAULT_DESTRUCT(GLTexture2DBuilder);
     DELETE_COPY(GLTexture2DBuilder);
+private:
+public:
+    [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
+};
+
+class TAU_DLL GLTextureNullBuilder final : public ITextureBuilder
+{
+    DEFAULT_CONSTRUCT_PU(GLTextureNullBuilder);
+    DEFAULT_DESTRUCT(GLTextureNullBuilder);
+    DELETE_COPY(GLTextureNullBuilder);
+private:
+public:
+    [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
+};
+
+class TAU_DLL GLTextureDepthBuilder final : public ITextureBuilder
+{
+    DEFAULT_CONSTRUCT_PU(GLTextureDepthBuilder);
+    DEFAULT_DESTRUCT(GLTextureDepthBuilder);
+    DELETE_COPY(GLTextureDepthBuilder);
 private:
 public:
     [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;

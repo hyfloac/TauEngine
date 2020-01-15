@@ -152,25 +152,37 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
     // const GLint filterType = smooth ? GL_LINEAR : GL_NEAREST;
     const ETexture::Filter filterType = smooth ? ETexture::Filter::Linear : ETexture::Filter::Nearest;
 
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->dataFormat(ETexture::Format::Red8UnsignedInt);
+    builder->mipmapLevels(0);
+
+    const Ref<ITextureBuilder> nullBuilder = context.createNullTexture();
+
     for(GLchar c = minChar; c <= maxChar; ++c)
     {
         if(FT_Load_Char(face, c, FT_LOAD_RENDER)) { continue; }
 
-        ITexture* texture = ITexture::create(context, face->glyph->bitmap.width, face->glyph->bitmap.rows, ETexture::Format::Red8UnsignedInt);
+        ITexture* texture;
 
-        texture->setFilterMode(filterType, filterType);
+        if(face->glyph->bitmap.buffer)
+        {
+            builder->width(face->glyph->bitmap.width);
+            builder->height(face->glyph->bitmap.rows);
 
+            texture = builder->build(null); //ITexture::create(context, face->glyph->bitmap.width, face->glyph->bitmap.rows, ETexture::Format::Red8UnsignedInt);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterType);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterType);
+            texture->setFilterMode(filterType, filterType);
+            texture->setWrapMode(ETexture::WrapMode::ClampToEdge, ETexture::WrapMode::ClampToEdge);
 
-        texture->set(face->glyph->bitmap.buffer);
+            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
-        //              face->glyph->bitmap.width, face->glyph->bitmap.rows,
-        //              0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+            texture->set(0, face->glyph->bitmap.buffer);
+        }
+        else
+        {
+            texture = nullBuilder->build(null);
+        }
 
         gs.glyphs[c - gs.minGlyph] = GlyphCharacter(texture,
                                      Vector2f(static_cast<float>(face->glyph->bitmap.width), static_cast<float>(face->glyph->bitmap.rows)),

@@ -42,8 +42,8 @@ void GLTexture2D::unbind(u8 textureUnit) noexcept
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLDepthTexture::GLDepthTexture(const u32 width, const u32 height, const ETexture::Format dataFormat) noexcept
-    : GLTexture2D(width, height, dataFormat),
+GLDepthTexture::GLDepthTexture(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
+    : GLTexture2D(width, height, dataFormat, texture),
       _depthCompareMode(GL_COMPARE_REF_TO_TEXTURE), _depthCompareFunc(GL_LEQUAL)
 { }
 
@@ -78,7 +78,7 @@ void GLTexture2D::generateMipmaps() noexcept
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-ITexture* GLTexture2DBuilder::build([[tau::out]] Error* error) const noexcept
+ITexture* GLTexture2DBuilder::build(Error* error) const noexcept
 {
     ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
     ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
@@ -89,6 +89,36 @@ ITexture* GLTexture2DBuilder::build([[tau::out]] Error* error) const noexcept
     glGenTextures(1, &textureHandle);
 
     GLTexture2D* const texture = new(std::nothrow) GLTexture2D(_width, _height, _dataFormat, textureHandle);
+
+    if(!textureHandle)
+    {
+        glDeleteTextures(1, &textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+ITexture* GLTextureNullBuilder::build([[tau::out]] Error* error) const noexcept
+{
+    GLNullTexture* const texture = new(std::nothrow) GLNullTexture;
+
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+ITexture* GLTextureDepthBuilder::build(Error* error) const noexcept
+{
+    ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
+    ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
+    ERROR_CODE_COND_N(_mipmapLevels < 0, Error::MipMapLevelsIsUnset);
+    ERROR_CODE_COND_N(_dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+
+    GLuint textureHandle;
+    glGenTextures(1, &textureHandle);
+
+    GLDepthTexture* const texture = new(std::nothrow) GLDepthTexture(_width, _height, _dataFormat, textureHandle);
 
     if(!textureHandle)
     {

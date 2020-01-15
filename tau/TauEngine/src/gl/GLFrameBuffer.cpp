@@ -72,25 +72,46 @@ void GLRenderTexture::unbind(u8) noexcept
 }
 
 GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(ITexture::create(context, width, height, ETexture::Format::RedGreenBlue8UnsignedInt)))
+    : IFrameBufferAttachment(width, height, Ref<ITexture>(null /*ITexture::create(context, width, height, ETexture::Format::RedGreenBlue8UnsignedInt)*/))
 {
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(width);
+    builder->height(height);
+    builder->dataFormat(ETexture::Format::RedGreenBlue8UnsignedInt);
+    builder->mipmapLevels(0);
+
+    _texture = Ref<ITexture>(builder->build(null));
     _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    _texture->set(nullptr);
+    _texture->set(0, nullptr);
 }
 
 GLFrameBufferDepthAttachment::GLFrameBufferDepthAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(ITexture::create(context, width, height, ETexture::Format::Depth32Float, ETexture::Type::Depth)))
+    : IFrameBufferAttachment(width, height, Ref<ITexture>(/*ITexture::create(context, width, height, ETexture::Format::Depth32Float, ETexture::Type::Depth)*/))
 {
+    Ref<ITextureBuilder> builder = context.createTextureDepth();
+    builder->width(width);
+    builder->height(height);
+    builder->dataFormat(ETexture::Format::Depth32Float);
+    builder->mipmapLevels(0);
+
+    _texture = Ref<ITexture>(builder->build(null));
     _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
     _texture->setDepthComparison(true, ETexture::DepthCompareFunc::LessThanOrEqual);
-    _texture->set(nullptr);
+    _texture->set(0, nullptr);
 }
 
 GLFrameBufferStencilAttachment::GLFrameBufferStencilAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(ITexture::create(context, width, height, ETexture::Format::Stencil8UnsignedInt)))
+    : IFrameBufferAttachment(width, height, Ref<ITexture>(null /*ITexture::create(context, width, height, ETexture::Format::Stencil8UnsignedInt)*/))
 {
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(width);
+    builder->height(height);
+    builder->dataFormat(ETexture::Format::Stencil8UnsignedInt);
+    builder->mipmapLevels(0);
+
+    _texture = Ref<ITexture>(builder->build(null));
     _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    _texture->set(nullptr);
+    _texture->set(0, nullptr);
 }
 
 GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(u32 width, u32 height) noexcept

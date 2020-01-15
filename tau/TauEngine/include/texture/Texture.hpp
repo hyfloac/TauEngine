@@ -13,7 +13,7 @@ class TAU_DLL ITexture
     DEFAULT_DESTRUCT_VI(ITexture);
     DELETE_COPY(ITexture);
 public:
-    static ITexture* create(IRenderingContext& context, u32 width, u32 height, ETexture::Format format, ETexture::Type textureType = ETexture::Type::T2D) noexcept;
+    [[deprecated]] static ITexture* create(IRenderingContext& context, u32 width, u32 height, ETexture::Format format, ETexture::Type textureType = ETexture::Type::T2D) noexcept;
 protected:
     u32 _width;
     u32 _height;
