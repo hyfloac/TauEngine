@@ -98,6 +98,8 @@ public:
 
     [[nodiscard]] virtual Ref<ITextureBuilder> createTextureDepth() noexcept = 0;
 
+    [[nodiscard]] virtual Ref<ITextureCubeBuilder> createTextureCube() noexcept = 0;
+
     template<typename _T>
     [[nodiscard]] bool isContextType() const noexcept
     { return _T::getStaticType() == getContextType(); }

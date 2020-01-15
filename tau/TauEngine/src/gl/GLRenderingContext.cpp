@@ -155,7 +155,6 @@ Ref<ITextureBuilder> GLRenderingContext::createTexture2D() noexcept
     return Ref<GLTexture2DBuilder>(new(std::nothrow) GLTexture2DBuilder);
 }
 
-
 Ref<ITextureBuilder> GLRenderingContext::createNullTexture() noexcept
 {
     return Ref<GLTextureNullBuilder>(new(std::nothrow) GLTextureNullBuilder);
@@ -164,4 +163,9 @@ Ref<ITextureBuilder> GLRenderingContext::createNullTexture() noexcept
 Ref<ITextureBuilder> GLRenderingContext::createTextureDepth() noexcept
 {
     return Ref<GLTextureDepthBuilder>(new(std::nothrow) GLTextureDepthBuilder);
+}
+
+Ref<ITextureCubeBuilder> GLRenderingContext::createTextureCube() noexcept
+{
+    return Ref<GLTextureCubeBuilder>(new(std::nothrow) GLTextureCubeBuilder);
 }

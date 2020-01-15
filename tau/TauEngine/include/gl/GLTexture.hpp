@@ -94,7 +94,7 @@ private:
     GLint _wrapT;
     GLint _wrapR;
 public:
-    GLTextureCube(u32 width, u32 height, ETexture::Format dataFormat) noexcept;
+    GLTextureCube(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
 
     ~GLTextureCube() noexcept override;
 
@@ -122,7 +122,6 @@ class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder
     DEFAULT_CONSTRUCT_PU(GLTexture2DBuilder);
     DEFAULT_DESTRUCT(GLTexture2DBuilder);
     DELETE_COPY(GLTexture2DBuilder);
-private:
 public:
     [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
 };
@@ -132,7 +131,6 @@ class TAU_DLL GLTextureNullBuilder final : public ITextureBuilder
     DEFAULT_CONSTRUCT_PU(GLTextureNullBuilder);
     DEFAULT_DESTRUCT(GLTextureNullBuilder);
     DELETE_COPY(GLTextureNullBuilder);
-private:
 public:
     [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
 };
@@ -142,7 +140,15 @@ class TAU_DLL GLTextureDepthBuilder final : public ITextureBuilder
     DEFAULT_CONSTRUCT_PU(GLTextureDepthBuilder);
     DEFAULT_DESTRUCT(GLTextureDepthBuilder);
     DELETE_COPY(GLTextureDepthBuilder);
-private:
 public:
     [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
+};
+
+class TAU_DLL GLTextureCubeBuilder final : public ITextureCubeBuilder
+{
+    DEFAULT_CONSTRUCT_PU(GLTextureCubeBuilder);
+    DEFAULT_DESTRUCT(GLTextureCubeBuilder);
+    DELETE_COPY(GLTextureCubeBuilder);
+public:
+    [[nodiscard]] ITextureCube* build([[tau::out]] Error* error) const noexcept override;
 };

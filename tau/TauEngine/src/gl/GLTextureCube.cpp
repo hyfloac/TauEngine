@@ -1,8 +1,9 @@
 #include "gl/GLTexture.hpp"
+#include <Safeties.hpp>
 
-GLTextureCube::GLTextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat) noexcept
-    : ITextureCube(width, height, dataFormat),
-      _texture(0), _minFilter(GL_LINEAR), _magFilter(GL_LINEAR),
+GLTextureCube::GLTextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
+    : ITextureCube(width, height, dataFormat), 
+      _texture(texture), _minFilter(GL_LINEAR), _magFilter(GL_LINEAR),
       _wrapS(GL_REPEAT), _wrapT(GL_REPEAT), _wrapR(GL_REPEAT)
 {
     glGenTextures(1, &_texture);
@@ -74,4 +75,25 @@ GLenum GLTextureCube::glCubeMapFace(ETexture::CubeSide cubeSide) noexcept
         case ETexture::CubeSide::Bottom: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
         default: return 0;
     }
+}
+
+ITextureCube* GLTextureCubeBuilder::build(Error* error) const noexcept
+{
+    ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
+    ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
+    ERROR_CODE_COND_N(_mipmapLevels < 0, Error::MipMapLevelsIsUnset);
+    ERROR_CODE_COND_N(_dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+
+    GLuint textureHandle;
+    glGenTextures(1, &textureHandle);
+
+    GLTextureCube* const texture = new(std::nothrow) GLTextureCube(_width, _height, _dataFormat, textureHandle);
+
+    if(!textureHandle)
+    {
+        glDeleteTextures(1, &textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    ERROR_CODE_V(Error::NoError, texture);
 }

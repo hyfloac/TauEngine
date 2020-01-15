@@ -99,7 +99,7 @@ ITexture* GLTexture2DBuilder::build(Error* error) const noexcept
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-ITexture* GLTextureNullBuilder::build([[tau::out]] Error* error) const noexcept
+ITexture* GLTextureNullBuilder::build(Error* error) const noexcept
 {
     GLNullTexture* const texture = new(std::nothrow) GLNullTexture;
 

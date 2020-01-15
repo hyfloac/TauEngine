@@ -178,6 +178,12 @@ ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const
         delete ret; \
         return null; }
 
+    Ref<ITextureCubeBuilder> builder = context.createTextureCube();
+    // builder->width(width);
+    // builder->height(height);
+    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+    builder->mipmapLevels(0);
+
     ITextureCube* ret = null;
 
     u32 width = 0;
@@ -238,7 +244,11 @@ ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const
 
         if(i == 0)
         {
-            ret = ITextureCube::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+            builder->width(width);
+            builder->height(height);
+
+            // ret = ITextureCube::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+            ret = builder->build(null);
             ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
             ret->setWrapModeCube(settings.wrapS, settings.wrapT, settings.wrapR);
         }

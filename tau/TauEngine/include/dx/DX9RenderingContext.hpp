@@ -65,6 +65,8 @@ public:
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }
 
     [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override { return null; }
+
+    [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override { return null; }
 protected:
     bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 

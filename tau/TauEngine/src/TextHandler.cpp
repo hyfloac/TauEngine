@@ -145,11 +145,10 @@ TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) no
 GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context, const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
 {
     PERF();
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
 
-    // const GLint filterType = smooth ? GL_LINEAR : GL_NEAREST;
     const ETexture::Filter filterType = smooth ? ETexture::Filter::Linear : ETexture::Filter::Nearest;
 
     Ref<ITextureBuilder> builder = context.createTexture2D();
@@ -173,9 +172,6 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
 
             texture->setFilterMode(filterType, filterType);
             texture->setWrapMode(ETexture::WrapMode::ClampToEdge, ETexture::WrapMode::ClampToEdge);
-
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
             texture->set(0, face->glyph->bitmap.buffer);
         }
