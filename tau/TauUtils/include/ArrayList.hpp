@@ -1,165 +1,134 @@
 #pragma once
 
 #include "NumTypes.hpp"
-#include "Objects.hpp"
+#include "PageAllocator.hpp"
 #include <cstring>
 
-class ArrayListAllocator final
-{
-    DELETE_CONSTRUCT(ArrayListAllocator);
-    DELETE_COPY(ArrayListAllocator);
-    DELETE_DESTRUCT(ArrayListAllocator);
-private:
-    static void init() noexcept;
-public:
-    static void* reserve(std::size_t numPages) noexcept;
-
-    static void* commitPage(void* page) noexcept;
-
-    static void decommitPage(void* page) noexcept;
-
-    static void decommitPages(void* page, std::size_t pageCount) noexcept;
-
-    static void free(void* page) noexcept;
-
-    static std::size_t pageSize() noexcept;
-};
-
-template<typename _T, std::size_t _NumReservePages = 1024>
+template<typename _T, uSys _NumReservePages = 1024>
 class ArrayList final
 {
 private:
-    i64* _refCount;
+    struct ControlBlock final
+    {
+        iSys refCount;
+        uSys elementCount;
+        uSys dataSize;
+        uSys committedPages;
+    };
+private:
+    ControlBlock* _ctrlBlock;
     _T* _arr;
-    std::size_t _elementCount;
-    std::size_t _dataSize;
-    std::size_t _committedPages;
 public:
     ArrayList() noexcept
-        : _refCount(reinterpret_cast<i64*>(ArrayListAllocator::reserve(_NumReservePages))), _arr(nullptr),
-          _elementCount(0), _dataSize(sizeof(i64)), _committedPages(1)
+        : _ctrlBlock(reinterpret_cast<ControlBlock*>(PageAllocator::reserve(_NumReservePages))),
+          _arr(reinterpret_cast<_T*>(_ctrlBlock + 1))
     {
-        (void) ArrayListAllocator::commitPage(_refCount);
-        *_refCount = 1;
-        _arr = reinterpret_cast<_T*>(_refCount + 1);
+        (void) PageAllocator::commitPage(_ctrlBlock);
+        _ctrlBlock->refCount = 1;
+        _ctrlBlock->elementCount = 0;
+        _ctrlBlock->dataSize = sizeof(ControlBlock);
+        _ctrlBlock->committedPages = 1;
     }
 
     ~ArrayList() noexcept
     {
-        if(--(*_refCount) <= 0)
-        {
-            ArrayListAllocator::free(_refCount);
-        }
+        if(--(_ctrlBlock->refCount) <= 0)
+        { PageAllocator::free(_ctrlBlock->refCount); }
     }
 
     ArrayList(const ArrayList<_T, _NumReservePages>& copy) noexcept
-        : _refCount(copy._refCount), _arr(copy._arr),
-          _elementCount(copy._elementCount), _dataSize(copy._dataSize),
-          _committedPages(copy._committedPages)
-    { ++(*_refCount); }
+        : _ctrlBlock(copy._ctrlBlock), _arr(copy._arr)
+    { ++(_ctrlBlock->refCount); }
 
     ArrayList(ArrayList<_T, _NumReservePages>&& move) noexcept
-        : _refCount(move._refCount), _arr(move._arr),
-          _elementCount(move._elementCount), _dataSize(move._dataSize),
-          _committedPages(move._committedPages)
-    { ++(*_refCount); }
+        : _ctrlBlock(move._ctrlBlock), _arr(move._arr)
+    { ++(_ctrlBlock->refCount); }
 
     ArrayList<_T, _NumReservePages>& operator =(const ArrayList<_T, _NumReservePages>& copy) noexcept
     {
-        _refCount = copy._refCount;
+        _ctrlBlock = copy._ctrlBlock;
         _arr = copy._arr;
-        _elementCount = copy._elementCount;
-        _dataSize = copy._dataSize;
-        _committedPages = copy._committedPages;
 
-        ++(*_refCount);
+        ++(_ctrlBlock->refCount);
         return *this;
     }
 
     ArrayList<_T, _NumReservePages>& operator =(ArrayList<_T, _NumReservePages>&& move) noexcept
     {
-        _refCount = move._refCount;
+        _ctrlBlock = move._ctrlBlock;
         _arr = move._arr;
-        _elementCount = move._elementCount;
-        _dataSize = move._dataSize;
-        _committedPages = move._committedPages;
 
-        ++(*_refCount);
+        ++(_ctrlBlock->refCount);
         return *this;
     }
 
-    [[nodiscard]] std::size_t count() const noexcept { return _elementCount; }
+    [[nodiscard]] uSys count() const noexcept { return _ctrlBlock->elementCount; }
 
     void add(const _T& val) noexcept
     {
         assertSize();
-        _arr[_elementCount++] = val;
-        _dataSize += sizeof(_T);
+        _arr[_ctrlBlock->elementCount++] = val;
+        _ctrlBlock->dataSize += sizeof(_T);
     }
 
     template<typename... _Args>
     _T& emplace(_Args... args) noexcept
     {
         assertSize();
-        void* const placement = reinterpret_cast<u8*>(_arr) + _elementCount * sizeof(_T);
+        void* const placement = reinterpret_cast<u8*>(_arr) + _ctrlBlock->elementCount * sizeof(_T);
         _T* ret = new(placement) _T(args...);
-        ++_elementCount;
-        _dataSize += sizeof(_T);
-
+        ++_ctrlBlock->elementCount;
+        _ctrlBlock->dataSize += sizeof(_T);
 
         return *ret;
     }
 
-    void remove(const std::size_t index) noexcept
+    void remove(const uSys index) noexcept
     {
-        if(index + 1 > _elementCount)
+        if(index + 1 > _ctrlBlock->elementCount)
         { return; }
 
-        --_elementCount;
-        if(index == _elementCount)
+        --_ctrlBlock->elementCount;
+        if(index == _ctrlBlock->elementCount)
         { return; }
 
-        (void) std::memcpy(reinterpret_cast<void*>(_arr + index), reinterpret_cast<void*>(_arr + _elementCount), sizeof(_T));
-        _dataSize -= sizeof(_T);
+        (void) std::memcpy(reinterpret_cast<void*>(_arr + index), reinterpret_cast<void*>(_arr + _ctrlBlock->elementCount), sizeof(_T));
+        _ctrlBlock->dataSize -= sizeof(_T);
     }
 
-    [[nodiscard]] _T* get(const std::size_t index) noexcept
+    [[nodiscard]] _T* get(const uSys index) noexcept
     {
-        if(index >= _elementCount)
-        {
-            return nullptr;
-        }
+        if(index >= _ctrlBlock->elementCount)
+        { return nullptr; }
 
         return _arr[index];
     }
 
-    [[nodiscard]] const _T* get(const std::size_t index) const noexcept
+    [[nodiscard]] const _T* get(const uSys index) const noexcept
     {
-        if(index >= _elementCount)
-        {
-            return nullptr;
-        }
+        if(index >= _ctrlBlock->elementCount)
+        { return nullptr; }
 
         return &_arr[index];
     }
 
-    [[nodiscard]] _T& operator[](const std::size_t index) noexcept
+    [[nodiscard]] _T& operator[](const uSys index) noexcept
     {
         return _arr[index];
     }
 
-    [[nodiscard]] const _T& operator[](const std::size_t index) const noexcept
+    [[nodiscard]] const _T& operator[](const uSys index) const noexcept
     {
         return _arr[index];
     }
 private:
     void assertSize() noexcept
     {
-        const std::size_t pageBytes = _committedPages * ArrayListAllocator::pageSize();
-        if(_dataSize + sizeof(_T) >= pageBytes)
+        const uSys pageBytes = _ctrlBlock->committedPages * PageAllocator::pageSize();
+        if(_ctrlBlock->dataSize + sizeof(_T) >= pageBytes)
         {
-            (void) ArrayListAllocator::commitPage(reinterpret_cast<u8*>(_refCount) + pageBytes);
-            ++_committedPages;
+            (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_ctrlBlock->refCount) + pageBytes);
+            ++_ctrlBlock->committedPages;
         }
     }
 };

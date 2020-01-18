@@ -255,6 +255,8 @@
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\ArrayList.hpp" />
     <ClInclude Include="include\CVersion.hpp" />
+    <ClInclude Include="include\FixedBlockAllocator.hpp" />
+    <ClInclude Include="include\PageAllocator.hpp" />
     <ClInclude Include="include\ReferenceCountingPointer.hpp" />
     <ClInclude Include="include\RunTimeType.hpp" />
     <ClInclude Include="include\String.hpp" />
@@ -272,7 +274,7 @@
     <ClInclude Include="include\Utils.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ArrayListAllocator.cpp" />
+    <ClCompile Include="src\PageAllocator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

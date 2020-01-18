@@ -33,7 +33,7 @@ template<typename _T>
     return static_cast<_T&&>(ref);
 }
 
-    template<typename _T>
+template<typename _T>
 [[nodiscard]] constexpr inline _T&& _forward(_RemoveReferenceT<_T>&& ref) noexcept
 {
     return static_cast<_T&&>(ref);
@@ -83,7 +83,7 @@ public:
 template<typename _T>
 class ReferenceCountingPointer final
 {
-private:
+public:
     template<typename _TT>
     using RCDO = _ReferenceCountingPointerUtils::_ReferenceCountDataObject<_TT>;
 private:
@@ -158,7 +158,7 @@ public:
 template<typename _T>
 class NullableReferenceCountingPointer final
 {
-private:
+public:
     template<typename _TT>
     using RCDO = _ReferenceCountingPointerUtils::_ReferenceCountDataObject<_TT>;
 private:
@@ -291,7 +291,7 @@ class WeakReferenceCountingPointer;
 template<typename _T>
 class StrongReferenceCountingPointer final
 {
-private:
+public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
 private:
@@ -386,7 +386,7 @@ private:
 template<typename _T>
 class WeakReferenceCountingPointer final
 {
-private:
+public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
 private:
@@ -472,7 +472,7 @@ class NullableWeakReferenceCountingPointer;
 template<typename _T>
 class NullableStrongReferenceCountingPointer final
 {
-private:
+public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
 private:
@@ -581,7 +581,7 @@ private:
 template<typename _T>
 class NullableWeakReferenceCountingPointer final
 {
-private:
+public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
 private:

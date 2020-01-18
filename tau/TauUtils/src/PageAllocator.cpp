@@ -7,7 +7,7 @@
 static bool initialized = false;
 static DWORD _pageSize = 0;
 
-void ArrayListAllocator::init() noexcept
+void PageAllocator::init() noexcept
 {
     if(!initialized)
     {
@@ -20,33 +20,33 @@ void ArrayListAllocator::init() noexcept
     }
 }
 
-void* ArrayListAllocator::reserve(std::size_t numPages) noexcept
+void* PageAllocator::reserve(const uSys numPages) noexcept
 {
     init();
     return VirtualAlloc(NULL, numPages * _pageSize, MEM_RESERVE, PAGE_NOACCESS);
 }
 
-void* ArrayListAllocator::commitPage(void* page) noexcept
+void* PageAllocator::commitPage(void* const page) noexcept
 {
     return VirtualAlloc(page, _pageSize, MEM_COMMIT, PAGE_READWRITE);
 }
 
-void ArrayListAllocator::decommitPage(void* page) noexcept
+void PageAllocator::decommitPage(void* const page) noexcept
 {
     VirtualFree(page, 1, MEM_DECOMMIT);
 }
 
-void ArrayListAllocator::decommitPages(void* page, std::size_t pageCount) noexcept
+void PageAllocator::decommitPages(void* const page, const uSys pageCount) noexcept
 {
     VirtualFree(page, pageCount * _pageSize, MEM_DECOMMIT);
 }
 
-void ArrayListAllocator::free(void* page) noexcept
+void PageAllocator::free(void* const page) noexcept
 {
     VirtualFree(page, 0, MEM_RELEASE);
 }
 
-std::size_t ArrayListAllocator::pageSize() noexcept
+uSys PageAllocator::pageSize() noexcept
 {
     return _pageSize;
 }
