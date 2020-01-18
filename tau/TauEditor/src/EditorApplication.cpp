@@ -11,7 +11,7 @@
 #include <events/Event.hpp>
 #include <events/WindowEvent.hpp>
 #include <GL/glew.h>
-#include <shlobj.h>
+#include <ShlObj.h>
 #include <texture/FITextureLoader.hpp>
 #include <RenderingPipeline.hpp>
 #include <ResourceLoader.hpp>
@@ -84,7 +84,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _renderer = new TERenderer(*_window, _gameState, async);
 
     TimingsWriter::end();
-    TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfRuntime.json");
+    TimingsWriter::begin("TauEditor::Runtime", "|TERes/perfRuntime.json");
     return true;
 }
 
@@ -100,17 +100,17 @@ void TauEditorApplication::onException(Exception& ex) noexcept
     dispatcher.dispatch<IncorrectContextException>(this, &TauEditorApplication::onIncorrectContext);
 }
 
-void TauEditorApplication::render(const DeltaTime& delta) noexcept
-{
-    PERF();
-    _renderer->render(delta);
-}
-
 void TauEditorApplication::update(const float fixedDelta) noexcept
 {
     PERF();
     ResourceLoader::update();
     _renderer->update(fixedDelta);
+}
+
+void TauEditorApplication::render(const DeltaTime& delta) noexcept
+{
+    PERF();
+    _renderer->render(delta);
 }
 
 void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept

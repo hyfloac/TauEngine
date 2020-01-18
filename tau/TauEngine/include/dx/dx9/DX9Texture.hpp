@@ -2,7 +2,7 @@
 #ifdef _WIN32
 
 #include "texture/Texture.hpp"
-#include "dx/DX9RenderingContext.hpp"
+#include "dx/dx9/DX9RenderingContext.hpp"
 #include <d3d9.h>
 
 class TAU_DLL D3D9Texture2D final : public ITexture

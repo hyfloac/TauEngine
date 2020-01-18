@@ -27,10 +27,10 @@ private:
     GLProfile _compat;
     bool _forwardCompatible;
 public:
-    GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept;
+    GLRenderingContext(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile core, bool forwardCompatible) noexcept;
     ~GLRenderingContext() noexcept override final;
 
-    [[nodiscard]] bool createContext(void* param) noexcept override final;
+    [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
     void createFromShared(void* param) noexcept override final;
 
@@ -46,7 +46,7 @@ public:
 
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) noexcept override final;
 
-    void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept override final;
+    void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept override final;
 
     void setVSync(bool vsync) noexcept override final;
 
@@ -74,7 +74,7 @@ public:
 
     [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override;
 protected:
-    bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final;
+    bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept override final;
 private:
     void handleCtxError(int profileMask) const noexcept;
 

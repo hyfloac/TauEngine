@@ -1,7 +1,7 @@
-#include "dx/DXBuffer.hpp"
+#include "dx/dx9/DX9Buffer.hpp"
 #include <Safeties.hpp>
 
-DXBuffer::~DXBuffer() noexcept
+DX9Buffer::~DX9Buffer() noexcept
 {
     if(_buffer)
     {
@@ -9,7 +9,7 @@ DXBuffer::~DXBuffer() noexcept
     }
 }
 
-void DXBuffer::fillBuffer(IRenderingContext& context, const void* const data) noexcept
+void DX9Buffer::fillBuffer(IRenderingContext& context, const void* const data) noexcept
 {
     void* storeHandle;
     _buffer->Lock(0, 0, &storeHandle, 0);
@@ -17,7 +17,7 @@ void DXBuffer::fillBuffer(IRenderingContext& context, const void* const data) no
     _buffer->Unlock();
 }
 
-void DXBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
+void DX9Buffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
 {
     void* storeHandle;
     _buffer->Lock(offset, size, &storeHandle, 0);
@@ -25,12 +25,12 @@ void DXBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, c
     _buffer->Unlock();
 }
 
-DXBufferBuilder::DXBufferBuilder(const uSys descriptorCount, DX9RenderingContext& context) noexcept
+DX9BufferBuilder::DX9BufferBuilder(const uSys descriptorCount, DX9RenderingContext& context) noexcept
     : IBufferBuilder(descriptorCount),
       _context(context)
 { }
 
-IBuffer* DXBufferBuilder::build(Error* error) const noexcept
+IBuffer* DX9BufferBuilder::build(Error* error) const noexcept
 {
     ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
@@ -56,7 +56,7 @@ IBuffer* DXBufferBuilder::build(Error* error) const noexcept
         ERROR_CODE_N(Error::UnknownError);
     }
 
-    DXBuffer* const buffer = new(std::nothrow) DXBuffer(_type, _usage, _bufferSize, _descriptor, d3dBuffer);
+    DX9Buffer* const buffer = new(std::nothrow) DX9Buffer(_type, _usage, _bufferSize, _descriptor, d3dBuffer);
 
     if(!buffer)
     {

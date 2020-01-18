@@ -448,7 +448,8 @@ bool Window::createContext() noexcept
     _context = IRenderingContext::create(this->_renderingMode);
 
     if(!_context) { return false; }
-    if(!_context->createContext(&this->_windowContainer.windowHandle)) { return false; }
+    // if(!_context->createContext(&this->_windowContainer.windowHandle)) { return false; }
+    if(!_context->createContext(*this)) { return false; }
 
     return true;
 }

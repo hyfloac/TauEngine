@@ -11,8 +11,8 @@
 #include "gl/GLTexture.hpp"
 #include "Timings.hpp"
 
-GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const bool debug, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
-    : IRenderingContext(mode, debug),
+GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
+    : IRenderingContext(mode),
       _device(null), _context(null),
       _vaos(),
       _majorVersion(majorVersion),
@@ -65,7 +65,7 @@ void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, flo
     glViewport(x, y, width, height);
 }
 
-void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue) noexcept
+void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
 {
     GLbitfield flags = 0;
     if(clearColorBuffer) { flags = GL_COLOR_BUFFER_BIT; }

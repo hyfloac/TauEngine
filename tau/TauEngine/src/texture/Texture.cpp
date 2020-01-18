@@ -1,6 +1,6 @@
 #include <texture/Texture.hpp>
 #include <gl/GLTexture.hpp>
-#include <dx/DXTexture.hpp>
+#include <dx/dx9/DX9Texture.hpp>
 #include <system/RenderingContext.hpp>
 #include <Utils.hpp>
 

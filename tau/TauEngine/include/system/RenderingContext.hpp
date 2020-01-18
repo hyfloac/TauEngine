@@ -23,6 +23,7 @@
 
 #define RC_IMPL(_TYPE) RC_IMPL_BASE(_TYPE)
 
+class Window;
 class IVertexArray;
 enum class DrawType : u8;
 class IBuffer;
@@ -43,18 +44,16 @@ public:
     using ContextType = RunTimeType<IRenderingContext>;
 protected:
     const RenderingMode& _mode;
-    bool _debug;
 protected:
-    IRenderingContext(const RenderingMode & mode, const bool debug)
-        : _mode(mode), _debug(debug)
+    IRenderingContext(const RenderingMode & mode)
+        : _mode(mode)
     { }
 public:
     [[nodiscard]] const RenderingMode& mode() const noexcept { return _mode; }
-    [[nodiscard]] bool debug() const noexcept { return _debug; }
 
     [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept = 0;
 
-    [[nodiscard]] virtual bool createContext(void* param) noexcept = 0;
+    [[nodiscard]] virtual bool createContext(Window& window) noexcept = 0;
 
     virtual void createFromShared(void* param) noexcept = 0;
 
@@ -72,7 +71,7 @@ public:
 
     virtual void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0, float maxZ = 0) noexcept = 0;
 
-    virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept = 0;
+    virtual void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept = 0;
 
     virtual void setVSync(bool vsync) noexcept = 0;
 
@@ -108,7 +107,7 @@ public:
     [[nodiscard]] _T* getVertexArrayHandle(IVertexArray* vertexArray) noexcept
     { return reinterpret_cast<_T*>(getVertexArrayHandle(vertexArray)); }
 protected:
-    virtual bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept = 0;
+    virtual bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept = 0;
 private:
     friend class SharedRenderingContexts;
 };
@@ -141,7 +140,7 @@ public:
     // ReSharper disable once CppMemberFunctionMayBeConst
     [[nodiscard]] IRenderingContext** contexts() noexcept { return _contexts; }
 
-    [[nodiscard]] bool createContexts(void* param) noexcept;
+    [[nodiscard]] bool createContexts(Window& window) noexcept;
 
     void destroyVA(IVertexArray* vertexArray) noexcept;
 };

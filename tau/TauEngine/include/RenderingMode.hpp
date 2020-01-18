@@ -22,6 +22,7 @@ public:
     enum Mode : u8
     {
         DirectX9 = 0,
+        DirectX10,
         DirectX11,
         DirectX12,
         DirectX12_1,

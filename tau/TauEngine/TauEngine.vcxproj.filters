@@ -210,10 +210,13 @@
     <ClCompile Include="src\terrain\TerrainTile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\dx\DX9RenderingContext.cpp">
+    <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\dx\DXBuffer.cpp">
+    <ClCompile Include="src\dx\dx9\DXBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -455,13 +458,7 @@
     <ClInclude Include="include\console\ConsoleLexer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\dx\DXBuffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\gl\GLTexture.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dx\DXTexture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\texture\TextureEnums.hpp">
@@ -494,13 +491,22 @@
     <ClInclude Include="include\shader\SpotLight.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\dx\DX9RenderingContext.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\terrain\TerrainTile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx9\DX9RenderingContext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx9\DX9Buffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx9\DX9Texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

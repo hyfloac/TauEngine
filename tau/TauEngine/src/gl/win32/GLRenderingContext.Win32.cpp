@@ -1,5 +1,6 @@
 #ifdef _WIN32
 #include "gl/GLRenderingContext.hpp"
+#include "system/Window.hpp"
 
 GLRenderingContext::~GLRenderingContext() noexcept
 {
@@ -64,7 +65,7 @@ void GLRenderingContext::handleCtxError(int profileMask) const noexcept
     {
         fputs("  Compatibility Profile\n", stderr);
     }
-    if(this->_debug)
+    if(this->_mode.debugMode())
     {
         fputs("  Debug Context\n", stderr);
     }
@@ -150,9 +151,9 @@ void GLRenderingContext::handleCtxError(int profileMask) const noexcept
 }
 #endif
 
-bool GLRenderingContext::createContext(void* param) noexcept
+bool GLRenderingContext::createContext(Window& window) noexcept
 {
-    return createContextsShared(param, null, 0);
+    return createContextsShared(window, null, 0);
 }
 
 struct ContextShareData final
@@ -161,7 +162,7 @@ struct ContextShareData final
     HGLRC hglrc;
 };
 
-bool GLRenderingContext::createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept
+bool GLRenderingContext::createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept
 {
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
@@ -177,7 +178,8 @@ bool GLRenderingContext::createContextsShared(void* param, IRenderingContext** s
 
     // ReSharper disable once CppLocalVariableMayBeConst
     // this->_device = *reinterpret_cast<HDC*>(param);
-    this->_device = GetDC(*reinterpret_cast<HWND*>(param));
+    // this->_device = GetDC(*reinterpret_cast<HWND*>(param));
+    this->_device = GetDC(window.sysWindowContainer().windowHandle);
 
     const int pixelFormat = ChoosePixelFormat(this->_device, &pfd);
 
@@ -206,7 +208,7 @@ bool GLRenderingContext::createContextsShared(void* param, IRenderingContext** s
         {
             WGL_CONTEXT_MAJOR_VERSION_ARB, this->_majorVersion,
             WGL_CONTEXT_MINOR_VERSION_ARB, this->_minorVersion,
-            WGL_CONTEXT_FLAGS_ARB,        (this->_debug ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
+            WGL_CONTEXT_FLAGS_ARB,        (this->_mode.debugMode() ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
                                           (this->_forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB : 0),
             WGL_CONTEXT_PROFILE_MASK_ARB, (this->_compat == GLProfile::Core ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB :
                                            this->_compat == GLProfile::Compat ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),

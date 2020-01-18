@@ -117,6 +117,7 @@ public:
     [[nodiscard]] inline u32 yPos()   const noexcept { return _yPos; }
     [[nodiscard]] inline const char* title() const noexcept { return _title; }
     [[nodiscard]] IRenderingContext* renderingContext() const noexcept { return _context; }
+    [[nodiscard]] inline const _SysWindowContainer& sysWindowContainer() const noexcept { return _windowContainer; }
     [[nodiscard]] inline const void* userContainer() const noexcept { return _userContainer; }
     [[nodiscard]] inline const Window* parent() const noexcept { return _parent; }
     [[nodiscard]] inline RenderingMode& renderingMode() const noexcept { return _renderingMode; }
@@ -173,11 +174,11 @@ public:
      */
     bool createContext() noexcept;
 
-    /**
-     *   Swaps the current frame buffer. Only needed if not 
-     * rendering in double buffered mode
-     */
-    void swapBuffers() const noexcept;
+    // /**
+    //  *   Swaps the current frame buffer. Only needed if not 
+    //  * rendering in double buffered mode
+    //  */
+    // void swapBuffers() const noexcept;
 public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;

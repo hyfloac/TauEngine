@@ -27,8 +27,9 @@
     <ClCompile Include="src\camera\Skybox.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
-    <ClCompile Include="src\dx\DX9RenderingContext.cpp" />
-    <ClCompile Include="src\dx\DXBuffer.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
+    <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp" />
+    <ClCompile Include="src\dx\dx9\DXBuffer.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
@@ -99,8 +100,9 @@
     <ClInclude Include="include\console\ConsoleController.hpp" />
     <ClInclude Include="include\console\ConsoleLexer.hpp" />
     <ClInclude Include="include\DLL.hpp" />
-    <ClInclude Include="include\dx\DXBuffer.hpp" />
-    <ClInclude Include="include\dx\DX9RenderingContext.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
+    <ClInclude Include="include\dx\dx9\DX9Buffer.hpp" />
+    <ClInclude Include="include\dx\dx9\DX9RenderingContext.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
     <ClInclude Include="include\events\WindowEvent.hpp" />
@@ -167,7 +169,7 @@
     <ClInclude Include="include\TauEngine.hpp" />
     <ClInclude Include="include\terrain\TerrainTile.hpp" />
     <ClInclude Include="include\TextHandler.hpp" />
-    <ClInclude Include="include\dx\DXTexture.hpp" />
+    <ClInclude Include="include\dx\dx9\DX9Texture.hpp" />
     <ClInclude Include="include\texture\FITextureLoader.hpp" />
     <ClInclude Include="include\gl\GLTexture.hpp" />
     <ClInclude Include="include\texture\FrameBuffer.hpp" />

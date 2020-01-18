@@ -1,11 +1,12 @@
-#include "dx/DX9RenderingContext.hpp"
+#include "dx/dx9/DX9RenderingContext.hpp"
 
 #ifdef _WIN32
 #include <Utils.hpp>
-#include "dx/DXBuffer.hpp"
+#include "dx/dx9/DX9Buffer.hpp"
+#include "system/Window.hpp"
 
-DX9RenderingContext::DX9RenderingContext(const RenderingMode& mode, const bool debug) noexcept
-    : IRenderingContext(mode, debug),
+DX9RenderingContext::DX9RenderingContext(const RenderingMode& mode) noexcept
+    : IRenderingContext(mode),
       _d3d9(null), _d3d9Device(null)
 { }
 
@@ -35,9 +36,10 @@ struct D3D9ContextSettings
     HWND hwnd;
 };
 
-bool DX9RenderingContext::createContext(void* param) noexcept
+bool DX9RenderingContext::createContext(Window& window) noexcept
 {
-    HWND hWnd = *reinterpret_cast<HWND*>(param);
+    // HWND hWnd = *reinterpret_cast<HWND*>(param);
+    HWND hWnd = window.sysWindowContainer().windowHandle;
 
     _d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
 
@@ -57,7 +59,7 @@ bool DX9RenderingContext::createContext(void* param) noexcept
     return true;
 }
 
-void DX9RenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, int stencilValue) noexcept
+void DX9RenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
 {
     DWORD flags = 0;
     if(clearColorBuffer)   { flags  = D3DCLEAR_TARGET;  }
@@ -84,6 +86,6 @@ void DX9RenderingContext::swapFrame() noexcept
 
 Ref<IBufferBuilder> DX9RenderingContext::createBuffer(const std::size_t descriptorCount) noexcept
 {
-    return Ref<DXBufferBuilder>(new(std::nothrow) DXBufferBuilder(descriptorCount, *this));
+    return Ref<DX9BufferBuilder>(new(std::nothrow) DX9BufferBuilder(descriptorCount, *this));
 }
 #endif

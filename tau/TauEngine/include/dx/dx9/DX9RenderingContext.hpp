@@ -1,13 +1,13 @@
 #pragma once
 
-#include <system/RenderingContext.hpp>
+#include "system/RenderingContext.hpp"
 
 #ifdef _WIN32
 #pragma warning(push, 0)
 #include <d3d9.h>
 #pragma warning(pop)
 
-#include <DLL.hpp>
+#include "DLL.hpp"
 
 class TAU_DLL DX9RenderingContext final : public IRenderingContext
 {
@@ -15,7 +15,7 @@ private:
     IDirect3D9* _d3d9;
     IDirect3DDevice9* _d3d9Device;
 public:
-    DX9RenderingContext(const RenderingMode& mode, const bool debug) noexcept;
+    DX9RenderingContext(const RenderingMode& mode) noexcept;
     ~DX9RenderingContext() noexcept override final;
 
     [[nodiscard]] const IDirect3D9* d3d9() const noexcept { return _d3d9; }
@@ -25,7 +25,7 @@ public:
 
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override final;
 
-    [[nodiscard]] bool createContext(void* param) noexcept override final;
+    [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
     void createFromShared(void* param) noexcept override final { }
 
@@ -40,7 +40,7 @@ public:
 
     void clearVAs() noexcept override final { }
 
-    void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, int stencilValue = 0) noexcept override final;
+    void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept override final;
 
     void setVSync(bool vsync) noexcept override final { }
 
@@ -68,7 +68,7 @@ public:
 
     [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override { return null; }
 protected:
-    bool createContextsShared(void* param, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
+    bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 
     RC_IMPL(DX9RenderingContext);
 };
