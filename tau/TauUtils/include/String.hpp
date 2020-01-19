@@ -454,8 +454,13 @@ private:
 
 class DynString final
 {
+public:
+    static DynString passControl(const char* str) noexcept
+    {
+        return DynString(str, ::std::strlen(str));
+    }
 private:
-    const char*    _string;
+    const char* _string;
     uSys* _refCount;
     uSys  _length;
     uSys  _hash;

@@ -57,6 +57,23 @@
   #define RESTRICT
 #endif
 
+#if defined(_WIN32)
+  #define NOVTABLE __declspec(novtable)
+#else
+  #define NOVTABLE
+#endif
+
+#if defined(_WIN32)
+  #define DYNAMIC_EXPORT __declspec(dllexport)
+  #define DYNAMIC_IMPORT __declspec(dllimport)
+#elif defined(__GNUC__) || defined(__CLANG__)
+  #define DYNAMIC_EXPORT __attribute__((visibility("default")))
+  #define DYNAMIC_IMPORT 
+#else
+  #define DYNAMIC_EXPORT
+  #define DYNAMIC_IMPORT
+#endif
+
 #define UNUSED(_X) ((void) (_X))
 #define UNUSED2(_0, _1) ((void) (_0)); ((void) (_1))
 #define UNUSED3(_0, _1, _2) ((void) (_0)); ((void) (_1)); ((void) (_2))
