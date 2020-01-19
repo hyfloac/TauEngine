@@ -27,6 +27,9 @@
     <ClCompile Include="src\camera\Skybox.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx9\DXBuffer.cpp" />
@@ -38,6 +41,7 @@
     <ClCompile Include="src\model\Material.cpp" />
     <ClCompile Include="src\shader\PointLight.cpp" />
     <ClCompile Include="src\shader\SpotLight.cpp" />
+    <ClCompile Include="src\system\SystemInterface.cpp" />
     <ClCompile Include="src\terrain\TerrainTile.cpp" />
     <ClCompile Include="src\texture\FITextureLoader.cpp" />
     <ClCompile Include="src\GameRecorder.cpp" />
@@ -86,6 +90,7 @@
     <ClCompile Include="src\VirtualIO.cpp" />
     <ClCompile Include="src\win32\Win32Mouse.cpp" />
     <ClCompile Include="src\win32\Win32Keyboard.cpp" />
+    <ClCompile Include="src\win32\Win32SystemInterface.cpp" />
     <ClCompile Include="src\win32\Win32Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +105,9 @@
     <ClInclude Include="include\console\ConsoleController.hpp" />
     <ClInclude Include="include\console\ConsoleLexer.hpp" />
     <ClInclude Include="include\DLL.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10GraphicsInterface.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx9\DX9Buffer.hpp" />
     <ClInclude Include="include\dx\dx9\DX9RenderingContext.hpp" />
@@ -158,6 +166,9 @@
     <ClInclude Include="include\shader\IUniform.hpp" />
     <ClInclude Include="include\shader\PointLight.hpp" />
     <ClInclude Include="include\shader\SpotLight.hpp" />
+    <ClInclude Include="include\system\GraphicsAccelerator.hpp" />
+    <ClInclude Include="include\system\GraphicsDisplay.hpp" />
+    <ClInclude Include="include\system\GraphicsInterface.hpp" />
     <ClInclude Include="include\system\Keyboard.hpp" />
     <ClInclude Include="include\system\Mouse.hpp" />
     <ClInclude Include="include\gl\GLShader.hpp" />
@@ -165,6 +176,7 @@
     <ClInclude Include="include\system\Mutex.hpp" />
     <ClInclude Include="include\system\RenderingContext.hpp" />
     <ClInclude Include="include\system\Semaphore.hpp" />
+    <ClInclude Include="include\system\SystemInterface.hpp" />
     <ClInclude Include="include\system\Win32Event.hpp" />
     <ClInclude Include="include\TauEngine.hpp" />
     <ClInclude Include="include\terrain\TerrainTile.hpp" />
@@ -178,7 +190,7 @@
     <ClInclude Include="include\Timings.hpp" />
     <ClInclude Include="include\TUID.hpp" />
     <ClInclude Include="include\system\Window.hpp" />
-    <ClInclude Include="include\system\_SysWindowContainer.hpp" />
+    <ClInclude Include="include\system\_SysContainer.hpp" />
     <ClInclude Include="include\ui\UIButton.hpp" />
     <ClInclude Include="include\ui\UIElement.hpp" />
     <ClInclude Include="include\ui\UIPanel.hpp" />

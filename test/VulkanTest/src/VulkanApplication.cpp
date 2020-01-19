@@ -196,7 +196,7 @@ void VulkanApplication::setupDebugMessenger(VkResult* vkRes) noexcept
     if(vkRes) { *vkRes = res; }
 }
 
-[[nodiscard]] VulkanApplication::Error VulkanApplication::selectPhysicalDevice() noexcept
+VulkanApplication::Error VulkanApplication::selectPhysicalDevice() noexcept
 {
     u32 deviceCount = 0;
     vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);

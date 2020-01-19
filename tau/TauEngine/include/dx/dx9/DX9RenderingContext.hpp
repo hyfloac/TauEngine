@@ -23,7 +23,7 @@ public:
     [[nodiscard]] const IDirect3DDevice9* d3d9Device() const noexcept { return _d3d9Device; }
     [[nodiscard]] IDirect3DDevice9* d3d9Device() noexcept { return _d3d9Device; }
 
-    void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override final;
+    void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0.0f, float maxZ = 1.0f) noexcept override final;
 
     [[nodiscard]] bool createContext(Window& window) noexcept override final;
 

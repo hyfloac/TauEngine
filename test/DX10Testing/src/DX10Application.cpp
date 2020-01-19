@@ -17,7 +17,7 @@ static void setupGameFolders() noexcept;
 
 DX10Application::DX10Application() noexcept
     : Application(32), _config { false, 800, 600 },
-      _window(null), _logger(null)
+      _window(null), _logger(null), _r(13), _g(23), _b(127), _rr(1), _gg(1), _bb(-1)
 { }
 
 DX10Application::~DX10Application() noexcept
@@ -83,6 +83,14 @@ void DX10Application::update(float fixedDelta) noexcept
 {
     UNUSED(fixedDelta);
     ResourceLoader::update();
+#define UPDATE_COLOR0(_COL, _INC) do {\
+        (_COL) += (_INC);\
+        if((_COL) == 255 || (_COL) == 0) { (_INC) *= -1; } \
+    }while(0);
+#define UPDATE_COLOR(_COL) UPDATE_COLOR0(_##_COL, _##_COL##_COL)
+    UPDATE_COLOR(r);
+    UPDATE_COLOR(g);
+    UPDATE_COLOR(b);
 }
 
 void DX10Application::render(const DeltaTime& delta) noexcept
@@ -90,7 +98,7 @@ void DX10Application::render(const DeltaTime& delta) noexcept
     UNUSED(delta);
     auto& ctx = *_window->renderingContext();
     ctx.beginFrame();
-    ctx.clearScreen(true, true, false, RGBAColor { 255, 0, 0, 255 });
+    ctx.clearScreen(true, true, false, RGBAColor { _r, _g, _b, 255 });
     ctx.endFrame();
     ctx.swapFrame();
 }

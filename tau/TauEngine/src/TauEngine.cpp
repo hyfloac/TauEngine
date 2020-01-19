@@ -4,6 +4,7 @@
 #include "Timings.hpp"
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
+#include "system/SystemInterface.hpp"
 
 bool tauInit() noexcept
 {
@@ -12,6 +13,7 @@ bool tauInit() noexcept
     if(!_initializationComplete)
     {
         _initializationComplete = true;
+        SystemInterface::create();
         // spdlog::set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
         // engineLogger = spdlog::stdout_color_mt("TauEngine");
         // engineLogger->set_level(spdlog::level::trace);

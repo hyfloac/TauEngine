@@ -13,7 +13,7 @@
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
 private:
-    ID3D10Device * _d3d10Device;
+    ID3D10Device* _d3d10Device;
     ID3D10RenderTargetView* _renderTargetView;
     ID3D10Texture2D* _depthStencilBuffer;
     ID3D10DepthStencilState* _depthStencilState;

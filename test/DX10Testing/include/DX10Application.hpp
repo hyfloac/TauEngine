@@ -19,6 +19,8 @@ private:
     Config _config;
     Window* _window;
     Ref<spdlog::logger> _logger;
+    u8 _r, _g, _b;
+    u8 _rr, _gg, _bb;
 public:
     DX10Application() noexcept;
 

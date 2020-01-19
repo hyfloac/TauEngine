@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <Utils.hpp>
 #include "system/Window.hpp"
+#include "system/SystemInterface.hpp"
 
 DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
     : IRenderingContext(mode),
@@ -43,65 +44,26 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     DXGI_RATIONAL refreshRate = { 0, 1 };
 
     {
-        // DirectX Graphics Interface Factory
-        IDXGIFactory* dxgiFactory;
-        CHECK(CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory)));
+        Ref<IGraphicsInterface> graphicsInterface = SystemInterface::get()->createGraphicsInterface(_mode);
+        auto gpuList = graphicsInterface->graphicsAccelerators();
+        if(gpuList.count() == 0) { return false; }
 
-        // Create adapter for primary graphics interface (graphics card)
-        IDXGIAdapter* dxgiAdapter;
-        CHECK(dxgiFactory->EnumAdapters(0, &dxgiAdapter));
+        auto displayList = gpuList[0]->graphicsDisplays();
+        if(displayList.count() == 0) { return false; }
 
-        // Enumerate primary adapter output (monitor)
-        IDXGIOutput* dxgiAdapterOutput;
-        CHECK(dxgiAdapter->EnumOutputs(0, &dxgiAdapterOutput));
+        auto displayModeList = displayList[0]->displayModes();
+        if(displayModeList.count() == 0) { return false; }
 
-        // Get the number of modes that match the specified display mode for the adapter output
-        u32 numDisplayModes;
-        CHECK(dxgiAdapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numDisplayModes, NULL));
-
-        // A list to hold all possible display modes for the monitor/video card combination
-        DXGI_MODE_DESC* displayModeList = new(std::nothrow) DXGI_MODE_DESC[numDisplayModes];
-        if(!displayModeList)
+        for(uSys i = 0; i < displayModeList.length(); ++i)
         {
-            return false;
-        }
-
-        CHECK(dxgiAdapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numDisplayModes, displayModeList));
-
-        for(uSys i = 0; i < numDisplayModes; ++i)
-        {
-            if(displayModeList[i].Width == window.width() &
-               displayModeList[i].Height == window.height())
+            if(displayModeList[i].width == window.width() &
+               displayModeList[i].height == window.height())
             {
-                refreshRate = displayModeList[i].RefreshRate;
+                refreshRate.Numerator = displayModeList[i].refreshRateNumerator;
+                refreshRate.Denominator = displayModeList[i].refreshRateDenominator;
+                break;
             }
         }
-
-        DXGI_ADAPTER_DESC dxgiAdapterDesc;
-        CHECK(dxgiAdapter->GetDesc(&dxgiAdapterDesc));
-
-        // Get the video card memory in MiB
-        uSys videoCardMemory = dxgiAdapterDesc.DedicatedVideoMemory / 1024 / 1024;
-        UNUSED(videoCardMemory);
-
-        uSys videoCardDescLen;
-        errno_t error = wcstombs_s(&videoCardDescLen, null, 0, dxgiAdapterDesc.Description, 128);
-        if(error || !videoCardDescLen)
-        {
-            return false;
-        }
-
-        char* videoCardDesc = new(std::nothrow) char[videoCardDescLen + 1];
-        error = wcstombs_s(&videoCardDescLen, videoCardDesc, videoCardDescLen, dxgiAdapterDesc.Description, 128);
-        if(error)
-        {
-            return false;
-        }
-
-        delete[] displayModeList;
-        dxgiAdapterOutput->Release();
-        dxgiAdapter->Release();
-        dxgiFactory->Release();
     }
 
     {
@@ -112,6 +74,8 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         swapChainDesc.BufferDesc.Width = window.width();
         swapChainDesc.BufferDesc.Height = window.height();
         swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
         if(_vsync)
         {
@@ -133,8 +97,6 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         constexpr bool fullScreen = false;
         swapChainDesc.Windowed = !fullScreen;
 
-        swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.Flags = 0;
 
@@ -152,21 +114,21 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     }
 
     {
-        D3D10_TEXTURE2D_DESC depthBufferDesc;
-        ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
-        depthBufferDesc.Width = window.width();
-        depthBufferDesc.Height = window.height();
-        depthBufferDesc.MipLevels = 1;
-        depthBufferDesc.ArraySize = 1;
-        depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        depthBufferDesc.SampleDesc.Count = 1;
-        depthBufferDesc.SampleDesc.Quality = 0;
-        depthBufferDesc.Usage = D3D10_USAGE_DEFAULT;
-        depthBufferDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
-        depthBufferDesc.CPUAccessFlags = 0;
-        depthBufferDesc.MiscFlags = 0;
+        D3D10_TEXTURE2D_DESC depthStencilBufferDesc;
+        ZeroMemory(&depthStencilBufferDesc, sizeof(depthStencilBufferDesc));
+        depthStencilBufferDesc.Width = window.width();
+        depthStencilBufferDesc.Height = window.height();
+        depthStencilBufferDesc.MipLevels = 1;
+        depthStencilBufferDesc.ArraySize = 1;
+        depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilBufferDesc.SampleDesc.Count = 1;
+        depthStencilBufferDesc.SampleDesc.Quality = 0;
+        depthStencilBufferDesc.Usage = D3D10_USAGE_DEFAULT;
+        depthStencilBufferDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
+        depthStencilBufferDesc.CPUAccessFlags = 0;
+        depthStencilBufferDesc.MiscFlags = 0;
 
-        CHECK(_d3d10Device->CreateTexture2D(&depthBufferDesc, NULL, &_depthStencilBuffer));
+        CHECK(_d3d10Device->CreateTexture2D(&depthStencilBufferDesc, NULL, &_depthStencilBuffer));
     }
 
     {
@@ -223,14 +185,7 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     }
 
     {
-        D3D10_VIEWPORT viewport;
-        viewport.Width = window.width();
-        viewport.Height = window.height();
-        viewport.MinDepth = 0.0f;
-        viewport.MaxDepth = 1.0f;
-        viewport.TopLeftX = 0;
-        viewport.TopLeftY = 0;
-
+        D3D10_VIEWPORT viewport = { 0, 0, window.width(), window.height(), 0.0f, 1.0f };
         _d3d10Device->RSSetViewports(1, &viewport);
     }
 
@@ -241,6 +196,8 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
 
 void DX10RenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
+    D3D10_VIEWPORT viewport = { static_cast<INT>(x), static_cast<INT>(y), width, height, minZ, maxZ };
+    _d3d10Device->RSSetViewports(1, &viewport);
 }
 
 void DX10RenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
@@ -286,10 +243,12 @@ void DX10RenderingContext::enableDepthWriting(bool writing) noexcept
 
 void DX10RenderingContext::beginFrame() noexcept
 {
+    // No-Op
 }
 
 void DX10RenderingContext::endFrame() noexcept
 {
+    // No-Op
 }
 
 void DX10RenderingContext::swapFrame() noexcept
