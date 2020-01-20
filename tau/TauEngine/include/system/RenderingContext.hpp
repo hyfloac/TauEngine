@@ -12,6 +12,7 @@
 #include "RenderingMode.hpp"
 #include "model/IBuffer.hpp"
 #include "texture/Texture.hpp"
+#include "shader/IShader.hpp"
 
 #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                             public: \
@@ -98,6 +99,8 @@ public:
     [[nodiscard]] virtual Ref<ITextureBuilder> createTextureDepth() noexcept = 0;
 
     [[nodiscard]] virtual Ref<ITextureCubeBuilder> createTextureCube() noexcept = 0;
+
+    [[nodiscard]] virtual Ref<IShaderBuilder> createShader() noexcept = 0;
 
     template<typename _T>
     [[nodiscard]] bool isContextType() const noexcept

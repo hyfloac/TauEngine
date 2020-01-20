@@ -5,17 +5,28 @@
 #include "shader/IShader.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "gl/GLUtils.hpp"
+#include "VFS.hpp"
 
 Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
       _projectionUni(null), _viewUni(null), _skyboxUni(null),
       _skybox(null), _cubeVA(context.createVertexArray(1, DrawType::SeparatedTriangles))
 {
-    Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexShaderPath);
-    Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, pixelShaderPath);
+    Ref<IShaderBuilder> shaderBuilder = context.createShader();
 
-    vertexShader->loadShader();
-    pixelShader->loadShader();
+    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->file(VFS::Instance().openFile(vertexShaderPath, FileProps::Read));
+    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
+
+    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->file(VFS::Instance().openFile(pixelShaderPath, FileProps::Read));
+    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
+
+    // Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexShaderPath);
+    // Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, pixelShaderPath);
+    //
+    // vertexShader->loadShader();
+    // pixelShader->loadShader();
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);

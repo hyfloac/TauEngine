@@ -3,9 +3,9 @@
 #include <DLL.hpp>
 #include <Objects.hpp>
 #include <String.hpp>
-#include <glm/mat4x4.hpp>
 #include <RunTimeType.hpp>
 #include <events/Exception.hpp>
+#include "IFile.hpp"
 
 class IRenderingContext;
 class Vector2f;
@@ -42,8 +42,9 @@ class Vector4f;
 /**
  * Represents an abstract, library independent shader.
  */
-class TAU_DLL IShader
+class TAU_DLL NOVTABLE IShader
 {
+    DEFAULT_CONSTRUCT_PO(IShader);
     DEFAULT_DESTRUCT_VI(IShader);
     DELETE_COPY(IShader);
 public:
@@ -62,15 +63,16 @@ public:
 
     using ShaderType = RunTimeType<IShader>;
 public:
-    static Ref<IShader> create(IRenderingContext& context, Type shaderType, const NotNull<const char>& shaderPath) noexcept;
+    // static Ref<IShader> create(IRenderingContext& context, Type shaderType, const NotNull<const char>& shaderPath) noexcept;
 protected:
-    Type _shaderType;
+    // Type _shaderType;
 protected:
-    IShader(const Type shaderType) noexcept
-        : _shaderType(shaderType)
-    { }
+    // IShader(const Type shaderType) noexcept
+    //     : _shaderType(shaderType)
+    // { }
 public:
-    [[nodiscard]] Type shaderType() const noexcept { return _shaderType; }
+    // [[nodiscard]] Type shaderType() const noexcept { return _shaderType; }
+    [[nodiscard]] virtual Type shaderType() const noexcept = 0;
 
     [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept = 0;
 
@@ -78,7 +80,43 @@ public:
     [[nodiscard]] virtual const char* getName() const noexcept = 0;
 #endif
 
-    virtual bool loadShader(const char* src = nullptr) noexcept = 0;
+    // virtual bool loadShader(const char* src = nullptr) noexcept = 0;
+};
+
+class TAU_DLL NOVTABLE IShaderBuilder
+{
+    // DEFAULT_CONSTRUCT_PO(IShaderBuilder);
+    DEFAULT_DESTRUCT_VI(IShaderBuilder);
+    DELETE_COPY(IShaderBuilder);
+public:
+    enum class Error
+    {
+        NoError = 0,
+        InvalidShaderType,
+        CompileError,
+        InvalidFile,
+        InvalidInclude,
+        ShaderObjectCreationFailure,
+        MemoryAllocationFailure
+    };
+protected:
+    Ref<IFile> _file;
+    const char* _src;
+    IShader::Type _type;
+protected:
+    IShaderBuilder() noexcept
+        : _file(null), _src(null), _type(static_cast<IShader::Type>(IntMaxMin<i32>::Max()))
+    { }
+public:
+    virtual void file(const Ref<IFile>& file) noexcept { _file = file; }
+    virtual void src(const char* const src) noexcept { _src = src; }
+    virtual void type(const IShader::Type type) noexcept { _type = type; }
+
+    [[nodiscard]] const Ref<IFile>& file() const noexcept { return _file; }
+    [[nodiscard]] const char* src() const noexcept { return _src; }
+    [[nodiscard]] IShader::Type type() const noexcept { return _type; }
+
+    [[nodiscard]] virtual IShader* build([[tau::out]] Error* error = null) noexcept = 0;
 };
 
 class IncorrectAPIShaderException final : public Exception

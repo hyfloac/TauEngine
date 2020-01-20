@@ -11,59 +11,63 @@
 #include "VFS.hpp"
 #include "Timings.hpp"
 
-GLShader::GLShader(const IShader::Type shaderType, const NotNull<const char>& shaderPath, const GLuint shaderID) noexcept
-    : IShader(shaderType), _shaderPath(shaderPath), _shaderID(shaderID)
+// GLShader::GLShader(const IShader::Type shaderType, const NotNull<const char>& shaderPath, const GLuint shaderID) noexcept
+//     : IShader(), _shaderPath(shaderPath), _shaderID(shaderID), _shaderType(shaderType)
+// { }
+
+GLShader::GLShader(const GLuint shaderID, const Type shaderType) noexcept
+    : IShader(), _shaderID(shaderID), _shaderType(shaderType)
 { }
 
-Ref<GLShader> GLShader::create(const IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept
-{
-    PERF();
-    GLenum glShaderType;
-
-    switch(shaderType)
-    {
-        case IShader::Type::Vertex:
-            glShaderType = GL_VERTEX_SHADER;
-            break;
-        case IShader::Type::TessellationControl:
-            glShaderType = GL_TESS_CONTROL_SHADER;
-            break;
-        case IShader::Type::TessellationEvaluation:
-            glShaderType = GL_TESS_EVALUATION_SHADER;
-            break;
-        case IShader::Type::Geometry:
-            glShaderType = GL_GEOMETRY_SHADER;
-            break;
-        case IShader::Type::Fragment:
-            glShaderType = GL_FRAGMENT_SHADER;
-            break;
-        default: return null;
-    }
-
-    const GLuint shaderID = glCreateShader(glShaderType);
-
-    if(shaderID == GL_FALSE)
-    {
-    #if !defined(TAU_PRODUCTION)
-        GLint result;
-        glGetShaderiv(GL_FALSE, GL_INFO_LOG_LENGTH, &result);
-        if(result <= 0)
-        {
-            fprintf(stderr, "OpenGL failed to create a shader, but no error message was generated.\n");
-        }
-        else
-        {
-            GLchar* errorMsg = new GLchar[result];
-            glGetShaderInfoLog(shaderID, result, &result, errorMsg);
-            fprintf(stderr, "OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
-            delete[] errorMsg;
-        }
-    #endif
-        return null;
-    }
-
-    return Ref<GLShader>(new(std::nothrow) GLShader(shaderType, shaderPath, shaderID));
-}
+// Ref<GLShader> GLShader::create(const IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept
+// {
+//     PERF();
+//     GLenum glShaderType;
+//
+//     switch(shaderType)
+//     {
+//         case IShader::Type::Vertex:
+//             glShaderType = GL_VERTEX_SHADER;
+//             break;
+//         case IShader::Type::TessellationControl:
+//             glShaderType = GL_TESS_CONTROL_SHADER;
+//             break;
+//         case IShader::Type::TessellationEvaluation:
+//             glShaderType = GL_TESS_EVALUATION_SHADER;
+//             break;
+//         case IShader::Type::Geometry:
+//             glShaderType = GL_GEOMETRY_SHADER;
+//             break;
+//         case IShader::Type::Fragment:
+//             glShaderType = GL_FRAGMENT_SHADER;
+//             break;
+//         default: return null;
+//     }
+//
+//     const GLuint shaderID = glCreateShader(glShaderType);
+//
+//     if(shaderID == GL_FALSE)
+//     {
+//     #if !defined(TAU_PRODUCTION)
+//         GLint result;
+//         glGetShaderiv(GL_FALSE, GL_INFO_LOG_LENGTH, &result);
+//         if(result <= 0)
+//         {
+//             fprintf(stderr, "OpenGL failed to create a shader, but no error message was generated.\n");
+//         }
+//         else
+//         {
+//             GLchar* errorMsg = new GLchar[result];
+//             glGetShaderInfoLog(shaderID, result, &result, errorMsg);
+//             fprintf(stderr, "OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
+//             delete[] errorMsg;
+//         }
+//     #endif
+//         return null;
+//     }
+//
+//     return Ref<GLShader>(new(std::nothrow) GLShader(shaderType, shaderPath, shaderID));
+// }
 
 GLShader::~GLShader() noexcept
 {
@@ -88,6 +92,7 @@ static void clearLine(uSys& index, uSys length, const u8* const arr) noexcept
 static uSys readInclude(uSys index, uSys length, const u8* const arr) noexcept
 {
     uSys i;
+    // ReSharper disable once CppPossiblyErroneousEmptyStatements
     for(i = index; i < length && arr[i] != '>'; ++i);
     return i - index;
 }
@@ -142,33 +147,126 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
     return ret;
 }
 
-bool GLShader::loadShader(const char* src) noexcept
+// bool GLShader::loadShader(const char* src) noexcept
+// {
+//     PERF();
+//     GLint result;
+//
+//     const GLchar* shaderSrc;
+//     RefDynArray<u8> data(0);
+//     if(src)
+//     {
+//         shaderSrc = src;
+//     }
+//     else
+//     {
+//         data = VFS::Instance().openFile(this->_shaderPath, FileProps::Read)->readFile();
+//
+//         data = handleIncludes(data);
+//
+//         shaderSrc = reinterpret_cast<GLchar*>(data.arr());
+//     }
+//
+//     glShaderSource(this->_shaderID, 1, &shaderSrc, null);
+//     glCompileShader(this->_shaderID);
+//
+//     glGetShaderiv(this->_shaderID, GL_COMPILE_STATUS, &result);
+//     if(result == GL_FALSE)
+//     {
+//         glGetShaderiv(this->_shaderID, GL_INFO_LOG_LENGTH, &result);
+//         if(result <= 0)
+//         {
+//             fprintf(stderr, "OpenGL failed to compile a shader, but no error message was generated.\n");
+//         }
+//         else
+//         {
+//             GLchar* errorMsg = new GLchar[result];
+//             glGetShaderInfoLog(this->_shaderID, result, &result, errorMsg);
+//             fprintf(stderr, "OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
+//             delete[] errorMsg;
+//             fprintf(stderr, "File Path: %s\n", this->_shaderPath);
+//             fprintf(stderr, "File Data: \n%s\n", shaderSrc);
+//         }
+//
+//         glDeleteShader(this->_shaderID);
+//         return false;
+//     }
+//
+//     return true;
+// }
+
+GLShader* GLShaderBuilder::build(Error* error) noexcept
 {
-    PERF();
+    GLenum glShaderType;
+
+    switch(_type)
+    {
+        case IShader::Type::Vertex:
+            glShaderType = GL_VERTEX_SHADER;
+            break;
+        case IShader::Type::TessellationControl:
+            glShaderType = GL_TESS_CONTROL_SHADER;
+            break;
+        case IShader::Type::TessellationEvaluation:
+            glShaderType = GL_TESS_EVALUATION_SHADER;
+            break;
+        case IShader::Type::Geometry:
+            glShaderType = GL_GEOMETRY_SHADER;
+            break;
+        case IShader::Type::Fragment:
+            glShaderType = GL_FRAGMENT_SHADER;
+            break;
+        default: ERROR_CODE_N(Error::InvalidShaderType);
+    }
+
+    const GLuint shaderID = glCreateShader(glShaderType);
+
+    if(shaderID == GL_FALSE)
+    {
+    #if !defined(TAU_PRODUCTION)
+        GLint result;
+        glGetShaderiv(GL_FALSE, GL_INFO_LOG_LENGTH, &result);
+        if(result <= 0)
+        {
+            fprintf(stderr, "OpenGL failed to create a shader, but no error message was generated.\n");
+        }
+        else
+        {
+            GLchar* errorMsg = new GLchar[result];
+            glGetShaderInfoLog(shaderID, result, &result, errorMsg);
+            fprintf(stderr, "OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
+            delete[] errorMsg;
+        }
+    #endif
+        ERROR_CODE_N(Error::ShaderObjectCreationFailure);
+    }
+
     GLint result;
 
     const GLchar* shaderSrc;
     RefDynArray<u8> data(0);
-    if(src)
+    if(_src)
     {
-        shaderSrc = src;
+        shaderSrc = _src;
     }
     else
     {
-        data = VFS::Instance().openFile(this->_shaderPath, FileProps::Read)->readFile();
+        ERROR_CODE_COND_N(!_file, Error::InvalidFile);
+        // data = VFS::Instance().openFile(this->_shaderPath, FileProps::Read)->readFile();
+        data = _file->readFile();
 
         data = handleIncludes(data);
 
         shaderSrc = reinterpret_cast<GLchar*>(data.arr());
     }
 
-    glShaderSource(this->_shaderID, 1, &shaderSrc, null);
-    glCompileShader(this->_shaderID);
+    glShaderSource(shaderID, 1, &shaderSrc, null);
+    glCompileShader(shaderID);
 
-    glGetShaderiv(this->_shaderID, GL_COMPILE_STATUS, &result);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
     if(result == GL_FALSE)
     {
-        glGetShaderiv(this->_shaderID, GL_INFO_LOG_LENGTH, &result);
+        glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &result);
         if(result <= 0)
         {
             fprintf(stderr, "OpenGL failed to compile a shader, but no error message was generated.\n");
@@ -176,16 +274,20 @@ bool GLShader::loadShader(const char* src) noexcept
         else
         {
             GLchar* errorMsg = new GLchar[result];
-            glGetShaderInfoLog(this->_shaderID, result, &result, errorMsg);
+            glGetShaderInfoLog(shaderID, result, &result, errorMsg);
             fprintf(stderr, "OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
-            fprintf(stderr, "File Path: %s\n", this->_shaderPath);
+            fprintf(stderr, "File Path: %s\n", _file->name());
             fprintf(stderr, "File Data: \n%s\n", shaderSrc);
         }
 
-        glDeleteShader(this->_shaderID);
-        return false;
+        glDeleteShader(shaderID);
+        ERROR_CODE_N(Error::CompileError);
     }
 
-    return true;
+    GLShader* shader = new(::std::nothrow) GLShader(shaderID, _type);
+
+    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, shader);
 }

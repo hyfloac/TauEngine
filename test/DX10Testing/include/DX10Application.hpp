@@ -21,6 +21,7 @@ private:
     Ref<spdlog::logger> _logger;
     u8 _r, _g, _b;
     u8 _rr, _gg, _bb;
+    Ref<IShader> _vertexShader;
 public:
     DX10Application() noexcept;
 

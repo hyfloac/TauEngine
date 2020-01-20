@@ -9,6 +9,7 @@
 #include "gl/GLFrameBuffer.hpp"
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 #include "gl/GLTexture.hpp"
+#include "gl/GLShader.hpp"
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
@@ -110,10 +111,10 @@ Ref<IBufferBuilder> GLRenderingContext::createBuffer(const std::size_t descripto
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:
-            return Ref<GLBufferBuilder>(new(std::nothrow) GLBufferBuilder(descriptorCount));
+            return Ref<GLBufferBuilder>(new(::std::nothrow) GLBufferBuilder(descriptorCount));
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return Ref<GLBufferBuilder>(new(std::nothrow) GLBuffer4_5Builder(descriptorCount));
+            return Ref<GLBufferBuilder>(new(::std::nothrow) GLBuffer4_5Builder(descriptorCount));
         default: return null;
     }
 }
@@ -137,35 +138,40 @@ Ref<IIndexBufferBuilder> GLRenderingContext::createIndexBuffer() noexcept
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:
-            return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBufferBuilder());
+            return Ref<GLIndexBufferBuilder>(new(::std::nothrow) GLIndexBufferBuilder());
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return Ref<GLIndexBufferBuilder>(new(std::nothrow) GLIndexBuffer4_5Builder());
+            return Ref<GLIndexBufferBuilder>(new(::std::nothrow) GLIndexBuffer4_5Builder());
         default: return null;
     }
 }
 
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
 {
-    return Ref<GLFrameBufferBuilder>(new(std::nothrow) GLFrameBufferBuilder);
+    return Ref<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
 }
 
 Ref<ITextureBuilder> GLRenderingContext::createTexture2D() noexcept
 {
-    return Ref<GLTexture2DBuilder>(new(std::nothrow) GLTexture2DBuilder);
+    return Ref<GLTexture2DBuilder>(new(::std::nothrow) GLTexture2DBuilder);
 }
 
 Ref<ITextureBuilder> GLRenderingContext::createNullTexture() noexcept
 {
-    return Ref<GLTextureNullBuilder>(new(std::nothrow) GLTextureNullBuilder);
+    return Ref<GLTextureNullBuilder>(new(::std::nothrow) GLTextureNullBuilder);
 }
 
 Ref<ITextureBuilder> GLRenderingContext::createTextureDepth() noexcept
 {
-    return Ref<GLTextureDepthBuilder>(new(std::nothrow) GLTextureDepthBuilder);
+    return Ref<GLTextureDepthBuilder>(new(::std::nothrow) GLTextureDepthBuilder);
 }
 
 Ref<ITextureCubeBuilder> GLRenderingContext::createTextureCube() noexcept
 {
-    return Ref<GLTextureCubeBuilder>(new(std::nothrow) GLTextureCubeBuilder);
+    return Ref<GLTextureCubeBuilder>(new(::std::nothrow) GLTextureCubeBuilder);
+}
+
+Ref<IShaderBuilder> GLRenderingContext::createShader() noexcept
+{
+    return Ref<GLShaderBuilder>(new(::std::nothrow) GLShaderBuilder);
 }

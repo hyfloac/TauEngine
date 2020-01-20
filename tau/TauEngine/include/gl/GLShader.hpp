@@ -1,11 +1,10 @@
 #pragma once
 
 #pragma warning(push, 0)
-#include <unordered_map>
+#include <gl/glew.h>
 #pragma warning(pop)
 
-#include <gl/GLProgram.hpp>
-#include <shader/IShader.hpp>
+#include "shader/IShader.hpp"
 #include <Safeties.hpp>
 
 /**
@@ -15,20 +14,22 @@ class TAU_DLL GLShader final : public IShader
 {
     SHADER_IMPL(GLShader);
 private:
-    // ShaderType _shaderType;
-    const char* _shaderPath;
+    // const char* _shaderPath;
     GLuint _shaderID;
-    std::unordered_map<String, GLint> _uniforms;
+    Type _shaderType;
 private:
-    GLShader(IShader::Type shaderType, const NotNull<const char>& shaderPath, GLuint shaderID) noexcept;
+    // GLShader(IShader::Type shaderType, const NotNull<const char>& shaderPath, GLuint shaderID) noexcept;
+    GLShader(GLuint shaderID, Type shaderType) noexcept;
 public:
-    static Ref<GLShader> create(IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept;
+    // static Ref<GLShader> create(IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept;
 public:
     ~GLShader() noexcept override final;
 
+    [[nodiscard]] Type shaderType() const noexcept override { return _shaderType; }
+
     [[nodiscard]] GLuint shaderId() const noexcept { return _shaderID; }
 
-    bool loadShader(const char* src = nullptr) noexcept override final;
+    // bool loadShader(const char* src = nullptr) noexcept override final;
 
     // i32 createUniform(String name) noexcept override final;
     //
@@ -65,4 +66,15 @@ public:
     // void setUniform(String& name, const Vector3i&  value) const noexcept override final;
     // void setUniform(String& name, const Vector4f&  value) const noexcept override final;
     // void setUniform(String& name, const glm::mat4& value) const noexcept override final;
+private:
+    friend class GLShaderBuilder;
+};
+
+class TAU_DLL GLShaderBuilder final : public IShaderBuilder
+{
+    DEFAULT_CONSTRUCT_PU(GLShaderBuilder);
+    DEFAULT_DESTRUCT(GLShaderBuilder);
+    DELETE_COPY(GLShaderBuilder);
+public:
+    [[nodiscard]] GLShader* build(Error* error) noexcept override;
 };

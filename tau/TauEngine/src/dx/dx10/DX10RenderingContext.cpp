@@ -6,6 +6,7 @@
 #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
+#include "dx/dx10/DX10Shader.hpp"
 
 DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
     : IRenderingContext(mode),
@@ -254,5 +255,10 @@ void DX10RenderingContext::endFrame() noexcept
 void DX10RenderingContext::swapFrame() noexcept
 {
     _swapChain->Present(_vsync ? 1 : 0, 0);
+}
+
+Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept
+{
+    return Ref<IShaderBuilder>(new(::std::nothrow) DX10ShaderBuilder(this));
 }
 #endif

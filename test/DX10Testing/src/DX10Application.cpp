@@ -63,6 +63,14 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     // TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_window->renderingContext()));
 
+    Ref<IShaderBuilder> shaderBuilder = _window->renderingContext()->createShader();
+    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->file(VFS::Instance().openFile("|NonExistentFile", FileProps::Read));
+
+    _vertexShader = Ref<IShader>(shaderBuilder->build());
+
+    // printf("Shader Name: %s\n", _vertexShader->getName());
+
     TimingsWriter::end();
     TimingsWriter::begin("DX10Test::Runtime", "|TERes/perfRuntime.json");
     return true;

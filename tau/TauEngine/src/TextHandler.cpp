@@ -23,11 +23,22 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
       _projUni(null), _texUni(null), _colorUni(null)
 {
     PERF();
-    Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexPath);
-    Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, fragmentPath);
+    Ref<IShaderBuilder> shaderBuilder = context.createShader();
 
-    vertexShader->loadShader();
-    pixelShader->loadShader();
+    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->file(VFS::Instance().openFile(vertexPath, FileProps::Read));
+    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
+
+    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->file(VFS::Instance().openFile(fragmentPath, FileProps::Read));
+    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
+
+    // Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexPath);
+    // Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, fragmentPath);
+    //
+    // vertexShader->loadShader();
+    // pixelShader->loadShader();
+    
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
 

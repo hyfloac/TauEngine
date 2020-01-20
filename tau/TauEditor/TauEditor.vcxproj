@@ -146,7 +146,7 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImaged.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImaged.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -209,7 +209,7 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -272,7 +272,7 @@
       <LargeAddressAware>true</LargeAddressAware>
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -314,7 +314,7 @@
       <WarningLevel>Level4</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>

@@ -2,18 +2,33 @@
 #include <shader/IShader.hpp>
 #include <model/IBuffer.hpp>
 #include <model/IVertexArray.hpp>
+#include "VFS.hpp"
 
 LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ortho) noexcept
     : ILayer(true), _window(window), _rp(rp), _ortho(ortho),
       _vao(window.renderingContext()->createVertexArray(2, DrawType::SeparatedTriangles)), _shader(IShaderProgram::create(*window.renderingContext()))
 {
-    Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/line/LineVertex.glsl");
-    Ref<IShader> geometryShader = IShader::create(*window.renderingContext(), IShader::Type::Geometry, "|TERes/line/LineGeometry.glsl");
-    Ref<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/line/LinePixel.glsl");
+    Ref<IShaderBuilder> shaderBuilder = window.renderingContext()->createShader();
 
-    vertexShader->loadShader();
-    geometryShader->loadShader();
-    pixelShader->loadShader();
+    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LineVertex.glsl", FileProps::Read));
+    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
+
+    shaderBuilder->type(IShader::Type::Geometry);
+    shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LineGeometry.glsl", FileProps::Read));
+    Ref<IShader> geometryShader = Ref<IShader>(shaderBuilder->build());
+
+    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LinePixel.glsl", FileProps::Read));
+    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
+
+    // Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/line/LineVertex.glsl");
+    // Ref<IShader> geometryShader = IShader::create(*window.renderingContext(), IShader::Type::Geometry, "|TERes/line/LineGeometry.glsl");
+    // Ref<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/line/LinePixel.glsl");
+    //
+    // vertexShader->loadShader();
+    // geometryShader->loadShader();
+    // pixelShader->loadShader();
 
     _shader->setVertexShader(*window.renderingContext(), vertexShader);
     _shader->setGeometryShader(*window.renderingContext(), geometryShader);
