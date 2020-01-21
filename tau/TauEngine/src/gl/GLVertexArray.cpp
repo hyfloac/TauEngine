@@ -20,7 +20,7 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const std::size_t bufferCount, DrawType drawType)
+GLVertexArray::GLVertexArray(const uSys bufferCount, DrawType drawType)
     : IVertexArray(bufferCount, drawType), _glDrawType(glDrawType(drawType))
 { }
 
@@ -30,15 +30,19 @@ void GLVertexArray::internalSetup(IRenderingContext& context) noexcept
 {
     PERF();
     u32 attribIndex = 0;
-    for(std::size_t i = 0; i < _buffers.size(); ++i)
+    for(uSys i = 0; i < _buffers.size(); ++i)
     {
         auto& buffer = _buffers[i];
         const BufferDescriptor& descriptor = buffer->descriptor();
 
         buffer->bind(context);
 
-        for(std::size_t j = 0; j < descriptor.elements().size(); ++j)
+        for(uSys j = 0; j < descriptor.elements().size(); ++j)
         {
+            // TODO: Properly handle matrices, integer, and float64 types.
+            // Matrices have to stored as a number of vectors
+            // Integers require glVertexAttribIPointer
+            // Doubles require glVertexAttribLPointer
 
             auto& element = descriptor.elements()[j];
             glEnableVertexAttribArray(attribIndex);

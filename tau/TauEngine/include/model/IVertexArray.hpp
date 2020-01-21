@@ -18,16 +18,15 @@ class TAU_DLL IVertexArray
 {
     DEFAULT_DESTRUCT_VI(IVertexArray);
     DELETE_COPY(IVertexArray);
-public:
 protected:
-    std::size_t _currentIndex;
-    std::size_t _attribCount;
+    uSys _currentIndex;
+    uSys _attribCount;
     DynArray<Ref<IBuffer>> _buffers;
     Ref<IIndexBuffer> _indexBuffer;
     u32 _drawCount;
     DrawType _drawType;
 protected:
-    IVertexArray(std::size_t bufferCount, DrawType drawType) noexcept;
+    IVertexArray(uSys bufferCount, DrawType drawType) noexcept;
 public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
 

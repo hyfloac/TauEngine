@@ -19,15 +19,19 @@ class TAU_DLL DX10VertexShader final : public DX10Shader
     DELETE_COPY(DX10VertexShader);
 private:
     ID3D10VertexShader* _shader;
+    ID3D10InputLayout* _inputLayout;
 public:
-    DX10VertexShader(ID3D10VertexShader* shader) noexcept
-        : _shader(shader)
+    DX10VertexShader(ID3D10VertexShader* shader, ID3D10InputLayout* inputLayout) noexcept
+        : _shader(shader), _inputLayout(inputLayout)
     { }
 
     [[nodiscard]] Type shaderType() const noexcept override { return IShader::Type::Vertex; }
 
     [[nodiscard]] const ID3D10VertexShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10VertexShader* shader() noexcept { return _shader; }
+
+    [[nodiscard]] const ID3D10InputLayout* inputLayout() const noexcept { return _inputLayout; }
+    [[nodiscard]] ID3D10InputLayout*& inputLayout() noexcept { return _inputLayout; }
 };
 
 class TAU_DLL DX10GeometryShader final : public DX10Shader
@@ -79,7 +83,7 @@ public:
 
     [[nodiscard]] DX10Shader* build([[tau::out]] Error* error) noexcept override;
 private:
-    [[nodiscard]] DX10VertexShader* buildVertexShader([[tau::out]] Error* error, ID3D10Blob* dataBlob) const noexcept;
+    [[nodiscard]] DX10VertexShader* buildVertexShader([[tau::out]] Error* error, ID3D10Blob* dataBlob, ID3D10InputLayout* inputLayout) const noexcept;
 
     [[nodiscard]] DX10GeometryShader* buildGeometryShader([[tau::out]] Error* error, ID3D10Blob* dataBlob) const noexcept;
 

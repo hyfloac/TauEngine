@@ -5,10 +5,12 @@
 
 #include <d3dcompiler.h>
 #include "dx/dx10/DX10RenderingContext.hpp"
+#include "dx/dx10/DX10VertexArray.hpp"
 
 DX10Shader* DX10ShaderBuilder::build(Error* error) noexcept
 {
     ERROR_CODE_COND_N(!_file, Error::InvalidFile);
+    ERROR_CODE_COND_N(!_inputLayout && _type == IShader::Type::Vertex, Error::InputLayoutNotSpecified);
 
     ID3D10Blob* dataBlob;
     // HRESULT h = D3DReadFileToBlob(L"", &dataBlob);
@@ -20,34 +22,47 @@ DX10Shader* DX10ShaderBuilder::build(Error* error) noexcept
     void* const dataBuffer = dataBlob->GetBufferPointer();
     (void) _file->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
 
+    DX10Shader* ret = null;
+
     switch(_type)
     {
         case IShader::Type::Vertex:
-            return buildVertexShader(error, dataBlob);
+            _context->tmpShaderBlob() = dataBlob;
+            _inputLayout->internalSetup(*_context);
+            if(!_context->tmpInputLayout())
+            {
+                dataBlob->Release();
+                ERROR_CODE_N(Error::InputLayoutFinalizationFailure);
+            }
+            ret = buildVertexShader(error, dataBlob, _context->tmpInputLayout());
             break;
         case IShader::Type::TessellationControl:
             break;
         case IShader::Type::TessellationEvaluation:
             break;
         case IShader::Type::Geometry:
-            return buildGeometryShader(error, dataBlob);
+            ret = buildGeometryShader(error, dataBlob);
             break;
         case IShader::Type::Pixel:
-            return buildPixelShader(error, dataBlob);
+            ret = buildPixelShader(error, dataBlob);
             break;
-        default: ERROR_CODE_N(Error::InvalidShaderType);
+        default: break;
     }
 
-    ERROR_CODE_N(Error::InvalidShaderType);
+    dataBlob->Release();
+
+    ERROR_CODE_COND_N(!ret, Error::InvalidShaderType);
+
+    return ret;
 }
 
-DX10VertexShader* DX10ShaderBuilder::buildVertexShader(Error* error, ID3D10Blob* dataBlob) const noexcept
+DX10VertexShader* DX10ShaderBuilder::buildVertexShader(Error* error, ID3D10Blob* dataBlob, ID3D10InputLayout* inputLayout) const noexcept
 {
     ID3D10VertexShader* d3dShader;
     const HRESULT h = _context->d3d10Device()->CreateVertexShader(dataBlob->GetBufferPointer(), dataBlob->GetBufferSize(), &d3dShader);
     ERROR_CODE_COND_N(FAILED(h), Error::ShaderObjectCreationFailure);
 
-    DX10VertexShader* shader = new(::std::nothrow) DX10VertexShader(d3dShader);
+    DX10VertexShader* shader = new(::std::nothrow) DX10VertexShader(d3dShader, inputLayout);
     ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, shader);

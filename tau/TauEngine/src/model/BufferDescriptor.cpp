@@ -95,21 +95,75 @@ u32 ShaderDataType::componentCount(Type type) noexcept
     }
 }
 
+ShaderDataType::Type ShaderDataType::underlyingType(Type type) noexcept
+{
+    switch(type)
+    {
+        case Matrix2x2Float:  return Type::Vector2Float;
+        case Matrix2x3Float:  return Type::Vector3Float;
+        case Matrix2x4Float:  return Type::Vector4Float;
+        case Matrix3x2Float:  return Type::Vector2Float;
+        case Matrix3x3Float:  return Type::Vector3Float;
+        case Matrix3x4Float:  return Type::Vector4Float;
+        case Matrix4x2Float:  return Type::Vector2Float;
+        case Matrix4x3Float:  return Type::Vector3Float;
+        case Matrix4x4Float:  return Type::Vector4Float;
+        case Matrix2x2Double: return Type::Vector2Double;
+        case Matrix2x3Double: return Type::Vector3Double;
+        case Matrix2x4Double: return Type::Vector4Double;
+        case Matrix3x2Double: return Type::Vector2Double;
+        case Matrix3x3Double: return Type::Vector3Double;
+        case Matrix3x4Double: return Type::Vector4Double;
+        case Matrix4x2Double: return Type::Vector2Double;
+        case Matrix4x3Double: return Type::Vector3Double;
+        case Matrix4x4Double: return Type::Vector4Double;
+        default: return type;
+    }
+}
+
+ShaderDataType::Type ShaderDataType::underlyingTypeND(Type type) noexcept
+{
+    switch(type)
+    {
+        case Double:          return Type::Vector2UInt;
+        case Vector2Double:   return Type::Vector4UInt;
+        case Vector3Double:   return Type::Vector2UInt;
+        case Vector4Double:   return Type::Vector4UInt;
+        case Matrix2x2Float:  return Type::Vector2Float;
+        case Matrix2x3Float:  return Type::Vector3Float;
+        case Matrix2x4Float:  return Type::Vector4Float;
+        case Matrix3x2Float:  return Type::Vector2Float;
+        case Matrix3x3Float:  return Type::Vector3Float;
+        case Matrix3x4Float:  return Type::Vector4Float;
+        case Matrix4x2Float:  return Type::Vector2Float;
+        case Matrix4x3Float:  return Type::Vector3Float;
+        case Matrix4x4Float:  return Type::Vector4Float;
+        case Matrix2x2Double: return Type::Vector4UInt;
+        case Matrix2x3Double: return Type::Vector2UInt;
+        case Matrix2x4Double: return Type::Vector4UInt;
+        case Matrix3x2Double: return Type::Vector4UInt;
+        case Matrix3x3Double: return Type::Vector2UInt;
+        case Matrix3x4Double: return Type::Vector4UInt;
+        case Matrix4x2Double: return Type::Vector4UInt;
+        case Matrix4x3Double: return Type::Vector2UInt;
+        case Matrix4x4Double: return Type::Vector4UInt;
+        default: return type;
+    }
+}
+
 void BufferDescriptor::addDescriptor(BufferElementDescriptor bed) noexcept
 {
-    bed._offsetCache = _offsetCache;
+    bed._offsetCache = _stride;
     _elementDescriptors[_currentIndex++] = bed;
 
-    _offsetCache += bed._sizeCache;
     _stride += bed._sizeCache;
 }
 
 void BufferDescriptor::addDescriptor(const ShaderDataType::Type type, const bool normalized) noexcept
 {
-    _elementDescriptors[_currentIndex++] = BufferElementDescriptor(type, _offsetCache, normalized);
+    _elementDescriptors[_currentIndex++] = BufferElementDescriptor(type, _stride, normalized);
 
     const u32 size = ShaderDataType::size(type);
 
-    _offsetCache += size;
     _stride += size;
 }

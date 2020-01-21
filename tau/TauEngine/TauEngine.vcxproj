@@ -32,6 +32,7 @@
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp" />
     <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx9\DXBuffer.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
@@ -104,11 +105,14 @@
     <ClInclude Include="include\console\ConsoleController.hpp" />
     <ClInclude Include="include\console\ConsoleLexer.hpp" />
     <ClInclude Include="include\DLL.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10Buffer.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsInterface.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10VertexArray.hpp" />
     <ClInclude Include="include\dx\dx9\DX9Buffer.hpp" />
     <ClInclude Include="include\dx\dx9\DX9RenderingContext.hpp" />
     <ClInclude Include="include\events\Event.hpp" />

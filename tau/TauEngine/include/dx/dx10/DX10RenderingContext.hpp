@@ -10,6 +10,8 @@
 
 #include "DLL.hpp"
 
+class DX10ShaderProgram;
+
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
 private:
@@ -22,6 +24,9 @@ private:
     IDXGISwapChain* _swapChain;
 
     bool _vsync;
+
+    ID3D10Blob* _tmpShaderBlob;
+    ID3D10InputLayout* _tmpInputLayout;
 public:
     DX10RenderingContext(const RenderingMode& mode) noexcept;
 
@@ -29,6 +34,12 @@ public:
 
     [[nodiscard]] const ID3D10Device* d3d10Device() const noexcept { return _d3d10Device; }
     [[nodiscard]] ID3D10Device* d3d10Device() noexcept { return _d3d10Device; }
+
+    [[nodiscard]] const ID3D10Blob* tmpShaderBlob() const noexcept { return _tmpShaderBlob; }
+    [[nodiscard]] ID3D10Blob*& tmpShaderBlob() noexcept { return _tmpShaderBlob; }
+
+    [[nodiscard]] const ID3D10InputLayout* tmpInputLayout() const noexcept { return _tmpInputLayout; }
+    [[nodiscard]] ID3D10InputLayout*& tmpInputLayout() noexcept { return _tmpInputLayout; }
 
     [[nodiscard]] bool createContext(Window& window) noexcept override;
     void createFromShared(void* param) noexcept override { }

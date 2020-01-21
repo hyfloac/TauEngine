@@ -17,7 +17,7 @@ public:
 private:
     GLenum _glDrawType;
 public:
-    GLVertexArray(std::size_t bufferCount, DrawType drawType);
+    GLVertexArray(uSys bufferCount, DrawType drawType);
 
     ~GLVertexArray() noexcept override;
 

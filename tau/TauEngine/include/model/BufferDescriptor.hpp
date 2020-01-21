@@ -86,6 +86,19 @@ public:
     static u32 size(Type type) noexcept;
 
     static u32 componentCount(Type type) noexcept;
+
+    /**
+     *   The underlying type of what needs to be passed to the
+     * shader. This is primarily used for matrices, which need
+     * to be interpreted as vectors by the CPU.
+     */
+    static Type underlyingType(Type type) noexcept;
+
+    /**
+     *   The underlying type when doubles aren't allowed to be
+     * passed to the shader.
+     */
+    static Type underlyingTypeND(Type type) noexcept;
 };
 
 class TAU_DLL BufferElementDescriptor final
@@ -115,6 +128,7 @@ public:
     [[nodiscard]] u32 offset() const noexcept { return _offsetCache; }
 private:
     friend class BufferDescriptor;
+    friend class IInputLayout;
 };
 
 class TAU_DLL BufferDescriptor final
@@ -123,10 +137,9 @@ private:
     u32 _currentIndex;
     RefDynArray<BufferElementDescriptor> _elementDescriptors;
     u32 _stride;
-    u32 _offsetCache;
 public:
     BufferDescriptor(const std::size_t descriptorCount) noexcept
-        : _currentIndex(0), _elementDescriptors(descriptorCount), _stride(0), _offsetCache(0)
+        : _currentIndex(0), _elementDescriptors(descriptorCount), _stride(0)
     { }
 
     [[nodiscard]] const RefDynArray<BufferElementDescriptor>& elements() const noexcept { return _elementDescriptors; }

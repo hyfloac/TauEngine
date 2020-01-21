@@ -15,7 +15,8 @@ DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
       _depthStencilBuffer(null), _depthStencilState(null), _depthStencilView(null),
       _rasterizerState(null),
       _swapChain(null),
-      _vsync(false)
+      _vsync(false),
+      _tmpShader(null)
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -193,7 +194,6 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     return true;
 #undef CHECK
 }
-
 
 void DX10RenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
