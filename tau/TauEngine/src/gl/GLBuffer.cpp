@@ -104,6 +104,10 @@ IBuffer* GLBufferBuilder::build(Error* error) const noexcept
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
+    glBindBuffer(_glType, bufferHandle);
+    glBufferData(_glType, _bufferSize, _initialBuffer, _glUsage);
+    glBindBuffer(_glType, 0);
+
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
@@ -131,6 +135,10 @@ IIndexBuffer* GLIndexBufferBuilder::build(Error* error) const noexcept
         GLBuffer::destroyBuffer(bufferHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _bufferSize, _initialBuffer, this->_glUsage);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     ERROR_CODE_V(Error::NoError, buffer);
 }

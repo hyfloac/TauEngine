@@ -27,6 +27,7 @@
     <ClCompile Include="src\camera\Skybox.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10Buffer.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />

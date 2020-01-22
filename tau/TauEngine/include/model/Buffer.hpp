@@ -180,18 +180,20 @@ protected:
     EBuffer::Type _type;
     EBuffer::UsageType _usage;
     uSys _bufferSize;
+    void* _initialBuffer;
     BufferDescriptor _descriptor;
 public:
     inline IBufferBuilder(const uSys descriptorCount) noexcept
         : _type(static_cast<EBuffer::Type>(0)),
           _usage(static_cast<EBuffer::UsageType>(0)),
-          _bufferSize(0),
+          _bufferSize(0), _initialBuffer(null),
           _descriptor(descriptorCount)
     { }
 
     virtual void type(const EBuffer::Type type) noexcept { _type = type; }
     virtual void usage(const EBuffer::UsageType usage) noexcept { _usage = usage; }
     inline void bufferSize(const uSys bufferSize) noexcept { _bufferSize = bufferSize; }
+    inline void initialBuffer(void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
     [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }
 
     [[nodiscard]] virtual IBuffer* build([[tau::out]] Error* error) const noexcept = 0;
@@ -206,13 +208,16 @@ public:
 protected:
     EBuffer::UsageType _usage;
     uSys _bufferSize;
+    void* _initialBuffer;
 public:
     inline IIndexBufferBuilder() noexcept
-        : _usage(static_cast<EBuffer::UsageType>(0)), _bufferSize(0)
+        : _usage(static_cast<EBuffer::UsageType>(0)),
+          _bufferSize(0), _initialBuffer(null)
     { }
 
     virtual void usage(const EBuffer::UsageType usage) noexcept { _usage = usage; }
     inline void bufferSize(const uSys bufferSize) noexcept { _bufferSize = bufferSize; }
+    inline void initialBuffer(void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
 
     [[nodiscard]] virtual IIndexBuffer* build([[tau::out]] Error* error) const noexcept = 0;
 };
