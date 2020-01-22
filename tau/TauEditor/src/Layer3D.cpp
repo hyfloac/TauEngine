@@ -2,6 +2,7 @@
 #include <RenderingPipeline.hpp>
 #include <system/Window.hpp>
 #include <model/RenderableObject.hpp>
+#include <model/InputLayout.hpp>
 #include <model/OBJLoader.hpp>
 #include <maths/GlmMatrixTransformExt.hpp>
 #include <shader/IShader.hpp>
@@ -27,7 +28,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
       _frameBufferShader(IShaderProgram::create(*window.renderingContext())),
       _texture(TextureLoader::loadTexture(*window.renderingContext(), "|TERes/TestTexture.png", ETexture::Filter::Linear)),
       _overlay(TextureLoader::loadTexture(*window.renderingContext(), "|TERes/Overlay.png", ETexture::Filter::Linear)),
-      _frameBufferVA(window.renderingContext()->createVertexArray(1, DrawType::SeparatedTriangles)),
+      _frameBufferVA(null),
       _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _cubePolarPos(3, 3, 0), _cubeViewMatrix(1.0f), _objects()
 {
     PERF();
@@ -191,13 +192,24 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     positionsBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
 
     Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
-
     positions->bind(*window.renderingContext());
     positions->fillBuffer(*window.renderingContext(), quadVertices);
     positions->unbind(*window.renderingContext());
 
-    _frameBufferVA->addVertexBuffer(*window.renderingContext(), positions);
-    _frameBufferVA->drawCount() = 6;
+    Ref<IInputLayoutBuilder> ilBuilder = window.renderingContext()->createInputLayout(2);
+    ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+    const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+
+    Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
+    vaBuilder->setVertexBuffer(0, positions);
+    vaBuilder->inputLayout(inputLayout);
+    vaBuilder->drawCount(6);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    _frameBufferVA = Ref<IVertexArray>(vaBuilder->build());
+
+    // _frameBufferVA->addVertexBuffer(*window.renderingContext(), positions);
+    // _frameBufferVA->drawCount() = 6;
 
     _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));

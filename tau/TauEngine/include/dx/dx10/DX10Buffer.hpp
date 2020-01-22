@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/IBuffer.hpp"
+#include "model/Buffer.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>
@@ -9,12 +9,11 @@ class TAU_DLL DX10Buffer final : public IBuffer
 {
     DEFAULT_CONSTRUCT(DX10Buffer);
     DEFAULT_DESTRUCT(DX10Buffer);
-    DELETE_COPY(DX10Buffer);
+    BUFFER_IMPL(DX10Buffer);
 private:
 public:
     [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return null; }
     [[nodiscard]] ID3D10Buffer* d3dBuffer() noexcept { return null; }
-
 
     void bind(IRenderingContext& context) noexcept override { }
     void unbind(IRenderingContext& context) noexcept override { }
@@ -24,9 +23,10 @@ public:
 
 class TAU_DLL DX10IndexBuffer final : public IIndexBuffer
 {
+    INDEX_BUFFER_IMPL(DX10IndexBuffer)
 public:
-    [[nodiscard]] const ID3D10Buffer * d3dBuffer() const noexcept { return null; }
-    [[nodiscard]] ID3D10Buffer * d3dBuffer() noexcept { return null; }
+    [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return null; }
+    [[nodiscard]] ID3D10Buffer* d3dBuffer() noexcept { return null; }
 
 };
 #endif

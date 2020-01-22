@@ -3,8 +3,19 @@
 #include <NumTypes.hpp>
 #include <DLL.hpp>
 #include <Objects.hpp>
+#include <RunTimeType.hpp>
 #include "model/BufferDescriptor.hpp"
 #include "model/BufferEnums.hpp"
+
+#define BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+                                RTT_IMPL(_TYPE, IBuffer)
+
+#define BUFFER_IMPL(_TYPE) BUFFER_IMPL_BASE(_TYPE)
+
+#define INDEX_BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+                                      RTT_IMPL(_TYPE, IIndexBuffer)
+
+#define INDEX_BUFFER_IMPL(_TYPE) INDEX_BUFFER_IMPL_BASE(_TYPE)
 
 class TAU_DLL IBuffer
 {
@@ -24,7 +35,7 @@ public:
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
     [[nodiscard]] inline const BufferDescriptor& descriptor() const noexcept { return _descriptor; }
-    // [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }
+    [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }
 
     virtual void bind(IRenderingContext& context) noexcept = 0;
 
@@ -33,6 +44,10 @@ public:
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
     virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+
+    RTT_BASE_IMPL(IBuffer);
+    RTT_BASE_CHECK(IBuffer);
+    RTT_BASE_CAST(IBuffer);
 };
 
 class TAU_DLL IIndexBuffer
@@ -58,6 +73,10 @@ public:
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
     virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+
+    RTT_BASE_IMPL(IIndexBuffer);
+    RTT_BASE_CHECK(IIndexBuffer);
+    RTT_BASE_CAST(IIndexBuffer);
 };
 
 class TAU_DLL IBufferBuilder

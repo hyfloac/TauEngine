@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/IVertexArray.hpp"
+#include "model/VertexArray.hpp"
 #include "maths/Vector3f.hpp"
 
 class TerrainTile

@@ -1,5 +1,8 @@
 #include "ui/UIButton.hpp"
 #include "events/WindowEvent.hpp"
+#include "model/InputLayout.hpp"
+
+static Ref<IInputLayout> _inputLayoutCache = null;
 
 bool UIButton::onClick(WindowMouseClickEvent& e) noexcept
 {
@@ -31,7 +34,8 @@ bool UIRectButton::isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept
 UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent, bool visible) noexcept
     : UIButton(clickHandler, x, y, parent, visible), _width(width), _height(height), _color(color),
       _vbo(nullptr),
-      _vao(context.createVertexArray(1, DrawType::SeparatedTriangles))
+      // _vao(context.createVertexArray(1, DrawType::SeparatedTriangles))
+      _vao(null)
 {
     const float xx = static_cast<float>(x);
     const float yy = static_cast<float>(y);
@@ -57,8 +61,25 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     _vbo->bind(context);
     _vbo->fillBuffer(context, model);
     _vbo->unbind(context);
-    _vao->addVertexBuffer(context, _vbo);
-    _vao->drawCount() = 6;
+
+    if(!_inputLayoutCache)
+    {
+        Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
+        ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+        _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    }
+
+
+    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
+    vaBuilder->setVertexBuffer(0, _vbo);
+    vaBuilder->inputLayout(_inputLayoutCache);
+    vaBuilder->drawCount(6);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+
+    _vao = Ref<IVertexArray>(vaBuilder->build());
+
+    // _vao->addVertexBuffer(context, _vbo);
+    // _vao->drawCount() = 6;
 }
 
 void UIRectButton::onRender(float delta) noexcept

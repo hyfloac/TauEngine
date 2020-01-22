@@ -5,7 +5,7 @@
 #include <RenderingPipeline.hpp>
 #include <DLL.hpp>
 #include <Objects.hpp>
-#include "IVertexArray.hpp"
+#include "VertexArray.hpp"
 #include "model/Material.hpp"
 #include <glm/vec4.hpp>
 

@@ -83,7 +83,7 @@ public:
     // virtual bool loadShader(const char* src = nullptr) noexcept = 0;
 };
 
-class IVertexArray;
+class IInputLayout;
 
 class TAU_DLL NOVTABLE IShaderBuilder
 {
@@ -107,7 +107,7 @@ protected:
     Ref<IFile> _file;
     const char* _src;
     IShader::Type _type;
-    Ref<IVertexArray> _inputLayout;
+    Ref<IInputLayout> _inputLayout;
 protected:
     IShaderBuilder() noexcept
         : _file(null), _src(null), _type(static_cast<IShader::Type>(IntMaxMin<i32>::Max()))
@@ -116,12 +116,12 @@ public:
     virtual void file(const Ref<IFile>& file) noexcept { _file = file; }
     virtual void src(const char* const src) noexcept { _src = src; }
     virtual void type(const IShader::Type type) noexcept { _type = type; }
-    virtual void inputLayout(const Ref<IVertexArray>& inputLayout) noexcept { _inputLayout = inputLayout; }
+    virtual void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept { _inputLayout = inputLayout; }
 
     [[nodiscard]] const Ref<IFile>& file() const noexcept { return _file; }
     [[nodiscard]] const char* src() const noexcept { return _src; }
     [[nodiscard]] IShader::Type type() const noexcept { return _type; }
-    [[nodiscard]] const Ref<IVertexArray>& inputLayout() const noexcept { return _inputLayout; }
+    [[nodiscard]] const Ref<IInputLayout>& inputLayout() const noexcept { return _inputLayout; }
 
     [[nodiscard]] virtual IShader* build([[tau::out]] Error* error = null) noexcept = 0;
 };

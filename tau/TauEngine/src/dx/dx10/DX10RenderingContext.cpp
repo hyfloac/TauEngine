@@ -7,6 +7,8 @@
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
 #include "dx/dx10/DX10Shader.hpp"
+#include "dx/dx10/DX10InputLayout.hpp"
+#include "dx/dx10/DX10VertexArray.hpp"
 
 DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
     : IRenderingContext(mode),
@@ -15,8 +17,8 @@ DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
       _depthStencilBuffer(null), _depthStencilState(null), _depthStencilView(null),
       _rasterizerState(null),
       _swapChain(null),
-      _vsync(false),
-      _tmpShader(null)
+      _vsync(false)//,
+      // _tmpShaderBlob(null), _tmpInputLayout(null)
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -255,6 +257,16 @@ void DX10RenderingContext::endFrame() noexcept
 void DX10RenderingContext::swapFrame() noexcept
 {
     _swapChain->Present(_vsync ? 1 : 0, 0);
+}
+
+Ref<IInputLayoutBuilder> DX10RenderingContext::createInputLayout(const uSys numDescriptors) noexcept
+{
+    return Ref<IInputLayoutBuilder>(new(::std::nothrow) DX10InputLayoutBuilder(numDescriptors));
+}
+
+Ref<IVertexArrayBuilder> DX10RenderingContext::createVertexArray(const uSys bufferCount) noexcept
+{
+    return Ref<IVertexArrayBuilder>(new(::std::nothrow) DX10VertexArrayBuilder(bufferCount));
 }
 
 Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept

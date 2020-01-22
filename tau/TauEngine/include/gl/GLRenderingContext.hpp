@@ -37,7 +37,6 @@ public:
     void deactivateContext() noexcept override final;
     void activateContext() noexcept override final;
 
-    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount, DrawType drawType) noexcept override;
     [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final;
 
     void destroyVA(IVertexArray* vertexArray) noexcept override final;
@@ -60,7 +59,11 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override final;
+    [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override;
+
+    [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
+
+    [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept override;
 
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override;
 
@@ -76,7 +79,7 @@ public:
 
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override;
 protected:
-    bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept override final;
+    bool createContextsShared(Window& window, IRenderingContext** sharers, uSys count) noexcept override final;
 private:
     void handleCtxError(int profileMask) const noexcept;
 

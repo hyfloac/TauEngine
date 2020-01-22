@@ -11,6 +11,7 @@
 #include "gl/GLTexture.hpp"
 #include "gl/GLShader.hpp"
 #include "Timings.hpp"
+#include "gl/GLInputLayout.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
     : IRenderingContext(mode),
@@ -21,11 +22,6 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
       _compat(core),
       _forwardCompatible(forwardCompatible)
 { }
-
-Ref<IVertexArray> GLRenderingContext::createVertexArray(const std::size_t attribCount, const DrawType drawType) noexcept
-{
-    return Ref<IVertexArray>(new(std::nothrow) GLVertexArray(attribCount, drawType));
-}
 
 void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexcept
 {
@@ -92,7 +88,17 @@ void GLRenderingContext::enableDepthWriting(bool writing) noexcept
     glDepthMask(writing ? GL_TRUE : GL_FALSE);
 }
 
-Ref<IBufferBuilder> GLRenderingContext::createBuffer(const std::size_t descriptorCount) noexcept
+Ref<IInputLayoutBuilder> GLRenderingContext::createInputLayout(const uSys numDescriptors) noexcept
+{
+    return Ref<IInputLayoutBuilder>(new(::std::nothrow) GLInputLayoutBuilder(numDescriptors));
+}
+
+Ref<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
+{
+    return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount));
+}
+
+Ref<IBufferBuilder> GLRenderingContext::createBuffer(const uSys descriptorCount) noexcept
 {
     switch(_mode.currentMode())
     {

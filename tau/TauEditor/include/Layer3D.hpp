@@ -11,7 +11,7 @@
 #include <glm/mat4x4.hpp>
 #include <maths/Vector3f.hpp>
 #include <events/WindowEvent.hpp>
-#include <model/IVertexArray.hpp>
+#include <model/VertexArray.hpp>
 #include <camera/Skybox.hpp>
 #include <shader/PointLight.hpp>
 #include <model/Material.hpp>

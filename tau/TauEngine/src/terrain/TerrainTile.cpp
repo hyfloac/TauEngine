@@ -1,5 +1,8 @@
 #include "terrain/TerrainTile.hpp"
-#include "model/IBuffer.hpp"
+#include "model/Buffer.hpp"
+#include "model/InputLayout.hpp"
+
+static Ref<IInputLayout> _inputLayoutCache = null;
 
 Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const float size, const uSys edgeVertices) noexcept
 {
@@ -82,11 +85,30 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     texBuf->fillBuffer(context, tex);
     indicesBuf->fillBuffer(context, indices);
 
-    Ref<IVertexArray> vao = context.createVertexArray(3, DrawType::SeparatedTriangles);
-    vao->addVertexBuffer(context, posBuf);
-    vao->addVertexBuffer(context, normBuf);
-    vao->addVertexBuffer(context, texBuf);
-    vao->setIndexBuffer(context, indicesBuf);
+    // Ref<IVertexArray> vao = context.createVertexArray(3, DrawType::SeparatedTriangles);
+    // vao->addVertexBuffer(context, posBuf);
+    // vao->addVertexBuffer(context, normBuf);
+    // vao->addVertexBuffer(context, texBuf);
+    // vao->setIndexBuffer(context, indicesBuf);
+
+    if(!_inputLayoutCache)
+    {
+        Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(3);
+        ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
+        ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
+        ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+        _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    }
+
+    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(3);
+    vaBuilder->setVertexBuffer(0, posBuf);
+    vaBuilder->setVertexBuffer(1, normBuf);
+    vaBuilder->setVertexBuffer(2, texBuf);
+    vaBuilder->indexBuffer(indicesBuf);
+    vaBuilder->inputLayout(_inputLayoutCache);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    vaBuilder->drawCount(numIndices * 2);
+    Ref<IVertexArray> vao = Ref<IVertexArray>(vaBuilder->build());
 
     return vao;
 }

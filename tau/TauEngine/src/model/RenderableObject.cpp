@@ -2,13 +2,16 @@
 #include <DynArray.hpp>
 #include <NumTypes.hpp>
 #include "system/RenderingContext.hpp"
-#include "model/IVertexArray.hpp"
+#include "model/VertexArray.hpp"
 #include "Timings.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "VFS.hpp"
+#include "model/InputLayout.hpp"
+
+static Ref<IInputLayout> _inputLayoutCache = null;
 
 RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const DrawType drawType) noexcept
-    : _va(context.createVertexArray(4, drawType))
+    : _va(null)
 {
     PERF();
     const size_t cnt1 = mesh.vertices.size();
@@ -97,13 +100,36 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     indices->fillBuffer(context, mesh.indices.data());
     indices->unbind(context);
 
-    _va->addVertexBuffer(context, positions);
-    _va->addVertexBuffer(context, normals);
-    _va->addVertexBuffer(context, tangents);
-    // _va->addVertexBuffer(context, bitangents);
-    _va->addVertexBuffer(context, textures);
-    _va->setIndexBuffer(context, indices);
-    _va->drawCount() = mesh.indices.size();
+    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
+
+    if(!_inputLayoutCache)
+    {
+        Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(4);
+        ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
+        ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
+        ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector3Float, ShaderSemantic::Tangent);
+        ilBuilder->setLayoutDescriptor(3, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+        _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    }
+
+    vaBuilder->setVertexBuffer(0, positions);
+    vaBuilder->setVertexBuffer(1, normals);
+    vaBuilder->setVertexBuffer(2, tangents);
+    vaBuilder->setVertexBuffer(3, textures);
+    vaBuilder->indexBuffer(indices);
+    vaBuilder->inputLayout(_inputLayoutCache);
+    vaBuilder->drawCount(mesh.indices.size());
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+
+    _va = Ref<IVertexArray>(vaBuilder->build());
+
+    // _va->addVertexBuffer(context, positions);
+    // _va->addVertexBuffer(context, normals);
+    // _va->addVertexBuffer(context, tangents);
+    // // _va->addVertexBuffer(context, bitangents);
+    // _va->addVertexBuffer(context, textures);
+    // _va->setIndexBuffer(context, indices);
+    // _va->drawCount() = mesh.indices.size();
 
     if(!mesh.material.map_Kd.empty())
     {
@@ -152,7 +178,8 @@ void RenderableObject::preRender(IRenderingContext& context) const noexcept
 
 void RenderableObject::render(IRenderingContext& context) const noexcept
 {
-    _va->drawIndexed(context);
+    // _va->drawIndexed(context);
+    _va->draw(context);
 }
 
 void RenderableObject::postRender(IRenderingContext& context) const noexcept

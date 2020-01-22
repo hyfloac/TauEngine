@@ -3,8 +3,8 @@
 #include "UIElement.hpp"
 #include "maths/Vector3f.hpp"
 #include "model/BufferDescriptor.hpp"
-#include "model/IBuffer.hpp"
-#include "model/IVertexArray.hpp"
+#include "model/Buffer.hpp"
+#include "model/VertexArray.hpp"
 #include "system/RenderingContext.hpp"
 
 class Window;

@@ -14,8 +14,6 @@ class TAU_DLL DX10ShaderProgram final : public IShaderProgram
     DEFAULT_DESTRUCT(DX10ShaderProgram);
     DELETE_COPY(DX10ShaderProgram);
 public:
-    [[nodiscard]] Ref<DX10VertexShader> dxVertexShader() const noexcept { return RefCast<DX10VertexShader>(_vertexShader); }
-
-
+    [[nodiscard]] Ref<DX10VertexShader> dxVertexShader() const noexcept;
 };
 #endif

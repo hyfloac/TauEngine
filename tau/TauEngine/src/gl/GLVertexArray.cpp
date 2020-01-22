@@ -1,5 +1,7 @@
 #include "gl/GLVertexArray.hpp"
 #include "Timings.hpp"
+#include "gl/GLBuffer.hpp"
+#include "gl/GLInputLayout.hpp"
 
 static GLenum glDrawType(DrawType drawType) noexcept;
 
@@ -20,8 +22,8 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const uSys bufferCount, DrawType drawType)
-    : IVertexArray(bufferCount, drawType), _glDrawType(glDrawType(drawType))
+GLVertexArray::GLVertexArray(const u32 drawCount, const DrawType drawType, const RefDynArray<Ref<IBuffer>>& buffers, const Ref<GLIndexBuffer>& indexBuffer)
+    : IVertexArray(drawCount), _glDrawType(glDrawType(drawType)), _buffers(buffers), _indexBuffer(indexBuffer), _attribCount(0)
 { }
 
 GLVertexArray::~GLVertexArray() noexcept = default;
@@ -88,19 +90,62 @@ void GLVertexArray::postDraw(IRenderingContext& context) noexcept
 
 void GLVertexArray::draw(IRenderingContext& context) noexcept
 {
-    glDrawArrays(_glDrawType, 0, this->_drawCount);
+    if(_indexBuffer)
+    {
+        _indexBuffer->bind(context);
+        glDrawElements(_glDrawType, _drawCount, GL_UNSIGNED_INT, nullptr);
+    }
+    else
+    {
+        glDrawArrays(_glDrawType, 0, this->_drawCount);
+    }
 }
 
-void GLVertexArray::drawIndexed(IRenderingContext& context) noexcept
+void GLVertexArrayBuilder::setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept
 {
-    _indexBuffer->bind(context);
-    glDrawElements(_glDrawType, this->_drawCount, GL_UNSIGNED_INT, nullptr);
+    if(RTT_CHECK(vertexBuffer.get(), GLBuffer))
+    {
+        IVertexArrayBuilder::setVertexBuffer(index, vertexBuffer);
+    }
 }
 
-void GLVertexArray::drawType(DrawType drawType) noexcept
+void GLVertexArrayBuilder::indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept
 {
-    IVertexArray::drawType(drawType);
-    _glDrawType = glDrawType(drawType);
+    if(!indexBuffer)
+    {
+        IVertexArrayBuilder::indexBuffer(null);
+        _indexBuffer = null;
+    }
+    else if(RTT_CHECK(indexBuffer.get(), GLIndexBuffer))
+    {
+        IVertexArrayBuilder::indexBuffer(indexBuffer);
+        _indexBuffer = RefCast<GLIndexBuffer>(indexBuffer);
+    }
+}
+
+void GLVertexArrayBuilder::inputLayout(const Ref<IInputLayout>& inputLayout) noexcept
+{
+    if(RTT_CHECK(inputLayout.get(), GLInputLayout))
+    {
+        IVertexArrayBuilder::inputLayout(inputLayout);
+    }
+}
+
+GLVertexArray* GLVertexArrayBuilder::build(Error* error) noexcept
+{
+    ERROR_CODE_COND_N(!_inputLayout, Error::InputLayoutNotSet);
+    ERROR_CODE_COND_N(_drawCount == 0, Error::DrawCountNotSet);
+    ERROR_CODE_COND_N(_drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
+
+    for(uSys i = 0; i < _buffers.count(); ++i)
+    {
+        ERROR_CODE_COND_N(!_buffers[i], Error::BuffersNotSet);
+    }
+
+    GLVertexArray* va = new(::std::nothrow) GLVertexArray(_drawCount, _drawType, _buffers, RefCast<GLIndexBuffer>(_indexBuffer));
+    ERROR_CODE_COND_N(!va, Error::MemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, va);
 }
 
 GLenum GLVertexArray::getGLType(const ShaderDataType::Type type) noexcept

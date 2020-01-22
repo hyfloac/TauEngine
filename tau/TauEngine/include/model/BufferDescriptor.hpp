@@ -8,27 +8,10 @@
 class IRenderingContext;
 class IBuffer;
 
-// enum class DataType : u8
-// {
-//     Byte = 1,
-//     UByte,
-//     Short,
-//     UShort,
-//     Int,
-//     UInt,
-//     HalfFloat,
-//     Float,
-//     Double,
-//     Fixed,
-//     Int2_10_10_10_Rev,
-//     UInt2_10_10_10_Rev,
-//     UInt10F_11F_11F_Rev
-// };
-
 class ShaderDataType final
 {
-    DEFAULT_CONSTRUCT_PI(ShaderDataType);
-    DEFAULT_DESTRUCT(ShaderDataType);
+    DELETE_CONSTRUCT(ShaderDataType);
+    DELETE_DESTRUCT(ShaderDataType);
     DELETE_COPY(ShaderDataType);
 public:
     enum Type : u8
@@ -101,11 +84,58 @@ public:
     static Type underlyingTypeND(Type type) noexcept;
 };
 
+class ShaderSemantic final
+{
+    DELETE_CONSTRUCT(ShaderSemantic);
+    DELETE_DESTRUCT(ShaderSemantic);
+    DELETE_COPY(ShaderSemantic);
+public:
+    enum Semantic
+    {
+        Unknown = 0,
+        BiNormal,
+        BlendIndices,
+        BlendWeight,
+        Color,
+        Normal,
+        Position,
+        PositionTransformed,
+        PointSize,
+        Tangent,
+        TextureCoord,
+        MAX_VALUE = TextureCoord
+    };
+public:
+    static ShaderDataType::Type associatedType(Semantic semantic) noexcept;
+
+    static bool hasIndices(Semantic semantic) noexcept;
+};
+
+class TAU_DLL InputLayoutDescriptor final
+{
+    DEFAULT_CONSTRUCT_PU(InputLayoutDescriptor);
+    DEFAULT_DESTRUCT(InputLayoutDescriptor);
+    DEFAULT_COPY(InputLayoutDescriptor);
+private:
+    ShaderDataType::Type _type;
+    ShaderSemantic::Semantic _semantic;
+public:
+    InputLayoutDescriptor(const ShaderDataType::Type type, const ShaderSemantic::Semantic semantic) noexcept
+        : _type(type), _semantic(semantic)
+    { }
+
+    [[nodiscard]] ShaderDataType::Type type() const noexcept { return _type; }
+    [[nodiscard]] ShaderSemantic::Semantic semantic() const noexcept { return _semantic; }
+
+    [[nodiscard]] ShaderDataType::Type& type() noexcept { return _type; }
+    [[nodiscard]] ShaderSemantic::Semantic& semantic() noexcept { return _semantic; }
+};
+
 class TAU_DLL BufferElementDescriptor final
 {
     DEFAULT_CONSTRUCT_PU(BufferElementDescriptor);
-    DEFAULT_COPY(BufferElementDescriptor);
     DEFAULT_DESTRUCT(BufferElementDescriptor);
+    DEFAULT_COPY(BufferElementDescriptor);
 private:
     ShaderDataType::Type _type;
     u32 _sizeCache;
@@ -133,12 +163,14 @@ private:
 
 class TAU_DLL BufferDescriptor final
 {
+    DEFAULT_DESTRUCT(BufferDescriptor);
+    DEFAULT_COPY(BufferDescriptor);
 private:
     u32 _currentIndex;
     RefDynArray<BufferElementDescriptor> _elementDescriptors;
     u32 _stride;
 public:
-    BufferDescriptor(const std::size_t descriptorCount) noexcept
+    BufferDescriptor(const uSys descriptorCount) noexcept
         : _currentIndex(0), _elementDescriptors(descriptorCount), _stride(0)
     { }
 

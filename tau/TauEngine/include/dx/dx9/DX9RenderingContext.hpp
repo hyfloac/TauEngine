@@ -32,7 +32,6 @@ public:
     void deactivateContext() noexcept override final { }
     void activateContext() noexcept override final { }
 
-    [[nodiscard]] Ref<IVertexArray> createVertexArray(std::size_t attribCount, DrawType drawType) noexcept override final { return null; }
 
     [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final { return null; }
 
@@ -53,6 +52,10 @@ public:
     void endFrame() noexcept override final;
 
     void swapFrame() noexcept override final;
+
+    [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override { return null; }
+
+    [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(std::size_t attribCount) noexcept override final { return null; }
 
     [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override final;
 

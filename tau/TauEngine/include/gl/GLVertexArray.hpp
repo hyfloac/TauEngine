@@ -1,7 +1,9 @@
 #pragma once
 
-#include "model/IVertexArray.hpp"
+#include "model/VertexArray.hpp"
 #include <GL/glew.h>
+
+class GLIndexBuffer;
 
 class TAU_DLL GLVertexArray final : public IVertexArray
 {
@@ -16,8 +18,11 @@ public:
     static GLenum getGLType(ShaderDataType::Type type) noexcept;
 private:
     GLenum _glDrawType;
+    RefDynArray<Ref<IBuffer>> _buffers;
+    Ref<GLIndexBuffer> _indexBuffer;
+    GLuint _attribCount;
 public:
-    GLVertexArray(uSys bufferCount, DrawType drawType);
+    GLVertexArray(u32 drawCount, DrawType drawType, const RefDynArray<Ref<IBuffer>>& buffers, const Ref<GLIndexBuffer>& indexBuffer);
 
     ~GLVertexArray() noexcept override;
 
@@ -32,8 +37,21 @@ public:
     void postDraw(IRenderingContext& context) noexcept override;
 
     void draw(IRenderingContext& context) noexcept override;
+};
 
-    void drawIndexed(IRenderingContext& context) noexcept override;
+class TAU_DLL GLVertexArrayBuilder final : public IVertexArrayBuilder
+{
+    DEFAULT_DESTRUCT(GLVertexArrayBuilder);
+    DELETE_COPY(GLVertexArrayBuilder);
+private:
+public:
+    GLVertexArrayBuilder(const uSys bufferCount) noexcept
+        : IVertexArrayBuilder(bufferCount)
+    { }
 
-    void drawType(DrawType drawType) noexcept override;
+    void setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept override;
+    void indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept override;
+    void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
+
+    [[nodiscard]] GLVertexArray* build([[tau::out]] Error* error) noexcept override;
 };

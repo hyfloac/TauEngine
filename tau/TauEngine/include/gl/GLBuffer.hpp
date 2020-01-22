@@ -4,11 +4,11 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include "model/IBuffer.hpp"
+#include "model/Buffer.hpp"
 
 class TAU_DLL GLBuffer final : public IBuffer
 {
-    DELETE_COPY(GLBuffer);
+    BUFFER_IMPL(GLBuffer);
 public:
     static GLenum getGLType(EBuffer::Type bt) noexcept;
 
@@ -43,7 +43,7 @@ private:
 
 class TAU_DLL GLIndexBuffer final : public IIndexBuffer
 {
-    DELETE_COPY(GLIndexBuffer);
+    INDEX_BUFFER_IMPL(GLIndexBuffer);
 private:
     GLuint _buffer;
     GLenum _glUsage;

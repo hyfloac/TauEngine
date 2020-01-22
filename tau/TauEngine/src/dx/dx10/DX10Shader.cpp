@@ -6,6 +6,7 @@
 #include <d3dcompiler.h>
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10VertexArray.hpp"
+#include "dx/dx10/DX10InputLayout.hpp"
 
 DX10Shader* DX10ShaderBuilder::build(Error* error) noexcept
 {
@@ -27,14 +28,12 @@ DX10Shader* DX10ShaderBuilder::build(Error* error) noexcept
     switch(_type)
     {
         case IShader::Type::Vertex:
-            _context->tmpShaderBlob() = dataBlob;
-            _inputLayout->internalSetup(*_context);
-            if(!_context->tmpInputLayout())
+            if(!RTT_CHECK(_inputLayout.get(), DX10InputLayout))
             {
                 dataBlob->Release();
                 ERROR_CODE_N(Error::InputLayoutFinalizationFailure);
             }
-            ret = buildVertexShader(error, dataBlob, _context->tmpInputLayout());
+            ret = buildVertexShader(error, dataBlob, RefCast<DX10InputLayout>(_inputLayout)->inputLayoutCache(*_context, dataBlob));
             break;
         case IShader::Type::TessellationControl:
             break;

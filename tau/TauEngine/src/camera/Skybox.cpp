@@ -1,7 +1,8 @@
 #include "camera/Skybox.hpp"
 #include "camera/Camera3D.hpp"
 #include "system/RenderingContext.hpp"
-#include "model/IVertexArray.hpp"
+#include "model/VertexArray.hpp"
+#include "model/InputLayout.hpp"
 #include "shader/IShader.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "gl/GLUtils.hpp"
@@ -10,7 +11,7 @@
 Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
       _projectionUni(null), _viewUni(null), _skyboxUni(null),
-      _skybox(null), _cubeVA(context.createVertexArray(1, DrawType::SeparatedTriangles))
+      _skybox(null), _cubeVA(null)
 {
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
 
@@ -21,12 +22,6 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     shaderBuilder->type(IShader::Type::Pixel);
     shaderBuilder->file(VFS::Instance().openFile(pixelShaderPath, FileProps::Read));
     Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
-
-    // Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexShaderPath);
-    // Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, pixelShaderPath);
-    //
-    // vertexShader->loadShader();
-    // pixelShader->loadShader();
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
@@ -99,20 +94,30 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     };
 
     Ref<IBufferBuilder> skyboxCubeBuilder = context.createBuffer(1);
-
     skyboxCubeBuilder->type(EBuffer::Type::ArrayBuffer);
     skyboxCubeBuilder->usage(EBuffer::UsageType::StaticDraw);
     skyboxCubeBuilder->bufferSize(sizeof(skyboxVertices));
     skyboxCubeBuilder->descriptor().addDescriptor(ShaderDataType::Type::Vector3Float);
 
     Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
-
     skyboxCube->bind(context);
     skyboxCube->fillBuffer(context, skyboxVertices);
     skyboxCube->unbind(context);
 
-    _cubeVA->addVertexBuffer(context, skyboxCube);
-    _cubeVA->drawCount() = 36;
+    Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
+    ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
+    const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+
+    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
+    vaBuilder->setVertexBuffer(0, skyboxCube);
+    vaBuilder->inputLayout(inputLayout);
+    vaBuilder->drawCount(36);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+
+    _cubeVA = Ref<IVertexArray>(vaBuilder->build());
+
+    // _cubeVA->addVertexBuffer(context, skyboxCube);
+    // _cubeVA->drawCount() = 36;
     // _cubeVA->drawCount() = 6;
 }
 

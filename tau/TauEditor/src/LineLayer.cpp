@@ -1,12 +1,12 @@
 #include "LineLayer.hpp"
 #include <shader/IShader.hpp>
-#include <model/IBuffer.hpp>
-#include <model/IVertexArray.hpp>
+#include <model/Buffer.hpp>
+#include <model/VertexArray.hpp>
 #include "VFS.hpp"
 
 LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ortho) noexcept
     : ILayer(true), _window(window), _rp(rp), _ortho(ortho),
-      _vao(window.renderingContext()->createVertexArray(2, DrawType::SeparatedTriangles)), _shader(IShaderProgram::create(*window.renderingContext()))
+      _vao(null), _shader(IShaderProgram::create(*window.renderingContext()))
 {
     Ref<IShaderBuilder> shaderBuilder = window.renderingContext()->createShader();
 
@@ -59,8 +59,15 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     lineData->fillBuffer(*window.renderingContext(), bufferData);
     lineData->unbind(*window.renderingContext());
 
-    _vao->addVertexBuffer(*window.renderingContext(), lineData);
-    _vao->drawCount() = 2;
+    Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
+    vaBuilder->setVertexBuffer(0, lineData);
+    vaBuilder->drawCount(2);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+
+    _vao = Ref<IVertexArray>(vaBuilder->build());
+
+    // _vao->addVertexBuffer(*window.renderingContext(), lineData);
+    // _vao->drawCount() = 2;
 }
 
 void LineLayer::onUpdate(float fixedDelta) noexcept

@@ -12,7 +12,7 @@
 #include <maths/Matrix4x4f.hpp>
 #include <imgui/ImGuiGLImpl.hpp>
 #include "system/RenderingContext.hpp"
-#include "model/IVertexArray.hpp"
+#include "model/VertexArray.hpp"
 #include "Timings.hpp"
 
 RenderingPipeline::RenderingPipeline(Window& window, ctxCtrl_f setupParams, void* setupParam, const bool async, const u32 bufferSize, const u32 ctxControlsSize) noexcept

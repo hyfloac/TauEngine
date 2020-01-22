@@ -151,6 +151,46 @@ ShaderDataType::Type ShaderDataType::underlyingTypeND(Type type) noexcept
     }
 }
 
+ShaderDataType::Type ShaderSemantic::associatedType(Semantic semantic) noexcept
+{
+    switch(semantic)
+    {
+        case BiNormal: return ShaderDataType::Vector4Float;
+        case BlendIndices: return ShaderDataType::UInt;
+        case BlendWeight: return ShaderDataType::Float;
+        case Color: return ShaderDataType::Vector4Float;
+        case Normal: return ShaderDataType::Vector4Float;
+        case Position: return ShaderDataType::Vector4Float;
+        case PositionTransformed: return ShaderDataType::Vector4Float;
+        case PointSize: return ShaderDataType::Float;
+        case Tangent: return ShaderDataType::Vector4Float;
+        case TextureCoord: return ShaderDataType::Vector4Float;
+
+        case Unknown:
+        default: return ShaderDataType::Unknown;
+    }
+}
+
+bool ShaderSemantic::hasIndices(Semantic semantic) noexcept
+{
+    switch(semantic)
+    {
+        case Unknown:
+        case BiNormal:
+        case BlendIndices:
+        case BlendWeight:
+        case Color:
+        case Normal:
+        case Position:
+        case Tangent:
+        case TextureCoord: return true;
+
+        case PositionTransformed:
+        case PointSize:
+        default: return false;
+    }
+}
+
 void BufferDescriptor::addDescriptor(BufferElementDescriptor bed) noexcept
 {
     bed._offsetCache = _stride;

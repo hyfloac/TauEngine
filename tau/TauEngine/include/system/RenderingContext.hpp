@@ -10,23 +10,27 @@
 #include "DLL.hpp"
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
-#include "model/IBuffer.hpp"
+#include "model/Buffer.hpp"
 #include "texture/Texture.hpp"
 #include "shader/IShader.hpp"
 
 #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                            public: \
-                                [[nodiscard]] static _TYPE::ContextType getStaticType() noexcept \
-                                { static IRenderingContext::ContextType type = IRenderingContext::ContextType::define(); \
-                                  return type; } \
-                                [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept override \
-                                { return _TYPE::getStaticType(); }
+                            RTT_IMPL(_TYPE, IRenderingContext)
+
+// #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+//                             public: \
+//                                 [[nodiscard]] static IRenderingContext::ContextType getStaticType() noexcept \
+//                                 { static IRenderingContext::ContextType type = IRenderingContext::ContextType::define(); \
+//                                   return type; } \
+//                                 [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept override \
+//                                 { return _TYPE::getStaticType(); }
 
 #define RC_IMPL(_TYPE) RC_IMPL_BASE(_TYPE)
 
 class Window;
+class IInputLayoutBuilder;
 class IVertexArray;
-enum class DrawType : u8;
+class IVertexArrayBuilder;
 class IBuffer;
 class IFrameBufferBuilder;
 
@@ -52,7 +56,7 @@ protected:
 public:
     [[nodiscard]] const RenderingMode& mode() const noexcept { return _mode; }
 
-    [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept = 0;
+    // [[nodiscard]] virtual IRenderingContext::ContextType getContextType() const noexcept = 0;
 
     [[nodiscard]] virtual bool createContext(Window& window) noexcept = 0;
 
@@ -61,8 +65,6 @@ public:
     virtual void deactivateContext() noexcept = 0;
 
     virtual void activateContext() noexcept = 0;
-
-    [[nodiscard]] virtual Ref<IVertexArray> createVertexArray(std::size_t attribCount, DrawType drawType) noexcept = 0;
 
     [[nodiscard]] virtual void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept = 0;
 
@@ -86,7 +88,11 @@ public:
 
     virtual void swapFrame() noexcept = 0;
 
-    [[nodiscard]] virtual Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept = 0;
+    [[nodiscard]] virtual Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept = 0;
+
+    [[nodiscard]] virtual Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept = 0;
+
+    [[nodiscard]] virtual Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept = 0;
 
     [[nodiscard]] virtual Ref<IIndexBufferBuilder> createIndexBuffer() noexcept = 0;
 
@@ -102,9 +108,12 @@ public:
 
     [[nodiscard]] virtual Ref<IShaderBuilder> createShader() noexcept = 0;
 
-    template<typename _T>
-    [[nodiscard]] bool isContextType() const noexcept
-    { return _T::getStaticType() == getContextType(); }
+    RTT_BASE_IMPL(IRenderingContext);
+    RTT_BASE_CHECK(IRenderingContext);
+    RTT_BASE_CAST(IRenderingContext);
+    // template<typename _T>
+    // [[nodiscard]] bool isContextType() const noexcept
+    // { return _T::getStaticType() == getContextType(); }
 
     template<typename _T>
     [[nodiscard]] _T* getVertexArrayHandle(IVertexArray* vertexArray) noexcept

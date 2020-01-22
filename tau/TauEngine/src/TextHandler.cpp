@@ -8,7 +8,8 @@
 #include "TextHandler.hpp"
 #include "texture/Texture.hpp"
 #include "model/BufferDescriptor.hpp"
-#include "model/IVertexArray.hpp"
+#include "model/VertexArray.hpp"
+#include "model/InputLayout.hpp"
 #include "shader/IShaderProgram.hpp"
 #include "shader/IShader.hpp"
 #include "RenderingPipeline.hpp"
@@ -18,7 +19,8 @@
 
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
-      _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
+      // _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
+      _va(null),
       _positionBuffer(null),
       _projUni(null), _texUni(null), _colorUni(null)
 {
@@ -73,14 +75,27 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     bufferBuilder->usage(EBuffer::UsageType::StaticDraw);
 
     Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
-
     textureCoordBuffer->bind(context);
     textureCoordBuffer->fillBuffer(context, textureCoords);
     textureCoordBuffer->unbind(context);
 
-    _va->addVertexBuffer(context, _positionBuffer);
-    _va->addVertexBuffer(context, textureCoordBuffer);
-    _va->drawCount() = 6;
+    Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(2);
+    ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+    const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+
+    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
+    vaBuilder->setVertexBuffer(0, _positionBuffer);
+    vaBuilder->setVertexBuffer(1, textureCoordBuffer);
+    vaBuilder->inputLayout(inputLayout);
+    vaBuilder->drawCount(6);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+
+    _va = Ref<IVertexArray>(vaBuilder->build());
+
+    // _va->addVertexBuffer(context, _positionBuffer);
+    // _va->addVertexBuffer(context, textureCoordBuffer);
+    // _va->drawCount() = 6;
 }
 
 TextHandler::~TextHandler() noexcept
@@ -213,7 +228,7 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
     _va->bind(context);
     _va->preDraw(context);
 
-    glFrontFace(GL_CCW);
+    // glFrontFace(GL_CCW);
 
     for(char c = *str; c != '\0'; c = *(++str))
     {

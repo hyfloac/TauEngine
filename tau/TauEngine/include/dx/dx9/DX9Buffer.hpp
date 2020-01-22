@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/IBuffer.hpp"
+#include "model/Buffer.hpp"
 #include "dx/dx9/DX9RenderingContext.hpp"
 
 #ifdef _WIN32
@@ -10,7 +10,7 @@
 
 class TAU_DLL DX9Buffer final : public IBuffer
 {
-    DELETE_COPY(DX9Buffer);
+    BUFFER_IMPL(DX9Buffer);
 private:
     IDirect3DVertexBuffer9* _buffer;
 public:
@@ -30,8 +30,7 @@ public:
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size,
-                      const void* data) noexcept override;
+    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 };
 
 class TAU_DLL DX9BufferBuilder final : public IBufferBuilder

@@ -132,9 +132,6 @@
     <ClCompile Include="src\model\RenderableObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\IVertexArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\model\OBJLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +229,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\InputLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10InputLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gl\GLInputLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -413,9 +425,6 @@
     <ClInclude Include="include\ResourceLoader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\IBuffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\gl\GLBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -426,9 +435,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\maths\GlmMatrixTransformExt.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\IVertexArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\GLVertexArray.hpp">
@@ -549,6 +555,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\InputLayout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\VertexArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Buffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10InputLayout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gl\GLInputLayout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
