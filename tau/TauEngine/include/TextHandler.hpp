@@ -91,6 +91,7 @@ private:
     Ref<IShaderProgram> _shader;
     Ref<IVertexArray> _va;
     Ref<IBuffer> _positionBuffer;
+    // Ref<IBuffer> _translationBuffer;
     Ref<IUniform<const glm::mat4&>> _projUni;
     Ref<IUniform<int>> _texUni;
     Ref<IUniform<const Vector3f&>> _colorUni;

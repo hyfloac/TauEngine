@@ -25,6 +25,19 @@ void DX9Buffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, 
     _buffer->Unlock();
 }
 
+
+void* DX9Buffer::mapBuffer(IRenderingContext& context) noexcept
+{
+    void* storeHandle;
+    _buffer->Lock(0, 0, &storeHandle, 0);
+    return storeHandle;
+}
+
+void DX9Buffer::unmapBuffer(IRenderingContext& context) noexcept
+{
+    _buffer->Unlock();
+}
+
 DX9BufferBuilder::DX9BufferBuilder(const uSys descriptorCount, DX9RenderingContext& context) noexcept
     : IBufferBuilder(descriptorCount),
       _context(context)
@@ -56,7 +69,7 @@ IBuffer* DX9BufferBuilder::build(Error* error) const noexcept
         ERROR_CODE_N(Error::UnknownError);
     }
 
-    DX9Buffer* const buffer = new(std::nothrow) DX9Buffer(_type, _usage, _bufferSize, _descriptor, d3dBuffer);
+    DX9Buffer* const buffer = new(std::nothrow) DX9Buffer(_type, _usage, _bufferSize, _instanced, _descriptor.build(), d3dBuffer);
 
     if(!buffer)
     {

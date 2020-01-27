@@ -31,20 +31,17 @@
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
-    <ClCompile Include="src\dx\dx10\DX10InputLayout.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp" />
     <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp" />
     <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp" />
-    <ClCompile Include="src\dx\dx9\DXBuffer.cpp" />
+    <ClCompile Include="src\dx\dx9\DX9Buffer.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FastRand.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
-    <ClCompile Include="src\gl\GLInputLayout.cpp" />
     <ClCompile Include="src\gl\GLTextureCube.cpp" />
-    <ClCompile Include="src\model\InputLayout.cpp" />
     <ClCompile Include="src\model\Material.cpp" />
     <ClCompile Include="src\shader\PointLight.cpp" />
     <ClCompile Include="src\shader\SpotLight.cpp" />
@@ -114,7 +111,6 @@
     <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsInterface.hpp" />
-    <ClInclude Include="include\dx\dx10\DX10InputLayout.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
@@ -132,7 +128,6 @@
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
-    <ClInclude Include="include\gl\GLInputLayout.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
     <ClInclude Include="include\gl\GLUniform.hpp" />
@@ -161,7 +156,6 @@
     <ClInclude Include="include\maths\Vector4f.hpp" />
     <ClInclude Include="include\model\BufferDescriptor.hpp" />
     <ClInclude Include="include\model\BufferEnums.hpp" />
-    <ClInclude Include="include\model\InputLayout.hpp" />
     <ClInclude Include="include\model\ModelLoader.hpp" />
     <ClInclude Include="include\model\Buffer.hpp" />
     <ClInclude Include="include\model\OBJLoader.hpp" />

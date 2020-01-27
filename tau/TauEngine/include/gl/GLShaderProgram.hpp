@@ -66,6 +66,6 @@ public:
     Ref<IUniform<const glm::dmat4x3&>> getUniformMatrix4x3Double(const char* name, bool transpose) noexcept override final;
     Ref<IUniform<const glm::dmat4x4&>> getUniformMatrix4x4Double(const char* name, bool transpose) noexcept override final;
 private:
-    void attach(IRenderingContext& context, Ref<IShader> shader) noexcept override final;
+    bool attach(IRenderingContext& context, Ref<IShader> shader) noexcept override final;
     void detach(IRenderingContext& context, Ref<IShader> shader) noexcept override final;
 };

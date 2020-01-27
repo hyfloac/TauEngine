@@ -153,7 +153,77 @@ void GLRenderingContext::handleCtxError(int profileMask) const noexcept
 
 bool GLRenderingContext::createContext(Window& window) noexcept
 {
-    return createContextsShared(window, null, 0);
+    // return createContextsShared(window, null, 0);
+
+     PIXELFORMATDESCRIPTOR pfd;
+     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+
+     pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+     pfd.nVersion = 1;
+     pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+     pfd.iPixelType = PFD_TYPE_RGBA;
+     pfd.cColorBits = 32;
+     pfd.cDepthBits = 24;
+     pfd.cStencilBits = 8;
+     pfd.iLayerType = PFD_MAIN_PLANE;
+
+     // ReSharper disable once CppLocalVariableMayBeConst
+     this->_device = GetDC(window.sysWindowContainer().windowHandle);
+
+     const int pixelFormat = ChoosePixelFormat(this->_device, &pfd);
+
+     if(!pixelFormat) { return false; }
+
+     const BOOL res = SetPixelFormat(this->_device, pixelFormat, &pfd);
+
+     if(!res) { return false; }
+
+     // ReSharper disable once CppLocalVariableMayBeConst
+     HGLRC tmpContext = wglCreateContext(this->_device);
+
+     if(!tmpContext)
+     {
+         handleCtxError(0);
+         return false;
+     }
+
+     wglMakeCurrent(this->_device, tmpContext);
+
+     if(glewInit() != GLEW_OK) { return false; }
+
+     if(WGLEW_ARB_create_context)
+     {
+         const int attribs[] =
+         {
+             WGL_CONTEXT_MAJOR_VERSION_ARB, this->_majorVersion,
+             WGL_CONTEXT_MINOR_VERSION_ARB, this->_minorVersion,
+             WGL_CONTEXT_FLAGS_ARB,        (this->_mode.debugMode() ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
+                                           (this->_forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB : 0),
+             WGL_CONTEXT_PROFILE_MASK_ARB, (this->_compat == GLProfile::Core ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB :
+                                            this->_compat == GLProfile::Compat ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
+             0
+         };
+
+         // ReSharper disable once CppLocalVariableMayBeConst
+         HGLRC attribContext = wglCreateContextAttribsARB(this->_device, null, attribs);
+
+         if(!attribContext)
+         {
+             handleCtxError(attribs[7]);
+             return false;
+         }
+
+         this->_context = attribContext;
+
+         wglMakeCurrent(null, null);
+         wglDeleteContext(tmpContext);
+     }
+     else
+     {
+         this->_context = tmpContext;
+     }
+
+     return true;
 }
 
 struct ContextShareData final
@@ -162,98 +232,98 @@ struct ContextShareData final
     HGLRC hglrc;
 };
 
-bool GLRenderingContext::createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept
-{
-    PIXELFORMATDESCRIPTOR pfd;
-    memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
-
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-
-    // ReSharper disable once CppLocalVariableMayBeConst
-    // this->_device = *reinterpret_cast<HDC*>(param);
-    // this->_device = GetDC(*reinterpret_cast<HWND*>(param));
-    this->_device = GetDC(window.sysWindowContainer().windowHandle);
-
-    const int pixelFormat = ChoosePixelFormat(this->_device, &pfd);
-
-    if(!pixelFormat) { return false; }
-
-    const BOOL res = SetPixelFormat(this->_device, pixelFormat, &pfd);
-
-    if(!res) { return false; }
-
-    // ReSharper disable once CppLocalVariableMayBeConst
-    HGLRC tmpContext = wglCreateContext(this->_device);
-
-    if(!tmpContext)
-    {
-        handleCtxError(0);
-        return false;
-    }
-
-    wglMakeCurrent(this->_device, tmpContext);
-
-    if(glewInit() != GLEW_OK) { return false; }
-
-    if(WGLEW_ARB_create_context)
-    {
-        const int attribs[] =
-        {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, this->_majorVersion,
-            WGL_CONTEXT_MINOR_VERSION_ARB, this->_minorVersion,
-            WGL_CONTEXT_FLAGS_ARB,        (this->_mode.debugMode() ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
-                                          (this->_forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB : 0),
-            WGL_CONTEXT_PROFILE_MASK_ARB, (this->_compat == GLProfile::Core ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB :
-                                           this->_compat == GLProfile::Compat ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
-            0
-        };
-
-        // ReSharper disable once CppLocalVariableMayBeConst
-        HGLRC attribContext = wglCreateContextAttribsARB(this->_device, null, attribs);
-
-        if(!attribContext)
-        {
-            handleCtxError(attribs[7]);
-            return false;
-        }
-
-        this->_context = attribContext;
-
-        wglMakeCurrent(null, null);
-        wglDeleteContext(tmpContext);
-
-        for(std::size_t i = 0; i < count; ++i)
-        {
-            // ReSharper disable once CppLocalVariableMayBeConst
-            HGLRC sharedContext = wglCreateContextAttribsARB(this->_device, null, attribs);
-            wglShareLists(attribContext, sharedContext);
-            ContextShareData shareData { this->_device, sharedContext };
-            sharers[i]->createFromShared(&shareData);
-        }
-
-        // wglMakeCurrent(this->_device, this->_context);
-    }
-    else
-    {
-        this->_context = tmpContext;
-    }
-
-    return true;
-}
-
-void GLRenderingContext::createFromShared(void* param) noexcept
-{
-    ContextShareData* shareData = reinterpret_cast<ContextShareData*>(param);
-    this->_device = shareData->hdc;
-    this->_context = shareData->hglrc;
-}
+// bool GLRenderingContext::createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept
+// {
+//     PIXELFORMATDESCRIPTOR pfd;
+//     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+//
+//     pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+//     pfd.nVersion = 1;
+//     pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+//     pfd.iPixelType = PFD_TYPE_RGBA;
+//     pfd.cColorBits = 32;
+//     pfd.cDepthBits = 24;
+//     pfd.cStencilBits = 8;
+//     pfd.iLayerType = PFD_MAIN_PLANE;
+//
+//     // ReSharper disable once CppLocalVariableMayBeConst
+//     // this->_device = *reinterpret_cast<HDC*>(param);
+//     // this->_device = GetDC(*reinterpret_cast<HWND*>(param));
+//     this->_device = GetDC(window.sysWindowContainer().windowHandle);
+//
+//     const int pixelFormat = ChoosePixelFormat(this->_device, &pfd);
+//
+//     if(!pixelFormat) { return false; }
+//
+//     const BOOL res = SetPixelFormat(this->_device, pixelFormat, &pfd);
+//
+//     if(!res) { return false; }
+//
+//     // ReSharper disable once CppLocalVariableMayBeConst
+//     HGLRC tmpContext = wglCreateContext(this->_device);
+//
+//     if(!tmpContext)
+//     {
+//         handleCtxError(0);
+//         return false;
+//     }
+//
+//     wglMakeCurrent(this->_device, tmpContext);
+//
+//     if(glewInit() != GLEW_OK) { return false; }
+//
+//     if(WGLEW_ARB_create_context)
+//     {
+//         const int attribs[] =
+//         {
+//             WGL_CONTEXT_MAJOR_VERSION_ARB, this->_majorVersion,
+//             WGL_CONTEXT_MINOR_VERSION_ARB, this->_minorVersion,
+//             WGL_CONTEXT_FLAGS_ARB,        (this->_mode.debugMode() ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) |
+//                                           (this->_forwardCompatible ? WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB : 0),
+//             WGL_CONTEXT_PROFILE_MASK_ARB, (this->_compat == GLProfile::Core ? WGL_CONTEXT_CORE_PROFILE_BIT_ARB :
+//                                            this->_compat == GLProfile::Compat ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 0),
+//             0
+//         };
+//
+//         // ReSharper disable once CppLocalVariableMayBeConst
+//         HGLRC attribContext = wglCreateContextAttribsARB(this->_device, null, attribs);
+//
+//         if(!attribContext)
+//         {
+//             handleCtxError(attribs[7]);
+//             return false;
+//         }
+//
+//         this->_context = attribContext;
+//
+//         wglMakeCurrent(null, null);
+//         wglDeleteContext(tmpContext);
+//
+//         for(std::size_t i = 0; i < count; ++i)
+//         {
+//             // ReSharper disable once CppLocalVariableMayBeConst
+//             HGLRC sharedContext = wglCreateContextAttribsARB(this->_device, null, attribs);
+//             wglShareLists(attribContext, sharedContext);
+//             ContextShareData shareData { this->_device, sharedContext };
+//             sharers[i]->createFromShared(&shareData);
+//         }
+//
+//         // wglMakeCurrent(this->_device, this->_context);
+//     }
+//     else
+//     {
+//         this->_context = tmpContext;
+//     }
+//
+//     return true;
+// }
+//
+// void GLRenderingContext::createFromShared(void* param) noexcept
+// {
+//     ContextShareData* shareData = reinterpret_cast<ContextShareData*>(param);
+//     this->_device = shareData->hdc;
+//     this->_context = shareData->hglrc;
+// }
 
 void GLRenderingContext::deactivateContext() noexcept
 {

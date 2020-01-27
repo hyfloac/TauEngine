@@ -5,8 +5,8 @@
 #include "dx/dx10/DX10RenderingContext.hpp"
 
 DX10Buffer::DX10Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize,
-                       const BufferDescriptor& descriptor, ID3D10Buffer* const d3dBuffer) noexcept
-    : IBuffer(type, usage, bufferSize, descriptor), _d3dBuffer(d3dBuffer)
+                       const bool instanced, const BufferDescriptor& descriptor, ID3D10Buffer* const d3dBuffer) noexcept
+    : IBuffer(type, usage, bufferSize, instanced, descriptor), _d3dBuffer(d3dBuffer)
 { }
 
 DX10Buffer::~DX10Buffer() noexcept
@@ -45,7 +45,30 @@ void DX10Buffer::modifyBuffer(IRenderingContext& context, intptr_t offset, std::
     }
 }
 
-DX10IndexBuffer::DX10IndexBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept
+void* DX10Buffer::mapBuffer(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        void* bufferAccess;
+
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            return bufferAccess;
+        }
+    }
+    return null;
+}
+
+void DX10Buffer::unmapBuffer(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        _d3dBuffer->Unmap();
+    }
+}
+
+DX10IndexBuffer::DX10IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
     : IIndexBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer)
 { }
 
@@ -85,6 +108,29 @@ void DX10IndexBuffer::modifyBuffer(IRenderingContext& context, intptr_t offset, 
     }
 }
 
+void* DX10IndexBuffer::mapBuffer(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        void* bufferAccess;
+
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            return bufferAccess;
+        }
+    }
+    return null;
+}
+
+void DX10IndexBuffer::unmapBuffer(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        _d3dBuffer->Unmap();
+    }
+}
+
 DX10BufferBuilder::DX10BufferBuilder(uSys descriptorCount, DX10RenderingContext& context) noexcept
     : IBufferBuilder(descriptorCount), _context(context)
 { }
@@ -97,7 +143,7 @@ DX10Buffer* DX10BufferBuilder::build(Error* error) const noexcept
     ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
 
     D3D10_BUFFER_DESC bufferDesc;
-    bufferDesc.ByteWidth = _descriptor.stride() * _bufferSize;
+    bufferDesc.ByteWidth = _bufferSize; //_descriptor.stride() *_bufferSize;
     bufferDesc.Usage = DX10Buffer::getDXUsage(_usage);
     bufferDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
     bufferDesc.CPUAccessFlags = 0;
@@ -121,7 +167,7 @@ DX10Buffer* DX10BufferBuilder::build(Error* error) const noexcept
         ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 
-    DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(_type, _usage, _bufferSize, _descriptor, d3dBuffer);
+    DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(_type, _usage, _bufferSize, _instanced, _descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();

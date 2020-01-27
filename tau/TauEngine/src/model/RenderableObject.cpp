@@ -6,9 +6,8 @@
 #include "Timings.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "VFS.hpp"
-#include "model/InputLayout.hpp"
 
-static Ref<IInputLayout> _inputLayoutCache = null;
+// static Ref<IInputLayout> _inputLayoutCache = null;
 
 RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const DrawType drawType) noexcept
     : _va(null)
@@ -59,18 +58,24 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     pnBuilder->type(EBuffer::Type::ArrayBuffer);
     pnBuilder->usage(EBuffer::UsageType::StaticDraw);
     pnBuilder->bufferSize(cnt3 * sizeof(float));
-    pnBuilder->descriptor().addDescriptor(ShaderDataType::Vector3Float);
+    pnBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
     texturesBuilder->type(EBuffer::Type::ArrayBuffer);
     texturesBuilder->usage(EBuffer::UsageType::StaticDraw);
     texturesBuilder->bufferSize(cnt2 * sizeof(float));
-    texturesBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    texturesBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     indicesBuilder->usage(EBuffer::UsageType::StaticDraw);
     indicesBuilder->bufferSize(mesh.indices.size() * sizeof(u32));
 
     Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
+
+    pnBuilder->descriptor().reset(1);
+    pnBuilder->descriptor().addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
     Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
+
+    pnBuilder->descriptor().reset(1);
+    pnBuilder->descriptor().addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
     Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
     // Ref<IBuffer> bitangents = Ref<IBuffer>(pnBuilder->build(nullptr));
     Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
@@ -102,22 +107,22 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
 
-    if(!_inputLayoutCache)
-    {
-        Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(4);
-        ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
-        ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
-        ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector3Float, ShaderSemantic::Tangent);
-        ilBuilder->setLayoutDescriptor(3, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-        _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
-    }
+    // if(!_inputLayoutCache)
+    // {
+        // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(4);
+        // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
+        // ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
+        // ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector3Float, ShaderSemantic::Tangent);
+        // ilBuilder->setLayoutDescriptor(3, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+        // _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    // }
 
     vaBuilder->setVertexBuffer(0, positions);
     vaBuilder->setVertexBuffer(1, normals);
     vaBuilder->setVertexBuffer(2, tangents);
     vaBuilder->setVertexBuffer(3, textures);
     vaBuilder->indexBuffer(indices);
-    vaBuilder->inputLayout(_inputLayoutCache);
+    // vaBuilder->inputLayout(_inputLayoutCache);
     vaBuilder->drawCount(mesh.indices.size());
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 

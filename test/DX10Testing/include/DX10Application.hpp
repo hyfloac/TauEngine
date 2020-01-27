@@ -8,6 +8,7 @@
 #include <system/RenderingContext.hpp>
 #include <Objects.hpp>
 #include "Config.h"
+#include <shader/IShaderProgram.hpp>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
@@ -21,7 +22,8 @@ private:
     Ref<spdlog::logger> _logger;
     u8 _r, _g, _b;
     u8 _rr, _gg, _bb;
-    Ref<IShader> _vertexShader;
+    Ref<IShaderProgram> _shader;
+    Ref<IVertexArray> _va;
 public:
     DX10Application() noexcept;
 
@@ -43,6 +45,9 @@ protected:
 
     void runMessageLoop() noexcept override;
 private:
+    [[nodiscard]] const IRenderingContext& ctx() const noexcept { return *_window->renderingContext(); }
+    [[nodiscard]] IRenderingContext& ctx() noexcept { return *_window->renderingContext(); }
+
     void setupConfig() noexcept;
 
     void writeConfig() noexcept;

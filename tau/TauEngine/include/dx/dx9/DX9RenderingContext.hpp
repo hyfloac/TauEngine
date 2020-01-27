@@ -27,17 +27,16 @@ public:
 
     [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
-    void createFromShared(void* param) noexcept override final { }
+    // void createFromShared(void* param) noexcept override final { }
 
     void deactivateContext() noexcept override final { }
     void activateContext() noexcept override final { }
 
+    // [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final { return null; }
 
-    [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final { return null; }
+    // void destroyVA(IVertexArray* vertexArray) noexcept override final { }
 
-    void destroyVA(IVertexArray* vertexArray) noexcept override final { }
-
-    void clearVAs() noexcept override final { }
+    // void clearVAs() noexcept override final { }
 
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept override final;
 
@@ -53,7 +52,7 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override { return null; }
+    // [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override { return null; }
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(std::size_t attribCount) noexcept override final { return null; }
 
@@ -73,7 +72,7 @@ public:
 
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override { return null; }
 protected:
-    bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
+    // bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
 
     RC_IMPL(DX9RenderingContext);
 };

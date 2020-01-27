@@ -1,8 +1,7 @@
 #include "ui/UIButton.hpp"
 #include "events/WindowEvent.hpp"
-#include "model/InputLayout.hpp"
 
-static Ref<IInputLayout> _inputLayoutCache = null;
+// static Ref<IInputLayout> _inputLayoutCache = null;
 
 bool UIButton::onClick(WindowMouseClickEvent& e) noexcept
 {
@@ -56,23 +55,23 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     vboBuilder->type(EBuffer::Type::ArrayBuffer);
     vboBuilder->usage(EBuffer::UsageType::StaticDraw);
     vboBuilder->bufferSize(sizeof(model));
-    vboBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    vboBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
 
     _vbo->bind(context);
     _vbo->fillBuffer(context, model);
     _vbo->unbind(context);
 
-    if(!_inputLayoutCache)
-    {
-        Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
-        ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-        _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
-    }
+    // if(!_inputLayoutCache)
+    // {
+        // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
+        // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+        // _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    // }
 
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
     vaBuilder->setVertexBuffer(0, _vbo);
-    vaBuilder->inputLayout(_inputLayoutCache);
+    // vaBuilder->inputLayout(_inputLayoutCache);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 

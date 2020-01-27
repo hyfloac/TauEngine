@@ -340,7 +340,7 @@ private:
     _T* _arr;
     uSys _size;
 public:
-    explicit DynArray(uSys size)
+    explicit DynArray(const uSys size)
         : _arr(new(::std::nothrow) _T[size]), _size(size)
     { }
 
@@ -350,7 +350,7 @@ public:
     DynArray(const DynArray<_T>& copy)
         : _arr(new(::std::nothrow) _T[copy._size]), _size(copy._size)
     {
-        memcpy(_arr, copy._arr, copy._size);
+        ::std::memcpy(_arr, copy._arr, copy._size * sizeof(_T));
     }
 
     DynArray(DynArray<_T>&& move) noexcept
@@ -367,7 +367,7 @@ public:
         _arr = new(::std::nothrow) _T[copy._size];
         _size = copy._size;
 
-        memcpy(_arr, copy._arr, copy._size);
+        ::std::memcpy(_arr, copy._arr, copy._size * sizeof(_T));
 
         return *this;
     }

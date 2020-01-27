@@ -7,8 +7,8 @@
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
 #include "dx/dx10/DX10Shader.hpp"
-#include "dx/dx10/DX10InputLayout.hpp"
 #include "dx/dx10/DX10VertexArray.hpp"
+#include "dx/dx10/DX10Buffer.hpp"
 
 DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
     : IRenderingContext(mode),
@@ -259,14 +259,19 @@ void DX10RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-Ref<IInputLayoutBuilder> DX10RenderingContext::createInputLayout(const uSys numDescriptors) noexcept
-{
-    return Ref<IInputLayoutBuilder>(new(::std::nothrow) DX10InputLayoutBuilder(numDescriptors));
-}
+// Ref<IInputLayoutBuilder> DX10RenderingContext::createInputLayout(const uSys numDescriptors) noexcept
+// {
+//     return Ref<IInputLayoutBuilder>(new(::std::nothrow) DX10InputLayoutBuilder(numDescriptors));
+// }
 
 Ref<IVertexArrayBuilder> DX10RenderingContext::createVertexArray(const uSys bufferCount) noexcept
 {
-    return Ref<IVertexArrayBuilder>(new(::std::nothrow) DX10VertexArrayBuilder(bufferCount));
+    return Ref<IVertexArrayBuilder>(new(::std::nothrow) DX10VertexArrayBuilder(bufferCount, *this));
+}
+
+Ref<IBufferBuilder> DX10RenderingContext::createBuffer(const uSys descriptorCount) noexcept
+{
+    return Ref<IBufferBuilder>(new(::std::nothrow) DX10BufferBuilder(descriptorCount, *this));
 }
 
 Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept

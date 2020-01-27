@@ -22,8 +22,10 @@ public:
     static uSys computeNumElements(ShaderDataType::Type type) noexcept;
 
     static D3D10_PRIMITIVE_TOPOLOGY getDXDrawType(DrawType drawType) noexcept;
+
+    static const char* getDXSemanticName(ShaderSemantic::Semantic semantic) noexcept;
 private:
-    Ref<DX10InputLayout> _inputLayout;
+    ID3D10InputLayout* _inputLayout;
     uSys _iaBufferCount;
     ID3D10Buffer** _iaBuffers;
     UINT* _iaStrides;
@@ -31,7 +33,7 @@ private:
     ID3D10Buffer* _dxIndexBuffer;
     D3D10_PRIMITIVE_TOPOLOGY _drawTypeCache;
 public:
-    DX10VertexArray(u32 drawCount, const Ref<DX10InputLayout>& inputLayout, uSys bufferCount, ID3D10Buffer** iaBuffers, 
+    DX10VertexArray(u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, ID3D10InputLayout* inputLayout, uSys bufferCount, ID3D10Buffer** iaBuffers,
                     UINT* iaStrides, UINT* iaOffsets, ID3D10Buffer* indexBuffer, DrawType drawType) noexcept;
 
     ~DX10VertexArray() noexcept override;
@@ -39,10 +41,11 @@ public:
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
 
-    void internalSetup(IRenderingContext& context) noexcept override;
+    // void internalSetup(IRenderingContext& context) noexcept override;
     void preDraw(IRenderingContext& context) noexcept override;
     void postDraw(IRenderingContext& context) noexcept override;
     void draw(IRenderingContext& context) noexcept override;
+    void drawInstanced(IRenderingContext& context, uSys instanceCount) noexcept override;
 private:
     // void handleInsertion(uSys& insertIndex, ID3D10Buffer* buffer, const BufferElementDescriptor& bed) const noexcept;
 };
@@ -52,15 +55,18 @@ class TAU_DLL DX10VertexArrayBuilder final : public IVertexArrayBuilder
     DEFAULT_DESTRUCT(DX10VertexArrayBuilder);
     DELETE_COPY(DX10VertexArrayBuilder);
 private:
+    DX10RenderingContext& _ctx;
     ID3D10Buffer* _indexBufferCache;
+    ID3D10Blob* _shaderBlobCache;
 public:
-    DX10VertexArrayBuilder(const uSys bufferCount) noexcept
-        : IVertexArrayBuilder(bufferCount), _indexBufferCache(null)
+    DX10VertexArrayBuilder(const uSys bufferCount, DX10RenderingContext& ctx) noexcept
+        : IVertexArrayBuilder(bufferCount), _ctx(ctx), _indexBufferCache(null)
     { }
 
+    void shader(const Ref<IShader>& shader) noexcept override;
     void setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept override;
     void indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept override;
-    void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
+    // void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
 
     [[nodiscard]] DX10VertexArray* build([[tau::out]] Error* error) noexcept override;
 };

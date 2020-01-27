@@ -2,8 +2,8 @@
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 #include <Safeties.hpp>
 
-GLBuffer::GLBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, const GLuint buffer, const GLenum glType, const GLenum glUsage) noexcept
-    : IBuffer(type, usage, bufferSize, descriptor),
+GLBuffer::GLBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor, const GLuint buffer, const GLenum glType, const GLenum glUsage) noexcept
+    : IBuffer(type, usage, bufferSize, instanced, descriptor),
       _buffer(buffer), _glType(glType), _glUsage(glUsage)
 { }
 
@@ -28,6 +28,16 @@ void GLBuffer::fillBuffer(IRenderingContext& context, const void* const data) no
 void GLBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
 {
     glBufferSubData(this->_glType, offset, size, data);
+}
+
+void* GLBuffer::mapBuffer(IRenderingContext& context) noexcept
+{
+    return glMapBuffer(this->_glType, GL_WRITE_ONLY);
+}
+
+void GLBuffer::unmapBuffer(IRenderingContext& context) noexcept
+{
+    glUnmapBuffer(this->_glType);
 }
 
 GLIndexBuffer::GLIndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const GLuint buffer, const GLenum glUsage) noexcept
@@ -56,6 +66,16 @@ void GLIndexBuffer::fillBuffer(IRenderingContext& context, const void* const dat
 void GLIndexBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, const std::ptrdiff_t size, const void* const data) noexcept
 {
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+}
+
+void* GLIndexBuffer::mapBuffer(IRenderingContext& context) noexcept
+{
+    return glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+}
+
+void GLIndexBuffer::unmapBuffer(IRenderingContext& context) noexcept
+{
+    glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 GLuint GLBuffer::createBuffer() noexcept
@@ -96,7 +116,7 @@ IBuffer* GLBufferBuilder::build(Error* error) const noexcept
 
     const GLuint bufferHandle = createBuffer();
 
-    GLBuffer* const buffer = new(std::nothrow) GLBuffer(_type, _usage, _bufferSize, _descriptor, bufferHandle, _glType, _glUsage);
+    GLBuffer* const buffer = new(std::nothrow) GLBuffer(_type, _usage, _bufferSize, _instanced, _descriptor.build(), bufferHandle, _glType, _glUsage);
 
     if(!buffer)
     {

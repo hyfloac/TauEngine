@@ -66,7 +66,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CINTERFACE;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -100,6 +100,10 @@
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\TestVertexShader.hlsl /Fo $(ProjectDir)resources\shader\TestVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\TestPixelShader.hlsl /Fo $(ProjectDir)resources\shader\TestPixelShader.cso</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -109,7 +113,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CINTERFACE;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -142,6 +146,10 @@
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\TestVertexShader.hlsl /Fo $(ProjectDir)resources\shader\TestVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\TestPixelShader.hlsl /Fo $(ProjectDir)resources\shader\TestPixelShader.cso</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Config.h" />

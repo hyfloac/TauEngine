@@ -14,8 +14,8 @@ class TAU_DLL DX9Buffer final : public IBuffer
 private:
     IDirect3DVertexBuffer9* _buffer;
 public:
-    DX9Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, IDirect3DVertexBuffer9* buffer)
-        : IBuffer(type, usage, bufferSize, descriptor),
+    DX9Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor, IDirect3DVertexBuffer9* buffer)
+        : IBuffer(type, usage, bufferSize, instanced, descriptor),
           _buffer(buffer)
     { }
 
@@ -31,6 +31,9 @@ public:
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 
     void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+
+    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
+    void unmapBuffer(IRenderingContext& context) noexcept override;
 };
 
 class TAU_DLL DX9BufferBuilder final : public IBufferBuilder

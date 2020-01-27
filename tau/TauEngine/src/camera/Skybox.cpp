@@ -2,7 +2,6 @@
 #include "camera/Camera3D.hpp"
 #include "system/RenderingContext.hpp"
 #include "model/VertexArray.hpp"
-#include "model/InputLayout.hpp"
 #include "shader/IShader.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "gl/GLUtils.hpp"
@@ -97,20 +96,20 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     skyboxCubeBuilder->type(EBuffer::Type::ArrayBuffer);
     skyboxCubeBuilder->usage(EBuffer::UsageType::StaticDraw);
     skyboxCubeBuilder->bufferSize(sizeof(skyboxVertices));
-    skyboxCubeBuilder->descriptor().addDescriptor(ShaderDataType::Type::Vector3Float);
+    skyboxCubeBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
     Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
     skyboxCube->bind(context);
     skyboxCube->fillBuffer(context, skyboxVertices);
     skyboxCube->unbind(context);
 
-    Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
-    ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
-    const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+    // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
+    // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
+    // const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
     vaBuilder->setVertexBuffer(0, skyboxCube);
-    vaBuilder->inputLayout(inputLayout);
+    // vaBuilder->inputLayout(inputLayout);
     vaBuilder->drawCount(36);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 

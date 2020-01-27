@@ -1,8 +1,7 @@
 #include "terrain/TerrainTile.hpp"
 #include "model/Buffer.hpp"
-#include "model/InputLayout.hpp"
 
-static Ref<IInputLayout> _inputLayoutCache = null;
+// static Ref<IInputLayout> _inputLayoutCache = null;
 
 Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const float size, const uSys edgeVertices) noexcept
 {
@@ -65,12 +64,12 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     buf3Builder->type(EBuffer::Type::ArrayBuffer);
     buf3Builder->usage(EBuffer::UsageType::StaticDraw);
     buf3Builder->bufferSize(3 * numVertices * sizeof(float));
-    buf3Builder->descriptor().addDescriptor(ShaderDataType::Vector3Float);
+    buf3Builder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
     buf2Builder->type(EBuffer::Type::ArrayBuffer);
     buf2Builder->usage(EBuffer::UsageType::StaticDraw);
     buf2Builder->bufferSize(2 * numVertices * sizeof(float));
-    buf2Builder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    buf2Builder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     indiceBuilder->usage(EBuffer::UsageType::StaticDraw);
     indiceBuilder->bufferSize(6 * numIndices * sizeof(u32));
@@ -91,21 +90,21 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     // vao->addVertexBuffer(context, texBuf);
     // vao->setIndexBuffer(context, indicesBuf);
 
-    if(!_inputLayoutCache)
-    {
-        Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(3);
-        ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
-        ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
-        ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-        _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
-    }
+    // if(!_inputLayoutCache)
+    // {
+    //     Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(3);
+    //     ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
+    //     ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
+    //     ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+    //     _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    // }
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(3);
     vaBuilder->setVertexBuffer(0, posBuf);
     vaBuilder->setVertexBuffer(1, normBuf);
     vaBuilder->setVertexBuffer(2, texBuf);
     vaBuilder->indexBuffer(indicesBuf);
-    vaBuilder->inputLayout(_inputLayoutCache);
+    // vaBuilder->inputLayout(_inputLayoutCache);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
     vaBuilder->drawCount(numIndices * 2);
     Ref<IVertexArray> vao = Ref<IVertexArray>(vaBuilder->build());

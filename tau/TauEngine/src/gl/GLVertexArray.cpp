@@ -1,7 +1,6 @@
 #include "gl/GLVertexArray.hpp"
 #include "Timings.hpp"
 #include "gl/GLBuffer.hpp"
-#include "gl/GLInputLayout.hpp"
 
 static GLenum glDrawType(DrawType drawType) noexcept;
 
@@ -22,54 +21,64 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const u32 drawCount, const DrawType drawType, const RefDynArray<Ref<IBuffer>>& buffers, const Ref<GLIndexBuffer>& indexBuffer)
-    : IVertexArray(drawCount), _glDrawType(glDrawType(drawType)), _buffers(buffers), _indexBuffer(indexBuffer), _attribCount(0)
+GLVertexArray::GLVertexArray(const u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, const GLuint vao, const DrawType drawType, /*const RefDynArray<Ref<IBuffer>>& buffers,*/ const Ref<GLIndexBuffer>& indexBuffer, const GLuint attribCount)
+    : IVertexArray(drawCount, buffers), _vao(vao), _glDrawType(glDrawType(drawType)), /*_buffers(buffers),*/ _indexBuffer(indexBuffer), _attribCount(attribCount)
 { }
 
-GLVertexArray::~GLVertexArray() noexcept = default;
-
-void GLVertexArray::internalSetup(IRenderingContext& context) noexcept
+GLVertexArray::~GLVertexArray() noexcept
 {
-    PERF();
-    u32 attribIndex = 0;
-    for(uSys i = 0; i < _buffers.size(); ++i)
-    {
-        auto& buffer = _buffers[i];
-        const BufferDescriptor& descriptor = buffer->descriptor();
-
-        buffer->bind(context);
-
-        for(uSys j = 0; j < descriptor.elements().size(); ++j)
-        {
-            // TODO: Properly handle matrices, integer, and float64 types.
-            // Matrices have to stored as a number of vectors
-            // Integers require glVertexAttribIPointer
-            // Doubles require glVertexAttribLPointer
-
-            auto& element = descriptor.elements()[j];
-            glEnableVertexAttribArray(attribIndex);
-            glVertexAttribPointer(attribIndex,
-                                  ShaderDataType::componentCount(element.type()),
-                                  getGLType(element.type()),
-                                  element.normalized() ? GL_TRUE : GL_FALSE,
-                                  descriptor.stride(),
-                                  reinterpret_cast<const void*>(static_cast<intptr_t>(element.offset())));
-            ++attribIndex;
-        }
-
-        buffer->unbind(context);
-    }
-    _attribCount = attribIndex;
+    glDeleteVertexArrays(1, &_vao);
 }
+
+// void GLVertexArray::internalSetup(IRenderingContext& context) noexcept
+// {
+//     PERF();
+//     u32 attribIndex = 0;
+//     for(uSys i = 0; i < _buffers.size(); ++i)
+//     {
+//         auto& buffer = _buffers[i];
+//         const BufferDescriptor& descriptor = buffer->descriptor();
+//
+//         buffer->bind(context);
+//
+//         for(uSys j = 0; j < descriptor.elements().size(); ++j)
+//         {
+//             // TODO: Properly handle matrices, integer, and float64 types.
+//             // Matrices have to stored as a number of vectors
+//             // Integers require glVertexAttribIPointer
+//             // Doubles require glVertexAttribLPointer
+//
+//             auto& element = descriptor.elements()[j];
+//             glEnableVertexAttribArray(attribIndex);
+//             glVertexAttribPointer(attribIndex,
+//                                   ShaderDataType::componentCount(element.type()),
+//                                   getGLType(element.type()),
+//                                   element.normalized() ? GL_TRUE : GL_FALSE,
+//                                   descriptor.stride(),
+//                                   reinterpret_cast<const void*>(static_cast<intptr_t>(element.offset())));
+//
+//             if(buffer->instanced())
+//             {
+//                 glVertexAttribDivisor(attribIndex, 1);
+//             }
+//
+//             ++attribIndex;
+//         }
+//
+//         buffer->unbind(context);
+//     }
+//     _attribCount = attribIndex;
+// }
 
 void GLVertexArray::bind(IRenderingContext& context) noexcept
 {
-    _bind(*context.getVertexArrayHandle<GLuint>(this));
+    // _bind(*context.getVertexArrayHandle<GLuint>(this));
+    glBindVertexArray(_vao);
 }
 
 void GLVertexArray::unbind(IRenderingContext& context) noexcept
 {
-    _bind(0);
+    glBindVertexArray(0);
 }
 
 void GLVertexArray::preDraw(IRenderingContext& context) noexcept
@@ -93,11 +102,24 @@ void GLVertexArray::draw(IRenderingContext& context) noexcept
     if(_indexBuffer)
     {
         _indexBuffer->bind(context);
-        glDrawElements(_glDrawType, _drawCount, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(_glDrawType, _drawCount, GL_UNSIGNED_INT, null);
     }
     else
     {
         glDrawArrays(_glDrawType, 0, this->_drawCount);
+    }
+}
+
+void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount) noexcept
+{
+    if(_indexBuffer)
+    {
+        _indexBuffer->bind(context);
+        glDrawElementsInstanced(_glDrawType, _drawCount, GL_UNSIGNED_INT, null, instanceCount);
+    }
+    else
+    {
+        glDrawArraysInstanced(_glDrawType, 0, this->_drawCount, instanceCount);
     }
 }
 
@@ -123,17 +145,17 @@ void GLVertexArrayBuilder::indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noe
     }
 }
 
-void GLVertexArrayBuilder::inputLayout(const Ref<IInputLayout>& inputLayout) noexcept
-{
-    if(RTT_CHECK(inputLayout.get(), GLInputLayout))
-    {
-        IVertexArrayBuilder::inputLayout(inputLayout);
-    }
-}
+// void GLVertexArrayBuilder::inputLayout(const Ref<IInputLayout>& inputLayout) noexcept
+// {
+//     if(RTT_CHECK(inputLayout.get(), GLInputLayout))
+//     {
+//         IVertexArrayBuilder::inputLayout(inputLayout);
+//     }
+// }
 
 GLVertexArray* GLVertexArrayBuilder::build(Error* error) noexcept
 {
-    ERROR_CODE_COND_N(!_inputLayout, Error::InputLayoutNotSet);
+    // ERROR_CODE_COND_N(!_inputLayout, Error::InputLayoutNotSet);
     ERROR_CODE_COND_N(_drawCount == 0, Error::DrawCountNotSet);
     ERROR_CODE_COND_N(_drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
 
@@ -142,7 +164,50 @@ GLVertexArray* GLVertexArrayBuilder::build(Error* error) noexcept
         ERROR_CODE_COND_N(!_buffers[i], Error::BuffersNotSet);
     }
 
-    GLVertexArray* va = new(::std::nothrow) GLVertexArray(_drawCount, _drawType, _buffers, RefCast<GLIndexBuffer>(_indexBuffer));
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+
+    glBindVertexArray(vao);
+
+
+    u32 attribIndex = 0;
+    for(uSys i = 0; i < _buffers.size(); ++i)
+    {
+        auto& buffer = _buffers[i];
+        const BufferDescriptor& descriptor = buffer->descriptor();
+
+        buffer->bind(reinterpret_cast<IRenderingContext&>(_ctx));
+
+        for(uSys j = 0; j < descriptor.elements().size(); ++j)
+        {
+            // TODO: Properly handle matrices, integer, and float64 types.
+            // Matrices have to stored as a number of vectors
+            // Integers require glVertexAttribIPointer
+            // Doubles require glVertexAttribLPointer
+
+            auto& element = descriptor.elements()[j];
+            glEnableVertexAttribArray(attribIndex);
+            glVertexAttribPointer(attribIndex,
+                                  ShaderDataType::componentCount(element.type()),
+                                  GLVertexArray::getGLType(element.type()),
+                                  element.normalized() ? GL_TRUE : GL_FALSE,
+                                  descriptor.stride(),
+                                  reinterpret_cast<const void*>(static_cast<intptr_t>(element.offset())));
+
+            if(buffer->instanced())
+            {
+                glVertexAttribDivisor(attribIndex, 1);
+            }
+
+            ++attribIndex;
+        }
+
+        buffer->unbind(reinterpret_cast<IRenderingContext&>(_ctx));
+    }
+
+    glBindVertexArray(0);
+
+    GLVertexArray* va = new(::std::nothrow) GLVertexArray(_drawCount, _buffers, vao, _drawType, RefCast<GLIndexBuffer>(_indexBuffer), attribIndex);
     ERROR_CODE_COND_N(!va, Error::MemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, va);

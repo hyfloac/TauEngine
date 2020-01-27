@@ -19,16 +19,18 @@ GLShaderProgram::~GLShaderProgram() noexcept
     _programID = 0;
 }
 
-void GLShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) noexcept
+bool GLShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) noexcept
 {
-    if(shader->getShaderType() == GLShader::getStaticType())
+    if(RTT_CHECK(shader.get(), GLShader))
     {
         const Ref<GLShader> glShader = RefCast<GLShader>(shader);
         glAttachShader(_programID, glShader->shaderId());
+        return true;
     }
     else
     {
         TAU_THROW(IncorrectAPIShaderException);
+        return false;
     }
 }
 

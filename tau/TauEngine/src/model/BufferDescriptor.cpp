@@ -191,7 +191,7 @@ bool ShaderSemantic::hasIndices(Semantic semantic) noexcept
     }
 }
 
-void BufferDescriptor::addDescriptor(BufferElementDescriptor bed) noexcept
+void BufferDescriptorBuilder::addDescriptor(BufferElementDescriptor bed) noexcept
 {
     bed._offsetCache = _stride;
     _elementDescriptors[_currentIndex++] = bed;
@@ -199,11 +199,23 @@ void BufferDescriptor::addDescriptor(BufferElementDescriptor bed) noexcept
     _stride += bed._sizeCache;
 }
 
-void BufferDescriptor::addDescriptor(const ShaderDataType::Type type, const bool normalized) noexcept
+void BufferDescriptorBuilder::addDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const bool normalized) noexcept
 {
-    _elementDescriptors[_currentIndex++] = BufferElementDescriptor(type, _stride, normalized);
+    _elementDescriptors[_currentIndex++] = BufferElementDescriptor(semantic, type, _stride, normalized);
 
     const u32 size = ShaderDataType::size(type);
 
     _stride += size;
+}
+
+void BufferDescriptorBuilder::reset(const uSys descriptorCount) noexcept
+{
+    _currentIndex = 0;
+    _stride = 0;
+    _elementDescriptors = RefDynArray<BufferElementDescriptor>(descriptorCount);
+}
+
+BufferDescriptor BufferDescriptorBuilder::build() const noexcept
+{
+    return BufferDescriptor(_elementDescriptors, _stride);
 }

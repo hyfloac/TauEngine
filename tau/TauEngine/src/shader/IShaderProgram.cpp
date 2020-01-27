@@ -3,6 +3,7 @@
 #include "RenderingMode.hpp"
 #include "system/RenderingContext.hpp"
 #include "gl/GLShaderProgram.hpp"
+#include "dx/dx10/DX10ShaderProgram.hpp"
 #include "Timings.hpp"
 
 Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
@@ -12,6 +13,12 @@ Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
         case RenderingMode::Mode::DirectX9:
         #ifdef _WIN32
             return null;
+        #else
+            return null;
+        #endif
+        case RenderingMode::Mode::DirectX10:
+        #ifdef _WIN32
+            return Ref<IShaderProgram>(new(::std::nothrow) DX10ShaderProgram);
         #else
             return null;
         #endif
@@ -57,7 +64,10 @@ bool IShaderProgram::setVertexShader(IRenderingContext& context, Ref<IShader>& v
             {
                 this->detach(context, _vertexShader);
             }
-            this->attach(context, vs);
+            if(!this->attach(context, vs))
+            {
+                return false;
+            }
             _vertexShader = vs;
             return true;
         }
@@ -82,7 +92,10 @@ bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, Re
             {
                 this->detach(context, _tessellationControlShader);
             }
-            this->attach(context, tcs);
+            if(!this->attach(context, tcs))
+            {
+                return false;
+            }
             _tessellationControlShader = tcs;
             return true;
         }
@@ -107,7 +120,10 @@ bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context,
             {
                 this->detach(context, _tessellationEvaluationShader);
             }
-            this->attach(context, tes);
+            if(!this->attach(context, tes))
+            {
+                return false;
+            }
             _tessellationEvaluationShader = tes;
             return true;
         }
@@ -132,7 +148,10 @@ bool IShaderProgram::setGeometryShader(IRenderingContext& context, Ref<IShader>&
             {
                 this->detach(context, _geometryShader);
             }
-            this->attach(context, gs);
+            if(!this->attach(context, gs))
+            {
+                return false;
+            }
             _geometryShader = gs;
             return true;
         }
@@ -157,7 +176,10 @@ bool IShaderProgram::setPixelShader(IRenderingContext& context, Ref<IShader>& ps
             {
                 this->detach(context, _pixelShader);
             }
-            this->attach(context, ps);
+            if(!this->attach(context, ps))
+            {
+                return false;
+            }
             _pixelShader = ps;
             return true;
         }

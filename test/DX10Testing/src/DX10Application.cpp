@@ -12,6 +12,7 @@
 #include <RenderingPipeline.hpp>
 #include <ResourceLoader.hpp>
 #include <Timings.hpp>
+#include <model/VertexArray.hpp>
 
 static void setupGameFolders() noexcept;
 
@@ -44,12 +45,12 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     if(!_window->createContext()) { return false; }
     _window->renderingContext()->activateContext();
     _window->setEventHandler(::onWindowEvent);
-    Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
+    // Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
     // Mouse::setVisible(false);
 
-    _window->renderingContext()->setVSync(_config.vsync);
+    ctx().setVSync(_config.vsync || true);
 
-    bool async = false;
+    bool async = false; 
 
     for(int i = 0; i < argCount; ++i)
     {
@@ -63,13 +64,62 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     // TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_window->renderingContext()));
 
-    Ref<IShaderBuilder> shaderBuilder = _window->renderingContext()->createShader();
+
+    // Ref<IInputLayoutBuilder> ilBuilder = ctx().createInputLayout(2);
+    // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    // ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector4Float, ShaderSemantic::Color);
+    // const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+
+    Ref<IShaderBuilder> shaderBuilder = ctx().createShader();
+
     shaderBuilder->type(IShader::Type::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile("|NonExistentFile", FileProps::Read));
+    shaderBuilder->file(VFS::Instance().openFile("|res/shader/TestVertexShader.cso", FileProps::Read));
+    // shaderBuilder->inputLayout(inputLayout);
+    auto vertexShader = Ref<IShader>(shaderBuilder->build());
 
-    _vertexShader = Ref<IShader>(shaderBuilder->build());
+    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->file(VFS::Instance().openFile("|res/shader/TestPixelShader.cso", FileProps::Read));
+    auto pixelShader = Ref<IShader>(shaderBuilder->build());
 
-    // printf("Shader Name: %s\n", _vertexShader->getName());
+    _shader = IShaderProgram::create(ctx());
+    _shader->setVertexShader(ctx(), vertexShader);
+    _shader->setPixelShader(ctx(), pixelShader);
+    _shader->link(ctx());
+    float positions[2 * 3] = {
+         0.0f,  0.5f,
+         0.5f, -0.5f,
+        -0.5f, -0.5f
+    };
+
+    Ref<IBufferBuilder> bufBuilder = ctx().createBuffer(1);
+    bufBuilder->type(EBuffer::Type::ArrayBuffer);
+    bufBuilder->usage(EBuffer::UsageType::StaticDraw);
+    bufBuilder->bufferSize(sizeof(positions));
+    bufBuilder->initialBuffer(positions);
+    bufBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    const Ref<IBuffer> posBuffer = Ref<IBuffer>(bufBuilder->build(null));
+
+    float colors[4 * 3] = {
+        1.0f, 0.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f, 1.0f
+    };
+
+    bufBuilder->bufferSize(sizeof(colors));
+    bufBuilder->initialBuffer(colors);
+    bufBuilder->descriptor().reset(1);
+    bufBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
+    const Ref<IBuffer> colorBuffer = Ref<IBuffer>(bufBuilder->build(null));
+
+    Ref<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(2);
+
+    vaBuilder->setVertexBuffer(0, posBuffer);
+    vaBuilder->setVertexBuffer(1, colorBuffer);
+    // vaBuilder->inputLayout(inputLayout);
+    vaBuilder->shader(vertexShader);
+    vaBuilder->drawCount(3);
+    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    _va = Ref<IVertexArray>(vaBuilder->build());
 
     TimingsWriter::end();
     TimingsWriter::begin("DX10Test::Runtime", "|TERes/perfRuntime.json");
@@ -104,11 +154,16 @@ void DX10Application::update(float fixedDelta) noexcept
 void DX10Application::render(const DeltaTime& delta) noexcept
 {
     UNUSED(delta);
-    auto& ctx = *_window->renderingContext();
-    ctx.beginFrame();
-    ctx.clearScreen(true, true, false, RGBAColor { _r, _g, _b, 255 });
-    ctx.endFrame();
-    ctx.swapFrame();
+    _logger->info("Render: DeltaTimeMS: {}", delta.mSeconds());
+    ctx().beginFrame();
+      ctx().clearScreen(true, true, false, RGBAColor { _r, _g, _b, 255 });
+      _shader->bind(ctx());
+        _va->preDraw(ctx());
+        _va->draw(ctx());
+        _va->postDraw(ctx());
+      _shader->unbind(ctx());
+    ctx().endFrame();
+    ctx().swapFrame();
 }
 
 void DX10Application::renderFPS(u32 ups, u32 fps) noexcept
@@ -253,15 +308,15 @@ static void setupGameFolders() noexcept
     // {
     //     VFS::Instance().mount("game", "C:\\DX10Test", Win32FileLoader::Instance());
     // }
-    if(!setupWinFolder(CSIDL_LOCAL_APPDATA, "/DX10Test", "game"))
+    if(!setupWinFolder(CSIDL_LOCAL_APPDATA, "/DX10Testing", "game"))
     {
-        VFS::Instance().mountDynamic("game", "C:/DX10Test", Win32FileLoader::Instance());
-        if(!Win32FileLoader::Instance()->fileExists("C:/DX10Test"))
+        VFS::Instance().mountDynamic("game", "C:/DX10Testing", Win32FileLoader::Instance());
+        if(!Win32FileLoader::Instance()->fileExists("C:/DX10Testing"))
         {
-            if(!Win32FileLoader::Instance()->createFolder("C:/DX10Test"))
+            if(!Win32FileLoader::Instance()->createFolder("C:/DX10Testing"))
             {
             }
         }
     }
-    VFS::Instance().mountDynamic("res", "E:/TauEngine/test/DX10Test/resources", Win32FileLoader::Instance());
+    VFS::Instance().mountDynamic("res", "E:/TauEngine/test/DX10Testing/resources", Win32FileLoader::Instance());
 }

@@ -22,12 +22,15 @@ class Vector4f;
 #endif
 
 #define SHADER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                                public: \
-                                    [[nodiscard]] static IShader::ShaderType getStaticType() noexcept \
-                                    { static IShader::ShaderType type = IShader::ShaderType::define(); \
-                                      return type; } \
-                                    [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept override \
-                                    { return _TYPE::getStaticType(); }
+                                RTT_IMPL(_TYPE, IShader)
+
+// #define SHADER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+//                                 public: \
+//                                     [[nodiscard]] static IShader::ShaderType getStaticType() noexcept \
+//                                     { static IShader::ShaderType type = IShader::ShaderType::define(); \
+//                                       return type; } \
+//                                     [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept override \
+//                                     { return _TYPE::getStaticType(); }
 
 #if SHADER_GEN_NAMES
   #define SHADER_IMPL(_TYPE) SHADER_IMPL_BASE(_TYPE); \
@@ -63,31 +66,23 @@ public:
 
     using ShaderType = RunTimeType<IShader>;
 public:
-    // static Ref<IShader> create(IRenderingContext& context, Type shaderType, const NotNull<const char>& shaderPath) noexcept;
-protected:
-    // Type _shaderType;
-protected:
-    // IShader(const Type shaderType) noexcept
-    //     : _shaderType(shaderType)
-    // { }
-public:
-    // [[nodiscard]] Type shaderType() const noexcept { return _shaderType; }
     [[nodiscard]] virtual Type shaderType() const noexcept = 0;
 
-    [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept = 0;
+    // [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept = 0;
+
+    RTT_BASE_IMPL(IShader);
+    RTT_BASE_CHECK(IShader);
+    RTT_BASE_CAST(IShader);
 
 #if SHADER_GEN_NAMES
     [[nodiscard]] virtual const char* getName() const noexcept = 0;
 #endif
-
-    // virtual bool loadShader(const char* src = nullptr) noexcept = 0;
 };
 
 class IInputLayout;
 
 class TAU_DLL NOVTABLE IShaderBuilder
 {
-    // DEFAULT_CONSTRUCT_PO(IShaderBuilder);
     DEFAULT_DESTRUCT_VI(IShaderBuilder);
     DELETE_COPY(IShaderBuilder);
 public:
@@ -107,7 +102,6 @@ protected:
     Ref<IFile> _file;
     const char* _src;
     IShader::Type _type;
-    Ref<IInputLayout> _inputLayout;
 protected:
     IShaderBuilder() noexcept
         : _file(null), _src(null), _type(static_cast<IShader::Type>(IntMaxMin<i32>::Max()))
@@ -116,12 +110,10 @@ public:
     virtual void file(const Ref<IFile>& file) noexcept { _file = file; }
     virtual void src(const char* const src) noexcept { _src = src; }
     virtual void type(const IShader::Type type) noexcept { _type = type; }
-    virtual void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept { _inputLayout = inputLayout; }
 
     [[nodiscard]] const Ref<IFile>& file() const noexcept { return _file; }
     [[nodiscard]] const char* src() const noexcept { return _src; }
     [[nodiscard]] IShader::Type type() const noexcept { return _type; }
-    [[nodiscard]] const Ref<IInputLayout>& inputLayout() const noexcept { return _inputLayout; }
 
     [[nodiscard]] virtual IShader* build([[tau::out]] Error* error = null) noexcept = 0;
 };

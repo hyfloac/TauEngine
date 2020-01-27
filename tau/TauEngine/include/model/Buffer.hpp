@@ -25,15 +25,17 @@ protected:
     EBuffer::Type _type;
     EBuffer::UsageType _usage;
     uSys _bufferSize;
+    bool _instanced;
     BufferDescriptor _descriptor;
 protected:
-    IBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor) noexcept
-        : _type(type), _usage(usage), _bufferSize(bufferSize), _descriptor(descriptor)
+    IBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor) noexcept
+        : _type(type), _usage(usage), _bufferSize(bufferSize), _instanced(instanced), _descriptor(descriptor)
     { }
 public:
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return _type; }
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
+    [[nodiscard]] inline bool instanced() const noexcept { return _instanced; }
     [[nodiscard]] inline const BufferDescriptor& descriptor() const noexcept { return _descriptor; }
     [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }
 
@@ -44,6 +46,9 @@ public:
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
     virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+
+    [[nodiscard]] virtual void* mapBuffer(IRenderingContext& context) noexcept = 0;
+    virtual void unmapBuffer(IRenderingContext& context) noexcept = 0;
 
     RTT_BASE_IMPL(IBuffer);
     RTT_BASE_CHECK(IBuffer);
@@ -73,6 +78,9 @@ public:
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
     virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+
+    [[nodiscard]] virtual void* mapBuffer(IRenderingContext& context) noexcept = 0;
+    virtual void unmapBuffer(IRenderingContext& context) noexcept = 0;
 
     RTT_BASE_IMPL(IIndexBuffer);
     RTT_BASE_CHECK(IIndexBuffer);
@@ -181,12 +189,14 @@ protected:
     EBuffer::UsageType _usage;
     uSys _bufferSize;
     void* _initialBuffer;
-    BufferDescriptor _descriptor;
+    bool _instanced;
+    BufferDescriptorBuilder _descriptor;
 public:
     inline IBufferBuilder(const uSys descriptorCount) noexcept
         : _type(static_cast<EBuffer::Type>(0)),
           _usage(static_cast<EBuffer::UsageType>(0)),
           _bufferSize(0), _initialBuffer(null),
+          _instanced(false),
           _descriptor(descriptorCount)
     { }
 
@@ -194,7 +204,8 @@ public:
     virtual void usage(const EBuffer::UsageType usage) noexcept { _usage = usage; }
     inline void bufferSize(const uSys bufferSize) noexcept { _bufferSize = bufferSize; }
     inline void initialBuffer(void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
-    [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }
+    inline void instanced(const bool instanced) noexcept { _instanced = instanced; }
+    [[nodiscard]] inline BufferDescriptorBuilder& descriptor() noexcept { return _descriptor; }
 
     [[nodiscard]] virtual IBuffer* build([[tau::out]] Error* error) const noexcept = 0;
 };

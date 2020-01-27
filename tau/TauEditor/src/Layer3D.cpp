@@ -2,7 +2,6 @@
 #include <RenderingPipeline.hpp>
 #include <system/Window.hpp>
 #include <model/RenderableObject.hpp>
-#include <model/InputLayout.hpp>
 #include <model/OBJLoader.hpp>
 #include <maths/GlmMatrixTransformExt.hpp>
 #include <shader/IShader.hpp>
@@ -188,22 +187,20 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     positionsBuilder->type(EBuffer::Type::ArrayBuffer);
     positionsBuilder->usage(EBuffer::UsageType::StaticDraw);
     positionsBuilder->bufferSize(sizeof(quadVertices));
-    positionsBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    positionsBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    positionsBuilder->initialBuffer(quadVertices);
+    positionsBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    positionsBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
-    positions->bind(*window.renderingContext());
-    positions->fillBuffer(*window.renderingContext(), quadVertices);
-    positions->unbind(*window.renderingContext());
 
-    Ref<IInputLayoutBuilder> ilBuilder = window.renderingContext()->createInputLayout(2);
-    ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-    ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-    const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+    // Ref<IInputLayoutBuilder> ilBuilder = window.renderingContext()->createInputLayout(2);
+    // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    // ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+    // const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
 
     Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
     vaBuilder->setVertexBuffer(0, positions);
-    vaBuilder->inputLayout(inputLayout);
+    // vaBuilder->inputLayout(inputLayout);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
     _frameBufferVA = Ref<IVertexArray>(vaBuilder->build());

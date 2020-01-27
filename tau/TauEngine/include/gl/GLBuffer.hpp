@@ -26,7 +26,7 @@ private:
     GLenum _glType;
     GLenum _glUsage;
 private:
-    GLBuffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, const BufferDescriptor& descriptor, GLuint buffer, GLenum glType, GLenum glUsage) noexcept;
+    GLBuffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, bool instanced, const BufferDescriptor& descriptor, GLuint buffer, GLenum glType, GLenum glUsage) noexcept;
 public:
     ~GLBuffer() noexcept override;
 
@@ -37,6 +37,9 @@ public:
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 
     void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+
+    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
+    void unmapBuffer(IRenderingContext& context) noexcept override;
 private:
     friend class GLBufferBuilder;
 };
@@ -59,6 +62,9 @@ public:
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 
     void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+
+    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
+    void unmapBuffer(IRenderingContext& context) noexcept override;
 private:
     friend class GLIndexBufferBuilder;
 };

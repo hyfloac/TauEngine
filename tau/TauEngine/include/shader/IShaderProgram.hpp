@@ -16,7 +16,7 @@ class Vector3i;
 class Vector3f;
 class Vector4f;
 
-class TAU_DLL IShaderProgram
+class TAU_DLL NOVTABLE IShaderProgram
 {
     DEFAULT_DESTRUCT_VI(IShaderProgram);
     DELETE_COPY(IShaderProgram);
@@ -117,7 +117,7 @@ public:
     Ref<IUniform<const typename ::std::remove_const<typename ::std::remove_reference<_T>::type>::type&>> getUniformMatrix(const DynString& name, bool transpose) noexcept
     { return getUniformMatrix<_T>(name.c_str(), transpose); }
 protected:
-    virtual void attach(IRenderingContext& context, Ref<IShader> shader) noexcept = 0;
+    virtual bool attach(IRenderingContext& context, Ref<IShader> shader) noexcept = 0;
     virtual void detach(IRenderingContext& context, Ref<IShader> shader) noexcept = 0;
 };
 

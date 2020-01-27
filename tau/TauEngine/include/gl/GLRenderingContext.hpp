@@ -32,16 +32,16 @@ public:
 
     [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
-    void createFromShared(void* param) noexcept override final;
+    // void createFromShared(void* param) noexcept override final;
 
     void deactivateContext() noexcept override final;
     void activateContext() noexcept override final;
 
-    [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final;
+    // [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final;
 
-    void destroyVA(IVertexArray* vertexArray) noexcept override final;
+    // void destroyVA(IVertexArray* vertexArray) noexcept override final;
 
-    void clearVAs() noexcept override final;
+    // void clearVAs() noexcept override final;
 
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ = 0.0f, float maxZ = 1.0f) noexcept override final;
 
@@ -59,7 +59,7 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override;
+    // [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override;
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
 
@@ -79,7 +79,7 @@ public:
 
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override;
 protected:
-    bool createContextsShared(Window& window, IRenderingContext** sharers, uSys count) noexcept override final;
+    // bool createContextsShared(Window& window, IRenderingContext** sharers, uSys count) noexcept override final;
 private:
     void handleCtxError(int profileMask) const noexcept;
 

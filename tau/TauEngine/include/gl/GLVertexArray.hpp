@@ -17,12 +17,13 @@ public:
     
     static GLenum getGLType(ShaderDataType::Type type) noexcept;
 private:
+    GLuint _vao;
     GLenum _glDrawType;
-    RefDynArray<Ref<IBuffer>> _buffers;
+    // RefDynArray<Ref<IBuffer>> _buffers;
     Ref<GLIndexBuffer> _indexBuffer;
     GLuint _attribCount;
 public:
-    GLVertexArray(u32 drawCount, DrawType drawType, const RefDynArray<Ref<IBuffer>>& buffers, const Ref<GLIndexBuffer>& indexBuffer);
+    GLVertexArray(u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, GLuint vao, DrawType drawType, /*const RefDynArray<Ref<IBuffer>>& buffers,*/ const Ref<GLIndexBuffer>& indexBuffer, GLuint attribCount);
 
     ~GLVertexArray() noexcept override;
 
@@ -30,28 +31,33 @@ public:
 
     void unbind(IRenderingContext& context) noexcept override;
 
-    void internalSetup(IRenderingContext& context) noexcept override;
+    // void internalSetup(IRenderingContext& context) noexcept override;
 
     void preDraw(IRenderingContext& context) noexcept override;
 
     void postDraw(IRenderingContext& context) noexcept override;
 
     void draw(IRenderingContext& context) noexcept override;
+
+    void drawInstanced(IRenderingContext& context, uSys instanceCount) noexcept override;
 };
+
+class GLRenderingContext;
 
 class TAU_DLL GLVertexArrayBuilder final : public IVertexArrayBuilder
 {
     DEFAULT_DESTRUCT(GLVertexArrayBuilder);
     DELETE_COPY(GLVertexArrayBuilder);
 private:
+    GLRenderingContext& _ctx;
 public:
-    GLVertexArrayBuilder(const uSys bufferCount) noexcept
-        : IVertexArrayBuilder(bufferCount)
+    GLVertexArrayBuilder(const uSys bufferCount, GLRenderingContext& ctx) noexcept
+        : IVertexArrayBuilder(bufferCount), _ctx(ctx)
     { }
 
     void setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept override;
     void indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept override;
-    void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
+    // void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
 
     [[nodiscard]] GLVertexArray* build([[tau::out]] Error* error) noexcept override;
 };

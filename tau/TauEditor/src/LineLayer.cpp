@@ -50,8 +50,8 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     lineDataBuilder->type(EBuffer::Type::ArrayBuffer);
     lineDataBuilder->usage(EBuffer::UsageType::StaticDraw);
     lineDataBuilder->bufferSize(sizeof(bufferData));
-    lineDataBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    lineDataBuilder->descriptor().addDescriptor(ShaderDataType::Vector4Float);
+    lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
 
     Ref<IBuffer> lineData = Ref<IBuffer>(lineDataBuilder->build(nullptr));
 

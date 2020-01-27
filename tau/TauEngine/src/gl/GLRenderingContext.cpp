@@ -11,7 +11,6 @@
 #include "gl/GLTexture.hpp"
 #include "gl/GLShader.hpp"
 #include "Timings.hpp"
-#include "gl/GLInputLayout.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
     : IRenderingContext(mode),
@@ -23,39 +22,39 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
       _forwardCompatible(forwardCompatible)
 { }
 
-void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexcept
-{
-    const auto iter = _vaos.find(vertexArray);
+// void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexcept
+// {
+//     const auto iter = _vaos.find(vertexArray);
+//
+//     if(iter == _vaos.end())
+//     {
+//         GLuint vao = GLVertexArray::generate();
+//         _vaos.insert(std::make_pair(vertexArray, vao));
+//
+//         GLVertexArray::_bind(vao);
+//
+//         vertexArray->internalSetup(*this);
+//     }
+//
+//     return &_vaos[vertexArray];
+// }
 
-    if(iter == _vaos.end())
-    {
-        GLuint vao = GLVertexArray::generate();
-        _vaos.insert(std::make_pair(vertexArray, vao));
+// void GLRenderingContext::destroyVA(IVertexArray* vertexArray) noexcept
+// {
+//     PERF();
+//     const auto iter = _vaos.find(vertexArray);
+//
+//     if(iter != _vaos.end())
+//     {
+//         GLVertexArray::destroy(_vaos[vertexArray]);
+//     }
+// }
 
-        GLVertexArray::_bind(vao);
-
-        vertexArray->internalSetup(*this);
-    }
-
-    return &_vaos[vertexArray];
-}
-
-void GLRenderingContext::destroyVA(IVertexArray* vertexArray) noexcept
-{
-    PERF();
-    const auto iter = _vaos.find(vertexArray);
-
-    if(iter != _vaos.end())
-    {
-        GLVertexArray::destroy(_vaos[vertexArray]);
-    }
-}
-
-void GLRenderingContext::clearVAs() noexcept
-{
-    PERF();
-    _vaos.clear();
-}
+// void GLRenderingContext::clearVAs() noexcept
+// {
+//     PERF();
+//     _vaos.clear();
+// }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
@@ -88,14 +87,14 @@ void GLRenderingContext::enableDepthWriting(bool writing) noexcept
     glDepthMask(writing ? GL_TRUE : GL_FALSE);
 }
 
-Ref<IInputLayoutBuilder> GLRenderingContext::createInputLayout(const uSys numDescriptors) noexcept
-{
-    return Ref<IInputLayoutBuilder>(new(::std::nothrow) GLInputLayoutBuilder(numDescriptors));
-}
+// Ref<IInputLayoutBuilder> GLRenderingContext::createInputLayout(const uSys numDescriptors) noexcept
+// {
+//     return Ref<IInputLayoutBuilder>(new(::std::nothrow) GLInputLayoutBuilder(numDescriptors));
+// }
 
 Ref<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
 {
-    return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount));
+    return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
 }
 
 Ref<IBufferBuilder> GLRenderingContext::createBuffer(const uSys descriptorCount) noexcept

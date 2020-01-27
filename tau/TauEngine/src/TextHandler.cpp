@@ -9,7 +9,6 @@
 #include "texture/Texture.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "model/VertexArray.hpp"
-#include "model/InputLayout.hpp"
 #include "shader/IShaderProgram.hpp"
 #include "shader/IShader.hpp"
 #include "RenderingPipeline.hpp"
@@ -17,11 +16,13 @@
 #include <winreg.h>
 #include "Timings.hpp"
 
+#define INSTANCE_COUNT 128
+
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
       // _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
       _va(null),
-      _positionBuffer(null),
+      // _positionBuffer(null),
       _projUni(null), _texUni(null), _colorUni(null)
 {
     PERF();
@@ -54,14 +55,11 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     bufferBuilder->type(EBuffer::Type::ArrayBuffer);
     bufferBuilder->usage(EBuffer::UsageType::DynamicDraw);
     bufferBuilder->bufferSize(sizeof(float) * 2 * 6);
-    bufferBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-
+    bufferBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    bufferBuilder->initialBuffer(null);
+    
     _positionBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
-
-    _positionBuffer->bind(context);
-    _positionBuffer->fillBuffer(context, null);
-    _positionBuffer->unbind(context);
-
+    
     float textureCoords[6][2] = {
         { 0.0f, 0.0f },
         { 0.0f, 1.0f },
@@ -71,23 +69,55 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
         { 1.0f, 1.0f },
         { 1.0f, 0.0f }
     };
-
+    
+    bufferBuilder->initialBuffer(textureCoords);
     bufferBuilder->usage(EBuffer::UsageType::StaticDraw);
+    bufferBuilder->descriptor().reset(1);
+    bufferBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+    
+    const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
 
-    Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
-    textureCoordBuffer->bind(context);
-    textureCoordBuffer->fillBuffer(context, textureCoords);
-    textureCoordBuffer->unbind(context);
+    // float posTexCoords[6][4] = {
+    //     { 0.0f, 1.0f, 0.0f, 0.0f },
+    //     { 0.0f, 0.0f, 0.0f, 1.0f },
+    //     { 1.0f, 0.0f, 1.0f, 1.0f },
+    //
+    //     { 0.0f, 1.0f, 0.0f, 0.0f },
+    //     { 1.0f, 0.0f, 1.0f, 1.0f },
+    //     { 1.0f, 1.0f, 1.0f, 0.0f }
+    // };
+    //
+    // Ref<IBufferBuilder> bufferBuilder = context.createBuffer(2);
+    // bufferBuilder->type(EBuffer::Type::ArrayBuffer);
+    // bufferBuilder->usage(EBuffer::UsageType::StaticDraw);
+    // bufferBuilder->bufferSize(sizeof(float) * 2 * 6 * 2);
+    // bufferBuilder->initialBuffer(posTexCoords);
+    // bufferBuilder->instanced(false);
+    // bufferBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    // bufferBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
+    //
+    // const Ref<IBuffer> posTexBuffer = Ref<IBuffer>(bufferBuilder->build(null));
+    //
+    // bufferBuilder->usage(EBuffer::UsageType::DynamicDraw);
+    // bufferBuilder->bufferSize(sizeof(float) * 4 * INSTANCE_COUNT);
+    // bufferBuilder->initialBuffer(null);
+    // bufferBuilder->instanced(true);
+    //
+    // _translationBuffer = Ref<IBuffer>(bufferBuilder->build(null));
 
-    Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(2);
-    ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-    ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-    const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
+    // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(2);
+    // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    // ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
+    // ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    // ilBuilder->setLayoutDescriptor(3, ShaderDataType::Vector2Float, ShaderSemantic::Position);
+    // const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
     vaBuilder->setVertexBuffer(0, _positionBuffer);
     vaBuilder->setVertexBuffer(1, textureCoordBuffer);
-    vaBuilder->inputLayout(inputLayout);
+    // vaBuilder->setVertexBuffer(0, posTexBuffer);
+    // vaBuilder->setVertexBuffer(1, _translationBuffer);
+    // vaBuilder->inputLayout(inputLayout);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
@@ -229,6 +259,10 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
     _va->preDraw(context);
 
     // glFrontFace(GL_CCW);
+
+    // void* const translations = _translationBuffer->mapBuffer(context);
+    //
+    // uSys index = 0;
 
     for(char c = *str; c != '\0'; c = *(++str))
     {

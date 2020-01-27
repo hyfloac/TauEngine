@@ -204,9 +204,6 @@
     <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\dx\dx9\DXBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -231,22 +228,16 @@
     <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\InputLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\dx\dx10\DX10InputLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\model\VertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gl\GLInputLayout.cpp">
+    <ClCompile Include="src\dx\dx10\DX10Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\dx\dx10\DX10Buffer.cpp">
+    <ClCompile Include="src\dx\dx9\DX9Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -560,19 +551,10 @@
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\InputLayout.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\model\VertexArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Buffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dx\dx10\DX10InputLayout.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gl\GLInputLayout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

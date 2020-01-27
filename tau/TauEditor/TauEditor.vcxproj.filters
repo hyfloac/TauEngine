@@ -94,6 +94,7 @@
     <None Include="resources\shader\SimpleVertexShader.glsl" />
     <None Include="resources\shader\Text\TextPixelShader.glsl" />
     <None Include="resources\shader\Text\TextVertexShader.glsl" />
+    <None Include="resources\shader\Text\TextVertexShader1.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\Default\DebugTexture.png">
