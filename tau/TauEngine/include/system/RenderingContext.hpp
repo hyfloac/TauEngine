@@ -10,6 +10,7 @@
 #include "DLL.hpp"
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
+#include "model/Buffer.hpp"
 
 #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                             RTT_IMPL(_TYPE, IRenderingContext)
@@ -19,7 +20,7 @@
 class Window;
 
 class IVertexArrayBuilder;
-class IBufferBuilder;
+// class IBufferBuilder;
 class IIndexBufferBuilder;
 class IUniformBufferBuilder;
 class IFrameBufferBuilder;
@@ -70,7 +71,8 @@ public:
     virtual void swapFrame() noexcept = 0;
 
     [[nodiscard]] virtual Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept = 0;
-    [[nodiscard]] virtual Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept = 0;
+    // [[nodiscard]] virtual Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept = 0;
+    [[nodiscard]] virtual IBuffer* createBuffer(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept = 0;
     [[nodiscard]] virtual Ref<IIndexBufferBuilder> createIndexBuffer() noexcept = 0;
     [[nodiscard]] virtual Ref<IUniformBufferBuilder> createUniformBuffer() noexcept = 0;
     [[nodiscard]] virtual Ref<IFrameBufferBuilder> createFrameBuffer() noexcept = 0;

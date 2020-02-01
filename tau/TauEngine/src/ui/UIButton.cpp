@@ -51,12 +51,12 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
         xx + ww, yy + hh
     };
 
-    Ref<IBufferBuilder> vboBuilder = context.createBuffer(1);
-    vboBuilder->type(EBuffer::Type::ArrayBuffer);
-    vboBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // vboBuilder->bufferSize(sizeof(model));
-    vboBuilder->elementCount(6);
-    vboBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    BufferArgs vboBuilder(1);
+    // Ref<IBufferBuilder> vboBuilder = context.createBuffer(1);
+    vboBuilder.type = EBuffer::Type::ArrayBuffer;
+    vboBuilder.usage = EBuffer::UsageType::StaticDraw;
+    vboBuilder.elementCount = 6;
+    vboBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
 
     _vbo->bind(context);
     _vbo->fillBuffer(context, model);

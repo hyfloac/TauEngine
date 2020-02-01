@@ -51,37 +51,39 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
         texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
     }
 
-    Ref<IBufferBuilder> pnBuilder = context.createBuffer(1);
-    Ref<IBufferBuilder> texturesBuilder = context.createBuffer(1);
+    BufferArgs pnBuilder(1);
+    BufferArgs texturesBuilder(1);
+    // Ref<IBufferBuilder> pnBuilder = context.createBuffer(1);
+    // Ref<IBufferBuilder> texturesBuilder = context.createBuffer(1);
     Ref<IIndexBufferBuilder> indicesBuilder = context.createIndexBuffer();
 
-    pnBuilder->type(EBuffer::Type::ArrayBuffer);
-    pnBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // pnBuilder->bufferSize(cnt3 * sizeof(float));
-    pnBuilder->elementCount(cnt1);
-    pnBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
+    pnBuilder.type = EBuffer::Type::ArrayBuffer;
+    pnBuilder.usage = EBuffer::UsageType::StaticDraw;
+    pnBuilder.elementCount = cnt1;
+    pnBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
-    texturesBuilder->type(EBuffer::Type::ArrayBuffer);
-    texturesBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // texturesBuilder->bufferSize(cnt2 * sizeof(float));
-    texturesBuilder->elementCount(cnt1);
-    texturesBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+    texturesBuilder.type = EBuffer::Type::ArrayBuffer;
+    texturesBuilder.usage = EBuffer::UsageType::StaticDraw;
+    texturesBuilder.elementCount = cnt1;
+    texturesBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     indicesBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // indicesBuilder->bufferSize(mesh.indices.size() * sizeof(u32));
     indicesBuilder->elementCount(mesh.indices.size());
 
-    Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
+    // Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> positions = Ref<IBuffer>(context.createBuffer(pnBuilder, nullptr));
 
-    pnBuilder->descriptor().reset(1);
-    pnBuilder->descriptor().addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
-    Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
+    pnBuilder.descriptor.reset(1);
+    pnBuilder.descriptor.addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
+    // Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> normals = Ref<IBuffer>(context.createBuffer(pnBuilder, nullptr));
 
-    pnBuilder->descriptor().reset(1);
-    pnBuilder->descriptor().addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
-    Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
-    // Ref<IBuffer> bitangents = Ref<IBuffer>(pnBuilder->build(nullptr));
-    Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
+    pnBuilder.descriptor.reset(1);
+    pnBuilder.descriptor.addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
+    // Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
+    Ref<IBuffer> tangents = Ref<IBuffer>(context.createBuffer(pnBuilder, nullptr));
+    // Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
+    Ref<IBuffer> textures = Ref<IBuffer>(context.createBuffer(texturesBuilder, nullptr));
     Ref<IIndexBuffer> indices = Ref<IIndexBuffer>(indicesBuilder->build(nullptr));
 
     positions->bind(context);

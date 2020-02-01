@@ -103,25 +103,3 @@ public:
         buffer->unmapBuffer(context);
     }
 };
-
-// class SpotLightUniforms final
-// {
-//     DEFAULT_DESTRUCT(SpotLightUniforms);
-//     DEFAULT_COPY(SpotLightUniforms);
-// private:
-//     Ref<IUniform<const Vector3f&>> _positionUni;
-//     Ref<IUniform<const Vector3f&>> _directionUni;
-//     Ref<IUniform<float>> _cutOffUni;
-//     Ref<IUniform<float>> _outerCutOffUni;
-//     Ref<IUniform<const Vector3f&>> _ambientUni;
-//     Ref<IUniform<const Vector3f&>> _diffuseUni;
-//     Ref<IUniform<const Vector3f&>> _specularUni;
-//     Ref<IUniform<float>> _constantUni;
-//     Ref<IUniform<float>> _linearUni;
-//     Ref<IUniform<float>> _quadraticUni;
-// public:
-//     SpotLightUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
-//
-// private:
-//     friend class SpotLight;
-// };

@@ -41,27 +41,26 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     // _viewportUni = _shader->getUniformVector4Float("viewport");
     // _miterLimitUni = _shader->getUniformFloat("miterLimit");
 
-    float bufferData[] = {
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-    };
+    // float bufferData[] = {
+        // 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        // 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+    // };
 
-    Ref<IBufferBuilder> lineDataBuilder = window.renderingContext()->createBuffer(2);
-    lineDataBuilder->type(EBuffer::Type::ArrayBuffer);
-    lineDataBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // lineDataBuilder->bufferSize(sizeof(bufferData));
-    lineDataBuilder->elementCount(2);
-    lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-    lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
+    // Ref<IBufferBuilder> lineDataBuilder = window.renderingContext()->createBuffer(2);
+    // lineDataBuilder->type(EBuffer::Type::ArrayBuffer);
+    // lineDataBuilder->usage(EBuffer::UsageType::StaticDraw);
+    // lineDataBuilder->elementCount(2);
+    // lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    // lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
 
-    Ref<IBuffer> lineData = Ref<IBuffer>(lineDataBuilder->build(nullptr));
+    // Ref<IBuffer> lineData = Ref<IBuffer>(lineDataBuilder->build(nullptr));
 
-    lineData->bind(*window.renderingContext());
-    lineData->fillBuffer(*window.renderingContext(), bufferData);
-    lineData->unbind(*window.renderingContext());
+    // lineData->bind(*window.renderingContext());
+    // lineData->fillBuffer(*window.renderingContext(), bufferData);
+    // lineData->unbind(*window.renderingContext());
 
     Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
-    vaBuilder->setVertexBuffer(0, lineData);
+    // vaBuilder->setVertexBuffer(0, lineData);
     vaBuilder->drawCount(2);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 

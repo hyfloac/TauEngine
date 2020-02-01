@@ -45,7 +45,8 @@ public:
     void swapFrame() noexcept override final;
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(std::size_t attribCount) noexcept override { return null; }
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override;
+    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept;
+    [[nodiscard]] IBuffer* createBuffer(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept override { return null; }
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }

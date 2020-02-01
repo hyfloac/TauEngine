@@ -6,24 +6,6 @@
 #include "maths/Vector3f.hpp"
 #include "Color.hpp"
 
-// class PointLightUniforms final
-// {
-//     DEFAULT_DESTRUCT(PointLightUniforms);
-//     DEFAULT_COPY(PointLightUniforms);
-// private:
-//     Ref<IUniform<const Vector3f&>> _positionUni;
-//     Ref<IUniform<const Vector3f&>> _ambientUni;
-//     Ref<IUniform<const Vector3f&>> _diffuseUni;
-//     Ref<IUniform<const Vector3f&>> _specularUni;
-//     Ref<IUniform<float>> _constantUni;
-//     Ref<IUniform<float>> _linearUni;
-//     Ref<IUniform<float>> _quadraticUni;
-// public:
-//     PointLightUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
-// private:
-//     friend class PointLight;
-// };
-
 class PointLight final
 {
     DEFAULT_CONSTRUCT_PU(PointLight);
@@ -59,8 +41,6 @@ public:
     [[nodiscard]] inline float& constant() noexcept { return _constant; }
     [[nodiscard]] inline float& linear() noexcept { return _linear; }
     [[nodiscard]] inline float& quadratic() noexcept { return _quadratic; }
-
-    // void set(const PointLightUniforms& uniforms) const noexcept;
 private:
     friend class UniformAccessor<PointLight>;
 };

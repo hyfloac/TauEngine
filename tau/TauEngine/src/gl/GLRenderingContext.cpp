@@ -99,7 +99,7 @@ Ref<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys buffer
     return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
 }
 
-Ref<IBufferBuilder> GLRenderingContext::createBuffer(const uSys descriptorCount) noexcept
+GLBuffer* GLRenderingContext::createBuffer(const BufferArgs& args, BufferArgs::Error* const error) noexcept
 {
     switch(_mode.currentMode())
     {
@@ -118,10 +118,11 @@ Ref<IBufferBuilder> GLRenderingContext::createBuffer(const uSys descriptorCount)
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:
-            return Ref<GLBufferBuilder>(new(::std::nothrow) GLBufferBuilder(descriptorCount));
+            return GLBuffer::build(args, error);
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return Ref<GLBufferBuilder>(new(::std::nothrow) GLBuffer4_5Builder(descriptorCount));
+            return GLBuffer::build4_5(args, error);
+            // return Ref<GLBufferBuilder>(new(::std::nothrow) GLBuffer4_5Builder(descriptorCount));
         default: return null;
     }
 }

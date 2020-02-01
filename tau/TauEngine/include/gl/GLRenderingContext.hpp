@@ -6,6 +6,7 @@
 #ifdef _WIN32
 #include <GL/wglew.h>
 #endif
+#include "gl/GLBuffer.hpp"
 
 class GLRenderingContext final : public IRenderingContext
 {
@@ -62,7 +63,8 @@ public:
     // [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override;
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept override;
+    // [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept override;
+    [[nodiscard]] GLBuffer* createBuffer(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept override;
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override;
     [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override;
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;

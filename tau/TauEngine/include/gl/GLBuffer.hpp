@@ -19,6 +19,9 @@ public:
     static EBuffer::UsageType getUsageType(GLenum usage) noexcept;
 
     static GLuint createBuffer() noexcept;
+
+    static GLBuffer* build(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
+    static GLBuffer* build4_5(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
 private:
     GLuint _buffer;
     GLenum _glType;

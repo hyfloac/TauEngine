@@ -45,7 +45,8 @@ public:
     void swapFrame() noexcept override;
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept override;
+    [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept;
+    [[nodiscard]] IBuffer* createBuffer(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept override { return null; }
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }

@@ -100,15 +100,16 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     // _texUni = _shader->getUniform<int>("textBMP");
     // _colorUni = _shader->getUniformVector<Vector3f>("textColor");
 
-    Ref<IBufferBuilder> bufferBuilder = context.createBuffer(1);
-    bufferBuilder->type(EBuffer::Type::ArrayBuffer);
-    bufferBuilder->usage(EBuffer::UsageType::DynamicDraw);
-    // bufferBuilder->bufferSize(sizeof(float) * 2 * 6);
-    bufferBuilder->elementCount(6);
-    bufferBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-    bufferBuilder->initialBuffer(null);
+    BufferArgs bufferBuilder(1);
+    // Ref<IBufferBuilder> bufferBuilder = context.createBuffer(1);
+    bufferBuilder.type = EBuffer::Type::ArrayBuffer;
+    bufferBuilder.usage = EBuffer::UsageType::DynamicDraw;
+    bufferBuilder.elementCount = 6;
+    bufferBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+    bufferBuilder.initialBuffer = null;
     
-    _positionBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
+    _positionBuffer = Ref<IBuffer>(context.createBuffer(bufferBuilder, nullptr));
+    // _positionBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
     
     float textureCoords[6][2] = {
         { 0.0f, 0.0f },
@@ -120,12 +121,13 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
         { 1.0f, 0.0f }
     };
     
-    bufferBuilder->initialBuffer(textureCoords);
-    bufferBuilder->usage(EBuffer::UsageType::StaticDraw);
-    bufferBuilder->descriptor().reset(1);
-    bufferBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+    bufferBuilder.initialBuffer = textureCoords;
+    bufferBuilder.usage = EBuffer::UsageType::StaticDraw;
+    bufferBuilder.descriptor.reset(1);
+    bufferBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     
-    const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
+    const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(context.createBuffer(bufferBuilder, null));
+    // const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
     vaBuilder->setVertexBuffer(0, _positionBuffer);
@@ -213,7 +215,7 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
 
     GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
 
-    const ETexture::Filter filterType = smooth ? ETexture::Filter::Linear : ETexture::Filter::Nearest;
+    // const ETexture::Filter filterType = smooth ? ETexture::Filter::Linear : ETexture::Filter::Nearest;
 
     Ref<ITextureBuilder> builder = context.createTexture2D();
     builder->dataFormat(ETexture::Format::Red8UnsignedInt);

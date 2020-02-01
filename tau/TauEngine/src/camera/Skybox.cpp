@@ -26,9 +26,9 @@ public:
 
 Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
-      _uniforms(context.createUniformBuffer()), _textureUploader(null),
+      _uniforms(context.createUniformBuffer()),
       // _projectionUni(null), _viewUni(null), _skyboxUni(null),
-      _skybox(null), _cubeVA(null)
+      _skybox(null), _textureUploader(null), _cubeVA(null)
 {
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
 
@@ -126,14 +126,15 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
          1.0f, -1.0f,  1.0f
     };
 
-    Ref<IBufferBuilder> skyboxCubeBuilder = context.createBuffer(1);
-    skyboxCubeBuilder->type(EBuffer::Type::ArrayBuffer);
-    skyboxCubeBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // skyboxCubeBuilder->bufferSize(sizeof(skyboxVertices));
-    skyboxCubeBuilder->elementCount(6 * 6);
-    skyboxCubeBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
+    BufferArgs skyboxCubeBuilder(1);
+    // Ref<IBufferBuilder> skyboxCubeBuilder = context.createBuffer(1);
+    skyboxCubeBuilder.type = EBuffer::Type::ArrayBuffer;
+    skyboxCubeBuilder.usage = EBuffer::UsageType::StaticDraw;
+    skyboxCubeBuilder.elementCount = 6 * 6;
+    skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
-    Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
+    // Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
+    Ref<IBuffer> skyboxCube = Ref<IBuffer>(context.createBuffer(skyboxCubeBuilder, nullptr));
     skyboxCube->bind(context);
     skyboxCube->fillBuffer(context, skyboxVertices);
     skyboxCube->unbind(context);

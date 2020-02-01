@@ -56,29 +56,31 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
         }
     }
 
-    Ref<IBufferBuilder> buf3Builder = context.createBuffer(1);
-    Ref<IBufferBuilder> buf2Builder = context.createBuffer(1);
+    BufferArgs buf3Builder(1);
+    BufferArgs buf2Builder(1);
+    // Ref<IBufferBuilder> buf3Builder = context.createBuffer(1);
+    // Ref<IBufferBuilder> buf2Builder = context.createBuffer(1);
     Ref<IIndexBufferBuilder> indiceBuilder = context.createIndexBuffer();
 
-    buf3Builder->type(EBuffer::Type::ArrayBuffer);
-    buf3Builder->usage(EBuffer::UsageType::StaticDraw);
-    // buf3Builder->bufferSize(3 * numVertices * sizeof(float));
-    buf3Builder->elementCount(numVertices);
-    buf3Builder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
+    buf3Builder.type = EBuffer::Type::ArrayBuffer;
+    buf3Builder.usage = EBuffer::UsageType::StaticDraw;
+    buf3Builder.elementCount = numVertices;
+    buf3Builder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
-    buf2Builder->type(EBuffer::Type::ArrayBuffer);
-    buf2Builder->usage(EBuffer::UsageType::StaticDraw);
-    // buf2Builder->bufferSize(2 * numVertices * sizeof(float));
-    buf2Builder->elementCount(numVertices);
-    buf2Builder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+    buf2Builder.type = EBuffer::Type::ArrayBuffer;
+    buf2Builder.usage = EBuffer::UsageType::StaticDraw;
+    buf2Builder.elementCount = numVertices;
+    buf2Builder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     indiceBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // indiceBuilder->bufferSize(6 * numIndices * sizeof(u32));
     indiceBuilder->elementCount(6 * numIndices);
 
-    Ref<IBuffer> posBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
-    Ref<IBuffer> normBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
-    Ref<IBuffer> texBuf = Ref<IBuffer>(buf2Builder->build(nullptr));
+    // Ref<IBuffer> posBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
+    // Ref<IBuffer> normBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
+    // Ref<IBuffer> texBuf = Ref<IBuffer>(buf2Builder->build(nullptr));
+    Ref<IBuffer> posBuf = Ref<IBuffer>(context.createBuffer(buf3Builder, nullptr));
+    Ref<IBuffer> normBuf = Ref<IBuffer>(context.createBuffer(buf3Builder, nullptr));
+    Ref<IBuffer> texBuf = Ref<IBuffer>(context.createBuffer(buf2Builder, nullptr));
     Ref<IIndexBuffer> indicesBuf = Ref<IIndexBuffer>(indiceBuilder->build(nullptr));
 
     posBuf->fillBuffer(context, pos);

@@ -162,7 +162,65 @@ void GLBufferBuilder::usage(const EBuffer::UsageType usage) noexcept
     _glUsage = GLBuffer::getGLUsageType(usage);
 }
 
-GLBuffer* GLBufferBuilder::build(Error* error) const noexcept
+GLBuffer* GLBuffer::build(const BufferArgs& args, BufferArgs::Error* const error) noexcept
+{
+    ERROR_CODE_COND_N(args.type == static_cast<EBuffer::Type>(0), BufferArgs::Error::TypeIsUnset);
+    ERROR_CODE_COND_N(args.usage == static_cast<EBuffer::UsageType>(0), BufferArgs::Error::UsageIsUnset);
+    ERROR_CODE_COND_N(args.type == EBuffer::Type::IndexBuffer, BufferArgs::Error::BufferCannotBeIndexBuffer);
+    ERROR_CODE_COND_N(args.type == EBuffer::Type::UniformBuffer, BufferArgs::Error::BufferCannotBeUniformBuffer);
+    ERROR_CODE_COND_N(args.elementCount == 0, BufferArgs::Error::BufferSizeIsZero);
+
+    const GLenum glType = GLBuffer::getGLType(args.type);
+    const GLenum glUsage = GLBuffer::getGLUsageType(args.usage);
+
+    GLuint bufferHandle;
+    glGenBuffers(1, &bufferHandle);
+
+    GLBuffer* const buffer = new(std::nothrow) GLBuffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), bufferHandle, glType, glUsage);
+
+    if(!buffer)
+    {
+        glDeleteBuffers(1, &bufferHandle);
+        ERROR_CODE_N(BufferArgs::Error::SystemMemoryAllocationFailure);
+    }
+
+    glBindBuffer(glType, bufferHandle);
+    glBufferData(glType, args.bufferSize(), args.initialBuffer, glUsage);
+    glBindBuffer(glType, 0);
+
+    ERROR_CODE_V(BufferArgs::Error::NoError, buffer);
+}
+
+GLBuffer* GLBuffer::build4_5(const BufferArgs& args, BufferArgs::Error* const error) noexcept
+{
+    ERROR_CODE_COND_N(args.type == static_cast<EBuffer::Type>(0), BufferArgs::Error::TypeIsUnset);
+    ERROR_CODE_COND_N(args.usage == static_cast<EBuffer::UsageType>(0), BufferArgs::Error::UsageIsUnset);
+    ERROR_CODE_COND_N(args.type == EBuffer::Type::IndexBuffer, BufferArgs::Error::BufferCannotBeIndexBuffer);
+    ERROR_CODE_COND_N(args.type == EBuffer::Type::UniformBuffer, BufferArgs::Error::BufferCannotBeUniformBuffer);
+    ERROR_CODE_COND_N(args.elementCount == 0, BufferArgs::Error::BufferSizeIsZero);
+
+    const GLenum glType = GLBuffer::getGLType(args.type);
+    const GLenum glUsage = GLBuffer::getGLUsageType(args.usage);
+
+    GLuint bufferHandle;
+    glCreateBuffers(1, &bufferHandle);
+
+    GLBuffer* const buffer = new(std::nothrow) GLBuffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), bufferHandle, glType, glUsage);
+
+    if(!buffer)
+    {
+        glDeleteBuffers(1, &bufferHandle);
+        ERROR_CODE_N(BufferArgs::Error::SystemMemoryAllocationFailure);
+    }
+
+    glBindBuffer(glType, bufferHandle);
+    glBufferData(glType, args.bufferSize(), args.initialBuffer, glUsage);
+    glBindBuffer(glType, 0);
+
+    ERROR_CODE_V(BufferArgs::Error::NoError, buffer);
+}
+
+GLBuffer* GLBufferBuilder::build(Error* const error) const noexcept
 {
     ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);

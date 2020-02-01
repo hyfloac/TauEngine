@@ -16,7 +16,7 @@
 #include <shader/PointLight.hpp>
 #include <model/Material.hpp>
 #include "State.hpp"
-#include "shader/SpotLight.hpp"
+#include <shader/SpotLight.hpp>
 
 class Window;
 class RenderingPipeline;
@@ -46,48 +46,19 @@ private:
     State& _state;
     FreeCamCamera3DController _camera;
     Skybox _skybox;
-    GameRecorder& _gr;
+
+    PointLight _pointLight;
+    SpotLight _spotLight;
 
     Ref<IShaderProgram> _shader;
     UniformBlockS<Uniforms> _uniforms;
     UniformBlockU<Material> _materialUniforms;
-    // Ref<IUniform<const glm::mat4&>> _compoundMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _projMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _modelViewMatrixUni;
     UniformBlockU<PointLight> _pointLightUniforms;
     UniformBlockU<SpotLight> _spotLightUniforms;
-    // Ref<MaterialUniforms> _materialUniforms;
-    // Ref<PointLightUniforms> _pointLightUniforms;
-    // Ref<SpotLightUniforms> _spotLightUniforms;
-    PointLight _pointLight;
-    SpotLight _spotLight;
     UniformBlockS<ViewPosUniforms> _cameraPosUni;
-    // Ref<IUniform<const Vector3f&>> _cameraPosUni;
-
-    Ref<IShaderProgram> _o_shader;
-    // Ref<IUniform<const glm::mat4&>> _o_projMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _o_viewMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _o_modelViewMatrixUni;
-    // Ref<IUniform<float>> _o_scaleFactorUni;
-
-    Ref<IShaderProgram> _reflectionShader;
-    // Ref<IUniform<const glm::mat4&>> _reflectionProjMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _reflectionViewMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _reflectionModelViewMatrixUni;
-    // Ref<IUniform<const Vector3f&>> _reflectionCameraPosUni;
-    // Ref<IUniform<int>> _reflectionTexture;
-
-    Ref<IShaderProgram> _refractionShader;
-    // Ref<IUniform<const glm::mat4&>> _refractionProjMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _refractionViewMatrixUni;
-    // Ref<IUniform<const glm::mat4&>> _refractionModelViewMatrixUni;
-    // Ref<IUniform<const Vector3f&>> _refractionCameraPosUni;
-    // Ref<IUniform<int>> _refractionTexture;
 
     Ref<IShaderProgram> _frameBufferShader;
     Ref<ITextureUploader> _frameBufferUploader;
-    // Ref<IUniform<int>> _frameBufferUni;
 
     Ref<ITexture> _texture;
     Ref<ITexture> _overlay;
@@ -96,10 +67,6 @@ private:
 
     Vector3f _modelPos;
     glm::mat4 _modelViewMatrix;
-
-    Vector3f _cubePolarPos;
-    glm::mat4 _cubeViewMatrix;
-    Ref<RenderableObject> _cube;
 
     std::vector<Ref<RenderableObject>> _objects;
 public:
