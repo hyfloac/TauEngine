@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 
 layout(location = 0) in vec2 vertex;
 layout(location = 1) in vec2 texCoord;
@@ -8,7 +8,12 @@ out VertexData
     vec2 texCoord;
 } vertexOut;
 
-uniform mat4 projectionMatrix;
+layout(binding = 0) uniform Matrices
+{
+    mat4 projectionMatrix;
+};
+
+// uniform mat4 projectionMatrix;
 
 void main()
 {

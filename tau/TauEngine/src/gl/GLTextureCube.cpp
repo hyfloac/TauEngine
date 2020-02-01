@@ -14,18 +14,18 @@ GLTextureCube::~GLTextureCube() noexcept
     glDeleteTextures(1, &_texture);
 }
 
-void GLTextureCube::setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept
-{
-    _minFilter = GLTexture2D::glFilterType(minificationFilter);
-    _magFilter = GLTexture2D::glFilterType(magnificationFilter);
-}
-
-void GLTextureCube::setWrapModeCube(const ETexture::WrapMode s, const ETexture::WrapMode t, const ETexture::WrapMode r) noexcept
-{
-    _wrapS = GLTexture2D::glWrapMode(s);
-    _wrapT = GLTexture2D::glWrapMode(t);
-    _wrapR = GLTexture2D::glWrapMode(r);
-}
+// void GLTextureCube::setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept
+// {
+//     _minFilter = GLTexture2D::glFilterType(minificationFilter);
+//     _magFilter = GLTexture2D::glFilterType(magnificationFilter);
+// }
+//
+// void GLTextureCube::setWrapModeCube(const ETexture::WrapMode s, const ETexture::WrapMode t, const ETexture::WrapMode r) noexcept
+// {
+//     _wrapS = GLTexture2D::glWrapMode(s);
+//     _wrapT = GLTexture2D::glWrapMode(t);
+//     _wrapR = GLTexture2D::glWrapMode(r);
+// }
 
 void GLTextureCube::setCube(const u32 level, ETexture::CubeSide side, const void* data) noexcept
 {

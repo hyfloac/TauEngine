@@ -1,10 +1,12 @@
-#version 330 core
+#version 430 core
 
 in vec2 fTexCoord;
 
 layout(location = 0) out vec4 fragColor;
 
-uniform sampler2D frameBufferSampler;
+layout(location = 0) uniform sampler2D frameBufferSampler;
+
+// uniform sampler2D frameBufferSampler;
 
 #include <|TERes/shader/include/Branchless.glsl>
 #include <|TERes/shader/include/Common.glsl>

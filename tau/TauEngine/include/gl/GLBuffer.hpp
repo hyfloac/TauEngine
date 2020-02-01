@@ -19,8 +19,6 @@ public:
     static EBuffer::UsageType getUsageType(GLenum usage) noexcept;
 
     static GLuint createBuffer() noexcept;
-
-    static void destroyBuffer(GLuint bufferHandle) noexcept;
 private:
     GLuint _buffer;
     GLenum _glType;
@@ -31,11 +29,9 @@ public:
     ~GLBuffer() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
-
     void unbind(IRenderingContext& context) noexcept override;
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-
     void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
     [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
@@ -56,17 +52,41 @@ public:
     ~GLIndexBuffer() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
-
     void unbind(IRenderingContext& context) noexcept override;
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-
     void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
     [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
     void unmapBuffer(IRenderingContext& context) noexcept override;
 private:
     friend class GLIndexBufferBuilder;
+};
+
+class TAU_DLL GLUniformBuffer : public IUniformBuffer
+{
+    UNIFORM_BUFFER_IMPL(GLUniformBuffer);
+private:
+    GLuint _buffer;
+    GLenum _glUsage;
+private:
+    GLUniformBuffer(EBuffer::UsageType usage, uSys bufferSize, GLuint buffer, GLenum glUsage) noexcept;
+public:
+    ~GLUniformBuffer() noexcept override;
+
+    void bind(IRenderingContext& context) noexcept override;
+    void unbind(IRenderingContext& context) noexcept override;
+
+    void bind(IRenderingContext& context, u32 index) noexcept override;
+    void unbind(IRenderingContext& context, u32 index) noexcept override;
+
+    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
+    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+
+    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
+    void unmapBuffer(IRenderingContext& context) noexcept override;
+private:
+    friend class GLUniformBufferBuilder;
 };
 
 class TAU_DLL GLBufferBuilder : public IBufferBuilder
@@ -82,7 +102,7 @@ public:
     void type(const EBuffer::Type type) noexcept override final;
     void usage(const EBuffer::UsageType usage) noexcept override final;
 
-    [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override final;
+    [[nodiscard]] GLBuffer* build([[tau::out]] Error* error) const noexcept override final;
 protected:
     virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
@@ -99,8 +119,26 @@ public:
 
     void usage(const EBuffer::UsageType usage) noexcept override final;
 
-    [[nodiscard]] IIndexBuffer* build([[tau::out]] Error* error) const noexcept override final;
+    [[nodiscard]] GLIndexBuffer* build([[tau::out]] Error* error) const noexcept override final;
 protected:
     virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
 };
+
+class TAU_DLL GLUniformBufferBuilder : public IUniformBufferBuilder
+{
+    DEFAULT_DESTRUCT(GLUniformBufferBuilder);
+    DELETE_COPY(GLUniformBufferBuilder);
+private:
+    GLenum _glUsage;
+public:
+    GLUniformBufferBuilder() noexcept;
+
+    void usage(const EBuffer::UsageType usage) noexcept override final;
+
+    [[nodiscard]] GLUniformBuffer* build([[tau::out]] Error* error) const noexcept override final;
+protected:
+    virtual GLuint createBuffer() const noexcept
+    { return GLBuffer::createBuffer(); }
+};
+

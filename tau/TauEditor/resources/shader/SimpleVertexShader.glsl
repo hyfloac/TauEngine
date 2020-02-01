@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
@@ -8,7 +8,7 @@ layout(location = 3) in vec2 texCoord;
 
 out vec3 fPosition;
 // out vec3 fNormal;
-// out vec3 fTangent;
+out vec3 fTangent;
 // out vec3 fBiTangent;
 out vec2 fTexCoord;
 out mat3 fTBN;
@@ -20,10 +20,18 @@ out mat3 fTBN;
 //     vec2 texCoord;
 // } vertexOut;
 
-uniform mat4 compoundMatrix;
-uniform mat4 projectionMatrix;
-uniform mat4 cameraViewMatrix;
-uniform mat4 modelViewMatrix;
+layout(binding = 0) uniform CameraMatrices
+{
+    mat4 compoundMatrix;
+    mat4 projectionMatrix;
+    mat4 cameraViewMatrix;
+    mat4 modelViewMatrix;
+};
+
+// uniform mat4 compoundMatrix;
+// uniform mat4 projectionMatrix;
+// uniform mat4 cameraViewMatrix;
+// uniform mat4 modelViewMatrix;
 
 void main(void)
 {
@@ -37,7 +45,7 @@ void main(void)
     fPosition = vec3(modelViewMatrix * pos4);
     // vec3 norm = mat3(transpose(inverse(modelViewMatrix))) * normalize(normal);
     // fNormal = normalize(norm);
-    // fTangent = normalize(fTangent);
+    fTangent = normalize(tangent);
     // fBiTangent = normalize(fBiTangent);
     fTexCoord = texCoord;
 
@@ -46,6 +54,11 @@ void main(void)
     vec3 N = normalize(vec3(modelViewMatrix * vec4(normal, 0.0)));
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
+
+    // if(dot(cross(N, T), B) < 0.0)
+    // {
+    //     T *= -1.0;
+    // }
 
     fTBN = mat3(T, B, N);
 }

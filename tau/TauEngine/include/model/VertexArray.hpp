@@ -1,11 +1,9 @@
 #pragma once
 
-#include "DLL.hpp"
 #include <Objects.hpp>
 #include <DynArray.hpp>
-
-#include "system/RenderingContext.hpp"
-#include "model/Buffer.hpp"
+#include <Safeties.hpp>
+#include "DLL.hpp"
 
 enum class DrawType : u8
 {
@@ -13,6 +11,11 @@ enum class DrawType : u8
     ConnectedTriangles,
     PointConnectedTriangles
 };
+
+class IBuffer;
+class IIndexBuffer;
+class IShader;
+class IRenderingContext;
 
 class TAU_DLL NOVTABLE IVertexArray
 {

@@ -14,8 +14,9 @@
 #include "DLL.hpp"
 #include "maths/Vector2f.hpp"
 #include "maths/Vector3f.hpp"
-#include "shader/IUniform.hpp"
+#include "shader/Uniform.hpp"
 #include "ResourceLoader.hpp"
+#include "shader/TextureUploader.hpp"
 
 struct LoadData;
 class Window;
@@ -83,6 +84,16 @@ public:
         TextHandler& th;
         void* param;
     };
+
+    struct ProjectionUniforms final
+    {
+        glm::mat4 projectionMatrix;
+    };
+
+    struct ColorUniforms final
+    {
+        Vector3f color;
+    };
 private:
     FT_Library _ft;
 
@@ -91,10 +102,14 @@ private:
     Ref<IShaderProgram> _shader;
     Ref<IVertexArray> _va;
     Ref<IBuffer> _positionBuffer;
+    UniformBlockS<ProjectionUniforms> _viewUniforms;
+    UniformBlockS<ColorUniforms> _colorUniforms;
+    Ref<ISingleTextureUploader> _textureUploader;
     // Ref<IBuffer> _translationBuffer;
-    Ref<IUniform<const glm::mat4&>> _projUni;
-    Ref<IUniform<int>> _texUni;
-    Ref<IUniform<const Vector3f&>> _colorUni;
+    // Ref<IUniform<const glm::mat4&>> _projUni;
+    // Ref<IUniform<int>> _texUni;
+    // Ref<IUniform<const Vector3f&>> _colorUni;
+    //
 public:
     TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept;
 
@@ -107,8 +122,8 @@ public:
 
     GlyphSetHandle generateBitmapCharacters(IRenderingContext& context, const DynString& glyphSetName, char minChar, char maxChar, bool smooth, FT_Face face) noexcept;
 
-    void renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept;
-    float renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept;
+    void renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) noexcept;
+    float renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) noexcept;
 
     float computeLength(GlyphSetHandle glyphSetHandle, const char* str, float scale) const noexcept;
     float computeHeight(GlyphSetHandle glyphSetHandle, const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept;

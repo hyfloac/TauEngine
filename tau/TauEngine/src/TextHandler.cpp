@@ -16,14 +16,50 @@
 #include <winreg.h>
 #include "Timings.hpp"
 
+template<>
+class UniformAccessor<TextHandler::ProjectionUniforms> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    static constexpr uSys MATRIX_SIZE = sizeof(float) * 4 * 4;
+
+    [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE; }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const TextHandler::ProjectionUniforms& t) noexcept
+    {
+        buffer->fillBuffer(context, glm::value_ptr(t.projectionMatrix));
+    }
+};
+
+template<>
+class UniformAccessor<TextHandler::ColorUniforms> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const TextHandler::ColorUniforms& t) noexcept
+    {
+        const __m128 vec = t.color.data().vec;
+        buffer->fillBuffer(context, reinterpret_cast<const void*>(&vec));
+    }
+};
+
+
 #define INSTANCE_COUNT 128
 
 TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
       // _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
       _va(null),
+      _viewUniforms(context.createUniformBuffer()),
+      _colorUniforms(context.createUniformBuffer())
       // _positionBuffer(null),
-      _projUni(null), _texUni(null), _colorUni(null)
+      // _projUni(null), _texUni(null), _colorUni(null)
 {
     PERF();
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
@@ -47,14 +83,28 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
 
     _shader->link(context);
 
-    _projUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
-    _texUni = _shader->getUniform<int>("textBMP");
-    _colorUni = _shader->getUniformVector<Vector3f>("textColor");
+    Ref<ITextureSamplerBuilder> textureSamplerBuilder = context.createTextureSampler();
+    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear,
+                                         ETexture::Filter::Linear,
+                                         ETexture::Filter::Linear);
+    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::ClampToEdge,
+                                       ETexture::WrapMode::ClampToEdge,
+                                       ETexture::WrapMode::ClampToEdge);
+    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+
+    Ref<ISingleTextureUploaderBuilder> tuBuilder = context.createSingleTextureUploader();
+    tuBuilder->textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+    _textureUploader = Ref<ISingleTextureUploader>(tuBuilder->build());
+
+    // _projUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
+    // _texUni = _shader->getUniform<int>("textBMP");
+    // _colorUni = _shader->getUniformVector<Vector3f>("textColor");
 
     Ref<IBufferBuilder> bufferBuilder = context.createBuffer(1);
     bufferBuilder->type(EBuffer::Type::ArrayBuffer);
     bufferBuilder->usage(EBuffer::UsageType::DynamicDraw);
-    bufferBuilder->bufferSize(sizeof(float) * 2 * 6);
+    // bufferBuilder->bufferSize(sizeof(float) * 2 * 6);
+    bufferBuilder->elementCount(6);
     bufferBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     bufferBuilder->initialBuffer(null);
     
@@ -77,55 +127,13 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     
     const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
 
-    // float posTexCoords[6][4] = {
-    //     { 0.0f, 1.0f, 0.0f, 0.0f },
-    //     { 0.0f, 0.0f, 0.0f, 1.0f },
-    //     { 1.0f, 0.0f, 1.0f, 1.0f },
-    //
-    //     { 0.0f, 1.0f, 0.0f, 0.0f },
-    //     { 1.0f, 0.0f, 1.0f, 1.0f },
-    //     { 1.0f, 1.0f, 1.0f, 0.0f }
-    // };
-    //
-    // Ref<IBufferBuilder> bufferBuilder = context.createBuffer(2);
-    // bufferBuilder->type(EBuffer::Type::ArrayBuffer);
-    // bufferBuilder->usage(EBuffer::UsageType::StaticDraw);
-    // bufferBuilder->bufferSize(sizeof(float) * 2 * 6 * 2);
-    // bufferBuilder->initialBuffer(posTexCoords);
-    // bufferBuilder->instanced(false);
-    // bufferBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    // bufferBuilder->descriptor().addDescriptor(ShaderDataType::Vector2Float);
-    //
-    // const Ref<IBuffer> posTexBuffer = Ref<IBuffer>(bufferBuilder->build(null));
-    //
-    // bufferBuilder->usage(EBuffer::UsageType::DynamicDraw);
-    // bufferBuilder->bufferSize(sizeof(float) * 4 * INSTANCE_COUNT);
-    // bufferBuilder->initialBuffer(null);
-    // bufferBuilder->instanced(true);
-    //
-    // _translationBuffer = Ref<IBuffer>(bufferBuilder->build(null));
-
-    // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(2);
-    // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-    // ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-    // ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-    // ilBuilder->setLayoutDescriptor(3, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-    // const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
-
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
     vaBuilder->setVertexBuffer(0, _positionBuffer);
     vaBuilder->setVertexBuffer(1, textureCoordBuffer);
-    // vaBuilder->setVertexBuffer(0, posTexBuffer);
-    // vaBuilder->setVertexBuffer(1, _translationBuffer);
-    // vaBuilder->inputLayout(inputLayout);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
     _va = Ref<IVertexArray>(vaBuilder->build());
-
-    // _va->addVertexBuffer(context, _positionBuffer);
-    // _va->addVertexBuffer(context, textureCoordBuffer);
-    // _va->drawCount() = 6;
 }
 
 TextHandler::~TextHandler() noexcept
@@ -226,8 +234,8 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
 
             texture = builder->build(null); //ITexture::create(context, face->glyph->bitmap.width, face->glyph->bitmap.rows, ETexture::Format::Red8UnsignedInt);
 
-            texture->setFilterMode(filterType, filterType);
-            texture->setWrapMode(ETexture::WrapMode::ClampToEdge, ETexture::WrapMode::ClampToEdge);
+            // texture->setFilterMode(filterType, filterType);
+            // texture->setWrapMode(ETexture::WrapMode::ClampToEdge, ETexture::WrapMode::ClampToEdge);
 
             texture->set(0, face->glyph->bitmap.buffer);
         }
@@ -245,15 +253,21 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
     return _glyphSets.size() - 1;
 }
 
-void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) const noexcept
+void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) noexcept
 {
     context.setFaceWinding(false);
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);
-    _projUni->set(proj);
-    _texUni->set(0);
-    _colorUni->set(color);
+    // _projUni->set(proj);
+    // _texUni->set(0);
+    // _colorUni->set(color);
+
+    _viewUniforms.data().projectionMatrix = proj;
+    _viewUniforms.upload(context, 0);
+
+    _colorUniforms.data().color = color;
+    _colorUniforms.upload(context, 1);
 
     _va->bind(context);
     _va->preDraw(context);
@@ -285,7 +299,10 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
             { xpos + w, ypos + h }
         };
 
-        gc->texture->bind(0);
+        // gc->texture->bind(0);
+        _textureUploader->texture(gc->texture);
+        TextureIndices indices(0, 0, 2);
+        (void) _textureUploader->upload(context, indices);
 
         _positionBuffer->bind(context);
         _positionBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
@@ -293,25 +310,35 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
 
         _va->draw(context);
 
-        gc->texture->unbind(0);
+        indices = TextureIndices(0, 0, 2);
+        (void) _textureUploader->unbind(context, indices);
+        // gc->texture->unbind(0);
 
         x += (gc->advance >> 6) * scale;
     }
 
     _va->postDraw(context);
     _va->unbind(context);
+    _viewUniforms.unbind(context, 2);
+    _colorUniforms.unbind(context, 1);
     _shader->unbind(context);
 }
 
-float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) const noexcept
+float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) noexcept
 {
     context.setFaceWinding(false);
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);
-    _projUni->set(proj);
-    _texUni->set(0);
-    _colorUni->set(color);
+    // _projUni->set(proj);
+    // _texUni->set(0);
+    // _colorUni->set(color);
+
+    _viewUniforms.data().projectionMatrix = proj;
+    _viewUniforms.upload(context, 0);
+
+    _colorUniforms.data().color = color;
+    _colorUniforms.upload(context, 1);
 
     _va->bind(context);
     _va->preDraw(context);
@@ -352,7 +379,10 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
             { xpos + w, ypos + h }
         };
 
-        gc->texture->bind(0);
+        // gc->texture->bind(0);
+        _textureUploader->texture(gc->texture);
+        TextureIndices indices(0, 0, 2);
+        (void) _textureUploader->upload(context, indices);
 
         _positionBuffer->bind(context);
         _positionBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
@@ -360,13 +390,17 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
 
         _va->draw(context);
 
-        gc->texture->unbind(0);
+        indices = TextureIndices(0, 0, 2);
+        (void) _textureUploader->unbind(context, indices);
+        // gc->texture->unbind(0);
 
         x += advance;
     }
 
     _va->postDraw(context);
     _va->unbind(context);
+    _viewUniforms.unbind(context, 2);
+    _colorUniforms.unbind(context, 1);
     _shader->unbind(context);
 
     return height;

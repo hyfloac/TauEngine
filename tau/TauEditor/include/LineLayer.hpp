@@ -4,7 +4,7 @@
 #include <system/Window.hpp>
 #include <RenderingPipeline.hpp>
 #include <shader/IShaderProgram.hpp>
-#include <shader/IUniform.hpp>
+#include <shader/Uniform.hpp>
 
 class LineLayer final : public ILayer
 {
@@ -18,10 +18,10 @@ private:
     Ref<IVertexArray> _vao;
 
     Ref<IShaderProgram> _shader;
-    Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
-    Ref<IUniform<float>> _lineThicknessUni;
-    Ref<IUniform<const glm::vec4&>> _viewportUni;
-    Ref<IUniform<float>> _miterLimitUni;
+    // Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
+    // Ref<IUniform<float>> _lineThicknessUni;
+    // Ref<IUniform<const glm::vec4&>> _viewportUni;
+    // Ref<IUniform<float>> _miterLimitUni;
 public:
     LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ortho) noexcept;
 

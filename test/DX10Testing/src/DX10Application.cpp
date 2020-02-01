@@ -94,7 +94,8 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     Ref<IBufferBuilder> bufBuilder = ctx().createBuffer(1);
     bufBuilder->type(EBuffer::Type::ArrayBuffer);
     bufBuilder->usage(EBuffer::UsageType::StaticDraw);
-    bufBuilder->bufferSize(sizeof(positions));
+    // bufBuilder->bufferSize(sizeof(positions));
+    bufBuilder->elementCount(3);
     bufBuilder->initialBuffer(positions);
     bufBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     const Ref<IBuffer> posBuffer = Ref<IBuffer>(bufBuilder->build(null));
@@ -105,7 +106,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
         0.0f, 0.0f, 1.0f, 1.0f
     };
 
-    bufBuilder->bufferSize(sizeof(colors));
+    // bufBuilder->bufferSize(sizeof(colors));
     bufBuilder->initialBuffer(colors);
     bufBuilder->descriptor().reset(1);
     bufBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);

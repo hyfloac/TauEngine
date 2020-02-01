@@ -10,12 +10,14 @@
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 #include "gl/GLTexture.hpp"
 #include "gl/GLShader.hpp"
+#include "gl/GLTextureSampler.hpp"
+#include "gl/GLTextureUploader.hpp"
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
     : IRenderingContext(mode),
       _device(null), _context(null),
-      _vaos(),
+      // _vaos(),
       _majorVersion(majorVersion),
       _minorVersion(minorVersion),
       _compat(core),
@@ -151,6 +153,33 @@ Ref<IIndexBufferBuilder> GLRenderingContext::createIndexBuffer() noexcept
     }
 }
 
+Ref<IUniformBufferBuilder> GLRenderingContext::createUniformBuffer() noexcept
+{
+    switch(_mode.currentMode())
+    {
+        case RenderingMode::Mode::DirectX9:
+        case RenderingMode::Mode::DirectX11:
+        case RenderingMode::Mode::DirectX12:
+        case RenderingMode::Mode::DirectX12_1:
+        case RenderingMode::Mode::Vulkan:
+            return null;
+        case RenderingMode::Mode::OpenGL2:
+        case RenderingMode::Mode::OpenGL3:
+        case RenderingMode::Mode::OpenGL3_1:
+        case RenderingMode::Mode::OpenGL3_2:
+        case RenderingMode::Mode::OpenGL3_3:
+        case RenderingMode::Mode::OpenGL4:
+        case RenderingMode::Mode::OpenGL4_2:
+        case RenderingMode::Mode::OpenGL4_3:
+        case RenderingMode::Mode::OpenGL4_4:
+            return Ref<GLUniformBufferBuilder>(new(::std::nothrow) GLUniformBufferBuilder);
+        case RenderingMode::Mode::OpenGL4_5:
+        case RenderingMode::Mode::OpenGL4_6:
+            return Ref<GLUniformBufferBuilder>(new(::std::nothrow) GLUniformBuffer4_5Builder);
+        default: return null;
+    }
+}
+
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
 {
     return Ref<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
@@ -174,6 +203,21 @@ Ref<ITextureBuilder> GLRenderingContext::createTextureDepth() noexcept
 Ref<ITextureCubeBuilder> GLRenderingContext::createTextureCube() noexcept
 {
     return Ref<GLTextureCubeBuilder>(new(::std::nothrow) GLTextureCubeBuilder);
+}
+
+Ref<ITextureSamplerBuilder> GLRenderingContext::createTextureSampler() noexcept
+{
+    return Ref<GLTextureSamplerBuilder>(new(::std::nothrow) GLTextureSamplerBuilder);
+}
+
+Ref<ITextureUploaderBuilder> GLRenderingContext::createTextureUploader(const uSys textureCount) noexcept
+{
+    return Ref<GLTextureUploaderBuilder>(new(::std::nothrow) GLTextureUploaderBuilder(textureCount, *this));
+}
+
+Ref<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUploader() noexcept
+{
+    return Ref<GLSingleTextureUploaderBuilder>(new(::std::nothrow) GLSingleTextureUploaderBuilder(*this));
 }
 
 Ref<IShaderBuilder> GLRenderingContext::createShader() noexcept

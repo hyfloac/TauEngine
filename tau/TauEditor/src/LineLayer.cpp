@@ -36,10 +36,10 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
 
     _shader->link(*window.renderingContext());
 
-    _viewMatrixUni = _shader->getUniformMatrix4x4Float("viewMatrix", false);
-    _lineThicknessUni = _shader->getUniformFloat("lineThickness");
-    _viewportUni = _shader->getUniformVector4Float("viewport");
-    _miterLimitUni = _shader->getUniformFloat("miterLimit");
+    // _viewMatrixUni = _shader->getUniformMatrix4x4Float("viewMatrix", false);
+    // _lineThicknessUni = _shader->getUniformFloat("lineThickness");
+    // _viewportUni = _shader->getUniformVector4Float("viewport");
+    // _miterLimitUni = _shader->getUniformFloat("miterLimit");
 
     float bufferData[] = {
         0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -49,7 +49,8 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     Ref<IBufferBuilder> lineDataBuilder = window.renderingContext()->createBuffer(2);
     lineDataBuilder->type(EBuffer::Type::ArrayBuffer);
     lineDataBuilder->usage(EBuffer::UsageType::StaticDraw);
-    lineDataBuilder->bufferSize(sizeof(bufferData));
+    // lineDataBuilder->bufferSize(sizeof(bufferData));
+    lineDataBuilder->elementCount(2);
     lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
 
@@ -80,10 +81,10 @@ void LineLayer::onRender(const DeltaTime& delta) noexcept
     UNUSED(delta);
     TAU_RENDER_S(_rp, {
         self->_shader->bind(context);
-        self->_viewMatrixUni->set(self->_ortho);
-        self->_lineThicknessUni->set(1.0f);
-        self->_viewportUni->set(glm::vec4(0.0f, 0.0f, window.width(), window.height()));
-        self->_miterLimitUni->set(1.0f);
+        // self->_viewMatrixUni->set(self->_ortho);
+        // self->_lineThicknessUni->set(1.0f);
+        // self->_viewportUni->set(glm::vec4(0.0f, 0.0f, window.width(), window.height()));
+        // self->_miterLimitUni->set(1.0f);
 
         self->_vao->bind(context);
         self->_vao->preDraw(context);

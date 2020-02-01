@@ -1,31 +1,10 @@
 #pragma once
 
-#include "shader/IShaderProgram.hpp"
+#include <Safeties.hpp>
+
+#include "shader/Uniform.hpp"
 #include "maths/Vector3f.hpp"
 #include "Color.hpp"
-#include <Safeties.hpp>
-#include <String.hpp>
-
-class SpotLightUniforms final
-{
-    DEFAULT_DESTRUCT(SpotLightUniforms);
-    DEFAULT_COPY(SpotLightUniforms);
-private:
-    Ref<IUniform<const Vector3f&>> _positionUni;
-    Ref<IUniform<const Vector3f&>> _directionUni;
-    Ref<IUniform<float>> _cutOffUni;
-    Ref<IUniform<float>> _outerCutOffUni;
-    Ref<IUniform<const Vector3f&>> _ambientUni;
-    Ref<IUniform<const Vector3f&>> _diffuseUni;
-    Ref<IUniform<const Vector3f&>> _specularUni;
-    Ref<IUniform<float>> _constantUni;
-    Ref<IUniform<float>> _linearUni;
-    Ref<IUniform<float>> _quadraticUni;
-public:
-    SpotLightUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
-private:
-    friend class SpotLight;
-};
 
 class SpotLight final
 {
@@ -35,12 +14,12 @@ class SpotLight final
 private:
     Vector3f _position;
     Vector3f _direction;
-    Vector3f _ambientCache;
-    Vector3f _diffuseCache;
-    Vector3f _specularCache;
     RGBColor _ambientColor;
     RGBColor _diffuseColor;
     RGBColor _specularColor;
+    Vector3f _ambientCache;
+    Vector3f _diffuseCache;
+    Vector3f _specularCache;
     float _constant;
     float _linear;
     float _quadratic;
@@ -73,5 +52,76 @@ public:
     [[nodiscard]] inline float& cutOff() noexcept { return _cutOff; }
     [[nodiscard]] inline float& outerCutOff() noexcept { return _outerCutOff; }
 
-    void set(const SpotLightUniforms& uniforms) const noexcept;
+    // void set(const SpotLightUniforms& uniforms) const noexcept;
+private:
+    // friend class SpotLightUniforms;
+    friend class UniformAccessor<SpotLight>;
 };
+
+template<>
+class UniformAccessor<SpotLight> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    [[nodiscard]] static inline uSys size() noexcept
+    {
+        // 5xVector4F + 5xFloat
+        return 5 * sizeof(float) * 4 + 5 * sizeof(float);
+    }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const SpotLight& t) noexcept
+    {
+        void* const buf = buffer->mapBuffer(context);
+
+#define SP_PASTE2(_A, _B) _A ## _B
+#define SP_PASTE(_A, _B) SP_PASTE2(_A, _B)
+#define SP_UNIQUE(_X) SP_PASTE(_X, __LINE__)
+#define STORE(_OFFSET, _VAR) ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + (_OFFSET)), &(_VAR), sizeof((_VAR)))
+#define COPY_VEC(_VEC, _OFFSET) const __m128 SP_UNIQUE(_vec_) = (_VEC).data().vec; \
+                                STORE(_OFFSET, SP_UNIQUE(_vec_))
+
+        COPY_VEC(t._position, 0);
+        COPY_VEC(t._direction, 16);
+        COPY_VEC(t._ambientCache, 32);
+        COPY_VEC(t._diffuseCache, 48);
+        COPY_VEC(t._specularCache, 64);
+
+        STORE(80, t._cutOff);
+        STORE(84, t._outerCutOff);
+        STORE(88, t._constant);
+        STORE(92, t._linear);
+        STORE(96, t._quadratic);
+
+#undef COPY_VEC
+#undef STORE
+#undef SP_UNIQUE
+#undef SP_PASTE
+#undef SP_PASTE2
+
+        buffer->unmapBuffer(context);
+    }
+};
+
+// class SpotLightUniforms final
+// {
+//     DEFAULT_DESTRUCT(SpotLightUniforms);
+//     DEFAULT_COPY(SpotLightUniforms);
+// private:
+//     Ref<IUniform<const Vector3f&>> _positionUni;
+//     Ref<IUniform<const Vector3f&>> _directionUni;
+//     Ref<IUniform<float>> _cutOffUni;
+//     Ref<IUniform<float>> _outerCutOffUni;
+//     Ref<IUniform<const Vector3f&>> _ambientUni;
+//     Ref<IUniform<const Vector3f&>> _diffuseUni;
+//     Ref<IUniform<const Vector3f&>> _specularUni;
+//     Ref<IUniform<float>> _constantUni;
+//     Ref<IUniform<float>> _linearUni;
+//     Ref<IUniform<float>> _quadraticUni;
+// public:
+//     SpotLightUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
+//
+// private:
+//     friend class SpotLight;
+// };

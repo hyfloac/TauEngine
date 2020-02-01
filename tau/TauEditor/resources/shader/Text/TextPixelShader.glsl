@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 in VertexData 
 {
@@ -7,10 +7,17 @@ in VertexData
 
 layout(location = 0) out vec4 fragColor;
 
-uniform sampler2D textBMP;
-uniform vec3 textColor;
+layout(binding = 1) uniform Color
+{
+    vec4 textColor;
+};
+
+layout(location = 2) uniform sampler2D textBMP;
+
+// uniform sampler2D textBMP;
+// uniform vec3 textColor;
 
 void main()
 {
-    fragColor = vec4(textColor, texture(textBMP, vertexIn.texCoord).r);
+    fragColor = vec4(textColor.xyz, texture(textBMP, vertexIn.texCoord).r);
 }

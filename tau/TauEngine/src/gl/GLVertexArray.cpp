@@ -169,7 +169,6 @@ GLVertexArray* GLVertexArrayBuilder::build(Error* error) noexcept
 
     glBindVertexArray(vao);
 
-
     u32 attribIndex = 0;
     for(uSys i = 0; i < _buffers.size(); ++i)
     {

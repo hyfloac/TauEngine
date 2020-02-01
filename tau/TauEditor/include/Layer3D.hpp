@@ -5,7 +5,7 @@
 #include <Safeties.hpp>
 #include <camera/Camera3D.hpp>
 #include <shader/IShaderProgram.hpp>
-#include <shader/IUniform.hpp>
+#include <shader/Uniform.hpp>
 #include <texture/Texture.hpp>
 #include <texture/FrameBuffer.hpp>
 #include <glm/mat4x4.hpp>
@@ -27,6 +27,19 @@ class Layer3D final : public ILayer
 {
     DEFAULT_DESTRUCT(Layer3D);
     LAYER_IMPL(Layer3D);
+public:
+    struct Uniforms final
+    {
+        glm::mat4 compoundMatrix;
+        glm::mat4 projectionMatrix;
+        glm::mat4 viewMatrix;
+        glm::mat4 modelMatrix;
+    };
+
+    struct ViewPosUniforms final
+    {
+        Vector3f cameraPos;
+    };
 private:
     Window& _window;
     RenderingPipeline& _rp;
@@ -36,39 +49,45 @@ private:
     GameRecorder& _gr;
 
     Ref<IShaderProgram> _shader;
-    Ref<IUniform<const glm::mat4&>> _compoundMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _projMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _modelViewMatrixUni;
-    Ref<MaterialUniforms> _materialUniforms;
-    Ref<PointLightUniforms> _pointLightUniforms;
-    Ref<SpotLightUniforms> _spotLightUniforms;
+    UniformBlockS<Uniforms> _uniforms;
+    UniformBlockU<Material> _materialUniforms;
+    // Ref<IUniform<const glm::mat4&>> _compoundMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _projMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _modelViewMatrixUni;
+    UniformBlockU<PointLight> _pointLightUniforms;
+    UniformBlockU<SpotLight> _spotLightUniforms;
+    // Ref<MaterialUniforms> _materialUniforms;
+    // Ref<PointLightUniforms> _pointLightUniforms;
+    // Ref<SpotLightUniforms> _spotLightUniforms;
     PointLight _pointLight;
     SpotLight _spotLight;
-    Ref<IUniform<const Vector3f&>> _cameraPosUni;
+    UniformBlockS<ViewPosUniforms> _cameraPosUni;
+    // Ref<IUniform<const Vector3f&>> _cameraPosUni;
 
     Ref<IShaderProgram> _o_shader;
-    Ref<IUniform<const glm::mat4&>> _o_projMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _o_viewMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _o_modelViewMatrixUni;
-    Ref<IUniform<float>> _o_scaleFactorUni;
+    // Ref<IUniform<const glm::mat4&>> _o_projMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _o_viewMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _o_modelViewMatrixUni;
+    // Ref<IUniform<float>> _o_scaleFactorUni;
 
     Ref<IShaderProgram> _reflectionShader;
-    Ref<IUniform<const glm::mat4&>> _reflectionProjMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _reflectionViewMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _reflectionModelViewMatrixUni;
-    Ref<IUniform<const Vector3f&>> _reflectionCameraPosUni;
-    Ref<IUniform<int>> _reflectionTexture;
+    // Ref<IUniform<const glm::mat4&>> _reflectionProjMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _reflectionViewMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _reflectionModelViewMatrixUni;
+    // Ref<IUniform<const Vector3f&>> _reflectionCameraPosUni;
+    // Ref<IUniform<int>> _reflectionTexture;
 
     Ref<IShaderProgram> _refractionShader;
-    Ref<IUniform<const glm::mat4&>> _refractionProjMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _refractionViewMatrixUni;
-    Ref<IUniform<const glm::mat4&>> _refractionModelViewMatrixUni;
-    Ref<IUniform<const Vector3f&>> _refractionCameraPosUni;
-    Ref<IUniform<int>> _refractionTexture;
+    // Ref<IUniform<const glm::mat4&>> _refractionProjMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _refractionViewMatrixUni;
+    // Ref<IUniform<const glm::mat4&>> _refractionModelViewMatrixUni;
+    // Ref<IUniform<const Vector3f&>> _refractionCameraPosUni;
+    // Ref<IUniform<int>> _refractionTexture;
 
     Ref<IShaderProgram> _frameBufferShader;
-    Ref<IUniform<int>> _frameBufferUni;
+    Ref<ITextureUploader> _frameBufferUploader;
+    // Ref<IUniform<int>> _frameBufferUni;
 
     Ref<ITexture> _texture;
     Ref<ITexture> _overlay;

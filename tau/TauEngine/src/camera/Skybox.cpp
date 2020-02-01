@@ -6,10 +6,28 @@
 #include "texture/FITextureLoader.hpp"
 #include "gl/GLUtils.hpp"
 #include "VFS.hpp"
+#include <glm/gtc/type_ptr.hpp>
+
+template<>
+class UniformAccessor<Skybox::Uniforms> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4 * 4 * 2; }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Skybox::Uniforms& t) noexcept
+    {
+        buffer->modifyBuffer(context, 0, sizeof(float) * 4 * 4, glm::value_ptr(t.projectionMatrix));
+        buffer->modifyBuffer(context, sizeof(float) * 4 * 4, sizeof(float) * 4 * 4, glm::value_ptr(t.viewMatrix));
+    }
+};
 
 Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
-      _projectionUni(null), _viewUni(null), _skyboxUni(null),
+      _uniforms(context.createUniformBuffer()), _textureUploader(null),
+      // _projectionUni(null), _viewUni(null), _skyboxUni(null),
       _skybox(null), _cubeVA(null)
 {
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
@@ -27,20 +45,36 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
 
     _shader->link(context);
 
-    _projectionUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
-    _viewUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
-    _skyboxUni = _shader->getUniform<int>("skybox");
 
-    const TextureLoader::GPUTextureSettings settings
-    {
-        -1,
-        ETexture::Filter::Linear,
-        ETexture::Filter::Linear,
-        ETexture::WrapMode::ClampToEdge,
-        ETexture::WrapMode::ClampToEdge,
-        ETexture::WrapMode::ClampToEdge
-    };
-    _skybox = Ref<ITextureCube>(TextureLoader::loadTextureCubeEx(context, skyboxPath, fileExtension, settings));
+    // _projectionUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
+    // _viewUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    // _skyboxUni = _shader->getUniform<int>("skybox");
+
+    // const TextureLoader::GPUTextureSettings settings
+    // {
+    //     -1,
+    //     ETexture::Filter::Linear,
+    //     ETexture::Filter::Linear,
+    //     ETexture::WrapMode::ClampToEdge,
+    //     ETexture::WrapMode::ClampToEdge,
+    //     ETexture::WrapMode::ClampToEdge
+    // };
+    _skybox = Ref<ITextureCube>(TextureLoader::loadTextureCubeEx(context, skyboxPath, fileExtension, -1));
+
+    Ref<ITextureSamplerBuilder> textureSamplerBuilder = context.createTextureSampler();
+    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear, 
+                                         ETexture::Filter::Linear, 
+                                         ETexture::Filter::Linear);
+    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::ClampToEdge,
+                                       ETexture::WrapMode::ClampToEdge,
+                                       ETexture::WrapMode::ClampToEdge);
+    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+
+    Ref<ITextureUploaderBuilder> uploaderBuilder = context.createTextureUploader(1);
+    uploaderBuilder->setTexture(0, _skybox);
+    uploaderBuilder->textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+
+    _textureUploader = Ref<ITextureUploader>(uploaderBuilder->build());
 
     float skyboxVertices[] = {
         // back
@@ -95,7 +129,8 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     Ref<IBufferBuilder> skyboxCubeBuilder = context.createBuffer(1);
     skyboxCubeBuilder->type(EBuffer::Type::ArrayBuffer);
     skyboxCubeBuilder->usage(EBuffer::UsageType::StaticDraw);
-    skyboxCubeBuilder->bufferSize(sizeof(skyboxVertices));
+    // skyboxCubeBuilder->bufferSize(sizeof(skyboxVertices));
+    skyboxCubeBuilder->elementCount(6 * 6);
     skyboxCubeBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
     Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
@@ -120,7 +155,7 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     // _cubeVA->drawCount() = 6;
 }
 
-void Skybox::render(IRenderingContext& context, const Camera3D& camera) const noexcept
+void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
 {
     context.enableDepthWriting(false);
     context.setFaceWinding(false);
@@ -128,9 +163,16 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) const no
     glDepthFunc(GL_LEQUAL);
 
     _shader->bind(context);
-    _projectionUni->set(camera.projectionMatrix());
-    _viewUni->set(camera.viewRotMatrix());
-    _skyboxUni->set(0);
+    _uniforms.data().projectionMatrix = camera.projectionMatrix();
+    _uniforms.data().viewMatrix = camera.viewRotMatrix();
+    _uniforms.upload(context, 0);
+    {
+        auto indices = TextureIndices(0, 0, 1);
+        (void) _textureUploader->upload(context, indices);
+    }
+    // _projectionUni->set(camera.projectionMatrix());
+    // _viewUni->set(camera.viewRotMatrix());
+    // _skyboxUni->set(0);
 
     _skybox->bind(0);
 
@@ -140,6 +182,11 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) const no
     _cubeVA->postDraw(context);
     _cubeVA->unbind(context);
 
+    _uniforms.unbind(context, 0);
+    {
+        auto indices = TextureIndices(0, 0, 1);
+        (void) _textureUploader->unbind(context, indices);
+    }
     _skybox->unbind(0);
     _shader->unbind(context);
 

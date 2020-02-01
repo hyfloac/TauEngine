@@ -47,7 +47,7 @@ ITexture* TextureLoader::generateMissingTexture(IRenderingContext& context) noex
 
     ITexture* const ret = builder->build(null); //ITexture::create(context, 2, 2, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
 
-    ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    // ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
     ret->set(0, textureData);
 
     // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -79,7 +79,7 @@ ITexture* TextureLoader::generateColorTexture(IRenderingContext& context, RGBCol
 
     ITexture* const ret = builder->build(null); //ITexture::create(context, 1, 1, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
 
-    ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    // ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
     ret->set(0, textureData);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
@@ -89,7 +89,7 @@ ITexture* TextureLoader::generateColorTexture(IRenderingContext& context, RGBCol
     return ret;
 }
 
-ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const GPUTextureSettings& settings, TextureLoadError* RESTRICT const error) noexcept
+ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -142,11 +142,11 @@ ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* R
 
     ITexture* const ret = builder->build(null); //ITexture::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt, ETexture::Type::T2D);
 
-    ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
-    ret->setWrapMode(settings.wrapS, settings.wrapT);
+    // ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
+    // ret->setWrapMode(settings.wrapS, settings.wrapT);
     ret->set(0, textureData);
 
-    if(settings.mipmapLevel < 0)
+    if(mipmapLevel < 0)
     {
         ret->generateMipmaps();
     }
@@ -168,7 +168,7 @@ static const char* fileNames[6] = {
     "top",
 };
 
-ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const char* folderPath, const char* fileExtension, const GPUTextureSettings& settings, TextureLoadError* error) noexcept
+ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -249,8 +249,8 @@ ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const
 
             // ret = ITextureCube::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
             ret = builder->build(null);
-            ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
-            ret->setWrapModeCube(settings.wrapS, settings.wrapT, settings.wrapR);
+            // ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
+            // ret->setWrapModeCube(settings.wrapS, settings.wrapT, settings.wrapR);
         }
 
         ret->setCube(0, static_cast<ETexture::CubeSide>(i + 1), textureData);
@@ -258,7 +258,7 @@ ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const
         FreeImage_Unload(texture);
     }
 
-    if(settings.mipmapLevel < 0)
+    if(mipmapLevel < 0)
     {
         ret->generateMipmaps();
     }

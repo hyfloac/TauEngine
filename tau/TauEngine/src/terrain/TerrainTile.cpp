@@ -1,7 +1,6 @@
 #include "terrain/TerrainTile.hpp"
 #include "model/Buffer.hpp"
-
-// static Ref<IInputLayout> _inputLayoutCache = null;
+#include "system/RenderingContext.hpp"
 
 Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const float size, const uSys edgeVertices) noexcept
 {
@@ -63,16 +62,19 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
 
     buf3Builder->type(EBuffer::Type::ArrayBuffer);
     buf3Builder->usage(EBuffer::UsageType::StaticDraw);
-    buf3Builder->bufferSize(3 * numVertices * sizeof(float));
+    // buf3Builder->bufferSize(3 * numVertices * sizeof(float));
+    buf3Builder->elementCount(numVertices);
     buf3Builder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
     buf2Builder->type(EBuffer::Type::ArrayBuffer);
     buf2Builder->usage(EBuffer::UsageType::StaticDraw);
-    buf2Builder->bufferSize(2 * numVertices * sizeof(float));
+    // buf2Builder->bufferSize(2 * numVertices * sizeof(float));
+    buf2Builder->elementCount(numVertices);
     buf2Builder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     indiceBuilder->usage(EBuffer::UsageType::StaticDraw);
-    indiceBuilder->bufferSize(6 * numIndices * sizeof(u32));
+    // indiceBuilder->bufferSize(6 * numIndices * sizeof(u32));
+    indiceBuilder->elementCount(6 * numIndices);
 
     Ref<IBuffer> posBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
     Ref<IBuffer> normBuf = Ref<IBuffer>(buf3Builder->build(nullptr));

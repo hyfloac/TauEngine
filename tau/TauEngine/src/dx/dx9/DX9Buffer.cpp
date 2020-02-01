@@ -48,10 +48,10 @@ IBuffer* DX9BufferBuilder::build(Error* error) const noexcept
     ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_N(_type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
-    ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
+    ERROR_CODE_COND_N(_elementCount == 0, Error::BufferSizeIsZero);
 
     IDirect3DVertexBuffer9* d3dBuffer;
-    const HRESULT res = _context.d3d9Device()->CreateVertexBuffer(_bufferSize, 0, 0, D3DPOOL_MANAGED, &d3dBuffer, null);
+    const HRESULT res = _context.d3d9Device()->CreateVertexBuffer(bufferSize(), 0, 0, D3DPOOL_MANAGED, &d3dBuffer, null);
     if(res != D3D_OK)
     {
         /* The call was incorrect, something must be wrong with the implementation of TauEngine */
@@ -69,7 +69,7 @@ IBuffer* DX9BufferBuilder::build(Error* error) const noexcept
         ERROR_CODE_N(Error::UnknownError);
     }
 
-    DX9Buffer* const buffer = new(std::nothrow) DX9Buffer(_type, _usage, _bufferSize, _instanced, _descriptor.build(), d3dBuffer);
+    DX9Buffer* const buffer = new(std::nothrow) DX9Buffer(_type, _usage, bufferSize(), _instanced, _descriptor.build(), d3dBuffer);
 
     if(!buffer)
     {

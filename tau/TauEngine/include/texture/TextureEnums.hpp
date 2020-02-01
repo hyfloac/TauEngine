@@ -15,6 +15,7 @@ enum class Type : u8
 enum class Filter : u8
 {
     Nearest = 1,
+    Point = Nearest,
     Linear
 };
 

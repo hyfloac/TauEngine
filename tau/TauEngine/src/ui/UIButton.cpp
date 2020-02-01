@@ -54,7 +54,8 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     Ref<IBufferBuilder> vboBuilder = context.createBuffer(1);
     vboBuilder->type(EBuffer::Type::ArrayBuffer);
     vboBuilder->usage(EBuffer::UsageType::StaticDraw);
-    vboBuilder->bufferSize(sizeof(model));
+    // vboBuilder->bufferSize(sizeof(model));
+    vboBuilder->elementCount(6);
     vboBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
 
     _vbo->bind(context);

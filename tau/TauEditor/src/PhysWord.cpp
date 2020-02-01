@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <Utils.hpp>
-#include <FastRand.hpp>
+#include <random/FastRand.hpp>
 #include <system/Mouse.hpp>
 #include <system/Window.hpp>
 #include <RenderingPipeline.hpp>
@@ -99,20 +99,22 @@ void PhysWord::update(const float fixedDelta, const Window& window) noexcept
 
 void PhysWord::randomReset(const Window& window) noexcept
 {
-    _textPos.x() = fastRand() % (window.width() - static_cast<int>(_length));
-    _textPos.y() = fastRand() % (window.height() - int(15 * _offsetFactor));
-    _textVel.x() = (fastRand() % 100) / 10.0f - 5.0f;
+    FastRand32 fastRand;
+
+    _textPos.x() = fastRand.rand() % (window.width() - static_cast<int>(_length));
+    _textPos.y() = fastRand.rand() % (window.height() - int(15 * _offsetFactor));
+    _textVel.x() = (fastRand.rand() % 100) / 10.0f - 5.0f;
     _textVel.y() = 0.0f;
     _textAcc.x() = 0.0f;
     _textAcc.y() = -0.01f;
 
-    _color.x() = (fastRand() % 512) / 512.0f;
-    _color.y() = (fastRand() % 512) / 512.0f;
-    _color.z() = (fastRand() % 512) / 512.0f;
+    _color.x() = (fastRand.rand() % 512) / 512.0f;
+    _color.y() = (fastRand.rand() % 512) / 512.0f;
+    _color.z() = (fastRand.rand() % 512) / 512.0f;
 
-    _colorVel.x() = (fastRand() % 100) / 9000.0f;
-    _colorVel.y() = (fastRand() % 100) / 9000.0f;
-    _colorVel.z() = (fastRand() % 100) / 9000.0f;
+    _colorVel.x() = (fastRand.rand() % 100) / 9000.0f;
+    _colorVel.y() = (fastRand.rand() % 100) / 9000.0f;
+    _colorVel.z() = (fastRand.rand() % 100) / 9000.0f;
 }
 
 void PhysWord::phaseColor() noexcept

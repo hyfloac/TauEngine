@@ -8,7 +8,9 @@ GLBuffer::GLBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, con
 { }
 
 GLBuffer::~GLBuffer() noexcept
-{ GLBuffer::destroyBuffer(_buffer); }
+{
+    glDeleteBuffers(1, &_buffer);
+}
 
 void GLBuffer::bind(IRenderingContext& context) noexcept
 {
@@ -32,12 +34,14 @@ void GLBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offset, c
 
 void* GLBuffer::mapBuffer(IRenderingContext& context) noexcept
 {
+    glBindBuffer(this->_glType, _buffer);
     return glMapBuffer(this->_glType, GL_WRITE_ONLY);
 }
 
 void GLBuffer::unmapBuffer(IRenderingContext& context) noexcept
 {
     glUnmapBuffer(this->_glType);
+    glBindBuffer(this->_glType, 0);
 }
 
 GLIndexBuffer::GLIndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const GLuint buffer, const GLenum glUsage) noexcept
@@ -46,7 +50,9 @@ GLIndexBuffer::GLIndexBuffer(const EBuffer::UsageType usage, const uSys bufferSi
 { }
 
 GLIndexBuffer::~GLIndexBuffer() noexcept
-{ GLBuffer::destroyBuffer(_buffer); }
+{
+    glDeleteBuffers(1, &_buffer);
+}
 
 void GLIndexBuffer::bind(IRenderingContext& context) noexcept
 {
@@ -70,12 +76,66 @@ void GLIndexBuffer::modifyBuffer(IRenderingContext& context, const intptr_t offs
 
 void* GLIndexBuffer::mapBuffer(IRenderingContext& context) noexcept
 {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffer);
     return glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 }
 
 void GLIndexBuffer::unmapBuffer(IRenderingContext& context) noexcept
 {
     glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+GLUniformBuffer::GLUniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const GLuint buffer, const GLenum glUsage) noexcept
+    : IUniformBuffer(usage, bufferSize),
+      _buffer(buffer), _glUsage(glUsage)
+{ }
+
+GLUniformBuffer::~GLUniformBuffer() noexcept
+{
+    glDeleteBuffers(1, &_buffer);
+}
+
+void GLUniformBuffer::bind(IRenderingContext& context) noexcept
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, _buffer);
+}
+
+void GLUniformBuffer::unbind(IRenderingContext& context) noexcept
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void GLUniformBuffer::bind(IRenderingContext& context, const u32 index) noexcept
+{
+    glBindBufferBase(GL_UNIFORM_BUFFER, index, _buffer);
+}
+
+void GLUniformBuffer::unbind(IRenderingContext& context, const u32 index) noexcept
+{
+    glBindBufferBase(GL_UNIFORM_BUFFER, index, 0);
+}
+
+void GLUniformBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
+{
+    glBufferData(GL_UNIFORM_BUFFER, _bufferSize, data, this->_glUsage);
+}
+
+void GLUniformBuffer::modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept
+{
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+}
+
+void* GLUniformBuffer::mapBuffer(IRenderingContext& context) noexcept
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, _buffer);
+    return glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+}
+
+void GLUniformBuffer::unmapBuffer(IRenderingContext& context) noexcept
+{
+    glUnmapBuffer(GL_UNIFORM_BUFFER);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 GLuint GLBuffer::createBuffer() noexcept
@@ -83,11 +143,6 @@ GLuint GLBuffer::createBuffer() noexcept
     GLuint buffer;
     glGenBuffers(1, &buffer);
     return buffer;
-}
-
-void GLBuffer::destroyBuffer(GLuint bufferHandle) noexcept
-{
-    glDeleteBuffers(1, &bufferHandle);
 }
 
 GLBufferBuilder::GLBufferBuilder(uSys descriptorCount) noexcept
@@ -107,25 +162,26 @@ void GLBufferBuilder::usage(const EBuffer::UsageType usage) noexcept
     _glUsage = GLBuffer::getGLUsageType(usage);
 }
 
-IBuffer* GLBufferBuilder::build(Error* error) const noexcept
+GLBuffer* GLBufferBuilder::build(Error* error) const noexcept
 {
     ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_N(_type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
-    ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
+    ERROR_CODE_COND_N(_type == EBuffer::Type::UniformBuffer, Error::BufferCannotBeUniformBuffer);
+    ERROR_CODE_COND_N(_elementCount == 0, Error::BufferSizeIsZero);
 
     const GLuint bufferHandle = createBuffer();
 
-    GLBuffer* const buffer = new(std::nothrow) GLBuffer(_type, _usage, _bufferSize, _instanced, _descriptor.build(), bufferHandle, _glType, _glUsage);
+    GLBuffer* const buffer = new(std::nothrow) GLBuffer(_type, _usage, bufferSize(), _instanced, _descriptor.build(), bufferHandle, _glType, _glUsage);
 
     if(!buffer)
     {
-        GLBuffer::destroyBuffer(bufferHandle);
+        glDeleteBuffers(1, &bufferHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
     glBindBuffer(_glType, bufferHandle);
-    glBufferData(_glType, _bufferSize, _initialBuffer, _glUsage);
+    glBufferData(_glType, bufferSize(), _initialBuffer, _glUsage);
     glBindBuffer(_glType, 0);
 
     ERROR_CODE_V(Error::NoError, buffer);
@@ -141,7 +197,7 @@ void GLIndexBufferBuilder::usage(const EBuffer::UsageType usage) noexcept
     _glUsage = GLBuffer::getGLUsageType(usage);
 }
 
-IIndexBuffer* GLIndexBufferBuilder::build(Error* error) const noexcept
+GLIndexBuffer* GLIndexBufferBuilder::build(Error* error) const noexcept
 {
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
@@ -152,13 +208,46 @@ IIndexBuffer* GLIndexBufferBuilder::build(Error* error) const noexcept
 
     if(!buffer)
     {
-        GLBuffer::destroyBuffer(bufferHandle);
+        glDeleteBuffers(1, &bufferHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _bufferSize, _initialBuffer, this->_glUsage);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+
+GLUniformBufferBuilder::GLUniformBufferBuilder() noexcept
+    : IUniformBufferBuilder(), _glUsage(0)
+{ }
+
+void GLUniformBufferBuilder::usage(const EBuffer::UsageType usage) noexcept
+{
+    IUniformBufferBuilder::usage(usage);
+    _glUsage = GLBuffer::getGLUsageType(usage);
+}
+
+GLUniformBuffer* GLUniformBufferBuilder::build(Error* error) const noexcept
+{
+    ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
+    ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
+
+    const GLuint bufferHandle = createBuffer();
+
+    GLUniformBuffer* const buffer = new(std::nothrow) GLUniformBuffer(_usage, _bufferSize, bufferHandle, _glUsage);
+
+    if(!buffer)
+    {
+        glDeleteBuffers(1, &bufferHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
+    glBufferData(GL_UNIFORM_BUFFER, _bufferSize, _initialBuffer, this->_glUsage);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     ERROR_CODE_V(Error::NoError, buffer);
 }
@@ -171,6 +260,13 @@ GLuint GLBuffer4_5Builder::createBuffer() const noexcept
 }
 
 GLuint GLIndexBuffer4_5Builder::createBuffer() const noexcept
+{
+    GLuint bufferHandle;
+    glCreateBuffers(1, &bufferHandle);
+    return bufferHandle;
+}
+
+GLuint GLUniformBuffer4_5Builder::createBuffer() const noexcept
 {
     GLuint bufferHandle;
     glCreateBuffers(1, &bufferHandle);

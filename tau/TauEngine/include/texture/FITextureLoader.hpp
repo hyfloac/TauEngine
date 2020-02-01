@@ -30,15 +30,15 @@ public:
         TEXTURE_SIZES_DONT_MATCH
     };
 
-    struct GPUTextureSettings final
-    {
-        i32 mipmapLevel;
-        ETexture::Filter magnificationFilter;
-        ETexture::Filter  minificationFilter;
-        ETexture::WrapMode wrapS;
-        ETexture::WrapMode wrapT;
-        ETexture::WrapMode wrapR;
-    };
+    // struct GPUTextureSettings final
+    // {
+    //     i32 mipmapLevel;
+    //     ETexture::Filter magnificationFilter;
+    //     ETexture::Filter  minificationFilter;
+    //     ETexture::WrapMode wrapS;
+    //     ETexture::WrapMode wrapT;
+    //     ETexture::WrapMode wrapR;
+    // };
 public:
     static void setMissingTexture(ITexture* missingTexture) noexcept;
 
@@ -55,31 +55,37 @@ public:
     static ITexture* generateNormalTexture(IRenderingContext& context) noexcept
     { return generateColorTexture(context, { 127, 127, 255 }); }
 
-    static ITexture* loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const GPUTextureSettings& settings, TextureLoadError* RESTRICT error = null) noexcept;
+    static ITexture* loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
+    static ITexture* loadTexture(IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = null) noexcept
+    { return loadTextureEx(context, fileName, -1, error); }
+    // static ITexture* loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const GPUTextureSettings& settings, TextureLoadError* RESTRICT error = null) noexcept;
 
-    static ITexture* loadTexture(IRenderingContext& context, const char* RESTRICT fileName, ETexture::Filter smooth = ETexture::Filter::Linear, i32 mipmapLevel = -1, TextureLoadError* RESTRICT error = null) noexcept
-    {
-        return TextureLoader::loadTextureEx(context, fileName, GPUTextureSettings { 
-            mipmapLevel,
-            smooth,
-            smooth,
-            ETexture::WrapMode::Repeat,
-            ETexture::WrapMode::Repeat,
-            ETexture::WrapMode::Repeat
-        }, error);
-    }
+    // static ITexture* loadTexture(IRenderingContext& context, const char* RESTRICT fileName, ETexture::Filter smooth = ETexture::Filter::Linear, i32 mipmapLevel = -1, TextureLoadError* RESTRICT error = null) noexcept
+    // {
+    //     return TextureLoader::loadTextureEx(context, fileName, GPUTextureSettings { 
+    //         mipmapLevel,
+    //         smooth,
+    //         smooth,
+    //         ETexture::WrapMode::Repeat,
+    //         ETexture::WrapMode::Repeat,
+    //         ETexture::WrapMode::Repeat
+    //     }, error);
+    // }
 
-    static ITextureCube* loadTextureCubeEx(IRenderingContext & context, const char* folderPath, const char* fileExtension, const GPUTextureSettings& settings, TextureLoadError* error = null) noexcept;
+    static ITextureCube* loadTextureCubeEx(IRenderingContext & context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
+    static ITexture* loadTextureCube(IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = null) noexcept
+    { return loadTextureCubeEx(context, folderPath, fileExtension, -1, error); }
+    // static ITextureCube* loadTextureCubeEx(IRenderingContext & context, const char* folderPath, const char* fileExtension, const GPUTextureSettings& settings, TextureLoadError* error = null) noexcept;
 
-    static ITextureCube* loadTextureCube(IRenderingContext & context, const char* folderPath, const char* fileExtension, ETexture::Filter smooth = ETexture::Filter::Linear, i32 mipmapLevel = -1, TextureLoadError* error = null) noexcept
-    {
-        return TextureLoader::loadTextureCubeEx(context, folderPath, fileExtension, GPUTextureSettings {
-            mipmapLevel,
-            smooth,
-            smooth,
-            ETexture::WrapMode::Repeat,
-            ETexture::WrapMode::Repeat,
-            ETexture::WrapMode::Repeat
-        }, error);
-    }
+    // static ITextureCube* loadTextureCube(IRenderingContext & context, const char* folderPath, const char* fileExtension, ETexture::Filter smooth = ETexture::Filter::Linear, i32 mipmapLevel = -1, TextureLoadError* error = null) noexcept
+    // {
+    //     return TextureLoader::loadTextureCubeEx(context, folderPath, fileExtension, GPUTextureSettings {
+    //         mipmapLevel,
+    //         smooth,
+    //         smooth,
+    //         ETexture::WrapMode::Repeat,
+    //         ETexture::WrapMode::Repeat,
+    //         ETexture::WrapMode::Repeat
+    //     }, error);
+    // }
 };

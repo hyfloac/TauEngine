@@ -57,16 +57,19 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
 
     pnBuilder->type(EBuffer::Type::ArrayBuffer);
     pnBuilder->usage(EBuffer::UsageType::StaticDraw);
-    pnBuilder->bufferSize(cnt3 * sizeof(float));
+    // pnBuilder->bufferSize(cnt3 * sizeof(float));
+    pnBuilder->elementCount(cnt1);
     pnBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
     texturesBuilder->type(EBuffer::Type::ArrayBuffer);
     texturesBuilder->usage(EBuffer::UsageType::StaticDraw);
-    texturesBuilder->bufferSize(cnt2 * sizeof(float));
+    // texturesBuilder->bufferSize(cnt2 * sizeof(float));
+    texturesBuilder->elementCount(cnt1);
     texturesBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     indicesBuilder->usage(EBuffer::UsageType::StaticDraw);
-    indicesBuilder->bufferSize(mesh.indices.size() * sizeof(u32));
+    // indicesBuilder->bufferSize(mesh.indices.size() * sizeof(u32));
+    indicesBuilder->elementCount(mesh.indices.size());
 
     Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
 
@@ -136,19 +139,21 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     // _va->setIndexBuffer(context, indices);
     // _va->drawCount() = mesh.indices.size();
 
+    MaterialBuilder matBuilder(context);
+
     if(!mesh.material.map_Kd.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Kd.c_str());
-        _material.diffuseTexture() = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+        matBuilder.diffuseTexture(Ref<ITexture>(TextureLoader::loadTexture(context, path.path)));
     }
     if(!mesh.material.map_Ks.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ks.c_str());
-        _material.specularTexture() = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+        matBuilder.specularTexture(Ref<ITexture>(TextureLoader::loadTexture(context, path.path)));
     }
     else
     {
-        _material.specularTexture() = Ref<ITexture>(TextureLoader::generateBlackTexture(context));
+        matBuilder.specularTexture(Ref<ITexture>(TextureLoader::generateBlackTexture(context)));
     }
     if(!mesh.material.map_Ka.empty())
     {
@@ -158,11 +163,11 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     if(!mesh.material.map_bump.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
-        _material.normalTexture() = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+        matBuilder.normalTexture(Ref<ITexture>(TextureLoader::loadTexture(context, path.path)));
     }
     else
     {
-        _material.normalTexture() = Ref<ITexture>(TextureLoader::generateNormalTexture(context));
+        matBuilder.normalTexture(Ref<ITexture>(TextureLoader::generateNormalTexture(context)));
     }
     // const auto ka = mesh.material.Ka;
     // const auto kd = mesh.material.Kd;
@@ -170,8 +175,21 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     // _ambientColor = glm::vec3(ka.x(), ka.y(), ka.z());
     // _diffuseColor = glm::vec3(kd.x(), kd.y(), kd.z());
     // _specularColor = glm::vec3(ks.x(), ks.y(), ks.z());
-    _material.specularExponent() = mesh.material.Ns;
+    matBuilder.specularExponent(mesh.material.Ns);
     _illumination = mesh.material.illum;
+
+    Ref<ITextureSamplerBuilder> textureSamplerBuilder = context.createTextureSampler();
+    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear,
+                                         ETexture::Filter::Linear,
+                                         ETexture::Filter::Linear);
+    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::Repeat,
+                                       ETexture::WrapMode::Repeat,
+                                       ETexture::WrapMode::Repeat);
+    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+
+    matBuilder.textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+
+    _material = matBuilder.build();
 }
 
 void RenderableObject::preRender(IRenderingContext& context) const noexcept

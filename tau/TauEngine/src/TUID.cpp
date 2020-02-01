@@ -2,7 +2,7 @@
 #include <cstdio>
 #pragma warning(pop)
 #include <TUID.hpp>
-#include <FastRand.hpp>
+#include <random/FastRand.hpp>
 #include "maths/Maths.hpp"
 
 TUID TUID::generate() noexcept 
@@ -11,10 +11,12 @@ TUID TUID::generate() noexcept
 
     const u32 inc = s_incremental++;
 
-    u64 b0 = fastRand();
-    u32 b1 = fastRand();
-    u64 b2 = fastRand();
-    u32 b3 = fastRand();
+    FastRand64 fastRand;
+
+    u64 b0 = fastRand.rand();
+    u32 b1 = fastRand.rand();
+    u64 b2 = fastRand.rand();
+    u32 b3 = fastRand.rand();
 
     b0 ^= b1 >> 8;
     b0 ^= b2 << 14;

@@ -11,16 +11,16 @@ class IRenderingContext;
 class TAU_DLL IRenderTexture : public ITexture
 {
     DEFAULT_DESTRUCT_VI(IRenderTexture);
-    DELETE_COPY(IRenderTexture);
+    TEXTURE_IMPL(IRenderTexture);
 protected:
     IRenderTexture(const u32 width, const u32 height, const ETexture::Format dataFormat)
         : ITexture(width, height, dataFormat)
     { }
 public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-    void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final { }
-    void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override final { }
-    void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final { }
+    // void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final { }
+    // void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override final { }
+    // void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final { }
     void set(u32 level, const void* data) noexcept override final { }
     void generateMipmaps() noexcept override final { }
 };

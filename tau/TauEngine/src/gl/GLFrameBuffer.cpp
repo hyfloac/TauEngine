@@ -81,7 +81,7 @@ GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height
     builder->mipmapLevels(0);
 
     _texture = Ref<ITexture>(builder->build(null));
-    _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    // _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
     _texture->set(0, nullptr);
 }
 
@@ -95,8 +95,8 @@ GLFrameBufferDepthAttachment::GLFrameBufferDepthAttachment(u32 width, u32 height
     builder->mipmapLevels(0);
 
     _texture = Ref<ITexture>(builder->build(null));
-    _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    _texture->setDepthComparison(true, ETexture::DepthCompareFunc::LessThanOrEqual);
+    // _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    // _texture->setDepthComparison(true, ETexture::DepthCompareFunc::LessThanOrEqual);
     _texture->set(0, nullptr);
 }
 
@@ -110,7 +110,7 @@ GLFrameBufferStencilAttachment::GLFrameBufferStencilAttachment(u32 width, u32 he
     builder->mipmapLevels(0);
 
     _texture = Ref<ITexture>(builder->build(null));
-    _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
+    // _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
     _texture->set(0, nullptr);
 }
 

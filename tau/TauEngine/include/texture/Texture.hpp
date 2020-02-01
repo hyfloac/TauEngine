@@ -3,17 +3,21 @@
 #include <DLL.hpp>
 #include <NumTypes.hpp>
 #include <Objects.hpp>
+#include <RunTimeType.hpp>
 #include "TextureEnums.hpp"
 
 class RenderingMode;
 class IRenderingContext;
 
+#define TEXTURE_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+                                 RTT_IMPL(_TYPE, ITexture)
+
+#define TEXTURE_IMPL(_TYPE) TEXTURE_IMPL_BASE(_TYPE)
+
 class TAU_DLL ITexture
 {
     DEFAULT_DESTRUCT_VI(ITexture);
     DELETE_COPY(ITexture);
-public:
-    // [[deprecated]] static ITexture* create(IRenderingContext& context, u32 width, u32 height, ETexture::Format format, ETexture::Type textureType = ETexture::Type::T2D) noexcept;
 protected:
     u32 _width;
     u32 _height;
@@ -30,11 +34,11 @@ public:
 
     [[nodiscard]] virtual inline ETexture::Type textureType() const noexcept = 0;
 
-    virtual void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept = 0;
-
-    virtual void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept = 0;
-
-    virtual void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept { }
+    // virtual void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept = 0;
+    //
+    // virtual void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept = 0;
+    //
+    // virtual void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept { }
 
     virtual void set(u32 level, const void* data) noexcept = 0;
 
@@ -43,6 +47,10 @@ public:
     virtual void unbind(u8 textureUnit) noexcept = 0;
 
     virtual void generateMipmaps() noexcept = 0;
+
+    RTT_BASE_IMPL(ITexture);
+    RTT_BASE_CHECK(ITexture);
+    RTT_BASE_CAST(ITexture);
 };
 
 class TAU_DLL ITextureCube : public ITexture
@@ -58,7 +66,7 @@ protected:
 public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Cube; }
 
-    virtual void setWrapModeCube(ETexture::WrapMode s, ETexture::WrapMode t, ETexture::WrapMode r) noexcept = 0;
+    // virtual void setWrapModeCube(ETexture::WrapMode s, ETexture::WrapMode t, ETexture::WrapMode r) noexcept = 0;
 
     virtual void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept = 0;
 };

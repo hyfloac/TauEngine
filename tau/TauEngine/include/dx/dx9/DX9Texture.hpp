@@ -28,9 +28,9 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
-    void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override { }
+    // void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override { }
 
-    void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override { }
+    // void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override { }
 
     void set(u32 level, const void* data) noexcept override final { }
 

@@ -27,16 +27,8 @@ public:
 
     [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
-    // void createFromShared(void* param) noexcept override final { }
-
     void deactivateContext() noexcept override final { }
     void activateContext() noexcept override final { }
-
-    // [[nodiscard]] void* getVertexArrayHandle(IVertexArray* vertexArray) noexcept override final { return null; }
-
-    // void destroyVA(IVertexArray* vertexArray) noexcept override final { }
-
-    // void clearVAs() noexcept override final { }
 
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept override final;
 
@@ -52,28 +44,20 @@ public:
 
     void swapFrame() noexcept override final;
 
-    // [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override { return null; }
-
-    [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(std::size_t attribCount) noexcept override final { return null; }
-
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override final;
-
-    [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return nullptr; }
-
-    [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return nullptr; }
-
+    [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(std::size_t attribCount) noexcept override { return null; }
+    [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept override;
+    [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return null; }
+    [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override { return null; }
+    [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override { return null; }
-
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }
-
     [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override { return null; }
-
     [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override { return null; }
-
+    [[nodiscard]] Ref<ITextureSamplerBuilder> createTextureSampler() noexcept override { return null; }
+    [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override { return null; }
+    [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override { return null; }
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override { return null; }
 protected:
-    // bool createContextsShared(Window& window, IRenderingContext** sharers, std::size_t count) noexcept override final { return false; }
-
     RC_IMPL(DX9RenderingContext);
 };
 #endif

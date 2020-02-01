@@ -9,6 +9,46 @@
 #include "Timings.hpp"
 #include "VFS.hpp"
 
+template<>
+class UniformAccessor<Layer3D::Uniforms> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    static constexpr uSys MATRIX_SIZE = sizeof(float) * 4 * 4;
+
+    [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 4; }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Layer3D::Uniforms& t) noexcept
+    {
+        void* buf = buffer->mapBuffer(context);
+
+        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 0), reinterpret_cast<const void*>(glm::value_ptr(t.compoundMatrix)), MATRIX_SIZE);
+        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 1), reinterpret_cast<const void*>(glm::value_ptr(t.projectionMatrix)), MATRIX_SIZE);
+        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 2), reinterpret_cast<const void*>(glm::value_ptr(t.viewMatrix)), MATRIX_SIZE);
+        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 3), reinterpret_cast<const void*>(glm::value_ptr(t.modelMatrix)), MATRIX_SIZE);
+
+        buffer->unmapBuffer(context);
+    }
+};
+
+template<>
+class UniformAccessor<Layer3D::ViewPosUniforms> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Layer3D::ViewPosUniforms& t) noexcept
+    {
+        const __m128 vec = t.cameraPos.data().vec;
+        buffer->fillBuffer(context, reinterpret_cast<const void*>(&vec));
+    }
+};
+
 static Vector3f fromPolar(Vector3f polar) noexcept;
 
 Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept
@@ -25,10 +65,13 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
       _reflectionShader(IShaderProgram::create(*window.renderingContext())),
       _refractionShader(IShaderProgram::create(*window.renderingContext())),
       _frameBufferShader(IShaderProgram::create(*window.renderingContext())),
-      _texture(TextureLoader::loadTexture(*window.renderingContext(), "|TERes/TestTexture.png", ETexture::Filter::Linear)),
-      _overlay(TextureLoader::loadTexture(*window.renderingContext(), "|TERes/Overlay.png", ETexture::Filter::Linear)),
+      _texture(TextureLoader::loadTexture(*window.renderingContext(), "|TERes/TestTexture.png")),
+      _overlay(TextureLoader::loadTexture(*window.renderingContext(), "|TERes/Overlay.png")),
       _frameBufferVA(null),
-      _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _cubePolarPos(3, 3, 0), _cubeViewMatrix(1.0f), _objects()
+      _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _cubePolarPos(3, 3, 0), _cubeViewMatrix(1.0f), _objects(),
+      _uniforms(window.renderingContext()->createUniformBuffer()), _pointLightUniforms(window.renderingContext()->createUniformBuffer()),
+      _spotLightUniforms(window.renderingContext()->createUniformBuffer()), _cameraPosUni(window.renderingContext()->createUniformBuffer()),
+      _materialUniforms(window.renderingContext()->createUniformBuffer())
 {
     PERF();
     objl::Loader loader;
@@ -133,33 +176,33 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _refractionShader->link(*window.renderingContext());
     _frameBufferShader->link(*window.renderingContext());
 
-    _compoundMatrixUni = _shader->getUniform<glm::mat4>("compoundMatrix", false);
-    _projMatrixUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
-    _viewMatrixUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
-    _modelViewMatrixUni = _shader->getUniform<glm::mat4>("modelViewMatrix", false);
-    _materialUniforms = Ref<MaterialUniforms>(new(std::nothrow) MaterialUniforms(_shader, "material."));
-    _pointLightUniforms = Ref<PointLightUniforms>(new(std::nothrow) PointLightUniforms(_shader, "pointLight."));
-    _spotLightUniforms = Ref<SpotLightUniforms>(new(std::nothrow) SpotLightUniforms(_shader, "spotLight."));
-    _cameraPosUni = _shader->getUniformVector<Vector3f>("viewPos");
+    // _compoundMatrixUni = _shader->getUniform<glm::mat4>("compoundMatrix", false);
+    // _projMatrixUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
+    // _viewMatrixUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    // _modelViewMatrixUni = _shader->getUniform<glm::mat4>("modelViewMatrix", false);
+    // _materialUniforms = Ref<MaterialUniforms>(new(std::nothrow) MaterialUniforms(_shader, "material."));
+    // _pointLightUniforms = Ref<PointLightUniforms>(new(std::nothrow) PointLightUniforms(_shader, "pointLight."));
+    // _spotLightUniforms = Ref<SpotLightUniforms>(new(std::nothrow) SpotLightUniforms(_shader, "spotLight."));
+    // _cameraPosUni = _shader->getUniformVector<Vector3f>("viewPos");
 
-    _o_projMatrixUni = _o_shader->getUniform<glm::mat4>("projectionMatrix", false);
-    _o_viewMatrixUni = _o_shader->getUniform<glm::mat4>("cameraViewMatrix", false);
-    _o_modelViewMatrixUni = _o_shader->getUniform<glm::mat4>("modelViewMatrix", false);
-    _o_scaleFactorUni = _o_shader->getUniform<float>("scaleFactor");
+    // _o_projMatrixUni = _o_shader->getUniform<glm::mat4>("projectionMatrix", false);
+    // _o_viewMatrixUni = _o_shader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    // _o_modelViewMatrixUni = _o_shader->getUniform<glm::mat4>("modelViewMatrix", false);
+    // _o_scaleFactorUni = _o_shader->getUniform<float>("scaleFactor");
 
-    _reflectionProjMatrixUni = _reflectionShader->getUniform<glm::mat4>("projectionMatrix", false);
-    _reflectionViewMatrixUni = _reflectionShader->getUniform<glm::mat4>("cameraViewMatrix", false);
-    _reflectionModelViewMatrixUni = _reflectionShader->getUniform<glm::mat4>("modelViewMatrix", false);
-    _reflectionCameraPosUni = _reflectionShader->getUniform<const Vector3f&>("cameraPos");
-    _reflectionTexture = _reflectionShader->getUniform<int>("cubeMap");
+    // _reflectionProjMatrixUni = _reflectionShader->getUniform<glm::mat4>("projectionMatrix", false);
+    // _reflectionViewMatrixUni = _reflectionShader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    // _reflectionModelViewMatrixUni = _reflectionShader->getUniform<glm::mat4>("modelViewMatrix", false);
+    // _reflectionCameraPosUni = _reflectionShader->getUniform<const Vector3f&>("cameraPos");
+    // _reflectionTexture = _reflectionShader->getUniform<int>("cubeMap");
 
-    _refractionProjMatrixUni = _refractionShader->getUniform<glm::mat4>("projectionMatrix", false);
-    _refractionViewMatrixUni = _refractionShader->getUniform<glm::mat4>("cameraViewMatrix", false);
-    _refractionModelViewMatrixUni = _refractionShader->getUniform<glm::mat4>("modelViewMatrix", false);
-    _refractionCameraPosUni = _refractionShader->getUniform<const Vector3f&>("cameraPos");
-    _refractionTexture = _refractionShader->getUniform<int>("cubeMap");
+    // _refractionProjMatrixUni = _refractionShader->getUniform<glm::mat4>("projectionMatrix", false);
+    // _refractionViewMatrixUni = _refractionShader->getUniform<glm::mat4>("cameraViewMatrix", false);
+    // _refractionModelViewMatrixUni = _refractionShader->getUniform<glm::mat4>("modelViewMatrix", false);
+    // _refractionCameraPosUni = _refractionShader->getUniform<const Vector3f&>("cameraPos");
+    // _refractionTexture = _refractionShader->getUniform<int>("cubeMap");
 
-    _frameBufferUni = _frameBufferShader->getUniform<int>("frameBufferSampler");
+    // _frameBufferUni = _frameBufferShader->getUniform<int>("frameBufferSampler");
 
     Ref<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
 
@@ -186,12 +229,13 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     Ref<IBufferBuilder> positionsBuilder = window.renderingContext()->createBuffer(2);
     positionsBuilder->type(EBuffer::Type::ArrayBuffer);
     positionsBuilder->usage(EBuffer::UsageType::StaticDraw);
-    positionsBuilder->bufferSize(sizeof(quadVertices));
+    // positionsBuilder->bufferSize(sizeof(quadVertices));
+    positionsBuilder->elementCount(6);
     positionsBuilder->initialBuffer(quadVertices);
     positionsBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     positionsBuilder->descriptor().addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
+    const Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
 
     // Ref<IInputLayoutBuilder> ilBuilder = window.renderingContext()->createInputLayout(2);
     // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
@@ -212,13 +256,13 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     _cubeViewMatrix = glmExt::translate(glmExt::translate(glm::mat4(1.0f), _camera->position()), fromPolar(_cubePolarPos));
 
-    _pointLight.position() = Vector3f(0.0f, -3.0f, -3.0f);
+    _pointLight.position() = Vector3f(0.0f, -10.0f, -5.0f);
     _pointLight.ambient({ 255, 255, 255 });
     _pointLight.diffuse({ 255, 255, 255 });
     _pointLight.specular({ 255, 255, 255 });
     _pointLight.constant() = 1.0f;
-    _pointLight.linear() = 0.09f;
-    _pointLight.quadratic() = 0.032f;
+    _pointLight.linear() = 0.007f;
+    _pointLight.quadratic() = 0.0002f;
 
     _spotLight.position() = Vector3f(0.0f);
     _spotLight.direction() = Vector3f(0.0f);
@@ -226,10 +270,29 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _spotLight.diffuse({ 255, 255, 255 });
     _spotLight.specular({ 255, 255, 255 });
     _spotLight.constant() = 1.0f;
-    _spotLight.linear() = 0.09f;
-    _spotLight.quadratic() = 0.032f;
+    _spotLight.linear() = 0.027f;
+    _spotLight.quadratic() = 0.0028f;
     _spotLight.cutOff() = fastCosD(30.0f);
     _spotLight.outerCutOff() = fastCosD(35.0f);
+
+    _pointLightUniforms.set(*window.renderingContext(), _pointLight);
+    _spotLightUniforms.set(*window.renderingContext(), _spotLight);
+
+
+    Ref<ITextureSamplerBuilder> textureSamplerBuilder = window.renderingContext()->createTextureSampler();
+    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear,
+                                         ETexture::Filter::Linear,
+                                         ETexture::Filter::Linear);
+    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::Repeat,
+                                       ETexture::WrapMode::Repeat,
+                                       ETexture::WrapMode::Repeat);
+    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+
+
+    Ref<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
+    uploaderBuilder->setTexture(0, colorBuffer->texture());
+    uploaderBuilder->textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+    _frameBufferUploader = Ref<ITextureUploader>(uploaderBuilder->build());
 }
 
 void Layer3D::onUpdate(float fixedDelta) noexcept
@@ -287,7 +350,7 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
     }
     
     TAU_RENDER_S(_rp, {
-        self->_frameBuffer->bind(context);
+        // self->_frameBuffer->bind(context);
         context.clearScreen(true, true, true, { 127, 127, 255, 255 });
     
         self->_shader->bind(context);
@@ -297,13 +360,27 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
         self->_spotLight.position() = self->_camera.camera().position();
         self->_spotLight.direction() = self->_camera.camera().front();
     
-        self->_compoundMatrixUni->set(self->_camera->compoundedMatrix());
-        self->_projMatrixUni->set(self->_camera->projectionMatrix());
-        self->_viewMatrixUni->set(self->_camera->viewMatrix());
-        self->_modelViewMatrixUni->set(self->_modelViewMatrix);
-        self->_cameraPosUni->set(self->_camera.camera().position());
-        self->_pointLight.set(*self->_pointLightUniforms.get());
-        self->_spotLight.set(*self->_spotLightUniforms.get());
+        self->_uniforms.data().compoundMatrix = self->_camera->compoundedMatrix();
+        self->_uniforms.data().projectionMatrix = self->_camera->projectionMatrix();
+        self->_uniforms.data().viewMatrix = self->_camera->viewMatrix();
+        self->_uniforms.data().modelMatrix = self->_modelViewMatrix;
+    
+        self->_cameraPosUni.data().cameraPos = self->_camera.camera().position();
+
+        self->_spotLightUniforms.set(context, self->_spotLight);
+
+        self->_uniforms.upload(context, 0);
+        self->_pointLightUniforms.upload(context, 2);
+        self->_spotLightUniforms.upload(context, 3);
+        self->_cameraPosUni.upload(context, 4);
+    
+        // self->_compoundMatrixUni->set(self->_camera->compoundedMatrix());
+        // self->_projMatrixUni->set(self->_camera->projectionMatrix());
+        // self->_viewMatrixUni->set(self->_camera->viewMatrix());
+        // self->_modelViewMatrixUni->set(self->_modelViewMatrix);
+        // self->_cameraPosUni->set(self->_camera.camera().position());
+        // self->_pointLight.set(*self->_pointLightUniforms.get());
+        // self->_spotLight.set(*self->_spotLightUniforms.get());
         // self->_overlayUni->set(1);
         // self->_reflectionProjMatrixUni->set(self->_camera->projectionMatrix());
         // self->_reflectionViewMatrixUni->set(self->_camera->viewMatrix());
@@ -315,15 +392,19 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
         // self->_refractionCameraPosUni->set(self->_camera->position());
         // self->_reflectionTexture->set(0);
         // self->_refractionTexture->set(0);
-
+    
         // self->_skybox.skybox()->bind(0);
         for(const Ref<RenderableObject>& ro : self->_objects)
         {
-            ro->material().set(*self->_materialUniforms.get(), 0);
+            // ro->material().set(*self->_materialUniforms.get(), 0);
+            TextureIndices indices(0, 0, 0);
+            ro->material().upload(context, self->_materialUniforms, 1, indices);
             ro->preRender(context);
             ro->render(context);
             ro->postRender(context);
-            ro->material().unbind(0);
+            indices = TextureIndices(0, 0, 0);
+            ro->material().unbind(context, self->_materialUniforms, 1, indices);
+            // ro->material().unbind(0);
         }
         // self->_skybox.skybox()->unbind(0);
         // glStencilMask(0x00);
@@ -346,6 +427,11 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
     
         // self->_reflectionShader->unbind(context);
         // self->_refractionShader->unbind(context);
+    
+        self->_cameraPosUni.unbind(context, 4);
+        self->_spotLightUniforms.unbind(context, 3);
+        self->_pointLightUniforms.unbind(context, 2);
+        self->_uniforms.unbind(context, 0);
         self->_shader->unbind(context);
     
         // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -377,27 +463,91 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
     
         self->_skybox.render(context, self->_camera.camera());
     
-        self->_frameBuffer->unbind(context);
-        context.clearScreen(true, true, true, { 0, 160, 0, 255 });
-    
-        glDisable(GL_DEPTH_TEST);
-    
-        self->_frameBufferShader->bind(context);
-        self->_frameBufferUni->set(0);
-    
-        context.setFaceWinding(false);
-        self->_frameBuffer->color()->texture()->bind(0);
-        self->_frameBufferVA->bind(context);
-        self->_frameBufferVA->preDraw(context);
-        self->_frameBufferVA->draw(context);
-        self->_frameBufferVA->postDraw(context);
-        self->_frameBufferVA->unbind(context);
-        self->_frameBuffer->color()->texture()->unbind(0);
-    
-        self->_frameBufferShader->unbind(context);
-    
-        glEnable(GL_DEPTH_TEST);
+        // self->_frameBuffer->unbind(context);
+        // context.clearScreen(true, true, true, { 0, 160, 0, 255 });
+        //
+        // glDisable(GL_DEPTH_TEST);
+        //
+        // self->_frameBufferShader->bind(context);
+        // // self->_frameBufferUni->set(0);
+        //
+        // TextureIndices indices(0, 0, 0);
+        // (void) self->_frameBufferUploader->upload(context, indices);
+        //
+        // context.setFaceWinding(false);
+        // // self->_frameBuffer->color()->texture()->bind(0);
+        // self->_frameBufferVA->bind(context);
+        // self->_frameBufferVA->preDraw(context);
+        // self->_frameBufferVA->draw(context);
+        // self->_frameBufferVA->postDraw(context);
+        // self->_frameBufferVA->unbind(context);
+        // // self->_frameBuffer->color()->texture()->unbind(0);
+        //
+        // indices = TextureIndices(0, 0, 0);
+        // (void) self->_frameBufferUploader->unbind(context, indices);
+        // self->_frameBufferShader->unbind(context);
+        //
+        // glEnable(GL_DEPTH_TEST);
     });
+     
+    // auto self = this; do { struct TauRenderCommand628
+    // {
+    //     typename ::std::remove_const< typename ::std::remove_reference< decltype(self) >::type >::type self; TauRenderCommand628(typename ::std::remove_const< typename ::std::remove_reference< decltype(self) >::type >::type self) : self(self) { } static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer)
+    //     {
+    //         ((void) (rp)); ((void) (window)); ((void) (context)); auto& self = reinterpret_cast<TauRenderCommand628*>(argBuffer)->self;
+    //         {
+    //             {
+    //                 // self->_frameBuffer->bind(context);
+    //                 context.clearScreen(true, true, true, { 127, 127, 255, 255 });
+    //                 self->_shader->bind(context);
+    //                 self->_spotLight.position() = self->_camera.camera().position();
+    //                 self->_spotLight.direction() = self->_camera.camera().front();
+    //                 self->_uniforms.data().compoundMatrix = self->_camera->compoundedMatrix();
+    //                 self->_uniforms.data().projectionMatrix = self->_camera->projectionMatrix();
+    //                 self->_uniforms.data().viewMatrix = self->_camera->viewMatrix();
+    //                 self->_uniforms.data().modelMatrix = self->_modelViewMatrix;
+    //                 self->_cameraPosUni.data().cameraPos = self->_camera.camera().position();
+    //                 self->_uniforms.upload(context, 0);
+    //                 self->_pointLightUniforms.upload(context, 2);
+    //                 self->_spotLightUniforms.set(context, self->_spotLight);
+    //                 self->_spotLightUniforms.upload(context, 3);
+    //                 self->_cameraPosUni.upload(context, 4);
+    //                 for(const Ref<RenderableObject>& ro : self->_objects)
+    //                 {
+    //                     TextureIndices indices(0, 0, 0);
+    //                     ro->material().upload(context, self->_materialUniforms, 1, indices);
+    //                     ro->preRender(context);
+    //                     ro->render(context);
+    //                     ro->postRender(context);
+    //                     indices = TextureIndices(0, 0, 0);
+    //                     ro->material().unbind(context, self->_materialUniforms, 1, indices);
+    //                 }
+    //                 self->_cameraPosUni.unbind(context, 4);
+    //                 self->_spotLightUniforms.unbind(context, 3);
+    //                 self->_pointLightUniforms.unbind(context, 2);
+    //                 self->_uniforms.unbind(context, 0);
+    //                 self->_shader->unbind(context);
+    //                 self->_skybox.render(context, self->_camera.camera());
+    //                 // self->_frameBuffer->unbind(context);
+    //                 // context.clearScreen(true, true, true, { 0, 160, 0, 255 });
+    //                 // glDisable(0x0B71);
+    //                 // self->_frameBufferShader->bind(context);
+    //                 // TextureIndices indices(0, 0, 0);
+    //                 // (void) self->_frameBufferUploader->upload(context, indices);
+    //                 // context.setFaceWinding(false);
+    //                 // self->_frameBufferVA->bind(context);
+    //                 // self->_frameBufferVA->preDraw(context);
+    //                 // self->_frameBufferVA->draw(context);
+    //                 // self->_frameBufferVA->postDraw(context);
+    //                 // self->_frameBufferVA->unbind(context);
+    //                 // indices = TextureIndices(0, 0, 0);
+    //                 // (void) self->_frameBufferUploader->unbind(context, indices);
+    //                 // self->_frameBufferShader->unbind(context);
+    //                 // glEnable(0x0B71);
+    //             };
+    //         }
+    //     }
+    // }; { void* mem = (_rp).pushExecuteCommand(TauRenderCommand628::execute, sizeof(TauRenderCommand628)); new(mem) TauRenderCommand628(self); } } while(0);;
 }
 
 void Layer3D::onEvent(Event& e) noexcept

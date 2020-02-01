@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <d3d10.h>
+#include "model/BufferDescriptor.hpp"
 
 class DX10RenderingContext;
 class DX10InputLayout;
@@ -60,7 +61,7 @@ private:
     ID3D10Blob* _shaderBlobCache;
 public:
     DX10VertexArrayBuilder(const uSys bufferCount, DX10RenderingContext& ctx) noexcept
-        : IVertexArrayBuilder(bufferCount), _ctx(ctx), _indexBufferCache(null)
+        : IVertexArrayBuilder(bufferCount), _ctx(ctx), _indexBufferCache(null), _shaderBlobCache(null)
     { }
 
     void shader(const Ref<IShader>& shader) noexcept override;

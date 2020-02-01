@@ -2,6 +2,7 @@
 
 #include "model/VertexArray.hpp"
 #include <GL/glew.h>
+#include "model/BufferDescriptor.hpp"
 
 class GLIndexBuffer;
 

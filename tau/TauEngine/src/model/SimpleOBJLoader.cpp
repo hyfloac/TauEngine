@@ -32,7 +32,6 @@ namespace objl
         return *this * recip;
     }
 
-
     namespace algorithm
     {
         bool strEmpty(const char* str) noexcept { return !(str && strlen(str)); }
@@ -355,9 +354,16 @@ namespace objl
 
             const float r = 1.0f / (dTex1.x() * dTex2.y() - dTex1.y() * dTex2.x());
             Vector3 tangent   = (dPos1 * dTex2.y() - dPos2 * dTex1.y()) * r;
-            // Vector3 bitangent = (dPos2 * dTex1.x() - dPos1 * dTex2.x()) * r;
+            Vector3 bitangent = (dPos2 * dTex1.x() - dPos1 * dTex2.x()) * r;
             tangent = tangent.normalize();
-            // bitangent = bitangent.normalize();
+            bitangent = bitangent.normalize();
+
+            if(vertices[0].normal.cross(tangent).dot(bitangent) < 0.0f ||
+               vertices[1].normal.cross(tangent).dot(bitangent) < 0.0f || 
+               vertices[2].normal.cross(tangent).dot(bitangent) < 0.0f)
+            {
+                tangent = tangent * -1.0f;
+            }
 
             vertices[0].tangent = tangent;
             vertices[1].tangent = tangent;

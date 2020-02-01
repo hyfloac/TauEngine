@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DLL.hpp"
-#include "shader/IUniform.hpp"
+#include "shader/Uniform.hpp"
 #include <glm/matrix.hpp>
 #include <GL/glew.h>
 
@@ -13,8 +13,8 @@
         private:                                        \
             GLint _uniformLocation;                     \
         public:                                         \
-        static GLint create(GLuint program, const char* name) noexcept \
-        { return glGetUniformLocation(program, name); } \
+            static GLint create(GLuint program, const char* name) noexcept \
+            { return glGetUniformLocation(program, name); } \
         public:                                         \
             GLUniform(GLint uniformLocation) noexcept   \
                 : _uniformLocation(uniformLocation)     \
@@ -33,8 +33,8 @@
             GLint _uniformLocation;                     \
             bool _transpose;                            \
         public:                                         \
-        static GLint create(GLuint program, const char* name) noexcept \
-        { return glGetUniformLocation(program, name); } \
+            static GLint create(GLuint program, const char* name) noexcept \
+            { return glGetUniformLocation(program, name); } \
         public:                                         \
             GLUniform(GLint uniformLocation,            \
                       bool transpose) noexcept          \

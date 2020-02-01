@@ -140,10 +140,10 @@ DX10Buffer* DX10BufferBuilder::build(Error* error) const noexcept
     ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_N(_type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
-    ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
+    ERROR_CODE_COND_N(_elementCount == 0, Error::BufferSizeIsZero);
 
     D3D10_BUFFER_DESC bufferDesc;
-    bufferDesc.ByteWidth = _bufferSize; //_descriptor.stride() *_bufferSize;
+    bufferDesc.ByteWidth = bufferSize();
     bufferDesc.Usage = DX10Buffer::getDXUsage(_usage);
     bufferDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
     bufferDesc.CPUAccessFlags = 0;
@@ -167,7 +167,7 @@ DX10Buffer* DX10BufferBuilder::build(Error* error) const noexcept
         ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 
-    DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(_type, _usage, _bufferSize, _instanced, _descriptor.build(), d3dBuffer);
+    DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(_type, _usage, bufferSize(), _instanced, _descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();

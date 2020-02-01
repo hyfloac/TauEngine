@@ -21,7 +21,7 @@ private:
     HDC _device;
     HGLRC _context;
 #endif
-    std::unordered_map<IVertexArray*, GLuint> _vaos;
+    // std::unordered_map<IVertexArray*, GLuint> _vaos;
     int _majorVersion;
     int _minorVersion;
     GLProfile _compat;
@@ -62,21 +62,17 @@ public:
     // [[nodiscard]] Ref<IInputLayoutBuilder> createInputLayout(uSys numDescriptors) noexcept override;
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
-
     [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept override;
-
     [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override;
-
+    [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override;
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
-
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override;
-
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override;
-
     [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override;
-
     [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override;
-
+    [[nodiscard]] Ref<ITextureSamplerBuilder> createTextureSampler() noexcept override;
+    [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
+    [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override;
 protected:
     // bool createContextsShared(Window& window, IRenderingContext** sharers, uSys count) noexcept override final;
