@@ -8,36 +8,26 @@ namespace _ReferenceCountingPointerUtils {
 
 template<typename _T>
 struct _RemoveReference final
-{
-    using type = _T;
-};
+{ using type = _T; };
 
 template<typename _T>
 struct _RemoveReference<_T&> final
-{
-    using type = _T;
-};
+{ using type = _T; };
 
 template<typename _T>
 struct _RemoveReference<_T&&> final
-{
-    using type = _T;
-};
+{ using type = _T; };
 
 template<typename _T>
 using _RemoveReferenceT = typename _RemoveReference<_T>::type;
 
 template<typename _T>
 [[nodiscard]] constexpr inline _T&& _forward(_RemoveReferenceT<_T>& ref) noexcept
-{
-    return static_cast<_T&&>(ref);
-}
+{ return static_cast<_T&&>(ref); }
 
 template<typename _T>
 [[nodiscard]] constexpr inline _T&& _forward(_RemoveReferenceT<_T>&& ref) noexcept
-{
-    return static_cast<_T&&>(ref);
-}
+{ return static_cast<_T&&>(ref); }
 
 template<typename _T>
 struct _ReferenceCountDataObject final
@@ -78,7 +68,34 @@ public:
     void destroyObj() noexcept { reinterpret_cast<_T*>(_objRaw)->~_T(); }
 };
 
+template<typename _FromT, typename _ToT>
+const _ReferenceCountDataObject<_ToT>& RCDOCast(const _ReferenceCountDataObject<_FromT>& obj) noexcept
+{ return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&>(obj); }
+
+template<typename _FromT, typename _ToT>
+_ReferenceCountDataObject<_ToT>& RCDOCast(_ReferenceCountDataObject<_FromT>& obj) noexcept
+{ return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&>(obj); }
+
+template<typename _FromT, typename _ToT>
+_ReferenceCountDataObject<_ToT>&& RCDOCast(_ReferenceCountDataObject<_FromT>&& obj) noexcept
+{ return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&&>(obj); }
+
+template<typename _FromT, typename _ToT>
+const _SWReferenceCount<_ToT>& SWRCCast(const _SWReferenceCount<_FromT>& obj) noexcept
+{ return reinterpret_cast<const _SWReferenceCount<_ToT>&>(obj); }
+
+template<typename _FromT, typename _ToT>
+_SWReferenceCount<_ToT>& SWRCCast(_SWReferenceCount<_FromT>& obj) noexcept
+{ return reinterpret_cast<const _SWReferenceCount<_ToT>&>(obj); }
+
+template<typename _FromT, typename _ToT>
+_SWReferenceCount<_ToT>&& SWRCCast(_SWReferenceCount<_FromT>&& obj) noexcept
+{ return reinterpret_cast<const _SWReferenceCount<_ToT>&&>(obj); }
+
 }
+
+template<typename _T>
+class NullableReferenceCountingPointer;
 
 template<typename _T>
 class ReferenceCountingPointer final
@@ -136,12 +153,15 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline _T& operator *() noexcept { return _ptr->_obj; }
-    [[nodiscard]] inline const _T& operator *() const noexcept { return _ptr->_obj; }
-    [[nodiscard]] inline _T* operator ->() noexcept { return &_ptr->_obj; }
+    inline ReferenceCountingPointer<_T>& operator=(const NullableReferenceCountingPointer<_T>& copy) noexcept;
+    inline ReferenceCountingPointer<_T>& operator=(NullableReferenceCountingPointer<_T>&& move) noexcept;
+
+    [[nodiscard]] inline       _T& operator  *()       noexcept { return  _ptr->_obj; }
+    [[nodiscard]] inline const _T& operator  *() const noexcept { return  _ptr->_obj; }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return &_ptr->_obj; }
     [[nodiscard]] inline const _T* operator ->() const noexcept { return &_ptr->_obj; }
 
-    [[nodiscard]] inline _T* get() noexcept { return &_ptr->_obj; }
+    [[nodiscard]] inline       _T* get()       noexcept { return &_ptr->_obj; }
     [[nodiscard]] inline const _T* get() const noexcept { return &_ptr->_obj; }
 
     [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_refCount; }
@@ -149,10 +169,14 @@ public:
     [[nodiscard]] inline operator bool() const noexcept { return true; }
     [[nodiscard]] inline bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
-    [[nodiscard]] inline bool operator ==(const _T*& ptr) const noexcept { return &_ptr->_obj == ptr; }
-    [[nodiscard]] inline bool operator !=(const _T*& ptr) const noexcept { return &_ptr->_obj != ptr; }
+    [[nodiscard]] inline bool operator ==(const NullableReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator !=(const NullableReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator ==(const _T*& ptr)  const noexcept { return &_ptr->_obj == ptr; }
+    [[nodiscard]] inline bool operator !=(const _T*& ptr)  const noexcept { return &_ptr->_obj != ptr; }
     [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return false; }
-    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return true; }
+    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return true;  }
+private:
+    friend class NullableReferenceCountingPointer<_T>;
 };
 
 template<typename _T>
@@ -182,15 +206,13 @@ public:
     inline NullableReferenceCountingPointer(const NullableReferenceCountingPointer<_T>& copy) noexcept
         : _ptr(copy._ptr)
     {
-        if(_ptr)
-        { ++_ptr->_refCount; }
+        if(_ptr) { ++_ptr->_refCount; }
     }
 
     inline NullableReferenceCountingPointer(NullableReferenceCountingPointer<_T>&& move) noexcept
         : _ptr(move._ptr)
     {
-        if(_ptr)
-        { ++_ptr->_refCount; }
+        if(_ptr) { ++_ptr->_refCount; }
     }
 
     inline NullableReferenceCountingPointer<_T>& operator=(const nullptr_t) noexcept
@@ -233,32 +255,57 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline _T& operator *() { return _ptr->_obj; }
-    [[nodiscard]] inline const _T& operator *() const { return _ptr->_obj; }
-    [[nodiscard]] inline _T* operator ->() noexcept { return _ptr ? &_ptr->_obj : nullptr; }
+    inline NullableReferenceCountingPointer<_T>& operator=(const ReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(_ptr && --_ptr->_refCount == 0)
+        { delete _ptr; }
+
+        _ptr = copy._ptr;
+        ++_ptr->_refCount;
+
+        return *this;
+    }
+
+    inline NullableReferenceCountingPointer<_T>& operator=(ReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(_ptr && --_ptr->_refCount == 0)
+        { delete _ptr; }
+
+        _ptr = move._ptr;
+        ++_ptr->_refCount;
+
+        return *this;
+    }
+
+    [[nodiscard]] inline       _T& operator  *()                { return _ptr->_obj; }
+    [[nodiscard]] inline const _T& operator  *() const          { return _ptr->_obj; }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr ? &_ptr->_obj : nullptr; }
     [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr ? &_ptr->_obj : nullptr; }
 
-    [[nodiscard]] inline _T* get() noexcept { return _ptr ? &_ptr->_obj : nullptr; }
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr ? &_ptr->_obj : nullptr; }
     [[nodiscard]] inline const _T* get() const noexcept { return _ptr ? &_ptr->_obj : nullptr; }
 
     [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr ? _ptr->_refCount : 0; }
 
     [[nodiscard]] inline operator bool() const noexcept { return _ptr; }
 
-    [[nodiscard]] inline bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept
+    [[nodiscard]] inline bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+
+    [[nodiscard]] inline bool operator ==(const NullableReferenceCountingPointer<_T>& ptr) const noexcept
     {
         if(_ptr && ptr._ptr)
         { return _ptr == ptr._ptr; }
-        if(!_ptr && !ptr._ptr) 
+        if(!_ptr && !ptr._ptr)
         { return true; }
         return false;
     }
 
-    [[nodiscard]] inline bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept
+    [[nodiscard]] inline bool operator !=(const NullableReferenceCountingPointer<_T>& ptr) const noexcept
     {
         if(_ptr && ptr._ptr)
         { return _ptr != ptr._ptr; }
-        if(!_ptr && !ptr._ptr) 
+        if(!_ptr && !ptr._ptr)
         { return false; }
         return true;
     }
@@ -283,10 +330,18 @@ public:
 
     [[nodiscard]] inline bool operator ==(const nullptr_t ptr) const noexcept { return _ptr == ptr; }
     [[nodiscard]] inline bool operator !=(const nullptr_t ptr) const noexcept { return _ptr != ptr; }
+private:
+    friend class ReferenceCountingPointer<_T>;
 };
 
 template<typename _T>
 class WeakReferenceCountingPointer;
+
+template<typename _T>
+class NullableStrongReferenceCountingPointer;
+
+template<typename _T>
+class NullableWeakReferenceCountingPointer;
 
 template<typename _T>
 class StrongReferenceCountingPointer final
@@ -302,8 +357,6 @@ public:
         : _ptr(new(::std::nothrow) SWRC<_T>(args...))
     { }
 
-    inline StrongReferenceCountingPointer(const WeakReferenceCountingPointer<_T>& ptr) noexcept;
-
     inline ~StrongReferenceCountingPointer() noexcept
     {
         if(--_ptr->_strongRefCount == 0)
@@ -314,15 +367,15 @@ public:
         }
     }
 
-    inline StrongReferenceCountingPointer(const StrongReferenceCountingPointer& copy) noexcept
+    inline StrongReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& copy) noexcept
         : _ptr(copy._ptr)
     { ++_ptr->_strongRefCount; }
 
-    inline StrongReferenceCountingPointer(StrongReferenceCountingPointer&& move) noexcept
+    inline StrongReferenceCountingPointer(StrongReferenceCountingPointer<_T>&& move) noexcept
         : _ptr(move._ptr)
     { ++_ptr->_strongRefCount; }
 
-    inline StrongReferenceCountingPointer& operator=(const StrongReferenceCountingPointer& copy) noexcept
+    inline StrongReferenceCountingPointer<_T>& operator=(const StrongReferenceCountingPointer<_T>& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
@@ -340,7 +393,7 @@ public:
         return *this;
     }
 
-    inline StrongReferenceCountingPointer& operator=(StrongReferenceCountingPointer&& move) noexcept
+    inline StrongReferenceCountingPointer<_T>& operator=(StrongReferenceCountingPointer<_T>&& move) noexcept
     {
         if(this == &move)
         { return *this; }
@@ -358,29 +411,42 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline _T& operator *() noexcept { return _ptr->obj(); }
-    [[nodiscard]] inline _T& operator *() const noexcept { return _ptr->obj(); }
-    [[nodiscard]] inline _T* operator ->() noexcept { return _ptr->objPtr(); }
-    [[nodiscard]] inline _T* operator ->() const noexcept { return _ptr->objPtr(); }
+    inline StrongReferenceCountingPointer<_T>& operator=(const WeakReferenceCountingPointer<_T>& copy) noexcept;
+    inline StrongReferenceCountingPointer<_T>& operator=(WeakReferenceCountingPointer<_T>&& move) noexcept;
+    inline StrongReferenceCountingPointer<_T>& operator=(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept;
+    inline StrongReferenceCountingPointer<_T>& operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept;
+    inline StrongReferenceCountingPointer<_T>& operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept;
+    inline StrongReferenceCountingPointer<_T>& operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept;
 
-    [[nodiscard]] inline _T* get() noexcept { return _ptr->objPtr(); }
-    [[nodiscard]] inline _T* get() const noexcept { return _ptr->objPtr(); }
+    [[nodiscard]] inline       _T& operator  *()       noexcept { return _ptr->obj();    }
+    [[nodiscard]] inline const _T& operator  *() const noexcept { return _ptr->obj();    }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr->objPtr(); }
+    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr->objPtr(); }
 
-    [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_strongRefCount; }
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr->objPtr(); }
+    [[nodiscard]] inline const _T* get() const noexcept { return _ptr->objPtr(); }
+
+    [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr->_strongRefCount; }
     [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr->_strongRefCount; }
-    [[nodiscard]] inline ::std::size_t weakRefCount() const noexcept { return _ptr->_weakRefCount; }
+    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr->_weakRefCount;   }
 
     [[nodiscard]] inline operator bool() const noexcept { return true; }
     [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
     [[nodiscard]] inline bool operator ==(const WeakReferenceCountingPointer<_T>& ptr) const noexcept;
     [[nodiscard]] inline bool operator !=(const WeakReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator ==(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator !=(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator ==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator !=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept;
     [[nodiscard]] inline bool operator ==(const _T*& ptr) const noexcept { return _ptr->objPtr() == ptr; }
     [[nodiscard]] inline bool operator !=(const _T*& ptr) const noexcept { return _ptr->objPtr() != ptr; }
     [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return false; }
     [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return true; }
 private:
     friend class WeakReferenceCountingPointer<_T>;
+    friend class NullableStrongReferenceCountingPointer<_T>;
+    friend class NullableWeakReferenceCountingPointer<_T>;
 };
 
 template<typename _T>
@@ -398,26 +464,24 @@ public:
 
     inline ~WeakReferenceCountingPointer() noexcept
     {
-        --_ptr->_weakRefCount;
-        if(!_ptr->_stongRefCount)
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
         { delete _ptr; }
     }
 
-    inline WeakReferenceCountingPointer(const WeakReferenceCountingPointer& copy) noexcept
+    inline WeakReferenceCountingPointer(const WeakReferenceCountingPointer<_T>& copy) noexcept
         : _ptr(copy._ptr)
     { ++_ptr->_weakRefCount; }
 
-    inline WeakReferenceCountingPointer(WeakReferenceCountingPointer&& move) noexcept
+    inline WeakReferenceCountingPointer(WeakReferenceCountingPointer<_T>&& move) noexcept
         : _ptr(move._ptr)
     { ++_ptr->_weakRefCount; }
 
-    inline WeakReferenceCountingPointer& operator=(const WeakReferenceCountingPointer& copy) noexcept
+    inline WeakReferenceCountingPointer<_T>& operator=(const WeakReferenceCountingPointer<_T>& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
         
-        --_ptr->_weakRefCount;
-        if(!_ptr->_stongRefCount)
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
         { delete _ptr; }
 
         _ptr = copy._ptr;
@@ -426,13 +490,12 @@ public:
         return *this;
     }
 
-    inline WeakReferenceCountingPointer& operator=(WeakReferenceCountingPointer&& move) noexcept
+    inline WeakReferenceCountingPointer<_T>& operator=(WeakReferenceCountingPointer<_T>&& move) noexcept
     {
         if(this == &move)
         { return *this; }
         
-        --_ptr->_weakRefCount;
-        if(!_ptr->_stongRefCount)
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
         { delete _ptr; }
 
         _ptr = move._ptr;
@@ -441,33 +504,63 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline _T& operator *() { return _ptr->obj(); }
-    [[nodiscard]] inline _T& operator *() const { return _ptr->obj(); }
-    [[nodiscard]] inline _T* operator ->() noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] inline _T* operator ->() const noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    inline WeakReferenceCountingPointer<_T>& operator=(const StrongReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
 
-    [[nodiscard]] inline _T* get() noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] inline _T* get() const noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+        _ptr = copy._ptr;
+        ++_ptr->_weakRefCount;
 
-    [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_weakRefCount; }
-    [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr->_strongRefCount; }
-    [[nodiscard]] inline ::std::size_t weakRefCount() const noexcept { return _ptr->_weakRefCount; }
+        return *this;
+    }
 
-    [[nodiscard]] inline operator bool() const noexcept { return true; }
+    inline WeakReferenceCountingPointer<_T>& operator=(StrongReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
+
+        _ptr = move._ptr;
+        ++_ptr->_weakRefCount;
+
+        return *this;
+    }
+
+    inline WeakReferenceCountingPointer<_T>& operator=(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept;
+    inline WeakReferenceCountingPointer<_T>& operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept;
+    inline WeakReferenceCountingPointer<_T>& operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept;
+    inline WeakReferenceCountingPointer<_T>& operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept;
+
+    [[nodiscard]] inline       _T& operator  *()                { return _ptr->obj(); }
+    [[nodiscard]] inline const _T& operator  *() const          { return _ptr->obj(); }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* get() const noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+
+    [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_weakRefCount   : 0;   }
+    [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
+    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0;   }
+
+    [[nodiscard]] inline operator bool() const noexcept { return _ptr->_strongRefCount; }
     [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
-    [[nodiscard]] inline bool operator ==(const WeakReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
-    [[nodiscard]] inline bool operator !=(const WeakReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] inline bool operator ==(const WeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const WeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] inline bool operator ==(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator !=(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator ==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator !=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept;
     [[nodiscard]] inline bool operator ==(const _T*& ptr) const noexcept { return _ptr->_strongRefCount && _ptr->objPtr() == ptr; }
     [[nodiscard]] inline bool operator !=(const _T*& ptr) const noexcept { return _ptr->_strongRefCount && _ptr->objPtr() != ptr; }
-    [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return false; }
-    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return true; }
+    [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return !_ptr->_strongRefCount; }
+    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return  _ptr->_strongRefCount; }
 private:
     friend class StrongReferenceCountingPointer<_T>;
+    friend class NullableStrongReferenceCountingPointer<_T>;
+    friend class NullableWeakReferenceCountingPointer<_T>;
 };
-
-template<typename _T>
-class NullableWeakReferenceCountingPointer;
 
 template<typename _T>
 class NullableStrongReferenceCountingPointer final
@@ -483,8 +576,6 @@ public:
         : _ptr(new(::std::nothrow) SWRC<_T>(args...))
     { }
 
-    inline NullableStrongReferenceCountingPointer(const NullableWeakReferenceCountingPointer<_T>& ptr) noexcept;
-
     inline ~NullableStrongReferenceCountingPointer() noexcept
     {
         if(_ptr && --_ptr->_strongRefCount == 0)
@@ -495,20 +586,65 @@ public:
         }
     }
 
-    inline NullableStrongReferenceCountingPointer(const NullableStrongReferenceCountingPointer& copy) noexcept
+    inline NullableStrongReferenceCountingPointer(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept
+        : _ptr(copy._ptr)
+    {
+        if(_ptr) { ++_ptr->_strongRefCount; }
+    }
+
+    inline NullableStrongReferenceCountingPointer(NullableStrongReferenceCountingPointer<_T>&& move) noexcept
+        : _ptr(move._ptr)
+    {
+        if(_ptr) { ++_ptr->_strongRefCount; }
+    }
+
+    inline NullableStrongReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& copy) noexcept
         : _ptr(copy._ptr)
     { ++_ptr->_strongRefCount; }
 
-    inline NullableStrongReferenceCountingPointer(NullableStrongReferenceCountingPointer&& move) noexcept
+    inline NullableStrongReferenceCountingPointer(StrongReferenceCountingPointer<_T>&& move) noexcept
         : _ptr(move._ptr)
     { ++_ptr->_strongRefCount; }
 
-    inline NullableStrongReferenceCountingPointer& operator=(const NullableStrongReferenceCountingPointer& copy) noexcept
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
-        if(--_ptr->_strongRefCount == 0)
+        if(_ptr && --_ptr->_strongRefCount == 0)
+        {
+            _ptr->destroyObj();
+            if(!_ptr->_weakRefCount)
+            { delete _ptr; }
+        }
+
+        _ptr = copy._ptr;
+        if(_ptr) { ++_ptr->_strongRefCount; }
+
+        return *this;
+    }
+
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        if(_ptr && --_ptr->_strongRefCount == 0)
+        {
+            _ptr->destroyObj();
+            if(!_ptr->_weakRefCount)
+            { delete _ptr; }
+        }
+
+        _ptr = move._ptr;
+        if(_ptr) { ++_ptr->_strongRefCount; }
+
+        return *this;
+    }
+    
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(const StrongReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(_ptr && --_ptr->_strongRefCount == 0)
         {
             _ptr->destroyObj();
             if(!_ptr->_weakRefCount)
@@ -521,12 +657,9 @@ public:
         return *this;
     }
 
-    inline NullableStrongReferenceCountingPointer& operator=(NullableStrongReferenceCountingPointer&& move) noexcept
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(StrongReferenceCountingPointer<_T>&& move) noexcept
     {
-        if(this == &move)
-        { return *this; }
-
-        if(--_ptr->_strongRefCount == 0)
+        if(_ptr && --_ptr->_strongRefCount == 0)
         {
             _ptr->destroyObj();
             if(!_ptr->_weakRefCount)
@@ -538,6 +671,51 @@ public:
 
         return *this;
     }
+
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(const WeakReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(_ptr && --_ptr->_strongRefCount == 0)
+        {
+            _ptr->destroyObj();
+            if(!_ptr->_weakRefCount)
+            { delete _ptr; }
+        }
+
+        if(copy)
+        {
+            _ptr = copy._ptr;
+            ++_ptr->_strongRefCount;
+        }
+        else
+        { _ptr = nullptr; }
+
+        return *this;
+    }
+
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(WeakReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(_ptr && --_ptr->_strongRefCount == 0)
+        {
+            _ptr->destroyObj();
+            if(!_ptr->_weakRefCount)
+            { delete _ptr; }
+        }
+
+        if(move)
+        {
+            _ptr = move._ptr;
+            ++_ptr->_strongRefCount;
+        }
+        else
+        {
+            _ptr = nullptr;
+        }
+
+        return *this;
+    }
+
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept;
+    inline NullableStrongReferenceCountingPointer<_T>& operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept;
 
     inline NullableStrongReferenceCountingPointer<_T>& operator=(const nullptr_t) noexcept
     {
@@ -553,28 +731,34 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline _T& operator *() { return _ptr->obj(); }
-    [[nodiscard]] inline _T& operator *() const { return _ptr->obj(); }
-    [[nodiscard]] inline _T* operator ->() noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] inline _T* operator ->() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline       _T& operator  *()                { return _ptr->obj(); }
+    [[nodiscard]] inline const _T& operator  *() const          { return _ptr->obj(); }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
 
-    [[nodiscard]] inline _T* get() noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] inline _T* get() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* get() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
 
-    [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_strongRefCount; }
-    [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr->_strongRefCount; }
-    [[nodiscard]] inline ::std::size_t weakRefCount() const noexcept { return _ptr->_weakRefCount; }
+    [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
+    [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
+    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0;  }
 
-    [[nodiscard]] inline operator bool() const noexcept { return true; }
+    [[nodiscard]] inline operator bool() const noexcept { return _ptr; }
+    [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] inline bool operator ==(const WeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const WeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr != ptr._ptr; }
     [[nodiscard]] inline bool operator ==(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
-    [[nodiscard]] inline bool operator ==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept;
-    [[nodiscard]] inline bool operator !=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept;
+    [[nodiscard]] inline bool operator ==(const NullableWeakReferenceCountingPointer<_T>& ptr)   const noexcept;
+    [[nodiscard]] inline bool operator !=(const NullableWeakReferenceCountingPointer<_T>& ptr)   const noexcept;
     [[nodiscard]] inline bool operator ==(const _T*& ptr) const noexcept { return _ptr && _ptr->objPtr() == ptr; }
     [[nodiscard]] inline bool operator !=(const _T*& ptr) const noexcept { return _ptr && _ptr->objPtr() != ptr; }
     [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return !_ptr; }
-    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return _ptr; }
+    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return  _ptr; }
 private:
+    friend class StrongReferenceCountingPointer<_T>;
+    friend class WeakReferenceCountingPointer<_T>;
     friend class NullableWeakReferenceCountingPointer<_T>;
 };
 
@@ -589,33 +773,72 @@ private:
 public:
     inline NullableWeakReferenceCountingPointer(const NullableStrongReferenceCountingPointer<_T>& ptr) noexcept
         : _ptr(ptr._ptr)
+    {
+        if(_ptr) { ++_ptr->_weakRefCount; }
+    }
+
+    inline NullableWeakReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& ptr) noexcept
+        : _ptr(ptr._ptr)
     { ++_ptr->_weakRefCount; }
 
     inline ~NullableWeakReferenceCountingPointer() noexcept
     {
-        if(_ptr)
-        {
-            --_ptr->_weakRefCount;
-            if(!_ptr->_stongRefCount)
-            { delete _ptr; }
-        }
+        if(_ptr && --_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
     }
 
-    inline NullableWeakReferenceCountingPointer(const NullableWeakReferenceCountingPointer& copy) noexcept
+    inline NullableWeakReferenceCountingPointer(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept
+        : _ptr(copy._ptr)
+    {
+        if(_ptr) { ++_ptr->_weakRefCount; }
+    }
+
+    inline NullableWeakReferenceCountingPointer(NullableWeakReferenceCountingPointer<_T>&& move) noexcept
+        : _ptr(move._ptr)
+    {
+        if(_ptr) { ++_ptr->_weakRefCount; }
+    }
+
+    inline NullableWeakReferenceCountingPointer(const WeakReferenceCountingPointer<_T>& copy) noexcept
         : _ptr(copy._ptr)
     { ++_ptr->_weakRefCount; }
 
-    inline NullableWeakReferenceCountingPointer(NullableWeakReferenceCountingPointer&& move) noexcept
+    inline NullableWeakReferenceCountingPointer(WeakReferenceCountingPointer<_T>&& move) noexcept
         : _ptr(move._ptr)
     { ++_ptr->_weakRefCount; }
 
-    inline NullableWeakReferenceCountingPointer& operator=(const NullableWeakReferenceCountingPointer& copy) noexcept
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
-        --_ptr->_weakRefCount;
-        if(!_ptr->_stongRefCount)
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
+
+        _ptr = copy._ptr;
+
+        if(_ptr) { ++_ptr->_weakRefCount; }
+
+        return *this;
+    }
+
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
+
+        _ptr = move._ptr;
+        if(_ptr) { ++_ptr->_weakRefCount; }
+
+        return *this;
+    }
+
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(const StrongReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
         { delete _ptr; }
 
         _ptr = copy._ptr;
@@ -624,13 +847,9 @@ public:
         return *this;
     }
 
-    inline NullableWeakReferenceCountingPointer& operator=(NullableWeakReferenceCountingPointer&& move) noexcept
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(StrongReferenceCountingPointer<_T>&& move) noexcept
     {
-        if(this == &move)
-        { return *this; }
-
-        --_ptr->_weakRefCount;
-        if(!_ptr->_stongRefCount)
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
         { delete _ptr; }
 
         _ptr = move._ptr;
@@ -639,53 +858,416 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline _T& operator *() { return _ptr->obj(); }
-    [[nodiscard]] inline _T& operator *() const { return _ptr->obj(); }
-    [[nodiscard]] inline _T* operator ->() noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] inline _T* operator ->() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(const WeakReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
 
-    [[nodiscard]] inline _T* get() noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] inline _T* get() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+        _ptr = copy._ptr;
+        ++_ptr->_weakRefCount;
 
-    [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_weakRefCount; }
-    [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr->_strongRefCount; }
-    [[nodiscard]] inline ::std::size_t weakRefCount() const noexcept { return _ptr->_weakRefCount; }
+        return *this;
+    }
 
-    [[nodiscard]] inline operator bool() const noexcept { return true; }
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(WeakReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
+
+        _ptr = move._ptr;
+        ++_ptr->_weakRefCount;
+
+        return *this;
+    }
+
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
+
+        _ptr = copy._ptr;
+        if(_ptr) { ++_ptr->_weakRefCount; }
+
+        return *this;
+    }
+
+    inline NullableWeakReferenceCountingPointer<_T>& operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept
+    {
+        if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+        { delete _ptr; }
+
+        _ptr = move._ptr;
+        if(_ptr) { ++_ptr->_weakRefCount; }
+
+        return *this;
+    }
+
+    [[nodiscard]] inline       _T& operator  *()                { return _ptr->obj(); }
+    [[nodiscard]] inline const _T& operator  *() const          { return _ptr->obj(); }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* get() const noexcept { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+
+    [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
+    [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
+    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
+
+    [[nodiscard]] inline operator bool() const noexcept { return _ptr && _ptr->_strongRefCount; }
+    [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] inline bool operator ==(const WeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const WeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr != ptr._ptr; }
     [[nodiscard]] inline bool operator ==(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
-    [[nodiscard]] inline bool operator ==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
-    [[nodiscard]] inline bool operator !=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] inline bool operator ==(const NullableWeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr == ptr._ptr; }
+    [[nodiscard]] inline bool operator !=(const NullableWeakReferenceCountingPointer<_T>& ptr)   const noexcept { return _ptr != ptr._ptr; }
     [[nodiscard]] inline bool operator ==(const _T*& ptr) const noexcept { return _ptr && _ptr->objPtr() == ptr; }
     [[nodiscard]] inline bool operator !=(const _T*& ptr) const noexcept { return _ptr && _ptr->objPtr() != ptr; }
     [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return !_ptr; }
-    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return _ptr; }
+    [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return  _ptr; }
 private:
     friend class NullableStrongReferenceCountingPointer<_T>;
 };
 
-template <typename _T>
-StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(const WeakReferenceCountingPointer<_T>& ptr) noexcept
-    : _ptr(ptr._ptr)
-{ ++_ptr->_strongRefCount; }
+template<typename _T>
+ReferenceCountingPointer<_T>& ReferenceCountingPointer<_T>::operator=(const NullableReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(!copy)
+    { return *this; }
 
-template <typename _T>
+    if(--_ptr->_refCount == 0)
+    { delete _ptr; }
+
+    _ptr = copy._ptr;
+    ++_ptr->_refCount;
+
+    return *this;
+}
+
+template<typename _T>
+ReferenceCountingPointer<_T>& ReferenceCountingPointer<_T>::operator=( NullableReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(!move)
+    { return *this; }
+
+    if(--_ptr->_refCount == 0)
+    { delete _ptr; }
+
+    _ptr = move._ptr;
+    ++_ptr->_refCount;
+
+    return *this;
+}
+
+template<typename _T>
+bool ReferenceCountingPointer<_T>::operator==(const NullableReferenceCountingPointer<_T>& ptr) const noexcept
+{ return _ptr == ptr._ptr; }
+
+template<typename _T>
+bool ReferenceCountingPointer<_T>::operator!=(const NullableReferenceCountingPointer<_T>& ptr) const noexcept
+{ return _ptr != ptr._ptr; }
+
+template<typename _T>
+StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const WeakReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(!copy)
+    { return *this; }
+
+    if(--_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+
+    _ptr = copy._ptr;
+    ++_ptr->_strongRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(WeakReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(!move)
+    { return *this; }
+
+    if(--_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+
+    _ptr = move._ptr;
+    ++_ptr->_strongRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(!copy)
+    { return *this; }
+
+    if(--_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+
+    _ptr = copy._ptr;
+    ++_ptr->_strongRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(!move)
+    { return *this; }
+
+    if(--_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+
+    _ptr = move._ptr;
+    ++_ptr->_strongRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(!copy)
+    { return *this; }
+
+    if(--_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+
+    _ptr = copy._ptr;
+    ++_ptr->_strongRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(!move)
+    { return *this; }
+
+    if(--_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+
+    _ptr = move._ptr;
+    ++_ptr->_strongRefCount;
+
+    return *this;
+}
+
+template<typename _T>
 bool StrongReferenceCountingPointer<_T>::operator==(const WeakReferenceCountingPointer<_T>& ptr) const noexcept
 { return _ptr == ptr._ptr; }
 
-template <typename _T>
+template<typename _T>
 bool StrongReferenceCountingPointer<_T>::operator!=(const WeakReferenceCountingPointer<_T>& ptr) const noexcept
 { return _ptr != ptr._ptr; }
 
-template <typename _T>
-NullableStrongReferenceCountingPointer<_T>::NullableStrongReferenceCountingPointer(const NullableWeakReferenceCountingPointer<_T>& ptr) noexcept
-    : _ptr(ptr._ptr)
-{ ++_ptr->_strongRefCount; }
+template<typename _T>
+bool StrongReferenceCountingPointer<_T>::operator==(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr == ptr._ptr : false; }
 
-template <typename _T>
+template<typename _T>
+bool StrongReferenceCountingPointer<_T>::operator!=(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr != ptr._ptr : true; }
+
+template<typename _T>
+bool StrongReferenceCountingPointer<_T>::operator==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr == ptr._ptr : false; }
+
+template<typename _T>
+bool StrongReferenceCountingPointer<_T>::operator!=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr != ptr._ptr : true; }
+
+template<typename _T>
+WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(const NullableStrongReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(!copy)
+    { return *this; }
+    
+    if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+    { delete _ptr; }
+
+    _ptr = copy._ptr;
+    ++_ptr->_weakRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(!move)
+    { return *this; }
+    
+    if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+    { delete _ptr; }
+
+    _ptr = move._ptr;
+    ++_ptr->_weakRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(!copy)
+    { return *this; }
+    
+    if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+    { delete _ptr; }
+
+    _ptr = copy._ptr;
+    ++_ptr->_weakRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(!move)
+    { return *this; }
+    
+    if(--_ptr->_weakRefCount == 0 && !_ptr->_stongRefCount)
+    { delete _ptr; }
+
+    _ptr = move._ptr;
+    ++_ptr->_weakRefCount;
+
+    return *this;
+}
+
+template<typename _T>
+bool WeakReferenceCountingPointer<_T>::operator==(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr == ptr._ptr : false; }
+
+template<typename _T>
+bool WeakReferenceCountingPointer<_T>::operator!=(const NullableStrongReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr != ptr._ptr : true; }
+
+template<typename _T>
+bool WeakReferenceCountingPointer<_T>::operator==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr == ptr._ptr : false; }
+
+template<typename _T>
+bool WeakReferenceCountingPointer<_T>::operator!=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
+{ return ptr ? _ptr != ptr._ptr : true; }
+
+template<typename _T>
+NullableStrongReferenceCountingPointer<_T>& NullableStrongReferenceCountingPointer<_T>::operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept
+{
+    if(_ptr && --_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+    
+    _ptr = copy._ptr;
+    if(_ptr) { ++_ptr->_strongRefCount; }
+    
+    return *this;
+}
+
+template<typename _T>
+NullableStrongReferenceCountingPointer<_T>& NullableStrongReferenceCountingPointer<_T>::operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept
+{
+    if(_ptr && --_ptr->_strongRefCount == 0)
+    {
+        _ptr->destroyObj();
+        if(!_ptr->_weakRefCount)
+        { delete _ptr; }
+    }
+    
+    _ptr = move._ptr;
+    if(_ptr) { ++_ptr->_strongRefCount; }
+    
+    return *this;
+}
+
+template<typename _T>
 bool NullableStrongReferenceCountingPointer<_T>::operator==(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
 { return _ptr == ptr._ptr; }
 
-template <typename _T>
+template<typename _T>
 bool NullableStrongReferenceCountingPointer<_T>::operator!=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
 { return _ptr != ptr._ptr; }
+
+template<typename _FromT, typename _ToT>
+ReferenceCountingPointer<_ToT> RCPCast(const ReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return reinterpret_cast<const ReferenceCountingPointer<_ToT>&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+ReferenceCountingPointer<_ToT> RCPCast(ReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return reinterpret_cast<ReferenceCountingPointer<_ToT>&&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+NullableReferenceCountingPointer<_ToT> RCPCast(const NullableReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return reinterpret_cast<const NullableReferenceCountingPointer<_ToT>&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+NullableReferenceCountingPointer<_ToT> RCPCast(NullableReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return reinterpret_cast<NullableReferenceCountingPointer<_ToT>&&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+StrongReferenceCountingPointer<_ToT> RCPCast(const StrongReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return reinterpret_cast<const StrongReferenceCountingPointer<_ToT>&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+StrongReferenceCountingPointer<_ToT> RCPCast(StrongReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return reinterpret_cast<StrongReferenceCountingPointer<_ToT>&&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+NullableStrongReferenceCountingPointer<_ToT> RCPCast(const NullableStrongReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return reinterpret_cast<const NullableStrongReferenceCountingPointer<_ToT>&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+NullableStrongReferenceCountingPointer<_ToT> RCPCast(NullableStrongReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return reinterpret_cast<NullableStrongReferenceCountingPointer<_ToT>&&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+WeakReferenceCountingPointer<_ToT> RCPCast(const WeakReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return reinterpret_cast<const WeakReferenceCountingPointer<_ToT>&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+WeakReferenceCountingPointer<_ToT> RCPCast(WeakReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return reinterpret_cast<WeakReferenceCountingPointer<_ToT>&&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+NullableWeakReferenceCountingPointer<_ToT> RCPCast(const NullableWeakReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return reinterpret_cast<const NullableWeakReferenceCountingPointer<_ToT>&>(ptr); }
+
+template<typename _FromT, typename _ToT>
+NullableWeakReferenceCountingPointer<_ToT> RCPCast(NullableWeakReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return reinterpret_cast<NullableWeakReferenceCountingPointer<_ToT>&&>(ptr); }
+
