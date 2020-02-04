@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NumTypes.hpp"
-#include "PageAllocator.hpp"
+#include "allocator/PageAllocator.hpp"
 #include <cstring>
 
 template<typename _T, uSys _NumReservePages = 1024>
@@ -33,7 +33,7 @@ public:
     ~ArrayList() noexcept
     {
         if(--(_ctrlBlock->refCount) <= 0)
-        { PageAllocator::free(_ctrlBlock->refCount); }
+        { PageAllocator::free(_ctrlBlock); }
     }
 
     ArrayList(const ArrayList<_T, _NumReservePages>& copy) noexcept
@@ -127,7 +127,7 @@ private:
         const uSys pageBytes = _ctrlBlock->committedPages * PageAllocator::pageSize();
         if(_ctrlBlock->dataSize + sizeof(_T) >= pageBytes)
         {
-            (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_ctrlBlock->refCount) + pageBytes);
+            (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_ctrlBlock) + pageBytes);
             ++_ctrlBlock->committedPages;
         }
     }

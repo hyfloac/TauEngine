@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <Objects.hpp>
 #include <NumTypes.hpp>
+#include <Windows.h>
 
 class UnitTests final
 {
@@ -19,6 +20,47 @@ public:
     static bool passedPrevious() noexcept;
 };
 
+class Console final
+{
+public:
+    enum Color : u8
+    {
+        Red = 0,
+        Green,
+        Blue,
+        Yellow,
+        Cyan,
+        Magenta,
+        BrightRed,
+        BrightGreen,
+        BrightBlue,
+        BrightYellow,
+        BrightCyan,
+        BrightMagenta,
+        White,
+        Black,
+        Gray,
+        LightGray
+    };
+public:
+    static Console& Instance() noexcept;
+private:
+    static WORD transformColor(Color foreground, Color background) noexcept;
+private:
+    HANDLE _outConsole;
+    HANDLE _errConsole;
+private:
+    Console() noexcept;
+public:
+    void setOutColor(Color foreground, Color background) const noexcept;
+    void setErrColor(Color foreground, Color background) const noexcept;
+
+    inline void resetOutColor() const noexcept
+    { setOutColor(Color::LightGray, Color::Black); }
+    inline void resetErrColor() const noexcept
+    { setErrColor(Color::LightGray, Color::Black); }
+};
+
 class UnitTest final
 {
     DELETE_COPY(UnitTest);
@@ -28,12 +70,15 @@ public:
     inline UnitTest(const char* name) noexcept
         : _name(name)
     {
+        Console::Instance().setOutColor(Console::White, Console::Black);
         printf("Starting Test: %s\n", name);
+        Console::Instance().resetOutColor();
         UnitTests::reset();
     }
 
     inline ~UnitTest()
     {
+        Console::Instance().setOutColor(Console::White, Console::Black);
         printf("Finishing Test: %s\n", _name);
         if(UnitTests::passedPrevious())
         {
@@ -43,8 +88,10 @@ public:
         {
             printf("Failed Tests: %s\n\n", _name);
         }
+        Console::Instance().resetOutColor();
     }
 };
+
 
 #define UNIT_TEST() UnitTest _ut_##__LINE__(__FUNCSIG__)
 
@@ -52,5 +99,12 @@ public:
 #define _x_STR(_X) _x_STR0(_X)
 
 #define Assert(_EXPR) \
-    if(!(_EXPR)) { fprintf(stderr, "Assert Failed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::fail(); }\
-    else { fprintf(stdout, "Assert Passed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::pass(); }
+    if(!(_EXPR)) { \
+        Console::Instance().setErrColor(Console::BrightRed, Console::Black); \
+        fprintf(stderr, "Assert Failed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::fail(); \
+        Console::Instance().resetErrColor(); \
+    } else { \
+        Console::Instance().setOutColor(Console::Green, Console::Black); \
+        fprintf(stdout, "Assert Passed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::pass(); \
+        Console::Instance().resetOutColor(); \
+    }

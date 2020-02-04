@@ -32,7 +32,7 @@ typedef float  f32;
 typedef double f64;
 
 #ifdef _MSVC_LANG
-  #ifdef _WIN64
+  #if defined(_WIN64) || (defined(_M_X64) && _M_X64 == 100)
     typedef i64 iSys;
     typedef u64 uSys;
   #else

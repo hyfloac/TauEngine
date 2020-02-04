@@ -1,13 +1,14 @@
 #include "ArrayListUnitTest.hpp"
 #include "StringTest.hpp"
 #include "RefUnitTest.hpp"
+#include "FixedBlockAllocatorTest.hpp"
 #include "UnitTest.hpp"
 #include <cstdio>
-#include <conio.h>
 
 #define SHOULD_PAUSE 0
 
 #if SHOULD_PAUSE
+  #include <conio.h>
   #define PAUSE(_MSG) printf("Press Any Key To %s.\n", (_MSG)); _getch()
 #else
   #define PAUSE(_MSG)
@@ -49,7 +50,25 @@ int main(int argCount, char* args[]) noexcept
     RefPtrTest::nullableStrongRefRewriteTest();
     RefPtrTest::nullableStrongRefTmpTest();
     RefPtrTest::nullableStrongRefNullSetTest();
+
+    RefPtrTest::refResetTest();
+    RefPtrTest::nullableRefResetTest();
+    RefPtrTest::strongRefResetTest();
+    RefPtrTest::nullableStrongRefResetTest();
+
+    RefPtrTest::refCrossAssignmentTest();
+    RefPtrTest::strongRefCrossAssignmentTest();
     printf("Reference Counting Pointer Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nFixed Block Allocator Tests:\n\n");
+    FixedBlockAllocatorUnitTest::arenaAllocationValidityTest();
+    FixedBlockAllocatorUnitTest::arenaMacroAllocateTest();
+    FixedBlockAllocatorUnitTest::arenaMaxPageExceedTest();
+    FixedBlockAllocatorUnitTest::arenaCountTest();
+    FixedBlockAllocatorUnitTest::arenaMultipleDeleteTest();
+    printf("Fixed Block Allocator Tests Finished\n");
 
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());
     printf("Tests Passed: %d\n", UnitTests::testsPassed());

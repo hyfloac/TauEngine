@@ -120,6 +120,40 @@ void _nullableRefNullSetTest() noexcept
     }
 }
 
+template<typename _PtrType>
+void _resetTest() noexcept
+{
+    _PtrType p0(72, 64);
+    p0.reset(16, 13);
+    Assert(p0->x() == 16 && p0->y() == 13);
+}
+
+template<typename _NonNullablePtrType, typename _NullablePtrType>
+void _crossAssignmentTest() noexcept
+{
+    _NonNullablePtrType p0(2, 5);
+    _NullablePtrType p1(p0);
+
+    Assert(p1->x() == p0->x() && p1->y() == p0->y());
+
+    p1.x() = 7;
+    Assert(p0->x() == p1->x() && p0->x() == 7);
+    Assert(p0->y() == p1->y() && p0->y() == 5);
+
+    p1 = _NullablePtrType(19, 32);
+    Assert(p0->x() != p1->x() && p0->y() != p1->y());
+    Assert(p0->x() == 7);
+
+    p1 = nullptr;
+    p0 = p1;
+    Assert(p0->x() == 2 && p0->y() == 5);
+
+    p0.reset(3, 4);
+    Assert(p0->x() == 3 && p0->y() == 4);
+    Assert(p0->x() != p1->x() && p0->y() != p1->y());
+    Assert(p0.get() != p1.get());
+}
+
 void refCountTest() noexcept
 {
     UNIT_TEST();
@@ -202,6 +236,42 @@ void nullableStrongRefNullSetTest() noexcept
 {
     UNIT_TEST();
     _nullableRefNullSetTest<NullableStrongReferenceCountingPointer<PtrData>>();
+}
+
+void refResetTest() noexcept
+{
+    UNIT_TEST();
+    _resetTest<ReferenceCountingPointer<PtrData>>();
+}
+
+void nullableRefResetTest() noexcept
+{
+    UNIT_TEST();
+    _resetTest<NullableReferenceCountingPointer<PtrData>>();
+}
+
+void strongRefResetTest() noexcept
+{
+    UNIT_TEST();
+    _resetTest<StrongReferenceCountingPointer<PtrData>>();
+}
+
+void nullableStrongRefResetTest() noexcept
+{
+    UNIT_TEST();
+    _resetTest<NullableStrongReferenceCountingPointer<PtrData>>();
+}
+
+void refCrossAssignmentTest() noexcept
+{
+    // UNIT_TEST();
+    // _crossAssignmentTest<ReferenceCountingPointer<PtrData>, NullableReferenceCountingPointer<PtrData>>();
+}
+
+void strongRefCrossAssignmentTest() noexcept
+{
+    // UNIT_TEST();
+    // _crossAssignmentTest<StrongReferenceCountingPointer<PtrData>, NullableStrongReferenceCountingPointer<PtrData>>();
 }
 
 }

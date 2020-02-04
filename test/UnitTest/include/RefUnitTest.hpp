@@ -1,7 +1,6 @@
 #pragma once
 
 namespace RefPtrTest {
-
 void refCountTest() noexcept;
 void refRewriteTest() noexcept;
 void refTmpTest() noexcept;
@@ -20,4 +19,11 @@ void nullableStrongRefRewriteTest() noexcept;
 void nullableStrongRefTmpTest() noexcept;
 void nullableStrongRefNullSetTest() noexcept;
 
+void refResetTest() noexcept;
+void nullableRefResetTest() noexcept;
+void strongRefResetTest() noexcept;
+void nullableStrongRefResetTest() noexcept;
+
+void refCrossAssignmentTest() noexcept;
+void strongRefCrossAssignmentTest() noexcept;
 }

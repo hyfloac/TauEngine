@@ -2,8 +2,7 @@
 #include "UnitTest.hpp"
 #include <ArrayList.hpp>
 
-namespace ArrayListUnitTest
-{
+namespace ArrayListUnitTest {
 
 struct TestStruct final
 {

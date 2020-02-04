@@ -3,31 +3,9 @@
 #include "Objects.hpp"
 #include "NumTypes.hpp"
 #include <memory>
+#include "allocator/TauAllocator.hpp"
 
 namespace _ReferenceCountingPointerUtils {
-
-template<typename _T>
-struct _RemoveReference final
-{ using type = _T; };
-
-template<typename _T>
-struct _RemoveReference<_T&> final
-{ using type = _T; };
-
-template<typename _T>
-struct _RemoveReference<_T&&> final
-{ using type = _T; };
-
-template<typename _T>
-using _RemoveReferenceT = typename _RemoveReference<_T>::type;
-
-template<typename _T>
-[[nodiscard]] constexpr inline _T&& _forward(_RemoveReferenceT<_T>& ref) noexcept
-{ return static_cast<_T&&>(ref); }
-
-template<typename _T>
-[[nodiscard]] constexpr inline _T&& _forward(_RemoveReferenceT<_T>&& ref) noexcept
-{ return static_cast<_T&&>(ref); }
 
 template<typename _T>
 struct _ReferenceCountDataObject final
@@ -40,7 +18,7 @@ public:
 public:
     template<typename... _Args>
     _ReferenceCountDataObject(_Args&&... args) noexcept
-        : _refCount(1), _obj(_forward<_Args>(args)...)
+        : _refCount(1), _obj(_TauAllocatorUtils::_forward<_Args>(args)...)
     { }
 };
 
@@ -57,7 +35,7 @@ public:
     template<typename... _Args>
     _SWReferenceCount(_Args&&... args) noexcept
         : _strongRefCount(1), _weakRefCount(0), _objRaw{}
-    { (void) new(_objRaw) _T(_forward<_Args>(args)...); }
+    { (void) new(_objRaw) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
 
     [[nodiscard]] _T& obj() noexcept { return *reinterpret_cast<_T*>(_objRaw); }
     [[nodiscard]] const _T& obj() const noexcept { return *reinterpret_cast<_T*>(_objRaw); }
@@ -155,6 +133,15 @@ public:
 
     inline ReferenceCountingPointer<_T>& operator=(const NullableReferenceCountingPointer<_T>& copy) noexcept;
     inline ReferenceCountingPointer<_T>& operator=(NullableReferenceCountingPointer<_T>&& move) noexcept;
+
+    template<typename... _Args>
+    inline void reset(_Args&&... args) noexcept
+    {
+        if(--_ptr->_refCount == 0)
+        { delete _ptr; }
+
+        _ptr = new(::std::nothrow) RCDO<_T>(args...);
+    }
 
     [[nodiscard]] inline       _T& operator  *()       noexcept { return  _ptr->_obj; }
     [[nodiscard]] inline const _T& operator  *() const noexcept { return  _ptr->_obj; }
@@ -275,6 +262,16 @@ public:
         ++_ptr->_refCount;
 
         return *this;
+    }
+
+
+    template<typename... _Args>
+    inline void reset(_Args&&... args) noexcept
+    {
+        if(_ptr && --_ptr->_refCount == 0)
+        { delete _ptr; }
+
+        _ptr = new(::std::nothrow) RCDO<_T>(args...);
     }
 
     [[nodiscard]] inline       _T& operator  *()                { return _ptr->_obj; }
@@ -417,6 +414,19 @@ public:
     inline StrongReferenceCountingPointer<_T>& operator=(NullableStrongReferenceCountingPointer<_T>&& move) noexcept;
     inline StrongReferenceCountingPointer<_T>& operator=(const NullableWeakReferenceCountingPointer<_T>& copy) noexcept;
     inline StrongReferenceCountingPointer<_T>& operator=(NullableWeakReferenceCountingPointer<_T>&& move) noexcept;
+
+    template<typename... _Args>
+    inline void reset(_Args&&... args) noexcept
+    {
+        if(--_ptr->_strongRefCount == 0)
+        {
+            _ptr->destroyObj();
+            if(!_ptr->_weakRefCount)
+            { delete _ptr; }
+        }
+
+        _ptr = new(::std::nothrow) SWRC<_T>(args...);
+    }
 
     [[nodiscard]] inline       _T& operator  *()       noexcept { return _ptr->obj();    }
     [[nodiscard]] inline const _T& operator  *() const noexcept { return _ptr->obj();    }
@@ -729,6 +739,19 @@ public:
         _ptr = nullptr;
 
         return *this;
+    }
+
+    template<typename... _Args>
+    inline void reset(_Args&&... args) noexcept
+    {
+        if(_ptr && --_ptr->_strongRefCount == 0)
+        {
+            _ptr->destroyObj();
+            if(!_ptr->_weakRefCount)
+            { delete _ptr; }
+        }
+
+        _ptr = new(::std::nothrow) SWRC<_T>(args...);
     }
 
     [[nodiscard]] inline       _T& operator  *()                { return _ptr->obj(); }
