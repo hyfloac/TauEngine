@@ -50,6 +50,24 @@ public:
 
 class IShaderProgram;
 
+struct VertexArrayArgs final
+{
+    DEFAULT_DESTRUCT(VertexArrayArgs);
+    DEFAULT_COPY(VertexArrayArgs);
+public:
+    Ref<IShader> shader;
+    RefDynArray<Ref<IBuffer>> buffers;
+    Ref<IIndexBuffer> indexBuffer;
+    u32 drawCount;
+    DrawType drawType;
+public:
+    inline VertexArrayArgs(const uSys bufferCount) noexcept
+        : shader(null), buffers(bufferCount),
+          indexBuffer(null),
+          drawCount(0), drawType(static_cast<DrawType>(0))
+    { }
+};
+
 class TAU_DLL NOVTABLE IVertexArrayBuilder
 {
     DEFAULT_DESTRUCT_VI(IVertexArrayBuilder);
@@ -73,8 +91,8 @@ protected:
     DrawType _drawType;
 protected:
     IVertexArrayBuilder(const uSys bufferCount) noexcept
-        : _buffers(bufferCount),
-          _indexBuffer(null), //_inputLayout(null),
+        : _shader(null), _buffers(bufferCount),
+          _indexBuffer(null), 
           _drawCount(0), _drawType(static_cast<DrawType>(0))
     { }
 public:
