@@ -31,7 +31,7 @@ namespace RefPtrTest {
 template<typename _PtrType>
 void _refCountTest() noexcept
 {
-    const _PtrType p0(1, 3);
+    const _PtrType p0(DefaultTauAllocator::Instance(), 1, 3);
     Assert(p0.refCount() == 1);
     {
         const _PtrType p1 = p0;
@@ -52,12 +52,12 @@ void _refCountTest() noexcept
 template<typename _PtrType>
 void _refRewriteTest() noexcept
 {
-    _PtrType p0(2, 4);
+    _PtrType p0(DefaultTauAllocator::Instance(), 2, 4);
     Assert(p0.refCount() == 1);
     {
         const _PtrType p1 = p0;
         Assert(p1.refCount() == 2);
-        const _PtrType p2(7, 7);
+        const _PtrType p2(DefaultTauAllocator::Instance(), 7, 7);
         Assert(p2.refCount() == 1);
         const _PtrType p3 = p0;
         Assert(p0.refCount() == 3);
@@ -76,7 +76,7 @@ void _refRewriteTest() noexcept
 template<typename _PtrType>
 void _refTmpTest() noexcept
 {
-    _PtrType p0(2, 4);
+    _PtrType p0(DefaultTauAllocator::Instance(), 2, 4);
     Assert(p0.refCount() == 1);
     {
         const _PtrType p1 = p0;
@@ -88,7 +88,7 @@ void _refTmpTest() noexcept
 
         Assert(p1->index() == p2->index());
         Assert(p0->index() == p1->index());
-        p0 = _PtrType(7, 7);
+        p0 = _PtrType(DefaultTauAllocator::Instance(), 7, 7);
         Assert(p1->index() == p2->index());
         Assert(p0->index() != p1->index());
         Assert(p0.refCount() == 1);
@@ -100,7 +100,7 @@ void _refTmpTest() noexcept
 template<typename _PtrType>
 void _nullableRefNullSetTest() noexcept
 {
-    _PtrType p0(2, 4);
+    _PtrType p0(DefaultTauAllocator::Instance(), 2, 4);
     Assert(p0.refCount() == 1);
     {
         const _PtrType p1 = p0;
@@ -123,33 +123,33 @@ void _nullableRefNullSetTest() noexcept
 template<typename _PtrType>
 void _resetTest() noexcept
 {
-    _PtrType p0(72, 64);
-    p0.reset(16, 13);
+    _PtrType p0(DefaultTauAllocator::Instance(), 72, 64);
+    p0.reset(DefaultTauAllocator::Instance(), 16, 13);
     Assert(p0->x() == 16 && p0->y() == 13);
 }
 
 template<typename _NonNullablePtrType, typename _NullablePtrType>
 void _crossAssignmentTest() noexcept
 {
-    _NonNullablePtrType p0(2, 5);
+    _NonNullablePtrType p0(DefaultTauAllocator::Instance(), 2, 5);
     _NullablePtrType p1(p0);
 
     Assert(p1->x() == p0->x() && p1->y() == p0->y());
 
-    p1.x() = 7;
+    p1->x() = 7;
     Assert(p0->x() == p1->x() && p0->x() == 7);
     Assert(p0->y() == p1->y() && p0->y() == 5);
 
-    p1 = _NullablePtrType(19, 32);
+    p1 = _NullablePtrType(DefaultTauAllocator::Instance(), 19, 32);
     Assert(p0->x() != p1->x() && p0->y() != p1->y());
     Assert(p0->x() == 7);
 
     p1 = nullptr;
     p0 = p1;
-    Assert(p0->x() == 2 && p0->y() == 5);
+    Assert(p0->x() == 7 && p0->y() == 5);
 
-    p0.reset(3, 4);
-    Assert(p0->x() == 3 && p0->y() == 4);
+    p1.reset(DefaultTauAllocator::Instance(), 3, 4);
+    Assert(p1->x() == 3 && p1->y() == 4);
     Assert(p0->x() != p1->x() && p0->y() != p1->y());
     Assert(p0.get() != p1.get());
 }
@@ -264,14 +264,14 @@ void nullableStrongRefResetTest() noexcept
 
 void refCrossAssignmentTest() noexcept
 {
-    // UNIT_TEST();
-    // _crossAssignmentTest<ReferenceCountingPointer<PtrData>, NullableReferenceCountingPointer<PtrData>>();
+    UNIT_TEST();
+    _crossAssignmentTest<ReferenceCountingPointer<PtrData>, NullableReferenceCountingPointer<PtrData>>();
 }
 
 void strongRefCrossAssignmentTest() noexcept
 {
-    // UNIT_TEST();
-    // _crossAssignmentTest<StrongReferenceCountingPointer<PtrData>, NullableStrongReferenceCountingPointer<PtrData>>();
+    UNIT_TEST();
+    _crossAssignmentTest<StrongReferenceCountingPointer<PtrData>, NullableStrongReferenceCountingPointer<PtrData>>();
 }
 
 }
