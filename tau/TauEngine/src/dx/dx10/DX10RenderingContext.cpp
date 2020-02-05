@@ -269,10 +269,10 @@ Ref<IVertexArrayBuilder> DX10RenderingContext::createVertexArray(const uSys buff
     return Ref<IVertexArrayBuilder>(new(::std::nothrow) DX10VertexArrayBuilder(bufferCount, *this));
 }
 
-Ref<IBufferBuilder> DX10RenderingContext::createBuffer(const uSys descriptorCount) noexcept
-{
-    return Ref<IBufferBuilder>(new(::std::nothrow) DX10BufferBuilder(descriptorCount, *this));
-}
+// Ref<IBufferBuilder> DX10RenderingContext::createBuffer(const uSys descriptorCount) noexcept
+// {
+//     return Ref<IBufferBuilder>(new(::std::nothrow) DX10BufferBuilder(descriptorCount, *this));
+// }
 
 Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept
 {

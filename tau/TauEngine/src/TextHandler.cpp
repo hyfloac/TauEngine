@@ -108,7 +108,7 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     bufferBuilder.initialBuffer = null;
     
-    _positionBuffer = Ref<IBuffer>(context.createBuffer(bufferBuilder, nullptr));
+    _positionBuffer = context.createBuffer().buildCPPRef(bufferBuilder, nullptr);
     // _positionBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
     
     float textureCoords[6][2] = {
@@ -126,7 +126,7 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     bufferBuilder.descriptor.reset(1);
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     
-    const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(context.createBuffer(bufferBuilder, null));
+    const Ref<IBuffer> textureCoordBuffer = context.createBuffer().buildCPPRef(bufferBuilder, null);
     // const Ref<IBuffer> textureCoordBuffer = Ref<IBuffer>(bufferBuilder->build(nullptr));
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);

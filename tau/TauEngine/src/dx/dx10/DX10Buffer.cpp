@@ -131,94 +131,94 @@ void DX10IndexBuffer::unmapBuffer(IRenderingContext& context) noexcept
     }
 }
 
-DX10BufferBuilder::DX10BufferBuilder(uSys descriptorCount, DX10RenderingContext& context) noexcept
-    : IBufferBuilder(descriptorCount), _context(context)
-{ }
+// DX10BufferBuilder::DX10BufferBuilder(uSys descriptorCount, DX10RenderingContext& context) noexcept
+//     : IBufferBuilder(descriptorCount), _context(context)
+// { }
+//
+// DX10Buffer* DX10BufferBuilder::build(Error* error) const noexcept
+// {
+//     ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
+//     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
+//     ERROR_CODE_COND_N(_type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
+//     ERROR_CODE_COND_N(_elementCount == 0, Error::BufferSizeIsZero);
+//
+//     D3D10_BUFFER_DESC bufferDesc;
+//     bufferDesc.ByteWidth = bufferSize();
+//     bufferDesc.Usage = DX10Buffer::getDXUsage(_usage);
+//     bufferDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+//     bufferDesc.CPUAccessFlags = 0;
+//     bufferDesc.MiscFlags = 0;
+//
+//     ID3D10Buffer* d3dBuffer;
+//
+//     if(_initialBuffer)
+//     {
+//         D3D10_SUBRESOURCE_DATA initialBuffer;
+//         initialBuffer.pSysMem = _initialBuffer;
+//         initialBuffer.SysMemPitch = 0;
+//         initialBuffer.SysMemSlicePitch = 0;
+//
+//         const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, &d3dBuffer);
+//         ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
+//     }
+//     else
+//     {
+//         const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, &d3dBuffer);
+//         ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
+//     }
+//
+//     DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(_type, _usage, bufferSize(), _instanced, _descriptor.build(), d3dBuffer);
+//     if(!buffer)
+//     {
+//         d3dBuffer->Release();
+//         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+//     }
+//
+//     ERROR_CODE_V(Error::NoError, buffer);
+// }
 
-DX10Buffer* DX10BufferBuilder::build(Error* error) const noexcept
-{
-    ERROR_CODE_COND_N(_type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
-    ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
-    ERROR_CODE_COND_N(_type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
-    ERROR_CODE_COND_N(_elementCount == 0, Error::BufferSizeIsZero);
-
-    D3D10_BUFFER_DESC bufferDesc;
-    bufferDesc.ByteWidth = bufferSize();
-    bufferDesc.Usage = DX10Buffer::getDXUsage(_usage);
-    bufferDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
-    bufferDesc.CPUAccessFlags = 0;
-    bufferDesc.MiscFlags = 0;
-
-    ID3D10Buffer* d3dBuffer;
-
-    if(_initialBuffer)
-    {
-        D3D10_SUBRESOURCE_DATA initialBuffer;
-        initialBuffer.pSysMem = _initialBuffer;
-        initialBuffer.SysMemPitch = 0;
-        initialBuffer.SysMemSlicePitch = 0;
-
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, &d3dBuffer);
-        ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-    }
-    else
-    {
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, &d3dBuffer);
-        ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-    }
-
-    DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(_type, _usage, bufferSize(), _instanced, _descriptor.build(), d3dBuffer);
-    if(!buffer)
-    {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, buffer);
-}
-
-DX10IndexBufferBuilder::DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept
-    : IIndexBufferBuilder(), _context(context)
-{ }
-
-DX10IndexBuffer* DX10IndexBufferBuilder::build(Error* error) const noexcept
-{
-    ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
-    ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
-
-    D3D10_BUFFER_DESC bufferDesc;
-    bufferDesc.ByteWidth = sizeof(u32) * _bufferSize;
-    bufferDesc.Usage = DX10Buffer::getDXUsage(_usage);
-    bufferDesc.BindFlags = D3D10_BIND_INDEX_BUFFER;
-    bufferDesc.CPUAccessFlags = 0;
-    bufferDesc.MiscFlags = 0;
-
-    ID3D10Buffer* d3dBuffer;
-    if(_initialBuffer)
-    {
-        D3D10_SUBRESOURCE_DATA initialBuffer;
-        initialBuffer.pSysMem = _initialBuffer;
-        initialBuffer.SysMemPitch = 0;
-        initialBuffer.SysMemSlicePitch = 0;
-
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, &d3dBuffer);
-        ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-    }
-    else
-    {
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, &d3dBuffer);
-        ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-    }
-
-    DX10IndexBuffer* buffer = new(::std::nothrow) DX10IndexBuffer(_usage, _bufferSize, d3dBuffer);
-    if(!buffer)
-    {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, buffer);
-}
+// DX10IndexBufferBuilder::DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept
+//     : IIndexBufferBuilder(), _context(context)
+// { }
+//
+// DX10IndexBuffer* DX10IndexBufferBuilder::build(Error* error) const noexcept
+// {
+//     ERROR_CODE_COND_N(_usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
+//     ERROR_CODE_COND_N(_bufferSize == 0, Error::BufferSizeIsZero);
+//
+//     D3D10_BUFFER_DESC bufferDesc;
+//     bufferDesc.ByteWidth = sizeof(u32) * _bufferSize;
+//     bufferDesc.Usage = DX10Buffer::getDXUsage(_usage);
+//     bufferDesc.BindFlags = D3D10_BIND_INDEX_BUFFER;
+//     bufferDesc.CPUAccessFlags = 0;
+//     bufferDesc.MiscFlags = 0;
+//
+//     ID3D10Buffer* d3dBuffer;
+//     if(_initialBuffer)
+//     {
+//         D3D10_SUBRESOURCE_DATA initialBuffer;
+//         initialBuffer.pSysMem = _initialBuffer;
+//         initialBuffer.SysMemPitch = 0;
+//         initialBuffer.SysMemSlicePitch = 0;
+//
+//         const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, &d3dBuffer);
+//         ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
+//     }
+//     else
+//     {
+//         const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, &d3dBuffer);
+//         ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
+//     }
+//
+//     DX10IndexBuffer* buffer = new(::std::nothrow) DX10IndexBuffer(_usage, _bufferSize, d3dBuffer);
+//     if(!buffer)
+//     {
+//         d3dBuffer->Release();
+//         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+//     }
+//
+//     ERROR_CODE_V(Error::NoError, buffer);
+// }
 
 D3D10_USAGE DX10Buffer::getDXUsage(EBuffer::UsageType usage) noexcept
 {

@@ -4,6 +4,9 @@
 #include <DLL.hpp>
 #include <Objects.hpp>
 #include <RunTimeType.hpp>
+#include <allocator/TauAllocator.hpp>
+#include <Safeties.hpp>
+#include <ReferenceCountingPointer.hpp>
 #include "model/BufferDescriptor.hpp"
 #include "model/BufferEnums.hpp"
 
@@ -130,7 +133,7 @@ struct BufferArgs final
     DEFAULT_DESTRUCT(BufferArgs);
     DEFAULT_COPY(BufferArgs);
 public:
-    enum Error : u8
+    enum class Error : u8
     {
         NoError = 0,
         /**
@@ -249,8 +252,45 @@ public:
     [[nodiscard]] inline uSys bufferSize() const noexcept { return elementCount * descriptor.stride(); }
 };
 
+struct IndexBufferArgs final
+{
+    DEFAULT_DESTRUCT(IndexBufferArgs);
+    DEFAULT_COPY(IndexBufferArgs);
+public:
+    using Error = BufferArgs::Error;
+public:
+    EBuffer::UsageType usage;
+    uSys elementCount;
+    void* initialBuffer;
+public:
+    inline IndexBufferArgs() noexcept
+        : usage(static_cast<EBuffer::UsageType>(0)),
+          elementCount(0), initialBuffer(null)
+    { }
+
+    [[nodiscard]] inline uSys bufferSize() const noexcept { return elementCount * sizeof(u32); }
+};
+
+struct UniformBufferArgs final
+{
+    DEFAULT_DESTRUCT(UniformBufferArgs);
+    DEFAULT_COPY(UniformBufferArgs);
+public:
+    using Error = BufferArgs::Error;
+public:
+    EBuffer::UsageType usage;
+    uSys bufferSize;
+    void* initialBuffer;
+public:
+    inline UniformBufferArgs() noexcept
+        : usage(static_cast<EBuffer::UsageType>(0)),
+          bufferSize(0), initialBuffer(null)
+    { }
+};
+
 class TAU_DLL IBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PO(IBufferBuilder);
     DEFAULT_DESTRUCT_VI(IBufferBuilder);
     DELETE_COPY(IBufferBuilder);
 public:
@@ -354,78 +394,40 @@ public:
          */
         UnknownError,
     };
-protected:
-    EBuffer::Type _type;
-    EBuffer::UsageType _usage;
-    uSys _elementCount;
-    void* _initialBuffer;
-    bool _instanced;
-    BufferDescriptorBuilder _descriptor;
 public:
-    inline IBufferBuilder(const uSys descriptorCount) noexcept
-        : _type(static_cast<EBuffer::Type>(0)),
-          _usage(static_cast<EBuffer::UsageType>(0)),
-          _elementCount(0), _initialBuffer(null),
-          _instanced(false),
-          _descriptor(descriptorCount)
-    { }
-
-    virtual void type(const EBuffer::Type type) noexcept { _type = type; }
-    virtual void usage(const EBuffer::UsageType usage) noexcept { _usage = usage; }
-    // inline void bufferSize(const uSys bufferSize) noexcept { _bufferSize = bufferSize; }
-    inline void elementCount(const uSys elementCount) noexcept { _elementCount = elementCount; }
-    inline void initialBuffer(void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
-    inline void instanced(const bool instanced) noexcept { _instanced = instanced; }
-    [[nodiscard]] inline BufferDescriptorBuilder& descriptor() noexcept { return _descriptor; }
-
-    [[nodiscard]] inline uSys bufferSize() const noexcept { return _elementCount * _descriptor.stride(); }
-
-    [[nodiscard]] virtual IBuffer* build([[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IBuffer* build(const BufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IBuffer* build(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual Ref<IBuffer> buildCPPRef(const BufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableReferenceCountingPointer<IBuffer> buildTauRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 class TAU_DLL IIndexBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PO(IIndexBufferBuilder);
     DEFAULT_DESTRUCT_VI(IIndexBufferBuilder);
     DELETE_COPY(IIndexBufferBuilder);
 public:
     using Error = IBufferBuilder::Error;
-protected:
-    EBuffer::UsageType _usage;
-    uSys _bufferSize;
-    void* _initialBuffer;
 public:
-    inline IIndexBufferBuilder() noexcept
-        : _usage(static_cast<EBuffer::UsageType>(0)),
-          _bufferSize(0), _initialBuffer(null)
-    { }
-
-    virtual void usage(const EBuffer::UsageType usage) noexcept { _usage = usage; }
-    // inline void bufferSize(const uSys bufferSize) noexcept { _bufferSize = bufferSize; }
-    inline void elementCount(const uSys elementCount) noexcept { _bufferSize = elementCount * sizeof(u32); }
-    inline void initialBuffer(void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
-
-    [[nodiscard]] virtual IIndexBuffer* build([[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IIndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IIndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual Ref<IIndexBuffer> buildCPPRef(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableReferenceCountingPointer<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 class TAU_DLL IUniformBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PO(IUniformBufferBuilder);
     DEFAULT_DESTRUCT_VI(IUniformBufferBuilder);
     DELETE_COPY(IUniformBufferBuilder);
 public:
     using Error = IBufferBuilder::Error;
-protected:
-    EBuffer::UsageType _usage;
-    uSys _bufferSize;
-    void* _initialBuffer;
 public:
-    inline IUniformBufferBuilder() noexcept
-        : _usage(static_cast<EBuffer::UsageType>(0)),
-        _bufferSize(0), _initialBuffer(null)
-    { }
-
-    virtual void usage(const EBuffer::UsageType usage) noexcept { _usage = usage; }
-    inline void bufferSize(const uSys bufferSize) noexcept { _bufferSize = bufferSize; }
-    inline void initialBuffer(void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
-
-    [[nodiscard]] virtual IUniformBuffer* build([[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IUniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IUniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual Ref<IUniformBuffer> buildCPPRef(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableReferenceCountingPointer<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

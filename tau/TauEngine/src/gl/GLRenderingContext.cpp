@@ -22,41 +22,31 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
       _minorVersion(minorVersion),
       _compat(core),
       _forwardCompatible(forwardCompatible)
-{ }
-
-// void* GLRenderingContext::getVertexArrayHandle(IVertexArray* vertexArray) noexcept
-// {
-//     const auto iter = _vaos.find(vertexArray);
-//
-//     if(iter == _vaos.end())
-//     {
-//         GLuint vao = GLVertexArray::generate();
-//         _vaos.insert(std::make_pair(vertexArray, vao));
-//
-//         GLVertexArray::_bind(vao);
-//
-//         vertexArray->internalSetup(*this);
-//     }
-//
-//     return &_vaos[vertexArray];
-// }
-
-// void GLRenderingContext::destroyVA(IVertexArray* vertexArray) noexcept
-// {
-//     PERF();
-//     const auto iter = _vaos.find(vertexArray);
-//
-//     if(iter != _vaos.end())
-//     {
-//         GLVertexArray::destroy(_vaos[vertexArray]);
-//     }
-// }
-
-// void GLRenderingContext::clearVAs() noexcept
-// {
-//     PERF();
-//     _vaos.clear();
-// }
+{
+    switch(_mode.currentMode())
+    {
+        case RenderingMode::Mode::OpenGL2:
+        case RenderingMode::Mode::OpenGL3:
+        case RenderingMode::Mode::OpenGL3_1:
+        case RenderingMode::Mode::OpenGL3_2:
+        case RenderingMode::Mode::OpenGL3_3:
+        case RenderingMode::Mode::OpenGL4:
+        case RenderingMode::Mode::OpenGL4_2:
+        case RenderingMode::Mode::OpenGL4_3:
+        case RenderingMode::Mode::OpenGL4_4:
+            _bufferBuilder = new(::std::nothrow) GLBufferBuilder();
+            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder();
+            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder();
+            break;
+        case RenderingMode::Mode::OpenGL4_5:
+        case RenderingMode::Mode::OpenGL4_6:
+            _bufferBuilder = new(::std::nothrow) GLBuffer4_5Builder();
+            _indexBufferBuilder = new(::std::nothrow) GLIndexBuffer4_5Builder();
+            _uniformBufferBuilder = new(::std::nothrow) GLUniformBuffer4_5Builder();
+            break;
+        default: break;
+    }
+}
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
@@ -89,96 +79,9 @@ void GLRenderingContext::enableDepthWriting(bool writing) noexcept
     glDepthMask(writing ? GL_TRUE : GL_FALSE);
 }
 
-// Ref<IInputLayoutBuilder> GLRenderingContext::createInputLayout(const uSys numDescriptors) noexcept
-// {
-//     return Ref<IInputLayoutBuilder>(new(::std::nothrow) GLInputLayoutBuilder(numDescriptors));
-// }
-
 Ref<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
 {
     return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
-}
-
-GLBuffer* GLRenderingContext::createBuffer(const BufferArgs& args, BufferArgs::Error* const error) noexcept
-{
-    switch(_mode.currentMode())
-    {
-        case RenderingMode::Mode::DirectX9:
-        case RenderingMode::Mode::DirectX11:
-        case RenderingMode::Mode::DirectX12:
-        case RenderingMode::Mode::DirectX12_1:
-        case RenderingMode::Mode::Vulkan:
-            return null;
-        case RenderingMode::Mode::OpenGL2:
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-        case RenderingMode::Mode::OpenGL4:
-        case RenderingMode::Mode::OpenGL4_2:
-        case RenderingMode::Mode::OpenGL4_3:
-        case RenderingMode::Mode::OpenGL4_4:
-            return GLBuffer::build(args, error);
-        case RenderingMode::Mode::OpenGL4_5:
-        case RenderingMode::Mode::OpenGL4_6:
-            return GLBuffer::build4_5(args, error);
-            // return Ref<GLBufferBuilder>(new(::std::nothrow) GLBuffer4_5Builder(descriptorCount));
-        default: return null;
-    }
-}
-
-Ref<IIndexBufferBuilder> GLRenderingContext::createIndexBuffer() noexcept
-{
-    switch(_mode.currentMode())
-    {
-        case RenderingMode::Mode::DirectX9:
-        case RenderingMode::Mode::DirectX11:
-        case RenderingMode::Mode::DirectX12:
-        case RenderingMode::Mode::DirectX12_1:
-        case RenderingMode::Mode::Vulkan:
-            return null;
-        case RenderingMode::Mode::OpenGL2:
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-        case RenderingMode::Mode::OpenGL4:
-        case RenderingMode::Mode::OpenGL4_2:
-        case RenderingMode::Mode::OpenGL4_3:
-        case RenderingMode::Mode::OpenGL4_4:
-            return Ref<GLIndexBufferBuilder>(new(::std::nothrow) GLIndexBufferBuilder());
-        case RenderingMode::Mode::OpenGL4_5:
-        case RenderingMode::Mode::OpenGL4_6:
-            return Ref<GLIndexBufferBuilder>(new(::std::nothrow) GLIndexBuffer4_5Builder());
-        default: return null;
-    }
-}
-
-Ref<IUniformBufferBuilder> GLRenderingContext::createUniformBuffer() noexcept
-{
-    switch(_mode.currentMode())
-    {
-        case RenderingMode::Mode::DirectX9:
-        case RenderingMode::Mode::DirectX11:
-        case RenderingMode::Mode::DirectX12:
-        case RenderingMode::Mode::DirectX12_1:
-        case RenderingMode::Mode::Vulkan:
-            return null;
-        case RenderingMode::Mode::OpenGL2:
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-        case RenderingMode::Mode::OpenGL4:
-        case RenderingMode::Mode::OpenGL4_2:
-        case RenderingMode::Mode::OpenGL4_3:
-        case RenderingMode::Mode::OpenGL4_4:
-            return Ref<GLUniformBufferBuilder>(new(::std::nothrow) GLUniformBufferBuilder);
-        case RenderingMode::Mode::OpenGL4_5:
-        case RenderingMode::Mode::OpenGL4_6:
-            return Ref<GLUniformBufferBuilder>(new(::std::nothrow) GLUniformBuffer4_5Builder);
-        default: return null;
-    }
 }
 
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept

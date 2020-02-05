@@ -36,15 +36,15 @@ public:
     void unmapBuffer(IRenderingContext& context) noexcept override;
 };
 
-class TAU_DLL DX9BufferBuilder final : public IBufferBuilder
-{
-    DEFAULT_DESTRUCT(DX9BufferBuilder);
-    DELETE_COPY(DX9BufferBuilder);
-private:
-    DX9RenderingContext& _context;
-public:
-    DX9BufferBuilder(uSys descriptorCount, DX9RenderingContext& context) noexcept;
-
-    [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override;
-};
+// class TAU_DLL DX9BufferBuilder final : public IBufferBuilder
+// {
+//     DEFAULT_DESTRUCT(DX9BufferBuilder);
+//     DELETE_COPY(DX9BufferBuilder);
+// private:
+//     DX9RenderingContext& _context;
+// public:
+//     DX9BufferBuilder(uSys descriptorCount, DX9RenderingContext& context) noexcept;
+//
+//     [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override;
+// };
 #endif

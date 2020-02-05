@@ -24,6 +24,10 @@ private:
     IDXGISwapChain* _swapChain;
 
     bool _vsync;
+
+    IBufferBuilder* _bufferBuilder;
+    IIndexBufferBuilder* _indexBufferBuilder;
+    IUniformBufferBuilder* _uniformBufferBuilder;
 public:
     DX10RenderingContext(const RenderingMode& mode) noexcept;
 
@@ -45,10 +49,10 @@ public:
     void swapFrame() noexcept override;
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
-    [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept;
-    [[nodiscard]] IBuffer* createBuffer(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept override { return null; }
-    [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return null; }
-    [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override { return null; }
+    // [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept;
+    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override { return *_bufferBuilder; }
+    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override { return *_indexBufferBuilder; }
+    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override { return *_uniformBufferBuilder; }
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }

@@ -58,9 +58,8 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
 
     BufferArgs buf3Builder(1);
     BufferArgs buf2Builder(1);
-    // Ref<IBufferBuilder> buf3Builder = context.createBuffer(1);
-    // Ref<IBufferBuilder> buf2Builder = context.createBuffer(1);
-    Ref<IIndexBufferBuilder> indiceBuilder = context.createIndexBuffer();
+    IndexBufferArgs indiceBuilder;
+    // Ref<IIndexBufferBuilder> indiceBuilder = context.createIndexBuffer();
 
     buf3Builder.type = EBuffer::Type::ArrayBuffer;
     buf3Builder.usage = EBuffer::UsageType::StaticDraw;
@@ -72,16 +71,17 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     buf2Builder.elementCount = numVertices;
     buf2Builder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    indiceBuilder->usage(EBuffer::UsageType::StaticDraw);
-    indiceBuilder->elementCount(6 * numIndices);
+    indiceBuilder.usage = EBuffer::UsageType::StaticDraw;
+    indiceBuilder.elementCount = 6 * numIndices;
 
     // Ref<IBuffer> posBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
     // Ref<IBuffer> normBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
     // Ref<IBuffer> texBuf = Ref<IBuffer>(buf2Builder->build(nullptr));
-    Ref<IBuffer> posBuf = Ref<IBuffer>(context.createBuffer(buf3Builder, nullptr));
-    Ref<IBuffer> normBuf = Ref<IBuffer>(context.createBuffer(buf3Builder, nullptr));
-    Ref<IBuffer> texBuf = Ref<IBuffer>(context.createBuffer(buf2Builder, nullptr));
-    Ref<IIndexBuffer> indicesBuf = Ref<IIndexBuffer>(indiceBuilder->build(nullptr));
+    Ref<IBuffer> posBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
+    Ref<IBuffer> normBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
+    Ref<IBuffer> texBuf = context.createBuffer().buildCPPRef(buf2Builder, nullptr);
+    // Ref<IIndexBuffer> indicesBuf = Ref<IIndexBuffer>(indiceBuilder->build(nullptr));
+    Ref<IIndexBuffer> indicesBuf = context.createIndexBuffer().buildCPPRef(indiceBuilder, nullptr);
 
     posBuf->fillBuffer(context, pos);
     normBuf->fillBuffer(context, norm);

@@ -11,24 +11,33 @@ template<typename _T>
 struct _ReferenceCountDataObject final
 {
     DELETE_COPY(_ReferenceCountDataObject);
-    DEFAULT_DESTRUCT(_ReferenceCountDataObject);
 public:
     uSys _refCount;
     TauAllocator& _allocator;
-    _T _obj;
+    u8 _objRaw[sizeof(_T)];
+    // _T _obj;
 public:
     template<typename... _Args>
     _ReferenceCountDataObject(TauAllocator& allocator, _Args&&... args) noexcept
-        : _refCount(1), _allocator(allocator),
-          _obj(_TauAllocatorUtils::_forward<_Args>(args)...)
-    { }
+        : _refCount(1), _allocator(allocator), _objRaw{}
+          // _obj(_TauAllocatorUtils::_forward<_Args>(args)...)
+    { (void) new(_objRaw) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
+
+    ~_ReferenceCountDataObject() noexcept
+    { reinterpret_cast<_T*>(_objRaw)->~_T(); }
+
+    [[nodiscard]] _T& obj() noexcept { return *reinterpret_cast<_T*>(_objRaw); }
+    [[nodiscard]] const _T& obj() const noexcept { return *reinterpret_cast<_T*>(_objRaw); }
+
+    [[nodiscard]] _T* objPtr() noexcept { return reinterpret_cast<_T*>(_objRaw); }
+    [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(_objRaw); }
 };
 
 template<typename _T>
 struct _SWReferenceCount final
 {
-    DELETE_COPY(_SWReferenceCount);
     DEFAULT_DESTRUCT(_SWReferenceCount);
+    DELETE_COPY(_SWReferenceCount);
 public:
     uSys _strongRefCount;
     uSys _weakRefCount;
@@ -49,27 +58,27 @@ public:
     void destroyObj() noexcept { reinterpret_cast<_T*>(_objRaw)->~_T(); }
 };
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 const _ReferenceCountDataObject<_ToT>& RCDOCast(const _ReferenceCountDataObject<_FromT>& obj) noexcept
 { return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&>(obj); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 _ReferenceCountDataObject<_ToT>& RCDOCast(_ReferenceCountDataObject<_FromT>& obj) noexcept
 { return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&>(obj); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 _ReferenceCountDataObject<_ToT>&& RCDOCast(_ReferenceCountDataObject<_FromT>&& obj) noexcept
 { return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&&>(obj); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 const _SWReferenceCount<_ToT>& SWRCCast(const _SWReferenceCount<_FromT>& obj) noexcept
 { return reinterpret_cast<const _SWReferenceCount<_ToT>&>(obj); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 _SWReferenceCount<_ToT>& SWRCCast(_SWReferenceCount<_FromT>& obj) noexcept
 { return reinterpret_cast<const _SWReferenceCount<_ToT>&>(obj); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 _SWReferenceCount<_ToT>&& SWRCCast(_SWReferenceCount<_FromT>&& obj) noexcept
 { return reinterpret_cast<const _SWReferenceCount<_ToT>&&>(obj); }
 
@@ -146,13 +155,13 @@ public:
         _ptr = allocator.allocateT<RCDO<_T>>(allocator, args...);
     }
 
-    [[nodiscard]] inline       _T& operator  *()       noexcept { return  _ptr->_obj; }
-    [[nodiscard]] inline const _T& operator  *() const noexcept { return  _ptr->_obj; }
-    [[nodiscard]] inline       _T* operator ->()       noexcept { return &_ptr->_obj; }
-    [[nodiscard]] inline const _T* operator ->() const noexcept { return &_ptr->_obj; }
+    [[nodiscard]] inline       _T& operator  *()       noexcept { return _ptr->obj();    }
+    [[nodiscard]] inline const _T& operator  *() const noexcept { return _ptr->obj();    }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr->objPtr(); }
+    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr->objPtr(); }
 
-    [[nodiscard]] inline       _T* get()       noexcept { return &_ptr->_obj; }
-    [[nodiscard]] inline const _T* get() const noexcept { return &_ptr->_obj; }
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr->objPtr(); }
+    [[nodiscard]] inline const _T* get() const noexcept { return _ptr->objPtr(); }
 
     [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_refCount; }
 
@@ -161,8 +170,8 @@ public:
     [[nodiscard]] inline bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
     [[nodiscard]] inline bool operator ==(const NullableReferenceCountingPointer<_T>& ptr) const noexcept;
     [[nodiscard]] inline bool operator !=(const NullableReferenceCountingPointer<_T>& ptr) const noexcept;
-    [[nodiscard]] inline bool operator ==(const _T*& ptr)  const noexcept { return &_ptr->_obj == ptr; }
-    [[nodiscard]] inline bool operator !=(const _T*& ptr)  const noexcept { return &_ptr->_obj != ptr; }
+    [[nodiscard]] inline bool operator ==(const _T*& ptr)  const noexcept { return _ptr->objPtr() == ptr; }
+    [[nodiscard]] inline bool operator !=(const _T*& ptr)  const noexcept { return _ptr->objPtr() != ptr; }
     [[nodiscard]] inline bool operator ==(const nullptr_t) const noexcept { return false; }
     [[nodiscard]] inline bool operator !=(const nullptr_t) const noexcept { return true;  }
 private:
@@ -289,13 +298,13 @@ public:
         _ptr = allocator.allocateT<RCDO<_T>>(allocator, args...);
     }
 
-    [[nodiscard]] inline       _T& operator  *()                { return _ptr->_obj; }
-    [[nodiscard]] inline const _T& operator  *() const          { return _ptr->_obj; }
-    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr ? &_ptr->_obj : nullptr; }
-    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr ? &_ptr->_obj : nullptr; }
+    [[nodiscard]] inline       _T& operator  *()                { return _ptr->obj(); }
+    [[nodiscard]] inline const _T& operator  *() const          { return _ptr->obj(); }
+    [[nodiscard]] inline       _T* operator ->()       noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* operator ->() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
 
-    [[nodiscard]] inline       _T* get()       noexcept { return _ptr ? &_ptr->_obj : nullptr; }
-    [[nodiscard]] inline const _T* get() const noexcept { return _ptr ? &_ptr->_obj : nullptr; }
+    [[nodiscard]] inline       _T* get()       noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]] inline const _T* get() const noexcept { return _ptr ? _ptr->objPtr() : nullptr; }
 
     [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr ? _ptr->_refCount : 0; }
 
@@ -325,7 +334,7 @@ public:
     [[nodiscard]] inline bool operator ==(const _T*& ptr) const noexcept
     {
         if(_ptr && ptr)
-        { return &_ptr->_obj == ptr; }
+        { return _ptr->objPtr() == ptr; }
         if(!_ptr && !ptr) 
         { return true; }
         return false;
@@ -334,7 +343,7 @@ public:
     [[nodiscard]] inline bool operator !=(const _T*& ptr) const noexcept
     {
         if(_ptr && ptr)
-        { return &_ptr->_obj != ptr; }
+        { return _ptr->objPtr() != ptr; }
         if(!_ptr && !ptr) 
         { return false; }
         return true;
@@ -601,6 +610,10 @@ public:
         : _ptr(allocator.allocateT<SWRC<_T>>(allocator, args...))
     { }
 
+    inline NullableStrongReferenceCountingPointer(const nullptr_t) noexcept
+        : _ptr(nullptr)
+    { }
+
     inline ~NullableStrongReferenceCountingPointer() noexcept
     {
         if(_ptr && --_ptr->_strongRefCount == 0)
@@ -816,6 +829,10 @@ public:
     inline NullableWeakReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& ptr) noexcept
         : _ptr(ptr._ptr)
     { ++_ptr->_weakRefCount; }
+
+    inline NullableWeakReferenceCountingPointer(const nullptr_t) noexcept
+        : _ptr(nullptr)
+    { }
 
     inline ~NullableWeakReferenceCountingPointer() noexcept
     {
@@ -1259,51 +1276,51 @@ template<typename _T>
 bool NullableStrongReferenceCountingPointer<_T>::operator!=(const NullableWeakReferenceCountingPointer<_T>& ptr) const noexcept
 { return _ptr != ptr._ptr; }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 ReferenceCountingPointer<_ToT> RCPCast(const ReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const ReferenceCountingPointer<_ToT>&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 ReferenceCountingPointer<_ToT> RCPCast(ReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<ReferenceCountingPointer<_ToT>&&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 NullableReferenceCountingPointer<_ToT> RCPCast(const NullableReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const NullableReferenceCountingPointer<_ToT>&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 NullableReferenceCountingPointer<_ToT> RCPCast(NullableReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<NullableReferenceCountingPointer<_ToT>&&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 StrongReferenceCountingPointer<_ToT> RCPCast(const StrongReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const StrongReferenceCountingPointer<_ToT>&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 StrongReferenceCountingPointer<_ToT> RCPCast(StrongReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<StrongReferenceCountingPointer<_ToT>&&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 NullableStrongReferenceCountingPointer<_ToT> RCPCast(const NullableStrongReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const NullableStrongReferenceCountingPointer<_ToT>&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 NullableStrongReferenceCountingPointer<_ToT> RCPCast(NullableStrongReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<NullableStrongReferenceCountingPointer<_ToT>&&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 WeakReferenceCountingPointer<_ToT> RCPCast(const WeakReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const WeakReferenceCountingPointer<_ToT>&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 WeakReferenceCountingPointer<_ToT> RCPCast(WeakReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<WeakReferenceCountingPointer<_ToT>&&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 NullableWeakReferenceCountingPointer<_ToT> RCPCast(const NullableWeakReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const NullableWeakReferenceCountingPointer<_ToT>&>(ptr); }
 
-template<typename _FromT, typename _ToT>
+template<typename _ToT, typename _FromT>
 NullableWeakReferenceCountingPointer<_ToT> RCPCast(NullableWeakReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<NullableWeakReferenceCountingPointer<_ToT>&&>(ptr); }
 

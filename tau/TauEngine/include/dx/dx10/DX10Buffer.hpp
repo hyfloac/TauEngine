@@ -54,27 +54,27 @@ public:
     void unmapBuffer(IRenderingContext& context) noexcept override;
 };
 
-class TAU_DLL DX10BufferBuilder final : public IBufferBuilder
-{
-    DEFAULT_DESTRUCT(DX10BufferBuilder);
-    DELETE_COPY(DX10BufferBuilder);
-private:
-    DX10RenderingContext& _context;
-public:
-    DX10BufferBuilder(uSys descriptorCount, DX10RenderingContext& context) noexcept;
+// class TAU_DLL DX10BufferBuilder final : public IBufferBuilder
+// {
+//     DEFAULT_DESTRUCT(DX10BufferBuilder);
+//     DELETE_COPY(DX10BufferBuilder);
+// private:
+//     DX10RenderingContext& _context;
+// public:
+//     DX10BufferBuilder(uSys descriptorCount, DX10RenderingContext& context) noexcept;
+//
+//     [[nodiscard]] DX10Buffer* build(Error* error) const noexcept override;
+// };
 
-    [[nodiscard]] DX10Buffer* build(Error* error) const noexcept override;
-};
-
-class TAU_DLL DX10IndexBufferBuilder final : public IIndexBufferBuilder
-{
-    DEFAULT_DESTRUCT(DX10IndexBufferBuilder);
-    DELETE_COPY(DX10IndexBufferBuilder);
-private:
-    DX10RenderingContext& _context;
-public:
-    DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept;
-
-    [[nodiscard]] DX10IndexBuffer* build(Error* error) const noexcept override;
-};
+// class TAU_DLL DX10IndexBufferBuilder final : public IIndexBufferBuilder
+// {
+//     DEFAULT_DESTRUCT(DX10IndexBufferBuilder);
+//     DELETE_COPY(DX10IndexBufferBuilder);
+// private:
+//     DX10RenderingContext& _context;
+// public:
+//     DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept;
+//
+//     [[nodiscard]] DX10IndexBuffer* build(Error* error) const noexcept override;
+// };
 #endif

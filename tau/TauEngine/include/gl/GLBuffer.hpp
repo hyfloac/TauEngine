@@ -5,6 +5,7 @@
 #pragma warning(pop)
 
 #include "model/Buffer.hpp"
+#include "Safeties.hpp"
 
 class TAU_DLL GLBuffer final : public IBuffer
 {
@@ -20,15 +21,15 @@ public:
 
     static GLuint createBuffer() noexcept;
 
-    static GLBuffer* build(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
-    static GLBuffer* build4_5(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
+    // static GLBuffer* build(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
+    // static GLBuffer* build4_5(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
 private:
     GLuint _buffer;
     GLenum _glType;
     GLenum _glUsage;
-private:
-    GLBuffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, bool instanced, const BufferDescriptor& descriptor, GLuint buffer, GLenum glType, GLenum glUsage) noexcept;
 public:
+    GLBuffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, bool instanced, const BufferDescriptor& descriptor, GLuint buffer, GLenum glType, GLenum glUsage) noexcept;
+
     ~GLBuffer() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
@@ -39,8 +40,6 @@ public:
 
     [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
     void unmapBuffer(IRenderingContext& context) noexcept override;
-private:
-    friend class GLBufferBuilder;
 };
 
 class TAU_DLL GLIndexBuffer final : public IIndexBuffer
@@ -49,9 +48,9 @@ class TAU_DLL GLIndexBuffer final : public IIndexBuffer
 private:
     GLuint _buffer;
     GLenum _glUsage;
-private:
-    GLIndexBuffer(EBuffer::UsageType usage, uSys bufferSize, GLuint buffer, GLenum glUsage) noexcept;
 public:
+    GLIndexBuffer(EBuffer::UsageType usage, uSys bufferSize, GLuint buffer, GLenum glUsage) noexcept;
+
     ~GLIndexBuffer() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
@@ -72,9 +71,9 @@ class TAU_DLL GLUniformBuffer : public IUniformBuffer
 private:
     GLuint _buffer;
     GLenum _glUsage;
-private:
-    GLUniformBuffer(EBuffer::UsageType usage, uSys bufferSize, GLuint buffer, GLenum glUsage) noexcept;
 public:
+    GLUniformBuffer(EBuffer::UsageType usage, uSys bufferSize, GLuint buffer, GLenum glUsage) noexcept;
+
     ~GLUniformBuffer() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
@@ -94,54 +93,78 @@ private:
 
 class TAU_DLL GLBufferBuilder : public IBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PU(GLBufferBuilder);
     DEFAULT_DESTRUCT(GLBufferBuilder);
     DELETE_COPY(GLBufferBuilder);
 private:
-    GLenum _glType;
-    GLenum _glUsage;
+    struct GLBufferArgs final
+    {
+        GLenum glType;
+        GLenum glUsage;
+        GLuint bufferHandle;
+    };
 public:
-    GLBufferBuilder(uSys descriptorCount) noexcept;
-
-    void type(const EBuffer::Type type) noexcept override final;
-    void usage(const EBuffer::UsageType usage) noexcept override final;
-
-    [[nodiscard]] GLBuffer* build([[tau::out]] Error* error) const noexcept override final;
+    [[nodiscard]] GLBuffer* build(const BufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLBuffer* build(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IBuffer> buildCPPRef(const BufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IBuffer> buildTauRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 protected:
-    virtual GLuint createBuffer() const noexcept
+    [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
+private:
+    [[nodiscard]] bool processBufferArgs(const BufferArgs& args, [[tau::out]] GLBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
+
+    void initBuffer(const BufferArgs& args, const GLBufferArgs& glArgs) const noexcept;
 };
 
 class TAU_DLL GLIndexBufferBuilder : public IIndexBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PU(GLIndexBufferBuilder);
     DEFAULT_DESTRUCT(GLIndexBufferBuilder);
     DELETE_COPY(GLIndexBufferBuilder);
 private:
-    GLenum _glUsage;
+    struct GLIndexBufferArgs final
+    {
+        GLenum glUsage;
+        GLuint bufferHandle;
+    };
 public:
-    GLIndexBufferBuilder() noexcept;
-
-    void usage(const EBuffer::UsageType usage) noexcept override final;
-
-    [[nodiscard]] GLIndexBuffer* build([[tau::out]] Error* error) const noexcept override final;
+    [[nodiscard]] GLIndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLIndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IIndexBuffer> buildCPPRef(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 protected:
-    virtual GLuint createBuffer() const noexcept
+    [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
+private:
+    [[nodiscard]] bool processBufferArgs(const IndexBufferArgs & args, [[tau::out]] GLIndexBufferArgs * glArgs, [[tau::out]] Error * error) const noexcept;
+
+    void initBuffer(const IndexBufferArgs & args, const GLIndexBufferArgs & glArgs) const noexcept;
+private:
+    friend class GLUniformBufferBuilder;
 };
 
 class TAU_DLL GLUniformBufferBuilder : public IUniformBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PU(GLUniformBufferBuilder);
     DEFAULT_DESTRUCT(GLUniformBufferBuilder);
     DELETE_COPY(GLUniformBufferBuilder);
 private:
-    GLenum _glUsage;
+    using GLUniformBufferArgs = GLIndexBufferBuilder::GLIndexBufferArgs;
 public:
-    GLUniformBufferBuilder() noexcept;
-
-    void usage(const EBuffer::UsageType usage) noexcept override final;
-
-    [[nodiscard]] GLUniformBuffer* build([[tau::out]] Error* error) const noexcept override final;
+    [[nodiscard]] GLUniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLUniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IUniformBuffer> buildCPPRef(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 protected:
-    virtual GLuint createBuffer() const noexcept
+    [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
+private:
+    [[nodiscard]] bool processBufferArgs(const UniformBufferArgs& args, [[tau::out]] GLUniformBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
+
+    void initBuffer(const UniformBufferArgs& args, const GLUniformBufferArgs& glArgs) const noexcept;
 };
 

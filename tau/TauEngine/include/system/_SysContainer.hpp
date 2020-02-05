@@ -14,6 +14,6 @@ struct _SysWindowContainer final
 
 struct _SysContainer final
 {
-    HANDLE programHandle;
+    HMODULE programHandle;
 };
 #endif

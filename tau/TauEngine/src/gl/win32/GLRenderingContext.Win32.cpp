@@ -4,6 +4,10 @@
 
 GLRenderingContext::~GLRenderingContext() noexcept
 {
+    delete _bufferBuilder;
+    delete _indexBufferBuilder;
+    delete _uniformBufferBuilder;
+
     deactivateContext();
     wglDeleteContext(_context);
 }

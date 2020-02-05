@@ -134,7 +134,7 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
     skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
     // Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
-    Ref<IBuffer> skyboxCube = Ref<IBuffer>(context.createBuffer(skyboxCubeBuilder, nullptr));
+    Ref<IBuffer> skyboxCube = context.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
     skyboxCube->bind(context);
     skyboxCube->fillBuffer(context, skyboxVertices);
     skyboxCube->unbind(context);

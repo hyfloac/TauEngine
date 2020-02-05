@@ -14,6 +14,10 @@ class TAU_DLL DX9RenderingContext final : public IRenderingContext
 private:
     IDirect3D9* _d3d9;
     IDirect3DDevice9* _d3d9Device;
+
+    IBufferBuilder* _bufferBuilder;
+    IIndexBufferBuilder* _indexBufferBuilder;
+    IUniformBufferBuilder* _uniformBufferBuilder;
 public:
     DX9RenderingContext(const RenderingMode& mode) noexcept;
     ~DX9RenderingContext() noexcept override final;
@@ -46,9 +50,9 @@ public:
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(std::size_t attribCount) noexcept override { return null; }
     [[nodiscard]] Ref<IBufferBuilder> createBuffer(std::size_t descriptorCount) noexcept;
-    [[nodiscard]] IBuffer* createBuffer(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept override { return null; }
-    [[nodiscard]] Ref<IIndexBufferBuilder> createIndexBuffer() noexcept override { return null; }
-    [[nodiscard]] Ref<IUniformBufferBuilder> createUniformBuffer() noexcept override { return null; }
+    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override { return *_bufferBuilder; }
+    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override { return *_indexBufferBuilder; }
+    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override { return *_uniformBufferBuilder; }
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }

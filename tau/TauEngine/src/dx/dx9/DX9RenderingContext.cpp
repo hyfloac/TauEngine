@@ -86,6 +86,7 @@ void DX9RenderingContext::swapFrame() noexcept
 
 Ref<IBufferBuilder> DX9RenderingContext::createBuffer(const std::size_t descriptorCount) noexcept
 {
-    return Ref<DX9BufferBuilder>(new(std::nothrow) DX9BufferBuilder(descriptorCount, *this));
+    return null;
+    // return Ref<DX9BufferBuilder>(new(std::nothrow) DX9BufferBuilder(descriptorCount, *this));
 }
 #endif

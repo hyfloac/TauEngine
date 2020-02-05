@@ -56,13 +56,14 @@ class UniformBlock<_T, UniformBlockBinding::UBB_Upload> final
 private:
     Ref<IUniformBuffer> _buffer;
 public:
-    inline UniformBlock(const Ref<IUniformBufferBuilder>& builder) noexcept
+    inline UniformBlock(const IUniformBufferBuilder& builder) noexcept
         : _buffer(null)
     {
-        builder->usage(EBuffer::UsageType::DynamicDraw);
-        builder->bufferSize(UniformAccessor<_T>::size());
-        builder->initialBuffer(null);
-        _buffer = Ref<IUniformBuffer>(builder->build(null));
+        UniformBufferArgs args;
+        args.usage = EBuffer::UsageType::DynamicDraw;
+        args.bufferSize = UniformAccessor<_T>::size();
+        args.initialBuffer = null;
+        _buffer = builder.buildCPPRef(args, null);
     }
 
     void set(IRenderingContext& context, const _T& t) noexcept
@@ -91,13 +92,14 @@ private:
     _T _t;
 public:
     template<typename... _Args>
-    UniformBlock(const Ref<IUniformBufferBuilder>& builder, _Args&&... args) noexcept
+    UniformBlock(const IUniformBufferBuilder& builder, _Args&&... args) noexcept
         : _buffer(null), _t(std::forward<_Args>(args)...)
     {
-        builder->usage(EBuffer::UsageType::DynamicDraw);
-        builder->bufferSize(UniformAccessor<_T>::size());
-        builder->initialBuffer(null);
-        _buffer = Ref<IUniformBuffer>(builder->build(null));
+        UniformBufferArgs bufArgs;
+        bufArgs.usage = EBuffer::UsageType::DynamicDraw;
+        bufArgs.bufferSize = UniformAccessor<_T>::size();
+        bufArgs.initialBuffer = null;
+        _buffer = builder.buildCPPRef(bufArgs, null);
     }
 
     [[nodiscard]] _T& data() noexcept { return _t; }
@@ -123,13 +125,14 @@ private:
     Ref<IUniformBuffer> _buffer;
     const _T* _t;
 public:
-    UniformBlock(const Ref<IUniformBufferBuilder>& builder, const _T* t) noexcept
+    UniformBlock(const IUniformBufferBuilder& builder, const _T* t) noexcept
         : _buffer(null), _t(t)
     {
-        builder->usage(EBuffer::UsageType::DynamicDraw);
-        builder->bufferSize(UniformAccessor<_T>::size());
-        builder->initialBuffer(null);
-        _buffer = Ref<IUniformBuffer>(builder->build(null));
+        UniformBufferArgs args;
+        args.usage = EBuffer::UsageType::DynamicDraw;
+        args.bufferSize = UniformAccessor<_T>::size();
+        args.initialBuffer = null;
+        _buffer = builder.buildCPPRef(args, null);
     }
 
     void upload(IRenderingContext& context, const u32 index) const noexcept

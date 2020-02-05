@@ -135,8 +135,6 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
     _frameBuffer = Ref<IFrameBuffer>(builder->build(nullptr));
 
-    // delete builder;
-
     float quadVertices[] = {
         -1.0f,  1.0f,  0.0f, 1.0f,
         -1.0f, -1.0f,  0.0f, 0.0f,
@@ -156,7 +154,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    const Ref<IBuffer> positions = Ref<IBuffer>(window.renderingContext()->createBuffer(positionsBuilder, nullptr));
+    const Ref<IBuffer> positions = window.renderingContext()->createBuffer().buildCPPRef(positionsBuilder, nullptr);
     // const Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
 
     Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
