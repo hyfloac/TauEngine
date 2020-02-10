@@ -4,7 +4,6 @@
 #include "system/RenderingContext.hpp"
 #include "gl/GLShaderProgram.hpp"
 #include "dx/dx10/DX10ShaderProgram.hpp"
-#include "Timings.hpp"
 
 Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
 {
@@ -58,7 +57,7 @@ bool IShaderProgram::setVertexShader(IRenderingContext& context, Ref<IShader>& v
 {
     if(vs)
     {
-        if(vs->shaderType() == IShader::Type::Vertex)
+        if(vs->shaderType() == EShader::Stage::Vertex)
         {
             if(_vertexShader)
             {
@@ -86,7 +85,7 @@ bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, Re
 {
     if(tcs)
     { 
-        if(tcs->shaderType() == IShader::Type::TessellationControl)
+        if(tcs->shaderType() == EShader::Stage::TessellationControl)
         {
             if(_tessellationControlShader)
             {
@@ -114,7 +113,7 @@ bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context,
 {
     if(tes)
     {
-        if(tes->shaderType() == IShader::Type::TessellationEvaluation)
+        if(tes->shaderType() == EShader::Stage::TessellationEvaluation)
         {
             if(_tessellationEvaluationShader)
             {
@@ -142,7 +141,7 @@ bool IShaderProgram::setGeometryShader(IRenderingContext& context, Ref<IShader>&
 {
     if(gs)
     {
-        if(gs->shaderType() == IShader::Type::Geometry)
+        if(gs->shaderType() == EShader::Stage::Geometry)
         {
             if(_geometryShader)
             {
@@ -170,7 +169,7 @@ bool IShaderProgram::setPixelShader(IRenderingContext& context, Ref<IShader>& ps
 {
     if(ps)
     {
-        if(ps->shaderType() == IShader::Type::Pixel)
+        if(ps->shaderType() == EShader::Stage::Pixel)
         {
             if(_pixelShader)
             {

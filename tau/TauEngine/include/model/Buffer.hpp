@@ -9,6 +9,7 @@
 #include <ReferenceCountingPointer.hpp>
 #include "model/BufferDescriptor.hpp"
 #include "model/BufferEnums.hpp"
+#include "shader/EShader.hpp"
 
 #define BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                 RTT_IMPL(_TYPE, IBuffer)
@@ -114,8 +115,8 @@ public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
     virtual void unbind(IRenderingContext& context) noexcept = 0;
 
-    virtual void bind(IRenderingContext& context, u32 index) noexcept = 0;
-    virtual void unbind(IRenderingContext& context, u32 index) noexcept = 0;
+    virtual void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
+    virtual void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
 
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
     virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;

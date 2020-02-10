@@ -89,7 +89,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;_LIB;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;_LIB;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -129,7 +129,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Full</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;_LIB;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;_LIB;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -173,7 +173,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;_LIB;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;_LIB;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -212,6 +212,7 @@
   <ItemGroup>
     <ClInclude Include="include\CFile.hpp" />
     <ClInclude Include="include\IFile.hpp" />
+    <ClInclude Include="include\ResourceSelector.hpp" />
     <ClInclude Include="include\VFS.hpp" />
     <ClInclude Include="include\WavefrontObj.hpp" />
     <ClInclude Include="include\Win32File.hpp" />
@@ -224,6 +225,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\CFile.cpp" />
+    <ClCompile Include="src\ResourceSelector.cpp" />
     <ClCompile Include="src\VFS.cpp" />
     <ClCompile Include="src\Win32File.cpp" />
   </ItemGroup>

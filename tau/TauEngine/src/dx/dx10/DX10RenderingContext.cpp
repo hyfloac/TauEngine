@@ -17,8 +17,10 @@ DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
       _depthStencilBuffer(null), _depthStencilState(null), _depthStencilView(null),
       _rasterizerState(null),
       _swapChain(null),
-      _vsync(false)//,
-      // _tmpShaderBlob(null), _tmpInputLayout(null)
+      _vsync(false),
+      _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
+      _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
+      _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this))
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -37,6 +39,13 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
     RELEASE(_rasterizerState);
     RELEASE(_swapChain);
 #undef RELEASE
+
+    delete _bufferBuilder;
+    delete _indexBufferBuilder;
+    delete _uniformBufferBuilder;
+    _bufferBuilder = null;
+    _indexBufferBuilder = null;
+    _uniformBufferBuilder = null;
 }
 
 bool DX10RenderingContext::createContext(Window& window) noexcept
@@ -174,7 +183,8 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     {
         D3D10_RASTERIZER_DESC rasterDesc;
         rasterDesc.AntialiasedLineEnable = false;
-        rasterDesc.CullMode = D3D10_CULL_BACK;
+        // rasterDesc.CullMode = D3D10_CULL_BACK;
+        rasterDesc.CullMode = D3D10_CULL_NONE;
         rasterDesc.DepthBias = 0;
         rasterDesc.DepthBiasClamp = 0.0f;
         rasterDesc.DepthClipEnable = true;
@@ -259,20 +269,25 @@ void DX10RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-// Ref<IInputLayoutBuilder> DX10RenderingContext::createInputLayout(const uSys numDescriptors) noexcept
-// {
-//     return Ref<IInputLayoutBuilder>(new(::std::nothrow) DX10InputLayoutBuilder(numDescriptors));
-// }
-
 Ref<IVertexArrayBuilder> DX10RenderingContext::createVertexArray(const uSys bufferCount) noexcept
 {
     return Ref<IVertexArrayBuilder>(new(::std::nothrow) DX10VertexArrayBuilder(bufferCount, *this));
 }
 
-// Ref<IBufferBuilder> DX10RenderingContext::createBuffer(const uSys descriptorCount) noexcept
-// {
-//     return Ref<IBufferBuilder>(new(::std::nothrow) DX10BufferBuilder(descriptorCount, *this));
-// }
+IBufferBuilder& DX10RenderingContext::createBuffer() noexcept
+{
+    return *_bufferBuilder;
+}
+
+IIndexBufferBuilder& DX10RenderingContext::createIndexBuffer() noexcept
+{
+    return *_indexBufferBuilder;
+}
+
+IUniformBufferBuilder& DX10RenderingContext::createUniformBuffer() noexcept
+{
+    return *_uniformBufferBuilder;
+}
 
 Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept
 {

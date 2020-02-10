@@ -173,6 +173,7 @@
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\RenderingPipeline.hpp" />
     <ClInclude Include="include\ResourceLoader.hpp" />
+    <ClInclude Include="include\shader\EShader.hpp" />
     <ClInclude Include="include\shader\IShaderProgram.hpp" />
     <ClInclude Include="include\shader\TextureUploader.hpp" />
     <ClInclude Include="include\shader\Uniform.hpp" />
@@ -376,7 +377,7 @@
       <EnableModules>false</EnableModules>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -463,7 +464,7 @@
       <EnableModules>false</EnableModules>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -532,7 +533,7 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerOutput>All</AssemblerOutput>
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <ProgramDataBaseFileName>$(IntDir)pdb\vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
@@ -550,7 +551,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <MinimalRebuild>false</MinimalRebuild>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -634,7 +635,7 @@
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

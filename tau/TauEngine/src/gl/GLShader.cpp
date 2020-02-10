@@ -5,7 +5,6 @@
 #pragma warning(pop)
 #include <gl/GLShader.hpp>
 #include <Utils.hpp>
-#include <maths/Vector2f.hpp>
 #include <maths/Vector3f.hpp>
 #include <cstdio>
 #include "VFS.hpp"
@@ -15,7 +14,7 @@
 //     : IShader(), _shaderPath(shaderPath), _shaderID(shaderID), _shaderType(shaderType)
 // { }
 
-GLShader::GLShader(const GLuint shaderID, const Type shaderType) noexcept
+GLShader::GLShader(const GLuint shaderID, const EShader::Stage shaderType) noexcept
     : IShader(), _shaderID(shaderID), _shaderType(shaderType)
 { }
 
@@ -201,19 +200,19 @@ GLShader* GLShaderBuilder::build(Error* error) noexcept
 
     switch(_type)
     {
-        case IShader::Type::Vertex:
+        case EShader::Stage::Vertex:
             glShaderType = GL_VERTEX_SHADER;
             break;
-        case IShader::Type::TessellationControl:
+        case EShader::Stage::TessellationControl:
             glShaderType = GL_TESS_CONTROL_SHADER;
             break;
-        case IShader::Type::TessellationEvaluation:
+        case EShader::Stage::TessellationEvaluation:
             glShaderType = GL_TESS_EVALUATION_SHADER;
             break;
-        case IShader::Type::Geometry:
+        case EShader::Stage::Geometry:
             glShaderType = GL_GEOMETRY_SHADER;
             break;
-        case IShader::Type::Fragment:
+        case EShader::Stage::Fragment:
             glShaderType = GL_FRAGMENT_SHADER;
             break;
         default: ERROR_CODE_N(Error::InvalidShaderType);

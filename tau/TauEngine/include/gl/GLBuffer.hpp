@@ -79,8 +79,8 @@ public:
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
 
-    void bind(IRenderingContext& context, u32 index) noexcept override;
-    void unbind(IRenderingContext& context, u32 index) noexcept override;
+    void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
+    void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
     void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
@@ -133,8 +133,8 @@ public:
     [[nodiscard]] GLIndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] GLIndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] Ref<IIndexBuffer> buildCPPRef(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 protected:
     [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }

@@ -9,21 +9,49 @@
 #include <Objects.hpp>
 #include "Config.h"
 #include <shader/IShaderProgram.hpp>
+#include <model/VertexArray.hpp>
+#include <shader/Uniform.hpp>
+#include <Color.hpp>
+#include <glm/mat4x4.hpp>
+#include <camera/Camera2D.hpp>
+#include <DirectXMath.h>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
 class DX10Application final : public Application
 {
     DELETE_COPY(DX10Application);
+public:
+    struct Uniforms final
+    {
+        RGBAColor color;
+
+        Uniforms(const RGBAColor& color)
+            : color(color)
+        {
+        }
+    };
+    struct Matrices final
+    {
+        glm::mat4 projection;
+        glm::mat4 viewMatrix;
+        glm::mat4 viewMatrixTrans;
+        glm::mat4 model;
+        DirectX::XMMATRIX dxProjection;
+    };
 private:
     static constexpr const char* CONFIG_PATH = "|game/config.bin";
     Config _config;
     Window* _window;
     Ref<spdlog::logger> _logger;
     u8 _r, _g, _b;
-    u8 _rr, _gg, _bb;
+    int _colorState;
+    u8 _aa;
     Ref<IShaderProgram> _shader;
     Ref<IVertexArray> _va;
+    UniformBlockS<Uniforms>* _uni;
+    UniformBlockS<Matrices>* _matrices;
+    Camera2DController* _camera;
 public:
     DX10Application() noexcept;
 
@@ -35,7 +63,7 @@ public:
 
     void finalize() noexcept override;
 
-    void onException(Exception& ex) noexcept override;
+    void onException(ExceptionData& ex) noexcept override;
 protected:
     void update(float fixedDelta) noexcept override;
 

@@ -10,15 +10,15 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
 {
     Ref<IShaderBuilder> shaderBuilder = window.renderingContext()->createShader();
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LineVertex.glsl", FileProps::Read));
     Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Geometry);
+    shaderBuilder->type(EShader::Stage::Geometry);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LineGeometry.glsl", FileProps::Read));
     Ref<IShader> geometryShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LinePixel.glsl", FileProps::Read));
     Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
 

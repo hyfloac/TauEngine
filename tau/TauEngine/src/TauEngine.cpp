@@ -32,16 +32,27 @@ void tauMain() noexcept
     initProgramStartTimes();
 }
 
-static Exception* ex = nullptr;
+static ExceptionData exData = { null, 0, "", "" };
 
-void tauThrowException(Exception& e) noexcept
+#if defined(_DEBUG)
+void tauThrowException(Exception& e, const uSys line, const char* const file, const char* const func) noexcept
 {
-    ex = &e;
+    exData.ex = &e;
+    exData.line = line;
+    exData.file = file;
+    exData.func = func;
     tauExit(-1);
 }
+#else
+void tauThrowException(Exception& e) noexcept
+{
+    exData.ex = &e;
+    tauExit(-1);
+}
+#endif
 
-Exception* tauGetException() noexcept
-{ return ex; }
+ExceptionData& tauGetException() noexcept
+{ return exData; }
 
 volatile static bool should_exit = false;
 volatile static i32 exit_code = 0;

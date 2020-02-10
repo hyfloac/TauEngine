@@ -130,6 +130,22 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const ch
     return resolvePath(pathCompound);
 }
 
+DynString VFS::win32Path(DynString path) noexcept
+{
+    char* cPath = new(::std::nothrow) char[path.length() + 1];
+    ::std::memcpy(cPath, path.c_str(), path.length() + 1);
+
+    for(uSys i = 0; i < path.length(); ++i)
+    {
+        if(cPath[i] == '/')
+        {
+            cPath[i] = '\\';
+        }
+    }
+
+    return DynString::passControl(cPath);
+}
+
 bool VFS::fileExists(const char* path) const noexcept
 {
     const Container c = resolvePath(path);

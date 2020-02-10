@@ -33,7 +33,7 @@ public:
 
     void finalize() noexcept override final;
 
-    void onException(Exception& ex) noexcept override;
+    void onException(ExceptionData& ex) noexcept override;
 protected:
     void update(float fixedDelta) noexcept override final;
 

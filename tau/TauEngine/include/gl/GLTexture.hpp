@@ -72,15 +72,10 @@ class TAU_DLL GLDepthTexture final : public GLTexture2D
 {
     DEFAULT_DESTRUCT(GLDepthTexture);
     DELETE_COPY(GLDepthTexture);
-private:
-    // GLint _depthCompareMode;
-    // GLint _depthCompareFunc;
 public:
     GLDepthTexture(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Depth; }
-
-    // void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final;
 
     void set(u32 level, const void* data) noexcept override final;
 };
@@ -104,21 +99,15 @@ public:
 
     [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
 
-    // void setWrapModeCube(ETexture::WrapMode s, ETexture::WrapMode t, ETexture::WrapMode r) noexcept override;
-
-    virtual void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept override final;
-
-    // void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final;
-
-    // void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override final { }
+    void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept override final;
 
     void generateMipmaps() noexcept override;
 
-    virtual void set(u32 level, const void*) noexcept override final { }
+    void set(u32 level, const void*) noexcept override { }
 
-    virtual void bind(u8 textureUnit) noexcept override final;
+    void bind(u8 textureUnit) noexcept override;
 
-    virtual void unbind(u8 textureUnit) noexcept override final;
+    void unbind(u8 textureUnit) noexcept override;
 };
 
 class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder

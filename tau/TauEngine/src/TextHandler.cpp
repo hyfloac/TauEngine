@@ -64,11 +64,11 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
     PERF();
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile(vertexPath, FileProps::Read));
     Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile(fragmentPath, FileProps::Read));
     Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
 
@@ -240,6 +240,8 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
             // texture->setWrapMode(ETexture::WrapMode::ClampToEdge, ETexture::WrapMode::ClampToEdge);
 
             texture->set(0, face->glyph->bitmap.buffer);
+
+            texture->generateMipmaps();
         }
         else
         {
@@ -266,10 +268,10 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
     // _colorUni->set(color);
 
     _viewUniforms.data().projectionMatrix = proj;
-    _viewUniforms.upload(context, 0);
+    _viewUniforms.upload(context, EShader::Stage::Vertex, 0);
 
     _colorUniforms.data().color = color;
-    _colorUniforms.upload(context, 1);
+    _colorUniforms.upload(context, EShader::Stage::Pixel, 1);
 
     _va->bind(context);
     _va->preDraw(context);
@@ -321,8 +323,8 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
 
     _va->postDraw(context);
     _va->unbind(context);
-    _viewUniforms.unbind(context, 2);
-    _colorUniforms.unbind(context, 1);
+    _viewUniforms.unbind(context, EShader::Stage::Vertex, 2);
+    _colorUniforms.unbind(context, EShader::Stage::Pixel, 1);
     _shader->unbind(context);
 }
 
@@ -337,10 +339,10 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
     // _colorUni->set(color);
 
     _viewUniforms.data().projectionMatrix = proj;
-    _viewUniforms.upload(context, 0);
+    _viewUniforms.upload(context, EShader::Stage::Vertex, 0);
 
     _colorUniforms.data().color = color;
-    _colorUniforms.upload(context, 1);
+    _colorUniforms.upload(context, EShader::Stage::Pixel, 1);
 
     _va->bind(context);
     _va->preDraw(context);
@@ -401,8 +403,8 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
 
     _va->postDraw(context);
     _va->unbind(context);
-    _viewUniforms.unbind(context, 2);
-    _colorUniforms.unbind(context, 1);
+    _viewUniforms.unbind(context, EShader::Stage::Vertex, 2);
+    _colorUniforms.unbind(context, EShader::Stage::Pixel, 1);
     _shader->unbind(context);
 
     return height;

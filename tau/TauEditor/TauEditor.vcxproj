@@ -133,7 +133,7 @@
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
     </ClCompile>
@@ -196,7 +196,7 @@
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
@@ -245,7 +245,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>false</EnableModules>
-      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerOutput>All</AssemblerOutput>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <BrowseInformation>false</BrowseInformation>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -259,8 +259,11 @@
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -296,7 +299,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <OpenMPSupport>false</OpenMPSupport>
       <CompileAs>CompileAsCpp</CompileAs>
-      <AdditionalOptions>-march=skylake %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <ExceptionHandling>false</ExceptionHandling>

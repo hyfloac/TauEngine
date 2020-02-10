@@ -46,17 +46,17 @@ public:
     ~Win32File() noexcept override
     { CloseHandle(_file); }
 
-    i64 size() noexcept override;
+    [[nodiscard]] i64 size() noexcept override;
 
-    bool exists() noexcept override;
+    [[nodiscard]] bool exists() noexcept override;
 
-    const char* name() noexcept override { return _name; }
+    [[nodiscard]] const char* name() noexcept override { return _name; }
 
-    void setPos(u64 pos) noexcept override;
+    void setPos(uSys pos) noexcept override;
 
-    i64 readBytes(u8* buffer, u64 len) noexcept override;
+    i64 readBytes(u8* buffer, uSys len) noexcept override;
 
-    i64 writeBytes(const u8* buffer, u64 len) noexcept override;
+    i64 writeBytes(const u8* buffer, uSys len) noexcept override;
 };
 
 /**
@@ -85,18 +85,24 @@ public:
 
     ~Win32FileLoader() noexcept override = default;
 
-    bool fileExists(const char* path) const noexcept override;
+    [[nodiscard]] bool fileExists(const char* path) const noexcept override;
 
-    Ref<IFile> load(const char* path, FileProps props) const noexcept override;
+    [[nodiscard]] Ref<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    Ref<Win32File> load2(const char* path, FileProps props) const noexcept
+    [[nodiscard]] Ref<Win32File> load2(const char* path, FileProps props) const noexcept
     { return RefCast<Win32File>(load(path, props)); }
 
-    bool createFolder(const char* path) const noexcept override;
+    [[nodiscard]] bool createFolder(const char* path) const noexcept override;
 
-    bool deleteFolder(const char* path) const noexcept override;
+    [[nodiscard]] bool createFolders(const char* path) const noexcept override;
 
-    bool deleteFile(const char* path) const noexcept override;
+    [[nodiscard]] bool deleteFolder(const char* path) const noexcept override;
+
+    [[nodiscard]] bool deleteFile(const char* path) const noexcept override;
+
+    [[nodiscard]] u64 creationTime(const char* path) const noexcept override;
+
+    [[nodiscard]] u64 modifyTime(const char* path) const noexcept override;
 };
 
 #endif

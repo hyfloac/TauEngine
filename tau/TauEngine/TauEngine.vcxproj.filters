@@ -584,6 +584,9 @@
     <ClInclude Include="include\gl\GLTextureUploader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\shader\EShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Window.natvis" />

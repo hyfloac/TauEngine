@@ -23,7 +23,7 @@ void Camera2D::setProjection(const Window& window, float bottom, float left) noe
 
 void Camera2D::setProjection(float top, float right, float bottom, float left) noexcept
 {
-    _projectionMatrix = glm::ortho(left, static_cast<float>(right), bottom, static_cast<float>(top), -1.0f, 1.0f);
+    _projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 }
 
@@ -35,6 +35,7 @@ void Camera2D::recomputeMatrices() noexcept
     const glm::mat4 transform = glmExt::translate(identity, _position) * 
                                 glmExt::rotateDegrees(identity, _rotation, axis);
     _viewMatrix = glm::inverse(transform);
+    // _viewMatrix = transform;
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 }
 

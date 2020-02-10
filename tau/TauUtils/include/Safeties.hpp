@@ -21,6 +21,8 @@
 #define ERROR_CODE_COND(_COND, _ERR)         do { if((_COND)) { if(error) { *error = _ERR; } return;         } } while(0)
 #define ERROR_CODE_COND_V(_COND, _ERR, _VAL) do { if((_COND)) { if(error) { *error = _ERR; } return _VAL;    } } while(0)
 #define ERROR_CODE_COND_N(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return nullptr; } } while(0)
+#define ERROR_CODE_COND_T(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return true;    } } while(0)
+#define ERROR_CODE_COND_F(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return false;   } } while(0)
 
 #ifdef _DEBUG
   #define Ensure(__STATE) Assert(__STATE)

@@ -44,4 +44,13 @@ enum class MemoryStorage : u8
     Managed
 };
 
+enum class ContentHandling
+{
+    /**
+     * The old contents are discarded.
+     */
+    Discard = 1,
+    NoOverwrite
+};
+
 }

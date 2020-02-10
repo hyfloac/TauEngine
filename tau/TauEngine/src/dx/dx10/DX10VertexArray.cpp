@@ -1,4 +1,5 @@
 #include "dx/dx10/DX10VertexArray.hpp"
+#include "TauEngine.hpp"
 
 #ifdef _WIN32
 
@@ -104,6 +105,7 @@ void DX10VertexArray::draw(IRenderingContext& context) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
+        TAU_THROW(IncorrectContextException);
         return;
     }
 
@@ -427,7 +429,7 @@ void DX10VertexArrayBuilder::shader(const Ref<IShader>& shader) noexcept
         _shaderBlobCache = null;
         IVertexArrayBuilder::shader(shader);
     }
-    if(shader->shaderType() == IShader::Type::Vertex == RTT_CHECK(shader.get(), DX10Shader))
+    if(shader->shaderType() == EShader::Stage::Vertex && RTT_CHECK(shader.get(), DX10Shader))
     {
         _shaderBlobCache = RefCast<DX10VertexShader>(shader)->shaderBlob();
         IVertexArrayBuilder::shader(shader);

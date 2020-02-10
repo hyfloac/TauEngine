@@ -40,11 +40,11 @@ public:
 
     virtual ~IFile() noexcept = default;
 
-    virtual i64 size() noexcept = 0;
+    [[nodiscard]] virtual i64 size() noexcept = 0;
 
-    virtual bool exists() noexcept = 0;
+    [[nodiscard]] virtual bool exists() noexcept = 0;
 
-    virtual const char* name() noexcept = 0;
+    [[nodiscard]] virtual const char* name() noexcept = 0;
 
     /**
      * Sets the current read/write index pointer of the file.
@@ -53,14 +53,17 @@ public:
      * as a specific implementation may have changed how the
      * index pointer works.
      */
-    virtual void setPos(u64 pos) noexcept = 0;
+    virtual void setPos(uSys pos) noexcept = 0;
 
     virtual void resetPos() noexcept
     { setPos(0); }
 
-    virtual i64 readBytes(u8* buffer, u64 len) noexcept = 0;
+    virtual i64 readBytes(u8* buffer, uSys len) noexcept = 0;
 
-    virtual i64 readString(char* buffer, u64 len) noexcept
+    virtual i64 read(void* buffer, uSys len) noexcept
+    { return readBytes(reinterpret_cast<u8*>(buffer), len); }
+
+    virtual i64 readString(char* buffer, uSys len) noexcept
     { return readBytes(reinterpret_cast<u8*>(buffer), len); }
 
     virtual RefDynArray<u8> readFile() noexcept
@@ -79,7 +82,10 @@ public:
         return cnt ? ret : -1;
     }
 
-    virtual i64 writeBytes(const u8* buffer, u64 len) noexcept = 0;
+    virtual i64 writeBytes(const u8* buffer, uSys len) noexcept = 0;
+
+    virtual i64 write(const void* buffer, uSys len) noexcept
+    { return writeBytes(reinterpret_cast<const u8*>(buffer), len); }
 
     virtual i64 writeString(const char* str) noexcept
     { return writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str)); }
@@ -90,7 +96,7 @@ public:
 
     template<typename _T>
     i64 writeType(const _T& t) noexcept
-    { return writeBytes(reinterpret_cast<u8*>(&t), sizeof(_T)); }
+    { return writeBytes(reinterpret_cast<const u8*>(&t), sizeof(_T)); }
 };
 
 /**
@@ -112,13 +118,19 @@ public:
 
     virtual ~IFileLoader() noexcept = default;
 
-    virtual bool fileExists(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool fileExists(const char* path) const noexcept = 0;
 
-    virtual Ref<IFile> load(const char* path, FileProps props) const noexcept = 0;
+    [[nodiscard]] virtual Ref<IFile> load(const char* path, FileProps props) const noexcept = 0;
 
-    virtual bool createFolder(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolder(const char* path) const noexcept = 0;
 
-    virtual bool deleteFolder(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolders(const char* path) const noexcept = 0;
 
-    virtual bool deleteFile(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool deleteFolder(const char* path) const noexcept = 0;
+
+    [[nodiscard]] virtual bool deleteFile(const char* path) const noexcept = 0;
+
+    [[nodiscard]] virtual u64 creationTime(const char* path) const noexcept = 0;
+
+    [[nodiscard]] virtual u64 modifyTime(const char* path) const noexcept = 0;
 };

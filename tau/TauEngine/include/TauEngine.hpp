@@ -17,11 +17,25 @@ bool tauInit() noexcept;
 
 void tauMain() noexcept;
 
+struct ExceptionData final
+{
+    Exception* ex;
+    uSys line;
+    const char* file;
+    const char* func;
+};
+
+#if defined(_DEBUG)
+TAU_DLL void tauThrowException(Exception& e, uSys line, const char* file, const char* func) noexcept;
+
+#define TAU_THROW(_TYPE, ...) tauThrowException(*new _TYPE(__VA_ARGS__), __LINE__, __FILE__, __FUNCSIG__)
+#else
 TAU_DLL void tauThrowException(Exception& e) noexcept;
 
 #define TAU_THROW(_TYPE, ...) tauThrowException(*new _TYPE(__VA_ARGS__))
+#endif
 
-TAU_DLL Exception* tauGetException() noexcept;
+TAU_DLL ExceptionData& tauGetException() noexcept;
 
 // /**
 //  *   Gets up to `NUM_MESSAGES_TO_READ` [default `8`] messages 

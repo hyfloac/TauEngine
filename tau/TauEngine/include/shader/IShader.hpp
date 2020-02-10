@@ -6,6 +6,7 @@
 #include <RunTimeType.hpp>
 #include <events/Exception.hpp>
 #include "IFile.hpp"
+#include "EShader.hpp"
 
 class IRenderingContext;
 class Vector2f;
@@ -23,14 +24,6 @@ class Vector4f;
 
 #define SHADER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                 RTT_IMPL(_TYPE, IShader)
-
-// #define SHADER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-//                                 public: \
-//                                     [[nodiscard]] static IShader::ShaderType getStaticType() noexcept \
-//                                     { static IShader::ShaderType type = IShader::ShaderType::define(); \
-//                                       return type; } \
-//                                     [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept override \
-//                                     { return _TYPE::getStaticType(); }
 
 #if SHADER_GEN_NAMES
   #define SHADER_IMPL(_TYPE) SHADER_IMPL_BASE(_TYPE); \
@@ -51,24 +44,10 @@ class TAU_DLL NOVTABLE IShader
     DEFAULT_DESTRUCT_VI(IShader);
     DELETE_COPY(IShader);
 public:
-    enum class Type
-    {
-        Vertex = 0,
-        TessellationControl,
-        Hull = TessellationControl,
-        TessellationEvaluation,
-        Domain = TessellationEvaluation,
-        Geometry,
-        Pixel,
-        Fragment = Pixel,
-        Compute
-    };
 
     using ShaderType = RunTimeType<IShader>;
 public:
-    [[nodiscard]] virtual Type shaderType() const noexcept = 0;
-
-    // [[nodiscard]] virtual IShader::ShaderType getShaderType() const noexcept = 0;
+    [[nodiscard]] virtual EShader::Stage shaderType() const noexcept = 0;
 
     RTT_BASE_IMPL(IShader);
     RTT_BASE_CHECK(IShader);
@@ -101,19 +80,19 @@ public:
 protected:
     Ref<IFile> _file;
     const char* _src;
-    IShader::Type _type;
+    EShader::Stage _type;
 protected:
     IShaderBuilder() noexcept
-        : _file(null), _src(null), _type(static_cast<IShader::Type>(IntMaxMin<i32>::Max()))
+        : _file(null), _src(null), _type(static_cast<EShader::Stage>(IntMaxMin<i32>::Max()))
     { }
 public:
     virtual void file(const Ref<IFile>& file) noexcept { _file = file; }
     virtual void src(const char* const src) noexcept { _src = src; }
-    virtual void type(const IShader::Type type) noexcept { _type = type; }
+    virtual void type(const EShader::Stage type) noexcept { _type = type; }
 
     [[nodiscard]] const Ref<IFile>& file() const noexcept { return _file; }
     [[nodiscard]] const char* src() const noexcept { return _src; }
-    [[nodiscard]] IShader::Type type() const noexcept { return _type; }
+    [[nodiscard]] EShader::Stage type() const noexcept { return _type; }
 
     [[nodiscard]] virtual IShader* build([[tau::out]] Error* error = null) noexcept = 0;
 };

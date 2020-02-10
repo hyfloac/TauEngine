@@ -73,14 +73,14 @@ public:
         _buffer->unbind(context);
     }
 
-    void upload(IRenderingContext& context, const u32 index) const noexcept
+    void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        _buffer->bind(context, index);
+        _buffer->bind(context, stage, index);
     }
 
-    void unbind(IRenderingContext& context, const u32 index) const noexcept
+    void unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        _buffer->unbind(context, index);
+        _buffer->unbind(context, stage, index);
     }
 };
 
@@ -104,17 +104,17 @@ public:
 
     [[nodiscard]] _T& data() noexcept { return _t; }
 
-    void upload(IRenderingContext& context, const u32 index) const noexcept
+    void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
         _buffer->bind(context);
         UniformAccessor<_T>::set(context, _buffer, _t);
         _buffer->unbind(context);
-        _buffer->bind(context, index);
+        _buffer->bind(context, stage, index);
     }
 
-    void unbind(IRenderingContext& context, const u32 index) const noexcept
+    void unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        _buffer->unbind(context, index);
+        _buffer->unbind(context, stage, index);
     }
 };
 
@@ -135,17 +135,17 @@ public:
         _buffer = builder.buildCPPRef(args, null);
     }
 
-    void upload(IRenderingContext& context, const u32 index) const noexcept
+    void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
         _buffer->bind(context);
         UniformAccessor<_T>::set(context, _buffer, *_t);
         _buffer->unbind(context);
-        _buffer->bind(context, index);
+        _buffer->bind(context, stage, index);
     }
 
-    void unbind(IRenderingContext& context, const u32 index) const noexcept
+    void unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        _buffer->unbind(context, index);
+        _buffer->unbind(context, stage, index);
     }
 };
 

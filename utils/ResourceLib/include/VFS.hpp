@@ -61,7 +61,7 @@ public:
         Container& operator=(const Container& copy) noexcept = default;
         Container& operator=(Container&& move) noexcept = default;
 
-        bool canCreateAndWriteFile() const noexcept { return canCreateFile && canWriteFile; }
+        [[nodiscard]] bool canCreateAndWriteFile() const noexcept { return canCreateFile && canWriteFile; }
     };
 
     // using Container = Triplet<DynString, Ref<IFileLoader>, bool>;
@@ -106,6 +106,8 @@ public:
     VFS::Container resolvePath(const char* path, const char* subPath0) const noexcept;
     VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept;
     VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept;
+
+    static DynString win32Path(DynString path) noexcept;
 
     bool fileExists(const char* path) const noexcept;
 

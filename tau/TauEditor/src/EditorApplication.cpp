@@ -94,9 +94,12 @@ void TauEditorApplication::finalize() noexcept
     stopDebugOutput();
 }
 
-void TauEditorApplication::onException(Exception& ex) noexcept
+void TauEditorApplication::onException(ExceptionData& ex) noexcept
 {
-    ExceptionDispatcher dispatcher(ex);
+#if defined(_DEBUG)
+    _logger->trace("Exception Thrown in {}@{} \"{}\"", ex.file, ex.line, ex.func);
+#endif
+    ExceptionDispatcher dispatcher(*ex.ex);
     dispatcher.dispatch<IncorrectContextException>(this, &TauEditorApplication::onIncorrectContext);
 }
 

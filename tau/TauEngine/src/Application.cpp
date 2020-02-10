@@ -55,9 +55,9 @@ void Application::startGameLoop() noexcept
         }
     }
 
-    Exception* ex = tauGetException();
-    if(ex)
+    ExceptionData& ex = tauGetException();
+    if(ex.ex)
     {
-        onException(*ex);
+        onException(ex);
     }
 }

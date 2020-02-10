@@ -36,9 +36,9 @@ private:
         : _specularExponent(specularExponent), _textureUploader(textureUploader)
     { }
 public:
-    TextureIndices& upload(IRenderingContext& context, UniformBlockU<Material>& uniform, u32 uniformIndex, TextureIndices& textureIndices) const noexcept;
+    TextureIndices& upload(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, TextureIndices& textureIndices) const noexcept;
 
-    TextureIndices& unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, u32 uniformIndex, TextureIndices& textureIndices) const noexcept;
+    TextureIndices& unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, TextureIndices& textureIndices) const noexcept;
 private:
     friend class MaterialBuilder;
     friend class UniformAccessor<Material>;

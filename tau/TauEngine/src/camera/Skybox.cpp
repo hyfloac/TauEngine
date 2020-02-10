@@ -32,11 +32,11 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
 {
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile(vertexShaderPath, FileProps::Read));
     Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile(pixelShaderPath, FileProps::Read));
     Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
 
@@ -166,7 +166,7 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     _shader->bind(context);
     _uniforms.data().projectionMatrix = camera.projectionMatrix();
     _uniforms.data().viewMatrix = camera.viewRotMatrix();
-    _uniforms.upload(context, 0);
+    _uniforms.upload(context, EShader::Stage::Vertex, 0);
     {
         auto indices = TextureIndices(0, 0, 1);
         (void) _textureUploader->upload(context, indices);
@@ -183,7 +183,7 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     _cubeVA->postDraw(context);
     _cubeVA->unbind(context);
 
-    _uniforms.unbind(context, 0);
+    _uniforms.unbind(context, EShader::Stage::Vertex, 0);
     {
         auto indices = TextureIndices(0, 0, 1);
         (void) _textureUploader->unbind(context, indices);

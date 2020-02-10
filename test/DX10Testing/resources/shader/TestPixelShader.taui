@@ -1,0 +1,2 @@
+"OpenGL": "TestPixelShader.glsl",
+"DirectX10": "TestPixelShader.cso"

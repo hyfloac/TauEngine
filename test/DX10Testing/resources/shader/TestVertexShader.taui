@@ -1,0 +1,2 @@
+"OpenGL": "TestVertexShader.glsl",
+"DirectX10": "TestVertexShader.cso"

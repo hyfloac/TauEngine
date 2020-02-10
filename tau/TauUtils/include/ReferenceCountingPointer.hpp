@@ -7,6 +7,13 @@
 
 namespace _ReferenceCountingPointerUtils {
 
+/**
+ *   This does not store a direct _T because we may want to
+ * cast it to a non-concrete interface, in which case the
+ * compiler complains. By using a raw buffer we can convince
+ * the compiler that it is still a reference to a concrete
+ * type.
+ */
 template<typename _T>
 struct _ReferenceCountDataObject final
 {
@@ -15,12 +22,10 @@ public:
     uSys _refCount;
     TauAllocator& _allocator;
     u8 _objRaw[sizeof(_T)];
-    // _T _obj;
 public:
     template<typename... _Args>
     _ReferenceCountDataObject(TauAllocator& allocator, _Args&&... args) noexcept
         : _refCount(1), _allocator(allocator), _objRaw{}
-          // _obj(_TauAllocatorUtils::_forward<_Args>(args)...)
     { (void) new(_objRaw) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
 
     ~_ReferenceCountDataObject() noexcept
@@ -33,6 +38,10 @@ public:
     [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(_objRaw); }
 };
 
+/**
+ *   This does not store a direct _T because we may have to
+ * destruct the value before the entire object is destroyed.
+ */
 template<typename _T>
 struct _SWReferenceCount final
 {

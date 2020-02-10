@@ -25,17 +25,17 @@ public:
 // }
 
 
-TextureIndices& Material::upload(IRenderingContext& context, UniformBlockU<Material>& uniform, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
+TextureIndices& Material::upload(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
 {
     uniform.set(context, *this);
-    uniform.upload(context, uniformIndex);
+    uniform.upload(context, stage, uniformIndex);
     return _textureUploader->upload(context, textureIndices);
 }
 
 
-TextureIndices& Material::unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
+TextureIndices& Material::unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
 {
-    uniform.unbind(context, uniformIndex);
+    uniform.unbind(context, stage, uniformIndex);
     return _textureUploader->unbind(context, textureIndices);
 }
 

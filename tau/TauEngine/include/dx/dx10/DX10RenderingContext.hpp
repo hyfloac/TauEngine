@@ -11,6 +11,9 @@
 #include "DLL.hpp"
 
 class DX10ShaderProgram;
+class DX10BufferBuilder;
+class DX10IndexBufferBuilder;
+class DX10UniformBufferBuilder;
 
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
@@ -25,9 +28,9 @@ private:
 
     bool _vsync;
 
-    IBufferBuilder* _bufferBuilder;
-    IIndexBufferBuilder* _indexBufferBuilder;
-    IUniformBufferBuilder* _uniformBufferBuilder;
+    DX10BufferBuilder* _bufferBuilder;
+    DX10IndexBufferBuilder* _indexBufferBuilder;
+    DX10UniformBufferBuilder* _uniformBufferBuilder;
 public:
     DX10RenderingContext(const RenderingMode& mode) noexcept;
 
@@ -50,9 +53,9 @@ public:
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
     // [[nodiscard]] Ref<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept;
-    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override { return *_bufferBuilder; }
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override { return *_indexBufferBuilder; }
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override { return *_uniformBufferBuilder; }
+    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
+    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
+    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }

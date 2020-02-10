@@ -4,7 +4,7 @@
 #include "DLL.hpp"
 #include "Timings.hpp"
 
-class Exception;
+struct ExceptionData;
 
 class TAU_DLL Application
 {
@@ -25,7 +25,7 @@ public:
 
     virtual void finalize() noexcept = 0;
 
-    virtual void onException(Exception& ex) noexcept { }
+    virtual void onException(ExceptionData& ex) noexcept { }
 protected:
     virtual void update(float fixedDelta) noexcept = 0;
 

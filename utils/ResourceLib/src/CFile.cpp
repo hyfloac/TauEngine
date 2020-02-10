@@ -6,7 +6,7 @@
 
 i64 CFile::size() noexcept
 {
-    long curPos = ftell(_file);
+    const long curPos = ftell(_file);
     if(fseek(_file, 0, SEEK_END))
     { return -2; }
 
@@ -16,19 +16,19 @@ i64 CFile::size() noexcept
     return size;
 }
 
-void CFile::setPos(u64 pos) noexcept
+void CFile::setPos(const uSys pos) noexcept
 {
     fseek(_file, pos, SEEK_SET);
 }
 
-i64 CFile::readBytes(u8* buffer, u64 len) noexcept
+i64 CFile::readBytes(u8* const buffer, const uSys len) noexcept
 {
     if(_props != FileProps::Read || _props != FileProps::ReadWrite)
     { return -1; }
     return fread(buffer, sizeof(u8), len, _file);
 }
 
-i64 CFile::writeBytes(const u8* buffer, u64 len) noexcept
+i64 CFile::writeBytes(const u8* const buffer, const uSys len) noexcept
 {
     if(_props == FileProps::Read)
     { return -1; }
@@ -42,7 +42,7 @@ Ref<CFileLoader>& CFileLoader::Instance() noexcept
 }
 
 
-bool CFileLoader::fileExists(const char* path) const noexcept
+bool CFileLoader::fileExists(const char* const path) const noexcept
 {
     FILE* file;
     if((file = fopen(path, "r")))
@@ -53,7 +53,7 @@ bool CFileLoader::fileExists(const char* path) const noexcept
     return false;
 }
 
-Ref<IFile> CFileLoader::load(const char* path, FileProps props) const noexcept
+Ref<IFile> CFileLoader::load(const char* const path, const FileProps props) const noexcept
 {
     FILE* handle;
     switch(props)
@@ -72,8 +72,7 @@ Ref<IFile> CFileLoader::load(const char* path, FileProps props) const noexcept
     return Ref<CFile>(new CFile(handle, path, props));
 }
 
-
-bool CFileLoader::createFolder(const char* path) const noexcept
+bool CFileLoader::createFolder(const char* const path) const noexcept
 {
 #ifdef _WIN32
     return Win32FileLoader::Instance()->createFolder(path);
@@ -82,7 +81,16 @@ bool CFileLoader::createFolder(const char* path) const noexcept
 #endif
 }
 
-bool CFileLoader::deleteFolder(const char* path) const noexcept
+bool CFileLoader::createFolders(const char* const path) const noexcept
+{
+#ifdef _WIN32
+    return Win32FileLoader::Instance()->createFolders(path);
+#else
+    return false;
+#endif
+}
+
+bool CFileLoader::deleteFolder(const char* const path) const noexcept
 {
 #ifdef _WIN32
     return Win32FileLoader::Instance()->deleteFolder(path);
@@ -91,7 +99,25 @@ bool CFileLoader::deleteFolder(const char* path) const noexcept
 #endif
 }
 
-bool CFileLoader::deleteFile(const char* path) const noexcept
+bool CFileLoader::deleteFile(const char* const path) const noexcept
 {
     return !remove(path);
+}
+
+u64 CFileLoader::creationTime(const char* const path) const noexcept
+{
+#ifdef _WIN32
+    return Win32FileLoader::Instance()->creationTime(path);
+#else
+    return 0;
+#endif
+}
+
+u64 CFileLoader::modifyTime(const char* const path) const noexcept
+{
+#ifdef _WIN32
+    return Win32FileLoader::Instance()->modifyTime(path);
+#else
+    return 0;
+#endif
 }

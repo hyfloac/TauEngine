@@ -41,17 +41,17 @@ DX10Shader* DX10ShaderBuilder::build(Error* error) noexcept
 
     switch(_type)
     {
-        case IShader::Type::Vertex:
+        case EShader::Stage::Vertex:
             ret = buildVertexShader(error, dataBlob);
             break;
-        case IShader::Type::TessellationControl:
+        case EShader::Stage::TessellationControl:
             break;
-        case IShader::Type::TessellationEvaluation:
+        case EShader::Stage::TessellationEvaluation:
             break;
-        case IShader::Type::Geometry:
+        case EShader::Stage::Geometry:
             ret = buildGeometryShader(error, dataBlob);
             break;
-        case IShader::Type::Pixel:
+        case EShader::Stage::Pixel:
             ret = buildPixelShader(error, dataBlob);
             break;
         default: break;

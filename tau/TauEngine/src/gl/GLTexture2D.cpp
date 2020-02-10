@@ -2,9 +2,7 @@
 #include "gl/GLUtils.hpp"
 
 GLTexture2D::GLTexture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
-    : ITexture(width, height, dataFormat),
-      _texture(texture)//, _minFilter(GL_LINEAR), _magFilter(GL_LINEAR),
-      // _wrapS(GL_REPEAT), _wrapT(GL_REPEAT)
+    : ITexture(width, height, dataFormat), _texture(texture)
 { }
 
 GLTexture2D::~GLTexture2D() noexcept
@@ -20,12 +18,6 @@ void GLTexture2D::set(const u32 level, const void* data) noexcept
 
     glBindTexture(GL_TEXTURE_2D, _texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _magFilter);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _minFilter);
-    //
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _wrapS);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _wrapT);
 
     glTexImage2D(GL_TEXTURE_2D, level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
@@ -43,35 +35,13 @@ void GLTexture2D::unbind(u8 textureUnit) noexcept
 }
 
 GLDepthTexture::GLDepthTexture(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
-    : GLTexture2D(width, height, dataFormat, texture)//,
-      // _depthCompareMode(GL_COMPARE_REF_TO_TEXTURE), _depthCompareFunc(GL_LEQUAL)
+    : GLTexture2D(width, height, dataFormat, texture)
 { }
-
-// void GLDepthTexture::setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept
-// {
-//     _depthCompareMode = enableDepthTest ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE;
-//     _depthCompareFunc = glDepthCompareFunc(compareFunc);
-// }
 
 void GLDepthTexture::set(const u32 level, const void* data) noexcept
 {
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, _depthCompareMode);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, _depthCompareFunc);
-
     GLTexture2D::set(level , data);
 }
-
-// void GLTexture2D::setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept
-// {
-//     _minFilter = glFilterType(minificationFilter);
-//     _magFilter = glFilterType(magnificationFilter);
-// }
-//
-// void GLTexture2D::setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept
-// {
-//     _wrapS = glWrapMode(s);
-//     _wrapT = glWrapMode(t);
-// }
 
 void GLTexture2D::generateMipmaps() noexcept
 {
@@ -172,18 +142,6 @@ GLint GLTexture2D::glInternalFormat(const ETexture::Format format) noexcept
 {
     switch(format)
     {
-        // case ETexture::Format::Red8UnsignedInt: return GL_R8UI;
-        // case ETexture::Format::Red16UnsignedInt: return GL_R16UI;
-        // case ETexture::Format::Red32UnsignedInt: return GL_R32UI;
-        // case ETexture::Format::RedGreen8UnsignedInt:  return GL_RG8UI;
-        // case ETexture::Format::RedGreen16UnsignedInt: return GL_RG16UI;
-        // case ETexture::Format::RedGreen32UnsignedInt: return GL_RG32UI;
-        // case ETexture::Format::RedGreenBlue8UnsignedInt:  return GL_RGB8UI;
-        // case ETexture::Format::RedGreenBlue16UnsignedInt: return GL_RGB16UI;
-        // case ETexture::Format::RedGreenBlue32UnsignedInt: return GL_RGB32UI;
-        // case ETexture::Format::RedGreenBlueAlpha8UnsignedInt:  return GL_RGBA8UI;
-        // case ETexture::Format::RedGreenBlueAlpha16UnsignedInt: return GL_RGBA16UI;
-        // case ETexture::Format::RedGreenBlueAlpha32UnsignedInt: return GL_RGBA32UI;
         case ETexture::Format::Red8UnsignedInt: return GL_R8;
         case ETexture::Format::Red16UnsignedInt: return GL_R16;
         case ETexture::Format::Red32UnsignedInt: return GL_R32UI;
@@ -231,18 +189,6 @@ GLenum GLTexture2D::glInputFormat(const ETexture::Format format) noexcept
         case ETexture::Format::RedGreenBlueAlpha8UnsignedInt:  return GL_RGBA;
         case ETexture::Format::RedGreenBlueAlpha16UnsignedInt: return GL_RGBA;
         case ETexture::Format::RedGreenBlueAlpha32UnsignedInt: return GL_RGBA;
-            // case ETexture::Format::Red8UnsignedInt: return GL_RED_INTEGER;
-            // case ETexture::Format::Red16UnsignedInt: return GL_RED_INTEGER;
-            // case ETexture::Format::Red32UnsignedInt: return GL_RED_INTEGER;
-            // case ETexture::Format::RedGreen8UnsignedInt:  return GL_RG_INTEGER;
-            // case ETexture::Format::RedGreen16UnsignedInt: return GL_RG_INTEGER;
-            // case ETexture::Format::RedGreen32UnsignedInt: return GL_RG_INTEGER;
-            // case ETexture::Format::RedGreenBlue8UnsignedInt:  return GL_RGB_INTEGER;
-            // case ETexture::Format::RedGreenBlue16UnsignedInt: return GL_RGB_INTEGER;
-            // case ETexture::Format::RedGreenBlue32UnsignedInt: return GL_RGB_INTEGER;
-            // case ETexture::Format::RedGreenBlueAlpha8UnsignedInt:  return GL_RGBA_INTEGER;
-            // case ETexture::Format::RedGreenBlueAlpha16UnsignedInt: return GL_RGBA_INTEGER;
-            // case ETexture::Format::RedGreenBlueAlpha32UnsignedInt: return GL_RGBA_INTEGER;
         case ETexture::Format::Red16Float: return GL_RED;
         case ETexture::Format::Red32Float: return GL_RED;
         case ETexture::Format::RedGreen16Float: return GL_RG;

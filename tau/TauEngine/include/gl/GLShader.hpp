@@ -16,16 +16,16 @@ class TAU_DLL GLShader final : public IShader
 private:
     // const char* _shaderPath;
     GLuint _shaderID;
-    Type _shaderType;
+    EShader::Stage _shaderType;
 private:
     // GLShader(IShader::Type shaderType, const NotNull<const char>& shaderPath, GLuint shaderID) noexcept;
-    GLShader(GLuint shaderID, Type shaderType) noexcept;
+    GLShader(GLuint shaderID, EShader::Stage shaderType) noexcept;
 public:
     // static Ref<GLShader> create(IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept;
 public:
     ~GLShader() noexcept override final;
 
-    [[nodiscard]] Type shaderType() const noexcept override { return _shaderType; }
+    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return _shaderType; }
 
     [[nodiscard]] GLuint shaderId() const noexcept { return _shaderID; }
 

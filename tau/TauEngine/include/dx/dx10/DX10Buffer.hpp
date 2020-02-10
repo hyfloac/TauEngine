@@ -54,27 +54,83 @@ public:
     void unmapBuffer(IRenderingContext& context) noexcept override;
 };
 
-// class TAU_DLL DX10BufferBuilder final : public IBufferBuilder
-// {
-//     DEFAULT_DESTRUCT(DX10BufferBuilder);
-//     DELETE_COPY(DX10BufferBuilder);
-// private:
-//     DX10RenderingContext& _context;
-// public:
-//     DX10BufferBuilder(uSys descriptorCount, DX10RenderingContext& context) noexcept;
-//
-//     [[nodiscard]] DX10Buffer* build(Error* error) const noexcept override;
-// };
+class TAU_DLL DX10UniformBuffer final : public IUniformBuffer
+{
+    UNIFORM_BUFFER_IMPL(DX10UniformBuffer);
+private:
+    ID3D10Buffer* _d3dBuffer;
+public:
+    DX10UniformBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept;
 
-// class TAU_DLL DX10IndexBufferBuilder final : public IIndexBufferBuilder
-// {
-//     DEFAULT_DESTRUCT(DX10IndexBufferBuilder);
-//     DELETE_COPY(DX10IndexBufferBuilder);
-// private:
-//     DX10RenderingContext& _context;
-// public:
-//     DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept;
-//
-//     [[nodiscard]] DX10IndexBuffer* build(Error* error) const noexcept override;
-// };
+    ~DX10UniformBuffer() noexcept;
+
+    [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
+    [[nodiscard]] ID3D10Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
+
+    void bind(IRenderingContext& context) noexcept override { }
+    void unbind(IRenderingContext& context) noexcept override { }
+
+    void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
+    void unbind(IRenderingContext& context, EShader::Stage, u32 index) noexcept override { }
+
+    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
+    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+
+    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
+    void unmapBuffer(IRenderingContext& context) noexcept override;
+};
+
+class TAU_DLL DX10BufferBuilder final : public IBufferBuilder
+{
+    DEFAULT_DESTRUCT(DX10BufferBuilder);
+    DELETE_COPY(DX10BufferBuilder);
+private:
+    DX10RenderingContext& _context;
+public:
+    DX10BufferBuilder(DX10RenderingContext& context) noexcept;
+
+    [[nodiscard]] DX10Buffer* build(const BufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10Buffer* build(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IBuffer> buildCPPRef(const BufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IBuffer> buildTauRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+private:
+    [[nodiscard]] bool processBufferArgs(const BufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+};
+
+class TAU_DLL DX10IndexBufferBuilder final : public IIndexBufferBuilder
+{
+    DEFAULT_DESTRUCT(DX10IndexBufferBuilder);
+    DELETE_COPY(DX10IndexBufferBuilder);
+private:
+    DX10RenderingContext& _context;
+public:
+    DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept;
+
+    [[nodiscard]] DX10IndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10IndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IIndexBuffer> buildCPPRef(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+private:
+    [[nodiscard]] bool processBufferArgs(const IndexBufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+};
+
+class TAU_DLL DX10UniformBufferBuilder final : public IUniformBufferBuilder
+{
+    DEFAULT_DESTRUCT(DX10UniformBufferBuilder);
+    DELETE_COPY(DX10UniformBufferBuilder);
+private:
+    DX10RenderingContext& _context;
+public:
+    DX10UniformBufferBuilder(DX10RenderingContext& context) noexcept;
+
+    [[nodiscard]] DX10UniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10UniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IUniformBuffer> buildCPPRef(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
+private:
+    [[nodiscard]] bool processBufferArgs(const UniformBufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+};
 #endif

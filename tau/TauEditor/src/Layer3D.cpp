@@ -80,39 +80,39 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
     Ref<IShaderBuilder> shaderBuilder = window.renderingContext()->createShader();
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/SimpleVertexShader.glsl", FileProps::Read));
     Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/nanosuit/NanosuitPixel.glsl", FileProps::Read));
     Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlineVertexShader.glsl", FileProps::Read));
     Ref<IShader> outlineVertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlinePixelShader.glsl", FileProps::Read));
     Ref<IShader> outlinePixelShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefVertexShader.glsl", FileProps::Read));
     Ref<IShader> refVertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/ReflectionPixelShader.glsl", FileProps::Read));
     Ref<IShader> reflectionPixelShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
     Ref<IShader> refractionPixelShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Vertex);
+    shaderBuilder->type(EShader::Stage::Vertex);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/FrameBufferVertexShader.glsl", FileProps::Read));
     Ref<IShader> frameBufferVertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(IShader::Type::Pixel);
+    shaderBuilder->type(EShader::Stage::Pixel);
     shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/FrameBufferPixelShader.glsl", FileProps::Read));
     Ref<IShader> frameBufferPixelShader = Ref<IShader>(shaderBuilder->build());
 
@@ -248,26 +248,26 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
 
         self->_spotLightUniforms.set(context, self->_spotLight);
 
-        self->_uniforms.upload(context, 0);
-        self->_pointLightUniforms.upload(context, 2);
-        self->_spotLightUniforms.upload(context, 3);
-        self->_cameraPosUni.upload(context, 4);
+        self->_uniforms.upload(context, EShader::Stage::Vertex, 0);
+        self->_pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
+        self->_spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
+        self->_cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
     
         for(const Ref<RenderableObject>& ro : self->_objects)
         {
             TextureIndices indices(0, 0, 0);
-            ro->material().upload(context, self->_materialUniforms, 1, indices);
+            ro->material().upload(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
             ro->preRender(context);
             ro->render(context);
             ro->postRender(context);
             indices = TextureIndices(0, 0, 0);
-            ro->material().unbind(context, self->_materialUniforms, 1, indices);
+            ro->material().unbind(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
         }
 
-        self->_cameraPosUni.unbind(context, 4);
-        self->_spotLightUniforms.unbind(context, 3);
-        self->_pointLightUniforms.unbind(context, 2);
-        self->_uniforms.unbind(context, 0);
+        self->_cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
+        self->_spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
+        self->_pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
+        self->_uniforms.unbind(context, EShader::Stage::Vertex, 0);
         self->_shader->unbind(context);
     
         self->_skybox.render(context, self->_camera.camera());

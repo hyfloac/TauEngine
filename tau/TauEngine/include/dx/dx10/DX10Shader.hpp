@@ -35,7 +35,7 @@ public:
         _shaderBlob->Release();
     }
 
-    [[nodiscard]] Type shaderType() const noexcept override { return IShader::Type::Vertex; }
+    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Vertex; }
 
     [[nodiscard]] const ID3D10VertexShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10VertexShader* shader() noexcept { return _shader; }
@@ -60,7 +60,7 @@ public:
         _shader->Release();
     }
 
-    [[nodiscard]] Type shaderType() const noexcept override { return IShader::Type::Geometry; }
+    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Geometry; }
 
     [[nodiscard]] const ID3D10GeometryShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10GeometryShader* shader() noexcept { return _shader; }
@@ -83,7 +83,7 @@ public:
         _shader->Release();
     }
 
-    [[nodiscard]] Type shaderType() const noexcept override { return IShader::Type::Pixel; }
+    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Pixel; }
 
     [[nodiscard]] const ID3D10PixelShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10PixelShader* shader() noexcept { return _shader; }
