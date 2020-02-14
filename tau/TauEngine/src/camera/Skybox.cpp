@@ -19,15 +19,16 @@ public:
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Skybox::Uniforms& t) noexcept
     {
-        buffer->modifyBuffer(context, 0, sizeof(float) * 4 * 4, glm::value_ptr(t.projectionMatrix));
-        buffer->modifyBuffer(context, sizeof(float) * 4 * 4, sizeof(float) * 4 * 4, glm::value_ptr(t.viewMatrix));
+        buffer->beginModification(context);
+        buffer->modifyBuffer(0, sizeof(float) * 4 * 4, glm::value_ptr(t.projectionMatrix));
+        buffer->modifyBuffer(sizeof(float) * 4 * 4, sizeof(float) * 4 * 4, glm::value_ptr(t.viewMatrix));
+        buffer->endModification(context);
     }
 };
 
 Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
       _uniforms(context.createUniformBuffer()),
-      // _projectionUni(null), _viewUni(null), _skyboxUni(null),
       _skybox(null), _textureUploader(null), _cubeVA(null)
 {
     Ref<IShaderBuilder> shaderBuilder = context.createShader();
@@ -45,34 +46,20 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
 
     _shader->link(context);
 
-
-    // _projectionUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
-    // _viewUni = _shader->getUniform<glm::mat4>("cameraViewMatrix", false);
-    // _skyboxUni = _shader->getUniform<int>("skybox");
-
-    // const TextureLoader::GPUTextureSettings settings
-    // {
-    //     -1,
-    //     ETexture::Filter::Linear,
-    //     ETexture::Filter::Linear,
-    //     ETexture::WrapMode::ClampToEdge,
-    //     ETexture::WrapMode::ClampToEdge,
-    //     ETexture::WrapMode::ClampToEdge
-    // };
     _skybox = Ref<ITextureCube>(TextureLoader::loadTextureCubeEx(context, skyboxPath, fileExtension, -1));
 
-    Ref<ITextureSamplerBuilder> textureSamplerBuilder = context.createTextureSampler();
-    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear, 
-                                         ETexture::Filter::Linear, 
-                                         ETexture::Filter::Linear);
-    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::ClampToEdge,
-                                       ETexture::WrapMode::ClampToEdge,
-                                       ETexture::WrapMode::ClampToEdge);
-    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+    TextureSamplerArgs textureSamplerArgs;
+    textureSamplerArgs.magFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.minFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.mipFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.wrapU = ETexture::WrapMode::ClampToEdge;
+    textureSamplerArgs.wrapV = ETexture::WrapMode::ClampToEdge;
+    textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
+    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
     Ref<ITextureUploaderBuilder> uploaderBuilder = context.createTextureUploader(1);
     uploaderBuilder->setTexture(0, _skybox);
-    uploaderBuilder->textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+    uploaderBuilder->textureSampler(Ref<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
 
     _textureUploader = Ref<ITextureUploader>(uploaderBuilder->build());
 
@@ -135,9 +122,7 @@ Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const c
 
     // Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
     Ref<IBuffer> skyboxCube = context.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
-    skyboxCube->bind(context);
     skyboxCube->fillBuffer(context, skyboxVertices);
-    skyboxCube->unbind(context);
 
     // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
     // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);

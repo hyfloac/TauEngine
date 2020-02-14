@@ -12,7 +12,7 @@ public:
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Material& t) noexcept
     {
-        buffer->fillBuffer(context, reinterpret_cast<const void*>(&t._specularExponent));
+        buffer->fillBuffer(context, &t._specularExponent);
     }
 };
 

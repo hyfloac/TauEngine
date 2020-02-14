@@ -58,9 +58,7 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     vboBuilder.elementCount = 6;
     vboBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
 
-    _vbo->bind(context);
     _vbo->fillBuffer(context, model);
-    _vbo->unbind(context);
 
     // if(!_inputLayoutCache)
     // {

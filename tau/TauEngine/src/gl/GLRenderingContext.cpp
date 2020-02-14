@@ -5,7 +5,6 @@
 #include "gl/GLRenderingContext.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLVertexArray.hpp"
-#include "gl/GLBuffer.hpp"
 #include "gl/GLFrameBuffer.hpp"
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 #include "gl/GLTexture.hpp"
@@ -17,7 +16,6 @@
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
     : IRenderingContext(mode),
       _device(null), _context(null),
-      // _vaos(),
       _majorVersion(majorVersion),
       _minorVersion(minorVersion),
       _compat(core),
@@ -34,18 +32,20 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:
-            _bufferBuilder = new(::std::nothrow) GLBufferBuilder();
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder();
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder();
+            _bufferBuilder = new(::std::nothrow) GLBufferBuilder;
+            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder;
+            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder;
             break;
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            _bufferBuilder = new(::std::nothrow) GLBuffer4_5Builder();
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBuffer4_5Builder();
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBuffer4_5Builder();
+            _bufferBuilder = new(::std::nothrow) GLBuffer4_5Builder;
+            _indexBufferBuilder = new(::std::nothrow) GLIndexBuffer4_5Builder;
+            _uniformBufferBuilder = new(::std::nothrow) GLUniformBuffer4_5Builder;
             break;
         default: break;
     }
+
+    _textureSamplerBuilder = new(::std::nothrow) GLTextureSamplerBuilder;
 }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
@@ -107,11 +107,6 @@ Ref<ITextureBuilder> GLRenderingContext::createTextureDepth() noexcept
 Ref<ITextureCubeBuilder> GLRenderingContext::createTextureCube() noexcept
 {
     return Ref<GLTextureCubeBuilder>(new(::std::nothrow) GLTextureCubeBuilder);
-}
-
-Ref<ITextureSamplerBuilder> GLRenderingContext::createTextureSampler() noexcept
-{
-    return Ref<GLTextureSamplerBuilder>(new(::std::nothrow) GLTextureSamplerBuilder);
 }
 
 Ref<ITextureUploaderBuilder> GLRenderingContext::createTextureUploader(const uSys textureCount) noexcept

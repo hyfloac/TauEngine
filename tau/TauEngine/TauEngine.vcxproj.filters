@@ -93,9 +93,6 @@
     <ClCompile Include="src\LayerStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\RenderingContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gl\win32\GLRenderingContext.Win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -244,6 +241,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gl\GLTextureUploader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\system\RenderingContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10TextureUploader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -585,6 +591,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\EShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10Texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10TextureUploader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

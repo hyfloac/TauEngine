@@ -83,17 +83,17 @@ TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, con
 
     _shader->link(context);
 
-    Ref<ITextureSamplerBuilder> textureSamplerBuilder = context.createTextureSampler();
-    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear,
-                                         ETexture::Filter::Linear,
-                                         ETexture::Filter::Linear);
-    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::ClampToEdge,
-                                       ETexture::WrapMode::ClampToEdge,
-                                       ETexture::WrapMode::ClampToEdge);
-    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+    TextureSamplerArgs textureSamplerArgs;
+    textureSamplerArgs.magFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.minFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.mipFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.wrapU = ETexture::WrapMode::ClampToEdge;
+    textureSamplerArgs.wrapV = ETexture::WrapMode::ClampToEdge;
+    textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
+    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
     Ref<ISingleTextureUploaderBuilder> tuBuilder = context.createSingleTextureUploader();
-    tuBuilder->textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+    tuBuilder->textureSampler(Ref<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
     _textureUploader = Ref<ISingleTextureUploader>(tuBuilder->build());
 
     // _projUni = _shader->getUniform<glm::mat4>("projectionMatrix", false);
@@ -308,9 +308,9 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
         TextureIndices indices(0, 0, 2);
         (void) _textureUploader->upload(context, indices);
 
-        _positionBuffer->bind(context);
-        _positionBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
-        _positionBuffer->unbind(context);
+        _positionBuffer->beginModification(context);
+        _positionBuffer->modifyBuffer(0, sizeof(vertices), vertices);
+        _positionBuffer->endModification(context);
 
         _va->draw(context);
 
@@ -388,9 +388,9 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
         TextureIndices indices(0, 0, 2);
         (void) _textureUploader->upload(context, indices);
 
-        _positionBuffer->bind(context);
-        _positionBuffer->modifyBuffer(context, 0, sizeof(vertices), vertices);
-        _positionBuffer->unbind(context);
+        _positionBuffer->beginModification(context);
+        _positionBuffer->modifyBuffer(0, sizeof(vertices), vertices);
+        _positionBuffer->endModification(context);
 
         _va->draw(context);
 

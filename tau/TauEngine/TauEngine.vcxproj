@@ -34,7 +34,9 @@
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10Texture.cpp" />
     <ClCompile Include="src\dx\dx10\DX10TextureSampler.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10TextureUploader.cpp" />
     <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp" />
     <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx9\DX9Buffer.cpp" />
@@ -78,7 +80,7 @@
     <ClCompile Include="src\model\VertexArray.cpp" />
     <ClCompile Include="src\model\OBJLoader.cpp" />
     <ClCompile Include="src\model\RenderableObject.cpp" />
-    <ClCompile Include="src\RenderingContext.cpp" />
+    <ClCompile Include="src\system\RenderingContext.cpp" />
     <ClCompile Include="src\RenderingPipeline.cpp" />
     <ClCompile Include="src\ResourceLoader.cpp" />
     <ClCompile Include="src\model\SimpleOBJLoader.cpp" />
@@ -116,7 +118,9 @@
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10Texture.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureSampler.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10TextureUploader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10VertexArray.hpp" />
     <ClInclude Include="include\dx\dx9\DX9Buffer.hpp" />
     <ClInclude Include="include\dx\dx9\DX9RenderingContext.hpp" />

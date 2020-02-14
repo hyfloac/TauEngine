@@ -15,6 +15,7 @@
 #include <shader/IShader.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <ResourceSelector.hpp>
+#include <texture/FITextureLoader.hpp>
 
 template<>
 class UniformAccessor<DX10Application::Uniforms> final
@@ -23,24 +24,21 @@ class UniformAccessor<DX10Application::Uniforms> final
     DELETE_DESTRUCT(UniformAccessor);
     DELETE_COPY(UniformAccessor);
 public:
-
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const DX10Application::Uniforms& t) noexcept
     {
-        void* buf = buffer->mapBuffer(context);
+        const float r = static_cast<float>(t.color.r) / 255.0f;
+        const float g = static_cast<float>(t.color.g) / 255.0f;
+        const float b = static_cast<float>(t.color.b) / 255.0f;
+        const float a = static_cast<float>(t.color.a) / 255.0f;
 
-        float r = static_cast<float>(t.color.r) / 255.0f;
-        float g = static_cast<float>(t.color.g) / 255.0f;
-        float b = static_cast<float>(t.color.b) / 255.0f;
-        float a = static_cast<float>(t.color.a) / 255.0f;
-
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + sizeof(float) * 0, &r, sizeof(float));
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + sizeof(float) * 1, &g, sizeof(float));
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + sizeof(float) * 2, &b, sizeof(float));
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + sizeof(float) * 3, &a, sizeof(float));
-
-        buffer->unmapBuffer(context);
+        buffer->beginModification(context);
+        buffer->modifyBuffer(sizeof(float) * 0, r);
+        buffer->modifyBuffer(sizeof(float) * 1, g);
+        buffer->modifyBuffer(sizeof(float) * 2, b);
+        buffer->modifyBuffer(sizeof(float) * 3, a);
+        buffer->endModification(context);
     }
 };
 
@@ -57,19 +55,27 @@ public:
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const DX10Application::Matrices& t) noexcept
     {
-        void* buf = buffer->mapBuffer(context);
-
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 0, &t.dxProjection, MATRIX_SIZE);
-        // ::std::memcpy(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 0, glm::value_ptr(t.projection), MATRIX_SIZE);
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 1, glm::value_ptr(t.viewMatrixTrans), MATRIX_SIZE);
-        ::std::memcpy(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 2, glm::value_ptr(t.model), MATRIX_SIZE);
-
-        buffer->unmapBuffer(context);
+        buffer->beginModification(context);
+        buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, &t.dxProjection);
+        // buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.projection));
+        buffer->modifyBuffer(MATRIX_SIZE * 1, MATRIX_SIZE, glm::value_ptr(t.viewMatrixTrans));
+        buffer->modifyBuffer(MATRIX_SIZE * 2, MATRIX_SIZE, glm::value_ptr(t.model));
+        buffer->endModification(context);
     }
 };
 
+class RMRSTransformer final : public IResourceSelectorTransformer
+{
+    DEFAULT_CONSTRUCT_PU(RMRSTransformer);
+    DEFAULT_DESTRUCT(RMRSTransformer);
+    DELETE_COPY(RMRSTransformer);
+public:
+    [[nodiscard]] ResIndex transform(const DynString& key) noexcept override;
+
+    [[nodiscard]] static ResIndex transform(const RenderingMode& rm) noexcept;
+};
+
 static void setupGameFolders() noexcept;
-static const DynString& transformRenderingMode(const RenderingMode::Mode mode) noexcept;
 
 DX10Application::DX10Application() noexcept
     : Application(32), _config { false, 800, 600 },
@@ -96,6 +102,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     TimingsWriter::begin("DX10Test::Initialization", "|TERes/perfInit.json");
 
+    RenderingMode::getGlobalMode().setDebugMode(true);
     RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
 
@@ -122,12 +129,9 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     UNUSED(async);
 
-    // TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_window->renderingContext()));
+    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
 
-    Ref<ResourceSelectorTransformer> transformer = Ref< ResourceSelectorTransformer>(new ResourceSelectorTransformer);
-
-    transformer->addTransform("OpenGL", 0);
-    transformer->addTransform("DirectX10", 1);
+    Ref<RMRSTransformer> transformer = Ref<RMRSTransformer>(new RMRSTransformer);
 
     ResourceSelectorLoader::setCacheDirectory("|res/cache");
 
@@ -137,13 +141,11 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     Ref<IShaderBuilder> shaderBuilder = ctx().createShader();
 
     shaderBuilder->type(EShader::Stage::Vertex);
-    // shaderBuilder->file(VFS::Instance().openFile(RenderingMode::getGlobalMode().currentMode() == RenderingMode::DirectX10 ? "|res/shader/TestVertexShader.cso" : "|res/shader/TestVertexShader.glsl", FileProps::Read));
-    shaderBuilder->file(vertexSelector.select(transformRenderingMode(RenderingMode::getGlobalMode().currentMode())));
+    shaderBuilder->file(vertexSelector.select(transformer->transform(RenderingMode::getGlobalMode())).loadFile(FileProps::Read));
     auto vertexShader = Ref<IShader>(shaderBuilder->build());
 
     shaderBuilder->type(EShader::Stage::Pixel);
-    // shaderBuilder->file(VFS::Instance().openFile(RenderingMode::getGlobalMode().currentMode() == RenderingMode::DirectX10 ? "|res/shader/TestPixelShader.cso" : "|res/shader/TestPixelShader.glsl", FileProps::Read));
-    shaderBuilder->file(pixelSelector.select(transformRenderingMode(RenderingMode::getGlobalMode().currentMode())));
+    shaderBuilder->file(pixelSelector.select(transformer->transform(RenderingMode::getGlobalMode())).loadFile(FileProps::Read));
     auto pixelShader = Ref<IShader>(shaderBuilder->build());
 
     _shader = IShaderProgram::create(ctx());
@@ -180,7 +182,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
         0, 1, 3,
         2, 3, 1
     };
-
+	
     BufferArgs bufBuilder(1);
     bufBuilder.type = EBuffer::Type::ArrayBuffer;
     bufBuilder.usage = EBuffer::UsageType::StaticDraw;
@@ -207,10 +209,23 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
     const Ref<IBuffer> colorBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
 
-    Ref<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(2);
+    float texCoords[2 * 4] = {
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
+    };
+
+    bufBuilder.initialBuffer = texCoords;
+    bufBuilder.descriptor.reset(1);
+    bufBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+    const Ref<IBuffer> texBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
+
+    Ref<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(3);
 
     vaBuilder->setVertexBuffer(0, posBuffer);
     vaBuilder->setVertexBuffer(1, colorBuffer);
+    vaBuilder->setVertexBuffer(2, texBuffer);
     vaBuilder->indexBuffer(indices);
     vaBuilder->shader(vertexShader);
     vaBuilder->drawCount(6);
@@ -227,6 +242,24 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     // _matrices->data().dxProjection = DirectX::XMMatrixPerspectiveFovLH(DEG_2_RAD_F(90.0f), static_cast<float>(_window->width())/static_cast<float>(_window->height()), 0.00001f, 1000.0f);
     // _matrices->data().dxProjection = DirectX::XMMatrixTranspose(_matrices->data().dxProjection);
     // _matrices->data().dxProjection = DirectX::XMMatrixIdentity();
+
+    TextureSamplerArgs textureSamplerArgs;
+    textureSamplerArgs.magFilter() = ETexture::Filter::Nearest;
+    textureSamplerArgs.minFilter() = ETexture::Filter::Nearest;
+    textureSamplerArgs.mipFilter() = ETexture::Filter::Nearest;
+    textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
+
+    Ref<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
+    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateMissingTexture(ctx())));
+    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
+    uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
+    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateWhiteTexture(ctx())));
+    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateNormalTexture(ctx())));
+    uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
+    _texUploader = Ref<ISingleTextureUploader>(uploaderBuilder->build());
 
     TimingsWriter::end();
     TimingsWriter::begin("DX10Test::Runtime", "|TERes/perfRuntime.json");
@@ -316,25 +349,30 @@ void DX10Application::update(float fixedDelta) noexcept
     // _matrices->data().projection = glm::perspectiveFovLH(DEG_2_RAD_F(90.0f), (float) _window->width(), (float) _window->height(), 0.00001f, 1000.0f);
     _matrices->data().viewMatrix = _camera->camera().viewMatrix(); 
     _matrices->data().viewMatrixTrans = transpose(_camera->camera().viewMatrix()); 
-    _matrices->data().model = glm::scale(glm::mat4(1.0f), glm::vec3(50.0f)); 
+    _matrices->data().model = glm::scale(glm::mat4(1.0f), glm::vec3(200.0f)); 
 }
 
 void DX10Application::render(const DeltaTime& delta) noexcept
 {
     UNUSED(delta);
-    // _logger->info("Render: DeltaTimeMS: {}", delta.mSeconds());
     ctx().beginFrame();
       ctx().clearScreen(true, true, false, RGBAColor { _r, _g, _b, 255 });
       _shader->bind(ctx());
         _matrices->upload(ctx(), EShader::Stage::Vertex, 0);
         _uni->upload(ctx(), EShader::Stage::Pixel, 1);
+        TextureIndices ind;
+        _texUploader->upload(ctx(), ind);
+
         _va->bind(ctx());
         _va->preDraw(ctx());
         _va->draw(ctx());
         _va->postDraw(ctx());
         _va->unbind(ctx());
+
+        TextureIndices ind0;
+        _texUploader->unbind(ctx(), ind0);
         _uni->unbind(ctx(), EShader::Stage::Pixel, 1);
-        _matrices->upload(ctx(), EShader::Stage::Vertex, 0);
+        _matrices->unbind(ctx(), EShader::Stage::Vertex, 0);
       _shader->unbind(ctx());
     ctx().endFrame();
     ctx().swapFrame();
@@ -368,7 +406,7 @@ void DX10Application::setupConfig() noexcept
     {
         Ref<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
         Config tmp = { false, 0, 0 };
-        const i32 read = configFile->readBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
+        const i32 read = configFile->readType(&tmp);
         if(read != sizeof(tmp))
         {
             writeConfig();
@@ -401,9 +439,42 @@ void DX10Application::onWindowEvent(WindowEvent& e) noexcept
     dispatcher.dispatch<WindowResizeEvent>(this, &DX10Application::onWindowResize);
 }
 
-bool DX10Application::onCharPress(WindowAsciiKeyEvent& e) const noexcept
+bool DX10Application::onCharPress(WindowAsciiKeyEvent& e) noexcept
 {
+    static uSys level = 1;
+	
     UNUSED(e);
+	if(e.c() == 'p')
+	{
+        printf("Texture Level: %zu\n", level);
+		
+        TextureSamplerArgs textureSamplerArgs;
+        textureSamplerArgs.magFilter() = ETexture::Filter::Nearest;
+        textureSamplerArgs.minFilter() = ETexture::Filter::Nearest;
+        textureSamplerArgs.mipFilter() = ETexture::Filter::Nearest;
+        textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
+        textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
+        textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
+        textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
+		
+        Ref<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
+        if(level % 2)
+        {
+            uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), level / 2)));
+        }
+        else
+        {
+            uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture8(ctx(), level / 2)));
+        }
+        uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
+        _texUploader = Ref<ISingleTextureUploader>(uploaderBuilder->build());
+        ++level;
+
+		if(level > 24)
+		{
+            level = 0;
+		}
+	}
     return false;
 }
 
@@ -479,10 +550,6 @@ static bool setupWinFolder(int dir, const char* subPath, const char* mountPoint)
 
 static void setupGameFolders() noexcept
 {
-    // if(!setupWinFolder(CSIDL_MYDOCUMENTS, "\\My Games\\DX10Test", "game"))
-    // {
-    //     VFS::Instance().mount("game", "C:\\DX10Test", Win32FileLoader::Instance());
-    // }
     if(!setupWinFolder(CSIDL_LOCAL_APPDATA, "/DX10Testing", "game"))
     {
         VFS::Instance().mountDynamic("game", "C:/DX10Testing", Win32FileLoader::Instance());
@@ -496,23 +563,28 @@ static void setupGameFolders() noexcept
     VFS::Instance().mountDynamic("res", "E:/TauEngine/test/DX10Testing/resources", Win32FileLoader::Instance());
 }
 
-static const DynString& transformRenderingMode(const RenderingMode::Mode mode) noexcept
+IResourceSelectorTransformer::ResIndex RMRSTransformer::transform(const DynString& key) noexcept
 {
-    static DynString DX10 = "DirectX10";
-    static DynString GL = "OpenGL";
-    static DynString Vk = "Vulkan";
-    static DynString Unknown = "";
+    STR_SWITCH(key, {
+        STR_CASE("DirectX10", { return 0; })
+        STR_CASE("Vulkan",    { return 1; })
+        STR_CASE("OpenGL",    { return 2; })
+    }, { })
+    return -1;
+}
 
-    switch(mode)
+IResourceSelectorTransformer::ResIndex RMRSTransformer::transform(const RenderingMode& rm) noexcept
+{
+    switch(rm.currentMode())
     {
         case RenderingMode::Mode::DirectX9:
         case RenderingMode::Mode::DirectX10:
         case RenderingMode::Mode::DirectX11:
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
-            return DX10;
+            return 0;
         case RenderingMode::Mode::Vulkan:
-            return Vk;
+            return 1;
         case RenderingMode::Mode::OpenGL2:
         case RenderingMode::Mode::OpenGL3:
         case RenderingMode::Mode::OpenGL3_1:
@@ -524,7 +596,7 @@ static const DynString& transformRenderingMode(const RenderingMode::Mode mode) n
         case RenderingMode::Mode::OpenGL4_4:
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return GL;
-        default: return Unknown;
+            return 2;
+        default: return -1;
     }
 }

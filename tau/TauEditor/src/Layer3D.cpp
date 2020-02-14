@@ -22,14 +22,12 @@ public:
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Layer3D::Uniforms& t) noexcept
     {
-        void* buf = buffer->mapBuffer(context);
-
-        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 0), reinterpret_cast<const void*>(glm::value_ptr(t.compoundMatrix)), MATRIX_SIZE);
-        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 1), reinterpret_cast<const void*>(glm::value_ptr(t.projectionMatrix)), MATRIX_SIZE);
-        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 2), reinterpret_cast<const void*>(glm::value_ptr(t.viewMatrix)), MATRIX_SIZE);
-        ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + MATRIX_SIZE * 3), reinterpret_cast<const void*>(glm::value_ptr(t.modelMatrix)), MATRIX_SIZE);
-
-        buffer->unmapBuffer(context);
+        buffer->beginModification(context);
+    	buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.compoundMatrix));
+        buffer->modifyBuffer(MATRIX_SIZE * 1, MATRIX_SIZE, glm::value_ptr(t.projectionMatrix));
+        buffer->modifyBuffer(MATRIX_SIZE * 2, MATRIX_SIZE, glm::value_ptr(t.viewMatrix));
+        buffer->modifyBuffer(MATRIX_SIZE * 3, MATRIX_SIZE, glm::value_ptr(t.modelMatrix));
+        buffer->endModification(context);
     }
 };
 
@@ -188,20 +186,18 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _pointLightUniforms.set(*window.renderingContext(), _pointLight);
     _spotLightUniforms.set(*window.renderingContext(), _spotLight);
 
-
-    Ref<ITextureSamplerBuilder> textureSamplerBuilder = window.renderingContext()->createTextureSampler();
-    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear,
-                                         ETexture::Filter::Linear,
-                                         ETexture::Filter::Linear);
-    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::Repeat,
-                                       ETexture::WrapMode::Repeat,
-                                       ETexture::WrapMode::Repeat);
-    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
-
+    TextureSamplerArgs textureSamplerArgs;
+    textureSamplerArgs.magFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.minFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.mipFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
     Ref<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
     uploaderBuilder->setTexture(0, colorBuffer->texture());
-    uploaderBuilder->textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+    uploaderBuilder->textureSampler(Ref<ITextureSampler>(window.renderingContext()->createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
     _frameBufferUploader = Ref<ITextureUploader>(uploaderBuilder->build());
 }
 

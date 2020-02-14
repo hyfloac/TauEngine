@@ -20,9 +20,6 @@ public:
     static EBuffer::UsageType getUsageType(GLenum usage) noexcept;
 
     static GLuint createBuffer() noexcept;
-
-    // static GLBuffer* build(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
-    // static GLBuffer* build4_5(const BufferArgs& args, [[tau::out]] BufferArgs::Error* error) noexcept;
 private:
     GLuint _buffer;
     GLenum _glType;
@@ -36,10 +33,11 @@ public:
     void unbind(IRenderingContext& context) noexcept override;
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override;
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
 };
 
 class TAU_DLL GLIndexBuffer final : public IIndexBuffer
@@ -57,15 +55,16 @@ public:
     void unbind(IRenderingContext& context) noexcept override;
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override;
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
 private:
     friend class GLIndexBufferBuilder;
 };
 
-class TAU_DLL GLUniformBuffer : public IUniformBuffer
+class TAU_DLL GLUniformBuffer final : public IUniformBuffer
 {
     UNIFORM_BUFFER_IMPL(GLUniformBuffer);
 private:
@@ -83,10 +82,11 @@ public:
     void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override;
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
 private:
     friend class GLUniformBufferBuilder;
 };
@@ -115,7 +115,7 @@ protected:
 private:
     [[nodiscard]] bool processBufferArgs(const BufferArgs& args, [[tau::out]] GLBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
 
-    void initBuffer(const BufferArgs& args, const GLBufferArgs& glArgs) const noexcept;
+    static void initBuffer(const BufferArgs& args, const GLBufferArgs& glArgs) noexcept;
 };
 
 class TAU_DLL GLIndexBufferBuilder : public IIndexBufferBuilder
@@ -141,7 +141,7 @@ protected:
 private:
     [[nodiscard]] bool processBufferArgs(const IndexBufferArgs & args, [[tau::out]] GLIndexBufferArgs * glArgs, [[tau::out]] Error * error) const noexcept;
 
-    void initBuffer(const IndexBufferArgs & args, const GLIndexBufferArgs & glArgs) const noexcept;
+    static void initBuffer(const IndexBufferArgs & args, const GLIndexBufferArgs & glArgs) noexcept;
 private:
     friend class GLUniformBufferBuilder;
 };
@@ -165,6 +165,6 @@ protected:
 private:
     [[nodiscard]] bool processBufferArgs(const UniformBufferArgs& args, [[tau::out]] GLUniformBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
 
-    void initBuffer(const UniformBufferArgs& args, const GLUniformBufferArgs& glArgs) const noexcept;
+    static void initBuffer(const UniformBufferArgs& args, const GLUniformBufferArgs& glArgs) noexcept;
 };
 

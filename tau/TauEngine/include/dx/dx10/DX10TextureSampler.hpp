@@ -12,13 +12,17 @@ class TAU_DLL DX10TextureSampler final : public ITextureSampler
     DEFAULT_DESTRUCT(DX10TextureSampler);
     TEXTURE_SAMPLER_IMPL(DX10TextureSampler);
 private:
+    DX10RenderingContext& _ctx;
     ID3D10SamplerState* _samplerState;
-private:
-    inline DX10TextureSampler(ID3D10SamplerState* const _samplerState) noexcept
-        : ITextureSampler(), _samplerState(_samplerState)
+public:
+    inline DX10TextureSampler(DX10RenderingContext& context, ID3D10SamplerState* const samplerState) noexcept
+        : ITextureSampler(), _ctx(context), _samplerState(samplerState)
     { }
-private:
-    friend class DX10TextureSamplerBuilder;
+
+    [[nodiscard]] const ID3D10SamplerState* d3dSampler() const noexcept { return _samplerState; }
+    [[nodiscard]] ID3D10SamplerState* d3dSampler() noexcept { return _samplerState; }
+
+    void apply(UINT slot) noexcept;
 };
 
 class TAU_DLL DX10TextureSamplerBuilder final : public ITextureSamplerBuilder
@@ -26,20 +30,22 @@ class TAU_DLL DX10TextureSamplerBuilder final : public ITextureSamplerBuilder
     DEFAULT_DESTRUCT(DX10TextureSamplerBuilder);
     DELETE_COPY(DX10TextureSamplerBuilder);
 public:
-    [[nodiscard]] static D3D10_FILTER getDXFilter(ETexture::Filter magnificationFilter, ETexture::Filter minificationFilter, ETexture::Filter mipmapMinificationFilter) noexcept;
-    [[nodiscard]] static D3D10_TEXTURE_ADDRESS_MODE  getDXWrapMode(ETexture::WrapMode wrapMode) noexcept;
-    [[nodiscard]] static D3D10_COMPARISON_FUNC getDXDepthComparison(ETexture::DepthCompareFunc depthCompare) noexcept;
+    [[nodiscard]] static D3D10_FILTER dxFilter(ETexture::Filter magnificationFilter, ETexture::Filter minificationFilter, ETexture::Filter mipmapMinificationFilter) noexcept;
+    [[nodiscard]] static D3D10_TEXTURE_ADDRESS_MODE  dxWrapMode(ETexture::WrapMode wrapMode) noexcept;
+    [[nodiscard]] static D3D10_COMPARISON_FUNC dxDepthComparison(ETexture::DepthCompareFunc depthCompare) noexcept;
 private:
     DX10RenderingContext& _ctx;
-    D3D10_SAMPLER_DESC _samplerDescriptor;
 public:
-    DX10TextureSamplerBuilder(DX10RenderingContext& context) noexcept;
+    DX10TextureSamplerBuilder(DX10RenderingContext& context) noexcept
+        : ITextureSamplerBuilder(), _ctx(context)
+    { }
 
-    void setFilterMode(ETexture::Filter magnificationFilter, ETexture::Filter minificationFilter, ETexture::Filter mipmapMinificationFilter) noexcept override;
-    void setWrapMode(ETexture::WrapMode u, ETexture::WrapMode v, ETexture::WrapMode w) noexcept override;
-    void setDepthComparison(ETexture::DepthCompareFunc compareFunc) noexcept override;
-    void setBorderColor(RGBAColor color) noexcept override;
-
-    [[nodiscard]] DX10TextureSampler* build(Error* error) noexcept override;
+    [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+private:
+    bool processTextureSamplerArgs(const TextureSamplerArgs& args, [[tau::out]] D3D10_SAMPLER_DESC* dxArgs, [[tau::out]] Error* error) const noexcept;
 };
 #endif

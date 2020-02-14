@@ -2,6 +2,8 @@
 #include "VFS.hpp"
 #include <ArrayList.hpp>
 
+using RST = IResourceSelectorTransformer;
+
 DynString ResourceSelectorLoader::_cacheDir = "";
 
 struct SelectorBundle final
@@ -27,7 +29,7 @@ static ParseData nullParse() noexcept
 
 static ParseData parseBinaryCache(const VFS::Container& con) noexcept;
 static ParseData parseBinaryFile(const VFS::Container& con) noexcept;
-static ParseData parseTextFile(const VFS::Container& con, const Ref<ResourceSelectorTransformer>& rst) noexcept;
+static ParseData parseTextFile(const VFS::Container& con, const Ref<RST>& rst) noexcept;
 static void writeCache(const VFS::Container& con, const ParseData& parseData, uSys lastModifyTim) noexcept;
 // ReSharper disable once CppDeclaratorNeverUsed
 static void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept;
@@ -52,11 +54,14 @@ static u64 _creationTime(const VFS::Container& con) noexcept
 static u64 _modifyTime(const VFS::Container& con) noexcept
 { return con.fileLoader->modifyTime(con.path); }
 
-RefDynArray<Ref<IFile>> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const Ref<ResourceSelectorTransformer>& rst) noexcept
+Ref<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
+{ return _loader->load(_path, props); }
+
+RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const Ref<RST>& rst) noexcept
 {
     const VFS::Container cacheDir = VFS::Instance().resolvePath(_cacheDir, path);
     if(!cacheDir.fileLoader->createFolders(cacheDir.path))
-    { return RefDynArray<Ref<IFile>>(0); }
+    { return RefDynArray<SelectedResource>(0); }
 
     const VFS::Container binaryCache = VFS::Instance().resolvePath(_cacheDir, path, filename, ".tauibcache");
     const VFS::Container binaryFile = VFS::Instance().resolvePath(vfsMount, path, filename, ".tauib");
@@ -67,7 +72,7 @@ RefDynArray<Ref<IFile>> ResourceSelectorLoader::loadFiles(const char* vfsMount, 
     const bool textFileExists = _fileExists(textFile);
 
     if(!binaryFileExists && !textFileExists)
-    { return RefDynArray<Ref<IFile>>(0); }
+    { return RefDynArray<SelectedResource>(0); }
 
     u64 lastModifyBinary = 0;
     u64 lastModifyText = 0;
@@ -109,12 +114,17 @@ RefDynArray<Ref<IFile>> ResourceSelectorLoader::loadFiles(const char* vfsMount, 
         maxIndex = max(maxIndex, resourceData.resources[i].index);
     }
 
-    RefDynArray<Ref<IFile>> ret(resourceData.resources.size());
+    RefDynArray<SelectedResource> ret(maxIndex + 1);
 
     for(uSys i = 0; i < resourceData.resources.size(); ++i)
     {
-        const VFS::Container resource = VFS::Instance().resolvePath(vfsMount, path, resourceData.resources[i].filePath);
-        ret[resourceData.resources[i].index] = _loadFile(resource);
+        const VFS::Container vfsRes = VFS::Instance().resolvePath(vfsMount, path, resourceData.resources[i].filePath);
+        const auto& res = resourceData.resources[i];
+        const uSys ind = res.index;
+        ret[ind]._index = ind;
+        ret[ind]._name = res.filePath;
+        ret[ind]._path = vfsRes.path;
+        ret[ind]._loader = vfsRes.fileLoader;
     }
 
     return ret;
@@ -239,7 +249,7 @@ struct TextParseKV final
     { }
 };
 
-ParseData parseTextFile(const VFS::Container& con, const Ref<ResourceSelectorTransformer>& rst) noexcept
+ParseData parseTextFile(const VFS::Container& con, const Ref<RST>& rst) noexcept
 {
     using Token = _ResourceSelector::Token;
     using Lexer = _ResourceSelector::Lexer;

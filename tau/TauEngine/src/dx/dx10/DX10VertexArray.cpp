@@ -334,7 +334,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
 
     DynArray<D3D10_INPUT_ELEMENT_DESC> inputElements(bufferDescriptorCount);
     ERROR_CODE_COND_N(!inputElements, Error::MemoryAllocationFailure);
-    DynArray<uSys> semanticIndices(static_cast<uSys>(ShaderSemantic::TextureCoord));
+    DynArray<uSys> semanticIndices(static_cast<uSys>(ShaderSemantic::MAX_VALUE + 1));
     ERROR_CODE_COND_N(!semanticIndices, Error::MemoryAllocationFailure);
     ::std::memset(semanticIndices.arr(), 0, semanticIndices.size() * sizeof(uSys));
     

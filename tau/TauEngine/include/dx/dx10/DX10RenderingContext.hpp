@@ -5,15 +5,14 @@
 #ifdef _WIN32
 #pragma warning(push, 0)
 #include <d3d10.h>
-#include <DirectXMath.h>
 #pragma warning(pop)
 
 #include "DLL.hpp"
 
-class DX10ShaderProgram;
 class DX10BufferBuilder;
 class DX10IndexBufferBuilder;
 class DX10UniformBufferBuilder;
+class DX10TextureSamplerBuilder;
 
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
@@ -31,6 +30,7 @@ private:
     DX10BufferBuilder* _bufferBuilder;
     DX10IndexBufferBuilder* _indexBufferBuilder;
     DX10UniformBufferBuilder* _uniformBufferBuilder;
+    DX10TextureSamplerBuilder* _textureSamplerBuilder;
 public:
     DX10RenderingContext(const RenderingMode& mode) noexcept;
 
@@ -57,13 +57,13 @@ public:
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
-    [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override { return null; }
+    [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override;
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override { return null; }
     [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override { return null; }
-    [[nodiscard]] Ref<ITextureSamplerBuilder> createTextureSampler() noexcept override { return null; }
-    [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override { return null; }
-    [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override { return null; }
+    [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
+    [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
+    [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);

@@ -79,7 +79,7 @@ public:
     [[nodiscard]] virtual Ref<ITextureBuilder> createNullTexture() noexcept = 0;
     [[nodiscard]] virtual Ref<ITextureBuilder> createTextureDepth() noexcept = 0;
     [[nodiscard]] virtual Ref<ITextureCubeBuilder> createTextureCube() noexcept = 0;
-    [[nodiscard]] virtual Ref<ITextureSamplerBuilder> createTextureSampler() noexcept = 0;
+    [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
     [[nodiscard]] virtual Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept = 0;
     [[nodiscard]] virtual Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept = 0;
     [[nodiscard]] virtual Ref<IShaderBuilder> createShader() noexcept = 0;

@@ -11,6 +11,21 @@
 #include "TUMaths.hpp"
 #include "Utils.hpp"
 
+#define STR_SWITCH(_PARAM, _BLOCK, _DEFAULT_BLOCK) \
+{ \
+    const auto& _tmp__strSwitch_ = _PARAM; \
+    bool _switch_defaulted_ = true; \
+    switch(_tmp__strSwitch_.hashCode()) _BLOCK \
+    if(_switch_defaulted_) _DEFAULT_BLOCK \
+}
+
+#define STR_CASE(_CASE, _BLOCK) \
+case ConstExprString(_CASE).hashCode(): \
+    if(ConstExprString(_CASE).equals(_tmp__strSwitch_.c_str())) { \
+        _switch_defaulted_ = false; \
+        _BLOCK \
+    } else { break; }
+
 static inline bool equalsIgnoreCase(const char* RESTRICT lhs, const char* RESTRICT rhs) noexcept
 {
     while(*lhs != '\0' && *rhs != '\0')
@@ -195,10 +210,38 @@ public:
     { return _index != other._index; }
 };
 
+class ConstExprString final
+{
+private:
+    const char* _string;
+    uSys _hash;
+public:
+    template<uSys _Len>
+    inline constexpr ConstExprString(const char(&str)[_Len]) noexcept
+        : _string(str), _hash(cexpr::findHashCode(str))
+    { }
+
+    [[nodiscard]] inline constexpr const char* c_str() const noexcept { return _string; }
+    [[nodiscard]] inline constexpr uSys hashCode() const noexcept { return _hash; }
+
+    template<uSys _Len>
+    [[nodiscard]] inline constexpr bool equals(const char(&str)[_Len]) const noexcept
+    {
+        if(_string == str) { return true; }
+        return strcmp(this->_string, str) == 0;
+    }
+
+    [[nodiscard]] inline bool equals(const char* str) const noexcept
+    {
+        if(_string == str) { return true; }
+        return strcmp(this->_string, str) == 0;
+    }
+};
+
 class String final
 {
 private:
-    const char*   _string;
+    const char* _string;
     uSys _length;
     uSys _hash;
 public:
@@ -549,9 +592,9 @@ public:
     [[nodiscard]] inline uSys length() const noexcept { return _length; }
 
     inline operator const char*() const noexcept { return _string; }
-    [[nodiscard]] inline u32 operator()() const noexcept { return _hash; }
+    [[nodiscard]] inline uSys operator()() const noexcept { return _hash; }
 
-    [[nodiscard]] inline u32 hashCode() const noexcept { return _hash; }
+    [[nodiscard]] inline uSys hashCode() const noexcept { return _hash; }
 
     [[nodiscard]] inline bool equals(const String& other) const noexcept
     {
@@ -804,7 +847,7 @@ public:
 
     [[nodiscard]] inline const char* c_str() const noexcept { return _string; }
     [[nodiscard]] inline uSys length() const noexcept { return _length; }
-    [[nodiscard]] inline u32 hashCode() const noexcept { return _hash; }
+    [[nodiscard]] inline uSys hashCode() const noexcept { return _hash; }
 
     [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
     [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
@@ -935,7 +978,7 @@ private:
 class StringBuilder final
 {
 private:
-    char*         _string;
+    char* _string;
     uSys _length;
     uSys _size;
 public:

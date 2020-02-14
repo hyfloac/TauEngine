@@ -54,11 +54,15 @@ public:
 
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
-    virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+    virtual void beginModification(IRenderingContext& context) noexcept = 0;
+    virtual void endModification(IRenderingContext& context) noexcept = 0;
 
-    [[nodiscard]] virtual void* mapBuffer(IRenderingContext& context) noexcept = 0;
-    virtual void unmapBuffer(IRenderingContext& context) noexcept = 0;
+    virtual void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept = 0;
 
+	template<typename _T>
+	void modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
+    { modifyBuffer(offset, sizeof(_T), &data); }
+	
     RTT_BASE_IMPL(IBuffer);
     RTT_BASE_CHECK(IBuffer);
     RTT_BASE_CAST(IBuffer);
@@ -86,11 +90,15 @@ public:
 
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
-    virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+    virtual void beginModification(IRenderingContext& context) noexcept = 0;
+    virtual void endModification(IRenderingContext& context) noexcept = 0;
 
-    [[nodiscard]] virtual void* mapBuffer(IRenderingContext& context) noexcept = 0;
-    virtual void unmapBuffer(IRenderingContext& context) noexcept = 0;
+    virtual void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept = 0;
 
+	template<typename _T>
+	void modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
+    { modifyBuffer(offset, sizeof(_T), &data); }
+	
     RTT_BASE_IMPL(IIndexBuffer);
     RTT_BASE_CHECK(IIndexBuffer);
     RTT_BASE_CAST(IIndexBuffer);
@@ -119,11 +127,16 @@ public:
     virtual void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
 
     virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
-    virtual void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept = 0;
+	
+    virtual void beginModification(IRenderingContext& context) noexcept = 0;
+    virtual void endModification(IRenderingContext& context) noexcept = 0;
 
-    [[nodiscard]] virtual void* mapBuffer(IRenderingContext& context) noexcept = 0;
-    virtual void unmapBuffer(IRenderingContext& context) noexcept = 0;
+    virtual void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept = 0;
 
+	template<typename _T>
+	void modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
+    { modifyBuffer(offset, sizeof(_T), &data); }
+	
     RTT_BASE_IMPL(IUniformBuffer);
     RTT_BASE_CHECK(IUniformBuffer);
     RTT_BASE_CAST(IUniformBuffer);

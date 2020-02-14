@@ -5,7 +5,7 @@
 #include "dx/dx9/DX9RenderingContext.hpp"
 #include <d3d9.h>
 
-class TAU_DLL D3D9Texture2D final : public ITexture
+class TAU_DLL D3D9Texture2D : public ITexture
 {
     DELETE_COPY(D3D9Texture2D);
 private:

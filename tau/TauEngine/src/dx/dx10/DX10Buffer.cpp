@@ -7,7 +7,7 @@
 
 DX10Buffer::DX10Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize,
                        const bool instanced, const BufferDescriptor& descriptor, ID3D10Buffer* const d3dBuffer) noexcept
-    : IBuffer(type, usage, bufferSize, instanced, descriptor), _d3dBuffer(d3dBuffer)
+    : IBuffer(type, usage, bufferSize, instanced, descriptor), _d3dBuffer(d3dBuffer), _currentMapping(null)
 { }
 
 DX10Buffer::~DX10Buffer() noexcept
@@ -31,7 +31,7 @@ void DX10Buffer::fillBuffer(IRenderingContext& context, const void* data) noexce
     }
 }
 
-void DX10Buffer::modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept
+void DX10Buffer::beginModification(IRenderingContext& context) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -40,37 +40,30 @@ void DX10Buffer::modifyBuffer(IRenderingContext& context, intptr_t offset, std::
         const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
         if(!FAILED(h))
         {
-            ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(bufferAccess) + offset), data, size);
-            _d3dBuffer->Unmap();
+            _currentMapping = bufferAccess;
         }
     }
 }
 
-void* DX10Buffer::mapBuffer(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
-    {
-        void* bufferAccess;
-
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            return bufferAccess;
-        }
-    }
-    return null;
-}
-
-void DX10Buffer::unmapBuffer(IRenderingContext& context) noexcept
+void DX10Buffer::endModification(IRenderingContext& context) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
         _d3dBuffer->Unmap();
+        _currentMapping = null;
     }
 }
 
+void DX10Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+	if(_currentMapping)
+	{
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+	}
+}
+
 DX10IndexBuffer::DX10IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
-    : IIndexBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer)
+    : IIndexBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer), _currentMapping(null)
 { }
 
 DX10IndexBuffer::~DX10IndexBuffer() noexcept
@@ -94,7 +87,7 @@ void DX10IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) n
     }
 }
 
-void DX10IndexBuffer::modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept
+void DX10IndexBuffer::beginModification(IRenderingContext& context) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -103,37 +96,30 @@ void DX10IndexBuffer::modifyBuffer(IRenderingContext& context, intptr_t offset, 
         const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
         if(!FAILED(h))
         {
-            ::std::memcpy(bufferAccess, data, _bufferSize);
-            _d3dBuffer->Unmap();
+            _currentMapping = bufferAccess;
         }
     }
 }
 
-void* DX10IndexBuffer::mapBuffer(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
-    {
-        void* bufferAccess;
-
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            return bufferAccess;
-        }
-    }
-    return null;
-}
-
-void DX10IndexBuffer::unmapBuffer(IRenderingContext& context) noexcept
+void DX10IndexBuffer::endModification(IRenderingContext& context) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
         _d3dBuffer->Unmap();
+        _currentMapping = null;
+    }
+}
+
+void DX10IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+    if(_currentMapping)
+    {
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
     }
 }
 
 DX10UniformBuffer::DX10UniformBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept
-    : IUniformBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer)
+    : IUniformBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer), _currentMapping(null)
 { }
 
 DX10UniformBuffer::~DX10UniformBuffer() noexcept
@@ -182,7 +168,7 @@ void DX10UniformBuffer::fillBuffer(IRenderingContext& context, const void* data)
     }
 }
 
-void DX10UniformBuffer::modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept
+void DX10UniformBuffer::beginModification(IRenderingContext& context) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -191,32 +177,25 @@ void DX10UniformBuffer::modifyBuffer(IRenderingContext& context, intptr_t offset
         const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
-            ::std::memcpy(bufferAccess, data, _bufferSize);
-            _d3dBuffer->Unmap();
+            _currentMapping = bufferAccess;
         }
     }
 }
 
-void* DX10UniformBuffer::mapBuffer(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
-    {
-        void* bufferAccess;
-
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            return bufferAccess;
-        }
-    }
-    return null;
-}
-
-void DX10UniformBuffer::unmapBuffer(IRenderingContext& context) noexcept
+void DX10UniformBuffer::endModification(IRenderingContext& context) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
         _d3dBuffer->Unmap();
+        _currentMapping = null;
+    }
+}
+
+void DX10UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+    if(_currentMapping)
+    {
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
     }
 }
 

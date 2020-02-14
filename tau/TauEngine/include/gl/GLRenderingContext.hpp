@@ -7,6 +7,7 @@
 #include <GL/wglew.h>
 #endif
 #include "GLBuffer.hpp"
+#include "GLTextureSampler.hpp"
 
 class GLRenderingContext final : public IRenderingContext
 {
@@ -30,6 +31,7 @@ private:
     GLBufferBuilder* _bufferBuilder;
     GLIndexBufferBuilder* _indexBufferBuilder;
     GLUniformBufferBuilder* _uniformBufferBuilder;
+    GLTextureSamplerBuilder* _textureSamplerBuilder;
 public:
     GLRenderingContext(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile core, bool forwardCompatible) noexcept;
     ~GLRenderingContext() noexcept override final;
@@ -57,14 +59,14 @@ public:
 
     [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
     [[nodiscard]] GLBufferBuilder& createBuffer() noexcept override { return *_bufferBuilder; }
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override { return *_indexBufferBuilder; }
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override { return *_uniformBufferBuilder; }
+    [[nodiscard]] GLIndexBufferBuilder& createIndexBuffer() noexcept override { return *_indexBufferBuilder; }
+    [[nodiscard]] GLUniformBufferBuilder& createUniformBuffer() noexcept override { return *_uniformBufferBuilder; }
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
     [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override;
     [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override;
     [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override;
     [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override;
-    [[nodiscard]] Ref<ITextureSamplerBuilder> createTextureSampler() noexcept override;
+    [[nodiscard]] GLTextureSamplerBuilder& createTextureSampler() noexcept override { return *_textureSamplerBuilder; }
     [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override;

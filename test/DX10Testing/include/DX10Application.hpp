@@ -15,6 +15,7 @@
 #include <glm/mat4x4.hpp>
 #include <camera/Camera2D.hpp>
 #include <DirectXMath.h>
+#include <shader/TextureUploader.hpp>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
@@ -52,6 +53,7 @@ private:
     UniformBlockS<Uniforms>* _uni;
     UniformBlockS<Matrices>* _matrices;
     Camera2DController* _camera;
+    Ref<ISingleTextureUploader> _texUploader;
 public:
     DX10Application() noexcept;
 
@@ -82,7 +84,7 @@ private:
 
     void onWindowEvent(WindowEvent& e) noexcept;
 
-    bool onCharPress(WindowAsciiKeyEvent& e) const noexcept;
+    bool onCharPress(WindowAsciiKeyEvent& e) noexcept;
 
     bool onKeyPress(WindowKeyEvent& e) noexcept;
 

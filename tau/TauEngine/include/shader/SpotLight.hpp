@@ -73,14 +73,13 @@ public:
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const SpotLight& t) noexcept
     {
-        void* const buf = buffer->mapBuffer(context);
+        buffer->beginModification(context);
 
 #define SP_PASTE2(_A, _B) _A ## _B
 #define SP_PASTE(_A, _B) SP_PASTE2(_A, _B)
 #define SP_UNIQUE(_X) SP_PASTE(_X, __LINE__)
-#define STORE(_OFFSET, _VAR) ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + (_OFFSET)), &(_VAR), sizeof((_VAR)))
 #define COPY_VEC(_VEC, _OFFSET) const __m128 SP_UNIQUE(_vec_) = (_VEC).data().vec; \
-                                STORE(_OFFSET, SP_UNIQUE(_vec_))
+                                buffer->modifyBuffer(_OFFSET, SP_UNIQUE(_vec_))
 
         COPY_VEC(t._position, 0);
         COPY_VEC(t._direction, 16);
@@ -88,18 +87,17 @@ public:
         COPY_VEC(t._diffuseCache, 48);
         COPY_VEC(t._specularCache, 64);
 
-        STORE(80, t._cutOff);
-        STORE(84, t._outerCutOff);
-        STORE(88, t._constant);
-        STORE(92, t._linear);
-        STORE(96, t._quadratic);
+        buffer->modifyBuffer(80, t._cutOff);
+        buffer->modifyBuffer(84, t._outerCutOff);
+        buffer->modifyBuffer(88, t._constant);
+        buffer->modifyBuffer(92, t._linear);
+        buffer->modifyBuffer(96, t._quadratic);
 
 #undef COPY_VEC
-#undef STORE
 #undef SP_UNIQUE
 #undef SP_PASTE
 #undef SP_PASTE2
 
-        buffer->unmapBuffer(context);
+        buffer->endModification(context);
     }
 };

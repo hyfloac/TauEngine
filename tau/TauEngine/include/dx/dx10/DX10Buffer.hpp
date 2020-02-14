@@ -15,6 +15,7 @@ public:
     static bool canReWrite(EBuffer::UsageType usage) noexcept;
 private:
     ID3D10Buffer* _d3dBuffer;
+    void* _currentMapping;
 public:
     DX10Buffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, bool instanced, const BufferDescriptor& descriptor, ID3D10Buffer* d3dBuffer) noexcept;
 
@@ -26,10 +27,11 @@ public:
     void bind(IRenderingContext& context) noexcept override { /* NO-OP */ }
     void unbind(IRenderingContext& context) noexcept override { /* NO-OP */ }
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override;
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
 };
 
 class TAU_DLL DX10IndexBuffer final : public IIndexBuffer
@@ -37,6 +39,7 @@ class TAU_DLL DX10IndexBuffer final : public IIndexBuffer
     INDEX_BUFFER_IMPL(DX10IndexBuffer);
 private:
     ID3D10Buffer* _d3dBuffer;
+    void* _currentMapping;
 public:
     DX10IndexBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept;
 
@@ -48,10 +51,11 @@ public:
     void bind(IRenderingContext& context) noexcept override { }
     void unbind(IRenderingContext& context) noexcept override { }
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override;
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
 };
 
 class TAU_DLL DX10UniformBuffer final : public IUniformBuffer
@@ -59,6 +63,7 @@ class TAU_DLL DX10UniformBuffer final : public IUniformBuffer
     UNIFORM_BUFFER_IMPL(DX10UniformBuffer);
 private:
     ID3D10Buffer* _d3dBuffer;
+    void* _currentMapping;
 public:
     DX10UniformBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept;
 
@@ -74,10 +79,11 @@ public:
     void unbind(IRenderingContext& context, EShader::Stage, u32 index) noexcept override { }
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override;
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
 };
 
 class TAU_DLL DX10BufferBuilder final : public IBufferBuilder

@@ -3,12 +3,17 @@
 #include "dx/dx10/DX10RenderingContext.hpp"
 
 #ifdef _WIN32
+// #include <D3DX10Core.h>
+
 #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
 #include "dx/dx10/DX10Shader.hpp"
 #include "dx/dx10/DX10VertexArray.hpp"
 #include "dx/dx10/DX10Buffer.hpp"
+#include "dx/dx10/DX10TextureSampler.hpp"
+#include "dx/dx10/DX10Texture.hpp"
+#include "dx/dx10/DX10TextureUploader.hpp"
 
 DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
     : IRenderingContext(mode),
@@ -20,7 +25,8 @@ DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
       _vsync(false),
       _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
-      _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this))
+      _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
+      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this))
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -43,9 +49,11 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
     delete _bufferBuilder;
     delete _indexBufferBuilder;
     delete _uniformBufferBuilder;
+    delete _textureSamplerBuilder;
     _bufferBuilder = null;
     _indexBufferBuilder = null;
     _uniformBufferBuilder = null;
+    _textureSamplerBuilder = null;
 }
 
 bool DX10RenderingContext::createContext(Window& window) noexcept
@@ -113,7 +121,9 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.Flags = 0;
 
-        CHECK(D3D10CreateDeviceAndSwapChain(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, 0, D3D10_SDK_VERSION, &swapChainDesc, &_swapChain, &_d3d10Device));
+        CHECK(D3D10CreateDeviceAndSwapChain(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, _mode.debugMode() ? D3D10_CREATE_DEVICE_DEBUG : 0, D3D10_SDK_VERSION, &swapChainDesc, &_swapChain, &_d3d10Device));
+
+        // D3DX10DebugMute(TRUE);
     }
 
     {
@@ -170,13 +180,16 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     }
 
     {
-        D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+        D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc[2];
         ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-        depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        depthStencilViewDesc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
-        depthStencilViewDesc.Texture2D.MipSlice = 0;
+        depthStencilViewDesc[0].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc[0].ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc[0].Texture2D.MipSlice = 0;
+        depthStencilViewDesc[1].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc[1].ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc[1].Texture2D.MipSlice = 0;
 
-        CHECK(_d3d10Device->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc, &_depthStencilView));
+        CHECK(_d3d10Device->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc[0], &_depthStencilView));
         _d3d10Device->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
     }
 
@@ -289,8 +302,28 @@ IUniformBufferBuilder& DX10RenderingContext::createUniformBuffer() noexcept
     return *_uniformBufferBuilder;
 }
 
+Ref<ITextureBuilder> DX10RenderingContext::createTexture2D() noexcept
+{
+    return Ref<ITextureBuilder>(new(::std::nothrow) DX10Texture2DBuilder(*this));
+}
+
+ITextureSamplerBuilder& DX10RenderingContext::createTextureSampler() noexcept
+{
+    return *_textureSamplerBuilder;
+}
+
 Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept
 {
     return Ref<IShaderBuilder>(new(::std::nothrow) DX10ShaderBuilder(this));
+}
+
+Ref<ITextureUploaderBuilder> DX10RenderingContext::createTextureUploader(uSys textureCount) noexcept
+{
+    return Ref<ITextureUploaderBuilder>(new(::std::nothrow) DX10TextureUploaderBuilder(textureCount, *this));
+}
+
+Ref<ISingleTextureUploaderBuilder> DX10RenderingContext::createSingleTextureUploader() noexcept
+{
+    return Ref<ISingleTextureUploaderBuilder>(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this));
 }
 #endif

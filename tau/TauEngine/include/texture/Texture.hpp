@@ -136,16 +136,19 @@ protected:
     u32 _height;
     i32 _mipmapLevels;
     ETexture::Format _dataFormat;
+    const void* _initialBuffer;
 public:
     inline ITextureBuilder() noexcept
         : _width(0), _height(0), _mipmapLevels(0),
-          _dataFormat(static_cast<ETexture::Format>(0))
+          _dataFormat(static_cast<ETexture::Format>(0)),
+		  _initialBuffer(null)
     { }
 
     void width(const u32 width) noexcept { _width = width; }
     void height(const u32 height) noexcept { _height = height; }
     virtual void mipmapLevels(const i32 mipmapLevels) noexcept { _mipmapLevels = mipmapLevels; }
     virtual void dataFormat(const ETexture::Format dataFormat) noexcept { _dataFormat = dataFormat; }
+    void initialBuffer(const void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
 
     [[nodiscard]] virtual ITexture* build([[tau::out]] Error* error) const noexcept = 0;
 };

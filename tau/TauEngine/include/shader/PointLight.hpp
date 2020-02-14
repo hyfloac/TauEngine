@@ -60,30 +60,28 @@ public:
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const PointLight& t) noexcept
     {
-        void* const buf = buffer->mapBuffer(context);
+        buffer->beginModification(context);
 
     #define SP_PASTE2(_A, _B) _A ## _B
     #define SP_PASTE(_A, _B) SP_PASTE2(_A, _B)
     #define SP_UNIQUE(_X) SP_PASTE(_X, __LINE__)
-    #define STORE(_OFFSET, _VAR) ::std::memcpy(reinterpret_cast<void*>(reinterpret_cast<u8*>(buf) + (_OFFSET)), &(_VAR), sizeof((_VAR)))
     #define COPY_VEC(_VEC, _OFFSET) const __m128 SP_UNIQUE(_vec_) = (_VEC).data().vec; \
-                                    STORE(_OFFSET, SP_UNIQUE(_vec_))
+                                    buffer->modifyBuffer(_OFFSET, SP_UNIQUE(_vec_))
 
         COPY_VEC(t._position, 0);
         COPY_VEC(t._ambientCache, 16);
         COPY_VEC(t._diffuseCache, 32);
         COPY_VEC(t._specularCache, 48);
 
-        STORE(64, t._constant);
-        STORE(68, t._linear);
-        STORE(72, t._quadratic);
+        buffer->modifyBuffer(64, t._constant);
+        buffer->modifyBuffer(68, t._linear);
+        buffer->modifyBuffer(72, t._quadratic);
 
     #undef COPY_VEC
-    #undef STORE
     #undef SP_UNIQUE
     #undef SP_PASTE
     #undef SP_PASTE2
 
-        buffer->unmapBuffer(context);
+        buffer->endModification(context);
     }
 };

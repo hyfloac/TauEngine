@@ -85,29 +85,11 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     // Ref<IIndexBuffer> indices = Ref<IIndexBuffer>(indicesBuilder->build(nullptr));
     Ref<IIndexBuffer> indices = context.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
 
-    positions->bind(context);
     positions->fillBuffer(context, positionsLoaded);
-    positions->unbind(context);
-
-    normals->bind(context);
     normals->fillBuffer(context, normalsLoaded);
-    normals->unbind(context);
-
-    tangents->bind(context);
     tangents->fillBuffer(context, tangentsLoaded);
-    tangents->unbind(context);
-
-    // bitangents->bind(context);
-    // bitangents->fillBuffer(context, bitangentsLoaded);
-    // bitangents->unbind(context);
-
-    textures->bind(context);
     textures->fillBuffer(context, texturesLoaded);
-    textures->unbind(context);
-
-    indices->bind(context);
     indices->fillBuffer(context, mesh.indices.data());
-    indices->unbind(context);
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
 
@@ -179,16 +161,16 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     matBuilder.specularExponent(mesh.material.Ns);
     _illumination = mesh.material.illum;
 
-    Ref<ITextureSamplerBuilder> textureSamplerBuilder = context.createTextureSampler();
-    textureSamplerBuilder->setFilterMode(ETexture::Filter::Linear,
-                                         ETexture::Filter::Linear,
-                                         ETexture::Filter::Linear);
-    textureSamplerBuilder->setWrapMode(ETexture::WrapMode::Repeat,
-                                       ETexture::WrapMode::Repeat,
-                                       ETexture::WrapMode::Repeat);
-    textureSamplerBuilder->setDepthComparison(ETexture::DepthCompareFunc::Never);
+    TextureSamplerArgs textureSamplerArgs;
+    textureSamplerArgs.magFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.minFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.mipFilter() = ETexture::Filter::Linear;
+    textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
+    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    matBuilder.textureSampler(Ref<ITextureSampler>(textureSamplerBuilder->build()));
+    matBuilder.textureSampler(Ref<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
 
     _material = matBuilder.build();
 }

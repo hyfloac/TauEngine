@@ -68,7 +68,7 @@ enum class Format : u16
     Stencil8UnsignedInt,
     Stencil16UnsignedInt,
     Depth24Stencil8,
-    Depth32FloatStencil8UnsignedInt,
+    Depth32FloatStencil8UnsignedInt
 };
 
 enum class CubeSide : u8
@@ -80,5 +80,40 @@ enum class CubeSide : u8
     Top,
     Bottom
 };
+
+static inline uSys bytesPerPixel(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Red8UnsignedInt:                 return 1 * 1;
+        case Format::Red16UnsignedInt:                return 2 * 1;
+        case Format::Red32UnsignedInt:                return 4 * 1;
+        case Format::RedGreen8UnsignedInt:            return 1 * 2;
+        case Format::RedGreen16UnsignedInt:           return 2 * 2;
+        case Format::RedGreen32UnsignedInt:           return 4 * 2;
+        case Format::RedGreenBlue8UnsignedInt:        return 1 * 3;
+        case Format::RedGreenBlue16UnsignedInt:       return 2 * 3;
+        case Format::RedGreenBlue32UnsignedInt:       return 4 * 3;
+        case Format::RedGreenBlueAlpha8UnsignedInt:   return 1 * 4;
+        case Format::RedGreenBlueAlpha16UnsignedInt:  return 2 * 4;
+        case Format::RedGreenBlueAlpha32UnsignedInt:  return 4 * 4;
+        case Format::Red16Float:                      return 2 * 1;
+        case Format::Red32Float:                      return 4 * 1;
+        case Format::RedGreen16Float:                 return 2 * 2;
+        case Format::RedGreen32Float:                 return 4 * 2;
+        case Format::RedGreenBlue16Float:             return 2 * 3;
+        case Format::RedGreenBlue32Float:             return 4 * 3;
+        case Format::RedGreenBlueAlpha16Float:        return 2 * 4;
+        case Format::RedGreenBlueAlpha32Float:        return 4 * 4;
+        case Format::Depth16UnsignedInt:              return 2;
+        case Format::Depth32UnsignedInt:              return 4;
+        case Format::Depth32Float:                    return 4;
+        case Format::Stencil8UnsignedInt:             return 1;
+        case Format::Stencil16UnsignedInt:            return 2;
+        case Format::Depth24Stencil8:                 return 4;
+        case Format::Depth32FloatStencil8UnsignedInt: return 5;
+        default: return 0;
+    }
+}
 
 }

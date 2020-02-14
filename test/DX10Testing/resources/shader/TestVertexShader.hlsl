@@ -2,6 +2,7 @@ struct VSInput
 {
     float2 position : POSITION;
     float4 color : COLOR;
+    float2 tex : TEXCOORD0;
     uint vertexID : SV_VertexID;
 };
 
@@ -9,6 +10,7 @@ struct PSInput
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
+    float2 tex : TEXCOORD;
 };
 
 cbuffer Matrices : register(b0)
@@ -29,6 +31,7 @@ PSInput vsMain(VSInput input)
 
     output.position = pos;
     output.color = input.color;
+    output.tex = input.tex;
 
     return output;
 }

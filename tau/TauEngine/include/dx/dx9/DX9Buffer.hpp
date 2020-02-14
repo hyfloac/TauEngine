@@ -30,21 +30,10 @@ public:
 
     void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 
-    void modifyBuffer(IRenderingContext& context, intptr_t offset, std::ptrdiff_t size, const void* data) noexcept override;
+    void beginModification(IRenderingContext& context) noexcept override { }
 
-    [[nodiscard]] void* mapBuffer(IRenderingContext& context) noexcept override;
-    void unmapBuffer(IRenderingContext& context) noexcept override;
+    void endModification(IRenderingContext& context) noexcept override { }
+
+    void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override { }
 };
-
-// class TAU_DLL DX9BufferBuilder final : public IBufferBuilder
-// {
-//     DEFAULT_DESTRUCT(DX9BufferBuilder);
-//     DELETE_COPY(DX9BufferBuilder);
-// private:
-//     DX9RenderingContext& _context;
-// public:
-//     DX9BufferBuilder(uSys descriptorCount, DX9RenderingContext& context) noexcept;
-//
-//     [[nodiscard]] IBuffer* build([[tau::out]] Error* error) const noexcept override;
-// };
 #endif

@@ -60,12 +60,14 @@ ITexture* GLTexture2DBuilder::build(Error* error) const noexcept
 
     GLTexture2D* const texture = new(std::nothrow) GLTexture2D(_width, _height, _dataFormat, textureHandle);
 
-    if(!textureHandle)
+    if(!texture)
     {
         glDeleteTextures(1, &textureHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
+    texture->set(0, _initialBuffer);
+	
     ERROR_CODE_V(Error::NoError, texture);
 }
 
@@ -90,11 +92,13 @@ ITexture* GLTextureDepthBuilder::build(Error* error) const noexcept
 
     GLDepthTexture* const texture = new(std::nothrow) GLDepthTexture(_width, _height, _dataFormat, textureHandle);
 
-    if(!textureHandle)
+    if(!texture)
     {
         glDeleteTextures(1, &textureHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
+
+    texture->set(0, _initialBuffer);
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -242,4 +246,3 @@ GLenum GLTexture2D::glInputDataType(const ETexture::Format format) noexcept
         default: return 0;
     }
 }
-

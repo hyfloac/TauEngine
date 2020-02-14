@@ -1,6 +1,5 @@
 #pragma warning(push, 0)
 #include <FreeImage.h>
-#include <GL/glew.h>
 #pragma warning(pop)
 
 #include <texture/FITextureLoader.hpp>
@@ -11,85 +10,159 @@
 #include "Timings.hpp"
 #include "system/RenderingContext.hpp"
 
-static ITexture* _missingTexture = null;
+static Ref<ITexture> _missingTexture = null;
 
-void TextureLoader::setMissingTexture(ITexture* missingTexture) noexcept
+void TextureLoader::setMissingTexture(const Ref<ITexture>& missingTexture) noexcept
 {
     _missingTexture = missingTexture;
 }
 
-ITexture* TextureLoader::generateMissingTexture(IRenderingContext& context) noexcept
+Ref<ITexture> TextureLoader::getMissingTexture() noexcept
+{
+    return _missingTexture;
+}
+
+Ref<ITexture> TextureLoader::generateMissingTexture(IRenderingContext& context) noexcept
 {
     PERF();
-    u8* const textureData = new u8[2 * 2 * 3];
+    u8* const textureData = new u8[2 * 2 * 4];
 
-    textureData[0 * 3 + 0] = 0xFF;
-    textureData[0 * 3 + 1] = 0x00;
-    textureData[0 * 3 + 2] = 0xFF;
+    textureData[0 * 4 + 0] = 0xFF;
+    textureData[0 * 4 + 1] = 0x00;
+    textureData[0 * 4 + 2] = 0xFF;
+    textureData[0 * 4 + 3] = 0xFF;
 
-    textureData[1 * 3 + 0] = 0x00;
-    textureData[1 * 3 + 1] = 0x00;
-    textureData[1 * 3 + 2] = 0x00;
+    textureData[1 * 4 + 0] = 0x00;
+    textureData[1 * 4 + 1] = 0x00;
+    textureData[1 * 4 + 2] = 0x00;
+    textureData[1 * 4 + 3] = 0xFF;
 
-    textureData[2 * 3 + 0] = 0xFF;
-    textureData[2 * 3 + 1] = 0x00;
-    textureData[2 * 3 + 2] = 0xFF;
+    textureData[2 * 4 + 0] = 0x00;
+    textureData[2 * 4 + 1] = 0x00;
+    textureData[2 * 4 + 2] = 0x00;
+    textureData[2 * 4 + 3] = 0xFF;
 
-    textureData[3 * 3 + 0] = 0x00;
-    textureData[3 * 3 + 1] = 0x00;
-    textureData[3 * 3 + 2] = 0x00;
+    textureData[3 * 4 + 0] = 0xFF;
+    textureData[3 * 4 + 1] = 0x00;
+    textureData[3 * 4 + 2] = 0xFF;
+    textureData[3 * 4 + 3] = 0xFF;
 
     Ref<ITextureBuilder> builder = context.createTexture2D();
     builder->width(2);
     builder->height(2);
     builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
     builder->mipmapLevels(0);
+    builder->initialBuffer(textureData);
 
-    ITexture* const ret = builder->build(null); //ITexture::create(context, 2, 2, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
+    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
+    
+    delete[] textureData;
 
-    // ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    ret->set(0, textureData);
+    return ret;
+}
 
-    // glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+Ref<ITexture> TextureLoader::generateDebugTexture8(IRenderingContext& context, const uSys power) noexcept
+{
+    if(power > 12)
+    { return  _missingTexture; }
 
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    const uSys side = 1 << power;
+    const uSys size = side * side;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
+    u8* const textureData = new u8[size * 4];
 
+    for(uSys i = 0; i < size; ++i)
+    {
+        const uSys x = i / side;
+        const uSys y = i % side;
+        const u16 r = static_cast<u8>((0xFF * x) / side);
+        const u16 g = static_cast<u8>((0xFF * y) / side);
+        const u16 b = static_cast<u8>((0xFF * i) / size);
+
+        textureData[i * 4 + 0] = 0xFF - b;
+        textureData[i * 4 + 1] = g;
+        textureData[i * 4 + 2] = r;
+        textureData[i * 4 + 3] = 0xFF;
+    }
+
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(side);
+    builder->height(side);
+    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+    builder->mipmapLevels(0);
+    builder->initialBuffer(textureData);
+
+    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
+    
+    delete[] textureData;
+
+    return ret;
+}
+
+Ref<ITexture> TextureLoader::generateDebugTexture16(IRenderingContext& context, const uSys power) noexcept
+{
+    if(power > 12)
+    {
+        return  _missingTexture;
+    }
+
+    const uSys side = 1 << power;
+    const uSys size = side * side;
+
+    u16* const textureData = new u16[size * 4];
+
+    for(uSys i = 0; i < size; ++i)
+    {
+        const uSys x = i / side;
+        const uSys y = i % side;
+        const u16 r = static_cast<u16>((0xFFFF * x) / side);
+        const u16 g = static_cast<u16>((0xFFFF * y) / side);
+        const u16 b = static_cast<u16>((0xFFFF * i) / size);
+
+        textureData[i * 4 + 0] = 0xFFFF - b;
+        textureData[i * 4 + 1] = g;
+        textureData[i * 4 + 2] = r;
+        textureData[i * 4 + 3] = 0xFFFF;
+    }
+
+    Ref<ITextureBuilder> builder = context.createTexture2D();
+    builder->width(side);
+    builder->height(side);
+    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha16UnsignedInt);
+    builder->mipmapLevels(0);
+    builder->initialBuffer(textureData);
+
+    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
 
     delete[] textureData;
 
     return ret;
 }
 
-ITexture* TextureLoader::generateColorTexture(IRenderingContext& context, RGBColor color) noexcept
+Ref<ITexture> TextureLoader::generateColorTexture(IRenderingContext& context, RGBColor color) noexcept
 {
-    u8* const textureData = new u8[1 * 1 * 3];
+    u8* const textureData = new u8[1 * 1 * 4];
 
     textureData[0] = color.r;
     textureData[1] = color.g;
     textureData[2] = color.b;
+    textureData[3] = 0xFF;
 
     Ref<ITextureBuilder> builder = context.createTexture2D();
     builder->width(1);
     builder->height(1);
     builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
     builder->mipmapLevels(0);
+    builder->initialBuffer(textureData);
 
-    ITexture* const ret = builder->build(null); //ITexture::create(context, 1, 1, ETexture::Format::RedGreenBlue8UnsignedInt, ETexture::Type::T2D);
-
-    // ret->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    ret->set(0, textureData);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_BGR, GL_UNSIGNED_BYTE, textureData);
-
+    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
+    
     delete[] textureData;
 
     return ret;
 }
 
-ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
+Ref<ITexture> TextureLoader::loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -118,7 +191,6 @@ ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* R
 
     ERR_EXIT(TextureLoadError::TEXTURE_FAILED_TO_LOAD, !texture);
 
-
     FIBITMAP* tmp = FreeImage_ConvertTo32Bits(texture);
     FreeImage_Unload(texture);
     texture = tmp;
@@ -139,12 +211,9 @@ ITexture* TextureLoader::loadTextureEx(IRenderingContext& context, const char* R
     builder->height(height);
     builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
     builder->mipmapLevels(0);
+    builder->initialBuffer(textureData);
 
-    ITexture* const ret = builder->build(null); //ITexture::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt, ETexture::Type::T2D);
-
-    // ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
-    // ret->setWrapMode(settings.wrapS, settings.wrapT);
-    ret->set(0, textureData);
+    Ref<ITexture> const ret = Ref<ITexture>(builder->build(null));
 
     if(mipmapLevel < 0)
     {
@@ -168,23 +237,20 @@ static const char* fileNames[6] = {
     "top",
 };
 
-ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
+Ref<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
     if((__CHECK)) { \
         if(error) { *error = __ERR; } \
         if(texture) { FreeImage_Unload(texture); } \
-        delete ret; \
         return null; }
 
     Ref<ITextureCubeBuilder> builder = context.createTextureCube();
-    // builder->width(width);
-    // builder->height(height);
     builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
     builder->mipmapLevels(0);
 
-    ITextureCube* ret = null;
+    Ref<ITextureCube> ret = null;
 
     u32 width = 0;
     u32 height = 0;
@@ -247,10 +313,7 @@ ITextureCube* TextureLoader::loadTextureCubeEx(IRenderingContext& context, const
             builder->width(width);
             builder->height(height);
 
-            // ret = ITextureCube::create(context, width, height, ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-            ret = builder->build(null);
-            // ret->setFilterMode(settings.minificationFilter, settings.magnificationFilter);
-            // ret->setWrapModeCube(settings.wrapS, settings.wrapT, settings.wrapR);
+            ret = Ref<ITextureCube>(builder->build(null));
         }
 
         ret->setCube(0, static_cast<ETexture::CubeSide>(i + 1), textureData);

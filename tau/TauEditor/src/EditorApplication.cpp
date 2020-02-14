@@ -308,7 +308,7 @@ void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, 
 
     const TauEditorApplication* tea = reinterpret_cast<const TauEditorApplication*>(userParam);
 
-#define STR_CASE(__ENUM, __STR) case __ENUM: str = __STR; break
+#define STR_CASE_GL(__ENUM, __STR) case __ENUM: str = __STR; break
 #define DEFAULT_CASE default: str = "Unknown"; break
 
     tea->logger()->error("--OpenGL Error Callback--");
@@ -316,25 +316,25 @@ void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, 
     const char* str;
     switch(source)
     {
-        STR_CASE(GL_DEBUG_SOURCE_API, "API");
-        STR_CASE(GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window System");
-        STR_CASE(GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler");
-        STR_CASE(GL_DEBUG_SOURCE_THIRD_PARTY, "Third Party");
-        STR_CASE(GL_DEBUG_SOURCE_APPLICATION, "Application");
-        STR_CASE(GL_DEBUG_SOURCE_OTHER, "Other");
+        STR_CASE_GL(GL_DEBUG_SOURCE_API, "API");
+        STR_CASE_GL(GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window System");
+        STR_CASE_GL(GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler");
+        STR_CASE_GL(GL_DEBUG_SOURCE_THIRD_PARTY, "Third Party");
+        STR_CASE_GL(GL_DEBUG_SOURCE_APPLICATION, "Application");
+        STR_CASE_GL(GL_DEBUG_SOURCE_OTHER, "Other");
         DEFAULT_CASE;
     }
     tea->logger()->error("Source [0x{0:X}] {1}", source, str);
 
     switch(type)
     {
-        STR_CASE(GL_DEBUG_TYPE_ERROR, "Error");
-        STR_CASE(GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior");
-        STR_CASE(GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior");
-        STR_CASE(GL_DEBUG_TYPE_PORTABILITY, "Portability");
-        STR_CASE(GL_DEBUG_TYPE_PERFORMANCE, "Performance");
-        STR_CASE(GL_DEBUG_TYPE_OTHER, "Other");
-        STR_CASE(GL_DEBUG_TYPE_MARKER, "Marker");
+        STR_CASE_GL(GL_DEBUG_TYPE_ERROR, "Error");
+        STR_CASE_GL(GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior");
+        STR_CASE_GL(GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior");
+        STR_CASE_GL(GL_DEBUG_TYPE_PORTABILITY, "Portability");
+        STR_CASE_GL(GL_DEBUG_TYPE_PERFORMANCE, "Performance");
+        STR_CASE_GL(GL_DEBUG_TYPE_OTHER, "Other");
+        STR_CASE_GL(GL_DEBUG_TYPE_MARKER, "Marker");
         DEFAULT_CASE;
     }
     tea->logger()->error("Type: [0x{0:X}] {1}", type, str);
@@ -342,10 +342,10 @@ void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, 
 
     switch(severity)
     {
-        STR_CASE(GL_DEBUG_SEVERITY_MEDIUM, "Medium");
-        STR_CASE(GL_DEBUG_SEVERITY_HIGH, "High");
-        STR_CASE(GL_DEBUG_SEVERITY_LOW, "Low");
-        STR_CASE(GL_DEBUG_SEVERITY_NOTIFICATION, "Notification");
+        STR_CASE_GL(GL_DEBUG_SEVERITY_MEDIUM, "Medium");
+        STR_CASE_GL(GL_DEBUG_SEVERITY_HIGH, "High");
+        STR_CASE_GL(GL_DEBUG_SEVERITY_LOW, "Low");
+        STR_CASE_GL(GL_DEBUG_SEVERITY_NOTIFICATION, "Notification");
         DEFAULT_CASE;
     }
     tea->logger()->error("Severity: [0x{0:X}] {1}", severity, str);
@@ -368,7 +368,7 @@ void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, 
 #endif
 
 #undef DEFAULT_CASE
-#undef STR_CASE
+#undef STR_CASE_GL
 }
 
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept
