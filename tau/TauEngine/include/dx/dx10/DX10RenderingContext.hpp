@@ -13,6 +13,7 @@ class DX10BufferBuilder;
 class DX10IndexBufferBuilder;
 class DX10UniformBufferBuilder;
 class DX10TextureSamplerBuilder;
+class DX10ShaderBuilder;
 
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
@@ -31,6 +32,7 @@ private:
     DX10IndexBufferBuilder* _indexBufferBuilder;
     DX10UniformBufferBuilder* _uniformBufferBuilder;
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
+    DX10ShaderBuilder* _shaderBuilder;
 public:
     DX10RenderingContext(const RenderingMode& mode) noexcept;
 
@@ -64,7 +66,7 @@ public:
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
-    [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override;
+    [[nodiscard]] IShaderBuilder& createShader() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);
 };

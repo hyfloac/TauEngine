@@ -44,7 +44,7 @@ private:
     Ref<ITextureUploader> _textureUploader;
     Ref<IVertexArray> _cubeVA;
 public:
-    Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept;
+    Skybox(IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
 
     [[nodiscard]] Ref<ITextureCube> skybox() const noexcept { return _skybox; }
     [[nodiscard]] const Ref<ITextureCube>& skybox() noexcept { return _skybox; }

@@ -87,7 +87,7 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
         lastModifyText = max(_modifyTime(textFile), _creationTime(textFile));
     }
 
-    const bool parseText = lastModifyText > lastModifyBinary;
+    bool parseText = lastModifyText > lastModifyBinary;
     const u64 lastModify = max(lastModifyBinary, lastModifyText);
 
     ParseData resourceData = nullParse();
@@ -99,9 +99,11 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
         if(lastModify <= cacheData.lastModifyTime)
         {
             resourceData = cacheData;
+            parseText = false;
         }
     }
-    else
+	
+    if(parseText)
     {
         resourceData = parseText ? parseTextFile(textFile, rst) : parseBinaryFile(binaryFile);
         writeCache(binaryCache, resourceData, parseText ? lastModifyText : lastModifyBinary);

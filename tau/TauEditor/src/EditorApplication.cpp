@@ -15,6 +15,7 @@
 #include <texture/FITextureLoader.hpp>
 #include <RenderingPipeline.hpp>
 #include <ResourceLoader.hpp>
+#include <ResourceSelector.hpp>
 #include <Timings.hpp>
 
 static void setupGameFolders() noexcept;
@@ -42,6 +43,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     setupGameFolders();
     setupConfig();
+
+    ResourceSelectorLoader::setCacheDirectory("|TERes/cache");
 
     TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfInit.json");
     PERF();

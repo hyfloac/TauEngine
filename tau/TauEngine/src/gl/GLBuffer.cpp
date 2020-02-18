@@ -148,7 +148,7 @@ GLuint GLBuffer::createBuffer() noexcept
 GLBuffer* GLBufferBuilder::build(const BufferArgs& args, Error* error) const noexcept
 {
     GLBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     GLBuffer* const buffer = new(std::nothrow) GLBuffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage);
@@ -167,7 +167,7 @@ GLBuffer* GLBufferBuilder::build(const BufferArgs& args, Error* error) const noe
 GLBuffer* GLBufferBuilder::build(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     GLBuffer* const buffer = allocator.allocateT<GLBuffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage);
@@ -186,7 +186,7 @@ GLBuffer* GLBufferBuilder::build(const BufferArgs& args, Error* error, TauAlloca
 Ref<IBuffer> GLBufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) const noexcept
 {
     GLBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const Ref<GLBuffer> buffer = Ref<GLBuffer>(new(std::nothrow) GLBuffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage));
@@ -205,7 +205,7 @@ Ref<IBuffer> GLBufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) 
 NullableReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const NullableReferenceCountingPointer<GLBuffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage);
@@ -226,7 +226,7 @@ NullableReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauRef(const Buf
 NullableStrongReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const NullableStrongReferenceCountingPointer<GLBuffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage);
@@ -244,7 +244,7 @@ NullableStrongReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauSRef(co
     ERROR_CODE_V(Error::NoError, iBuffer);
 }
 
-bool GLBufferBuilder::processBufferArgs(const BufferArgs& args, GLBufferArgs* glArgs, Error* error) const noexcept
+bool GLBufferBuilder::processArgs(const BufferArgs& args, GLBufferArgs* glArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(args.type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
@@ -269,7 +269,7 @@ void GLBufferBuilder::initBuffer(const BufferArgs& args, const GLBufferArgs& glA
 GLIndexBuffer* GLIndexBufferBuilder::build(const IndexBufferArgs& args, Error* error) const noexcept
 {
     GLIndexBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     GLIndexBuffer* const buffer = new(std::nothrow) GLIndexBuffer(args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage);
@@ -288,7 +288,7 @@ GLIndexBuffer* GLIndexBufferBuilder::build(const IndexBufferArgs& args, Error* e
 GLIndexBuffer* GLIndexBufferBuilder::build(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLIndexBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     GLIndexBuffer* const buffer = allocator.allocateT<GLIndexBuffer>(args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage);
@@ -307,7 +307,7 @@ GLIndexBuffer* GLIndexBufferBuilder::build(const IndexBufferArgs& args, Error* e
 Ref<IIndexBuffer> GLIndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* error) const noexcept
 {
     GLIndexBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const Ref<GLIndexBuffer> buffer = Ref<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage));
@@ -326,7 +326,7 @@ Ref<IIndexBuffer> GLIndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args,
 NullableReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLIndexBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const NullableReferenceCountingPointer<GLIndexBuffer> buffer(allocator, args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage);
@@ -347,7 +347,7 @@ NullableReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::buildTauRef
 NullableStrongReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLIndexBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const NullableStrongReferenceCountingPointer<GLIndexBuffer> buffer(allocator, args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage);
@@ -365,7 +365,7 @@ NullableStrongReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::build
     ERROR_CODE_V(Error::NoError, iBuffer);
 }
 
-bool GLIndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, GLIndexBufferArgs* glArgs, Error* error) const noexcept
+bool GLIndexBufferBuilder::processArgs(const IndexBufferArgs& args, GLIndexBufferArgs* glArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_F(args.elementCount == 0, Error::BufferSizeIsZero);
@@ -386,7 +386,7 @@ void GLIndexBufferBuilder::initBuffer(const IndexBufferArgs& args, const GLIndex
 GLUniformBuffer* GLUniformBufferBuilder::build(const UniformBufferArgs& args, Error* error) const noexcept
 {
     GLUniformBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     GLUniformBuffer* const buffer = new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage);
@@ -405,7 +405,7 @@ GLUniformBuffer* GLUniformBufferBuilder::build(const UniformBufferArgs& args, Er
 GLUniformBuffer* GLUniformBufferBuilder::build(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLUniformBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     GLUniformBuffer* const buffer = allocator.allocateT<GLUniformBuffer>(args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage);
@@ -424,7 +424,7 @@ GLUniformBuffer* GLUniformBufferBuilder::build(const UniformBufferArgs& args, Er
 Ref<IUniformBuffer> GLUniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* error) const noexcept
 {
     GLUniformBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const Ref<GLUniformBuffer> buffer = Ref<GLUniformBuffer>(new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage));
@@ -443,7 +443,7 @@ Ref<IUniformBuffer> GLUniformBufferBuilder::buildCPPRef(const UniformBufferArgs&
 NullableReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLUniformBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const NullableReferenceCountingPointer<GLUniformBuffer> buffer(allocator, args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage);
@@ -464,7 +464,7 @@ NullableReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::buildTa
 NullableStrongReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLUniformBufferArgs glArgs;
-    if(!processBufferArgs(args, &glArgs, error))
+    if(!processArgs(args, &glArgs, error))
     { return null; }
 
     const NullableStrongReferenceCountingPointer<GLUniformBuffer> buffer(allocator, args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage);
@@ -482,7 +482,7 @@ NullableStrongReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::b
     ERROR_CODE_V(Error::NoError, iBuffer);
 }
 
-bool GLUniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, GLUniformBufferArgs* glArgs, Error* error) const noexcept
+bool GLUniformBufferBuilder::processArgs(const UniformBufferArgs& args, GLUniformBufferArgs* glArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_F(args.bufferSize == 0, Error::BufferSizeIsZero);

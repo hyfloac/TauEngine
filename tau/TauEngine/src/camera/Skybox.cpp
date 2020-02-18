@@ -5,7 +5,6 @@
 #include "shader/IShader.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "gl/GLUtils.hpp"
-#include "VFS.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
 template<>
@@ -26,20 +25,22 @@ public:
     }
 };
 
-Skybox::Skybox(IRenderingContext& context, const char* vertexShaderPath, const char* pixelShaderPath, const char* skyboxPath, const char* fileExtension) noexcept
+Skybox::Skybox(IRenderingContext& context, const char* const vfsMount, const char* const shaderPath, const char* const vertexName, const char* const pixelName, const char* const skyboxPath, const char* const fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
       _uniforms(context.createUniformBuffer()),
       _skybox(null), _textureUploader(null), _cubeVA(null)
 {
-    Ref<IShaderBuilder> shaderBuilder = context.createShader();
+    ShaderArgs shaderArgs;
+    shaderArgs.vfsMount = vfsMount;
+    shaderArgs.path = shaderPath;
 
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile(vertexShaderPath, FileProps::Read));
-    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
+	shaderArgs.fileName = vertexName;
+    shaderArgs.stage = EShader::Stage::Vertex;
+    Ref<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile(pixelShaderPath, FileProps::Read));
-    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = pixelName;
+    shaderArgs.stage = EShader::Stage::Pixel;
+    Ref<IShader> pixelShader = context.createShader().buildCPPRef(shaderArgs, null);
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);

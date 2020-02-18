@@ -48,6 +48,10 @@
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
     <ClCompile Include="src\model\Material.cpp" />
     <ClCompile Include="src\shader\PointLight.cpp" />
+    <ClCompile Include="src\shader\PrintShaderBundleVisitor.cpp" />
+    <ClCompile Include="src\shader\ShaderBundleLexer.cpp" />
+    <ClCompile Include="src\shader\ShaderBundleParser.cpp" />
+    <ClCompile Include="src\shader\ShaderBundleVisitor.cpp" />
     <ClCompile Include="src\shader\SpotLight.cpp" />
     <ClCompile Include="src\system\SystemInterface.cpp" />
     <ClCompile Include="src\terrain\TerrainTile.cpp" />
@@ -177,8 +181,16 @@
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\RenderingPipeline.hpp" />
     <ClInclude Include="include\ResourceLoader.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\BlockExprAST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\ExprAST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\FileExprAST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\ShaderIOBindingExprAST.hpp" />
+    <ClInclude Include="include\shader\bundle\PrintShaderBundleVisitor.hpp" />
+    <ClInclude Include="include\shader\bundle\ShaderBundleLexer.hpp" />
+    <ClInclude Include="include\shader\bundle\ShaderBundleVisitor.hpp" />
     <ClInclude Include="include\shader\EShader.hpp" />
     <ClInclude Include="include\shader\IShaderProgram.hpp" />
+    <ClInclude Include="include\shader\bundle\ShaderBundleParser.hpp" />
     <ClInclude Include="include\shader\TextureUploader.hpp" />
     <ClInclude Include="include\shader\Uniform.hpp" />
     <ClInclude Include="include\shader\PointLight.hpp" />

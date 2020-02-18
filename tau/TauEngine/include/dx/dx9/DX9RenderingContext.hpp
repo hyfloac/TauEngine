@@ -19,6 +19,7 @@ private:
     IIndexBufferBuilder* _indexBufferBuilder;
     IUniformBufferBuilder* _uniformBufferBuilder;
     ITextureSamplerBuilder* _textureSamplerBuilder;
+    IShaderBuilder* _shaderBuilder;
 public:
     DX9RenderingContext(const RenderingMode& mode) noexcept;
     ~DX9RenderingContext() noexcept override final;
@@ -62,7 +63,7 @@ public:
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override { return *_textureSamplerBuilder; }
     [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override { return null; }
     [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override { return null; }
-    [[nodiscard]] Ref<IShaderBuilder> createShader() noexcept override { return null; }
+    [[nodiscard]] IShaderBuilder& createShader() noexcept override { return *_shaderBuilder; }
 protected:
     RC_IMPL(DX9RenderingContext);
 };

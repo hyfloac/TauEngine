@@ -8,19 +8,21 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
     : ILayer(true), _window(window), _rp(rp), _ortho(ortho),
       _vao(null), _shader(IShaderProgram::create(*window.renderingContext()))
 {
-    Ref<IShaderBuilder> shaderBuilder = window.renderingContext()->createShader();
+    ShaderArgs shaderArgs;
+    shaderArgs.vfsMount = "|TERes";
+    shaderArgs.path = "/line/";
 
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LineVertex.glsl", FileProps::Read));
-    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = "LineVertex";
+    shaderArgs.stage = EShader::Stage::Vertex;
+    Ref<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Geometry);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LineGeometry.glsl", FileProps::Read));
-    Ref<IShader> geometryShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = "LineGeometry";
+    shaderArgs.stage = EShader::Stage::Geometry;
+    Ref<IShader> geometryShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/line/LinePixel.glsl", FileProps::Read));
-    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = "LinePixel";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    Ref<IShader> pixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
     // Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/line/LineVertex.glsl");
     // Ref<IShader> geometryShader = IShader::create(*window.renderingContext(), IShader::Type::Geometry, "|TERes/line/LineGeometry.glsl");

@@ -1,15 +1,16 @@
 #pragma once
 
-#include <NumTypes.hpp>
-#include <DLL.hpp>
 #include <Objects.hpp>
+#include <NumTypes.hpp>
+#include <Safeties.hpp>
 #include <RunTimeType.hpp>
 #include <allocator/TauAllocator.hpp>
-#include <Safeties.hpp>
 #include <ReferenceCountingPointer.hpp>
-#include "model/BufferDescriptor.hpp"
-#include "model/BufferEnums.hpp"
+
+#include "DLL.hpp"
 #include "shader/EShader.hpp"
+#include "model/BufferEnums.hpp"
+#include "model/BufferDescriptor.hpp"
 
 #define BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                 RTT_IMPL(_TYPE, IBuffer)
@@ -26,7 +27,7 @@
 
 #define UNIFORM_BUFFER_IMPL(_TYPE) UNIFORM_BUFFER_IMPL_BASE(_TYPE)
 
-class TAU_DLL IBuffer
+class TAU_DLL NOVTABLE IBuffer
 {
     DEFAULT_DESTRUCT_VI(IBuffer);
     DELETE_COPY(IBuffer);
@@ -68,7 +69,7 @@ public:
     RTT_BASE_CAST(IBuffer);
 };
 
-class TAU_DLL IIndexBuffer
+class TAU_DLL NOVTABLE IIndexBuffer
 {
     DEFAULT_DESTRUCT_VI(IIndexBuffer);
     DELETE_COPY(IIndexBuffer);
@@ -104,7 +105,7 @@ public:
     RTT_BASE_CAST(IIndexBuffer);
 };
 
-class TAU_DLL IUniformBuffer
+class TAU_DLL NOVTABLE IUniformBuffer
 {
     DEFAULT_DESTRUCT_VI(IUniformBuffer);
     DELETE_COPY(IUniformBuffer);
@@ -197,7 +198,7 @@ public:
     { }
 };
 
-class TAU_DLL IBufferBuilder
+class TAU_DLL NOVTABLE IBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IBufferBuilder);
     DEFAULT_DESTRUCT_VI(IBufferBuilder);
@@ -311,7 +312,7 @@ public:
     [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
-class TAU_DLL IIndexBufferBuilder
+class TAU_DLL NOVTABLE IIndexBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IIndexBufferBuilder);
     DEFAULT_DESTRUCT_VI(IIndexBufferBuilder);
@@ -326,7 +327,7 @@ public:
     [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
-class TAU_DLL IUniformBufferBuilder
+class TAU_DLL NOVTABLE IUniformBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IUniformBufferBuilder);
     DEFAULT_DESTRUCT_VI(IUniformBufferBuilder);

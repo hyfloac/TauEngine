@@ -1,0 +1,20 @@
+Vertex: {
+	File: "|TERes/shader/SimpleVertexShader",
+	Uniforms: {
+		0: "CameraMatrices"
+	}
+},
+Fragment: {
+	File: "|TERes/nanosuit/NanosuitPixel.glsl",
+	Uniforms: {
+		1: "MaterialUni",
+		2: "PointLightUni",
+		3: "SpotLightUni",
+		4: "ViewPosUni",
+		Textures: {
+			0: "diffuseSampler",
+			1: "specularSampler",
+			2: "normalSampler"
+		}
+	}
+}

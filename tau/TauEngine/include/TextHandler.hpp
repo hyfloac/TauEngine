@@ -111,7 +111,7 @@ private:
     // Ref<IUniform<const Vector3f&>> _colorUni;
     //
 public:
-    TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept;
+    TextHandler(IRenderingContext& context, const char* vfsMount, const char* path, const char* vertexName, const char* pixelName) noexcept;
 
     ~TextHandler() noexcept;
 

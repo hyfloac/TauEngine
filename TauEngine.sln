@@ -46,20 +46,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceLib", "utils\Resour
 		{26293AE2-B33C-45FF-8D0D-F2B82B8F4C60} = {26293AE2-B33C-45FF-8D0D-F2B82B8F4C60}
 	EndProjectSection
 EndProject
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "lld-link", "..\ProgramFiles\x86\MSVisualStudio\2019\Community\VC\Tools\Llvm\bin\lld-link.exe", "{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}"
-	ProjectSection(DebuggerProjectSystem) = preProject
-		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = E:\LLVM_build\llvm-project\build\Release\bin\lld-link.exe
-		RemoteMachine = DESKTOP-T01C296
-		StartingDirectory = E:\TauEngine\obj\Release-x64\TauEditor
-		Arguments = /OUT:"E:\TauEngine\obj\Release-x64\TauEditor\TauEditor.exe" /INCREMENTAL:NO /LIBPATH:"E:\TauEngine\bin\Release-x64\\" /LIBPATH:"E:\TauEngine\libs\freetype-2.10.0\objs\x64\Release Static\\" /LIBPATH:E:\ProgramFiles\x86\MSVisualStudio\2019\Community\VC\Tools\MSVC\14.23.28105\lib\x64 /LIBPATH:E:\ProgramFiles\x86\MSVisualStudio\2019\Community\VC\Tools\MSVC\14.23.28105\atlmfc\lib\x64 /LIBPATH:E:\ProgramFiles\x86\MSVisualStudio\2019\Community\VC\Auxiliary\VS\lib\x64 /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64" /LIBPATH:"C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64" /LIBPATH:"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.7.2\lib\um\x64" /LIBPATH:"C:\Program Files (x86)\Windows Kits\NETFXSDK\4.7.2\Lib\um\x64" TauEngine.lib opengl32.lib GLEW.lib FreeImage.lib freetype.lib ResourceLib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG:FULL /PDB:"E:\TauEngine\bin\Release-x64\TauEditor.pdb" /SUBSYSTEM:CONSOLE /LARGEADDRESSAWARE /OPT:REF /OPT:ICF /DYNAMICBASE /FIXED:NO /NXCOMPAT /IMPLIB:"E:\TauEngine\bin\Release-x64\TauEditor.lib" /MACHINE:X64 /SAFESEH:NO /guard:cf "E:\TauEngine\obj\Release-x64\TauEditor\EditorApplication.obj" "E:\TauEngine\obj\Release-x64\TauEditor\Main.obj" "E:\TauEngine\obj\Release-x64\TauEditor\TERenderer.obj"
-		Environment = Default
-		LaunchingEngine = 00000000-0000-0000-0000-000000000000
-		UseLegacyDebugEngines = No
-		LaunchSQLEngine = No
-		AttachLaunchAction = No
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "test\UnitTest\UnitTest.vcxproj", "{7121518C-E7B8-4FCE-9A95-540D23949660}"
 	ProjectSection(ProjectDependencies) = postProject
 		{26293AE2-B33C-45FF-8D0D-F2B82B8F4C60} = {26293AE2-B33C-45FF-8D0D-F2B82B8F4C60}
@@ -323,18 +309,6 @@ Global
 		{9933887F-700C-4176-A185-10FEFF66DC5C}.Release|x64.Build.0 = Release|x64
 		{9933887F-700C-4176-A185-10FEFF66DC5C}.Release|x86.ActiveCfg = Release|x64
 		{9933887F-700C-4176-A185-10FEFF66DC5C}.Release|x86.Build.0 = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Debug|Any CPU.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Debug|x64.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Debug|x86.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.OptimizedDebug|Any CPU.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.OptimizedDebug|x64.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.OptimizedDebug|x86.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Production|Any CPU.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Production|x64.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Production|x86.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Release|Any CPU.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Release|x64.ActiveCfg = Release|x64
-		{BE529D3A-2B60-4E2D-A9F7-08F93874E70B}.Release|x86.ActiveCfg = Release|x64
 		{7121518C-E7B8-4FCE-9A95-540D23949660}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{7121518C-E7B8-4FCE-9A95-540D23949660}.Debug|x64.ActiveCfg = Debug|x64
 		{7121518C-E7B8-4FCE-9A95-540D23949660}.Debug|x64.Build.0 = Debug|x64

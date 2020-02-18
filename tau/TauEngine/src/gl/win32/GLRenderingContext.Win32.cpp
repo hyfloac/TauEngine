@@ -1,5 +1,11 @@
 #ifdef _WIN32
 #include "gl/GLRenderingContext.hpp"
+
+#include "gl/GLBuffer.hpp"
+#include "gl/GLShader.hpp"
+#include "gl/GLTextureSampler.hpp"
+#include "gl/GLBufferDescriptor.hpp"
+
 #include "system/Window.hpp"
 
 GLRenderingContext::~GLRenderingContext() noexcept
@@ -8,6 +14,7 @@ GLRenderingContext::~GLRenderingContext() noexcept
     delete _indexBufferBuilder;
     delete _uniformBufferBuilder;
     delete _textureSamplerBuilder;
+    delete _shaderBuilder;
 
     deactivateContext();
     wglDeleteContext(_context);

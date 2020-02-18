@@ -25,9 +25,7 @@ private:
 public:
     DX10VertexShader(ID3D10VertexShader* shader, ID3D10Blob* shaderBlob) noexcept
         : _shader(shader), _shaderBlob(shaderBlob)
-    {
-        shaderBlob->AddRef();
-    }
+    { shaderBlob->AddRef(); }
 
     ~DX10VertexShader() noexcept
     {
@@ -56,9 +54,7 @@ public:
     { }
 
     ~DX10GeometryShader() noexcept
-    {
-        _shader->Release();
-    }
+    { _shader->Release(); }
 
     [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Geometry; }
 
@@ -79,9 +75,7 @@ public:
     { }
 
     ~DX10PixelShader() noexcept
-    {
-        _shader->Release();
-    }
+    { _shader->Release(); }
 
     [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Pixel; }
 
@@ -96,18 +90,31 @@ class TAU_DLL DX10ShaderBuilder final : public IShaderBuilder
     DEFAULT_DESTRUCT(DX10ShaderBuilder);
     DELETE_COPY(DX10ShaderBuilder);
 private:
-    DX10RenderingContext* _context;
-public:
-    DX10ShaderBuilder(DX10RenderingContext* context) noexcept
-        : _context(context)
-    { }
+	struct DXShaderArgs final
+	{
+        ID3D10Blob* dataBlob;
+	};
 
-    [[nodiscard]] DX10Shader* build([[tau::out]] Error* error) noexcept override;
+	union D3D10ShaderObjects final
+	{
+        ID3D10VertexShader* vertex;
+        ID3D10GeometryShader* geometry;
+        ID3D10PixelShader* pixel;
+	};
 private:
-    [[nodiscard]] DX10VertexShader* buildVertexShader([[tau::out]] Error* error, ID3D10Blob* dataBlob) const noexcept;
+    DX10RenderingContext& _ctx;
+    IResourceSelectorTransformer::ResIndex _resIndex;
+public:
+    DX10ShaderBuilder(DX10RenderingContext& ctx) noexcept;
 
-    [[nodiscard]] DX10GeometryShader* buildGeometryShader([[tau::out]] Error* error, ID3D10Blob* dataBlob) const noexcept;
+    [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
-    [[nodiscard]] DX10PixelShader* buildPixelShader([[tau::out]] Error* error, ID3D10Blob* dataBlob) const noexcept;
+    [[nodiscard]] D3D10ShaderObjects createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, [[tau::out]] Error* error) const noexcept;
 };
 #endif

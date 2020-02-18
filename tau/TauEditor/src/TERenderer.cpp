@@ -49,7 +49,7 @@ TERenderer::TERenderer(Window& window, State& state, bool async) noexcept
 {
     PERF();
     _rp = new RenderingPipeline(window, setupParams, nullptr, async);
-    _th = new TextHandler(*window.renderingContext(), "|TERes/shader/Text/TextVertexShader.glsl", "|TERes/shader/Text/TextPixelShader.glsl");
+    _th = new TextHandler(*window.renderingContext(), "|TERes", "/shader/Text/", "TextVertexShader", "TextPixelShader");
     (void) _th->init();
     // (void) _th->loadTTFFile("|TERes/Sansation_Regular.ttf", 0, 48, finalizeLoadSansation, this);
     // (void) _th->loadTTFFile("|TERes/MonoConsole.ttf",  0, 48, finalizeLoadMono, this);

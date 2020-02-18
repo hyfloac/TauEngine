@@ -54,7 +54,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
               Keyboard::Key::Shift, Keyboard::Key::W, Keyboard::Key::S,
               Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Space, Keyboard::Key::Ctrl,
               recorder),
-      _skybox(*window.renderingContext(), "|TERes/shader/SkyboxVertexShader.glsl", "|TERes/shader/SkyboxPixelShader.glsl", "|TERes/Skybox/OceanMountain/", ".png"),
+      _skybox(*window.renderingContext(), "|TERes", "/shader/", "SkyboxVertexShader", "SkyboxPixelShader", "|TERes/Skybox/OceanMountain/", ".png"),
       _shader(IShaderProgram::create(*window.renderingContext())),
       _uniforms(window.renderingContext()->createUniformBuffer()),
       _materialUniforms(window.renderingContext()->createUniformBuffer()),
@@ -76,43 +76,47 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
         }
     }
 
-    Ref<IShaderBuilder> shaderBuilder = window.renderingContext()->createShader();
+    ShaderArgs shaderArgs;
+    shaderArgs.vfsMount = "|TERes";
 
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/SimpleVertexShader.glsl", FileProps::Read));
-    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.path = "/nanosuit/";
+    shaderArgs.fileName = "NanosuitPixel";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    Ref<IShader> pixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/nanosuit/NanosuitPixel.glsl", FileProps::Read));
-    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.path = "/shader/";
+    shaderArgs.fileName = "SimpleVertexShader";
+    shaderArgs.stage = EShader::Stage::Vertex;
+    Ref<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlineVertexShader.glsl", FileProps::Read));
-    Ref<IShader> outlineVertexShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlinePixelShader.glsl", FileProps::Read));
-    Ref<IShader> outlinePixelShader = Ref<IShader>(shaderBuilder->build());
+    // shaderBuilder->type(EShader::Stage::Vertex);
+    // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlineVertexShader.glsl", FileProps::Read));
+    // Ref<IShader> outlineVertexShader = Ref<IShader>(shaderBuilder->build());
+    //
+    // shaderBuilder->type(EShader::Stage::Pixel);
+    // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlinePixelShader.glsl", FileProps::Read));
+    // Ref<IShader> outlinePixelShader = Ref<IShader>(shaderBuilder->build());
+    //
+    // shaderBuilder->type(EShader::Stage::Vertex);
+    // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefVertexShader.glsl", FileProps::Read));
+    // Ref<IShader> refVertexShader = Ref<IShader>(shaderBuilder->build());
+    //
+    // shaderBuilder->type(EShader::Stage::Pixel);
+    // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/ReflectionPixelShader.glsl", FileProps::Read));
+    // Ref<IShader> reflectionPixelShader = Ref<IShader>(shaderBuilder->build());
+    //
+    // shaderBuilder->type(EShader::Stage::Pixel);
+    // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
+    // Ref<IShader> refractionPixelShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefVertexShader.glsl", FileProps::Read));
-    Ref<IShader> refVertexShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = "FrameBufferVertexShader";
+    shaderArgs.stage = EShader::Stage::Vertex;
+    Ref<IShader> frameBufferVertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/ReflectionPixelShader.glsl", FileProps::Read));
-    Ref<IShader> reflectionPixelShader = Ref<IShader>(shaderBuilder->build());
-
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
-    Ref<IShader> refractionPixelShader = Ref<IShader>(shaderBuilder->build());
-
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/FrameBufferVertexShader.glsl", FileProps::Read));
-    Ref<IShader> frameBufferVertexShader = Ref<IShader>(shaderBuilder->build());
-
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/FrameBufferPixelShader.glsl", FileProps::Read));
-    Ref<IShader> frameBufferPixelShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = "FrameBufferPixelShader";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    Ref<IShader> frameBufferPixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
     _shader->setVertexShader(*window.renderingContext(), vertexShader);
     _shader->setPixelShader(*window.renderingContext(), pixelShader);

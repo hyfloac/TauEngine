@@ -2,15 +2,20 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 #include <Utils.hpp>
+
 #include "gl/GLRenderingContext.hpp"
-#include "gl/GLBufferDescriptor.hpp"
+
+#include "gl/GLShader.hpp"
+#include "gl/GLTexture.hpp"
 #include "gl/GLVertexArray.hpp"
 #include "gl/GLFrameBuffer.hpp"
-#include "gl/gl4_5/GLBuffer4_5.hpp"
-#include "gl/GLTexture.hpp"
-#include "gl/GLShader.hpp"
 #include "gl/GLTextureSampler.hpp"
 #include "gl/GLTextureUploader.hpp"
+#include "gl/GLBufferDescriptor.hpp"
+
+#include "gl/GLBuffer.hpp"
+#include "gl/gl4_5/GLBuffer4_5.hpp"
+
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
@@ -46,6 +51,7 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
     }
 
     _textureSamplerBuilder = new(::std::nothrow) GLTextureSamplerBuilder;
+    _shaderBuilder = new(::std::nothrow) GLShaderBuilder(*this);
 }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
@@ -84,6 +90,15 @@ Ref<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys buffer
     return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
 }
 
+IBufferBuilder& GLRenderingContext::createBuffer() noexcept
+{ return *_bufferBuilder; }
+
+IIndexBufferBuilder& GLRenderingContext::createIndexBuffer() noexcept
+{ return *_indexBufferBuilder; }
+
+IUniformBufferBuilder& GLRenderingContext::createUniformBuffer() noexcept
+{ return *_uniformBufferBuilder; }
+
 Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
 {
     return Ref<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
@@ -109,6 +124,9 @@ Ref<ITextureCubeBuilder> GLRenderingContext::createTextureCube() noexcept
     return Ref<GLTextureCubeBuilder>(new(::std::nothrow) GLTextureCubeBuilder);
 }
 
+ITextureSamplerBuilder& GLRenderingContext::createTextureSampler() noexcept
+{ return *_textureSamplerBuilder; }
+
 Ref<ITextureUploaderBuilder> GLRenderingContext::createTextureUploader(const uSys textureCount) noexcept
 {
     return Ref<GLTextureUploaderBuilder>(new(::std::nothrow) GLTextureUploaderBuilder(textureCount, *this));
@@ -119,7 +137,5 @@ Ref<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUpload
     return Ref<GLSingleTextureUploaderBuilder>(new(::std::nothrow) GLSingleTextureUploaderBuilder(*this));
 }
 
-Ref<IShaderBuilder> GLRenderingContext::createShader() noexcept
-{
-    return Ref<GLShaderBuilder>(new(::std::nothrow) GLShaderBuilder);
-}
+IShaderBuilder& GLRenderingContext::createShader() noexcept
+{ return *_shaderBuilder; }

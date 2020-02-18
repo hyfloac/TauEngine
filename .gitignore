@@ -5,6 +5,9 @@
 /tau/TauEditor/resources/perfInit.json
 /tau/TauEditor/resources/perfRuntime.json
 
+# Caching
+/tau/TauEditor/resources/cache/
+
 # GLEW stuff
 glewinfo.txt
 visualinfo.txt

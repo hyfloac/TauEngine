@@ -1,18 +1,15 @@
 #pragma once
 
-#include <DLL.hpp>
 #include <Objects.hpp>
-#include <String.hpp>
 #include <RunTimeType.hpp>
-#include <events/Exception.hpp>
-#include "IFile.hpp"
+#include <ResourceSelector.hpp>
+#include <ReferenceCountingPointer.hpp>
+
+#include "DLL.hpp"
+#include "events/Exception.hpp"
 #include "EShader.hpp"
 
-class IRenderingContext;
-class Vector2f;
-class Vector3f;
-class Vector3i;
-class Vector4f;
+class RenderingMode;
 
 #ifndef SHADER_GEN_NAMES
   #ifndef TAU_PRODUCTION
@@ -44,7 +41,6 @@ class TAU_DLL NOVTABLE IShader
     DEFAULT_DESTRUCT_VI(IShader);
     DELETE_COPY(IShader);
 public:
-
     using ShaderType = RunTimeType<IShader>;
 public:
     [[nodiscard]] virtual EShader::Stage shaderType() const noexcept = 0;
@@ -58,17 +54,43 @@ public:
 #endif
 };
 
-class IInputLayout;
+struct ShaderArgs final
+{
+    DEFAULT_DESTRUCT(ShaderArgs);
+    DEFAULT_COPY(ShaderArgs);
+public:
+    const char* vfsMount;
+    const char* path;
+    const char* fileName;
+    EShader::Stage stage;
+public:
+	inline ShaderArgs() noexcept
+        : vfsMount(null), path(null), fileName(null),
+		  stage(static_cast<EShader::Stage>(0))
+    { }
+};
+
+class RenderingModeResourceSelectorTransformer final : public IResourceSelectorTransformer
+{
+    DEFAULT_CONSTRUCT_PU(RenderingModeResourceSelectorTransformer);
+    DEFAULT_DESTRUCT(RenderingModeResourceSelectorTransformer);
+    DELETE_COPY(RenderingModeResourceSelectorTransformer);
+public:
+    [[nodiscard]] ResIndex transform(const DynString& key) noexcept override;
+
+    [[nodiscard]] static ResIndex transform(const RenderingMode& rm) noexcept;
+};
 
 class TAU_DLL NOVTABLE IShaderBuilder
 {
+    DEFAULT_CONSTRUCT_PO(IShaderBuilder);
     DEFAULT_DESTRUCT_VI(IShaderBuilder);
     DELETE_COPY(IShaderBuilder);
 public:
     enum class Error
     {
         NoError = 0,
-        InvalidShaderType,
+        InvalidShaderStage,
         CompileError,
         InvalidFile,
         InvalidInclude,
@@ -78,30 +100,20 @@ public:
         InputLayoutFinalizationFailure
     };
 protected:
-    Ref<IFile> _file;
-    const char* _src;
-    EShader::Stage _type;
-protected:
-    IShaderBuilder() noexcept
-        : _file(null), _src(null), _type(static_cast<EShader::Stage>(IntMaxMin<i32>::Max()))
-    { }
+    static Ref<RenderingModeResourceSelectorTransformer> rsTransformer;
 public:
-    virtual void file(const Ref<IFile>& file) noexcept { _file = file; }
-    virtual void src(const char* const src) noexcept { _src = src; }
-    virtual void type(const EShader::Stage type) noexcept { _type = type; }
-
-    [[nodiscard]] const Ref<IFile>& file() const noexcept { return _file; }
-    [[nodiscard]] const char* src() const noexcept { return _src; }
-    [[nodiscard]] EShader::Stage type() const noexcept { return _type; }
-
-    [[nodiscard]] virtual IShader* build([[tau::out]] Error* error = null) noexcept = 0;
+    [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual Ref<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 class IncorrectAPIShaderException final : public Exception
 {
 public:
     IncorrectAPIShaderException() noexcept = default;
-    ~IncorrectAPIShaderException() noexcept override final = default;
+    ~IncorrectAPIShaderException() noexcept override = default;
 
     EXCEPTION_IMPL(IncorrectAPIShaderException);
 };

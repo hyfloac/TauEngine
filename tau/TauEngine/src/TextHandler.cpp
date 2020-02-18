@@ -52,32 +52,25 @@ public:
 
 #define INSTANCE_COUNT 128
 
-TextHandler::TextHandler(IRenderingContext& context, const char* vertexPath, const char* fragmentPath) noexcept
+TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
-      // _va(context.createVertexArray(2, DrawType::SeparatedTriangles)),
       _va(null),
       _viewUniforms(context.createUniformBuffer()),
       _colorUniforms(context.createUniformBuffer())
-      // _positionBuffer(null),
-      // _projUni(null), _texUni(null), _colorUni(null)
 {
     PERF();
-    Ref<IShaderBuilder> shaderBuilder = context.createShader();
-
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(VFS::Instance().openFile(vertexPath, FileProps::Read));
-    Ref<IShader> vertexShader = Ref<IShader>(shaderBuilder->build());
-
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(VFS::Instance().openFile(fragmentPath, FileProps::Read));
-    Ref<IShader> pixelShader = Ref<IShader>(shaderBuilder->build());
-
-    // Ref<IShader> vertexShader = IShader::create(context, IShader::Type::Vertex, vertexPath);
-    // Ref<IShader> pixelShader = IShader::create(context, IShader::Type::Pixel, fragmentPath);
-    //
-    // vertexShader->loadShader();
-    // pixelShader->loadShader();
+    ShaderArgs shaderArgs;
+    shaderArgs.vfsMount = vfsMount;
+    shaderArgs.path = path;
     
+    shaderArgs.fileName = vertexName;
+    shaderArgs.stage = EShader::Stage::Vertex;
+    Ref<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
+
+    shaderArgs.fileName = pixelName;
+    shaderArgs.stage = EShader::Stage::Pixel;
+    Ref<IShader> pixelShader = context.createShader().buildCPPRef(shaderArgs, null);
+
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
 

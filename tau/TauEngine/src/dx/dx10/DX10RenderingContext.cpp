@@ -26,7 +26,8 @@ DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
       _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
-      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this))
+      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
+      _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this))
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -45,15 +46,18 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
     RELEASE(_rasterizerState);
     RELEASE(_swapChain);
 #undef RELEASE
+#define RELEASE(_OBJ) do { \
+    if(_OBJ) {\
+        delete (_OBJ); \
+        (_OBJ) = null; \
+    } } while(0)
 
-    delete _bufferBuilder;
-    delete _indexBufferBuilder;
-    delete _uniformBufferBuilder;
-    delete _textureSamplerBuilder;
-    _bufferBuilder = null;
-    _indexBufferBuilder = null;
-    _uniformBufferBuilder = null;
-    _textureSamplerBuilder = null;
+    RELEASE(_bufferBuilder);
+    RELEASE(_indexBufferBuilder);
+    RELEASE(_uniformBufferBuilder);
+    RELEASE(_textureSamplerBuilder);
+    RELEASE(_shaderBuilder);
+#undef RELEASE
 }
 
 bool DX10RenderingContext::createContext(Window& window) noexcept
@@ -288,19 +292,13 @@ Ref<IVertexArrayBuilder> DX10RenderingContext::createVertexArray(const uSys buff
 }
 
 IBufferBuilder& DX10RenderingContext::createBuffer() noexcept
-{
-    return *_bufferBuilder;
-}
+{ return *_bufferBuilder; }
 
 IIndexBufferBuilder& DX10RenderingContext::createIndexBuffer() noexcept
-{
-    return *_indexBufferBuilder;
-}
+{ return *_indexBufferBuilder; }
 
 IUniformBufferBuilder& DX10RenderingContext::createUniformBuffer() noexcept
-{
-    return *_uniformBufferBuilder;
-}
+{ return *_uniformBufferBuilder; }
 
 Ref<ITextureBuilder> DX10RenderingContext::createTexture2D() noexcept
 {
@@ -308,14 +306,7 @@ Ref<ITextureBuilder> DX10RenderingContext::createTexture2D() noexcept
 }
 
 ITextureSamplerBuilder& DX10RenderingContext::createTextureSampler() noexcept
-{
-    return *_textureSamplerBuilder;
-}
-
-Ref<IShaderBuilder> DX10RenderingContext::createShader() noexcept
-{
-    return Ref<IShaderBuilder>(new(::std::nothrow) DX10ShaderBuilder(this));
-}
+{ return *_textureSamplerBuilder; }
 
 Ref<ITextureUploaderBuilder> DX10RenderingContext::createTextureUploader(uSys textureCount) noexcept
 {
@@ -326,4 +317,7 @@ Ref<ISingleTextureUploaderBuilder> DX10RenderingContext::createSingleTextureUplo
 {
     return Ref<ISingleTextureUploaderBuilder>(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this));
 }
+
+IShaderBuilder& DX10RenderingContext::createShader() noexcept
+{ return *_shaderBuilder; }
 #endif

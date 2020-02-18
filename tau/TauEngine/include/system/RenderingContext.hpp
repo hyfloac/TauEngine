@@ -82,7 +82,7 @@ public:
     [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
     [[nodiscard]] virtual Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept = 0;
     [[nodiscard]] virtual Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept = 0;
-    [[nodiscard]] virtual Ref<IShaderBuilder> createShader() noexcept = 0;
+    [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
 
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);

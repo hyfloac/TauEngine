@@ -3,7 +3,7 @@
 namespace EShader {
 enum class Stage
 {
-    Vertex = 0,
+    Vertex = 1,
     TessellationControl,
     Hull = TessellationControl,
     TessellationEvaluation,

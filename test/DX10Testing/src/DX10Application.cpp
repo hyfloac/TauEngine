@@ -16,6 +16,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <ResourceSelector.hpp>
 #include <texture/FITextureLoader.hpp>
+#include <shader/bundle/ShaderBundleParser.hpp>
+#include <shader/bundle/PrintShaderBundleVisitor.hpp>
+#include <shader/bundle/ast/ExprAST.hpp>
 
 template<>
 class UniformAccessor<DX10Application::Uniforms> final
@@ -129,24 +132,82 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     UNUSED(async);
 
-    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
+    const Ref<IFile> testShader = VFS::Instance().openFile("|res/shader/TestShader.tausi", FileProps::Read);
+    ShaderBundleLexer lexer(testShader);
+    ShaderBundleParser parser(lexer);
 
-    Ref<RMRSTransformer> transformer = Ref<RMRSTransformer>(new RMRSTransformer);
+    auto ast = parser.parse();
+    PrintShaderBundleVisitor visitor;
+    ast->visit(visitor);
+
+    // while(true)
+    // {
+    //     const SBPToken token = lexer.getNextToken();
+    //     if(token == SBPToken::EndOfFile)
+    //     {
+    //         printf("EOF\n");
+    //         break;
+    //     }
+    //
+    //     switch(token)
+    //     {
+    //         case SBPToken::Identifier:
+    //             printf("Identifier: %s\n", lexer.identifierValue().c_str());
+    //             break;
+    //         case SBPToken::VertexBlock:
+    //             printf("Vertex Block\n");
+    //             break;
+    //         case SBPToken::TessellationControlBlock:
+    //             printf("Tessellation Control Block\n");
+    //             break;
+    //         case SBPToken::TessellationEvaluationBlock:
+    //             printf("Tessellation Evaluation Block\n");
+    //             break;
+    //         case SBPToken::GeometryBlock:
+    //             printf("Geometry Block\n");
+    //             break;
+    //         case SBPToken::PixelBlock:
+    //             printf("Pixel Block\n");
+    //             break;
+    //         case SBPToken::File:
+    //             printf("File\n");
+    //             break;
+    //         case SBPToken::UniformsBlock:
+    //             printf("UniformsBlock Block\n");
+    //             break;
+    //         case SBPToken::TexturesBlock:
+    //             printf("TexturesBlock Block\n");
+    //             break;
+    //         case SBPToken::StringLiteral:
+    //             printf("String Literal: %s\n", lexer.strValue().c_str());
+    //             break;
+    //         case SBPToken::IntegerLiteral:
+    //             printf("Integer Literal: %d\n", lexer.intValue());
+    //             break;
+    //         case SBPToken::Character:
+    //             printf("Character Literal: %c\n", lexer.cValue());
+    //             break;
+    //         default:
+    //             printf("Unknown Token.\n");
+    //             break;
+    //     }
+    // }
+
+    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
 
     ResourceSelectorLoader::setCacheDirectory("|res/cache");
 
-    const ResourceSelector vertexSelector = ResourceSelectorLoader::load("|res", "/shader/", "TestVertexShader", transformer);
-    const ResourceSelector pixelSelector = ResourceSelectorLoader::load("|res", "/shader/", "TestPixelShader", transformer);
+    ShaderArgs shaderArgs;
+    shaderArgs.vfsMount = "|res";
+    shaderArgs.path = "/shader/";
 
-    Ref<IShaderBuilder> shaderBuilder = ctx().createShader();
+    shaderArgs.fileName = "TestVertexShader";
+    shaderArgs.stage = EShader::Stage::Vertex;
+    auto vertexShader = ctx().createShader().buildCPPRef(shaderArgs, null);
 
-    shaderBuilder->type(EShader::Stage::Vertex);
-    shaderBuilder->file(vertexSelector.select(transformer->transform(RenderingMode::getGlobalMode())).loadFile(FileProps::Read));
-    auto vertexShader = Ref<IShader>(shaderBuilder->build());
-
-    shaderBuilder->type(EShader::Stage::Pixel);
-    shaderBuilder->file(pixelSelector.select(transformer->transform(RenderingMode::getGlobalMode())).loadFile(FileProps::Read));
-    auto pixelShader = Ref<IShader>(shaderBuilder->build());
+    shaderArgs.fileName = "TestPixelShader";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    auto pixelShader = ctx().createShader().buildCPPRef(shaderArgs, null);
 
     _shader = IShaderProgram::create(ctx());
     _shader->setVertexShader(ctx(), vertexShader);
@@ -182,7 +243,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
         0, 1, 3,
         2, 3, 1
     };
-	
+    
     BufferArgs bufBuilder(1);
     bufBuilder.type = EBuffer::Type::ArrayBuffer;
     bufBuilder.usage = EBuffer::UsageType::StaticDraw;
@@ -235,7 +296,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     _uni = new UniformBlockS<Uniforms>(ctx().createUniformBuffer(), RGBAColor { 0, 0, 0, 0 });
     _matrices = new UniformBlockS<Matrices>(ctx().createUniformBuffer());
     
-    _camera = new(::std::nothrow) Camera2DController(*_window, 100.0f, 100.0f, Keyboard::Key::S, Keyboard::Key::W, Keyboard::Key::D, Keyboard::Key::A, Keyboard::Key::Q, Keyboard::Key::E);
+    _camera = new(::std::nothrow) Camera2DController(*_window, 100.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::E, Keyboard::Key::Q);
 
     // _matrices->data().dxProjection = DirectX::XMMatrixOrthographicOffCenterLH(0.0f, _window->width(), 0.0f, _window->height(), -1.0f, 100.0f);
     _matrices->data().dxProjection = DirectX::XMMatrixOrthographicLH(_window->width(), _window->height(), -1.0f, 100.0f);
@@ -255,7 +316,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     Ref<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
     // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateMissingTexture(ctx())));
     // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
-    uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
+    uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 5)));
     // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateWhiteTexture(ctx())));
     // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateNormalTexture(ctx())));
     uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
@@ -441,40 +502,7 @@ void DX10Application::onWindowEvent(WindowEvent& e) noexcept
 
 bool DX10Application::onCharPress(WindowAsciiKeyEvent& e) noexcept
 {
-    static uSys level = 1;
-	
     UNUSED(e);
-	if(e.c() == 'p')
-	{
-        printf("Texture Level: %zu\n", level);
-		
-        TextureSamplerArgs textureSamplerArgs;
-        textureSamplerArgs.magFilter() = ETexture::Filter::Nearest;
-        textureSamplerArgs.minFilter() = ETexture::Filter::Nearest;
-        textureSamplerArgs.mipFilter() = ETexture::Filter::Nearest;
-        textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
-        textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
-        textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
-        textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
-		
-        Ref<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
-        if(level % 2)
-        {
-            uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), level / 2)));
-        }
-        else
-        {
-            uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture8(ctx(), level / 2)));
-        }
-        uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
-        _texUploader = Ref<ISingleTextureUploader>(uploaderBuilder->build());
-        ++level;
-
-		if(level > 24)
-		{
-            level = 0;
-		}
-	}
     return false;
 }
 

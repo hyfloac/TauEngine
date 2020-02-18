@@ -7,6 +7,7 @@
 
 #include <NumTypes.hpp>
 #include <Utils.hpp>
+#include <ReferenceCountingPointer.hpp>
 
 #define ____str(__X) #__X
 #define ___str(__X) ____str(__X)
@@ -18,6 +19,8 @@
 #define ERROR_CODE(_ERR)         do { if(error) { *error = _ERR; } return;         } while(0)
 #define ERROR_CODE_V(_ERR, _VAL) do { if(error) { *error = _ERR; } return _VAL;    } while(0)
 #define ERROR_CODE_N(_ERR)       do { if(error) { *error = _ERR; } return nullptr; } while(0)
+#define ERROR_CODE_T(_ERR)       do { if(error) { *error = _ERR; } return true;    } while(0)
+#define ERROR_CODE_F(_ERR)       do { if(error) { *error = _ERR; } return false;   } while(0)
 #define ERROR_CODE_COND(_COND, _ERR)         do { if((_COND)) { if(error) { *error = _ERR; } return;         } } while(0)
 #define ERROR_CODE_COND_V(_COND, _ERR, _VAL) do { if((_COND)) { if(error) { *error = _ERR; } return _VAL;    } } while(0)
 #define ERROR_CODE_COND_N(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return nullptr; } } while(0)
@@ -40,26 +43,32 @@
 template<typename _T>
 class NotNull final
 {
-public:
+private:
     _T* _t;
 public:
     constexpr inline NotNull(_T* t) noexcept : _t(t)
     {
         Ensure(t != nullptr);
     }
-    constexpr inline NotNull(const NotNull& copy) noexcept : _t(copy._t) { }
-    constexpr inline NotNull(NotNull&& move) noexcept : _t(move._t) { }
+    constexpr inline NotNull(const NotNull<_T>& copy) noexcept : _t(copy._t) { }
+    constexpr inline NotNull(NotNull<_T>&& move) noexcept : _t(move._t) { }
 
     inline ~NotNull() noexcept = default;
 
-    constexpr inline NotNull& operator =(const NotNull& copy) noexcept
+    constexpr inline NotNull<_T>& operator =(const NotNull<_T>& copy) noexcept
     {
+        if(this == &copy)
+        { return *this; }
+
         this->_t = copy._t;
         return *this;
     }
 
-    constexpr inline NotNull& operator =(NotNull&& move) noexcept
+    constexpr inline NotNull<_T>& operator =(NotNull<_T>&& move) noexcept
     {
+        if(this == &move)
+        { return *this; }
+
         this->_t = move._t;
         return *this;
     }
@@ -330,7 +339,6 @@ public:
     inline _T operator ()() const noexcept { return value(); }
 };
 
-
 template<typename _T, _T _ErroneousValue>
 using ExpectedS = Expected<_T, _ErroneousValue, const char*, nullptr>;
 
@@ -356,13 +364,23 @@ template<typename _T>
 using Ref = std::shared_ptr<_T>;
 
 template<typename _T>
-using StrongRef = std::shared_ptr<_T>;
+using CPPStrongRef = std::shared_ptr<_T>;
 
 template<typename _T>
-using WeakRef = std::weak_ptr<_T>;
+using CPPWeakRef = std::weak_ptr<_T>;
+
+template<typename _T>
+using StrongRef = StrongReferenceCountingPointer<_T>;
+
+template<typename _T>
+using WeakRef = WeakReferenceCountingPointer<_T>;
+
+template<typename _T>
+using NullableStrongRef = NullableStrongReferenceCountingPointer<_T>;
+
+template<typename _T>
+using NullableWeakRef = NullableWeakReferenceCountingPointer<_T>;
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline Ref<_Out> RefCast(const Ref<_In>& in) noexcept
 { return std::static_pointer_cast<_Out>(in); }
-
-

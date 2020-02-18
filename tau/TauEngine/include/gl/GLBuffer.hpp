@@ -113,7 +113,7 @@ protected:
     [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
 private:
-    [[nodiscard]] bool processBufferArgs(const BufferArgs& args, [[tau::out]] GLBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const BufferArgs& args, [[tau::out]] GLBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
 
     static void initBuffer(const BufferArgs& args, const GLBufferArgs& glArgs) noexcept;
 };
@@ -139,7 +139,7 @@ protected:
     [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
 private:
-    [[nodiscard]] bool processBufferArgs(const IndexBufferArgs & args, [[tau::out]] GLIndexBufferArgs * glArgs, [[tau::out]] Error * error) const noexcept;
+    [[nodiscard]] bool processArgs(const IndexBufferArgs & args, [[tau::out]] GLIndexBufferArgs * glArgs, [[tau::out]] Error * error) const noexcept;
 
     static void initBuffer(const IndexBufferArgs & args, const GLIndexBufferArgs & glArgs) noexcept;
 private:
@@ -163,7 +163,7 @@ protected:
     [[nodiscard]] virtual GLuint createBuffer() const noexcept
     { return GLBuffer::createBuffer(); }
 private:
-    [[nodiscard]] bool processBufferArgs(const UniformBufferArgs& args, [[tau::out]] GLUniformBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const UniformBufferArgs& args, [[tau::out]] GLUniformBufferArgs* glArgs, [[tau::out]] Error* error) const noexcept;
 
     static void initBuffer(const UniformBufferArgs& args, const GLUniformBufferArgs& glArgs) noexcept;
 };

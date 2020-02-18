@@ -1,11 +1,13 @@
 #pragma once
 
 #pragma warning(push, 0)
-#include <gl/glew.h>
+#include <GL/glew.h>
 #pragma warning(pop)
 
 #include "shader/IShader.hpp"
 #include <Safeties.hpp>
+
+class GLRenderingContext;
 
 /**
  * Represents an OpenGL shader.
@@ -14,22 +16,16 @@ class TAU_DLL GLShader final : public IShader
 {
     SHADER_IMPL(GLShader);
 private:
-    // const char* _shaderPath;
     GLuint _shaderID;
     EShader::Stage _shaderType;
-private:
-    // GLShader(IShader::Type shaderType, const NotNull<const char>& shaderPath, GLuint shaderID) noexcept;
+public:
     GLShader(GLuint shaderID, EShader::Stage shaderType) noexcept;
-public:
-    // static Ref<GLShader> create(IShader::Type shaderType, const NotNull<const char>& shaderPath) noexcept;
-public:
+	
     ~GLShader() noexcept override final;
 
     [[nodiscard]] EShader::Stage shaderType() const noexcept override { return _shaderType; }
 
     [[nodiscard]] GLuint shaderId() const noexcept { return _shaderID; }
-
-    // bool loadShader(const char* src = nullptr) noexcept override final;
 
     // i32 createUniform(String name) noexcept override final;
     //
@@ -72,9 +68,25 @@ private:
 
 class TAU_DLL GLShaderBuilder final : public IShaderBuilder
 {
-    DEFAULT_CONSTRUCT_PU(GLShaderBuilder);
     DEFAULT_DESTRUCT(GLShaderBuilder);
     DELETE_COPY(GLShaderBuilder);
+private:
+	struct GLShaderArgs final
+	{
+        GLuint shaderID;
+	};
+private:
+    IResourceSelectorTransformer::ResIndex _resIndex;
 public:
-    [[nodiscard]] GLShader* build(Error* error) noexcept override;
+    GLShaderBuilder(GLRenderingContext& ctx) noexcept;
+
+    [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<IShader> buildCPPRef(const ShaderArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+private:
+    [[nodiscard]] static bool processArgs(const ShaderArgs& args, [[tau::out]] GLShaderArgs* glArgs, [[tau::out]] Error* error) noexcept;
+
+    [[nodiscard]] bool compileShader(const ShaderArgs& args, GLShaderArgs& glArgs, [[tau::out]] Error* error) const noexcept;
 };
