@@ -3,8 +3,12 @@
 #include <DLL.hpp>
 #include <NumTypes.hpp>
 #include <Objects.hpp>
+#include <ReferenceCountingPointer.hpp>
 #include <RunTimeType.hpp>
+#include <Safeties.hpp>
+
 #include "TextureEnums.hpp"
+#include "shader/EShader.hpp"
 
 class RenderingMode;
 class IRenderingContext;
@@ -34,17 +38,11 @@ public:
 
     [[nodiscard]] virtual inline ETexture::Type textureType() const noexcept = 0;
 
-    // virtual void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept = 0;
-    //
-    // virtual void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept = 0;
-    //
-    // virtual void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept { }
-
     virtual void set(u32 level, const void* data) noexcept = 0;
 
-    virtual void bind(u8 textureUnit) noexcept = 0;
+    virtual void bind(u8 textureUnit, EShader::Stage stage) noexcept = 0;
 
-    virtual void unbind(u8 textureUnit) noexcept = 0;
+    virtual void unbind(u8 textureUnit, EShader::Stage stage) noexcept = 0;
 
     virtual void generateMipmaps() noexcept = 0;
 
@@ -57,8 +55,6 @@ class TAU_DLL ITextureCube : public ITexture
 {
     DEFAULT_DESTRUCT_VI(ITextureCube);
     DELETE_COPY(ITextureCube);
-public:
-    // [[nodiscard]] static ITextureCube* create(IRenderingContext& context, u32 width, u32 height, ETexture::Format format) noexcept;
 protected:
     inline ITextureCube(u32 width, u32 height, ETexture::Format dataFormat) noexcept
         : ITexture(width, height, dataFormat)
@@ -66,13 +62,30 @@ protected:
 public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Cube; }
 
-    // virtual void setWrapModeCube(ETexture::WrapMode s, ETexture::WrapMode t, ETexture::WrapMode r) noexcept = 0;
-
     virtual void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept = 0;
 };
 
-class TAU_DLL ITextureBuilder
+struct TextureArgs final
 {
+    DEFAULT_DESTRUCT(TextureArgs);
+    DEFAULT_COPY(TextureArgs);
+public:
+    u32 width;
+    u32 height;
+    i32 mipmapLevels;
+    ETexture::Format dataFormat;
+    const void* initialBuffer;
+public:
+    inline TextureArgs() noexcept
+        : width(0), height(0), mipmapLevels(0),
+          dataFormat(static_cast<ETexture::Format>(0)),
+          initialBuffer(null)
+    { }
+};
+
+class TAU_DLL NOVTABLE ITextureBuilder
+{
+    DEFAULT_CONSTRUCT_PO(ITextureBuilder);
     DEFAULT_DESTRUCT_VI(ITextureBuilder);
     DELETE_COPY(ITextureBuilder);
 public:
@@ -131,49 +144,43 @@ public:
          * TauEngine), the model (or at the very least, the model size), etc.
          */
     };
-protected:
-    u32 _width;
-    u32 _height;
-    i32 _mipmapLevels;
-    ETexture::Format _dataFormat;
-    const void* _initialBuffer;
 public:
-    inline ITextureBuilder() noexcept
-        : _width(0), _height(0), _mipmapLevels(0),
-          _dataFormat(static_cast<ETexture::Format>(0)),
-		  _initialBuffer(null)
-    { }
-
-    void width(const u32 width) noexcept { _width = width; }
-    void height(const u32 height) noexcept { _height = height; }
-    virtual void mipmapLevels(const i32 mipmapLevels) noexcept { _mipmapLevels = mipmapLevels; }
-    virtual void dataFormat(const ETexture::Format dataFormat) noexcept { _dataFormat = dataFormat; }
-    void initialBuffer(const void* const initialBuffer) noexcept { _initialBuffer = initialBuffer; }
-
-    [[nodiscard]] virtual ITexture* build([[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual ITexture* build(const TextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual ITexture* build(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual Ref<ITexture> buildCPPRef(const TextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
-class TAU_DLL ITextureCubeBuilder
+struct TextureCubeArgs final
 {
+    DEFAULT_DESTRUCT(TextureCubeArgs);
+    DEFAULT_COPY(TextureCubeArgs);
+public:
+    u32 width;
+    u32 height;
+    i32 mipmapLevels;
+    ETexture::Format dataFormat;
+    const void* initialBuffer[6];
+public:
+    inline TextureCubeArgs() noexcept
+        : width(0), height(0), mipmapLevels(0),
+          dataFormat(static_cast<ETexture::Format>(0)),
+          initialBuffer{ null, null, null, null, null, null }
+    { }
+};
+
+class TAU_DLL NOVTABLE ITextureCubeBuilder
+{
+    DEFAULT_CONSTRUCT_PO(ITextureCubeBuilder);
     DEFAULT_DESTRUCT_VI(ITextureCubeBuilder);
     DELETE_COPY(ITextureCubeBuilder);
 public:
     using Error = ITextureBuilder::Error;
-protected:
-    u32 _width;
-    u32 _height;
-    i32 _mipmapLevels;
-    ETexture::Format _dataFormat;
 public:
-    inline ITextureCubeBuilder() noexcept
-        : _width(0), _height(0), _mipmapLevels(0),
-        _dataFormat(static_cast<ETexture::Format>(0))
-    { }
-
-    void width(const u32 width) noexcept { _width = width; }
-    void height(const u32 height) noexcept { _height = height; }
-    virtual void mipmapLevels(const i32 mipmapLevels) noexcept { _mipmapLevels = mipmapLevels; }
-    virtual void dataFormat(const ETexture::Format dataFormat) noexcept { _dataFormat = dataFormat; }
-
-    [[nodiscard]] virtual ITextureCube* build([[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual ITextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual ITextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual Ref<ITextureCube> buildCPPRef(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableReferenceCountingPointer<ITextureCube> buildTauRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<ITextureCube> buildTauSRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

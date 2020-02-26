@@ -34,7 +34,7 @@ Skybox::Skybox(IRenderingContext& context, const char* const vfsMount, const cha
     shaderArgs.vfsMount = vfsMount;
     shaderArgs.path = shaderPath;
 
-	shaderArgs.fileName = vertexName;
+    shaderArgs.fileName = vertexName;
     shaderArgs.stage = EShader::Stage::Vertex;
     Ref<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
 
@@ -115,31 +115,21 @@ Skybox::Skybox(IRenderingContext& context, const char* const vfsMount, const cha
     };
 
     BufferArgs skyboxCubeBuilder(1);
-    // Ref<IBufferBuilder> skyboxCubeBuilder = context.createBuffer(1);
     skyboxCubeBuilder.type = EBuffer::Type::ArrayBuffer;
     skyboxCubeBuilder.usage = EBuffer::UsageType::StaticDraw;
     skyboxCubeBuilder.elementCount = 6 * 6;
     skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
-    // Ref<IBuffer> skyboxCube = Ref<IBuffer>(skyboxCubeBuilder->build(nullptr));
     Ref<IBuffer> skyboxCube = context.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
     skyboxCube->fillBuffer(context, skyboxVertices);
 
-    // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
-    // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
-    // const Ref<IInputLayout> inputLayout = Ref<IInputLayout>(ilBuilder->build());
-
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
+    vaBuilder->shader(vertexShader);
     vaBuilder->setVertexBuffer(0, skyboxCube);
-    // vaBuilder->inputLayout(inputLayout);
     vaBuilder->drawCount(36);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
     _cubeVA = Ref<IVertexArray>(vaBuilder->build());
-
-    // _cubeVA->addVertexBuffer(context, skyboxCube);
-    // _cubeVA->drawCount() = 36;
-    // _cubeVA->drawCount() = 6;
 }
 
 void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
@@ -154,14 +144,11 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     _uniforms.data().viewMatrix = camera.viewRotMatrix();
     _uniforms.upload(context, EShader::Stage::Vertex, 0);
     {
-        auto indices = TextureIndices(0, 0, 1);
-        (void) _textureUploader->upload(context, indices);
+        auto indices = TextureIndices(0, 0, 0);
+        (void) _textureUploader->upload(context, indices, EShader::Stage::Pixel);
     }
-    // _projectionUni->set(camera.projectionMatrix());
-    // _viewUni->set(camera.viewRotMatrix());
-    // _skyboxUni->set(0);
 
-    _skybox->bind(0);
+    // _skybox->bind(0, EShader::Stage::Pixel);
 
     _cubeVA->bind(context);
     _cubeVA->preDraw(context);
@@ -171,10 +158,10 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
 
     _uniforms.unbind(context, EShader::Stage::Vertex, 0);
     {
-        auto indices = TextureIndices(0, 0, 1);
-        (void) _textureUploader->unbind(context, indices);
+        auto indices = TextureIndices(0, 0, 0);
+        (void) _textureUploader->unbind(context, indices, EShader::Stage::Pixel);
     }
-    _skybox->unbind(0);
+    // _skybox->unbind(0, EShader::Stage::Pixel);
     _shader->unbind(context);
 
     glDepthFunc(GL_LESS);

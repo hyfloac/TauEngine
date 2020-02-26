@@ -12,7 +12,7 @@ layout(binding = 1) uniform Color
     vec4 textColor;
 };
 
-layout(location = 2) uniform sampler2D textBMP;
+layout(location = 0) uniform sampler2D textBMP;
 
 // uniform sampler2D textBMP;
 // uniform vec3 textColor;

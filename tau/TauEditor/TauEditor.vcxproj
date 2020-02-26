@@ -77,6 +77,7 @@
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\freetype-2.10.0\objs\$(Platform)\$(Configuration) Static\;$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
@@ -84,6 +85,7 @@
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\freetype-2.10.0\objs\$(Platform)\Release Static\;$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
@@ -91,6 +93,7 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\freetype-2.10.0\objs\$(Platform)\$(Configuration) Static\;$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
@@ -98,6 +101,7 @@
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -106,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsManaged>false</CompileAsManaged>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
@@ -161,6 +165,14 @@
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Text\TextVertexShader.hlsl /Fo $(ProjectDir)resources\shader\Text\TextVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Text\TextPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\Text\TextPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SkyboxVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SkyboxVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\SkyboxPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\SkyboxPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SimpleVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SimpleVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixel.hlsl  /Fo $(ProjectDir)resources\nanosuit\NanosuitPixel.cso</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <ClCompile>
@@ -224,6 +236,14 @@
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Text\TextVertexShader.hlsl /Fo $(ProjectDir)resources\shader\Text\TextVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Text\TextPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\Text\TextPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SkyboxVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SkyboxVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\SkyboxPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\SkyboxPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SimpleVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SimpleVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixel.hlsl  /Fo $(ProjectDir)resources\nanosuit\NanosuitPixel.cso</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -290,6 +310,14 @@
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Text\TextVertexShader.hlsl /Fo $(ProjectDir)resources\shader\Text\TextVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Text\TextPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\Text\TextPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SkyboxVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SkyboxVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\SkyboxPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\SkyboxPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SimpleVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SimpleVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixel.hlsl  /Fo $(ProjectDir)resources\nanosuit\NanosuitPixel.cso</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <ClCompile>
@@ -331,6 +359,14 @@
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Text\TextVertexShader.hlsl /Fo $(ProjectDir)resources\shader\Text\TextVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Text\TextPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\Text\TextPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SkyboxVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SkyboxVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\SkyboxPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\SkyboxPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SimpleVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SimpleVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixel.hlsl  /Fo $(ProjectDir)resources\nanosuit\NanosuitPixel.cso</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ConsoleLayer.cpp" />

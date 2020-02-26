@@ -27,7 +27,10 @@ DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
       _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
-      _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this))
+      _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this)),
+      _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(*this)),
+      _textureNullBuilder(new(::std::nothrow) DX10NullTextureBuilder),
+      _textureCubeBuilder(new(::std::nothrow) DX10TextureCubeBuilder(*this))
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -57,6 +60,9 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
     RELEASE(_uniformBufferBuilder);
     RELEASE(_textureSamplerBuilder);
     RELEASE(_shaderBuilder);
+    RELEASE(_texture2DBuilder);
+    RELEASE(_textureNullBuilder);
+    RELEASE(_textureCubeBuilder);
 #undef RELEASE
 }
 
@@ -300,10 +306,17 @@ IIndexBufferBuilder& DX10RenderingContext::createIndexBuffer() noexcept
 IUniformBufferBuilder& DX10RenderingContext::createUniformBuffer() noexcept
 { return *_uniformBufferBuilder; }
 
-Ref<ITextureBuilder> DX10RenderingContext::createTexture2D() noexcept
-{
-    return Ref<ITextureBuilder>(new(::std::nothrow) DX10Texture2DBuilder(*this));
-}
+ITextureBuilder& DX10RenderingContext::createTexture2D() noexcept
+{ return *_texture2DBuilder; }
+
+ITextureBuilder& DX10RenderingContext::createNullTexture() noexcept
+{ return *_textureNullBuilder; }
+
+ITextureBuilder& DX10RenderingContext::createTextureDepth() noexcept
+{ return *static_cast<ITextureBuilder*>(null); }
+
+ITextureCubeBuilder& DX10RenderingContext::createTextureCube() noexcept
+{ return *_textureCubeBuilder; }
 
 ITextureSamplerBuilder& DX10RenderingContext::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }

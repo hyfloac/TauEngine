@@ -14,9 +14,9 @@ public:
         : ISingleTextureUploader(texture, textureSampler)
     { }
 
-    TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices) noexcept override;
+    TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept override;
 
-    TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices) noexcept override;
+    TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept override;
 private:
     friend class GLTextureUploaderBuilder;
 };
@@ -30,9 +30,9 @@ public:
         : ITextureUploader(textures, textureSampler)
     { }
 
-    TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices) noexcept override;
+    TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept override;
 
-    TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices) noexcept override;
+    TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept override;
 private:
     friend class GLTextureUploaderBuilder;
 };

@@ -24,6 +24,8 @@ void PrintShaderBundleVisitor::visit(const TypedBlockExprAST& expr) noexcept
         case BlockType::Pixel:                  fputs("Pixel", stdout); break;
         case BlockType::Uniforms:               fputs("Uniforms", stdout); break;
         case BlockType::Textures:               fputs("Textures", stdout); break;
+        case BlockType::Inputs:                 fputs("Inputs", stdout); break;
+        case BlockType::Outputs:                fputs("Outputs", stdout); break;
     }
     fputs(": {\n", stdout);
     ++_currIndent;

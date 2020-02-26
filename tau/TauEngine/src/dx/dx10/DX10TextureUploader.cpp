@@ -6,7 +6,7 @@
 #include "dx/dx10/DX10TextureSampler.hpp"
 #include "TauEngine.hpp"
 
-TextureIndices& DX10SingleTextureUploader::upload(IRenderingContext& context, TextureIndices& textureIndices) noexcept
+TextureIndices& DX10SingleTextureUploader::upload(IRenderingContext& context, TextureIndices& textureIndices, const EShader::Stage stage) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
@@ -14,7 +14,7 @@ TextureIndices& DX10SingleTextureUploader::upload(IRenderingContext& context, Te
         return textureIndices;
     }
 
-    _texture->bind(textureIndices.textureStartIndex);
+    _texture->bind(textureIndices.textureStartIndex, stage);
     RefCast<DX10TextureSampler>(_textureSampler)->apply(textureIndices.samplerStartIndex);
 
     ++textureIndices.textureStartIndex;
@@ -22,12 +22,12 @@ TextureIndices& DX10SingleTextureUploader::upload(IRenderingContext& context, Te
     return textureIndices;
 }
 
-TextureIndices& DX10SingleTextureUploader::unbind(IRenderingContext& context, TextureIndices& textureIndices) noexcept
+TextureIndices& DX10SingleTextureUploader::unbind(IRenderingContext&, TextureIndices& textureIndices, EShader::Stage) noexcept
 {
     return textureIndices;
 }
 
-TextureIndices& DX10TextureUploader::upload(IRenderingContext& context, TextureIndices& textureIndices) noexcept
+TextureIndices& DX10TextureUploader::upload(IRenderingContext& context, TextureIndices& textureIndices, const EShader::Stage stage) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
@@ -37,7 +37,7 @@ TextureIndices& DX10TextureUploader::upload(IRenderingContext& context, TextureI
 
     for(uSys i = 0; i < _textures.size(); ++i)
     {
-        _textures[i]->bind(textureIndices.textureStartIndex);
+        _textures[i]->bind(i + textureIndices.textureStartIndex, stage);
     }
     RefCast<DX10TextureSampler>(_textureSampler)->apply(textureIndices.samplerStartIndex);
 
@@ -46,7 +46,7 @@ TextureIndices& DX10TextureUploader::upload(IRenderingContext& context, TextureI
     return textureIndices;
 }
 
-TextureIndices& DX10TextureUploader::unbind(IRenderingContext& context, TextureIndices& textureIndices) noexcept
+TextureIndices& DX10TextureUploader::unbind(IRenderingContext&, TextureIndices& textureIndices, EShader::Stage) noexcept
 {
     return textureIndices;
 }

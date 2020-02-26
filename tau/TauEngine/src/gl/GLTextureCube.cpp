@@ -3,8 +3,7 @@
 
 GLTextureCube::GLTextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
     : ITextureCube(width, height, dataFormat), 
-      _texture(texture), _minFilter(GL_LINEAR), _magFilter(GL_LINEAR),
-      _wrapS(GL_REPEAT), _wrapT(GL_REPEAT), _wrapR(GL_REPEAT)
+      _texture(texture)
 {
     glGenTextures(1, &_texture);
 }
@@ -13,19 +12,6 @@ GLTextureCube::~GLTextureCube() noexcept
 {
     glDeleteTextures(1, &_texture);
 }
-
-// void GLTextureCube::setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept
-// {
-//     _minFilter = GLTexture2D::glFilterType(minificationFilter);
-//     _magFilter = GLTexture2D::glFilterType(magnificationFilter);
-// }
-//
-// void GLTextureCube::setWrapModeCube(const ETexture::WrapMode s, const ETexture::WrapMode t, const ETexture::WrapMode r) noexcept
-// {
-//     _wrapS = GLTexture2D::glWrapMode(s);
-//     _wrapT = GLTexture2D::glWrapMode(t);
-//     _wrapR = GLTexture2D::glWrapMode(r);
-// }
 
 void GLTextureCube::setCube(const u32 level, ETexture::CubeSide side, const void* data) noexcept
 {
@@ -36,23 +22,16 @@ void GLTextureCube::setCube(const u32 level, ETexture::CubeSide side, const void
     glBindTexture(GL_TEXTURE_CUBE_MAP, _texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, _magFilter);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, _minFilter);
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, _wrapS);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, _wrapT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, _wrapR);
-
     glTexImage2D(glCubeMapFace(side), level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
 
-void GLTextureCube::bind(u8 textureUnit) noexcept
+void GLTextureCube::bind(const u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, _texture);
 }
 
-void GLTextureCube::unbind(u8 textureUnit) noexcept
+void GLTextureCube::unbind(const u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -77,23 +56,117 @@ GLenum GLTextureCube::glCubeMapFace(ETexture::CubeSide cubeSide) noexcept
     }
 }
 
-ITextureCube* GLTextureCubeBuilder::build(Error* error) const noexcept
+GLTextureCube* GLTextureCubeBuilder::build(const TextureCubeArgs& args, Error* error) const noexcept
 {
-    ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
-    ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
-    ERROR_CODE_COND_N(_mipmapLevels < 0, Error::MipMapLevelsIsUnset);
-    ERROR_CODE_COND_N(_dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
 
-    GLuint textureHandle;
-    glGenTextures(1, &textureHandle);
+    GLTextureCube* const texture = new(std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
-    GLTextureCube* const texture = new(std::nothrow) GLTextureCube(_width, _height, _dataFormat, textureHandle);
-
-    if(!textureHandle)
+    if(!texture)
     {
-        glDeleteTextures(1, &textureHandle);
+        glDeleteTextures(1, &glArgs.textureHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
+    setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
+
     ERROR_CODE_V(Error::NoError, texture);
+}
+
+GLTextureCube* GLTextureCubeBuilder::build(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLTextureCube* const texture = allocator.allocateT<GLTextureCube>(args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+Ref<ITextureCube> GLTextureCubeBuilder::buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    const Ref<GLTextureCube> texture = Ref<GLTextureCube>(new(std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.textureHandle));
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableReferenceCountingPointer<ITextureCube> GLTextureCubeBuilder::buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    NullableReferenceCountingPointer<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
+
+    ERROR_CODE_V(Error::NoError, RCPCast<ITextureCube>(texture));
+}
+
+NullableStrongReferenceCountingPointer<ITextureCube> GLTextureCubeBuilder::buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    NullableStrongReferenceCountingPointer<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
+
+    ERROR_CODE_V(Error::NoError, RCPCast<ITextureCube>(texture));
+}
+
+bool GLTextureCubeBuilder::processArgs(const TextureCubeArgs& args, GLTextureArgs* glArgs, Error* error) noexcept
+{
+    ERROR_CODE_COND_F(args.width == 0, Error::WidthIsZero);
+    ERROR_CODE_COND_F(args.height == 0, Error::HeightIsZero);
+    ERROR_CODE_COND_F(args.mipmapLevels < 0, Error::MipMapLevelsIsUnset);
+    ERROR_CODE_COND_F(args.dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+
+    glGenTextures(1, &glArgs->textureHandle);
+
+    return true;
+}
+
+void GLTextureCubeBuilder::setupInitial(GLTextureCube& texture, const void* initialBuffers[6])
+{
+    for(uSys i = 0; i < 6; ++i)
+    {
+        texture.setCube(0, static_cast<ETexture::CubeSide>(i + static_cast<uSys>(ETexture::CubeSide::Front)), initialBuffers[i]);
+    }
 }

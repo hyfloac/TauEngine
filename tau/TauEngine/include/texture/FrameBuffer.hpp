@@ -18,9 +18,6 @@ protected:
     { }
 public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-    // void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final { }
-    // void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override final { }
-    // void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override final { }
     void set(u32 level, const void* data) noexcept override final { }
     void generateMipmaps() noexcept override final { }
 };
@@ -32,8 +29,6 @@ public:
     enum Type
     {
         Color,
-        Depth,
-        Stencil,
         DepthStencil
     };
 
@@ -97,8 +92,6 @@ public:
         NoError = 0,
         NoAttachment,
         NoColorAttachment,
-        DepthAlreadyExists,
-        StencilAlreadyExists,
         DS_DepthAlreadyExists,
         DS_StencilAlreadyExists,
         DSAlreadyExists,
@@ -109,12 +102,9 @@ public:
 protected:
     IFrameBufferAttachment* _attachment;
     u32 _colorCount;
-    bool _hasDepth;
-    bool _hasStencil;
 protected:
     inline IFrameBufferBuilder() noexcept
-        : _attachment(nullptr), _colorCount(0),
-          _hasDepth(false), _hasStencil(false)
+        : _attachment(nullptr), _colorCount(0)
     { }
 public:
     [[nodiscard]] virtual IFrameBuffer* build([[tau::out]] Error* error = nullptr) const noexcept = 0;

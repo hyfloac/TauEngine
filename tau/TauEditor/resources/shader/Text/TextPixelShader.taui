@@ -1,1 +1,2 @@
-"OpenGL": "TextPixelShader.glsl"
+"OpenGL": "TextPixelShader.glsl",
+"DirectX10": "TextPixelShader.cso"

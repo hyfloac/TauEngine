@@ -41,8 +41,8 @@ public:
 #if defined(APP_MAIN)
 Application* startGame() noexcept;
 
-void tauMain() noexcept;
-i32 tauExitCode() noexcept;
+TAU_DLL void tauMain() noexcept;
+TAU_DLL i32 tauExitCode() noexcept;
 
 int main(int argCount, char* args[]) noexcept
 {

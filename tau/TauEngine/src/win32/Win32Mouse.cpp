@@ -52,7 +52,6 @@ void Mouse::setVisible(bool visible) noexcept
     ShowCursor(visible);
 }
 
-
 int Mouse::convertToSysVButton(const Mouse::Button key) noexcept
 {
     switch(key)

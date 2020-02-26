@@ -1,42 +1,17 @@
 #include "model/Material.hpp"
 #include "system/RenderingContext.hpp"
 
-template<>
-class UniformAccessor<Material> final
-{
-    DELETE_CONSTRUCT(UniformAccessor);
-    DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
-public:
-    [[nodiscard]] static inline uSys size() noexcept { return sizeof(float); }
-
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Material& t) noexcept
-    {
-        buffer->fillBuffer(context, &t._specularExponent);
-    }
-};
-
-// MaterialUniforms::MaterialUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept
-// {
-//     _specularExponentUni = shader->getUniform<float>(uniformPrefix.concat("specularExponent"));
-//     _diffuseSamplerUni = shader->getUniform<int>(uniformPrefix.concat("diffuseSampler"));
-//     _specularSamplerUni = shader->getUniform<int>(uniformPrefix.concat("specularSampler"));
-//     _normalSamplerUni = shader->getUniform<int>(uniformPrefix.concat("normalSampler"));
-// }
-
-
 TextureIndices& Material::upload(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
 {
     uniform.set(context, *this);
     uniform.upload(context, stage, uniformIndex);
-    return _textureUploader->upload(context, textureIndices);
+    return _textureUploader->upload(context, textureIndices, stage);
 }
-
 
 TextureIndices& Material::unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
 {
     uniform.unbind(context, stage, uniformIndex);
-    return _textureUploader->unbind(context, textureIndices);
+    return _textureUploader->unbind(context, textureIndices, stage);
 }
 
 Material MaterialBuilder::build() const noexcept

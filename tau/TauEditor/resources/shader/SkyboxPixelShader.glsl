@@ -4,7 +4,7 @@ in vec3 texCoord;
 
 layout(location = 0) out vec4 fragColor;
 
-layout(location = 1) uniform samplerCube skybox;
+layout(location = 0) uniform samplerCube skybox;
 
 // uniform samplerCube skybox;
 

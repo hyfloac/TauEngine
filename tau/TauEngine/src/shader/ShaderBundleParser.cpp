@@ -73,6 +73,12 @@ NullableStrongRef<BlockExprAST> ShaderBundleParser::parseBlock() noexcept
         case SBPToken::TexturesBlock:
             blockType = BlockType::Textures;
             break;
+        case SBPToken::InputsBlock:
+            blockType = BlockType::Inputs;
+            break;
+        case SBPToken::OutputsBlock:
+            blockType = BlockType::Outputs;
+            break;
         case SBPToken::Identifier:
         {
             const NullableStrongRef<NamedBlockExprAST> namedBlock(DefaultTauAllocator::Instance(), null, null, _lexer.identifierValue());

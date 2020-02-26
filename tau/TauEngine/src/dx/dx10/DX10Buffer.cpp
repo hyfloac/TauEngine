@@ -264,9 +264,7 @@ NullableReferenceCountingPointer<IBuffer> DX10BufferBuilder::buildTauRef(const B
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableReferenceCountingPointer<IBuffer> iBuffer = RCPCast<IBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
 }
 
 NullableStrongReferenceCountingPointer<IBuffer> DX10BufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -282,9 +280,7 @@ NullableStrongReferenceCountingPointer<IBuffer> DX10BufferBuilder::buildTauSRef(
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableStrongReferenceCountingPointer<IBuffer> iBuffer = RCPCast<IBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
 }
 
 bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
@@ -298,7 +294,7 @@ bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer**
      bufferDesc.ByteWidth = args.bufferSize();
      bufferDesc.Usage = DX10Buffer::getDXUsage(args.usage);
      bufferDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
-     bufferDesc.CPUAccessFlags = 0;
+     bufferDesc.CPUAccessFlags = DX10Buffer::getDXAccess(args.usage);
      bufferDesc.MiscFlags = 0;
 
      if(args.initialBuffer)
@@ -385,9 +381,7 @@ NullableReferenceCountingPointer<IIndexBuffer> DX10IndexBufferBuilder::buildTauR
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableReferenceCountingPointer<IIndexBuffer> iBuffer = RCPCast<IIndexBuffer>(buffer);
-    
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
 NullableStrongReferenceCountingPointer<IIndexBuffer> DX10IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -403,9 +397,7 @@ NullableStrongReferenceCountingPointer<IIndexBuffer> DX10IndexBufferBuilder::bui
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableStrongReferenceCountingPointer<IIndexBuffer> iBuffer = RCPCast<IIndexBuffer>(buffer);
-    
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
 bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
@@ -417,7 +409,7 @@ bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D
     bufferDesc.ByteWidth = args.bufferSize();
     bufferDesc.Usage = DX10Buffer::getDXUsage(args.usage);
     bufferDesc.BindFlags = D3D10_BIND_INDEX_BUFFER;
-    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.CPUAccessFlags = DX10Buffer::getDXAccess(args.usage);
     bufferDesc.MiscFlags = 0;
 
     if(args.initialBuffer)
@@ -504,9 +496,7 @@ NullableReferenceCountingPointer<IUniformBuffer> DX10UniformBufferBuilder::build
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableReferenceCountingPointer<IUniformBuffer> iBuffer = RCPCast<IUniformBuffer>(buffer);
-    
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
 }
 
 NullableStrongReferenceCountingPointer<IUniformBuffer> DX10UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -522,9 +512,7 @@ NullableStrongReferenceCountingPointer<IUniformBuffer> DX10UniformBufferBuilder:
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableStrongReferenceCountingPointer<IUniformBuffer> iBuffer = RCPCast<IUniformBuffer>(buffer);
-    
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
 }
 
 bool DX10UniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
@@ -574,6 +562,25 @@ D3D10_USAGE DX10Buffer::getDXUsage(EBuffer::UsageType usage) noexcept
         case EBuffer::UsageType::StaticCopy:
         case EBuffer::UsageType::StaticDraw:
         default: return D3D10_USAGE_DEFAULT;
+    }
+}
+
+D3D10_CPU_ACCESS_FLAG DX10Buffer::getDXAccess(EBuffer::UsageType usage) noexcept
+{
+    switch (usage)
+    {
+        case EBuffer::UsageType::StreamDraw:
+        case EBuffer::UsageType::StreamCopy:
+        case EBuffer::UsageType::DynamicDraw:
+        case EBuffer::UsageType::DynamicCopy: return D3D10_CPU_ACCESS_WRITE;
+
+        case EBuffer::UsageType::StaticRead:
+        case EBuffer::UsageType::StreamRead:
+        case EBuffer::UsageType::DynamicRead: return D3D10_CPU_ACCESS_READ;
+
+        case EBuffer::UsageType::StaticCopy:
+        case EBuffer::UsageType::StaticDraw:
+        default: return static_cast<D3D10_CPU_ACCESS_FLAG>(0);
     }
 }
 

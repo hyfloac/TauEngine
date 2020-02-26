@@ -1,6 +1,6 @@
 #pragma once
 
-#include "maths/GlmMatrixTransformExt.hpp"
+#include "maths/glmExt/GlmMatrixTransformExt.hpp"
 #include <maths/Maths.hpp>
 #include <maths/Vector3f.hpp>
 #include <maths/Matrix4x4f.hpp>

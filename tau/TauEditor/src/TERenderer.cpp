@@ -85,8 +85,8 @@ void TERenderer::render(const DeltaTime& delta) noexcept
     TAU_RENDER(*_rp, {
         context.clearScreen(true, true, true, { 127, 127, 255, 255 });
         context.beginFrame();
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
+        // glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        // glStencilMask(0xFF);
     });
     for(auto* layer : _layerStack.layers())
     {

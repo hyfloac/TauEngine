@@ -125,16 +125,18 @@ DECL_HANDLER(rpBindTexture)
 {
     GET_VALUE(ITexture*, texture);
     GET_VALUE(u8, textureUnit);
+    GET_VALUE(EShader::Stage, stage);
 
-    texture->bind(textureUnit);
+    texture->bind(textureUnit, stage);
 }
 
 DECL_HANDLER(rpUnbindTexture)
 {
     GET_VALUE(ITexture*, texture);
     GET_VALUE(u8, textureUnit);
+    GET_VALUE(EShader::Stage, stage);
 
-    texture->unbind(textureUnit);
+    texture->unbind(textureUnit, stage);
 }
 
 DECL_HANDLER(rpEnableBufferDescriptor)

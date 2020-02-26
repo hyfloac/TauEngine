@@ -52,6 +52,10 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
 
     _textureSamplerBuilder = new(::std::nothrow) GLTextureSamplerBuilder;
     _shaderBuilder = new(::std::nothrow) GLShaderBuilder(*this);
+    _texture2DBuilder = new(::std::nothrow) GLTexture2DBuilder;
+    _textureNullBuilder = new(::std::nothrow) GLTextureNullBuilder;
+    _textureDepthBuilder = new(::std::nothrow) GLTextureDepthBuilder;
+    _textureCubeBuilder = new(::std::nothrow) GLTextureCubeBuilder;
 }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
@@ -104,25 +108,17 @@ Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
     return Ref<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
 }
 
-Ref<ITextureBuilder> GLRenderingContext::createTexture2D() noexcept
-{
-    return Ref<GLTexture2DBuilder>(new(::std::nothrow) GLTexture2DBuilder);
-}
+ITextureBuilder& GLRenderingContext::createTexture2D() noexcept
+{ return *_texture2DBuilder; }
 
-Ref<ITextureBuilder> GLRenderingContext::createNullTexture() noexcept
-{
-    return Ref<GLTextureNullBuilder>(new(::std::nothrow) GLTextureNullBuilder);
-}
+ITextureBuilder& GLRenderingContext::createNullTexture() noexcept
+{ return *_textureNullBuilder; }
 
-Ref<ITextureBuilder> GLRenderingContext::createTextureDepth() noexcept
-{
-    return Ref<GLTextureDepthBuilder>(new(::std::nothrow) GLTextureDepthBuilder);
-}
+ITextureBuilder& GLRenderingContext::createTextureDepth() noexcept
+{ return *_textureDepthBuilder; }
 
-Ref<ITextureCubeBuilder> GLRenderingContext::createTextureCube() noexcept
-{
-    return Ref<GLTextureCubeBuilder>(new(::std::nothrow) GLTextureCubeBuilder);
-}
+ITextureCubeBuilder& GLRenderingContext::createTextureCube() noexcept
+{ return *_textureCubeBuilder; }
 
 ITextureSamplerBuilder& GLRenderingContext::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }

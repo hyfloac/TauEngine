@@ -14,6 +14,9 @@ class DX10IndexBufferBuilder;
 class DX10UniformBufferBuilder;
 class DX10TextureSamplerBuilder;
 class DX10ShaderBuilder;
+class DX10Texture2DBuilder;
+class DX10NullTextureBuilder;
+class DX10TextureCubeBuilder;
 
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
@@ -33,6 +36,9 @@ private:
     DX10UniformBufferBuilder* _uniformBufferBuilder;
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
     DX10ShaderBuilder* _shaderBuilder;
+    DX10Texture2DBuilder* _texture2DBuilder;
+    DX10NullTextureBuilder* _textureNullBuilder;
+    DX10TextureCubeBuilder* _textureCubeBuilder;
 public:
     DX10RenderingContext(const RenderingMode& mode) noexcept;
 
@@ -59,10 +65,10 @@ public:
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
-    [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override;
-    [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override { return null; }
-    [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override { return null; }
-    [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override { return null; }
+    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
+    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
+    [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
+    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;

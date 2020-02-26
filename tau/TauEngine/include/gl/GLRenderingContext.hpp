@@ -11,6 +11,10 @@ class GLIndexBufferBuilder;
 class GLUniformBufferBuilder;
 class GLTextureSamplerBuilder;
 class GLShaderBuilder;
+class GLTexture2DBuilder;
+class GLTextureNullBuilder;
+class GLTextureDepthBuilder;
+class GLTextureCubeBuilder;
 
 class GLRenderingContext final : public IRenderingContext
 {
@@ -36,6 +40,10 @@ private:
     GLUniformBufferBuilder* _uniformBufferBuilder;
     GLTextureSamplerBuilder* _textureSamplerBuilder;
     GLShaderBuilder* _shaderBuilder;
+    GLTexture2DBuilder* _texture2DBuilder;
+    GLTextureNullBuilder* _textureNullBuilder;
+    GLTextureDepthBuilder* _textureDepthBuilder;
+    GLTextureCubeBuilder* _textureCubeBuilder;
 public:
     GLRenderingContext(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile core, bool forwardCompatible) noexcept;
     ~GLRenderingContext() noexcept override final;
@@ -66,10 +74,10 @@ public:
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
-    [[nodiscard]] Ref<ITextureBuilder> createTexture2D() noexcept override;
-    [[nodiscard]] Ref<ITextureBuilder> createNullTexture() noexcept override;
-    [[nodiscard]] Ref<ITextureBuilder> createTextureDepth() noexcept override;
-    [[nodiscard]] Ref<ITextureCubeBuilder> createTextureCube() noexcept override;
+    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
+    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
+    [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
+    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;

@@ -13,7 +13,9 @@ enum class BlockType
     Geometry,
     Pixel,
     Uniforms,
-    Textures
+    Textures,
+    Inputs,
+    Outputs
 };
 
 class TAU_DLL BlockExprAST : public ExprAST

@@ -1,10 +1,9 @@
 #include "system/RenderingContext.hpp"
 #include "gl/GLRenderingContext.hpp"
 #include "Timings.hpp"
-#include "dx/dx10/DX10RenderingContext.hpp"
 
 #ifdef _WIN32
-#include "dx/dx9/DX9RenderingContext.hpp"
+#include "dx/dx10/DX10RenderingContext.hpp"
 #endif
 
 IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
@@ -13,7 +12,7 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
     {
     #ifdef _WIN32
         case RenderingMode::Mode::DirectX9:
-            return new(std::nothrow) DX9RenderingContext(mode);
+            return null;
         case RenderingMode::Mode::DirectX10:
             return new(std::nothrow) DX10RenderingContext(mode);
         case RenderingMode::Mode::DirectX11:

@@ -5,6 +5,7 @@
 #include "gl/GLShader.hpp"
 #include "gl/GLTextureSampler.hpp"
 #include "gl/GLBufferDescriptor.hpp"
+#include "gl/GLTexture.hpp"
 
 #include "system/Window.hpp"
 
@@ -15,6 +16,10 @@ GLRenderingContext::~GLRenderingContext() noexcept
     delete _uniformBufferBuilder;
     delete _textureSamplerBuilder;
     delete _shaderBuilder;
+    delete _texture2DBuilder;
+    delete _textureNullBuilder;
+    delete _textureDepthBuilder;
+    delete _textureCubeBuilder;
 
     deactivateContext();
     wglDeleteContext(_context);

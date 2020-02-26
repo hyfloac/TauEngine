@@ -19,6 +19,11 @@
 #include <shader/bundle/ShaderBundleParser.hpp>
 #include <shader/bundle/PrintShaderBundleVisitor.hpp>
 #include <shader/bundle/ast/ExprAST.hpp>
+#include <maths/GlmMatrixTransformExt.hpp>
+
+#include "gl/GLUtils.hpp"
+
+static bool setupDebugCallback(DX10Application* tea) noexcept;
 
 template<>
 class UniformAccessor<DX10Application::Uniforms> final
@@ -59,9 +64,9 @@ public:
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const DX10Application::Matrices& t) noexcept
     {
         buffer->beginModification(context);
-        buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, &t.dxProjection);
-        // buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.projection));
-        buffer->modifyBuffer(MATRIX_SIZE * 1, MATRIX_SIZE, glm::value_ptr(t.viewMatrixTrans));
+        // buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, &t.dxProjection);
+        buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.projection));
+        buffer->modifyBuffer(MATRIX_SIZE * 1, MATRIX_SIZE, glm::value_ptr(t.viewMatrix));
         buffer->modifyBuffer(MATRIX_SIZE * 2, MATRIX_SIZE, glm::value_ptr(t.model));
         buffer->endModification(context);
     }
@@ -118,6 +123,8 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     // Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
     // Mouse::setVisible(false);
 
+    setupDebugCallback(this);
+
     ctx().setVSync(_config.vsync || true);
 
     bool async = false; 
@@ -140,59 +147,6 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     PrintShaderBundleVisitor visitor;
     ast->visit(visitor);
 
-    // while(true)
-    // {
-    //     const SBPToken token = lexer.getNextToken();
-    //     if(token == SBPToken::EndOfFile)
-    //     {
-    //         printf("EOF\n");
-    //         break;
-    //     }
-    //
-    //     switch(token)
-    //     {
-    //         case SBPToken::Identifier:
-    //             printf("Identifier: %s\n", lexer.identifierValue().c_str());
-    //             break;
-    //         case SBPToken::VertexBlock:
-    //             printf("Vertex Block\n");
-    //             break;
-    //         case SBPToken::TessellationControlBlock:
-    //             printf("Tessellation Control Block\n");
-    //             break;
-    //         case SBPToken::TessellationEvaluationBlock:
-    //             printf("Tessellation Evaluation Block\n");
-    //             break;
-    //         case SBPToken::GeometryBlock:
-    //             printf("Geometry Block\n");
-    //             break;
-    //         case SBPToken::PixelBlock:
-    //             printf("Pixel Block\n");
-    //             break;
-    //         case SBPToken::File:
-    //             printf("File\n");
-    //             break;
-    //         case SBPToken::UniformsBlock:
-    //             printf("UniformsBlock Block\n");
-    //             break;
-    //         case SBPToken::TexturesBlock:
-    //             printf("TexturesBlock Block\n");
-    //             break;
-    //         case SBPToken::StringLiteral:
-    //             printf("String Literal: %s\n", lexer.strValue().c_str());
-    //             break;
-    //         case SBPToken::IntegerLiteral:
-    //             printf("Integer Literal: %d\n", lexer.intValue());
-    //             break;
-    //         case SBPToken::Character:
-    //             printf("Character Literal: %c\n", lexer.cValue());
-    //             break;
-    //         default:
-    //             printf("Unknown Token.\n");
-    //             break;
-    //     }
-    // }
-
     TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
 
     ResourceSelectorLoader::setCacheDirectory("|res/cache");
@@ -214,7 +168,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     _shader->setPixelShader(ctx(), pixelShader);
     _shader->link(ctx());
 
-    float positionsCube[2 * 4] = {
+    float positionsSquare[2 * 4] = {
          0.5f,  0.5f,
          0.5f, -0.5f,
         -0.5f, -0.5f,
@@ -239,7 +193,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     //     0.0f, 1.0f
     // };
 
-    u32 indicesCube[3 * 2] = {
+    u32 indicesSquare[3 * 2] = {
         0, 1, 3,
         2, 3, 1
     };
@@ -248,24 +202,24 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.type = EBuffer::Type::ArrayBuffer;
     bufBuilder.usage = EBuffer::UsageType::StaticDraw;
     bufBuilder.elementCount = 4;
-    bufBuilder.initialBuffer = positionsCube;
+    bufBuilder.initialBuffer = positionsSquare;
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     const Ref<IBuffer> posBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
 
     IndexBufferArgs indiceArgs;
     indiceArgs.usage = EBuffer::UsageType::StaticDraw;
     indiceArgs.elementCount = 6;
-    indiceArgs.initialBuffer = indicesCube;
+    indiceArgs.initialBuffer = indicesSquare;
     const Ref<IIndexBuffer> indices = ctx().createIndexBuffer().buildCPPRef(indiceArgs, null);
 
-    float colorsCube[4 * 4] = {
+    float colorsSquare[4 * 4] = {
         1.0f, 0.0f, 0.0f, 1.0f,
         0.0f, 1.0f, 0.0f, 1.0f,
         0.0f, 0.0f, 1.0f, 1.0f,
         0.5f, 1.0f, 1.0f, 1.0f
     };
 
-    bufBuilder.initialBuffer = colorsCube;
+    bufBuilder.initialBuffer = colorsSquare;
     bufBuilder.descriptor.reset(1);
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
     const Ref<IBuffer> colorBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
@@ -405,10 +359,17 @@ void DX10Application::update(float fixedDelta) noexcept
     { _aa *= -1; }
 
     _camera->update(fixedDelta);
+    if(glmExt::useTranspose(ctx().mode()))
+    {
+        _matrices->data().viewMatrix = _camera->camera().viewMatrixTrans();
+    }
+    else
+    {
+        _matrices->data().viewMatrix = _camera->camera().viewMatrix();
+    }
     _matrices->data().projection = _camera->camera().projectionMatrix();
     // _matrices->data().projection =  glm::orthoLH_ZO(static_cast<float>(_window->width()), 0.0f, static_cast<float>(_window->height()), 0.0f, 0.0f, 1.0f);
     // _matrices->data().projection = glm::perspectiveFovLH(DEG_2_RAD_F(90.0f), (float) _window->width(), (float) _window->height(), 0.00001f, 1000.0f);
-    _matrices->data().viewMatrix = _camera->camera().viewMatrix(); 
     _matrices->data().viewMatrixTrans = transpose(_camera->camera().viewMatrix()); 
     _matrices->data().model = glm::scale(glm::mat4(1.0f), glm::vec3(200.0f)); 
 }
@@ -422,7 +383,7 @@ void DX10Application::render(const DeltaTime& delta) noexcept
         _matrices->upload(ctx(), EShader::Stage::Vertex, 0);
         _uni->upload(ctx(), EShader::Stage::Pixel, 1);
         TextureIndices ind;
-        _texUploader->upload(ctx(), ind);
+        _texUploader->upload(ctx(), ind, EShader::Stage::Pixel);
 
         _va->bind(ctx());
         _va->preDraw(ctx());
@@ -431,7 +392,7 @@ void DX10Application::render(const DeltaTime& delta) noexcept
         _va->unbind(ctx());
 
         TextureIndices ind0;
-        _texUploader->unbind(ctx(), ind0);
+        _texUploader->unbind(ctx(), ind0, EShader::Stage::Pixel);
         _uni->unbind(ctx(), EShader::Stage::Pixel, 1);
         _matrices->unbind(ctx(), EShader::Stage::Vertex, 0);
       _shader->unbind(ctx());
@@ -627,4 +588,14 @@ IResourceSelectorTransformer::ResIndex RMRSTransformer::transform(const Renderin
             return 2;
         default: return -1;
     }
+}
+
+static bool setupDebugCallback(DX10Application* app) noexcept
+{
+#ifndef TAU_PRODUCTION
+    setupDefaultDebugMessageCallback(app->logger(), true);
+    return true;
+#else
+    return false;
+#endif
 }

@@ -1,5 +1,7 @@
 #include "camera/Camera3D.hpp"
-#include "maths/GlmMatrixTransformExt.hpp"
+#include "maths/glmExt/GlmMatrixTransformExt.hpp"
+#include "maths/glmExt/GlmMatrixProjectionExt.hpp"
+#include "maths/glmExt/GlmQuaternionTransformExt.hpp"
 #include "maths/Maths.hpp"
 #include "system/Window.hpp"
 #include <glm/gtc/matrix_transform.hpp>
@@ -7,44 +9,38 @@
 
 Camera3D::Camera3D(const Window& window, const float fov, const float zNear, const float zFar) noexcept
     : _position(0.0f), _pitch(0.0f), _yaw(0.0f), _viewQuaternion(),
-      _projectionMatrix(glm::perspective(fov, static_cast<float>(window.width()) / static_cast<float>(window.height()), zNear, zFar)),
+      _projectionMatrix(glmExt::perspectiveDegrees(fov, static_cast<float>(window.width()), static_cast<float>(window.height()), zNear, zFar)),
       _viewMatrix(1.0f), _viewRotMatrix(1.0f), _compoundedMatrix(_projectionMatrix * _viewMatrix)
 { }
 
 void Camera3D::setProjection(const Window& window, float fov, float zNear, float zFar) noexcept
 {
-    _projectionMatrix = glm::perspective(fov, static_cast<float>(window.width()) / static_cast<float>(window.height()), zNear, zFar);
+    _projectionMatrix = glmExt::perspectiveDegrees(fov, static_cast<float>(window.width()), static_cast<float>(window.height()), zNear, zFar);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 }
 
 void Camera3D::recomputeMatrices() noexcept
 {
-    static const glm::mat4 identity(1.0f);
-    // static const glm::vec3 xAxis(-1.0f, 0.0f, 0.0f);
-    // static const glm::vec3 yAxis(0.0f, -1.0f, 0.0f);
+    static constexpr glm::mat4 identity(1.0f);
 
     const glm::mat4 rotMat = glm::toMat4(_viewQuaternion);
 
-    const glm::mat4 transform = glmExt::translate(identity, _position) * 
-                                rotMat;
+    const glm::mat4 transform = glmExt::translate(identity, _position) * rotMat;
     _viewMatrix = glm::inverse(transform);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 
-    // const float pitch = 180.0f - _pitch;
-    // const glm::quat q0 = glm::rotate(identity, DEG_2_RAD_F(_yaw), yAxis);
-    // const glm::quat q1 = glm::rotate(q0, DEG_2_RAD_F(pitch), xAxis);
     _viewRotMatrix = glm::inverse(rotMat);
 }
 
 void Camera3D::computeQuat() noexcept
 {
-    static const glm::mat4 identity(1.0f);
-    static const glm::vec3 xAxis(-1.0f, 0.0f, 0.0f);
-    static const glm::vec3 yAxis(0.0f, -1.0f, 0.0f);
+    static constexpr glm::mat4 identity(1.0f);
+    static constexpr glm::vec3 xAxis(-1.0f, 0.0f, 0.0f);
+    static constexpr glm::vec3 yAxis(0.0f, -1.0f, 0.0f);
 
     const float pitch = 180.0f - _pitch;
-    const glm::quat q0 = glm::rotate(identity, DEG_2_RAD_F(_yaw), yAxis);
-    const glm::quat q1 = glm::rotate(q0, DEG_2_RAD_F(pitch), xAxis);
+    const glm::quat q0 = glmExt::rotateDegrees(identity, _yaw, yAxis);
+    const glm::quat q1 = glmExt::rotateDegrees(q0, pitch, xAxis);
     _viewQuaternion = q1;
 
     const SinCos<float> pitchSC = fastSinCosD(-_pitch);
@@ -105,7 +101,6 @@ void FreeCamCamera3DController::update(const float fixedDelta, const Vector3f ve
         if(_nextPitch > 80.0f) { _nextPitch = 80.0f; }
         else if(_nextPitch < -87.0f) { _nextPitch = -87.0f; }
 
-        // _camera._viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_camera._pitch), DEG_2_RAD_F(_camera._yaw), 0.0f));
         _camera.computeQuat();
     }
 
@@ -175,7 +170,6 @@ void FreeCamCamera3DController::lerp(const DeltaTime& delta) noexcept
     {
         _camera._pitch = largeLerp(_lastPitch, _nextPitch, _lerp, _maxLerp);
         _camera._yaw = largeLerp(_lastYaw, _nextYaw, _lerp, _maxLerp);
-        // _camera._viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_camera._pitch), DEG_2_RAD_F(_camera._yaw), 0.0f));
         _camera.computeQuat();
     }
 

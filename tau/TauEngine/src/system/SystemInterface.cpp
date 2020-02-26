@@ -9,7 +9,7 @@ SystemInterface* SystemInterface::create() noexcept
     if(!created)
     {
         created = true;
-        _g__systemInterfacePtr_ = new(std::nothrow) SystemInterface;
+        _g__systemInterfacePtr_ = new(::std::nothrow) SystemInterface;
         return _g__systemInterfacePtr_;
     }
 

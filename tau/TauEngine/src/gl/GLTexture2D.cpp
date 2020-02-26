@@ -22,13 +22,13 @@ void GLTexture2D::set(const u32 level, const void* data) noexcept
     glTexImage2D(GL_TEXTURE_2D, level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
 
-void GLTexture2D::bind(u8 textureUnit) noexcept
+void GLTexture2D::bind(u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _texture);
 }
 
-void GLTexture2D::unbind(u8 textureUnit) noexcept
+void GLTexture2D::unbind(u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -48,59 +48,241 @@ void GLTexture2D::generateMipmaps() noexcept
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-ITexture* GLTexture2DBuilder::build(Error* error) const noexcept
+GLTexture2D* GLTexture2DBuilder::build(const TextureArgs& args, Error* error) const noexcept
 {
-    ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
-    ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
-    ERROR_CODE_COND_N(_mipmapLevels < 0, Error::MipMapLevelsIsUnset);
-    ERROR_CODE_COND_N(_dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
 
-    GLuint textureHandle;
-    glGenTextures(1, &textureHandle);
-
-    GLTexture2D* const texture = new(std::nothrow) GLTexture2D(_width, _height, _dataFormat, textureHandle);
+    GLTexture2D* const texture = new(std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
-        glDeleteTextures(1, &textureHandle);
+        glDeleteTextures(1, &glArgs.textureHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    texture->set(0, _initialBuffer);
-	
+    texture->set(0, args.initialBuffer);
+
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-ITexture* GLTextureNullBuilder::build(Error* error) const noexcept
+GLTexture2D* GLTexture2DBuilder::build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLTexture2D* const texture = allocator.allocateT<GLTexture2D>(args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+Ref<ITexture> GLTexture2DBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    const Ref<GLTexture2D> texture = Ref<GLTexture2D>(new(std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.textureHandle));
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableReferenceCountingPointer<ITexture> GLTexture2DBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    NullableReferenceCountingPointer<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+}
+
+NullableStrongReferenceCountingPointer<ITexture> GLTexture2DBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    NullableStrongReferenceCountingPointer<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+}
+
+bool GLTexture2DBuilder::processArgs(const TextureArgs& args, GLTextureArgs* glArgs, Error* error) noexcept
+{
+    ERROR_CODE_COND_F(args.width == 0, Error::WidthIsZero);
+    ERROR_CODE_COND_F(args.height == 0, Error::HeightIsZero);
+    ERROR_CODE_COND_F(args.mipmapLevels < 0, Error::MipMapLevelsIsUnset);
+    ERROR_CODE_COND_F(args.dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+
+    glGenTextures(1, &glArgs->textureHandle);
+
+    return true;
+}
+
+GLNullTexture* GLTextureNullBuilder::build(const TextureArgs& args, Error* error) const noexcept
 {
     GLNullTexture* const texture = new(std::nothrow) GLNullTexture;
-
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+GLNullTexture* GLTextureNullBuilder::build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLNullTexture* const texture = allocator.allocateT<GLNullTexture>();
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+Ref<ITexture> GLTextureNullBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+{
+    const Ref<GLNullTexture> texture = Ref<GLNullTexture>(new(std::nothrow) GLNullTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableReferenceCountingPointer<ITexture> GLTextureNullBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    const NullableReferenceCountingPointer<GLNullTexture> texture(allocator);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+}
+
+NullableStrongReferenceCountingPointer<ITexture> GLTextureNullBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    const NullableStrongReferenceCountingPointer<GLNullTexture> texture(allocator);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+}
+
+GLDepthTexture* GLTextureDepthBuilder::build(const TextureArgs& args, Error* error) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLDepthTexture* const texture = new(std::nothrow) GLDepthTexture(args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
 
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-ITexture* GLTextureDepthBuilder::build(Error* error) const noexcept
+GLDepthTexture* GLTextureDepthBuilder::build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    ERROR_CODE_COND_N(_width == 0, Error::WidthIsZero);
-    ERROR_CODE_COND_N(_height == 0, Error::HeightIsZero);
-    ERROR_CODE_COND_N(_mipmapLevels < 0, Error::MipMapLevelsIsUnset);
-    ERROR_CODE_COND_N(_dataFormat == static_cast<ETexture::Format>(0), Error::DataFormatIsUnset);
+    GLTextureArgs glArgs;
+    if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
+    { return null; }
 
-    GLuint textureHandle;
-    glGenTextures(1, &textureHandle);
-
-    GLDepthTexture* const texture = new(std::nothrow) GLDepthTexture(_width, _height, _dataFormat, textureHandle);
+    GLDepthTexture* const texture = allocator.allocateT<GLDepthTexture>(args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
-        glDeleteTextures(1, &textureHandle);
+        glDeleteTextures(1, &glArgs.textureHandle);
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    texture->set(0, _initialBuffer);
+    texture->set(0, args.initialBuffer);
 
     ERROR_CODE_V(Error::NoError, texture);
+}
+
+Ref<ITexture> GLTextureDepthBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
+    { return null; }
+
+    const Ref<GLDepthTexture> texture = Ref<GLDepthTexture>(new(std::nothrow) GLDepthTexture(args.width, args.height, args.dataFormat, glArgs.textureHandle));
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableReferenceCountingPointer<ITexture> GLTextureDepthBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
+    { return null; }
+
+    NullableReferenceCountingPointer<GLDepthTexture> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+}
+
+NullableStrongReferenceCountingPointer<ITexture> GLTextureDepthBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    GLTextureArgs glArgs;
+    if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
+    { return null; }
+
+    NullableStrongReferenceCountingPointer<GLDepthTexture> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+
+    if(!texture)
+    {
+        glDeleteTextures(1, &glArgs.textureHandle);
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    texture->set(0, args.initialBuffer);
+
+    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
 }
 
 GLint GLTexture2D::glFilterType(const ETexture::Filter filterType) noexcept

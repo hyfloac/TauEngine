@@ -23,9 +23,12 @@ private:
     glm::mat4 _projectionMatrix;
     glm::mat4 _viewMatrix;
     glm::mat4 _compoundedMatrix;
+    // glm::mat4 _projectionMatrixTrans;
+    glm::mat4 _viewMatrixTrans;
+    glm::mat4 _compoundedMatrixTrans;
 public:
-    Camera2D(const Window& window, float bottom = 0.0f, float left = 0.0f) noexcept;
-    Camera2D(float top, float right, float bottom = 0.0f, float left = 0.0f) noexcept;
+    Camera2D(const Window& window, float nearZ = -1.0f, float farZ = 1.0f) noexcept;
+    Camera2D(float width, float height, float nearZ = -1.0f, float farZ = 1.0f) noexcept;
 
     [[nodiscard]] Vector3f position() const noexcept { return _position; }
     [[nodiscard]] float rotation() const noexcept { return _rotation; }
@@ -33,9 +36,13 @@ public:
     [[nodiscard]] const glm::mat4& viewMatrix() const noexcept { return _viewMatrix; }
     /** _projectionMatrix * _viewMatrix */
     [[nodiscard]] const glm::mat4& compoundedMatrix() const noexcept { return _compoundedMatrix; }
+    // [[nodiscard]] const glm::mat4& projectionMatrixTrans() const noexcept { return _projectionMatrixTrans; }
+    [[nodiscard]] const glm::mat4& viewMatrixTrans() const noexcept { return _viewMatrixTrans; }
+    /** _projectionMatrixTrans * _viewMatrixTrans */
+    [[nodiscard]] const glm::mat4& compoundedMatrixTrans() const noexcept { return _compoundedMatrixTrans; }
 
-    void setProjection(const Window& window, float bottom = 0.0f, float left = 0.0f) noexcept;
-    void setProjection(float top, float right, float bottom = 0.0f, float left = 0.0f) noexcept;
+    void setProjection(const Window& window, float nearZ = -1.0f, float farZ = 1.0f) noexcept;
+    void setProjection(float width, float height, float nearZ = -1.0f, float farZ = 1.0f) noexcept;
 
     void position(Vector3f pos) noexcept
     {

@@ -2,7 +2,7 @@
 
 in vec3 fPosition;
 // in vec3 fNormal;
-in vec3 fTangent;
+// in vec3 fTangent;
 // in vec3 fBiTangent;
 in vec2 fTexCoord;
 in mat3 fTBN;
@@ -13,22 +13,22 @@ layout(location = 0) out vec4 fragColor;
 #include <|TERes/shader/include/PointLight.glsl>
 #include <|TERes/shader/include/SpotLight.glsl>
 
-layout(binding = 1) uniform MaterialUni
+layout(std140, binding = 1) uniform MaterialUni
 {
     Material material;
 };
 
-layout(binding = 2) uniform PointLightUni
+layout(std140, binding = 2) uniform PointLightUni
 {
     PointLight pointLight;
 };
 
-layout(binding = 3) uniform SpotLightUni
+layout(std140, binding = 3) uniform SpotLightUni
 {
     SpotLight spotLight;
 };
 
-layout(binding = 4) uniform ViewPosUni
+layout(std140, binding = 4) uniform ViewPosUni
 {
     vec4 viewPos4;
 };

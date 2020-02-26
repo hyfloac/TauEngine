@@ -3,7 +3,7 @@
 #include <system/Window.hpp>
 #include <model/RenderableObject.hpp>
 #include <model/OBJLoader.hpp>
-#include <maths/GlmMatrixTransformExt.hpp>
+#include <maths/glmExt/GlmMatrixTransformExt.hpp>
 #include <shader/IShader.hpp>
 #include "texture/FITextureLoader.hpp"
 #include "Timings.hpp"
@@ -67,14 +67,6 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
       _modelPos(0, 0, 0), _modelViewMatrix(1.0f)
 {
     PERF();
-    objl::Loader loader;
-    if(loader.loadFile("|TERes/nanosuit/nanosuit.obj"))
-    {
-        for(const objl::Mesh& mesh : loader.meshes())
-        {
-            _objects.emplace_back(std::make_shared<RenderableObject>(*window.renderingContext(), mesh, "|TERes/nanosuit/"));
-        }
-    }
 
     ShaderArgs shaderArgs;
     shaderArgs.vfsMount = "|TERes";
@@ -89,6 +81,14 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     shaderArgs.stage = EShader::Stage::Vertex;
     Ref<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
+    objl::Loader loader;
+    if(loader.loadFile("|TERes/nanosuit/nanosuit.obj"))
+    {
+        for(const objl::Mesh& mesh : loader.meshes())
+        {
+            _objects.emplace_back(std::make_shared<RenderableObject>(*window.renderingContext(), mesh, "|TERes/nanosuit/", vertexShader));
+        }
+    }
 
     // shaderBuilder->type(EShader::Stage::Vertex);
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlineVertexShader.glsl", FileProps::Read));
@@ -110,32 +110,32 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
     // Ref<IShader> refractionPixelShader = Ref<IShader>(shaderBuilder->build());
 
-    shaderArgs.fileName = "FrameBufferVertexShader";
-    shaderArgs.stage = EShader::Stage::Vertex;
-    Ref<IShader> frameBufferVertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
-
-    shaderArgs.fileName = "FrameBufferPixelShader";
-    shaderArgs.stage = EShader::Stage::Pixel;
-    Ref<IShader> frameBufferPixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
-
+    // shaderArgs.fileName = "FrameBufferVertexShader";
+    // shaderArgs.stage = EShader::Stage::Vertex;
+    // Ref<IShader> frameBufferVertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    //
+    // shaderArgs.fileName = "FrameBufferPixelShader";
+    // shaderArgs.stage = EShader::Stage::Pixel;
+    // Ref<IShader> frameBufferPixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    //
     _shader->setVertexShader(*window.renderingContext(), vertexShader);
     _shader->setPixelShader(*window.renderingContext(), pixelShader);
-
-    _frameBufferShader->setVertexShader(*window.renderingContext(), frameBufferVertexShader);
-    _frameBufferShader->setPixelShader(*window.renderingContext(), frameBufferPixelShader);
-
+    //
+    // _frameBufferShader->setVertexShader(*window.renderingContext(), frameBufferVertexShader);
+    // _frameBufferShader->setPixelShader(*window.renderingContext(), frameBufferPixelShader);
+    //
     _shader->link(*window.renderingContext());
-    _frameBufferShader->link(*window.renderingContext());
+    // _frameBufferShader->link(*window.renderingContext());
 
-    Ref<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
-
-    IFrameBufferAttachment* colorBuffer   = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Color, window.width(), window.height());
-    IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::DepthStencil, window.width(), window.height());
-
-    builder->attach(colorBuffer, nullptr);
-    builder->attach(depthStencilBuffer, nullptr);
-
-    _frameBuffer = Ref<IFrameBuffer>(builder->build(nullptr));
+    // Ref<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
+    //
+    // IFrameBufferAttachment* colorBuffer   = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Color, window.width(), window.height());
+    // IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::DepthStencil, window.width(), window.height());
+    //
+    // builder->attach(colorBuffer, nullptr);
+    // builder->attach(depthStencilBuffer, nullptr);
+    //
+    // _frameBuffer = Ref<IFrameBuffer>(builder->build(nullptr));
 
     float quadVertices[] = {
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -159,11 +159,11 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     const Ref<IBuffer> positions = window.renderingContext()->createBuffer().buildCPPRef(positionsBuilder, nullptr);
     // const Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
 
-    Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
-    vaBuilder->setVertexBuffer(0, positions);
-    vaBuilder->drawCount(6);
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
-    _frameBufferVA = Ref<IVertexArray>(vaBuilder->build());
+    // Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
+    // vaBuilder->setVertexBuffer(0, positions);
+    // vaBuilder->drawCount(6);
+    // vaBuilder->drawType(DrawType::SeparatedTriangles);
+    // _frameBufferVA = Ref<IVertexArray>(vaBuilder->build());
 
     _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -199,10 +199,10 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    Ref<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
-    uploaderBuilder->setTexture(0, colorBuffer->texture());
-    uploaderBuilder->textureSampler(Ref<ITextureSampler>(window.renderingContext()->createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
-    _frameBufferUploader = Ref<ITextureUploader>(uploaderBuilder->build());
+    // Ref<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
+    // uploaderBuilder->setTexture(0, colorBuffer->texture());
+    // uploaderBuilder->textureSampler(Ref<ITextureSampler>(window.renderingContext()->createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
+    // _frameBufferUploader = Ref<ITextureUploader>(uploaderBuilder->build());
 }
 
 void Layer3D::onUpdate(float fixedDelta) noexcept
@@ -229,75 +229,127 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
     {
         _camera.lerp(delta);
     }
-    
-    TAU_RENDER_S(_rp, {
-        // self->_frameBuffer->bind(context);
-        context.clearScreen(true, true, true, { 127, 127, 255, 255 });
-    
-        self->_shader->bind(context);
-        
-        self->_spotLight.position() = self->_camera.camera().position();
-        self->_spotLight.direction() = self->_camera.camera().front();
-    
-        self->_uniforms.data().compoundMatrix = self->_camera->compoundedMatrix();
-        self->_uniforms.data().projectionMatrix = self->_camera->projectionMatrix();
-        self->_uniforms.data().viewMatrix = self->_camera->viewMatrix();
-        self->_uniforms.data().modelMatrix = self->_modelViewMatrix;
-    
-        self->_cameraPosUni.data().cameraPos = self->_camera.camera().position();
-
-        self->_spotLightUniforms.set(context, self->_spotLight);
-
-        self->_uniforms.upload(context, EShader::Stage::Vertex, 0);
-        self->_pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
-        self->_spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
-        self->_cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
-    
-        for(const Ref<RenderableObject>& ro : self->_objects)
+    //
+    // TAU_RENDER_S(_rp, {
+    //     // self->_frameBuffer->bind(context);
+    //
+    //     self->_shader->bind(context);
+    //     
+    //     self->_spotLight.position() = self->_camera.camera().position();
+    //     self->_spotLight.direction() = self->_camera.camera().front();
+    //
+    //     self->_uniforms.data().compoundMatrix = self->_camera->compoundedMatrix();
+    //     self->_uniforms.data().projectionMatrix = self->_camera->projectionMatrix();
+    //     self->_uniforms.data().viewMatrix = self->_camera->viewMatrix();
+    //     self->_uniforms.data().modelMatrix = self->_modelViewMatrix;
+    //
+    //     self->_cameraPosUni.data().cameraPos = self->_camera.camera().position();
+    //
+    //     self->_spotLightUniforms.set(context, self->_spotLight);
+    //
+    //     self->_uniforms.upload(context, EShader::Stage::Vertex, 0);
+    //     self->_pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
+    //     self->_spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
+    //     self->_cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
+    //
+    //     for(const Ref<RenderableObject>& ro : self->_objects)
+    //     {
+    //         TextureIndices indices(0, 0, 0);
+    //         ro->material().upload(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
+    //         ro->preRender(context);
+    //         ro->render(context);
+    //         ro->postRender(context);
+    //         indices = TextureIndices(0, 0, 0);
+    //         ro->material().unbind(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
+    //     }
+    //
+    //     self->_cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
+    //     self->_spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
+    //     self->_pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
+    //     self->_uniforms.unbind(context, EShader::Stage::Vertex, 0);
+    //     self->_shader->unbind(context);
+    //
+    //     self->_skybox.render(context, self->_camera.camera());
+    //
+    //     // self->_frameBuffer->unbind(context);
+    //     // context.clearScreen(true, true, true, { 0, 160, 0, 255 });
+    //     //
+    //     // glDisable(GL_DEPTH_TEST);
+    //     //
+    //     // self->_frameBufferShader->bind(context);
+    //     // // self->_frameBufferUni->set(0);
+    //     //
+    //     // TextureIndices indices(0, 0, 0);
+    //     // (void) self->_frameBufferUploader->upload(context, indices);
+    //     //
+    //     // context.setFaceWinding(false);
+    //     // // self->_frameBuffer->color()->texture()->bind(0);
+    //     // self->_frameBufferVA->bind(context);
+    //     // self->_frameBufferVA->preDraw(context);
+    //     // self->_frameBufferVA->draw(context);
+    //     // self->_frameBufferVA->postDraw(context);
+    //     // self->_frameBufferVA->unbind(context);
+    //     // // self->_frameBuffer->color()->texture()->unbind(0);
+    //     //
+    //     // indices = TextureIndices(0, 0, 0);
+    //     // (void) self->_frameBufferUploader->unbind(context, indices);
+    //     // self->_frameBufferShader->unbind(context);
+    //     //
+    //     // glEnable(GL_DEPTH_TEST);
+    // });
+    auto self = this;
+    do
+    {
+        struct TauRenderCommand368
         {
-            TextureIndices indices(0, 0, 0);
-            ro->material().upload(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
-            ro->preRender(context);
-            ro->render(context);
-            ro->postRender(context);
-            indices = TextureIndices(0, 0, 0);
-            ro->material().unbind(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
+            typename ::std::remove_const< typename ::std::remove_reference< decltype(self) >::type >::type self;
+            TauRenderCommand368(typename ::std::remove_const< typename ::std::remove_reference< decltype(self) >::type >::type self) : self(self) { }
+            static void execute([maybe_unused] RenderingPipeline& rp, [maybe_unused] Window& window, [maybe_unused] IRenderingContext& context, void* argBuffer)
+            {
+                ((void) (rp));
+                ((void) (window));
+                ((void) (context));
+                auto& self = reinterpret_cast<TauRenderCommand368*>(argBuffer)->self;
+                {
+                    {
+                        self->_shader->bind(context);
+                        self->_spotLight.position() = self->_camera.camera().position();
+                        self->_spotLight.direction() = self->_camera.camera().front();
+                        self->_uniforms.data().compoundMatrix = self->_camera->compoundedMatrix();
+                        self->_uniforms.data().projectionMatrix = self->_camera->projectionMatrix();
+                        self->_uniforms.data().viewMatrix = self->_camera->viewMatrix();
+                        self->_uniforms.data().modelMatrix = self->_modelViewMatrix;
+                        self->_cameraPosUni.data().cameraPos = self->_camera.camera().position();
+                        self->_spotLightUniforms.set(context, self->_spotLight);
+                        self->_uniforms.upload(context, EShader::Stage::Vertex, 0);
+                        self->_pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
+                        self->_spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
+                        self->_cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
+                        for(const Ref<RenderableObject>& ro : self->_objects)
+                        {
+                            TextureIndices indices(0, 0, 0);
+                            ro->material().upload(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
+                            ro->preRender(context);
+                            ro->render(context);
+                            ro->postRender(context);
+                            indices = TextureIndices(0, 0, 0);
+                            ro->material().unbind(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
+                        }
+                        self->_cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
+                        self->_spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
+                        self->_pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
+                        self->_uniforms.unbind(context, EShader::Stage::Vertex, 0);
+                        self->_shader->unbind(context);
+                        self->_skybox.render(context, self->_camera.camera());
+                    };
+                }
+            }
+        };
+        {
+            void* mem = (_rp).pushExecuteCommand(TauRenderCommand368::execute, sizeof(TauRenderCommand368));
+            new(mem) TauRenderCommand368(self);
         }
-
-        self->_cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
-        self->_spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
-        self->_pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
-        self->_uniforms.unbind(context, EShader::Stage::Vertex, 0);
-        self->_shader->unbind(context);
-    
-        self->_skybox.render(context, self->_camera.camera());
-    
-        // self->_frameBuffer->unbind(context);
-        // context.clearScreen(true, true, true, { 0, 160, 0, 255 });
-        //
-        // glDisable(GL_DEPTH_TEST);
-        //
-        // self->_frameBufferShader->bind(context);
-        // // self->_frameBufferUni->set(0);
-        //
-        // TextureIndices indices(0, 0, 0);
-        // (void) self->_frameBufferUploader->upload(context, indices);
-        //
-        // context.setFaceWinding(false);
-        // // self->_frameBuffer->color()->texture()->bind(0);
-        // self->_frameBufferVA->bind(context);
-        // self->_frameBufferVA->preDraw(context);
-        // self->_frameBufferVA->draw(context);
-        // self->_frameBufferVA->postDraw(context);
-        // self->_frameBufferVA->unbind(context);
-        // // self->_frameBuffer->color()->texture()->unbind(0);
-        //
-        // indices = TextureIndices(0, 0, 0);
-        // (void) self->_frameBufferUploader->unbind(context, indices);
-        // self->_frameBufferShader->unbind(context);
-        //
-        // glEnable(GL_DEPTH_TEST);
-    });
+    } while(0);;
 }
 
 void Layer3D::onEvent(Event& e) noexcept
@@ -308,15 +360,16 @@ void Layer3D::onEvent(Event& e) noexcept
 
 bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
 {
-    Ref<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
-
-    IFrameBufferAttachment* colorBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Color, e.newWidth(), e.newHeight());
-    IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::DepthStencil, e.newWidth(), e.newHeight());
-
-    builder->attach(colorBuffer);
-    builder->attach(depthStencilBuffer);
-
-    _frameBuffer = Ref<IFrameBuffer>(builder->build());
+    UNUSED(e);
+    // Ref<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
+    //
+    // IFrameBufferAttachment* colorBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Color, e.newWidth(), e.newHeight());
+    // IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::DepthStencil, e.newWidth(), e.newHeight());
+    //
+    // builder->attach(colorBuffer);
+    // builder->attach(depthStencilBuffer);
+    //
+    // _frameBuffer = Ref<IFrameBuffer>(builder->build());
 
     return true;
 }

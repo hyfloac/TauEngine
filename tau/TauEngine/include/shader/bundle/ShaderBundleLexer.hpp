@@ -17,6 +17,8 @@ enum class SBPToken
     PixelBlock,
     UniformsBlock,
     TexturesBlock,
+    InputsBlock,
+    OutputsBlock,
     File,
     StringLiteral,
     IntegerLiteral,

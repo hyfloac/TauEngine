@@ -1,1 +1,2 @@
-"OpenGL": "SimpleVertexShader.glsl"
+"OpenGL": "SimpleVertexShader.glsl",
+"DirectX10": "SimpleVertexShader.cso"

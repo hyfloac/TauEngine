@@ -25,7 +25,7 @@ struct ExceptionData final
     const char* func;
 };
 
-#if defined(_DEBUG)
+#if !defined(TAU_PRODUCTION)
 TAU_DLL void tauThrowException(Exception& e, uSys line, const char* file, const char* func) noexcept;
 
 #define TAU_THROW(_TYPE, ...) tauThrowException(*new _TYPE(__VA_ARGS__), __LINE__, __FILE__, __FUNCSIG__)
@@ -57,6 +57,18 @@ TAU_DLL bool tauShouldExit() noexcept;
  */
 TAU_DLL void tauExit(i32 code) noexcept;
 
+/**
+ * Tells the application that we are ready to exit.
+ *
+ *   This does not set an exit code. If you need to set an
+ * code call `tauExit(i32)`.
+ */
+TAU_DLL void tauExit() noexcept;
+
+/**
+ * @return
+ *    Returns the exit code for the program;
+ */
 TAU_DLL i32 tauExitCode() noexcept;
 
 typedef void (* update_f)(float);

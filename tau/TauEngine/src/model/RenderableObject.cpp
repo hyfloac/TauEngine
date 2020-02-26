@@ -9,7 +9,7 @@
 
 // static Ref<IInputLayout> _inputLayoutCache = null;
 
-RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const DrawType drawType) noexcept
+RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const Ref<IShader>& shader, const DrawType drawType) noexcept
     : _va(null)
 {
     PERF();
@@ -69,40 +69,36 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     indicesBuilder.elementCount = mesh.indices.size();
 
     // Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
+    pnBuilder.initialBuffer = positionsLoaded;
     Ref<IBuffer> positions = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
+    pnBuilder.initialBuffer = normalsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
     // Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
     Ref<IBuffer> normals = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
+    pnBuilder.initialBuffer = tangentsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
     // Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
     Ref<IBuffer> tangents = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
     // Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
+    texturesBuilder.initialBuffer = texturesLoaded;
     Ref<IBuffer> textures = context.createBuffer().buildCPPRef(texturesBuilder, nullptr);
     // Ref<IIndexBuffer> indices = Ref<IIndexBuffer>(indicesBuilder->build(nullptr));
+    indicesBuilder.initialBuffer = mesh.indices.data();
     Ref<IIndexBuffer> indices = context.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
 
-    positions->fillBuffer(context, positionsLoaded);
-    normals->fillBuffer(context, normalsLoaded);
-    tangents->fillBuffer(context, tangentsLoaded);
-    textures->fillBuffer(context, texturesLoaded);
-    indices->fillBuffer(context, mesh.indices.data());
+    // positions->fillBuffer(context, positionsLoaded);
+    // normals->fillBuffer(context, normalsLoaded);
+    // tangents->fillBuffer(context, tangentsLoaded);
+    // textures->fillBuffer(context, texturesLoaded);
+    // indices->fillBuffer(context, mesh.indices.data());
 
     Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
 
-    // if(!_inputLayoutCache)
-    // {
-        // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(4);
-        // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
-        // ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
-        // ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector3Float, ShaderSemantic::Tangent);
-        // ilBuilder->setLayoutDescriptor(3, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-        // _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
-    // }
-
+    vaBuilder->shader(shader);
     vaBuilder->setVertexBuffer(0, positions);
     vaBuilder->setVertexBuffer(1, normals);
     vaBuilder->setVertexBuffer(2, tangents);
@@ -177,7 +173,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
 
 void RenderableObject::preRender(IRenderingContext& context) const noexcept
 {
-    glFrontFace(GL_CCW);
+    context.setFaceWinding(false);
     _va->bind(context);
     _va->preDraw(context);
 }
@@ -192,5 +188,5 @@ void RenderableObject::postRender(IRenderingContext& context) const noexcept
 {
     _va->postDraw(context);
     _va->unbind(context);
-    glFrontFace(GL_CW);
+    context.setFaceWinding(true);
 }

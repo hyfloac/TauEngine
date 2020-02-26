@@ -87,3 +87,6 @@ union ALIGN_MSVC(16) ComponentVector4i
 
 typedef ComponentVector4  CompVec4;
 typedef ComponentVector4i CompVec4i;
+
+static_assert(sizeof(ComponentVector4)  == 16, "Component Vector4 does not have proper sizing.");
+static_assert(sizeof(ComponentVector4i) == 16, "Component Vector4i does not have proper sizing.");

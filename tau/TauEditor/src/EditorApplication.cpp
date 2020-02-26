@@ -49,18 +49,14 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfInit.json");
     PERF();
 
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX9);
+    RenderingMode::getGlobalMode().setDebugMode(true);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
     _window->showWindow();
     if(!_window->createContext()) { return false; }
-
-    // while(true)
-    // {
-    //     _window->renderingContext()->clearScreen(true, true, false, RGBAColor { 255, 0, 0, 255 });
-    //     _window->renderingContext()->swapFrame();
-    // }
 
     _window->renderingContext()->activateContext();
 
@@ -69,6 +65,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     Mouse::setVisible(false);
 
     setupDebugCallback(this);
+    filterDebugOutput(GLDebugSeverity::Notification, false);
 
     _window->renderingContext()->setVSync(_config.vsync);
 
@@ -122,8 +119,8 @@ void TauEditorApplication::render(const DeltaTime& delta) noexcept
 void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
 {
     PERF();
-    char buf[256];
-    snprintf(buf, 256, "Tau Editor: UPS / FPS: %u / %u", ups, fps);
+    char buf[64];
+    snprintf(buf, 64, "Tau Editor: UPS / FPS: %u / %u", ups, fps);
     _window->setTitle(buf);
 }
 
@@ -131,7 +128,7 @@ void TauEditorApplication::runMessageLoop() noexcept
 {
     PERF();
 #ifndef NUM_MESSAGES_TO_READ
-  #define NUM_MESSAGES_TO_READ 64
+  #define NUM_MESSAGES_TO_READ 256
 #endif
 
     MSG msg;
@@ -299,85 +296,10 @@ static void setupGameFolders() noexcept
     VFS::Instance().mountDynamic("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 }
 
-void GLAPIENTRY openGLDebugErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) noexcept
-{
-    UNUSED2(length, userParam);
-    UNUSED2(id, message);
-
-    if(severity == GL_DEBUG_SEVERITY_NOTIFICATION)
-    {
-        return;
-    }
-
-    const TauEditorApplication* tea = reinterpret_cast<const TauEditorApplication*>(userParam);
-
-#define STR_CASE_GL(__ENUM, __STR) case __ENUM: str = __STR; break
-#define DEFAULT_CASE default: str = "Unknown"; break
-
-    tea->logger()->error("--OpenGL Error Callback--");
-    tea->logger()->error("Message: {0}", message);
-    const char* str;
-    switch(source)
-    {
-        STR_CASE_GL(GL_DEBUG_SOURCE_API, "API");
-        STR_CASE_GL(GL_DEBUG_SOURCE_WINDOW_SYSTEM, "Window System");
-        STR_CASE_GL(GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler");
-        STR_CASE_GL(GL_DEBUG_SOURCE_THIRD_PARTY, "Third Party");
-        STR_CASE_GL(GL_DEBUG_SOURCE_APPLICATION, "Application");
-        STR_CASE_GL(GL_DEBUG_SOURCE_OTHER, "Other");
-        DEFAULT_CASE;
-    }
-    tea->logger()->error("Source [0x{0:X}] {1}", source, str);
-
-    switch(type)
-    {
-        STR_CASE_GL(GL_DEBUG_TYPE_ERROR, "Error");
-        STR_CASE_GL(GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior");
-        STR_CASE_GL(GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR, "Undefined Behavior");
-        STR_CASE_GL(GL_DEBUG_TYPE_PORTABILITY, "Portability");
-        STR_CASE_GL(GL_DEBUG_TYPE_PERFORMANCE, "Performance");
-        STR_CASE_GL(GL_DEBUG_TYPE_OTHER, "Other");
-        STR_CASE_GL(GL_DEBUG_TYPE_MARKER, "Marker");
-        DEFAULT_CASE;
-    }
-    tea->logger()->error("Type: [0x{0:X}] {1}", type, str);
-    tea->logger()->error("Id: 0x{0:X} // {0:d}", id);
-
-    switch(severity)
-    {
-        STR_CASE_GL(GL_DEBUG_SEVERITY_MEDIUM, "Medium");
-        STR_CASE_GL(GL_DEBUG_SEVERITY_HIGH, "High");
-        STR_CASE_GL(GL_DEBUG_SEVERITY_LOW, "Low");
-        STR_CASE_GL(GL_DEBUG_SEVERITY_NOTIFICATION, "Notification");
-        DEFAULT_CASE;
-    }
-    tea->logger()->error("Severity: [0x{0:X}] {1}", severity, str);
-    tea->logger()->error("-------------------------");
-#if _DEBUG && 0
-    if(severity != GL_DEBUG_SEVERITY_NOTIFICATION && renderData && renderData->rp)
-    {
-        FILE* fileData = fopen("CommandBuffer.txt", "w");
-        renderData->rp->dumpCommandBufferToFile(fileData);
-        fclose(fileData);
-
-        // char* fileName = new char[1024];
-        // GetFullPathNameA("CommandBuffer.txt", 1024, fileName, NULL);
-        // fprintf(stderr, "Command Dump: %s\n", fileName);
-        // delete[] fileName;
-        __debugbreak();
-    }
-#else
-    // getchar();
-#endif
-
-#undef DEFAULT_CASE
-#undef STR_CASE_GL
-}
-
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept
 {
 #ifndef TAU_PRODUCTION
-    setupDebugMessageCallback(openGLDebugErrorCallback, tea, true);
+    setupDefaultDebugMessageCallback(tea->logger(), true);
     return true;
 #else
     return false;

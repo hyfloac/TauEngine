@@ -12,6 +12,7 @@ class TAU_DLL DX10Buffer final : public IBuffer
     BUFFER_IMPL(DX10Buffer);
 public:
     static D3D10_USAGE getDXUsage(EBuffer::UsageType usage) noexcept;
+    static D3D10_CPU_ACCESS_FLAG getDXAccess(EBuffer::UsageType usage) noexcept;
     static bool canReWrite(EBuffer::UsageType usage) noexcept;
 private:
     ID3D10Buffer* _d3dBuffer;

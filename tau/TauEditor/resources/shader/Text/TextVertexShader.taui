@@ -1,1 +1,2 @@
-"OpenGL": "TextVertexShader.glsl"
+"OpenGL": "TextVertexShader.glsl",
+"DirectX10": "TextVertexShader.cso"

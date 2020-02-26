@@ -33,9 +33,11 @@ SBPToken ShaderBundleLexer::getNextToken() noexcept
             STR_CASE("Geometry", { return _currentToken = SBPToken::GeometryBlock; })
             STR_CASE("Pixel", { return _currentToken = SBPToken::PixelBlock; })
             STR_CASE("Fragment", { return _currentToken = SBPToken::PixelBlock; })
+            STR_CASE("Uniforms", { return _currentToken = SBPToken::UniformsBlock; })
+            STR_CASE("Textures", { return _currentToken = SBPToken::TexturesBlock; })
+            STR_CASE("Inputs", { return _currentToken = SBPToken::InputsBlock; })
+            STR_CASE("Outputs", { return _currentToken = SBPToken::OutputsBlock; })
             STR_CASE("File", { return _currentToken = SBPToken::File; })
-            STR_CASE("UniformsBlock", { return _currentToken = SBPToken::UniformsBlock; })
-            STR_CASE("TexturesBlock", { return _currentToken = SBPToken::TexturesBlock; })
         },
         {
             _currentToken = SBPToken::Identifier;

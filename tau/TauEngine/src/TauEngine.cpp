@@ -62,13 +62,24 @@ bool tauShouldExit() noexcept
     return should_exit;
 }
 
+void tauExit(const i32 code) noexcept
+{
+    should_exit = true;
+    exit_code = code;
+}
+
+void tauExit() noexcept
+{
+    should_exit = true;
+}
+
 #ifdef _WIN32
 #pragma warning(push, 0)
 #include <Windows.h>
 #pragma warning(pop)
 
 #ifndef NUM_MESSAGES_TO_READ
-  #define NUM_MESSAGES_TO_READ 24
+  #define NUM_MESSAGES_TO_READ 128
 #endif
 
 static void runMessageLoop() noexcept
@@ -81,21 +92,9 @@ static void runMessageLoop() noexcept
         DispatchMessageA(&msg);
     }
 }
-
-void tauExit(i32 code) noexcept
-{
-    should_exit = true;
-    exit_code = code;
-    PostQuitMessage(code);
-}
 #else
 static void runMessageLoop() noexcept
 {
-}
-
-void tauExit(int code) noexcept
-{
-    should_exit = true;
 }
 #endif
 

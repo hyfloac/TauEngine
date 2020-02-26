@@ -151,7 +151,7 @@ public:
     EBuffer::Type type;
     EBuffer::UsageType usage;
     uSys elementCount;
-    void* initialBuffer;
+    const void* initialBuffer;
     bool instanced;
     BufferDescriptorBuilder descriptor;
 public:
@@ -173,7 +173,7 @@ struct IndexBufferArgs final
 public:
     EBuffer::UsageType usage;
     uSys elementCount;
-    void* initialBuffer;
+    const void* initialBuffer;
 public:
     inline IndexBufferArgs() noexcept
         : usage(static_cast<EBuffer::UsageType>(0)),
@@ -190,7 +190,7 @@ struct UniformBufferArgs final
 public:
     EBuffer::UsageType usage;
     uSys bufferSize;
-    void* initialBuffer;
+    const void* initialBuffer;
 public:
     inline UniformBufferArgs() noexcept
         : usage(static_cast<EBuffer::UsageType>(0)),
@@ -204,7 +204,7 @@ class TAU_DLL NOVTABLE IBufferBuilder
     DEFAULT_DESTRUCT_VI(IBufferBuilder);
     DELETE_COPY(IBufferBuilder);
 public:
-    enum Error : u8
+    enum class Error : u8
     {
         NoError = 0,
         /**

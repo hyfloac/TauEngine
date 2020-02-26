@@ -52,6 +52,7 @@
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\freetype-2.10.0\objs\$(Platform)\$(Configuration) Static\;$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -59,6 +60,7 @@
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include;$(SolutionDir)utils\ResourceLib\include;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\freetype-2.10.0\objs\$(Platform)\$(Configuration) Static\;$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

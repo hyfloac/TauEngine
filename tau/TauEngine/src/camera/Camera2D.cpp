@@ -1,42 +1,57 @@
 #include "camera/Camera2D.hpp"
-#include "maths/GlmMatrixTransformExt.hpp"
+#include "maths/glmExt/GlmMatrixTransformExt.hpp"
+#include "maths/glmExt/GlmMatrixProjectionExt.hpp"
 #include "system/Window.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera2D::Camera2D(const Window& window, float bottom, float left) noexcept
+#include <DirectXMath.h>
+
+Camera2D::Camera2D(const Window& window, float nearZ, float farZ) noexcept
     : _position(0.0f), _rotation(0.0f),
-      _projectionMatrix(glm::ortho(left, static_cast<float>(window.width()), bottom, static_cast<float>(window.height()), -1.0f, 1.0f)),
-      _viewMatrix(1.0f), _compoundedMatrix(_projectionMatrix * _viewMatrix)
+      _projectionMatrix(glmExt::ortho(static_cast<float>(window.width()), static_cast<float>(window.height()), nearZ, farZ)),
+      _viewMatrix(1.0f), _compoundedMatrix(_projectionMatrix * _viewMatrix),
+      _viewMatrixTrans(glm::transpose(_viewMatrix)),
+      _compoundedMatrixTrans(_projectionMatrix * _viewMatrixTrans)
 { }
 
-Camera2D::Camera2D(float top, float right, float bottom, float left) noexcept
+Camera2D::Camera2D(float width, float height, float nearZ, float farZ) noexcept
     : _position(0.0f), _rotation(0.0f),
-      _projectionMatrix(glm::ortho(left, static_cast<float>(right), bottom, static_cast<float>(top), -1.0f, 1.0f)),
-      _viewMatrix(1.0f), _compoundedMatrix(_projectionMatrix * _viewMatrix)
+      _projectionMatrix(glmExt::ortho(width, height, nearZ, farZ)),
+      _viewMatrix(1.0f), _compoundedMatrix(_projectionMatrix * _viewMatrix),
+      _viewMatrixTrans(glm::transpose(_viewMatrix)),
+      _compoundedMatrixTrans(_projectionMatrix * _viewMatrixTrans)
 { }
 
-void Camera2D::setProjection(const Window& window, float bottom, float left) noexcept
+void Camera2D::setProjection(const Window& window, float nearZ, float farZ) noexcept
 {
-    _projectionMatrix = glm::ortho(left, static_cast<float>(window.width()), bottom, static_cast<float>(window.height()), -1.0f, 1.0f);
+    // _projectionMatrix = glm::ortho(left, static_cast<float>(window.width()), bottom, static_cast<float>(window.height()), -1.0f, 1.0f);
+    _projectionMatrix = glmExt::ortho(static_cast<float>(window.width()), static_cast<float>(window.height()), nearZ, farZ);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
+
+    _compoundedMatrixTrans = _projectionMatrix * _viewMatrixTrans;
 }
 
-void Camera2D::setProjection(float top, float right, float bottom, float left) noexcept
+void Camera2D::setProjection(float width, float height, float nearZ, float farZ) noexcept
 {
-    _projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+    // _projectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+    _projectionMatrix = glmExt::ortho(width, height, nearZ, farZ);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
+
+    _compoundedMatrixTrans = _projectionMatrix * _viewMatrixTrans;
 }
 
 void Camera2D::recomputeMatrices() noexcept
 {
-    static const glm::vec3 axis(0.0f, 0.0f, 1.0f);
-    static const glm::mat4 identity(1.0f);
+    static constexpr glm::vec3 axis(0.0f, 0.0f, 1.0f);
+    static constexpr glm::mat4 identity(1.0f);
 
     const glm::mat4 transform = glmExt::translate(identity, _position) * 
                                 glmExt::rotateDegrees(identity, _rotation, axis);
     _viewMatrix = glm::inverse(transform);
-    // _viewMatrix = transform;
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
+
+    _viewMatrixTrans = glmExt::transpose(_viewMatrix);
+    _compoundedMatrixTrans = _projectionMatrix * _viewMatrixTrans;
 }
 
 void Camera2DController::update(const float fixedDelta) noexcept

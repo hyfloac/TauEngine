@@ -18,7 +18,198 @@
 #include "events/WindowEvent.hpp"
 #include "Timings.hpp"
 
+#include <TUMaths.hpp>
 #include <EnumBitFields.hpp>
+
+/**
+ * A basic AVL tree.
+ *
+ *   This is used to help speed up the search time of windows
+ * from the WindowProc. Given that this is one of the most
+ * called functions in the engine this is quite important to
+ * have fast. That being said, the linear search wasn't
+ * particularly slow, especially for a single window, but this
+ * will have a faster lookup for multiple windows. Insertion
+ * may be slow, but you're probably not inserting windows
+ * every frame.
+ */
+struct WindowNode final
+{
+    DEFAULT_CONSTRUCT_PU(WindowNode);
+    DEFAULT_DESTRUCT(WindowNode);
+    DEFAULT_COPY(WindowNode);
+public:
+    static i32 height(const WindowNode* const node) noexcept
+    {
+        if(!node) { return 0; }
+        return maxT(height(node->left), height(node->right)) + 1;
+    }
+
+    static WindowNode* rotateRight(WindowNode* const y) noexcept
+    {
+        WindowNode* x = y->left;
+        WindowNode* T2 = x->right;
+
+        x->right = y;
+        y->left = T2;
+
+        return x;
+    }
+
+    static WindowNode* rotateLeft(WindowNode* const x) noexcept
+    {
+        WindowNode* y = x->left;
+        WindowNode* T2 = y->right;
+
+        y->left = x;
+        x->right = T2;
+
+        return y;
+    }
+
+    static WindowNode* insert(WindowNode* const root, WindowNode* const node) noexcept
+    {
+        if(node->key() < root->key())
+        { root->left = insert(root->left, node); }
+        else if(node->key() > root->key())
+        { root->right = insert(root->right, node); }
+        else
+        { return root; }
+
+        const i32 balance = root->getBalance();
+
+        if(balance > 1 && node->key() < root->left->key())
+        { return rotateRight(root); }
+
+        if(balance < -1 && node->key() > root->right->key())
+        { return rotateLeft(root); }
+
+        if(balance > 1 && node->key() > root->left->key())
+        {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+
+        if(balance < -1 && node->key() < root->right->key())
+        {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+
+        return root;
+    }
+
+    static WindowNode* remove(WindowNode* root, HWND nodeKey) noexcept
+    {
+        if(root->key() == nodeKey)
+        {
+            root->window = null;
+            return null;
+        }
+
+        if(nodeKey < root->key())
+        { root->left = remove(root->left, nodeKey); }
+        else if(nodeKey > root->key())
+        { root->right = remove(root->right, nodeKey); }
+        else
+        {
+            if(!root->left || !root->right)
+            {
+                WindowNode* tmp = root->left ? root->left : root->right;
+                if(tmp)
+                {
+                    *root = *tmp;
+                }
+                else
+                {
+                    tmp = root;
+                    root = nullptr;
+                }
+
+                tmp->window = nullptr;
+            }
+            else
+            {
+                WindowNode* tmp = root->right->minValueNode();
+
+                root->window = tmp->window;
+                root->right = remove(root->right, tmp->key());
+            }
+        }
+
+        if(!root)
+        { return root; }
+
+        const i32 balance = root->getBalance();
+
+        if(balance > 1 && root->left->getBalance() >= 0)
+        { return rotateRight(root); }
+
+        if(balance < -1 && root->right->getBalance() <= 0)
+        { return rotateLeft(root); }
+
+        if(balance > 1 && root->left->getBalance() < 0)
+        {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
+
+        if(balance < -1 && root->right->getBalance() > 0)
+        {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
+
+        return root;
+    }
+public:
+    Window* window;
+    WindowNode* left;
+    WindowNode* right;
+public:
+    WindowNode(Window* window) noexcept
+        : window(window), left(null), right(null)
+    { }
+
+    [[nodiscard]] inline HWND key() const noexcept { return window->_windowContainer.windowHandle; }
+
+    [[nodiscard]] inline i32 getBalance() const noexcept { return height(left) - height(right); }
+
+    [[nodiscard]] inline WindowNode* minValueNode() noexcept
+    {
+        WindowNode* current = this;
+
+        while(current->left)
+        { current = current->left; }
+
+        return current;
+    }
+
+    [[nodiscard]] inline WindowNode* find(HWND findKey) noexcept
+    {
+        if(key() == findKey)
+        {
+            return this;
+        }
+
+        if(key() > findKey)
+        {
+            if(right)
+            {
+                return right->find(findKey);
+            }
+            return null;
+        }
+        else
+        {
+            if(left)
+            {
+                return left->find(findKey);
+            }
+            return null;
+        }
+    }
+};
 
 #ifndef MAX_WINDOW_COUNT
 /**
@@ -36,15 +227,26 @@
 /**
  *   When we get a message for a window we only receive the
  * handle, thus we need to store the reference to the actual
- * window somewhere. That somewhere is in this array.
+ * window somewhere. That somewhere is in this tree.
  */
-static Window* windowHandles[MAX_WINDOW_COUNT];
+static WindowNode windowHandles[MAX_WINDOW_COUNT];
 
-/**
- * This is the current index for the {@link windowHandles @endlink} array.
- * It serves to let us easily insert the next window.
- */
-static u32 currentWindowHandleIndex = 0;
+static WindowNode* root = null;
+
+static uSys windowCount() noexcept
+{
+    uSys ret = 0;
+
+    for(auto& windowHandle : windowHandles)
+    {
+        if(windowHandle.window)
+        {
+            ++ret;
+        }
+    }
+
+    return ret;
+}
 
 /**
  * Subtracts a window to {@link windowHandles @endlink}.
@@ -57,11 +259,31 @@ static u32 currentWindowHandleIndex = 0;
  */
 static bool addWindow(Window& systemWindowContainer) noexcept
 {
-    if(currentWindowHandleIndex < MAX_WINDOW_COUNT)
+    if(windowCount() == 0)
     {
-        windowHandles[currentWindowHandleIndex++] = &systemWindowContainer;
+        windowHandles[0].window = &systemWindowContainer;
+        windowHandles[0].left = nullptr;
+        windowHandles[0].right = nullptr;
+
+        root = &windowHandles[0];
+
         return true;
     }
+
+    for(auto& windowHandle : windowHandles)
+    {
+        if(!windowHandle.window)
+        {
+            windowHandle.window = &systemWindowContainer;
+            windowHandle.left = nullptr;
+            windowHandle.right = nullptr;
+
+            root = WindowNode::insert(root, &windowHandle);
+
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -75,19 +297,9 @@ static bool addWindow(Window& systemWindowContainer) noexcept
  */
 static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
 {
-    for(u32 i = 0; i < currentWindowHandleIndex; ++i)
+    if(root)
     {
-        if(systemWindowContainer->_windowContainer.windowHandle == windowHandles[i]->_windowContainer.windowHandle)
-        {
-            memcpy(windowHandles + i, windowHandles + i + 1, --currentWindowHandleIndex - i);
-#if !defined(TAU_PRODUCTION)
-            //   If in debug mode zero out the location, this is useful
-            // for debugging. In practice, this is actually useless for 
-            // the system and requires a memory write.
-            windowHandles[currentWindowHandleIndex] = null;
-#endif
-            return;
-        }
+        root = WindowNode::remove(root, systemWindowContainer->_windowContainer.windowHandle);
     }
 }
 
@@ -103,11 +315,12 @@ static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
  */
 static Nullable Window* getWindowFromHandle(HWND handle) noexcept
 {
-    for(u32 i = 0; i < currentWindowHandleIndex; ++i)
+    if(root)
     {
-        if(windowHandles[i]->_windowContainer.windowHandle == handle)
+        WindowNode* const node = root->find(handle);
+        if(node)
         {
-            return windowHandles[i];
+            return node->window;
         }
     }
 
@@ -228,6 +441,10 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
 
     switch(uMsg)
     {
+        case WM_CREATE:
+            window = reinterpret_cast<Window*>(reinterpret_cast<CREATESTRUCTA*>(lParam)->lpCreateParams);
+            UNUSED(window);
+            break;
         case WM_ACTIVATE:
             if(window && window->_eventHandler)
             {
@@ -257,8 +474,8 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             if(window) { window->closeWindow(); }
             break;
         case WM_DESTROY:
-            if(window) { window->closeWindow(); }
-            if(currentWindowHandleIndex == 0) { tauExit(0); }
+            // if(window) { window->closeWindow(); }
+            if(!root) { tauExit(); }
             break;
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
@@ -405,7 +622,7 @@ bool Window::createWindow() noexcept
     this->_windowContainer.windowHandle = CreateWindowExA(0, windowClass->lpszClassName, this->_title,
                                                           WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 
                                                           static_cast<i32>(this->_width), static_cast<i32>(this->_height),
-                                                          parent, null, windowClass->hInstance, static_cast<LPVOID>(null));
+                                                          parent, null, windowClass->hInstance, static_cast<LPVOID>(this));
 
     this->_windowContainer.hdc = GetDC(this->_windowContainer.windowHandle);
 

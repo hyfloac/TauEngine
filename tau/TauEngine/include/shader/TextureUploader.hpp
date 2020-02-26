@@ -40,9 +40,9 @@ public:
     void texture(const Ref<ITexture>& texture) noexcept { _texture = texture; }
     void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
 
-    virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices) noexcept = 0;
+    virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
 
-    virtual TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices) noexcept = 0;
+    virtual TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
 };
 
 class TAU_DLL NOVTABLE ITextureUploader
@@ -57,9 +57,9 @@ protected:
         : _textures(textures), _textureSampler(textureSampler)
     { }
 public:
-    virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices) noexcept = 0;
+    virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
 
-    virtual TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices) noexcept = 0;
+    virtual TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
 };
 
 class TAU_DLL NOVTABLE ISingleTextureUploaderBuilder

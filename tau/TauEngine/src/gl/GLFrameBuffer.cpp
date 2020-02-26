@@ -1,7 +1,6 @@
 #include "gl/GLFrameBuffer.hpp"
 #include "system/RenderingContext.hpp"
 #include "gl/GLRenderingContext.hpp"
-#include "../../../TauEditor/include/Layer3D.hpp"
 #include "gl/GLTexture.hpp"
 
 static GLenum getFrameBufferMode(IFrameBuffer::AccessMode mode) noexcept;
@@ -61,57 +60,26 @@ void GLRenderTexture::_unbind() noexcept
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-void GLRenderTexture::bind(u8) noexcept
+void GLRenderTexture::bind(u8, EShader::Stage) noexcept
 {
     _bind(_rbo);
 }
 
-void GLRenderTexture::unbind(u8) noexcept
+void GLRenderTexture::unbind(u8, EShader::Stage) noexcept
 {
     _unbind();
 }
 
 GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(null /*ITexture::create(context, width, height, ETexture::Format::RedGreenBlue8UnsignedInt)*/))
+    : IFrameBufferAttachment(width, height, Ref<ITexture>(null))
 {
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(width);
-    builder->height(height);
-    builder->dataFormat(ETexture::Format::RedGreenBlue8UnsignedInt);
-    builder->mipmapLevels(0);
+    TextureArgs args;
+    args.width = width;
+    args.height = height;
+    args.dataFormat = ETexture::Format::RedGreenBlue8UnsignedInt;
+    args.mipmapLevels = 0;
 
-    _texture = Ref<ITexture>(builder->build(null));
-    // _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    _texture->set(0, nullptr);
-}
-
-GLFrameBufferDepthAttachment::GLFrameBufferDepthAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(/*ITexture::create(context, width, height, ETexture::Format::Depth32Float, ETexture::Type::Depth)*/))
-{
-    Ref<ITextureBuilder> builder = context.createTextureDepth();
-    builder->width(width);
-    builder->height(height);
-    builder->dataFormat(ETexture::Format::Depth32Float);
-    builder->mipmapLevels(0);
-
-    _texture = Ref<ITexture>(builder->build(null));
-    // _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    // _texture->setDepthComparison(true, ETexture::DepthCompareFunc::LessThanOrEqual);
-    _texture->set(0, nullptr);
-}
-
-GLFrameBufferStencilAttachment::GLFrameBufferStencilAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(null /*ITexture::create(context, width, height, ETexture::Format::Stencil8UnsignedInt)*/))
-{
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(width);
-    builder->height(height);
-    builder->dataFormat(ETexture::Format::Stencil8UnsignedInt);
-    builder->mipmapLevels(0);
-
-    _texture = Ref<ITexture>(builder->build(null));
-    // _texture->setFilterMode(ETexture::Filter::Nearest, ETexture::Filter::Nearest);
-    _texture->set(0, nullptr);
+    _texture = context.createTexture2D().buildCPPRef(args, null);
 }
 
 GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(u32 width, u32 height) noexcept
@@ -122,16 +90,6 @@ GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(u32 wid
 void GLFrameBufferColorAttachment::attach() noexcept
 {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RefCast<GLTexture2D>(_texture)->texture(), 0);
-}
-
-void GLFrameBufferDepthAttachment::attach() noexcept
-{
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, RefCast<GLTexture2D>(_texture)->texture(), 0);
-}
-
-void GLFrameBufferStencilAttachment::attach() noexcept
-{
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, RefCast<GLTexture2D>(_texture)->texture(), 0);
 }
 
 void GLFrameBufferDepthStencilAttachment::attach() noexcept

@@ -1,1 +1,2 @@
-"OpenGL": "NanosuitPixel.glsl"
+"OpenGL": "NanosuitPixel.glsl",
+"DirectX10": "NanosuitPixel.cso"

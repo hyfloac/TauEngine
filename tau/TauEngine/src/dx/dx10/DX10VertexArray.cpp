@@ -2,6 +2,7 @@
 #include "TauEngine.hpp"
 
 #ifdef _WIN32
+#include <array>
 
 #include "dx/dx10/DX10Buffer.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
@@ -307,7 +308,7 @@ uSys DX10VertexArray::computeNumElements(ShaderDataType::Type type) noexcept
 //     }
 // }
 
-static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, DynArray<uSys>& semanticIndices) noexcept;
+static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept;
 
 DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
 {
@@ -334,9 +335,10 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
 
     DynArray<D3D10_INPUT_ELEMENT_DESC> inputElements(bufferDescriptorCount);
     ERROR_CODE_COND_N(!inputElements, Error::MemoryAllocationFailure);
-    DynArray<uSys> semanticIndices(static_cast<uSys>(ShaderSemantic::MAX_VALUE + 1));
-    ERROR_CODE_COND_N(!semanticIndices, Error::MemoryAllocationFailure);
-    ::std::memset(semanticIndices.arr(), 0, semanticIndices.size() * sizeof(uSys));
+    // DynArray<uSys> semanticIndices(static_cast<uSys>(ShaderSemantic::MAX_VALUE + 1));
+    ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1> semanticIndices{};
+    // ERROR_CODE_COND_N(!semanticIndices, Error::MemoryAllocationFailure);
+    ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(uSys));
     
     auto* iaBuffers = new(::std::nothrow) ID3D10Buffer* [_buffers.size()];
     auto* iaStrides = new(::std::nothrow) UINT[_buffers.size()];
@@ -368,7 +370,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
         }
     }
 
-    for(uSys i = 0; i < semanticIndices.count(); ++i)
+    for(uSys i = 0; i < semanticIndices.size(); ++i)
     {
         const ShaderSemantic::Semantic semantic = static_cast<ShaderSemantic::Semantic>(i);
         if(!ShaderSemantic::hasIndices(semantic) && semanticIndices[i] > 1)
@@ -404,7 +406,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
     ERROR_CODE_V(Error::NoError, va);
 }
 
-static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, DynArray<uSys>& semanticIndices) noexcept
+static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept
 {
     const ShaderDataType::Type underlyingType = ShaderDataType::underlyingTypeND(bed.type());
     const uSys columns = DX10VertexArray::computeNumElements(bed.type());

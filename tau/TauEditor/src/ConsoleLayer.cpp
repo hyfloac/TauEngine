@@ -36,25 +36,27 @@ void ConsoleLayer::onRender(const DeltaTime& delta) noexcept
     UNUSED(delta);
     if(_visible && _consolas != -1)
     {
+        constexpr float xOffset = 5.0f;
         const float textOffset = 50.0f * _textScale;
         const float maxY = 0.0f;
-        float y = static_cast<float>(_window.height() - textOffset);
+        float y = static_cast<float>(_window.height() / 2 - textOffset);
+        const float x = -static_cast<float>(_window.width() / 2) + xOffset;
 
         if(_columnMarker)
         { _inputBuilder.append('|'); }
         else
         { _inputBuilder.append(' '); }
-        y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _inputBuilder.c_str(), 0.0f, y, _textScale, 0, 255, 255, &_window, -textOffset, _ortho);
+        y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _inputBuilder.c_str(), x, y, _textScale, 0, 255, 255, &_window, -textOffset, _ortho);
         _inputBuilder.backspace();
 
         if(_lineBuilder.length() > 0)
         {
-            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _lineBuilder.c_str(), 0.0f, y, _textScale, 0, 120, 255, &_window, -textOffset, _ortho);
+            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _lineBuilder.c_str(), x, y, _textScale, 0, 120, 255, &_window, -textOffset, _ortho);
         }
 
         for(auto it = _strings.rbegin(); it != _strings.rend(); ++it)
         {
-            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, *it, 0.0f, y, _textScale, 255, 255, 255, &_window, -textOffset, _ortho);
+            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, *it, x, y, _textScale, 255, 255, 255, &_window, -textOffset, _ortho);
             if(y - textOffset < maxY)
             { break; }
         }

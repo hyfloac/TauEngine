@@ -168,9 +168,6 @@
     <ClCompile Include="src\texture\FITextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\texture\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gl\GLTextureCube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -193,9 +190,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\terrain\TerrainTile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\dx\dx9\DX9RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp">
@@ -229,9 +223,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10Buffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\dx\dx9\DX9Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10TextureSampler.cpp">
@@ -449,9 +440,6 @@
     <ClInclude Include="include\camera\Camera2D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\maths\GlmMatrixTransformExt.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\gl\GLVertexArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -519,15 +507,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dx\dx9\DX9RenderingContext.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dx\dx9\DX9Buffer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dx\dx9\DX9Texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp">
@@ -633,6 +612,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\bundle\PrintShaderBundleVisitor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\maths\glmExt\GlmMatrixTransformExt.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\maths\glmExt\GlmMatrixProjectionExt.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\maths\glmExt\GlmQuaternionTransformExt.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

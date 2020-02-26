@@ -67,8 +67,8 @@ class UniformAccessor<SpotLight> final
 public:
     [[nodiscard]] static inline uSys size() noexcept
     {
-        // 5xVector4F + 5xFloat
-        return 5 * sizeof(float) * 4 + 5 * sizeof(float);
+        // 5xVector4F + 5xFloat (pad 3xFloat)
+        return 5 * sizeof(float) * 4 + 8 * sizeof(float);
     }
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const SpotLight& t) noexcept

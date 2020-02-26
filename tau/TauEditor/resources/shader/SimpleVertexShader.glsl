@@ -8,7 +8,7 @@ layout(location = 3) in vec2 texCoord;
 
 out vec3 fPosition;
 // out vec3 fNormal;
-out vec3 fTangent;
+// out vec3 fTangent;
 // out vec3 fBiTangent;
 out vec2 fTexCoord;
 out mat3 fTBN;
@@ -20,7 +20,7 @@ out mat3 fTBN;
 //     vec2 texCoord;
 // } vertexOut;
 
-layout(binding = 0) uniform CameraMatrices
+layout(std140, binding = 0) uniform CameraMatrices
 {
     mat4 compoundMatrix;
     mat4 projectionMatrix;
@@ -45,7 +45,7 @@ void main(void)
     fPosition = vec3(modelViewMatrix * pos4);
     // vec3 norm = mat3(transpose(inverse(modelViewMatrix))) * normalize(normal);
     // fNormal = normalize(norm);
-    fTangent = normalize(tangent);
+    // fTangent = normalize(tangent);
     // fBiTangent = normalize(fBiTangent);
     fTexCoord = texCoord;
 

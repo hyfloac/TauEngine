@@ -20,9 +20,9 @@ public:
 
     [[nodiscard]] inline GLuint rbo() const noexcept { return _rbo; }
 
-    void bind(u8 textureUnit) noexcept override;
+    void bind(u8 textureUnit, EShader::Stage stage) noexcept override;
 
-    void unbind(u8 textureUnit) noexcept override;
+    void unbind(u8 textureUnit, EShader::Stage stage) noexcept override;
 };
 
 class TAU_DLL GLFrameBufferColorAttachment final : public IFrameBufferAttachment
@@ -33,30 +33,6 @@ public:
     GLFrameBufferColorAttachment(u32 width, u32 height, IRenderingContext& context) noexcept;
 
     [[nodiscard]] Type type() const noexcept override final { return Type::Color; }
-
-    void attach() noexcept override;
-};
-
-class TAU_DLL GLFrameBufferDepthAttachment final : public IFrameBufferAttachment
-{
-    DEFAULT_DESTRUCT(GLFrameBufferDepthAttachment);
-    DELETE_COPY(GLFrameBufferDepthAttachment);
-public:
-    GLFrameBufferDepthAttachment(u32 width, u32 height, IRenderingContext& context) noexcept;
-
-    [[nodiscard]] Type type() const noexcept override final { return Type::Depth; }
-
-    void attach() noexcept override;
-};
-
-class TAU_DLL GLFrameBufferStencilAttachment final : public IFrameBufferAttachment
-{
-    DEFAULT_DESTRUCT(GLFrameBufferStencilAttachment);
-    DELETE_COPY(GLFrameBufferStencilAttachment);
-public:
-    GLFrameBufferStencilAttachment(u32 width, u32 height, IRenderingContext& context) noexcept;
-
-    [[nodiscard]] Type type() const noexcept override final { return Type::Stencil; }
 
     void attach() noexcept override;
 };
@@ -100,5 +76,4 @@ public:
     inline ~GLFrameBufferBuilder() noexcept override final = default;
 
     [[nodiscard]] IFrameBuffer* build([[tau::out]] Error* error) const noexcept override final;
-
 };

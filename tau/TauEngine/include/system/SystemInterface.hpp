@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Objects.hpp>
-#include <DynArray.hpp>
 #include "DLL.hpp"
 #include "_SysContainer.hpp"
 #include "system/GraphicsAccelerator.hpp"
@@ -10,6 +9,7 @@
 
 class TAU_DLL SystemInterface final
 {
+    DEFAULT_DESTRUCT(SystemInterface);
     DELETE_COPY(SystemInterface);
 public:
     static SystemInterface* create() noexcept;

@@ -15,18 +15,16 @@ public:
     { }
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-    // void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override { }
-    // void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override { }
-    // void setDepthComparison(bool enableDepthTest, ETexture::DepthCompareFunc compareFunc) noexcept override { }
+
     void set(u32 level, const void* data) noexcept override { }
 
-    void bind(u8 textureUnit) noexcept override
+    void bind(u8 textureUnit, EShader::Stage) noexcept override
     {
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void unbind(u8 textureUnit) noexcept override { }
+    void unbind(u8 textureUnit, EShader::Stage) noexcept override { }
     void generateMipmaps() noexcept override { }
 };
 
@@ -42,10 +40,6 @@ public:
     static GLenum glInputDataType(ETexture::Format format) noexcept;
 protected:
     GLuint _texture;
-    // GLint _minFilter;
-    // GLint _magFilter;
-    // GLint _wrapS;
-    // GLint _wrapT;
 public:
     GLTexture2D(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
 
@@ -55,17 +49,13 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
-    // void setFilterMode(ETexture::Filter minificationFilter, ETexture::Filter magnificationFilter) noexcept override final;
-
-    // void setWrapMode(ETexture::WrapMode s, ETexture::WrapMode t) noexcept override final;
-
     void generateMipmaps() noexcept override;
 
     void set(u32 level, const void* data) noexcept override;
 
-    void bind(u8 textureUnit) noexcept override final;
+    void bind(u8 textureUnit, EShader::Stage) noexcept override final;
 
-    void unbind(u8 textureUnit) noexcept override final;
+    void unbind(u8 textureUnit, EShader::Stage) noexcept override final;
 };
 
 class TAU_DLL GLDepthTexture final : public GLTexture2D
@@ -77,7 +67,7 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Depth; }
 
-    void set(u32 level, const void* data) noexcept override final;
+    void set(u32 level, const void* data) noexcept override;
 };
 
 class TAU_DLL GLTextureCube final : public ITextureCube
@@ -87,11 +77,6 @@ public:
     static GLenum glCubeMapFace(ETexture::CubeSide cubeSide) noexcept;
 private:
     GLuint _texture;
-    GLint _minFilter;
-    GLint _magFilter;
-    GLint _wrapS;
-    GLint _wrapT;
-    GLint _wrapR;
 public:
     GLTextureCube(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
 
@@ -105,9 +90,9 @@ public:
 
     void set(u32 level, const void*) noexcept override { }
 
-    void bind(u8 textureUnit) noexcept override;
+    void bind(u8 textureUnit, EShader::Stage stage) noexcept override;
 
-    void unbind(u8 textureUnit) noexcept override;
+    void unbind(u8 textureUnit, EShader::Stage stage) noexcept override;
 };
 
 class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder
@@ -116,7 +101,18 @@ class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder
     DEFAULT_DESTRUCT(GLTexture2DBuilder);
     DELETE_COPY(GLTexture2DBuilder);
 public:
-    [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
+    struct GLTextureArgs final
+    {
+        GLuint textureHandle;
+    };
+public:
+    [[nodiscard]] GLTexture2D* build(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] GLTexture2D* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+public:
+    [[nodiscard]] static bool processArgs(const TextureArgs& args, [[tau::out]] GLTextureArgs* glArgs, [[tau::out]] Error* error) noexcept;
 };
 
 class TAU_DLL GLTextureNullBuilder final : public ITextureBuilder
@@ -125,7 +121,11 @@ class TAU_DLL GLTextureNullBuilder final : public ITextureBuilder
     DEFAULT_DESTRUCT(GLTextureNullBuilder);
     DELETE_COPY(GLTextureNullBuilder);
 public:
-    [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLNullTexture* build(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] GLNullTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 };
 
 class TAU_DLL GLTextureDepthBuilder final : public ITextureBuilder
@@ -134,7 +134,13 @@ class TAU_DLL GLTextureDepthBuilder final : public ITextureBuilder
     DEFAULT_DESTRUCT(GLTextureDepthBuilder);
     DELETE_COPY(GLTextureDepthBuilder);
 public:
-    [[nodiscard]] ITexture* build([[tau::out]] Error* error) const noexcept override;
+    using GLTextureArgs = GLTexture2DBuilder::GLTextureArgs;
+public:
+    [[nodiscard]] GLDepthTexture* build(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] GLDepthTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 };
 
 class TAU_DLL GLTextureCubeBuilder final : public ITextureCubeBuilder
@@ -143,5 +149,15 @@ class TAU_DLL GLTextureCubeBuilder final : public ITextureCubeBuilder
     DEFAULT_DESTRUCT(GLTextureCubeBuilder);
     DELETE_COPY(GLTextureCubeBuilder);
 public:
-    [[nodiscard]] ITextureCube* build([[tau::out]] Error* error) const noexcept override;
+    using GLTextureArgs = GLTexture2DBuilder::GLTextureArgs;
+public:
+    [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] Ref<ITextureCube> buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableReferenceCountingPointer<ITextureCube> buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongReferenceCountingPointer<ITextureCube> buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+private:
+    [[nodiscard]] static bool processArgs(const TextureCubeArgs& args, [[tau::out]] GLTextureArgs* glArgs, [[tau::out]] Error* error) noexcept;
+
+    static void setupInitial(GLTextureCube& texture, const void* initialBuffers[6]);
 };

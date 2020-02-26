@@ -126,19 +126,21 @@ public:
         postPushInst();
     }
 
-    void pushBindTexture(const ITexture* texture, const u8 textureUnit) noexcept
+    void pushBindTexture(const ITexture* texture, const u8 textureUnit, const EShader::Stage stage) noexcept
     {
         prePushInst<RenderingOpcode::BIND_TEXTURE>();
         LOAD_VALUE(texture);
         _backBuffer[_insertPtr++] = textureUnit;
+        LOAD_VALUE(stage);
         postPushInst();
     }
 
-    void pushUnbindTexture(const ITexture* texture, const u8 textureUnit) noexcept
+    void pushUnbindTexture(const ITexture* texture, const u8 textureUnit, const EShader::Stage stage) noexcept
     {
         prePushInst<RenderingOpcode::UNBIND_TEXTURE>();
         LOAD_VALUE(texture);
         _backBuffer[_insertPtr++] = textureUnit;
+        LOAD_VALUE(stage);
         postPushInst();
     }
 

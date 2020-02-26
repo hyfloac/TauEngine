@@ -185,6 +185,7 @@ public:
     friend void removeWindow(NotNull<const Window>) noexcept;
     friend Nullable Window* getWindowFromHandle(HWND) noexcept;
     friend void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
+    friend struct WindowNode;
 #endif
     friend class Mouse;
 };

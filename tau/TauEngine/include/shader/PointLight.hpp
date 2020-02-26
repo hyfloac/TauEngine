@@ -54,8 +54,8 @@ class UniformAccessor<PointLight> final
 public:
     [[nodiscard]] static inline uSys size() noexcept
     {
-        // 4xVector4F + 3xFloat
-        return 4 * sizeof(float) * 4 + 3 * sizeof(float);
+        // 4xVector4F + 3xFloat (pad 1xFloat)
+        return 4 * sizeof(float) * 4 + 4 * sizeof(float);
     }
 
     static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const PointLight& t) noexcept

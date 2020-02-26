@@ -1,1 +1,2 @@
-"OpenGL": "SkyboxPixelShader.glsl"
+"OpenGL": "SkyboxPixelShader.glsl",
+"DirectX10": "SkyboxPixelShader.cso"

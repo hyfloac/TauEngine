@@ -218,9 +218,7 @@ NullableReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauRef(const Buf
 
     initBuffer(args, glArgs);
 
-    NullableReferenceCountingPointer<IBuffer> iBuffer = RCPCast<IBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
 }
 
 NullableStrongReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -239,9 +237,7 @@ NullableStrongReferenceCountingPointer<IBuffer> GLBufferBuilder::buildTauSRef(co
 
     initBuffer(args, glArgs);
 
-    NullableStrongReferenceCountingPointer<IBuffer> iBuffer = RCPCast<IBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
 }
 
 bool GLBufferBuilder::processArgs(const BufferArgs& args, GLBufferArgs* glArgs, Error* error) const noexcept
@@ -339,9 +335,7 @@ NullableReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::buildTauRef
 
     initBuffer(args, glArgs);
 
-    NullableReferenceCountingPointer<IIndexBuffer> iBuffer = RCPCast<IIndexBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
 NullableStrongReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -360,9 +354,7 @@ NullableStrongReferenceCountingPointer<IIndexBuffer> GLIndexBufferBuilder::build
 
     initBuffer(args, glArgs);
 
-    NullableStrongReferenceCountingPointer<IIndexBuffer> iBuffer = RCPCast<IIndexBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
 bool GLIndexBufferBuilder::processArgs(const IndexBufferArgs& args, GLIndexBufferArgs* glArgs, Error* error) const noexcept
@@ -456,9 +448,7 @@ NullableReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::buildTa
 
     initBuffer(args, glArgs);
 
-    NullableReferenceCountingPointer<IUniformBuffer> iBuffer = RCPCast<IUniformBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
 }
 
 NullableStrongReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -477,9 +467,7 @@ NullableStrongReferenceCountingPointer<IUniformBuffer> GLUniformBufferBuilder::b
 
     initBuffer(args, glArgs);
 
-    NullableStrongReferenceCountingPointer<IUniformBuffer> iBuffer = RCPCast<IUniformBuffer>(buffer);
-
-    ERROR_CODE_V(Error::NoError, iBuffer);
+    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
 }
 
 bool GLUniformBufferBuilder::processArgs(const UniformBufferArgs& args, GLUniformBufferArgs* glArgs, Error* error) const noexcept

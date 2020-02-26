@@ -128,7 +128,7 @@ public:
     float computeLength(GlyphSetHandle glyphSetHandle, const char* str, float scale) const noexcept;
     float computeHeight(GlyphSetHandle glyphSetHandle, const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept;
 private:
-    static FileData* __cdecl load2(RefDynArray<u8> file, LoadData* parseParam) noexcept;
+    static FileData* __cdecl load2(RefDynArray<u8> file, LoadData* ld) noexcept;
 };
 
 DynString findSystemFont(const char* fontName) noexcept;

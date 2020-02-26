@@ -28,7 +28,7 @@ private:
     i32 _illumination;
     Material _material;
 public:
-    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
+    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const Ref<IShader>& shader, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
 
     void preRender(IRenderingContext& context) const noexcept;
     void render(IRenderingContext& context) const noexcept;

@@ -72,3 +72,18 @@ public:
 
     // void unbind(int textureBeginIndex) const noexcept;
 };
+
+template<>
+class UniformAccessor<Material> final
+{
+    DELETE_CONSTRUCT(UniformAccessor);
+    DELETE_DESTRUCT(UniformAccessor);
+    DELETE_COPY(UniformAccessor);
+public:
+    [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
+
+    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Material& t) noexcept
+    {
+        buffer->modifyBuffer(0, sizeof(float), &t._specularExponent);
+    }
+};

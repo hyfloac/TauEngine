@@ -47,15 +47,17 @@ Ref<ITexture> TextureLoader::generateMissingTexture(IRenderingContext& context) 
     textureData[3 * 4 + 2] = 0xFF;
     textureData[3 * 4 + 3] = 0xFF;
 
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(2);
-    builder->height(2);
-    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-    builder->mipmapLevels(0);
-    builder->initialBuffer(textureData);
+    TextureArgs args;
+    args.width = 2;
+    args.height = 2;
+    args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    args.mipmapLevels = 0;
+    args.initialBuffer = textureData;
 
-    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
-    
+    const Ref<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+
+    ret->generateMipmaps();
+
     delete[] textureData;
 
     return ret;
@@ -85,15 +87,17 @@ Ref<ITexture> TextureLoader::generateDebugTexture8(IRenderingContext& context, c
         textureData[i * 4 + 3] = 0xFF;
     }
 
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(side);
-    builder->height(side);
-    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-    builder->mipmapLevels(0);
-    builder->initialBuffer(textureData);
+    TextureArgs args;
+    args.width = side;
+    args.height = side;
+    args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    args.mipmapLevels = 0;
+    args.initialBuffer = textureData;
 
-    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
-    
+    const Ref<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+
+    ret->generateMipmaps();
+
     delete[] textureData;
 
     return ret;
@@ -125,14 +129,16 @@ Ref<ITexture> TextureLoader::generateDebugTexture16(IRenderingContext& context, 
         textureData[i * 4 + 3] = 0xFFFF;
     }
 
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(side);
-    builder->height(side);
-    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha16UnsignedInt);
-    builder->mipmapLevels(0);
-    builder->initialBuffer(textureData);
+    TextureArgs args;
+    args.width = side;
+    args.height = side;
+    args.dataFormat = ETexture::Format::RedGreenBlueAlpha16UnsignedInt;
+    args.mipmapLevels = 0;
+    args.initialBuffer = textureData;
 
-    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
+    const Ref<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+
+    ret->generateMipmaps();
 
     delete[] textureData;
 
@@ -148,15 +154,17 @@ Ref<ITexture> TextureLoader::generateColorTexture(IRenderingContext& context, RG
     textureData[2] = color.b;
     textureData[3] = 0xFF;
 
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(1);
-    builder->height(1);
-    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-    builder->mipmapLevels(0);
-    builder->initialBuffer(textureData);
+    TextureArgs args;
+    args.width = 1;
+    args.height = 1;
+    args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    args.mipmapLevels = 0;
+    args.initialBuffer = textureData;
 
-    const Ref<ITexture> ret = Ref<ITexture>(builder->build(null));
-    
+    const Ref<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+
+    ret->generateMipmaps();
+
     delete[] textureData;
 
     return ret;
@@ -206,14 +214,14 @@ Ref<ITexture> TextureLoader::loadTextureEx(IRenderingContext& context, const cha
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_SMALL, bitsPerPixel < 8);
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_LARGE, bitsPerPixel > 32);
 
-    Ref<ITextureBuilder> builder = context.createTexture2D();
-    builder->width(width);
-    builder->height(height);
-    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-    builder->mipmapLevels(0);
-    builder->initialBuffer(textureData);
+    TextureArgs args;
+    args.width = width;
+    args.height = height;
+    args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    args.mipmapLevels = 0;
+    args.initialBuffer = textureData;
 
-    Ref<ITexture> const ret = Ref<ITexture>(builder->build(null));
+    const Ref<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
 
     if(mipmapLevel < 0)
     {
@@ -246,15 +254,20 @@ Ref<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context, c
         if(texture) { FreeImage_Unload(texture); } \
         return null; }
 
-    Ref<ITextureCubeBuilder> builder = context.createTextureCube();
-    builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-    builder->mipmapLevels(0);
+    TextureCubeArgs args;
+    args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    args.mipmapLevels = 0;
+    // Ref<ITextureCubeBuilder> builder = context.createTextureCube();
+    // builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
+    // builder->mipmapLevels(0);
 
-    Ref<ITextureCube> ret = null;
+    // Ref<ITextureCube> ret = null;
 
     u32 width = 0;
     u32 height = 0;
     u32 bitsPerPixel = 0;
+
+    FIBITMAP* textures[6];
 
     for(uSys i = 0; i < 6; ++i)
     {
@@ -280,12 +293,12 @@ Ref<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context, c
 
         FIBITMAP* tmp = FreeImage_ConvertTo32Bits(texture);
         FreeImage_Unload(texture);
-        texture = tmp;
+        textures[i] = tmp;
 
-        BYTE* textureData = FreeImage_GetBits(texture);
-        const u32 _width = FreeImage_GetWidth(texture);
-        const u32 _height = FreeImage_GetHeight(texture);
-        const u32 _bitsPerPixel = FreeImage_GetBPP(texture);
+        BYTE* textureData = FreeImage_GetBits(textures[i]);
+        const u32 _width = FreeImage_GetWidth(textures[i]);
+        const u32 _height = FreeImage_GetHeight(textures[i]);
+        const u32 _bitsPerPixel = FreeImage_GetBPP(textures[i]);
 
         if(width == 0 && height == 0 && bitsPerPixel == 0)
         {
@@ -310,15 +323,21 @@ Ref<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context, c
 
         if(i == 0)
         {
-            builder->width(width);
-            builder->height(height);
+            args.width = width;
+            args.height = height;
 
-            ret = Ref<ITextureCube>(builder->build(null));
+            // ret = Ref<ITextureCube>(builder->build(null));
         }
 
-        ret->setCube(0, static_cast<ETexture::CubeSide>(i + 1), textureData);
+        args.initialBuffer[i] = textureData;
+        // ret->setCube(0, static_cast<ETexture::CubeSide>(i + 1), textureData);
+    }
 
-        FreeImage_Unload(texture);
+    Ref<ITextureCube> ret = context.createTextureCube().buildCPPRef(args, null);
+
+    for(uSys i = 0; i < 6; ++i)
+    {
+        FreeImage_Unload(textures[i]);
     }
 
     if(mipmapLevel < 0)
