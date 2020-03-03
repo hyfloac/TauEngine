@@ -22,5 +22,5 @@ private:
 public:
     [[nodiscard]] const _SysContainer& sysContainer() const noexcept { return _sysContainer; }
 
-    [[nodiscard]] Ref<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) noexcept;
+    [[nodiscard]] CPPRef<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) noexcept;
 };

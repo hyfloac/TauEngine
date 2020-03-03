@@ -3,9 +3,9 @@
 #ifdef _WIN32
 #include "dx/dx10/DX10GraphicsDisplay.hpp"
 
-RefDynArray<Ref<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays() noexcept
+RefDynArray<CPPRef<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays() noexcept
 {
-#define CHECK(_VAL) do { if(FAILED(_VAL)) { return RefDynArray<Ref<IGraphicsDisplay>>(0); } } while(0)
+#define CHECK(_VAL) do { if(FAILED(_VAL)) { return RefDynArray<CPPRef<IGraphicsDisplay>>(0); } } while(0)
 
     IDXGIOutput* dxgiAdapterOutput;
     UINT i;
@@ -14,7 +14,7 @@ RefDynArray<Ref<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays() n
         dxgiAdapterOutput->Release();
     }
 
-    RefDynArray<Ref<IGraphicsDisplay>> displays(i);
+    RefDynArray<CPPRef<IGraphicsDisplay>> displays(i);
 
     DX10GraphicsDisplayBuilder* builder = new(std::nothrow) DX10GraphicsDisplayBuilder;
 
@@ -23,7 +23,7 @@ RefDynArray<Ref<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays() n
     {
         CHECK(_dxgiAdapter->EnumOutputs(i, &dxgiAdapterOutput));
         builder->setAdapterOutput(dxgiAdapterOutput);
-        displays[i] = Ref<IGraphicsDisplay>(builder->build());
+        displays[i] = CPPRef<IGraphicsDisplay>(builder->build());
         dxgiAdapterOutput->Release();
     }
 

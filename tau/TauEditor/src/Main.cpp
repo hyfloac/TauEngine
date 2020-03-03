@@ -44,7 +44,7 @@
 // struct RenderData final
 // {
 //     Window& window;
-//     std::vector<Ref<RenderableObject>>& renderableObjects;
+//     std::vector<CPPRef<RenderableObject>>& renderableObjects;
 //     GLProgram* glProgram;
 //     IShader* vertexShader;
 //     IShader* pixelShader;
@@ -512,7 +512,7 @@
 //     
 //     rp->pushBindTexture(renderData->texID, 0);
 //     rp->pushBindTexture(renderData->overlayID, 1);
-//     for(const Ref<RenderableObject>& ro : renderData->renderableObjects)
+//     for(const CPPRef<RenderableObject>& ro : renderData->renderableObjects)
 //     {
 //         ro->preRender(*rp);
 //         ro->render(*rp);

@@ -14,19 +14,19 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
 
     shaderArgs.fileName = "LineVertex";
     shaderArgs.stage = EShader::Stage::Vertex;
-    Ref<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.fileName = "LineGeometry";
     shaderArgs.stage = EShader::Stage::Geometry;
-    Ref<IShader> geometryShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> geometryShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.fileName = "LinePixel";
     shaderArgs.stage = EShader::Stage::Pixel;
-    Ref<IShader> pixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
-    // Ref<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/line/LineVertex.glsl");
-    // Ref<IShader> geometryShader = IShader::create(*window.renderingContext(), IShader::Type::Geometry, "|TERes/line/LineGeometry.glsl");
-    // Ref<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/line/LinePixel.glsl");
+    // CPPRef<IShader> vertexShader = IShader::create(*window.renderingContext(), IShader::Type::Vertex, "|TERes/line/LineVertex.glsl");
+    // CPPRef<IShader> geometryShader = IShader::create(*window.renderingContext(), IShader::Type::Geometry, "|TERes/line/LineGeometry.glsl");
+    // CPPRef<IShader> pixelShader = IShader::create(*window.renderingContext(), IShader::Type::Pixel, "|TERes/line/LinePixel.glsl");
     //
     // vertexShader->loadShader();
     // geometryShader->loadShader();
@@ -48,25 +48,25 @@ LineLayer::LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ort
         // 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
     // };
 
-    // Ref<IBufferBuilder> lineDataBuilder = window.renderingContext()->createBuffer(2);
+    // CPPRef<IBufferBuilder> lineDataBuilder = window.renderingContext()->createBuffer(2);
     // lineDataBuilder->type(EBuffer::Type::ArrayBuffer);
     // lineDataBuilder->usage(EBuffer::UsageType::StaticDraw);
     // lineDataBuilder->elementCount(2);
     // lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     // lineDataBuilder->descriptor().addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
 
-    // Ref<IBuffer> lineData = Ref<IBuffer>(lineDataBuilder->build(nullptr));
+    // CPPRef<IBuffer> lineData = CPPRef<IBuffer>(lineDataBuilder->build(nullptr));
 
     // lineData->bind(*window.renderingContext());
     // lineData->fillBuffer(*window.renderingContext(), bufferData);
     // lineData->unbind(*window.renderingContext());
 
-    Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
+    CPPRef<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
     // vaBuilder->setVertexBuffer(0, lineData);
     vaBuilder->drawCount(2);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
-    _vao = Ref<IVertexArray>(vaBuilder->build());
+    _vao = CPPRef<IVertexArray>(vaBuilder->build());
 
     // _vao->addVertexBuffer(*window.renderingContext(), lineData);
     // _vao->drawCount() = 2;

@@ -5,7 +5,7 @@
 #include "gl/GLShaderProgram.hpp"
 #include "dx/dx10/DX10ShaderProgram.hpp"
 
-Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
+CPPRef<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
 {
     switch(context.mode().currentMode())
     {
@@ -17,7 +17,7 @@ Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
         #endif
         case RenderingMode::Mode::DirectX10:
         #ifdef _WIN32
-            return Ref<IShaderProgram>(new(::std::nothrow) DX10ShaderProgram);
+            return CPPRef<IShaderProgram>(new(::std::nothrow) DX10ShaderProgram);
         #else
             return null;
         #endif
@@ -42,7 +42,7 @@ Ref<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
         case RenderingMode::Mode::OpenGL4_4:
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return Ref<IShaderProgram>(new(std::nothrow) GLShaderProgram(context));
+            return CPPRef<IShaderProgram>(new(std::nothrow) GLShaderProgram(context));
         default: return null;
     }
 }
@@ -53,11 +53,11 @@ IShaderProgram::IShaderProgram() noexcept
       _geometryShader(null), _pixelShader(null)
 { }
 
-bool IShaderProgram::setVertexShader(IRenderingContext& context, Ref<IShader>& vs) noexcept
+bool IShaderProgram::setVertexShader(IRenderingContext& context, CPPRef<IShader>& vs) noexcept
 {
     if(vs)
     {
-        if(vs->shaderType() == EShader::Stage::Vertex)
+        if(vs->shaderStage() == EShader::Stage::Vertex)
         {
             if(_vertexShader)
             {
@@ -81,11 +81,11 @@ bool IShaderProgram::setVertexShader(IRenderingContext& context, Ref<IShader>& v
     return false;
 }
 
-bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, Ref<IShader>& tcs) noexcept
+bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, CPPRef<IShader>& tcs) noexcept
 {
     if(tcs)
     { 
-        if(tcs->shaderType() == EShader::Stage::TessellationControl)
+        if(tcs->shaderStage() == EShader::Stage::TessellationControl)
         {
             if(_tessellationControlShader)
             {
@@ -109,11 +109,11 @@ bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, Re
     return false;
 }
 
-bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context, Ref<IShader>& tes) noexcept
+bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context, CPPRef<IShader>& tes) noexcept
 {
     if(tes)
     {
-        if(tes->shaderType() == EShader::Stage::TessellationEvaluation)
+        if(tes->shaderStage() == EShader::Stage::TessellationEvaluation)
         {
             if(_tessellationEvaluationShader)
             {
@@ -137,11 +137,11 @@ bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context,
     return false;
 }
 
-bool IShaderProgram::setGeometryShader(IRenderingContext& context, Ref<IShader>& gs) noexcept
+bool IShaderProgram::setGeometryShader(IRenderingContext& context, CPPRef<IShader>& gs) noexcept
 {
     if(gs)
     {
-        if(gs->shaderType() == EShader::Stage::Geometry)
+        if(gs->shaderStage() == EShader::Stage::Geometry)
         {
             if(_geometryShader)
             {
@@ -165,11 +165,11 @@ bool IShaderProgram::setGeometryShader(IRenderingContext& context, Ref<IShader>&
     return false;
 }
 
-bool IShaderProgram::setPixelShader(IRenderingContext& context, Ref<IShader>& ps) noexcept
+bool IShaderProgram::setPixelShader(IRenderingContext& context, CPPRef<IShader>& ps) noexcept
 {
     if(ps)
     {
-        if(ps->shaderType() == EShader::Stage::Pixel)
+        if(ps->shaderStage() == EShader::Stage::Pixel)
         {
             if(_pixelShader)
             {

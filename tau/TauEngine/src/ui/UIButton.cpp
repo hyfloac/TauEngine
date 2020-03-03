@@ -1,7 +1,7 @@
 #include "ui/UIButton.hpp"
 #include "events/WindowEvent.hpp"
 
-// static Ref<IInputLayout> _inputLayoutCache = null;
+// static CPPRef<IInputLayout> _inputLayoutCache = null;
 
 bool UIButton::onClick(WindowMouseClickEvent& e) noexcept
 {
@@ -52,7 +52,7 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     };
 
     BufferArgs vboBuilder(1);
-    // Ref<IBufferBuilder> vboBuilder = context.createBuffer(1);
+    // CPPRef<IBufferBuilder> vboBuilder = context.createBuffer(1);
     vboBuilder.type = EBuffer::Type::ArrayBuffer;
     vboBuilder.usage = EBuffer::UsageType::StaticDraw;
     vboBuilder.elementCount = 6;
@@ -62,19 +62,19 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
 
     // if(!_inputLayoutCache)
     // {
-        // Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
+        // CPPRef<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
         // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-        // _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+        // _inputLayoutCache = CPPRef<IInputLayout>(ilBuilder->build());
     // }
 
 
-    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
+    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
     vaBuilder->setVertexBuffer(0, _vbo);
     // vaBuilder->inputLayout(_inputLayoutCache);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
-    _vao = Ref<IVertexArray>(vaBuilder->build());
+    _vao = CPPRef<IVertexArray>(vaBuilder->build());
 
     // _vao->addVertexBuffer(context, _vbo);
     // _vao->drawCount() = 6;

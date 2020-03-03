@@ -42,7 +42,7 @@ public:
 
     [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] CPPRef<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] NullableReferenceCountingPointer<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] NullableStrongReferenceCountingPointer<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:

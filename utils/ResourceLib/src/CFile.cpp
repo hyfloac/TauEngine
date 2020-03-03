@@ -35,9 +35,9 @@ i64 CFile::writeBytes(const u8* const buffer, const uSys len) noexcept
     return fwrite(buffer, sizeof(u8), len, _file);
 }
 
-Ref<CFileLoader>& CFileLoader::Instance() noexcept
+CPPRef<CFileLoader>& CFileLoader::Instance() noexcept
 {
-    static Ref<CFileLoader> instance = Ref<CFileLoader>(new CFileLoader);
+    static CPPRef<CFileLoader> instance = CPPRef<CFileLoader>(new CFileLoader);
     return instance;
 }
 
@@ -53,7 +53,7 @@ bool CFileLoader::fileExists(const char* const path) const noexcept
     return false;
 }
 
-Ref<IFile> CFileLoader::load(const char* const path, const FileProps props) const noexcept
+CPPRef<IFile> CFileLoader::load(const char* const path, const FileProps props) const noexcept
 {
     FILE* handle;
     switch(props)
@@ -69,7 +69,7 @@ Ref<IFile> CFileLoader::load(const char* const path, const FileProps props) cons
     if(!handle)
     { return nullptr; }
 
-    return Ref<CFile>(new CFile(handle, path, props));
+    return CPPRef<CFile>(new CFile(handle, path, props));
 }
 
 bool CFileLoader::createFolder(const char* const path) const noexcept

@@ -15,6 +15,8 @@ class GLTexture2DBuilder;
 class GLTextureNullBuilder;
 class GLTextureDepthBuilder;
 class GLTextureCubeBuilder;
+class GLDepthStencilState;
+class GLDepthStencilStateBuilder;
 
 class GLRenderingContext final : public IRenderingContext
 {
@@ -35,6 +37,9 @@ private:
     GLProfile _compat;
     bool _forwardCompatible;
 
+    NullableRef<GLDepthStencilState> _defaultDepthStencilState;
+    NullableRef<GLDepthStencilState> _currentDepthStencilState;
+
     GLBufferBuilder* _bufferBuilder;
     GLIndexBufferBuilder* _indexBufferBuilder;
     GLUniformBufferBuilder* _uniformBufferBuilder;
@@ -44,6 +49,7 @@ private:
     GLTextureNullBuilder* _textureNullBuilder;
     GLTextureDepthBuilder* _textureDepthBuilder;
     GLTextureCubeBuilder* _textureCubeBuilder;
+    GLDepthStencilStateBuilder* _depthStencilStateBuilder;
 public:
     GLRenderingContext(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile core, bool forwardCompatible) noexcept;
     ~GLRenderingContext() noexcept override final;
@@ -63,25 +69,30 @@ public:
 
     void enableDepthWriting(bool writing) noexcept override final;
 
-    void beginFrame() noexcept override final { }
+    NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
+    void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
+    void resetDepthStencilState() noexcept override;
+    const DepthStencilParams& getDefaultDepthStencilStateParams() noexcept override;
 
+    void beginFrame() noexcept override final { }
     void endFrame() noexcept override final { }
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] Ref<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
+    [[nodiscard]] CPPRef<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
-    [[nodiscard]] Ref<IFrameBufferBuilder> createFrameBuffer() noexcept override;
+    [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
     [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
     [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
     [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] Ref<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
-    [[nodiscard]] Ref<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
+    [[nodiscard]] CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
+    [[nodiscard]] CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
 private:
     void handleCtxError(int profileMask) const noexcept;
 

@@ -1,6 +1,6 @@
 #include "shader/PointLight.hpp"
 
-// PointLightUniforms::PointLightUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept
+// PointLightUniforms::PointLightUniforms(const CPPRef<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept
 // {
 //     _positionUni = shader->getUniformVector<Vector3f>(uniformPrefix.concat("position"));
 //     _ambientUni = shader->getUniformVector<Vector3f>(uniformPrefix.concat("ambient"));

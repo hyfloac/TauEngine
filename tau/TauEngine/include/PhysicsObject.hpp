@@ -5,19 +5,19 @@
 class PhysicsObject final
 {
 private:
-    Ref<WorldObject> _object;
+    CPPRef<WorldObject> _object;
     Vector3f _acceleration;
     Vector3f _velocity;
 public:
-    PhysicsObject(Ref<WorldObject>& object) noexcept
+    PhysicsObject(CPPRef<WorldObject>& object) noexcept
         : _object(object), _acceleration(), _velocity()
     { }
 
-    PhysicsObject(Ref<WorldObject>& object, Vector3f acceleration) noexcept
+    PhysicsObject(CPPRef<WorldObject>& object, Vector3f acceleration) noexcept
         : _object(object), _acceleration(acceleration), _velocity()
     { }
 
-    PhysicsObject(Ref<WorldObject>& object, Vector3f acceleration, Vector3f velocity) noexcept
+    PhysicsObject(CPPRef<WorldObject>& object, Vector3f acceleration, Vector3f velocity) noexcept
         : _object(object), _acceleration(acceleration), _velocity(velocity)
     { }
 
@@ -29,7 +29,7 @@ public:
     PhysicsObject& operator=(const PhysicsObject& copy) = default;
     PhysicsObject& operator=(PhysicsObject&& move) noexcept = default;
 
-    [[nodiscard]] const Ref<WorldObject>& Object() const noexcept { return _object; }
+    [[nodiscard]] const CPPRef<WorldObject>& Object() const noexcept { return _object; }
     [[nodiscard]] Vector3f acceleration() const noexcept { return _acceleration; }
     [[nodiscard]] Vector3f velocity() const noexcept { return _velocity; }
 

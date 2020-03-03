@@ -147,9 +147,9 @@ public:
 public:
     [[nodiscard]] virtual ITexture* build(const TextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual ITexture* build(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual Ref<ITexture> buildCPPRef(const TextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<ITexture> buildCPPRef(const TextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<ITexture> buildTauRef(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 struct TextureCubeArgs final
@@ -180,7 +180,7 @@ public:
 public:
     [[nodiscard]] virtual ITextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual ITextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual Ref<ITextureCube> buildCPPRef(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableReferenceCountingPointer<ITextureCube> buildTauRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<ITextureCube> buildTauSRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<ITextureCube> buildCPPRef(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<ITextureCube> buildTauRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<ITextureCube> buildTauSRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

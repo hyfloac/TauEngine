@@ -4,9 +4,9 @@
 #include "dxgi.h"
 #include "dx/dx10/DX10GraphicsAccelerator.hpp"
 
-RefDynArray<Ref<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAccelerators() noexcept
+RefDynArray<CPPRef<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAccelerators() noexcept
 {
-#define CHECK(_VAL) do { if(FAILED(_VAL)) { return RefDynArray<Ref<IGraphicsAccelerator>>(0); } } while(0)
+#define CHECK(_VAL) do { if(FAILED(_VAL)) { return RefDynArray<CPPRef<IGraphicsAccelerator>>(0); } } while(0)
 
     IDXGIFactory* dxgiFactory;
     CHECK(CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory)));
@@ -18,7 +18,7 @@ RefDynArray<Ref<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAccelerato
         dxgiAdapter->Release();
     }
 
-    RefDynArray<Ref<IGraphicsAccelerator>> accelerators(i);
+    RefDynArray<CPPRef<IGraphicsAccelerator>> accelerators(i);
 
     DX10GraphicsAcceleratorBuilder* builder = new(std::nothrow) DX10GraphicsAcceleratorBuilder;
 
@@ -27,7 +27,7 @@ RefDynArray<Ref<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAccelerato
     {
         CHECK(dxgiFactory->EnumAdapters(i, &dxgiAdapter));
         builder->setAdapter(dxgiAdapter);
-        accelerators[i] = Ref<IGraphicsAccelerator>(builder->build());
+        accelerators[i] = CPPRef<IGraphicsAccelerator>(builder->build());
         dxgiAdapter->Release();
     }
 

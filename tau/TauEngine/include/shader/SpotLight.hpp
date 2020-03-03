@@ -71,7 +71,7 @@ public:
         return 5 * sizeof(float) * 4 + 8 * sizeof(float);
     }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const SpotLight& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const SpotLight& t) noexcept
     {
         buffer->beginModification(context);
 

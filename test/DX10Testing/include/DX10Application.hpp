@@ -44,22 +44,22 @@ private:
     static constexpr const char* CONFIG_PATH = "|game/config.bin";
     Config _config;
     Window* _window;
-    Ref<spdlog::logger> _logger;
+    CPPRef<spdlog::logger> _logger;
     u8 _r, _g, _b;
     int _colorState;
     u8 _aa;
-    Ref<IShaderProgram> _shader;
-    Ref<IVertexArray> _va;
+    CPPRef<IShaderProgram> _shader;
+    CPPRef<IVertexArray> _va;
     UniformBlockS<Uniforms>* _uni;
     UniformBlockS<Matrices>* _matrices;
     Camera2DController* _camera;
-    Ref<ISingleTextureUploader> _texUploader;
+    CPPRef<ISingleTextureUploader> _texUploader;
 public:
     DX10Application() noexcept;
 
     ~DX10Application() noexcept override;
 
-    [[nodiscard]] Ref<spdlog::logger> logger() const noexcept { return _logger; }
+    [[nodiscard]] CPPRef<spdlog::logger> logger() const noexcept { return _logger; }
 
     bool init(int argCount, char* args[]) noexcept override;
 

@@ -7,9 +7,9 @@
 #include "texture/FITextureLoader.hpp"
 #include "VFS.hpp"
 
-// static Ref<IInputLayout> _inputLayoutCache = null;
+// static CPPRef<IInputLayout> _inputLayoutCache = null;
 
-RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const Ref<IShader>& shader, const DrawType drawType) noexcept
+RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, const DrawType drawType) noexcept
     : _va(null)
 {
     PERF();
@@ -68,27 +68,27 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     indicesBuilder.usage = EBuffer::UsageType::StaticDraw;
     indicesBuilder.elementCount = mesh.indices.size();
 
-    // Ref<IBuffer> positions = Ref<IBuffer>(pnBuilder->build(nullptr));
+    // CPPRef<IBuffer> positions = CPPRef<IBuffer>(pnBuilder->build(nullptr));
     pnBuilder.initialBuffer = positionsLoaded;
-    Ref<IBuffer> positions = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IBuffer> positions = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = normalsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
-    // Ref<IBuffer> normals = Ref<IBuffer>(pnBuilder->build(nullptr));
-    Ref<IBuffer> normals = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    // CPPRef<IBuffer> normals = CPPRef<IBuffer>(pnBuilder->build(nullptr));
+    CPPRef<IBuffer> normals = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = tangentsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
-    // Ref<IBuffer> tangents = Ref<IBuffer>(pnBuilder->build(nullptr));
-    Ref<IBuffer> tangents = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
-    // Ref<IBuffer> textures = Ref<IBuffer>(texturesBuilder->build(nullptr));
+    // CPPRef<IBuffer> tangents = CPPRef<IBuffer>(pnBuilder->build(nullptr));
+    CPPRef<IBuffer> tangents = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    // CPPRef<IBuffer> textures = CPPRef<IBuffer>(texturesBuilder->build(nullptr));
     texturesBuilder.initialBuffer = texturesLoaded;
-    Ref<IBuffer> textures = context.createBuffer().buildCPPRef(texturesBuilder, nullptr);
-    // Ref<IIndexBuffer> indices = Ref<IIndexBuffer>(indicesBuilder->build(nullptr));
+    CPPRef<IBuffer> textures = context.createBuffer().buildCPPRef(texturesBuilder, nullptr);
+    // CPPRef<IIndexBuffer> indices = CPPRef<IIndexBuffer>(indicesBuilder->build(nullptr));
     indicesBuilder.initialBuffer = mesh.indices.data();
-    Ref<IIndexBuffer> indices = context.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
+    CPPRef<IIndexBuffer> indices = context.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
 
     // positions->fillBuffer(context, positionsLoaded);
     // normals->fillBuffer(context, normalsLoaded);
@@ -96,7 +96,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     // textures->fillBuffer(context, texturesLoaded);
     // indices->fillBuffer(context, mesh.indices.data());
 
-    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
+    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
 
     vaBuilder->shader(shader);
     vaBuilder->setVertexBuffer(0, positions);
@@ -108,7 +108,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     vaBuilder->drawCount(mesh.indices.size());
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
-    _va = Ref<IVertexArray>(vaBuilder->build());
+    _va = CPPRef<IVertexArray>(vaBuilder->build());
 
     // _va->addVertexBuffer(context, positions);
     // _va->addVertexBuffer(context, normals);
@@ -123,30 +123,30 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     if(!mesh.material.map_Kd.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Kd.c_str());
-        matBuilder.diffuseTexture(Ref<ITexture>(TextureLoader::loadTexture(context, path.path)));
+        matBuilder.diffuseTexture(CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path)));
     }
     if(!mesh.material.map_Ks.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ks.c_str());
-        matBuilder.specularTexture(Ref<ITexture>(TextureLoader::loadTexture(context, path.path)));
+        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path)));
     }
     else
     {
-        matBuilder.specularTexture(Ref<ITexture>(TextureLoader::generateBlackTexture(context)));
+        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::generateBlackTexture(context)));
     }
     if(!mesh.material.map_Ka.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ka.c_str());
-        _reflectiveTexture = Ref<ITexture>(TextureLoader::loadTexture(context, path.path));
+        _reflectiveTexture = CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path));
     }
     if(!mesh.material.map_bump.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
-        matBuilder.normalTexture(Ref<ITexture>(TextureLoader::loadTexture(context, path.path)));
+        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path)));
     }
     else
     {
-        matBuilder.normalTexture(Ref<ITexture>(TextureLoader::generateNormalTexture(context)));
+        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(context)));
     }
     // const auto ka = mesh.material.Ka;
     // const auto kd = mesh.material.Kd;
@@ -166,7 +166,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    matBuilder.textureSampler(Ref<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
+    matBuilder.textureSampler(CPPRef<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
 
     _material = matBuilder.build();
 }

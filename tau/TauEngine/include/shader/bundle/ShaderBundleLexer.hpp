@@ -28,7 +28,7 @@ enum class SBPToken
 class TAU_DLL ShaderBundleLexer
 {
 private:
-    Ref<IFile> _file;
+    CPPRef<IFile> _file;
     SBPToken _currentToken;
     DynString _strValue;
     i32 _intValue;
@@ -37,7 +37,7 @@ private:
     char _lastRead;
     bool _isEOF;
 public:
-    inline ShaderBundleLexer(const Ref<IFile>& file) noexcept
+    inline ShaderBundleLexer(const CPPRef<IFile>& file) noexcept
         : _file(file), _currentToken(SBPToken::Unknown),
         _strValue(""), _intValue(0), _cValue('\0'), _lastRead('\0'), _isEOF(false)
     {

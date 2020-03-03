@@ -10,7 +10,7 @@ class TAU_DLL GLSingleTextureUploader final : public ISingleTextureUploader
     DEFAULT_DESTRUCT(GLSingleTextureUploader);
     DELETE_COPY(GLSingleTextureUploader);
 public:
-    GLSingleTextureUploader(const Ref<ITexture>& texture, const Ref<ITextureSampler>& textureSampler) noexcept
+    GLSingleTextureUploader(const CPPRef<ITexture>& texture, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : ISingleTextureUploader(texture, textureSampler)
     { }
 
@@ -26,7 +26,7 @@ class TAU_DLL GLTextureUploader final : public ITextureUploader
     DEFAULT_DESTRUCT(GLTextureUploader);
     DELETE_COPY(GLTextureUploader);
 public:
-    GLTextureUploader(const RefDynArray<Ref<ITexture>>& textures, const Ref<ITextureSampler>& textureSampler) noexcept
+    GLTextureUploader(const RefDynArray<CPPRef<ITexture>>& textures, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : ITextureUploader(textures, textureSampler)
     { }
 
@@ -44,7 +44,7 @@ class TAU_DLL GLSingleTextureUploaderBuilder final : public ISingleTextureUpload
 public:
     GLSingleTextureUploaderBuilder(GLRenderingContext& context) noexcept;
 
-    void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept override;
+    void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept override;
 
     [[nodiscard]] GLSingleTextureUploader* build(Error* error) noexcept override;
 };
@@ -56,7 +56,7 @@ class TAU_DLL GLTextureUploaderBuilder final : public ITextureUploaderBuilder
 public:
     GLTextureUploaderBuilder(const uSys textureCount, GLRenderingContext& context) noexcept;
 
-    void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept override;
+    void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept override;
 
     [[nodiscard]] GLTextureUploader* build(Error* error) noexcept override;
 };

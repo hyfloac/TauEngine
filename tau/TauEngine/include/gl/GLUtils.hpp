@@ -50,7 +50,7 @@ TAU_DLL void filterDebugOutput(GLDebugSeverity filter, bool allowed) noexcept;
 
 namespace spdlog { class logger; }
 
-TAU_DLL void setupDefaultDebugMessageCallback(const Ref<spdlog::logger>& logger, bool synchronous) noexcept;
+TAU_DLL void setupDefaultDebugMessageCallback(const CPPRef<spdlog::logger>& logger, bool synchronous) noexcept;
 TAU_DLL void stopDefaultDebugOutput() noexcept;
 
 TAU_DLL void __internal__clearGLErrors() noexcept;

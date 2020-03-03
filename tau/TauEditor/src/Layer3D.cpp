@@ -20,7 +20,7 @@ public:
 
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 4; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Layer3D::Uniforms& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Layer3D::Uniforms& t) noexcept
     {
         buffer->beginModification(context);
     	buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.compoundMatrix));
@@ -40,7 +40,7 @@ class UniformAccessor<Layer3D::ViewPosUniforms> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Layer3D::ViewPosUniforms& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Layer3D::ViewPosUniforms& t) noexcept
     {
         const __m128 vec = t.cameraPos.data().vec;
         buffer->fillBuffer(context, reinterpret_cast<const void*>(&vec));
@@ -74,12 +74,12 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     shaderArgs.path = "/nanosuit/";
     shaderArgs.fileName = "NanosuitPixel";
     shaderArgs.stage = EShader::Stage::Pixel;
-    Ref<IShader> pixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.path = "/shader/";
     shaderArgs.fileName = "SimpleVertexShader";
     shaderArgs.stage = EShader::Stage::Vertex;
-    Ref<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
 
     objl::Loader loader;
     if(loader.loadFile("|TERes/nanosuit/nanosuit.obj"))
@@ -92,31 +92,31 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
 
     // shaderBuilder->type(EShader::Stage::Vertex);
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlineVertexShader.glsl", FileProps::Read));
-    // Ref<IShader> outlineVertexShader = Ref<IShader>(shaderBuilder->build());
+    // CPPRef<IShader> outlineVertexShader = CPPRef<IShader>(shaderBuilder->build());
     //
     // shaderBuilder->type(EShader::Stage::Pixel);
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/OutlinePixelShader.glsl", FileProps::Read));
-    // Ref<IShader> outlinePixelShader = Ref<IShader>(shaderBuilder->build());
+    // CPPRef<IShader> outlinePixelShader = CPPRef<IShader>(shaderBuilder->build());
     //
     // shaderBuilder->type(EShader::Stage::Vertex);
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefVertexShader.glsl", FileProps::Read));
-    // Ref<IShader> refVertexShader = Ref<IShader>(shaderBuilder->build());
+    // CPPRef<IShader> refVertexShader = CPPRef<IShader>(shaderBuilder->build());
     //
     // shaderBuilder->type(EShader::Stage::Pixel);
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/ReflectionPixelShader.glsl", FileProps::Read));
-    // Ref<IShader> reflectionPixelShader = Ref<IShader>(shaderBuilder->build());
+    // CPPRef<IShader> reflectionPixelShader = CPPRef<IShader>(shaderBuilder->build());
     //
     // shaderBuilder->type(EShader::Stage::Pixel);
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
-    // Ref<IShader> refractionPixelShader = Ref<IShader>(shaderBuilder->build());
+    // CPPRef<IShader> refractionPixelShader = CPPRef<IShader>(shaderBuilder->build());
 
     // shaderArgs.fileName = "FrameBufferVertexShader";
     // shaderArgs.stage = EShader::Stage::Vertex;
-    // Ref<IShader> frameBufferVertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    // CPPRef<IShader> frameBufferVertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
     //
     // shaderArgs.fileName = "FrameBufferPixelShader";
     // shaderArgs.stage = EShader::Stage::Pixel;
-    // Ref<IShader> frameBufferPixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
+    // CPPRef<IShader> frameBufferPixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
     //
     _shader->setVertexShader(*window.renderingContext(), vertexShader);
     _shader->setPixelShader(*window.renderingContext(), pixelShader);
@@ -127,7 +127,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     _shader->link(*window.renderingContext());
     // _frameBufferShader->link(*window.renderingContext());
 
-    // Ref<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
+    // CPPRef<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
     //
     // IFrameBufferAttachment* colorBuffer   = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Color, window.width(), window.height());
     // IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::DepthStencil, window.width(), window.height());
@@ -135,7 +135,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     // builder->attach(colorBuffer, nullptr);
     // builder->attach(depthStencilBuffer, nullptr);
     //
-    // _frameBuffer = Ref<IFrameBuffer>(builder->build(nullptr));
+    // _frameBuffer = CPPRef<IFrameBuffer>(builder->build(nullptr));
 
     float quadVertices[] = {
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -148,7 +148,7 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     };
 
     BufferArgs positionsBuilder(2);
-    // Ref<IBufferBuilder> positionsBuilder = window.renderingContext()->createBuffer(2);
+    // CPPRef<IBufferBuilder> positionsBuilder = window.renderingContext()->createBuffer(2);
     positionsBuilder.type = EBuffer::Type::ArrayBuffer;
     positionsBuilder.usage = EBuffer::UsageType::StaticDraw;
     positionsBuilder.elementCount = 6;
@@ -156,14 +156,14 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    const Ref<IBuffer> positions = window.renderingContext()->createBuffer().buildCPPRef(positionsBuilder, nullptr);
-    // const Ref<IBuffer> positions = Ref<IBuffer>(positionsBuilder->build(nullptr));
+    const CPPRef<IBuffer> positions = window.renderingContext()->createBuffer().buildCPPRef(positionsBuilder, nullptr);
+    // const CPPRef<IBuffer> positions = CPPRef<IBuffer>(positionsBuilder->build(nullptr));
 
-    // Ref<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
+    // CPPRef<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
     // vaBuilder->setVertexBuffer(0, positions);
     // vaBuilder->drawCount(6);
     // vaBuilder->drawType(DrawType::SeparatedTriangles);
-    // _frameBufferVA = Ref<IVertexArray>(vaBuilder->build());
+    // _frameBufferVA = CPPRef<IVertexArray>(vaBuilder->build());
 
     _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -199,10 +199,10 @@ Layer3D::Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, 
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    // Ref<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
+    // CPPRef<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
     // uploaderBuilder->setTexture(0, colorBuffer->texture());
-    // uploaderBuilder->textureSampler(Ref<ITextureSampler>(window.renderingContext()->createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
-    // _frameBufferUploader = Ref<ITextureUploader>(uploaderBuilder->build());
+    // uploaderBuilder->textureSampler(CPPRef<ITextureSampler>(window.renderingContext()->createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
+    // _frameBufferUploader = CPPRef<ITextureUploader>(uploaderBuilder->build());
 }
 
 void Layer3D::onUpdate(float fixedDelta) noexcept
@@ -252,7 +252,7 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
     //     self->_spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
     //     self->_cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
     //
-    //     for(const Ref<RenderableObject>& ro : self->_objects)
+    //     for(const CPPRef<RenderableObject>& ro : self->_objects)
     //     {
     //         TextureIndices indices(0, 0, 0);
     //         ro->material().upload(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
@@ -325,7 +325,7 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
                         self->_pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
                         self->_spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
                         self->_cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
-                        for(const Ref<RenderableObject>& ro : self->_objects)
+                        for(const CPPRef<RenderableObject>& ro : self->_objects)
                         {
                             TextureIndices indices(0, 0, 0);
                             ro->material().upload(context, self->_materialUniforms, EShader::Stage::Pixel, 1, indices);
@@ -361,7 +361,7 @@ void Layer3D::onEvent(Event& e) noexcept
 bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
 {
     UNUSED(e);
-    // Ref<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
+    // CPPRef<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
     //
     // IFrameBufferAttachment* colorBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Color, e.newWidth(), e.newHeight());
     // IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::DepthStencil, e.newWidth(), e.newHeight());
@@ -369,7 +369,7 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     // builder->attach(colorBuffer);
     // builder->attach(depthStencilBuffer);
     //
-    // _frameBuffer = Ref<IFrameBuffer>(builder->build());
+    // _frameBuffer = CPPRef<IFrameBuffer>(builder->build());
 
     return true;
 }

@@ -10,14 +10,14 @@ SystemInterface::SystemInterface() noexcept
     _sysContainer.programHandle = GetModuleHandleA(NULL);
 }
 
-Ref<IGraphicsInterface> SystemInterface::createGraphicsInterface(const RenderingMode& renderingMode) noexcept
+CPPRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const RenderingMode& renderingMode) noexcept
 {
     switch(renderingMode.currentMode())
     {
         case RenderingMode::Mode::DirectX9:
             return null;
         case RenderingMode::Mode::DirectX10:
-            return Ref<IGraphicsInterface>(new(std::nothrow) DX10GraphicsInterface);
+            return CPPRef<IGraphicsInterface>(new(std::nothrow) DX10GraphicsInterface);
         case RenderingMode::Mode::DirectX11:
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:

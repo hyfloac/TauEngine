@@ -108,9 +108,9 @@ public:
 public:
     [[nodiscard]] GLTexture2D* build(const TextureArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLTexture2D* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 public:
     [[nodiscard]] static bool processArgs(const TextureArgs& args, [[tau::out]] GLTextureArgs* glArgs, [[tau::out]] Error* error) noexcept;
 };
@@ -123,9 +123,9 @@ class TAU_DLL GLTextureNullBuilder final : public ITextureBuilder
 public:
     [[nodiscard]] GLNullTexture* build(const TextureArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLNullTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 };
 
 class TAU_DLL GLTextureDepthBuilder final : public ITextureBuilder
@@ -138,9 +138,9 @@ public:
 public:
     [[nodiscard]] GLDepthTexture* build(const TextureArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLDepthTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 };
 
 class TAU_DLL GLTextureCubeBuilder final : public ITextureCubeBuilder
@@ -153,9 +153,9 @@ public:
 public:
     [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<ITextureCube> buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<ITextureCube> buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<ITextureCube> buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITextureCube> buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITextureCube> buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITextureCube> buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 private:
     [[nodiscard]] static bool processArgs(const TextureCubeArgs& args, [[tau::out]] GLTextureArgs* glArgs, [[tau::out]] Error* error) noexcept;
 

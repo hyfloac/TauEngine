@@ -38,19 +38,19 @@ public:
     struct Container final
     {
         DynString path;
-        Ref<IFileLoader> fileLoader;
+        CPPRef<IFileLoader> fileLoader;
         bool canCreateFile;
         bool canWriteFile;
 
-        Container(DynString path, Ref<IFileLoader> fileLoader, const bool canCreateFile, const bool canWriteFile)
+        Container(DynString path, CPPRef<IFileLoader> fileLoader, const bool canCreateFile, const bool canWriteFile)
             : path(std::move(path)), fileLoader(std::move(fileLoader)),
               canCreateFile(canCreateFile), canWriteFile(canWriteFile)
         { }
 
-        static Container Dynamic(const DynString& path, const Ref<IFileLoader>& fileLoader)
+        static Container Dynamic(const DynString& path, const CPPRef<IFileLoader>& fileLoader)
         { return Container(path, fileLoader, true, true); }
 
-        static Container Static(const DynString& path, const  Ref<IFileLoader>& fileLoader)
+        static Container Static(const DynString& path, const  CPPRef<IFileLoader>& fileLoader)
         { return Container(path, fileLoader, false, false); }
 
         ~Container() = default;
@@ -64,14 +64,14 @@ public:
         [[nodiscard]] bool canCreateAndWriteFile() const noexcept { return canCreateFile && canWriteFile; }
     };
 
-    // using Container = Triplet<DynString, Ref<IFileLoader>, bool>;
+    // using Container = Triplet<DynString, CPPRef<IFileLoader>, bool>;
     using MountMap = std::unordered_multimap<DynString, VFS::Container>;
 private:
 
-    Ref<IFileLoader> _defaultLoader;
+    CPPRef<IFileLoader> _defaultLoader;
     MountMap _mountPoints;
 public:
-    explicit VFS(Ref<IFileLoader> defaultLoader) noexcept
+    explicit VFS(CPPRef<IFileLoader> defaultLoader) noexcept
         : _defaultLoader(std::move(defaultLoader)), _mountPoints()
     { }
 
@@ -83,12 +83,12 @@ public:
     VFS& operator=(const VFS& copy) noexcept = default;
     VFS& operator=(VFS&& move) noexcept = default;
 
-    void mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader, bool canCreateFile, bool canWriteFile);
+    void mount(const DynString& mountPoint, const DynString& path, const CPPRef<IFileLoader>& loader, bool canCreateFile, bool canWriteFile);
     
-    void mountDynamic(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader)
+    void mountDynamic(const DynString& mountPoint, const DynString& path, const CPPRef<IFileLoader>& loader)
     { mount(mountPoint, path, loader, true, true); }
 
-    void mountStatic(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader)
+    void mountStatic(const DynString& mountPoint, const DynString& path, const CPPRef<IFileLoader>& loader)
     { mount(mountPoint, path, loader, false, false); }
 
     void unmount(const DynString& mountPoint) noexcept;
@@ -111,5 +111,5 @@ public:
 
     bool fileExists(const char* path) const noexcept;
 
-    Ref<IFile> openFile(const char* path, FileProps props) const noexcept;
+    CPPRef<IFile> openFile(const char* path, FileProps props) const noexcept;
 };

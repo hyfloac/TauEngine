@@ -124,7 +124,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error, TauAlloca
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-Ref<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
+CPPRef<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
 {
     GLShaderArgs glArgs;
     if(!processArgs(args, &glArgs, error))
@@ -133,7 +133,7 @@ Ref<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) 
     if(!compileShader(args, glArgs, error))
     { return null; }
 
-    const Ref<GLShader> shader = Ref<GLShader>(new(::std::nothrow) GLShader(glArgs.shaderID, args.stage));
+    const CPPRef<GLShader> shader = CPPRef<GLShader>(new(::std::nothrow) GLShader(glArgs.shaderID, args.stage));
 
     ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
 
@@ -233,7 +233,7 @@ bool GLShaderBuilder::compileShader(const ShaderArgs& args, GLShaderArgs& glArgs
 {
     const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
 
-    const Ref<IFile> shaderFile = shaderSelector.select(_resIndex).loadFile(FileProps::Read);
+    const CPPRef<IFile> shaderFile = shaderSelector.select(_resIndex).loadFile(FileProps::Read);
 
     ERROR_CODE_COND_F(!shaderFile, Error::InvalidFile);
 

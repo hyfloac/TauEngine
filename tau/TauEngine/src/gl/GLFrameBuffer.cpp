@@ -71,7 +71,7 @@ void GLRenderTexture::unbind(u8, EShader::Stage) noexcept
 }
 
 GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(null))
+    : IFrameBufferAttachment(width, height, CPPRef<ITexture>(null))
 {
     TextureArgs args;
     args.width = width;
@@ -83,7 +83,7 @@ GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height
 }
 
 GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(u32 width, u32 height) noexcept
-    : IFrameBufferAttachment(width, height, Ref<ITexture>(new GLRenderTexture(width, height, ETexture::Format::Depth24Stencil8)))
+    : IFrameBufferAttachment(width, height, CPPRef<ITexture>(new GLRenderTexture(width, height, ETexture::Format::Depth24Stencil8)))
 { }
 
 

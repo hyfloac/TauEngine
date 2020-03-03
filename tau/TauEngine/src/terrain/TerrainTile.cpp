@@ -2,7 +2,7 @@
 #include "model/Buffer.hpp"
 #include "system/RenderingContext.hpp"
 
-Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const float size, const uSys edgeVertices) noexcept
+CPPRef<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const float size, const uSys edgeVertices) noexcept
 {
     const uSys numVertices = edgeVertices * edgeVertices;
     const uSys numIndices = (edgeVertices - 1) * (edgeVertices - 1);
@@ -59,7 +59,7 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     BufferArgs buf3Builder(1);
     BufferArgs buf2Builder(1);
     IndexBufferArgs indiceBuilder;
-    // Ref<IIndexBufferBuilder> indiceBuilder = context.createIndexBuffer();
+    // CPPRef<IIndexBufferBuilder> indiceBuilder = context.createIndexBuffer();
 
     buf3Builder.type = EBuffer::Type::ArrayBuffer;
     buf3Builder.usage = EBuffer::UsageType::StaticDraw;
@@ -74,21 +74,21 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     indiceBuilder.usage = EBuffer::UsageType::StaticDraw;
     indiceBuilder.elementCount = 6 * numIndices;
 
-    // Ref<IBuffer> posBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
-    // Ref<IBuffer> normBuf = Ref<IBuffer>(buf3Builder->build(nullptr));
-    // Ref<IBuffer> texBuf = Ref<IBuffer>(buf2Builder->build(nullptr));
-    Ref<IBuffer> posBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
-    Ref<IBuffer> normBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
-    Ref<IBuffer> texBuf = context.createBuffer().buildCPPRef(buf2Builder, nullptr);
-    // Ref<IIndexBuffer> indicesBuf = Ref<IIndexBuffer>(indiceBuilder->build(nullptr));
-    Ref<IIndexBuffer> indicesBuf = context.createIndexBuffer().buildCPPRef(indiceBuilder, nullptr);
+    // CPPRef<IBuffer> posBuf = CPPRef<IBuffer>(buf3Builder->build(nullptr));
+    // CPPRef<IBuffer> normBuf = CPPRef<IBuffer>(buf3Builder->build(nullptr));
+    // CPPRef<IBuffer> texBuf = CPPRef<IBuffer>(buf2Builder->build(nullptr));
+    CPPRef<IBuffer> posBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
+    CPPRef<IBuffer> normBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
+    CPPRef<IBuffer> texBuf = context.createBuffer().buildCPPRef(buf2Builder, nullptr);
+    // CPPRef<IIndexBuffer> indicesBuf = CPPRef<IIndexBuffer>(indiceBuilder->build(nullptr));
+    CPPRef<IIndexBuffer> indicesBuf = context.createIndexBuffer().buildCPPRef(indiceBuilder, nullptr);
 
     posBuf->fillBuffer(context, pos);
     normBuf->fillBuffer(context, norm);
     texBuf->fillBuffer(context, tex);
     indicesBuf->fillBuffer(context, indices);
 
-    // Ref<IVertexArray> vao = context.createVertexArray(3, DrawType::SeparatedTriangles);
+    // CPPRef<IVertexArray> vao = context.createVertexArray(3, DrawType::SeparatedTriangles);
     // vao->addVertexBuffer(context, posBuf);
     // vao->addVertexBuffer(context, normBuf);
     // vao->addVertexBuffer(context, texBuf);
@@ -96,14 +96,14 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
 
     // if(!_inputLayoutCache)
     // {
-    //     Ref<IInputLayoutBuilder> ilBuilder = context.createInputLayout(3);
+    //     CPPRef<IInputLayoutBuilder> ilBuilder = context.createInputLayout(3);
     //     ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
     //     ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
     //     ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-    //     _inputLayoutCache = Ref<IInputLayout>(ilBuilder->build());
+    //     _inputLayoutCache = CPPRef<IInputLayout>(ilBuilder->build());
     // }
 
-    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(3);
+    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(3);
     vaBuilder->setVertexBuffer(0, posBuf);
     vaBuilder->setVertexBuffer(1, normBuf);
     vaBuilder->setVertexBuffer(2, texBuf);
@@ -111,7 +111,7 @@ Ref<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const
     // vaBuilder->inputLayout(_inputLayoutCache);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
     vaBuilder->drawCount(numIndices * 2);
-    Ref<IVertexArray> vao = Ref<IVertexArray>(vaBuilder->build());
+    CPPRef<IVertexArray> vao = CPPRef<IVertexArray>(vaBuilder->build());
 
     return vao;
 }

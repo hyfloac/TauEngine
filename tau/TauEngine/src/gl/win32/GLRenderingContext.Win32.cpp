@@ -6,6 +6,7 @@
 #include "gl/GLTextureSampler.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLTexture.hpp"
+#include "gl/GLDepthStencilState.hpp"
 
 #include "system/Window.hpp"
 
@@ -20,6 +21,7 @@ GLRenderingContext::~GLRenderingContext() noexcept
     delete _textureNullBuilder;
     delete _textureDepthBuilder;
     delete _textureCubeBuilder;
+    delete _depthStencilStateBuilder;
 
     deactivateContext();
     wglDeleteContext(_context);
@@ -239,6 +241,31 @@ bool GLRenderingContext::createContext(Window& window) noexcept
      {
          this->_context = tmpContext;
      }
+
+     DepthStencilParams depthStencilParams;
+     depthStencilParams.enableDepthTest = true;
+     depthStencilParams.enableStencilTest = true;
+
+     depthStencilParams.depthWriteMask = DepthStencilParams::DepthWriteMask::All;
+     depthStencilParams.depthCompareFunc = DepthStencilParams::CompareFunc::LessThan;
+
+     depthStencilParams.stencilReadMask = 0xFF;
+     depthStencilParams.stencilWriteMask = 0xFF;
+
+     depthStencilParams.frontFace.failOp = DepthStencilParams::StencilOp::Keep;
+     depthStencilParams.frontFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::IncrementClamp;
+     depthStencilParams.frontFace.passOp = DepthStencilParams::StencilOp::Keep;
+     depthStencilParams.frontFace.compareFunc = DepthStencilParams::CompareFunc::Always;
+
+     depthStencilParams.backFace.failOp = DepthStencilParams::StencilOp::Keep;
+     depthStencilParams.backFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::IncrementClamp;
+     depthStencilParams.backFace.passOp = DepthStencilParams::StencilOp::Keep;
+     depthStencilParams.backFace.compareFunc = DepthStencilParams::CompareFunc::Always;
+
+     NullableRef<IDepthStencilState> dsState = createDepthStencilState().buildTauRef(depthStencilParams, null);
+     _defaultDepthStencilState = RefCast<GLDepthStencilState>(dsState);
+     _currentDepthStencilState = _defaultDepthStencilState;
+     _currentDepthStencilState->apply();
 
      return true;
 }

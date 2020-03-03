@@ -85,7 +85,7 @@ GLSingleTextureUploaderBuilder::GLSingleTextureUploaderBuilder(GLRenderingContex
     : ISingleTextureUploaderBuilder()
 { }
 
-void GLSingleTextureUploaderBuilder::textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept
+void GLSingleTextureUploaderBuilder::textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
 {
     if(RTT_CHECK(textureSampler.get(), GLTextureSampler))
     {
@@ -105,7 +105,7 @@ GLTextureUploaderBuilder::GLTextureUploaderBuilder(const uSys textureCount, GLRe
     : ITextureUploaderBuilder(textureCount)
 { }
 
-void GLTextureUploaderBuilder::textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept
+void GLTextureUploaderBuilder::textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
 {
     if(RTT_CHECK(textureSampler.get(), GLTextureSampler))
     {

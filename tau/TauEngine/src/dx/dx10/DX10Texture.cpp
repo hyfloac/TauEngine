@@ -95,25 +95,25 @@ DX10NullTexture* DX10NullTextureBuilder::build(const TextureArgs& args, Error* e
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITexture> DX10NullTextureBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+CPPRef<ITexture> DX10NullTextureBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
 {
-    const Ref<DX10NullTexture> texture = Ref<DX10NullTexture>(new(::std::nothrow) DX10NullTexture);
+    const CPPRef<DX10NullTexture> texture = CPPRef<DX10NullTexture>(new(::std::nothrow) DX10NullTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-NullableReferenceCountingPointer<ITexture> DX10NullTextureBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<ITexture> DX10NullTextureBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    const NullableReferenceCountingPointer<DX10NullTexture> texture(allocator);
+    const NullableRef<DX10NullTexture> texture(allocator);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
-    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
-NullableStrongReferenceCountingPointer<ITexture> DX10NullTextureBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITexture> DX10NullTextureBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    const NullableStrongReferenceCountingPointer<DX10NullTexture> texture(allocator);
+    const NullableStrongRef<DX10NullTexture> texture(allocator);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
-    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
 DX10Texture2D* DX10Texture2DBuilder::build(const TextureArgs& args, Error* error) const noexcept
@@ -152,13 +152,13 @@ DX10Texture2D* DX10Texture2DBuilder::build(const TextureArgs& args, Error* error
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITexture> DX10Texture2DBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+CPPRef<ITexture> DX10Texture2DBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
 {
     DXTextureArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const Ref<DX10Texture2D> texture = Ref<DX10Texture2D>(new(::std::nothrow) DX10Texture2D(args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels));
+    const CPPRef<DX10Texture2D> texture = CPPRef<DX10Texture2D>(new(::std::nothrow) DX10Texture2D(args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels));
 
     if(!texture)
     {
@@ -170,13 +170,13 @@ Ref<ITexture> DX10Texture2DBuilder::buildCPPRef(const TextureArgs& args, Error* 
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-NullableReferenceCountingPointer<ITexture> DX10Texture2DBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<ITexture> DX10Texture2DBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     DXTextureArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableReferenceCountingPointer<DX10Texture2D> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
+    const NullableRef<DX10Texture2D> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
 
     if(!texture)
     {
@@ -185,18 +185,16 @@ NullableReferenceCountingPointer<ITexture> DX10Texture2DBuilder::buildTauRef(con
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    const NullableReferenceCountingPointer<ITexture> iTexture = RCPCast<ITexture>(texture);
-
-    ERROR_CODE_V(Error::NoError, iTexture);
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
-NullableStrongReferenceCountingPointer<ITexture> DX10Texture2DBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITexture> DX10Texture2DBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     DXTextureArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableStrongReferenceCountingPointer<DX10Texture2D> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
+    const NullableStrongRef<DX10Texture2D> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
 
     if(!texture)
     {
@@ -205,9 +203,7 @@ NullableStrongReferenceCountingPointer<ITexture> DX10Texture2DBuilder::buildTauS
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    const NullableStrongReferenceCountingPointer<ITexture> iTexture = RCPCast<ITexture>(texture);
-
-    ERROR_CODE_V(Error::NoError, iTexture);
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
 bool DX10Texture2DBuilder::processArgs(const TextureArgs& args, DXTextureArgs* dxArgs, Error* error) const noexcept
@@ -292,13 +288,13 @@ DX10TextureCube* DX10TextureCubeBuilder::build(const TextureCubeArgs& args, Erro
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITextureCube> DX10TextureCubeBuilder::buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept
+CPPRef<ITextureCube> DX10TextureCubeBuilder::buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept
 {
     DXTextureCubeArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const Ref<DX10TextureCube> texture = Ref<DX10TextureCube>(new(::std::nothrow) DX10TextureCube(args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels));
+    const CPPRef<DX10TextureCube> texture = CPPRef<DX10TextureCube>(new(::std::nothrow) DX10TextureCube(args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels));
 
     if(!texture)
     {
@@ -310,13 +306,13 @@ Ref<ITextureCube> DX10TextureCubeBuilder::buildCPPRef(const TextureCubeArgs& arg
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-NullableReferenceCountingPointer<ITextureCube> DX10TextureCubeBuilder::buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<ITextureCube> DX10TextureCubeBuilder::buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     DXTextureCubeArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableReferenceCountingPointer<DX10TextureCube> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
+    const NullableRef<DX10TextureCube> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
 
     if(!texture)
     {
@@ -325,18 +321,16 @@ NullableReferenceCountingPointer<ITextureCube> DX10TextureCubeBuilder::buildTauR
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    const NullableReferenceCountingPointer<ITextureCube> iTexture = RCPCast<ITextureCube>(texture);
-
-    ERROR_CODE_V(Error::NoError, iTexture);
+    ERROR_CODE_V(Error::NoError, RefCast<ITextureCube>(texture));
 }
 
-NullableStrongReferenceCountingPointer<ITextureCube> DX10TextureCubeBuilder::buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITextureCube> DX10TextureCubeBuilder::buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     DXTextureCubeArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableStrongReferenceCountingPointer<DX10TextureCube> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
+    const NullableStrongRef<DX10TextureCube> texture(allocator, args.width, args.height, args.dataFormat, _ctx, dxArgs.d3dTexture, dxArgs.d3dTextureView, args.mipmapLevels);
 
     if(!texture)
     {
@@ -345,9 +339,7 @@ NullableStrongReferenceCountingPointer<ITextureCube> DX10TextureCubeBuilder::bui
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    const NullableStrongReferenceCountingPointer<ITextureCube> iTexture = RCPCast<ITextureCube>(texture);
-
-    ERROR_CODE_V(Error::NoError, iTexture);
+    ERROR_CODE_V(Error::NoError, RefCast<ITextureCube>(texture));
 }
 
 bool DX10TextureCubeBuilder::processArgs(const TextureCubeArgs& args, DXTextureCubeArgs* dxArgs, Error* error) const noexcept

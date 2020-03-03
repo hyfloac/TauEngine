@@ -34,7 +34,7 @@ private:
     ID3D10Buffer* _dxIndexBuffer;
     D3D10_PRIMITIVE_TOPOLOGY _drawTypeCache;
 public:
-    DX10VertexArray(u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, ID3D10InputLayout* inputLayout, uSys bufferCount, ID3D10Buffer** iaBuffers,
+    DX10VertexArray(u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D10InputLayout* inputLayout, uSys bufferCount, ID3D10Buffer** iaBuffers,
                     UINT* iaStrides, UINT* iaOffsets, ID3D10Buffer* indexBuffer, DrawType drawType) noexcept;
 
     ~DX10VertexArray() noexcept override;
@@ -64,10 +64,10 @@ public:
         : IVertexArrayBuilder(bufferCount), _ctx(ctx), _indexBufferCache(null), _shaderBlobCache(null)
     { }
 
-    void shader(const Ref<IShader>& shader) noexcept override;
-    void setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept override;
-    void indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept override;
-    // void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
+    void shader(const CPPRef<IShader>& shader) noexcept override;
+    void setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept override;
+    void indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept override;
+    // void inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept override;
 
     [[nodiscard]] DX10VertexArray* build([[tau::out]] Error* error) noexcept override;
 };

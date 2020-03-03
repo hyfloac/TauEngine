@@ -120,7 +120,7 @@ public:
 
     [[nodiscard]] virtual bool fileExists(const char* path) const noexcept = 0;
 
-    [[nodiscard]] virtual Ref<IFile> load(const char* path, FileProps props) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IFile> load(const char* path, FileProps props) const noexcept = 0;
 
     [[nodiscard]] virtual bool createFolder(const char* path) const noexcept = 0;
 

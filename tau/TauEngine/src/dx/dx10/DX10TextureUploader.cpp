@@ -51,7 +51,7 @@ TextureIndices& DX10TextureUploader::unbind(IRenderingContext&, TextureIndices& 
     return textureIndices;
 }
 
-void DX10SingleTextureUploaderBuilder::textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept
+void DX10SingleTextureUploaderBuilder::textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
 {
     if(RTT_CHECK(textureSampler.get(), DX10TextureSampler))
     {
@@ -67,7 +67,7 @@ ISingleTextureUploader* DX10SingleTextureUploaderBuilder::build(Error* error) no
     ERROR_CODE_V(Error::NoError, uploader);
 }
 
-void DX10TextureUploaderBuilder::textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept
+void DX10TextureUploaderBuilder::textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
 {
     if(RTT_CHECK(textureSampler.get(), DX10TextureSampler))
     {

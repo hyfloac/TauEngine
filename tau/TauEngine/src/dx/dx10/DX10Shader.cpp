@@ -99,7 +99,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error, TauAl
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-Ref<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
+CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
 {
     DXShaderArgs dxArgs;
 	if(!processArgs(args, &dxArgs, error))
@@ -109,18 +109,18 @@ Ref<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error
 	if(!objects.vertex)
     { return null; }
 	
-    Ref<DX10Shader> shader;
+    CPPRef<DX10Shader> shader;
 
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = Ref<DX10Shader>(new(::std::nothrow) DX10VertexShader(objects.vertex, dxArgs.dataBlob));
+            shader = CPPRef<DX10Shader>(new(::std::nothrow) DX10VertexShader(objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = Ref<DX10Shader>(new(::std::nothrow) DX10GeometryShader(objects.geometry));
+            shader = CPPRef<DX10Shader>(new(::std::nothrow) DX10GeometryShader(objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = Ref<DX10Shader>(new(::std::nothrow) DX10PixelShader(objects.pixel));
+            shader = CPPRef<DX10Shader>(new(::std::nothrow) DX10PixelShader(objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
@@ -218,7 +218,7 @@ bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* dxArgs
 
     const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
 	
-    const Ref<IFile> shaderFile = shaderSelector.select(_resIndex).loadFile(FileProps::Read);
+    const CPPRef<IFile> shaderFile = shaderSelector.select(_resIndex).loadFile(FileProps::Read);
     const i64 fileSize = shaderFile->size();
 	
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);

@@ -66,7 +66,7 @@ public:
 class CFileLoader final : public IFileLoader
 {
 public:
-    static Ref<CFileLoader>& Instance() noexcept;
+    static CPPRef<CFileLoader>& Instance() noexcept;
 private:
     CFileLoader(const CFileLoader& copy) noexcept = delete;
     CFileLoader(CFileLoader&& move) noexcept = delete;
@@ -80,9 +80,9 @@ public:
 
     [[nodiscard]] bool fileExists(const char* path) const noexcept override;
 
-    [[nodiscard]] Ref<IFile> load(const char* path, FileProps props) const noexcept override;
+    [[nodiscard]] CPPRef<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    [[nodiscard]] Ref<CFile> load2(const char* path, FileProps props) const noexcept
+    [[nodiscard]] CPPRef<CFile> load2(const char* path, FileProps props) const noexcept
     { return RefCast<CFile>(load(path, props)); }
 
     [[nodiscard]] bool createFolder(const char* path) const noexcept override;

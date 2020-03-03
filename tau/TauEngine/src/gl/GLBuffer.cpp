@@ -183,13 +183,13 @@ GLBuffer* GLBufferBuilder::build(const BufferArgs& args, Error* error, TauAlloca
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-Ref<IBuffer> GLBufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) const noexcept
+CPPRef<IBuffer> GLBufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) const noexcept
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const Ref<GLBuffer> buffer = Ref<GLBuffer>(new(std::nothrow) GLBuffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage));
+    const CPPRef<GLBuffer> buffer = CPPRef<GLBuffer>(new(std::nothrow) GLBuffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), glArgs.bufferHandle, glArgs.glType, glArgs.glUsage));
 
     if(!buffer)
     {
@@ -300,13 +300,13 @@ GLIndexBuffer* GLIndexBufferBuilder::build(const IndexBufferArgs& args, Error* e
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-Ref<IIndexBuffer> GLIndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* error) const noexcept
+CPPRef<IIndexBuffer> GLIndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* error) const noexcept
 {
     GLIndexBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const Ref<GLIndexBuffer> buffer = Ref<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage));
+    const CPPRef<GLIndexBuffer> buffer = CPPRef<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(args.usage, args.bufferSize(), glArgs.bufferHandle, glArgs.glUsage));
 
     if(!buffer)
     {
@@ -413,13 +413,13 @@ GLUniformBuffer* GLUniformBufferBuilder::build(const UniformBufferArgs& args, Er
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-Ref<IUniformBuffer> GLUniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* error) const noexcept
+CPPRef<IUniformBuffer> GLUniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* error) const noexcept
 {
     GLUniformBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const Ref<GLUniformBuffer> buffer = Ref<GLUniformBuffer>(new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage));
+    const CPPRef<GLUniformBuffer> buffer = CPPRef<GLUniformBuffer>(new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs.bufferHandle, glArgs.glUsage));
 
     if(!buffer)
     {

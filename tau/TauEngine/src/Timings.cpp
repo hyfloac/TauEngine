@@ -178,7 +178,7 @@ const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept
     return &clockCycles;
 }
 
-static Ref<IFile> _profileFile = null;
+static CPPRef<IFile> _profileFile = null;
 static u32 _profileCount = 0;
 static SRWMutex _mutex;
 

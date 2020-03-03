@@ -53,7 +53,7 @@ DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& a
     ERROR_CODE_V(Error::NoError, sampler);
 }
 
-Ref<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
+CPPRef<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
 {
     D3D10_SAMPLER_DESC d3dSamplerDesc;
     if(!processTextureSamplerArgs(args, &d3dSamplerDesc, error))
@@ -64,7 +64,7 @@ Ref<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSampler
 
     ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
 
-    const Ref<DX10TextureSampler> sampler = Ref<DX10TextureSampler>(new(::std::nothrow) DX10TextureSampler(_ctx, d3dSampler));
+    const CPPRef<DX10TextureSampler> sampler = CPPRef<DX10TextureSampler>(new(::std::nothrow) DX10TextureSampler(_ctx, d3dSampler));
 
     if(!sampler)
     {

@@ -19,22 +19,22 @@ private:
     uSys _index;
     DynString _name;
     DynString _path;
-    Ref<IFileLoader> _loader;
+    CPPRef<IFileLoader> _loader;
 public:
     inline SelectedResource() noexcept
         : _index(0), _name(""), _path(""), _loader(null)
     { }
 
-    inline SelectedResource(const uSys index, const DynString& name, const DynString& path, const Ref<IFileLoader>& fileLoader) noexcept
+    inline SelectedResource(const uSys index, const DynString& name, const DynString& path, const CPPRef<IFileLoader>& fileLoader) noexcept
         : _index(index), _name(name), _path(path), _loader(fileLoader)
     { }
 
     [[nodiscard]] uSys index() const noexcept { return _index; }
     [[nodiscard]] const DynString& name() const noexcept { return _name; }
     [[nodiscard]] const DynString& path() const noexcept { return _path; }
-    [[nodiscard]] const Ref<IFileLoader>& loader() const noexcept { return _loader; }
+    [[nodiscard]] const CPPRef<IFileLoader>& loader() const noexcept { return _loader; }
 
-    [[nodiscard]] Ref<IFile> loadFile(FileProps props) const noexcept;
+    [[nodiscard]] CPPRef<IFile> loadFile(FileProps props) const noexcept;
 private:
     friend class ResourceSelectorLoader;
 };
@@ -79,9 +79,9 @@ private:
     using RST = IResourceSelectorTransformer;
 private:
     RefDynArray<SelectedResource> _files;
-    const Ref<RST> _rst;
+    const CPPRef<RST> _rst;
 public:
-    ResourceSelector(const RefDynArray<SelectedResource>& files, const Ref<RST>& rst) noexcept
+    ResourceSelector(const RefDynArray<SelectedResource>& files, const CPPRef<RST>& rst) noexcept
         : _files(files), _rst(rst)
     { }
 
@@ -102,9 +102,9 @@ private:
 private:
     static DynString _cacheDir;
 private:
-    static RefDynArray<SelectedResource> loadFiles(const char* vfsMount, const char* path, const char* filename, const Ref<RST>& rst) noexcept;
+    static RefDynArray<SelectedResource> loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept;
 public:
-    [[nodiscard]] static ResourceSelector load(const char* vfsMount, const char* path, const char* filename, const Ref<RST>& rst) noexcept
+    [[nodiscard]] static ResourceSelector load(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
     { return ResourceSelector(loadFiles(vfsMount, path, filename, rst), rst); }
 
     static void setCacheDirectory(const DynString& cacheDir) noexcept
@@ -126,12 +126,12 @@ class Lexer final
     DEFAULT_DESTRUCT(Lexer);
     DEFAULT_COPY(Lexer);
 private:
-    Ref<IFile> _file;
+    CPPRef<IFile> _file;
     Token _currentToken;
     DynString _currentString;
     char _currentChar;
 public:
-    inline Lexer(const Ref<IFile>& file) noexcept
+    inline Lexer(const CPPRef<IFile>& file) noexcept
         : _file(file), _currentToken(Token::Unknown), _currentString(""), _currentChar('\0')
     { }
 

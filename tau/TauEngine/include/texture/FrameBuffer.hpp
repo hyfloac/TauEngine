@@ -36,17 +36,17 @@ public:
 protected:
     u32 _width;
     u32 _height;
-    Ref<ITexture> _texture;
+    CPPRef<ITexture> _texture;
     IFrameBufferAttachment* _next;
 protected:
-    inline IFrameBufferAttachment(const u32 width, const u32 height, const Ref<ITexture>& texture) noexcept
+    inline IFrameBufferAttachment(const u32 width, const u32 height, const CPPRef<ITexture>& texture) noexcept
         : _width(width), _height(height), _texture(texture), _next(nullptr)
     { }
 public:
     virtual ~IFrameBufferAttachment() noexcept;
 
-    [[nodiscard]] const Ref<ITexture>& texture() const noexcept { return _texture; }
-    [[nodiscard]] Ref<ITexture>& texture() noexcept { return _texture; }
+    [[nodiscard]] const CPPRef<ITexture>& texture() const noexcept { return _texture; }
+    [[nodiscard]] CPPRef<ITexture>& texture() noexcept { return _texture; }
 
     [[nodiscard]] const IFrameBufferAttachment* next() const noexcept { return _next; }
     [[nodiscard]] IFrameBufferAttachment*& next() noexcept { return _next; }

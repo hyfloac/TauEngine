@@ -19,7 +19,7 @@
 #include <shader/bundle/ShaderBundleParser.hpp>
 #include <shader/bundle/PrintShaderBundleVisitor.hpp>
 #include <shader/bundle/ast/ExprAST.hpp>
-#include <maths/GlmMatrixTransformExt.hpp>
+#include <maths/glmExt/GlmMatrixTransformExt.hpp>
 
 #include "gl/GLUtils.hpp"
 
@@ -34,7 +34,7 @@ class UniformAccessor<DX10Application::Uniforms> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const DX10Application::Uniforms& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const DX10Application::Uniforms& t) noexcept
     {
         const float r = static_cast<float>(t.color.r) / 255.0f;
         const float g = static_cast<float>(t.color.g) / 255.0f;
@@ -61,7 +61,7 @@ public:
 
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 3; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const DX10Application::Matrices& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const DX10Application::Matrices& t) noexcept
     {
         buffer->beginModification(context);
         // buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, &t.dxProjection);
@@ -139,12 +139,21 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     UNUSED(async);
 
-    const Ref<IFile> testShader = VFS::Instance().openFile("|res/shader/TestShader.tausi", FileProps::Read);
+    const CPPRef<IFile> testShader = VFS::Instance().openFile("|res/shader/TestShader.tausi", FileProps::Read);
     ShaderBundleLexer lexer(testShader);
     ShaderBundleParser parser(lexer);
 
     auto ast = parser.parse();
-    PrintShaderBundleVisitor visitor;
+
+    PrintSBVArgs pArgs;
+    pArgs.indentCount = 4;
+    pArgs.indentChar = PrintSBVArgs::Spaces;
+    pArgs.newLineChar = PrintSBVArgs::LF;
+    pArgs.tessCtrlName = PrintSBVArgs::TessellationControl;
+    pArgs.tessEvalName = PrintSBVArgs::TessellationEvaluation;
+    pArgs.pixelName = PrintSBVArgs::Fragment;
+    pArgs.braces = PrintSBVArgs::SameLine;
+    PrintShaderBundleVisitor visitor(&pArgs);
     ast->visit(visitor);
 
     TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
@@ -204,13 +213,13 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.elementCount = 4;
     bufBuilder.initialBuffer = positionsSquare;
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-    const Ref<IBuffer> posBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
+    const CPPRef<IBuffer> posBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
 
     IndexBufferArgs indiceArgs;
     indiceArgs.usage = EBuffer::UsageType::StaticDraw;
     indiceArgs.elementCount = 6;
     indiceArgs.initialBuffer = indicesSquare;
-    const Ref<IIndexBuffer> indices = ctx().createIndexBuffer().buildCPPRef(indiceArgs, null);
+    const CPPRef<IIndexBuffer> indices = ctx().createIndexBuffer().buildCPPRef(indiceArgs, null);
 
     float colorsSquare[4 * 4] = {
         1.0f, 0.0f, 0.0f, 1.0f,
@@ -222,7 +231,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.initialBuffer = colorsSquare;
     bufBuilder.descriptor.reset(1);
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
-    const Ref<IBuffer> colorBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
+    const CPPRef<IBuffer> colorBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
 
     float texCoords[2 * 4] = {
         1.0f, 0.0f,
@@ -234,9 +243,9 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.initialBuffer = texCoords;
     bufBuilder.descriptor.reset(1);
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
-    const Ref<IBuffer> texBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
+    const CPPRef<IBuffer> texBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
 
-    Ref<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(3);
+    CPPRef<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(3);
 
     vaBuilder->setVertexBuffer(0, posBuffer);
     vaBuilder->setVertexBuffer(1, colorBuffer);
@@ -245,7 +254,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     vaBuilder->shader(vertexShader);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
-    _va = Ref<IVertexArray>(vaBuilder->build());
+    _va = CPPRef<IVertexArray>(vaBuilder->build());
 
     _uni = new UniformBlockS<Uniforms>(ctx().createUniformBuffer(), RGBAColor { 0, 0, 0, 0 });
     _matrices = new UniformBlockS<Matrices>(ctx().createUniformBuffer());
@@ -267,14 +276,14 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    Ref<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
-    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateMissingTexture(ctx())));
-    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
-    uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 5)));
-    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateWhiteTexture(ctx())));
-    // uploaderBuilder->texture(Ref<ITexture>(TextureLoader::generateNormalTexture(ctx())));
+    CPPRef<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
+    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateMissingTexture(ctx())));
+    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
+    uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 5)));
+    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateWhiteTexture(ctx())));
+    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(ctx())));
     uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
-    _texUploader = Ref<ISingleTextureUploader>(uploaderBuilder->build());
+    _texUploader = CPPRef<ISingleTextureUploader>(uploaderBuilder->build());
 
     TimingsWriter::end();
     TimingsWriter::begin("DX10Test::Runtime", "|TERes/perfRuntime.json");
@@ -426,7 +435,7 @@ void DX10Application::setupConfig() noexcept
 {
     if(VFS::Instance().fileExists(CONFIG_PATH))
     {
-        Ref<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
+        CPPRef<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
         Config tmp = { false, 0, 0 };
         const i32 read = configFile->readType(&tmp);
         if(read != sizeof(tmp))
@@ -446,7 +455,7 @@ void DX10Application::setupConfig() noexcept
 
 void DX10Application::writeConfig() noexcept
 {
-    Ref<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
+    CPPRef<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
     if(file)
     {
         file->writeBytes(reinterpret_cast<u8*>(&_config), sizeof(_config));

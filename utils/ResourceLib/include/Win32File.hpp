@@ -73,7 +73,7 @@ public:
 class Win32FileLoader final : public IFileLoader
 {
 public:
-    static Ref<Win32FileLoader>& Instance() noexcept;
+    static CPPRef<Win32FileLoader>& Instance() noexcept;
 private:
     Win32FileLoader(const Win32FileLoader& copy) noexcept = delete;
     Win32FileLoader(Win32FileLoader&& move) noexcept = delete;
@@ -87,9 +87,9 @@ public:
 
     [[nodiscard]] bool fileExists(const char* path) const noexcept override;
 
-    [[nodiscard]] Ref<IFile> load(const char* path, FileProps props) const noexcept override;
+    [[nodiscard]] CPPRef<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    [[nodiscard]] Ref<Win32File> load2(const char* path, FileProps props) const noexcept
+    [[nodiscard]] CPPRef<Win32File> load2(const char* path, FileProps props) const noexcept
     { return RefCast<Win32File>(load(path, props)); }
 
     [[nodiscard]] bool createFolder(const char* path) const noexcept override;

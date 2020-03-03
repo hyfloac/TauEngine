@@ -31,7 +31,7 @@ struct GlyphCharacter final
     DEFAULT_COPY(GlyphCharacter);
     DEFAULT_DESTRUCT(GlyphCharacter);
 public:
-    Ref<ITexture> texture;
+    CPPRef<ITexture> texture;
     Vector2f size;
     Vector2f bearing; // Offset from baseline to left/top of glyph
     u32      advance; // Offset to advance to next glyph
@@ -99,16 +99,16 @@ private:
 
     std::vector<GlyphSet> _glyphSets;
 
-    Ref<IShaderProgram> _shader;
-    Ref<IVertexArray> _va;
-    Ref<IBuffer> _positionBuffer;
+    CPPRef<IShaderProgram> _shader;
+    CPPRef<IVertexArray> _va;
+    CPPRef<IBuffer> _positionBuffer;
     UniformBlockS<ProjectionUniforms> _viewUniforms;
     UniformBlockS<ColorUniforms> _colorUniforms;
-    Ref<ISingleTextureUploader> _textureUploader;
-    // Ref<IBuffer> _translationBuffer;
-    // Ref<IUniform<const glm::mat4&>> _projUni;
-    // Ref<IUniform<int>> _texUni;
-    // Ref<IUniform<const Vector3f&>> _colorUni;
+    CPPRef<ISingleTextureUploader> _textureUploader;
+    // CPPRef<IBuffer> _translationBuffer;
+    // CPPRef<IUniform<const glm::mat4&>> _projUni;
+    // CPPRef<IUniform<int>> _texUni;
+    // CPPRef<IUniform<const Vector3f&>> _colorUni;
     //
 public:
     TextHandler(IRenderingContext& context, const char* vfsMount, const char* path, const char* vertexName, const char* pixelName) noexcept;

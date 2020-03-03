@@ -31,32 +31,32 @@ public:
         TEXTURE_SIZES_DONT_MATCH
     };
 public:
-    static void setMissingTexture(const Ref<ITexture>& missingTexture) noexcept;
-    static Ref<ITexture> getMissingTexture() noexcept;
+    static void setMissingTexture(const CPPRef<ITexture>& missingTexture) noexcept;
+    static CPPRef<ITexture> getMissingTexture() noexcept;
 
-    static Ref<ITexture> generateMissingTexture(IRenderingContext& context) noexcept;
+    static CPPRef<ITexture> generateMissingTexture(IRenderingContext& context) noexcept;
 
-    static Ref<ITexture> generateDebugTexture8(IRenderingContext& context, uSys power) noexcept;
-    static Ref<ITexture> generateDebugTexture16(IRenderingContext& context, uSys power) noexcept;
-    static Ref<ITexture> generateDebugTexture(IRenderingContext& context, const uSys power) noexcept
+    static CPPRef<ITexture> generateDebugTexture8(IRenderingContext& context, uSys power) noexcept;
+    static CPPRef<ITexture> generateDebugTexture16(IRenderingContext& context, uSys power) noexcept;
+    static CPPRef<ITexture> generateDebugTexture(IRenderingContext& context, const uSys power) noexcept
     { return generateDebugTexture8(context, power); }
 	
-    static Ref<ITexture> generateColorTexture(IRenderingContext& context, RGBColor color) noexcept;
+    static CPPRef<ITexture> generateColorTexture(IRenderingContext& context, RGBColor color) noexcept;
 
-    static Ref<ITexture> generateWhiteTexture(IRenderingContext& context) noexcept
+    static CPPRef<ITexture> generateWhiteTexture(IRenderingContext& context) noexcept
     { return generateColorTexture(context, { 255, 255, 255 }); }
 
-    static Ref<ITexture> generateBlackTexture(IRenderingContext& context) noexcept
+    static CPPRef<ITexture> generateBlackTexture(IRenderingContext& context) noexcept
     { return generateColorTexture(context, { 0, 0, 0 }); }
 
-    static Ref<ITexture> generateNormalTexture(IRenderingContext& context) noexcept
+    static CPPRef<ITexture> generateNormalTexture(IRenderingContext& context) noexcept
     { return generateColorTexture(context, { 127, 127, 255 }); }
 
-    static Ref<ITexture> loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
-    static Ref<ITexture> loadTexture(IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = null) noexcept
+    static CPPRef<ITexture> loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
+    static CPPRef<ITexture> loadTexture(IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = null) noexcept
     { return loadTextureEx(context, fileName, -1, error); }
 
-    static Ref<ITextureCube> loadTextureCubeEx(IRenderingContext & context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
-    static Ref<ITextureCube> loadTextureCube(IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = null) noexcept
+    static CPPRef<ITextureCube> loadTextureCubeEx(IRenderingContext & context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
+    static CPPRef<ITextureCube> loadTextureCube(IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = null) noexcept
     { return loadTextureCubeEx(context, folderPath, fileExtension, -1, error); }
 };

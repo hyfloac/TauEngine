@@ -50,8 +50,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     PERF();
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
@@ -64,8 +64,11 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
     Mouse::setVisible(false);
 
-    setupDebugCallback(this);
-    filterDebugOutput(GLDebugSeverity::Notification, false);
+    if(RenderingMode::getGlobalMode().isOpenGL())
+    {
+        setupDebugCallback(this);
+        filterDebugOutput(GLDebugSeverity::Notification, false);
+    }
 
     _window->renderingContext()->setVSync(_config.vsync);
 
@@ -91,7 +94,10 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 void TauEditorApplication::finalize() noexcept
 {
     TimingsWriter::end();
-    stopDebugOutput();
+    if(RenderingMode::getGlobalMode().isOpenGL())
+    {
+        stopDebugOutput();
+    }
 }
 
 void TauEditorApplication::onException(ExceptionData& ex) noexcept
@@ -145,7 +151,7 @@ void TauEditorApplication::setupConfig() noexcept
     PERF();
     if(VFS::Instance().fileExists(CONFIG_PATH))
     {
-        Ref<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
+        CPPRef<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
         Config tmp = { false, 0, 0 };
         const i32 read = configFile->readBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
         if(read != sizeof(tmp))
@@ -166,7 +172,7 @@ void TauEditorApplication::setupConfig() noexcept
 void TauEditorApplication::writeConfig() noexcept
 {
     PERF();
-    Ref<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
+    CPPRef<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
     if(file)
     {
         file->writeBytes(reinterpret_cast<u8*>(&_config), sizeof(_config));

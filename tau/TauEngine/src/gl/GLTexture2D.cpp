@@ -86,13 +86,13 @@ GLTexture2D* GLTexture2DBuilder::build(const TextureArgs& args, Error* error, Ta
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITexture> GLTexture2DBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+CPPRef<ITexture> GLTexture2DBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
 {
     GLTextureArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const Ref<GLTexture2D> texture = Ref<GLTexture2D>(new(std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.textureHandle));
+    const CPPRef<GLTexture2D> texture = CPPRef<GLTexture2D>(new(std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.textureHandle));
 
     if(!texture)
     {
@@ -105,13 +105,13 @@ Ref<ITexture> GLTexture2DBuilder::buildCPPRef(const TextureArgs& args, Error* er
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-NullableReferenceCountingPointer<ITexture> GLTexture2DBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<ITexture> GLTexture2DBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLTextureArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    NullableReferenceCountingPointer<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+    NullableRef<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
@@ -121,16 +121,16 @@ NullableReferenceCountingPointer<ITexture> GLTexture2DBuilder::buildTauRef(const
 
     texture->set(0, args.initialBuffer);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
-NullableStrongReferenceCountingPointer<ITexture> GLTexture2DBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITexture> GLTexture2DBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLTextureArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    NullableStrongReferenceCountingPointer<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+    NullableStrongRef<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
@@ -140,7 +140,7 @@ NullableStrongReferenceCountingPointer<ITexture> GLTexture2DBuilder::buildTauSRe
 
     texture->set(0, args.initialBuffer);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
 bool GLTexture2DBuilder::processArgs(const TextureArgs& args, GLTextureArgs* glArgs, Error* error) noexcept
@@ -169,9 +169,9 @@ GLNullTexture* GLTextureNullBuilder::build(const TextureArgs& args, Error* error
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITexture> GLTextureNullBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+CPPRef<ITexture> GLTextureNullBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
 {
-    const Ref<GLNullTexture> texture = Ref<GLNullTexture>(new(std::nothrow) GLNullTexture);
+    const CPPRef<GLNullTexture> texture = CPPRef<GLNullTexture>(new(std::nothrow) GLNullTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -228,13 +228,13 @@ GLDepthTexture* GLTextureDepthBuilder::build(const TextureArgs& args, Error* err
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITexture> GLTextureDepthBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
+CPPRef<ITexture> GLTextureDepthBuilder::buildCPPRef(const TextureArgs& args, Error* error) const noexcept
 {
     GLTextureArgs glArgs;
     if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
     { return null; }
 
-    const Ref<GLDepthTexture> texture = Ref<GLDepthTexture>(new(std::nothrow) GLDepthTexture(args.width, args.height, args.dataFormat, glArgs.textureHandle));
+    const CPPRef<GLDepthTexture> texture = CPPRef<GLDepthTexture>(new(std::nothrow) GLDepthTexture(args.width, args.height, args.dataFormat, glArgs.textureHandle));
 
     if(!texture)
     {
@@ -247,13 +247,13 @@ Ref<ITexture> GLTextureDepthBuilder::buildCPPRef(const TextureArgs& args, Error*
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-NullableReferenceCountingPointer<ITexture> GLTextureDepthBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<ITexture> GLTextureDepthBuilder::buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLTextureArgs glArgs;
     if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
     { return null; }
 
-    NullableReferenceCountingPointer<GLDepthTexture> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+    NullableRef<GLDepthTexture> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
@@ -263,16 +263,16 @@ NullableReferenceCountingPointer<ITexture> GLTextureDepthBuilder::buildTauRef(co
 
     texture->set(0, args.initialBuffer);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
-NullableStrongReferenceCountingPointer<ITexture> GLTextureDepthBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITexture> GLTextureDepthBuilder::buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLTextureArgs glArgs;
     if(!GLTexture2DBuilder::processArgs(args, &glArgs, error))
     { return null; }
 
-    NullableStrongReferenceCountingPointer<GLDepthTexture> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+    NullableStrongRef<GLDepthTexture> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
@@ -282,7 +282,7 @@ NullableStrongReferenceCountingPointer<ITexture> GLTextureDepthBuilder::buildTau
 
     texture->set(0, args.initialBuffer);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<ITexture>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITexture>(texture));
 }
 
 GLint GLTexture2D::glFilterType(const ETexture::Filter filterType) noexcept

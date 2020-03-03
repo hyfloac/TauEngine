@@ -32,7 +32,7 @@ public:
     [[nodiscard]] bool has64BitInt() noexcept override { return false; }
     [[nodiscard]] bool has16BitInt() noexcept override { return false; }
 
-    [[nodiscard]] RefDynArray<Ref<IGraphicsDisplay>> graphicsDisplays() noexcept override;
+    [[nodiscard]] RefDynArray<CPPRef<IGraphicsDisplay>> graphicsDisplays() noexcept override;
 };
 
 class TAU_DLL DX10GraphicsAcceleratorBuilder final

@@ -50,9 +50,9 @@ i64 Win32File::writeBytes(const u8* buffer, const uSys len) noexcept
     return written;
 }
 
-Ref<Win32FileLoader>& Win32FileLoader::Instance() noexcept
+CPPRef<Win32FileLoader>& Win32FileLoader::Instance() noexcept
 {
-    static Ref<Win32FileLoader> instance = Ref<Win32FileLoader>(new Win32FileLoader);
+    static CPPRef<Win32FileLoader> instance = CPPRef<Win32FileLoader>(new Win32FileLoader);
     return instance;
 }
 
@@ -62,7 +62,7 @@ bool Win32FileLoader::fileExists(const char* const path) const noexcept
     return !(GetFileAttributesA(path) == INVALID_FILE_ATTRIBUTES && GetLastError() == ERROR_FILE_NOT_FOUND);
 }
 
-Ref<IFile> Win32FileLoader::load(const char* const path, const FileProps props) const noexcept
+CPPRef<IFile> Win32FileLoader::load(const char* const path, const FileProps props) const noexcept
 {
     HANDLE file;
     if(props == FileProps::Read)
@@ -105,7 +105,7 @@ Ref<IFile> Win32FileLoader::load(const char* const path, const FileProps props) 
         return nullptr;
     }
 
-    return Ref<Win32File>(new Win32File(file, path, props));
+    return CPPRef<Win32File>(new Win32File(file, path, props));
 }
 
 bool Win32FileLoader::createFolder(const char* const path) const noexcept

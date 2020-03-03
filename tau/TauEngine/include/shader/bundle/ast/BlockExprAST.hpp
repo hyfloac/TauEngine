@@ -7,7 +7,8 @@
 
 enum class BlockType
 {
-    Vertex = 1,
+    Global = 0,
+    Vertex,
     TessellationControl,
     TessellationEvaluation,
     Geometry,
@@ -15,7 +16,9 @@ enum class BlockType
     Uniforms,
     Textures,
     Inputs,
-    Outputs
+    Outputs,
+    STAGE_BLOCK_BEGIN = Vertex,
+    STAGE_BLOCK_END = Pixel
 };
 
 class TAU_DLL BlockExprAST : public ExprAST

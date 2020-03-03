@@ -13,12 +13,12 @@
 //     DEFAULT_DESTRUCT(MaterialUniforms);
 //     DEFAULT_COPY(MaterialUniforms);
 // private:
-//     Ref<IUniform<float>> _specularExponentUni;
-//     Ref<IUniform<int>> _diffuseSamplerUni;
-//     Ref<IUniform<int>> _specularSamplerUni;
-//     Ref<IUniform<int>> _normalSamplerUni;
+//     CPPRef<IUniform<float>> _specularExponentUni;
+//     CPPRef<IUniform<int>> _diffuseSamplerUni;
+//     CPPRef<IUniform<int>> _specularSamplerUni;
+//     CPPRef<IUniform<int>> _normalSamplerUni;
 // public:
-//     MaterialUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
+//     MaterialUniforms(const CPPRef<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
 // private:
 //     friend class Material;
 // };
@@ -30,9 +30,9 @@ class Material final
     DEFAULT_COPY(Material);
 private:
     float _specularExponent;
-    Ref<ITextureUploader> _textureUploader;
+    CPPRef<ITextureUploader> _textureUploader;
 private:
-    inline Material(const float specularExponent, const Ref<ITextureUploader>& textureUploader) noexcept
+    inline Material(const float specularExponent, const CPPRef<ITextureUploader>& textureUploader) noexcept
         : _specularExponent(specularExponent), _textureUploader(textureUploader)
     { }
 public:
@@ -51,20 +51,20 @@ class MaterialBuilder final
 private:
     IRenderingContext& _ctx;
     float _specularExponent;
-    Ref<ITexture> _diffuseTexture;
-    Ref<ITexture> _specularTexture;
-    Ref<ITexture> _normalTexture;
-    Ref<ITextureSampler> _textureSampler;
+    CPPRef<ITexture> _diffuseTexture;
+    CPPRef<ITexture> _specularTexture;
+    CPPRef<ITexture> _normalTexture;
+    CPPRef<ITextureSampler> _textureSampler;
 public:
     inline MaterialBuilder(IRenderingContext& context) noexcept
         : _ctx(context), _specularExponent(1.0f)
     { }
 
     inline void specularExponent(const float specularExponent) noexcept { _specularExponent = specularExponent; }
-    inline void diffuseTexture(const Ref<ITexture>& diffuseTexture) noexcept { _diffuseTexture = diffuseTexture; }
-    inline void specularTexture(const Ref<ITexture>& specularTexture) noexcept { _specularTexture = specularTexture; }
-    inline void normalTexture(const Ref<ITexture>& normalTexture) noexcept { _normalTexture = normalTexture; }
-    inline void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
+    inline void diffuseTexture(const CPPRef<ITexture>& diffuseTexture) noexcept { _diffuseTexture = diffuseTexture; }
+    inline void specularTexture(const CPPRef<ITexture>& specularTexture) noexcept { _specularTexture = specularTexture; }
+    inline void normalTexture(const CPPRef<ITexture>& normalTexture) noexcept { _normalTexture = normalTexture; }
+    inline void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
 
     [[nodiscard]] Material build() const noexcept;
 
@@ -82,7 +82,7 @@ class UniformAccessor<Material> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const Material& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Material& t) noexcept
     {
         buffer->modifyBuffer(0, sizeof(float), &t._specularExponent);
     }

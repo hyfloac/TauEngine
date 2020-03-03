@@ -37,7 +37,7 @@ class UniformAccessor final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(_T); }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const _T& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const _T& t) noexcept
     { buffer->fillBuffer(context, reinterpret_cast<const void*>(&t)); }
 };
 
@@ -54,7 +54,7 @@ class UniformBlock<_T, UniformBlockBinding::UBB_Upload> final
     DEFAULT_DESTRUCT(UniformBlock);
     DEFAULT_COPY(UniformBlock);
 private:
-    Ref<IUniformBuffer> _buffer;
+    CPPRef<IUniformBuffer> _buffer;
 public:
     inline UniformBlock(const IUniformBufferBuilder& builder) noexcept
         : _buffer(null)
@@ -88,7 +88,7 @@ template<typename _T>
 class UniformBlock<_T, UniformBlockBinding::UBB_Store> final
 {
 private:
-    Ref<IUniformBuffer> _buffer;
+    CPPRef<IUniformBuffer> _buffer;
     _T _t;
 public:
     template<typename... _Args>
@@ -122,7 +122,7 @@ template<typename _T>
 class UniformBlock<_T, UniformBlockBinding::UBB_Bind> final
 {
 private:
-    Ref<IUniformBuffer> _buffer;
+    CPPRef<IUniformBuffer> _buffer;
     const _T* _t;
 public:
     UniformBlock(const IUniformBufferBuilder& builder, const _T* t) noexcept
@@ -180,17 +180,24 @@ public:
      */
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 2 + (4 * 4); }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const _ExampleUniform& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const _ExampleUniform& t) noexcept
     {
-        buffer->modifyBuffer(context, 0, MATRIX_SIZE, glm::value_ptr(t.projectionMatrix));
-        buffer->modifyBuffer(context, MATRIX_SIZE, MATRIX_SIZE, glm::value_ptr(t.viewMatrix));
+        buffer->beginModification(context);
+        buffer->modifyBuffer(0, MATRIX_SIZE, glm::value_ptr(t.projectionMatrix));
+        buffer->modifyBuffer(MATRIX_SIZE, MATRIX_SIZE, glm::value_ptr(t.viewMatrix));
 
         const float x = t.cameraPos.x;
         const float y = t.cameraPos.y;
         const float z = t.cameraPos.z;
-        buffer->modifyBuffer(context, MATRIX_SIZE * 2, 4, &x);
-        buffer->modifyBuffer(context, MATRIX_SIZE * 2 + 4, 4, &y);
-        buffer->modifyBuffer(context, MATRIX_SIZE * 2 + 8, 4, &z);
+        buffer->modifyBuffer(MATRIX_SIZE * 2, 4, &x);
+        buffer->modifyBuffer(MATRIX_SIZE * 2 + 4, 4, &y);
+        buffer->modifyBuffer(MATRIX_SIZE * 2 + 8, 4, &z);
+
+        //   We don't need to modify the buffer for the final
+        // virtual element (w). The buffer has already been
+        // padded, and the shader doesn't care about the data.
+
+        buffer->endModification(context);
     }  
 };
 #endif

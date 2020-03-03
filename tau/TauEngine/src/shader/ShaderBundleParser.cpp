@@ -68,15 +68,24 @@ NullableStrongRef<BlockExprAST> ShaderBundleParser::parseBlock() noexcept
             blockType = BlockType::Pixel;
             break;
         case SBPToken::UniformsBlock:
+            if(_currentBlock < BlockType::STAGE_BLOCK_BEGIN || _currentBlock > BlockType::STAGE_BLOCK_END)
+            { return null; }
             blockType = BlockType::Uniforms;
             break;
         case SBPToken::TexturesBlock:
+            // if(_currentBlock < BlockType::STAGE_BLOCK_BEGIN || _currentBlock > BlockType::STAGE_BLOCK_END)
+            if(_currentBlock != BlockType::Uniforms)
+            { return null; }
             blockType = BlockType::Textures;
             break;
         case SBPToken::InputsBlock:
+            if(_currentBlock != BlockType::Vertex)
+            { return null; }
             blockType = BlockType::Inputs;
             break;
         case SBPToken::OutputsBlock:
+            if(_currentBlock != BlockType::Pixel)
+            { return null; }
             blockType = BlockType::Outputs;
             break;
         case SBPToken::Identifier:
@@ -88,6 +97,7 @@ NullableStrongRef<BlockExprAST> ShaderBundleParser::parseBlock() noexcept
         default: return null;
     }
 
+    _currentBlock = blockType;
     const NullableStrongRef<TypedBlockExprAST> typedBlock(DefaultTauAllocator::Instance(), null, null, blockType);
     parseNextBlockEntry(RCPCast<BlockExprAST>(typedBlock));
     return RCPCast<BlockExprAST>(typedBlock);

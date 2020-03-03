@@ -33,7 +33,7 @@
 //           _currAttrib(0)
 //     { }
 //
-//     void addAttribute(Ref<IBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept override final;
+//     void addAttribute(CPPRef<IBuffer> buffer, u32 size, DataType type, bool normalized, i32 stride, const void* pointer) noexcept override final;
 //
 //     void bind(IRenderingContext& context) noexcept override final;
 //

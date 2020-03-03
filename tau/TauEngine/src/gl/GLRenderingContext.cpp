@@ -12,6 +12,7 @@
 #include "gl/GLTextureSampler.hpp"
 #include "gl/GLTextureUploader.hpp"
 #include "gl/GLBufferDescriptor.hpp"
+#include "gl/GLDepthStencilState.hpp"
 
 #include "gl/GLBuffer.hpp"
 #include "gl/gl4_5/GLBuffer4_5.hpp"
@@ -24,7 +25,9 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
       _majorVersion(majorVersion),
       _minorVersion(minorVersion),
       _compat(core),
-      _forwardCompatible(forwardCompatible)
+      _forwardCompatible(forwardCompatible),
+      _defaultDepthStencilState(null),
+      _currentDepthStencilState(null)
 {
     switch(_mode.currentMode())
     {
@@ -56,6 +59,7 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
     _textureNullBuilder = new(::std::nothrow) GLTextureNullBuilder;
     _textureDepthBuilder = new(::std::nothrow) GLTextureDepthBuilder;
     _textureCubeBuilder = new(::std::nothrow) GLTextureCubeBuilder;
+    _depthStencilStateBuilder = new(::std::nothrow) GLDepthStencilStateBuilder;
 }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
@@ -89,9 +93,39 @@ void GLRenderingContext::enableDepthWriting(bool writing) noexcept
     glDepthMask(writing ? GL_TRUE : GL_FALSE);
 }
 
-Ref<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
+NullableRef<IDepthStencilState> GLRenderingContext::setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept
 {
-    return Ref<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
+    NullableRef<IDepthStencilState> ret = RefCast<IDepthStencilState>(_currentDepthStencilState);
+
+    if(!dsState || !RTT_CHECK(dsState.get(), GLDepthStencilState))
+    { return ret; }
+
+    _currentDepthStencilState = RefCast<GLDepthStencilState>(dsState);
+    _currentDepthStencilState->apply();
+
+    return ret;
+}
+
+void GLRenderingContext::setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept
+{
+    if(!dsState || !RTT_CHECK(dsState.get(), GLDepthStencilState))
+    { return; }
+
+    _defaultDepthStencilState = RefCast<GLDepthStencilState>(dsState);
+}
+
+void GLRenderingContext::resetDepthStencilState() noexcept
+{
+    _currentDepthStencilState = _defaultDepthStencilState;
+    _currentDepthStencilState->apply();
+}
+
+const DepthStencilParams& GLRenderingContext::getDefaultDepthStencilStateParams() noexcept
+{ return _defaultDepthStencilState->params(); }
+
+CPPRef<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
+{
+    return CPPRef<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
 }
 
 IBufferBuilder& GLRenderingContext::createBuffer() noexcept
@@ -103,9 +137,9 @@ IIndexBufferBuilder& GLRenderingContext::createIndexBuffer() noexcept
 IUniformBufferBuilder& GLRenderingContext::createUniformBuffer() noexcept
 { return *_uniformBufferBuilder; }
 
-Ref<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
+CPPRef<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
 {
-    return Ref<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
+    return CPPRef<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
 }
 
 ITextureBuilder& GLRenderingContext::createTexture2D() noexcept
@@ -123,15 +157,18 @@ ITextureCubeBuilder& GLRenderingContext::createTextureCube() noexcept
 ITextureSamplerBuilder& GLRenderingContext::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
 
-Ref<ITextureUploaderBuilder> GLRenderingContext::createTextureUploader(const uSys textureCount) noexcept
+CPPRef<ITextureUploaderBuilder> GLRenderingContext::createTextureUploader(const uSys textureCount) noexcept
 {
-    return Ref<GLTextureUploaderBuilder>(new(::std::nothrow) GLTextureUploaderBuilder(textureCount, *this));
+    return CPPRef<GLTextureUploaderBuilder>(new(::std::nothrow) GLTextureUploaderBuilder(textureCount, *this));
 }
 
-Ref<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUploader() noexcept
+CPPRef<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUploader() noexcept
 {
-    return Ref<GLSingleTextureUploaderBuilder>(new(::std::nothrow) GLSingleTextureUploaderBuilder(*this));
+    return CPPRef<GLSingleTextureUploaderBuilder>(new(::std::nothrow) GLSingleTextureUploaderBuilder(*this));
 }
 
 IShaderBuilder& GLRenderingContext::createShader() noexcept
 { return *_shaderBuilder; }
+
+IDepthStencilStateBuilder& GLRenderingContext::createDepthStencilState() noexcept
+{ return *_depthStencilStateBuilder; }

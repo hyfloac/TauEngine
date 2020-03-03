@@ -45,7 +45,7 @@ class TAU_DLL IModelLoader
 public:
     virtual ~IModelLoader() noexcept = default;
 
-    virtual Ref<Model> load(const char* path) const noexcept = 0;
+    virtual CPPRef<Model> load(const char* path) const noexcept = 0;
 private:
     IModelLoader() noexcept = default;
 

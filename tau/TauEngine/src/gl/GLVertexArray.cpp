@@ -21,7 +21,7 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, const GLuint vao, const DrawType drawType, /*const RefDynArray<Ref<IBuffer>>& buffers,*/ const Ref<GLIndexBuffer>& indexBuffer, const GLuint attribCount)
+GLVertexArray::GLVertexArray(const u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, const GLuint vao, const DrawType drawType, /*const RefDynArray<CPPRef<IBuffer>>& buffers,*/ const CPPRef<GLIndexBuffer>& indexBuffer, const GLuint attribCount)
     : IVertexArray(drawCount, buffers), _vao(vao), _glDrawType(glDrawType(drawType)), /*_buffers(buffers),*/ _indexBuffer(indexBuffer), _attribCount(attribCount)
 { }
 
@@ -123,7 +123,7 @@ void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanc
     }
 }
 
-void GLVertexArrayBuilder::setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept
+void GLVertexArrayBuilder::setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept
 {
     if(RTT_CHECK(vertexBuffer.get(), GLBuffer))
     {
@@ -131,7 +131,7 @@ void GLVertexArrayBuilder::setVertexBuffer(uSys index, const Ref<IBuffer>& verte
     }
 }
 
-void GLVertexArrayBuilder::indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept
+void GLVertexArrayBuilder::indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept
 {
     if(!indexBuffer)
     {
@@ -145,7 +145,7 @@ void GLVertexArrayBuilder::indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noe
     }
 }
 
-// void GLVertexArrayBuilder::inputLayout(const Ref<IInputLayout>& inputLayout) noexcept
+// void GLVertexArrayBuilder::inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept
 // {
 //     if(RTT_CHECK(inputLayout.get(), GLInputLayout))
 //     {

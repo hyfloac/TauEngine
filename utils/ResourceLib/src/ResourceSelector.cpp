@@ -29,7 +29,7 @@ static ParseData nullParse() noexcept
 
 static ParseData parseBinaryCache(const VFS::Container& con) noexcept;
 static ParseData parseBinaryFile(const VFS::Container& con) noexcept;
-static ParseData parseTextFile(const VFS::Container& con, const Ref<RST>& rst) noexcept;
+static ParseData parseTextFile(const VFS::Container& con, const CPPRef<RST>& rst) noexcept;
 static void writeCache(const VFS::Container& con, const ParseData& parseData, uSys lastModifyTim) noexcept;
 // ReSharper disable once CppDeclaratorNeverUsed
 static void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept;
@@ -45,7 +45,7 @@ template<typename _T>
 static bool _fileExists(const VFS::Container& con) noexcept
 { return con.fileLoader->fileExists(con.path); }
 
-static Ref<IFile> _loadFile(const VFS::Container& con, const FileProps props = FileProps::Read) noexcept
+static CPPRef<IFile> _loadFile(const VFS::Container& con, const FileProps props = FileProps::Read) noexcept
 { return con.fileLoader->load(con.path, props); }
 
 static u64 _creationTime(const VFS::Container& con) noexcept
@@ -54,10 +54,10 @@ static u64 _creationTime(const VFS::Container& con) noexcept
 static u64 _modifyTime(const VFS::Container& con) noexcept
 { return con.fileLoader->modifyTime(con.path); }
 
-Ref<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
+CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
 { return _loader->load(_path, props); }
 
-RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const Ref<RST>& rst) noexcept
+RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
 {
     const VFS::Container cacheDir = VFS::Instance().resolvePath(_cacheDir, path);
     if(!cacheDir.fileLoader->createFolders(cacheDir.path))
@@ -132,7 +132,7 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
     return ret;
 }
 
-static RefDynArray<SelectorBundle> parseBinaryData(const Ref<IFile>& file) noexcept
+static RefDynArray<SelectorBundle> parseBinaryData(const CPPRef<IFile>& file) noexcept
 {
     uSys numEntries;
     file->readType(&numEntries);
@@ -166,7 +166,7 @@ static RefDynArray<SelectorBundle> parseBinaryData(const Ref<IFile>& file) noexc
     return bundles;
 }
 
-static void writeBinaryData(const Ref<IFile>& file, const ParseData& parseData) noexcept
+static void writeBinaryData(const CPPRef<IFile>& file, const ParseData& parseData) noexcept
 {
     const uSys numEntries = parseData.resources.count();
     file->writeType(numEntries);
@@ -186,7 +186,7 @@ static constexpr u16 BinaryVersion = 0;
 
 ParseData parseBinaryCache(const VFS::Container& con) noexcept
 {
-    const Ref<IFile> cacheFile = _loadFile(con);
+    const CPPRef<IFile> cacheFile = _loadFile(con);
     const i64 size = cacheFile->size();
 
     if(size < 0 || static_cast<uSys>(size) < sizeof(u32) + sizeof(u64) + sizeof(uSys))
@@ -212,7 +212,7 @@ ParseData parseBinaryCache(const VFS::Container& con) noexcept
 
 ParseData parseBinaryFile(const VFS::Container& con) noexcept
 {
-    const Ref<IFile> binaryFile = _loadFile(con);
+    const CPPRef<IFile> binaryFile = _loadFile(con);
     const i64 size = binaryFile->size();
 
     if(size < 0 || static_cast<uSys>(size) < sizeof(u32) + sizeof(u16) + sizeof(uSys))
@@ -251,12 +251,12 @@ struct TextParseKV final
     { }
 };
 
-ParseData parseTextFile(const VFS::Container& con, const Ref<RST>& rst) noexcept
+ParseData parseTextFile(const VFS::Container& con, const CPPRef<RST>& rst) noexcept
 {
     using Token = _ResourceSelector::Token;
     using Lexer = _ResourceSelector::Lexer;
 
-    const Ref<IFile> textFile = _loadFile(con);
+    const CPPRef<IFile> textFile = _loadFile(con);
     Lexer lexer(textFile);
 
     ArrayList<TextParseKV> entries;
@@ -295,7 +295,7 @@ ParseData parseTextFile(const VFS::Container& con, const Ref<RST>& rst) noexcept
 
 void writeCache(const VFS::Container& con, const ParseData& parseData, const uSys lastModifyTime) noexcept
 {
-    const Ref<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
+    const CPPRef<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
 
     cacheFile->writeType(CacheHeader);
     cacheFile->writeType(CacheVersion);
@@ -306,7 +306,7 @@ void writeCache(const VFS::Container& con, const ParseData& parseData, const uSy
 
 void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept
 {
-    const Ref<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
+    const CPPRef<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
 
     cacheFile->writeType(BinaryHeader);
     cacheFile->writeType(BinaryVersion);

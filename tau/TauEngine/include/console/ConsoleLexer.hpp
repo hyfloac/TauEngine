@@ -72,12 +72,12 @@ union TokenVal final
 class TAU_DLL Lexer final
 {
 private:
-    Ref<IFile> _file;
+    CPPRef<IFile> _file;
     Token _lastToken;
     TokenVal _lastTokenVal;
     char _lastChar;
 public:
-    Lexer(Ref<IFile> file) noexcept
+    Lexer(CPPRef<IFile> file) noexcept
         : _file(std::move(file)), _lastToken(), _lastTokenVal(0), _lastChar('\0')
     {
         const int c = file->readChar();

@@ -16,11 +16,11 @@ class TAU_DLL RenderableObject final
     DEFAULT_DESTRUCT(RenderableObject);
     DEFAULT_COPY(RenderableObject);
 private:
-    Ref<IVertexArray> _va;
-    // Ref<ITexture> _diffuseTexture;
-    // Ref<ITexture> _specularTexture;
-    Ref<ITexture> _reflectiveTexture;
-    // Ref<ITexture> _normalTexture;
+    CPPRef<IVertexArray> _va;
+    // CPPRef<ITexture> _diffuseTexture;
+    // CPPRef<ITexture> _specularTexture;
+    CPPRef<ITexture> _reflectiveTexture;
+    // CPPRef<ITexture> _normalTexture;
     // glm::vec3 _ambientColor;
     // glm::vec3 _diffuseColor;
     // glm::vec3 _specularColor;
@@ -28,17 +28,17 @@ private:
     i32 _illumination;
     Material _material;
 public:
-    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const Ref<IShader>& shader, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
+    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
 
     void preRender(IRenderingContext& context) const noexcept;
     void render(IRenderingContext& context) const noexcept;
     void postRender(IRenderingContext& context) const noexcept;
 
-    [[nodiscard]] Ref<IVertexArray> vertexArray() noexcept { return _va; }
-    // [[nodiscard]] Ref<ITexture> diffuseTexture() const noexcept { return _diffuseTexture; }
-    // [[nodiscard]] Ref<ITexture> specularTexture() const noexcept { return _specularTexture; }
-    [[nodiscard]] Ref<ITexture> reflectiveTexture() const noexcept { return _reflectiveTexture; }
-    // [[nodiscard]] Ref<ITexture> normalTexture() const noexcept { return _normalTexture; }
+    [[nodiscard]] CPPRef<IVertexArray> vertexArray() noexcept { return _va; }
+    // [[nodiscard]] CPPRef<ITexture> diffuseTexture() const noexcept { return _diffuseTexture; }
+    // [[nodiscard]] CPPRef<ITexture> specularTexture() const noexcept { return _specularTexture; }
+    [[nodiscard]] CPPRef<ITexture> reflectiveTexture() const noexcept { return _reflectiveTexture; }
+    // [[nodiscard]] CPPRef<ITexture> normalTexture() const noexcept { return _normalTexture; }
     // [[nodiscard]] glm::vec3 ambientColor() const noexcept { return _ambientColor; }
     // [[nodiscard]] glm::vec3 diffuseColor() const noexcept { return _diffuseColor; }
     // [[nodiscard]] glm::vec3 specularColor() const noexcept { return _specularColor; }

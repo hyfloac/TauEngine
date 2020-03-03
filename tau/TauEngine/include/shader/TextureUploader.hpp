@@ -30,15 +30,15 @@ class TAU_DLL NOVTABLE ISingleTextureUploader
     DEFAULT_DESTRUCT_VI(ISingleTextureUploader);
     DELETE_COPY(ISingleTextureUploader);
 protected:
-    Ref<ITexture> _texture;
-    Ref<ITextureSampler> _textureSampler;
+    CPPRef<ITexture> _texture;
+    CPPRef<ITextureSampler> _textureSampler;
 protected:
-    ISingleTextureUploader(const Ref<ITexture>& texture, const Ref<ITextureSampler>& textureSampler) noexcept
+    ISingleTextureUploader(const CPPRef<ITexture>& texture, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : _texture(texture), _textureSampler(textureSampler)
     { }
 public:
-    void texture(const Ref<ITexture>& texture) noexcept { _texture = texture; }
-    void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
+    void texture(const CPPRef<ITexture>& texture) noexcept { _texture = texture; }
+    void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
 
     virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
 
@@ -50,10 +50,10 @@ class TAU_DLL NOVTABLE ITextureUploader
     DEFAULT_DESTRUCT_VI(ITextureUploader);
     DELETE_COPY(ITextureUploader);
 protected:
-    RefDynArray<Ref<ITexture>> _textures;
-    Ref<ITextureSampler> _textureSampler;
+    RefDynArray<CPPRef<ITexture>> _textures;
+    CPPRef<ITextureSampler> _textureSampler;
 protected:
-    ITextureUploader(const RefDynArray<Ref<ITexture>>& textures, const Ref<ITextureSampler>& textureSampler) noexcept
+    ITextureUploader(const RefDynArray<CPPRef<ITexture>>& textures, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : _textures(textures), _textureSampler(textureSampler)
     { }
 public:
@@ -90,19 +90,19 @@ public:
          SystemMemoryAllocationFailure
     };
 protected:
-    Ref<ITexture> _texture;
-    Ref<ITextureSampler> _textureSampler;
+    CPPRef<ITexture> _texture;
+    CPPRef<ITextureSampler> _textureSampler;
 protected:
     inline ISingleTextureUploaderBuilder() noexcept
         : _texture(null), _textureSampler(null)
     { }
 public:
-    virtual void texture(const Ref<ITexture>& texture) noexcept
+    virtual void texture(const CPPRef<ITexture>& texture) noexcept
     {
         _texture = texture;
     }
 
-    virtual void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept
+    virtual void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
     {
         _textureSampler = textureSampler;
     }
@@ -138,14 +138,14 @@ public:
         SystemMemoryAllocationFailure
     };
 protected:
-    RefDynArray<Ref<ITexture>> _textures;
-    Ref<ITextureSampler> _textureSampler;
+    RefDynArray<CPPRef<ITexture>> _textures;
+    CPPRef<ITextureSampler> _textureSampler;
 protected:
     inline ITextureUploaderBuilder(const uSys textureCount) noexcept
         : _textures(textureCount), _textureSampler(null)
     { }
 public:
-    virtual void setTexture(uSys index, const Ref<ITexture>& texture) noexcept
+    virtual void setTexture(uSys index, const CPPRef<ITexture>& texture) noexcept
     {
         if(index < _textures.count())
         {
@@ -153,7 +153,7 @@ public:
         }
     }
 
-    virtual void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept
+    virtual void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
     {
         _textureSampler = textureSampler;
     }

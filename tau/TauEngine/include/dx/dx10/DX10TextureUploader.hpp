@@ -10,7 +10,7 @@ class TAU_DLL DX10SingleTextureUploader final : public ISingleTextureUploader
     DEFAULT_DESTRUCT(DX10SingleTextureUploader);
     DELETE_COPY(DX10SingleTextureUploader);
 public:
-    DX10SingleTextureUploader(const Ref<ITexture>& texture, const Ref<ITextureSampler>& textureSampler) noexcept
+    DX10SingleTextureUploader(const CPPRef<ITexture>& texture, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : ISingleTextureUploader(texture, textureSampler)
     { }
 
@@ -23,7 +23,7 @@ class TAU_DLL DX10TextureUploader final : public ITextureUploader
     DEFAULT_DESTRUCT(DX10TextureUploader);
     DELETE_COPY(DX10TextureUploader);
 public:
-    DX10TextureUploader(const RefDynArray<Ref<ITexture>>& textures, const Ref<ITextureSampler>& textureSampler) noexcept
+    DX10TextureUploader(const RefDynArray<CPPRef<ITexture>>& textures, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : ITextureUploader(textures, textureSampler) 
     { }
 
@@ -42,7 +42,7 @@ public:
         : ISingleTextureUploaderBuilder(), _ctx(ctx)
     { }
 
-    void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept override;
+    void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept override;
 
     [[nodiscard]] ISingleTextureUploader* build(Error* error) noexcept override;
 };
@@ -58,7 +58,7 @@ public:
         : ITextureUploaderBuilder(textureCount), _ctx(ctx)
     { }
 
-    void textureSampler(const Ref<ITextureSampler>& textureSampler) noexcept override;
+    void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept override;
 
     [[nodiscard]] ITextureUploader* build(Error* error) noexcept override;
 };

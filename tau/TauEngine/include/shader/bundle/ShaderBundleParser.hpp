@@ -8,14 +8,17 @@ class BlockExprAST;
 class FileExprAST;
 class ShaderIOPointExprAST;
 
+enum class BlockType;
+
 class TAU_DLL ShaderBundleParser
 {
 private:
     ShaderBundleLexer _lexer;
     NullableStrongRef<ExprAST> _ast;
+    BlockType _currentBlock;
 public:
     inline ShaderBundleParser(const ShaderBundleLexer& lexer) noexcept
-        : _lexer(lexer), _ast(null)
+        : _lexer(lexer), _ast(null), _currentBlock(static_cast<BlockType>(0))
     { }
 
     NullableStrongRef<ExprAST> parse() noexcept;

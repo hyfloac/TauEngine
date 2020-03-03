@@ -15,13 +15,13 @@ private:
     RenderingPipeline& _rp;
     const glm::mat4& _ortho;
 
-    Ref<IVertexArray> _vao;
+    CPPRef<IVertexArray> _vao;
 
-    Ref<IShaderProgram> _shader;
-    // Ref<IUniform<const glm::mat4&>> _viewMatrixUni;
-    // Ref<IUniform<float>> _lineThicknessUni;
-    // Ref<IUniform<const glm::vec4&>> _viewportUni;
-    // Ref<IUniform<float>> _miterLimitUni;
+    CPPRef<IShaderProgram> _shader;
+    // CPPRef<IUniform<const glm::mat4&>> _viewMatrixUni;
+    // CPPRef<IUniform<float>> _lineThicknessUni;
+    // CPPRef<IUniform<const glm::vec4&>> _viewportUni;
+    // CPPRef<IUniform<float>> _miterLimitUni;
 public:
     LineLayer(Window& window, RenderingPipeline& rp, const glm::mat4& ortho) noexcept;
 

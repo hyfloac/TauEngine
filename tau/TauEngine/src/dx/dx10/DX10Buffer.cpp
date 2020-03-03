@@ -235,13 +235,13 @@ DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error, TauAl
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-Ref<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) const noexcept
+CPPRef<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    Ref<DX10Buffer> buffer = Ref<DX10Buffer>(new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
+    CPPRef<DX10Buffer> buffer = CPPRef<DX10Buffer>(new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -352,13 +352,13 @@ DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-Ref<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* error) const noexcept
+CPPRef<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    Ref<DX10IndexBuffer> buffer = Ref<DX10IndexBuffer>(new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
+    CPPRef<DX10IndexBuffer> buffer = CPPRef<DX10IndexBuffer>(new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -467,13 +467,13 @@ DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-Ref<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* error) const noexcept
+CPPRef<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    Ref<DX10UniformBuffer> buffer = Ref<DX10UniformBuffer>(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
+    CPPRef<DX10UniformBuffer> buffer = CPPRef<DX10UniformBuffer>(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();

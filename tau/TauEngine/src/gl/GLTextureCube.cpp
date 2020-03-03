@@ -94,13 +94,13 @@ GLTextureCube* GLTextureCubeBuilder::build(const TextureCubeArgs& args, Error* e
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-Ref<ITextureCube> GLTextureCubeBuilder::buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept
+CPPRef<ITextureCube> GLTextureCubeBuilder::buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept
 {
     GLTextureArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const Ref<GLTextureCube> texture = Ref<GLTextureCube>(new(std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.textureHandle));
+    const CPPRef<GLTextureCube> texture = CPPRef<GLTextureCube>(new(std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.textureHandle));
 
     if(!texture)
     {
@@ -113,13 +113,13 @@ Ref<ITextureCube> GLTextureCubeBuilder::buildCPPRef(const TextureCubeArgs& args,
     ERROR_CODE_V(Error::NoError, texture);
 }
 
-NullableReferenceCountingPointer<ITextureCube> GLTextureCubeBuilder::buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<ITextureCube> GLTextureCubeBuilder::buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLTextureArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    NullableReferenceCountingPointer<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+    NullableRef<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
@@ -129,16 +129,16 @@ NullableReferenceCountingPointer<ITextureCube> GLTextureCubeBuilder::buildTauRef
 
     setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
 
-    ERROR_CODE_V(Error::NoError, RCPCast<ITextureCube>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITextureCube>(texture));
 }
 
-NullableStrongReferenceCountingPointer<ITextureCube> GLTextureCubeBuilder::buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITextureCube> GLTextureCubeBuilder::buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLTextureArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    NullableStrongReferenceCountingPointer<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
+    NullableStrongRef<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.textureHandle);
 
     if(!texture)
     {
@@ -148,7 +148,7 @@ NullableStrongReferenceCountingPointer<ITextureCube> GLTextureCubeBuilder::build
 
     setupInitial(*texture, const_cast<const void**>(args.initialBuffer));
 
-    ERROR_CODE_V(Error::NoError, RCPCast<ITextureCube>(texture));
+    ERROR_CODE_V(Error::NoError, RefCast<ITextureCube>(texture));
 }
 
 bool GLTextureCubeBuilder::processArgs(const TextureCubeArgs& args, GLTextureArgs* glArgs, Error* error) noexcept

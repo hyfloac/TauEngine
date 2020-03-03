@@ -19,7 +19,7 @@ private:
     static constexpr const char* CONFIG_PATH = "|game/config.bin";
     Config _config;
     Window* _window;
-    Ref<spdlog::logger> _logger;
+    CPPRef<spdlog::logger> _logger;
     TERenderer* _renderer;
     State _gameState;
 public:
@@ -27,7 +27,7 @@ public:
 
     ~TauEditorApplication() noexcept override final;
 
-    [[nodiscard]] Ref<spdlog::logger> logger() const noexcept { return _logger; }
+    [[nodiscard]] CPPRef<spdlog::logger> logger() const noexcept { return _logger; }
 
     bool init(int argCount, char* args[]) noexcept override final;
 

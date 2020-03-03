@@ -46,9 +46,9 @@ GLTextureSampler* GLTextureSamplerBuilder::build(const TextureSamplerArgs& args,
     ERROR_CODE_V(Error::NoError, sampler);
 }
 
-Ref<ITextureSampler> GLTextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
+CPPRef<ITextureSampler> GLTextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
 {
-    Ref<GLTextureSampler> const sampler = Ref<GLTextureSampler>(new GLTextureSampler);
+    CPPRef<GLTextureSampler> const sampler = CPPRef<GLTextureSampler>(new GLTextureSampler);
 
     ERROR_CODE_COND_N(!sampler, Error::SystemMemoryAllocationFailure);
 

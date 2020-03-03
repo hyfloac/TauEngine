@@ -43,7 +43,10 @@ class TAU_DLL NOVTABLE IShader
 public:
     using ShaderType = RunTimeType<IShader>;
 public:
-    [[nodiscard]] virtual EShader::Stage shaderType() const noexcept = 0;
+    [[nodiscard]] virtual EShader::Stage shaderStage() const noexcept = 0;
+
+    [[nodiscard]] virtual uSys mapUniform(const uSys virtualIndex) const noexcept { return virtualIndex; }
+    [[nodiscard]] virtual uSys mapTexture(const uSys virtualIndex) const noexcept { return virtualIndex; }
 
     RTT_BASE_IMPL(IShader);
     RTT_BASE_CHECK(IShader);
@@ -100,11 +103,11 @@ public:
         InputLayoutFinalizationFailure
     };
 protected:
-    static Ref<RenderingModeResourceSelectorTransformer> rsTransformer;
+    static CPPRef<RenderingModeResourceSelectorTransformer> rsTransformer;
 public:
     [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual Ref<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

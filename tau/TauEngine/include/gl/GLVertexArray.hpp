@@ -20,11 +20,11 @@ public:
 private:
     GLuint _vao;
     GLenum _glDrawType;
-    // RefDynArray<Ref<IBuffer>> _buffers;
-    Ref<GLIndexBuffer> _indexBuffer;
+    // RefDynArray<CPPRef<IBuffer>> _buffers;
+    CPPRef<GLIndexBuffer> _indexBuffer;
     GLuint _attribCount;
 public:
-    GLVertexArray(u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, GLuint vao, DrawType drawType, /*const RefDynArray<Ref<IBuffer>>& buffers,*/ const Ref<GLIndexBuffer>& indexBuffer, GLuint attribCount);
+    GLVertexArray(u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, GLuint vao, DrawType drawType, /*const RefDynArray<CPPRef<IBuffer>>& buffers,*/ const CPPRef<GLIndexBuffer>& indexBuffer, GLuint attribCount);
 
     ~GLVertexArray() noexcept override;
 
@@ -56,9 +56,9 @@ public:
         : IVertexArrayBuilder(bufferCount), _ctx(ctx)
     { }
 
-    void setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept override;
-    void indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept override;
-    // void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept override;
+    void setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept override;
+    void indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept override;
+    // void inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept override;
 
     [[nodiscard]] GLVertexArray* build([[tau::out]] Error* error) noexcept override;
 };

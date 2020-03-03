@@ -27,7 +27,7 @@ public:
 
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const TextHandler::ProjectionUniforms& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const TextHandler::ProjectionUniforms& t) noexcept
     {
         buffer->fillBuffer(context, glm::value_ptr(t.projectionMatrix));
     }
@@ -42,7 +42,7 @@ class UniformAccessor<TextHandler::ColorUniforms> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const Ref<IUniformBuffer>& buffer, const TextHandler::ColorUniforms& t) noexcept
+    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const TextHandler::ColorUniforms& t) noexcept
     {
         const __m128 vec = t.color.data().vec;
         buffer->fillBuffer(context, reinterpret_cast<const void*>(&vec));
@@ -65,11 +65,11 @@ TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount,
     
     shaderArgs.fileName = vertexName;
     shaderArgs.stage = EShader::Stage::Vertex;
-    Ref<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.fileName = pixelName;
     shaderArgs.stage = EShader::Stage::Pixel;
-    Ref<IShader> pixelShader = context.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = context.createShader().buildCPPRef(shaderArgs, null);
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
@@ -85,9 +85,9 @@ TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount,
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    Ref<ISingleTextureUploaderBuilder> tuBuilder = context.createSingleTextureUploader();
-    tuBuilder->textureSampler(Ref<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
-    _textureUploader = Ref<ISingleTextureUploader>(tuBuilder->build());
+    CPPRef<ISingleTextureUploaderBuilder> tuBuilder = context.createSingleTextureUploader();
+    tuBuilder->textureSampler(CPPRef<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
+    _textureUploader = CPPRef<ISingleTextureUploader>(tuBuilder->build());
 
     BufferArgs bufferBuilder(1);
     bufferBuilder.type = EBuffer::Type::ArrayBuffer;
@@ -113,16 +113,16 @@ TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount,
     bufferBuilder.descriptor.reset(1);
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     
-    const Ref<IBuffer> textureCoordBuffer = context.createBuffer().buildCPPRef(bufferBuilder, null);
+    const CPPRef<IBuffer> textureCoordBuffer = context.createBuffer().buildCPPRef(bufferBuilder, null);
 
-    Ref<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
+    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
     vaBuilder->shader(vertexShader);
     vaBuilder->setVertexBuffer(0, _positionBuffer);
     vaBuilder->setVertexBuffer(1, textureCoordBuffer);
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
 
-    _va = Ref<IVertexArray>(vaBuilder->build());
+    _va = CPPRef<IVertexArray>(vaBuilder->build());
 }
 
 TextHandler::~TextHandler() noexcept
@@ -139,7 +139,7 @@ FT_Error TextHandler::init() noexcept
 TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight) noexcept
 {
     PERF();
-    const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
+    const CPPRef<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
     
     if(!file) { return null; }
     
@@ -165,7 +165,7 @@ struct LoadData final
 int TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight, const ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* const userParam) noexcept
 {
     PERF();
-    const Ref<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
+    const CPPRef<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
 
     if(!file)
     { return -1; }

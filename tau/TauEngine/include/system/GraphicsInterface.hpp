@@ -12,5 +12,5 @@ class TAU_DLL NOVTABLE IGraphicsInterface
     DEFAULT_DESTRUCT_VI(IGraphicsInterface);
     DELETE_COPY(IGraphicsInterface);
 public:
-    [[nodiscard]] virtual RefDynArray<Ref<IGraphicsAccelerator>> graphicsAccelerators() noexcept = 0;
+    [[nodiscard]] virtual RefDynArray<CPPRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept = 0;
 };

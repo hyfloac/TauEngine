@@ -6,6 +6,6 @@
 class TerrainTile
 {
 private:
-    static Ref<IVertexArray> generateTerrain(IRenderingContext& context, float size, uSys edgeVertices) noexcept;
+    static CPPRef<IVertexArray> generateTerrain(IRenderingContext& context, float size, uSys edgeVertices) noexcept;
 public:
 };

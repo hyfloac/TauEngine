@@ -361,13 +361,19 @@ template<typename _T, typename _D = std::default_delete<_T>>
 using Scoped = std::unique_ptr<_T, _D>;
 
 template<typename _T>
-using Ref = std::shared_ptr<_T>;
+using CPPRef = std::shared_ptr<_T>;
 
 template<typename _T>
 using CPPStrongRef = std::shared_ptr<_T>;
 
 template<typename _T>
 using CPPWeakRef = std::weak_ptr<_T>;
+
+template<typename _T>
+using Ref = ReferenceCountingPointer<_T>;
+
+template<typename _T>
+using NullableRef = NullableReferenceCountingPointer<_T>;
 
 template<typename _T>
 using StrongRef = StrongReferenceCountingPointer<_T>;
@@ -382,5 +388,29 @@ template<typename _T>
 using NullableWeakRef = NullableWeakReferenceCountingPointer<_T>;
 
 template<typename _Out, typename _In>
-[[nodiscard]] static inline Ref<_Out> RefCast(const Ref<_In>& in) noexcept
+[[nodiscard]] static inline CPPRef<_Out> RefCast(const CPPRef<_In>& in) noexcept
 { return std::static_pointer_cast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline Ref<_Out> RefCast(const Ref<_In>& in) noexcept
+{ return RCPCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline NullableRef<_Out> RefCast(const NullableRef<_In>& in) noexcept
+{ return RCPCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline StrongRef<_Out> RefCast(const StrongRef<_In>& in) noexcept
+{ return RCPCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline WeakRef<_Out> RefCast(const WeakRef<_In>& in) noexcept
+{ return RCPCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline NullableStrongRef<_Out> RefCast(const NullableStrongRef<_In>& in) noexcept
+{ return RCPCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline NullableWeakRef<_Out> RefCast(const NullableWeakRef<_In>& in) noexcept
+{ return RCPCast<_Out>(in); }

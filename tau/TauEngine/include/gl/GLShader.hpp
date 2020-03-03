@@ -23,7 +23,7 @@ public:
 	
     ~GLShader() noexcept override final;
 
-    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return _shaderType; }
+    [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return _shaderType; }
 
     [[nodiscard]] GLuint shaderId() const noexcept { return _shaderID; }
 
@@ -82,7 +82,7 @@ public:
 
     [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<IShader> buildCPPRef(const ShaderArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] CPPRef<IShader> buildCPPRef(const ShaderArgs& args, Error* error) const noexcept override;
     [[nodiscard]] NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 private:

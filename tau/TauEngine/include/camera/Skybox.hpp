@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/mat4x4.hpp>
 #include <Objects.hpp>
 
 #include "DLL.hpp"
@@ -7,6 +8,7 @@
 #include "texture/Texture.hpp"
 #include "shader/Uniform.hpp"
 #include "shader/TextureUploader.hpp"
+#include "graphics/DepthStencilState.hpp"
 
 class Camera3D;
 class IRenderingContext;
@@ -34,20 +36,22 @@ public:
         { }
     };
 private:
-    Ref<IShaderProgram> _shader;
-    // Ref<IUniform<const glm::mat4&>> _projectionUni;
-    // Ref<IUniform<const glm::mat4&>> _viewUni;
-    // Ref<IUniform<int>> _skyboxUni;
+    CPPRef<IShaderProgram> _shader;
+    // CPPRef<IUniform<const glm::mat4&>> _projectionUni;
+    // CPPRef<IUniform<const glm::mat4&>> _viewUni;
+    // CPPRef<IUniform<int>> _skyboxUni;
     UniformBlockS<Uniforms> _uniforms;
 
-    Ref<ITextureCube> _skybox;
-    Ref<ITextureUploader> _textureUploader;
-    Ref<IVertexArray> _cubeVA;
+    CPPRef<ITextureCube> _skybox;
+    CPPRef<ITextureUploader> _textureUploader;
+    CPPRef<IVertexArray> _cubeVA;
+
+    NullableRef<IDepthStencilState> _skyboxDepthStencilState;
 public:
     Skybox(IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
 
-    [[nodiscard]] Ref<ITextureCube> skybox() const noexcept { return _skybox; }
-    [[nodiscard]] const Ref<ITextureCube>& skybox() noexcept { return _skybox; }
+    [[nodiscard]] CPPRef<ITextureCube> skybox() const noexcept { return _skybox; }
+    [[nodiscard]] const CPPRef<ITextureCube>& skybox() noexcept { return _skybox; }
 
     void render(IRenderingContext& context, const Camera3D& camera) noexcept;
 };

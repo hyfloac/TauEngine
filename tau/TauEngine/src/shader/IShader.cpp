@@ -41,4 +41,4 @@ IResourceSelectorTransformer::ResIndex RenderingModeResourceSelectorTransformer:
     }
 }
 
-Ref<RenderingModeResourceSelectorTransformer> IShaderBuilder::rsTransformer = Ref<RenderingModeResourceSelectorTransformer>(new RenderingModeResourceSelectorTransformer);
+CPPRef<RenderingModeResourceSelectorTransformer> IShaderBuilder::rsTransformer = CPPRef<RenderingModeResourceSelectorTransformer>(new RenderingModeResourceSelectorTransformer);

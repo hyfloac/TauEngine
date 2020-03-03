@@ -114,9 +114,9 @@ void filterDebugOutput(GLDebugSeverity filter, bool allowed) noexcept
     }
 }
 
-static Ref<spdlog::logger> _logger;
+static CPPRef<spdlog::logger> _logger;
 
-void setupDefaultDebugMessageCallback(const Ref<spdlog::logger>& logger, bool synchronous) noexcept
+void setupDefaultDebugMessageCallback(const CPPRef<spdlog::logger>& logger, bool synchronous) noexcept
 {
     _logger = logger;
     setupDebugMessageCallback(openGLDebugErrorDefaultCallback, &_logger, synchronous);
@@ -157,7 +157,7 @@ static void __cdecl openGLDebugErrorDefaultCallback(GLDebugSource source, GLDebu
 {
     UNUSED4(length, userParam, id, message);
 
-    const Ref<spdlog::logger>& logger = *reinterpret_cast<const Ref<spdlog::logger>*>(userParam);
+    const CPPRef<spdlog::logger>& logger = *reinterpret_cast<const CPPRef<spdlog::logger>*>(userParam);
 
 #define STR_CASE_GL(__ENUM, __STR) case __ENUM: str = __STR; break
 #define DEFAULT_CASE default: str = "Unknown"; break

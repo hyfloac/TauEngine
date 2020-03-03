@@ -9,7 +9,7 @@ VFS& VFS::Instance() noexcept
     return instance;
 }
 
-void VFS::mount(const DynString& mountPoint, const DynString& path, const Ref<IFileLoader>& loader, bool canCreateFile, bool canWriteFile)
+void VFS::mount(const DynString& mountPoint, const DynString& path, const CPPRef<IFileLoader>& loader, bool canCreateFile, bool canWriteFile)
 {
     _mountPoints.insert(MountMap::value_type(mountPoint, VFS::Container(path, loader, canCreateFile, canWriteFile)));
 }
@@ -153,7 +153,7 @@ bool VFS::fileExists(const char* path) const noexcept
     return c.fileLoader->fileExists(c.path);
 }
 
-Ref<IFile> VFS::openFile(const char* path, FileProps props) const noexcept
+CPPRef<IFile> VFS::openFile(const char* path, FileProps props) const noexcept
 {
     const VFS::Container physPath = resolvePath(path);
 

@@ -27,9 +27,9 @@ protected:
      *   It is necessary to hold on to a pointer to the
      * buffers to ensure they don't get destroyed.
      */
-    RefDynArray<Ref<IBuffer>> _buffers;
+    RefDynArray<CPPRef<IBuffer>> _buffers;
 protected:
-    inline IVertexArray(uSys drawCount, const RefDynArray<Ref<IBuffer>>& buffers) noexcept
+    inline IVertexArray(uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers) noexcept
         : _drawCount(drawCount), _buffers(buffers)
     { }
 public:
@@ -55,9 +55,9 @@ struct VertexArrayArgs final
     DEFAULT_DESTRUCT(VertexArrayArgs);
     DEFAULT_COPY(VertexArrayArgs);
 public:
-    Ref<IShader> shader;
-    RefDynArray<Ref<IBuffer>> buffers;
-    Ref<IIndexBuffer> indexBuffer;
+    CPPRef<IShader> shader;
+    RefDynArray<CPPRef<IBuffer>> buffers;
+    CPPRef<IIndexBuffer> indexBuffer;
     u32 drawCount;
     DrawType drawType;
 public:
@@ -84,9 +84,9 @@ public:
         InternalError,
     };
 protected:
-    Ref<IShader> _shader;
-    RefDynArray<Ref<IBuffer>> _buffers;
-    Ref<IIndexBuffer> _indexBuffer;
+    CPPRef<IShader> _shader;
+    RefDynArray<CPPRef<IBuffer>> _buffers;
+    CPPRef<IIndexBuffer> _indexBuffer;
     u32 _drawCount;
     DrawType _drawType;
 protected:
@@ -96,20 +96,20 @@ protected:
           _drawCount(0), _drawType(static_cast<DrawType>(0))
     { }
 public:
-    virtual void shader(const Ref<IShader>& shader) noexcept { _shader = shader; }
+    virtual void shader(const CPPRef<IShader>& shader) noexcept { _shader = shader; }
 
-    virtual void setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept { _buffers[index] = vertexBuffer; }
+    virtual void setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept { _buffers[index] = vertexBuffer; }
 
-    virtual void indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept { _indexBuffer = indexBuffer; }
+    virtual void indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept { _indexBuffer = indexBuffer; }
 
-    // virtual void inputLayout(const Ref<IInputLayout>& inputLayout) noexcept { _inputLayout = inputLayout; }
+    // virtual void inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept { _inputLayout = inputLayout; }
 
     virtual void drawCount(u32 drawCount) noexcept { _drawCount = drawCount; }
     virtual void drawType(DrawType drawType) noexcept { _drawType = drawType; }
 
-    [[nodiscard]] const Ref<IBuffer>& getVertexBuffer(uSys index) const noexcept { return _buffers[index]; }
-    [[nodiscard]] const Ref<IIndexBuffer>& indexBuffer() const noexcept { return _indexBuffer; }
-    // [[nodiscard]] const Ref<IInputLayout>& inputLayout() const noexcept { return _inputLayout; }
+    [[nodiscard]] const CPPRef<IBuffer>& getVertexBuffer(uSys index) const noexcept { return _buffers[index]; }
+    [[nodiscard]] const CPPRef<IIndexBuffer>& indexBuffer() const noexcept { return _indexBuffer; }
+    // [[nodiscard]] const CPPRef<IInputLayout>& inputLayout() const noexcept { return _inputLayout; }
     [[nodiscard]] u32 drawCount() const noexcept { return _drawCount; }
     [[nodiscard]] DrawType drawType() const noexcept { return _drawType; }
 

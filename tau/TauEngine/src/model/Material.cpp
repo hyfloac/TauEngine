@@ -16,13 +16,13 @@ TextureIndices& Material::unbind(IRenderingContext& context, UniformBlockU<Mater
 
 Material MaterialBuilder::build() const noexcept
 {
-    Ref<ITextureUploaderBuilder> uploaderBuilder = _ctx.createTextureUploader(3);
+    CPPRef<ITextureUploaderBuilder> uploaderBuilder = _ctx.createTextureUploader(3);
     uploaderBuilder->setTexture(0, _diffuseTexture);
     uploaderBuilder->setTexture(1, _specularTexture);
     uploaderBuilder->setTexture(2, _normalTexture);
     uploaderBuilder->textureSampler(_textureSampler);
 
-    return Material(_specularExponent, Ref<ITextureUploader>(uploaderBuilder->build()));
+    return Material(_specularExponent, CPPRef<ITextureUploader>(uploaderBuilder->build()));
 }
 
 // void Material::set(const MaterialUniforms& uniforms, const int textureBeginIndex) const noexcept

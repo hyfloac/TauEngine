@@ -9,7 +9,7 @@
 #include "dx/dx10/DX10ShaderProgram.hpp"
 #include "dx/dx10/DX10Shader.hpp"
 
-DX10VertexArray::DX10VertexArray(const u32 drawCount, const RefDynArray<Ref<IBuffer>>& buffers, ID3D10InputLayout* const inputLayout, const uSys bufferCount, ID3D10Buffer** const iaBuffers,
+DX10VertexArray::DX10VertexArray(const u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D10InputLayout* const inputLayout, const uSys bufferCount, ID3D10Buffer** const iaBuffers,
                                  UINT* const iaStrides, UINT* const iaOffsets, ID3D10Buffer* const indexBuffer, const DrawType drawType) noexcept
     : IVertexArray(drawCount, buffers), _inputLayout(inputLayout), _iaBufferCount(bufferCount),
       _iaBuffers(iaBuffers), _iaStrides(iaStrides), _iaOffsets(iaOffsets),
@@ -141,7 +141,7 @@ void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys insta
     }
 }
 
-// void DX10VertexArray::addVertexBuffer(IRenderingContext& context, const Ref<IBuffer>& vertexBuffer) noexcept
+// void DX10VertexArray::addVertexBuffer(IRenderingContext& context, const CPPRef<IBuffer>& vertexBuffer) noexcept
 // {
 //     IVertexArray::addVertexBuffer(context, vertexBuffer);
 //
@@ -188,7 +188,7 @@ void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys insta
 //             auto& buffer = _buffers[i];
 //             const BufferDescriptor& descriptor = buffer->descriptor();
 //
-//             Ref<DX10Buffer> dxBuffer = RefCast<DX10Buffer>(buffer);
+//             CPPRef<DX10Buffer> dxBuffer = RefCast<DX10Buffer>(buffer);
 //
 //             for(uSys j = 0; j < descriptor.elements().size(); ++j)
 //             {
@@ -359,7 +359,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
         auto& buffer = _buffers[i];
         auto& elements = buffer->descriptor().elements();
 
-        Ref<DX10Buffer> dxBuffer = RefCast<DX10Buffer>(buffer);
+        CPPRef<DX10Buffer> dxBuffer = RefCast<DX10Buffer>(buffer);
 
         iaBuffers[i] = dxBuffer->d3dBuffer();
         iaStrides[i] = dxBuffer->descriptor().stride();
@@ -424,21 +424,21 @@ static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElem
     }
 }
 
-void DX10VertexArrayBuilder::shader(const Ref<IShader>& shader) noexcept
+void DX10VertexArrayBuilder::shader(const CPPRef<IShader>& shader) noexcept
 {
     if(!shader)
     {
         _shaderBlobCache = null;
         IVertexArrayBuilder::shader(shader);
     }
-    if(shader->shaderType() == EShader::Stage::Vertex && RTT_CHECK(shader.get(), DX10Shader))
+    if(shader->shaderStage() == EShader::Stage::Vertex && RTT_CHECK(shader.get(), DX10Shader))
     {
         _shaderBlobCache = RefCast<DX10VertexShader>(shader)->shaderBlob();
         IVertexArrayBuilder::shader(shader);
     }
 }
 
-void DX10VertexArrayBuilder::setVertexBuffer(uSys index, const Ref<IBuffer>& vertexBuffer) noexcept
+void DX10VertexArrayBuilder::setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept
 {
     if(RTT_CHECK(vertexBuffer.get(), DX10Buffer))
     {
@@ -446,7 +446,7 @@ void DX10VertexArrayBuilder::setVertexBuffer(uSys index, const Ref<IBuffer>& ver
     }
 }
 
-void DX10VertexArrayBuilder::indexBuffer(const Ref<IIndexBuffer>& indexBuffer) noexcept
+void DX10VertexArrayBuilder::indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept
 {
     if(!indexBuffer)
     {

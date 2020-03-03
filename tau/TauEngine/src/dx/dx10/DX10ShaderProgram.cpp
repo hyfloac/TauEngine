@@ -5,17 +5,17 @@
 #include "dx/dx10/DX10Shader.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 
-Ref<DX10VertexShader> DX10ShaderProgram::dxVertexShader() const noexcept
+CPPRef<DX10VertexShader> DX10ShaderProgram::dxVertexShader() const noexcept
 {
     return RefCast<DX10VertexShader>(_vertexShader);
 }
 
-Ref<DX10GeometryShader> DX10ShaderProgram::dxGeometryShader() const noexcept
+CPPRef<DX10GeometryShader> DX10ShaderProgram::dxGeometryShader() const noexcept
 {
     return RefCast<DX10GeometryShader>(_geometryShader);
 }
 
-Ref<DX10PixelShader> DX10ShaderProgram::dxPixelShader() const noexcept
+CPPRef<DX10PixelShader> DX10ShaderProgram::dxPixelShader() const noexcept
 {
     return RefCast<DX10PixelShader>(_pixelShader);
 }
@@ -52,7 +52,7 @@ bool DX10ShaderProgram::link(IRenderingContext& context) noexcept
     return true;
 }
 
-bool DX10ShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) noexcept
+bool DX10ShaderProgram::attach(IRenderingContext& context, CPPRef<IShader> shader) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
@@ -61,7 +61,7 @@ bool DX10ShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) 
     }
     if(RTT_CHECK(shader.get(), DX10Shader))
     {
-        // const Ref<DX10Shader> dxShader = RefCast<DX10Shader>(shader);
+        // const CPPRef<DX10Shader> dxShader = RefCast<DX10Shader>(shader);
         // dxShader->bind(reinterpret_cast<DX10RenderingContext&>(context));
         return true;
     }
@@ -72,25 +72,25 @@ bool DX10ShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) 
     }
 }
 
-void DX10ShaderProgram::detach(IRenderingContext& context, Ref<IShader> shader) noexcept
+void DX10ShaderProgram::detach(IRenderingContext& context, CPPRef<IShader> shader) noexcept
 {
 }
 
 #if 0
   #define GET_DX10_UNIFORM(_FUNC, _TYPE) \
-      Ref<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name) noexcept \
-      { return Ref<IUniform<_TYPE>>(new(std::nothrow) DX10Uniform<_TYPE>(DX10Uniform<_TYPE>::create(_programID, name))); }
+      CPPRef<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name) noexcept \
+      { return CPPRef<IUniform<_TYPE>>(new(std::nothrow) DX10Uniform<_TYPE>(DX10Uniform<_TYPE>::create(_programID, name))); }
   
   #define GET_DX10_UNIFORM_MATRIX(_FUNC, _TYPE) \
-      Ref<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
-      { return Ref<IUniform<_TYPE>>(new(std::nothrow) DX10Uniform<_TYPE>(DX10Uniform<_TYPE>::create(_programID, name), transpose)); }
+      CPPRef<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
+      { return CPPRef<IUniform<_TYPE>>(new(std::nothrow) DX10Uniform<_TYPE>(DX10Uniform<_TYPE>::create(_programID, name), transpose)); }
 #else
   #define GET_DX10_UNIFORM(_FUNC, _TYPE) \
-      Ref<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name) noexcept \
+      CPPRef<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name) noexcept \
       { return null; }
   
   #define GET_DX10_UNIFORM_MATRIX(_FUNC, _TYPE) \
-      Ref<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
+      CPPRef<IUniform<_TYPE>> DX10ShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
       { return null; }
 #endif
 

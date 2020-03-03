@@ -1,6 +1,6 @@
 #include "shader/SpotLight.hpp"
 
-// SpotLightUniforms::SpotLightUniforms(const Ref<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept
+// SpotLightUniforms::SpotLightUniforms(const CPPRef<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept
 // {
 //     _positionUni = shader->getUniformVector<Vector3f>(uniformPrefix.concat("position"));
 //     _directionUni = shader->getUniformVector<Vector3f>(uniformPrefix.concat("direction"));

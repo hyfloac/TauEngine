@@ -28,6 +28,7 @@
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\console\ConsoleController.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Buffer.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10DepthStencilState.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
+    <ClCompile Include="src\gl\GLDepthStencilState.cpp" />
     <ClCompile Include="src\gl\GLTextureCube.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
@@ -113,6 +115,7 @@
     <ClInclude Include="include\console\ConsoleLexer.hpp" />
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Buffer.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10DepthStencilState.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsInterface.hpp" />
@@ -132,8 +135,10 @@
     <ClInclude Include="include\GameRecorder.hpp" />
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
+    <ClInclude Include="include\gl\GLDepthStencilState.hpp" />
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
+    <ClInclude Include="include\gl\GLShaderBundleVisitor.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
     <ClInclude Include="include\gl\GLTextureSampler.hpp" />
     <ClInclude Include="include\gl\GLTextureUploader.hpp" />
@@ -141,6 +146,7 @@
     <ClInclude Include="include\gl\GLUtils.hpp" />
     <ClInclude Include="include\gl\GLBuffer.hpp" />
     <ClInclude Include="include\gl\GLVertexArray.hpp" />
+    <ClInclude Include="include\graphics\DepthStencilState.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />

@@ -19,11 +19,11 @@ GLShaderProgram::~GLShaderProgram() noexcept
     _programID = 0;
 }
 
-bool GLShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) noexcept
+bool GLShaderProgram::attach(IRenderingContext& context, CPPRef<IShader> shader) noexcept
 {
     if(RTT_CHECK(shader.get(), GLShader))
     {
-        const Ref<GLShader> glShader = RefCast<GLShader>(shader);
+        const CPPRef<GLShader> glShader = RefCast<GLShader>(shader);
         glAttachShader(_programID, glShader->shaderId());
         return true;
     }
@@ -34,9 +34,9 @@ bool GLShaderProgram::attach(IRenderingContext& context, Ref<IShader> shader) no
     }
 }
 
-void GLShaderProgram::detach(IRenderingContext& context, Ref<IShader> shader) noexcept
+void GLShaderProgram::detach(IRenderingContext& context, CPPRef<IShader> shader) noexcept
 {
-    const Ref<GLShader> glShader = RefCast<GLShader>(shader);
+    const CPPRef<GLShader> glShader = RefCast<GLShader>(shader);
     glDetachShader(_programID, glShader->shaderId());
 }
 
@@ -105,12 +105,12 @@ bool GLShaderProgram::link(IRenderingContext& context) noexcept
 }
 
 #define GET_GL_UNIFORM(_FUNC, _TYPE) \
-    Ref<IUniform<_TYPE>> GLShaderProgram::_FUNC(const char* name) noexcept \
-    { return Ref<IUniform<_TYPE>>(new(std::nothrow) GLUniform<_TYPE>(GLUniform<_TYPE>::create(_programID, name))); }
+    CPPRef<IUniform<_TYPE>> GLShaderProgram::_FUNC(const char* name) noexcept \
+    { return CPPRef<IUniform<_TYPE>>(new(std::nothrow) GLUniform<_TYPE>(GLUniform<_TYPE>::create(_programID, name))); }
 
 #define GET_GL_UNIFORM_MATRIX(_FUNC, _TYPE) \
-    Ref<IUniform<_TYPE>> GLShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
-    { return Ref<IUniform<_TYPE>>(new(std::nothrow) GLUniform<_TYPE>(GLUniform<_TYPE>::create(_programID, name), transpose)); }
+    CPPRef<IUniform<_TYPE>> GLShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
+    { return CPPRef<IUniform<_TYPE>>(new(std::nothrow) GLUniform<_TYPE>(GLUniform<_TYPE>::create(_programID, name), transpose)); }
 
 // GET_GL_UNIFORM(getUniformBool, bool);
 // GET_GL_UNIFORM(getUniformInt, int);

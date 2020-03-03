@@ -33,7 +33,7 @@ public:
         _shaderBlob->Release();
     }
 
-    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Vertex; }
+    [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Vertex; }
 
     [[nodiscard]] const ID3D10VertexShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10VertexShader* shader() noexcept { return _shader; }
@@ -56,7 +56,7 @@ public:
     ~DX10GeometryShader() noexcept
     { _shader->Release(); }
 
-    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Geometry; }
+    [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Geometry; }
 
     [[nodiscard]] const ID3D10GeometryShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10GeometryShader* shader() noexcept { return _shader; }
@@ -77,7 +77,7 @@ public:
     ~DX10PixelShader() noexcept
     { _shader->Release(); }
 
-    [[nodiscard]] EShader::Stage shaderType() const noexcept override { return EShader::Stage::Pixel; }
+    [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Pixel; }
 
     [[nodiscard]] const ID3D10PixelShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10PixelShader* shader() noexcept { return _shader; }
@@ -109,7 +109,7 @@ public:
 
     [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] Ref<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] CPPRef<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:

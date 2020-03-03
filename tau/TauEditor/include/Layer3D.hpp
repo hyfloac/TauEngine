@@ -50,25 +50,25 @@ private:
     PointLight _pointLight;
     SpotLight _spotLight;
 
-    Ref<IShaderProgram> _shader;
+    CPPRef<IShaderProgram> _shader;
     UniformBlockS<Uniforms> _uniforms;
     UniformBlockU<Material> _materialUniforms;
     UniformBlockU<PointLight> _pointLightUniforms;
     UniformBlockU<SpotLight> _spotLightUniforms;
     UniformBlockS<ViewPosUniforms> _cameraPosUni;
 
-    Ref<IShaderProgram> _frameBufferShader;
-    Ref<ITextureUploader> _frameBufferUploader;
+    CPPRef<IShaderProgram> _frameBufferShader;
+    CPPRef<ITextureUploader> _frameBufferUploader;
 
-    Ref<ITexture> _texture;
-    Ref<ITexture> _overlay;
-    Ref<IFrameBuffer> _frameBuffer;
-    Ref<IVertexArray> _frameBufferVA;
+    CPPRef<ITexture> _texture;
+    CPPRef<ITexture> _overlay;
+    CPPRef<IFrameBuffer> _frameBuffer;
+    CPPRef<IVertexArray> _frameBufferVA;
 
     Vector3f _modelPos;
     glm::mat4 _modelViewMatrix;
 
-    std::vector<Ref<RenderableObject>> _objects;
+    std::vector<CPPRef<RenderableObject>> _objects;
 public:
     Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept;
 

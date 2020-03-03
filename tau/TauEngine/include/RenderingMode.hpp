@@ -97,5 +97,49 @@ public:
         if(it != _changeHandlers.end())
         { _changeHandlers.erase(it); }
     }
+
+    [[nodiscard]] inline bool isOpenGL() const noexcept
+    {
+        switch(_currentMode)
+        {
+            case Mode::OpenGL2:
+            case Mode::OpenGL3:
+            case Mode::OpenGL3_1:
+            case Mode::OpenGL3_2:
+            case Mode::OpenGL3_3:
+            case Mode::OpenGL4:
+            case Mode::OpenGL4_2:
+            case Mode::OpenGL4_3:
+            case Mode::OpenGL4_4:
+            case Mode::OpenGL4_5:
+            case Mode::OpenGL4_6:
+                return true;
+            default: return false;
+        }
+    }
+
+    [[nodiscard]] inline bool isVulkan() const noexcept
+    {
+        switch(_currentMode)
+        {
+            case Mode::Vulkan:
+                return true;
+            default: return false;
+        }
+    }
+
+    [[nodiscard]] inline bool isDirectX() const noexcept
+    {
+        switch(_currentMode)
+        {
+            case DirectX9:
+            case DirectX10:
+            case DirectX11:
+            case DirectX12:
+            case DirectX12_1:
+                return true;
+            default: return false;
+        }
+    }
 };
 

@@ -28,10 +28,10 @@ public:
 public:
     static void update() noexcept;
 
-    static void loadFile(const Ref<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
+    static void loadFile(const CPPRef<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
 
     template<typename _TParse, typename _TFinalize, typename _F>
-    static void loadFileT(const Ref<IFile>& file, parseFileT_f<_TParse, _F> parseFile, _TParse* parseParam, finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* finalizeParam) noexcept
+    static void loadFileT(const CPPRef<IFile>& file, parseFileT_f<_TParse, _F> parseFile, _TParse* parseParam, finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* finalizeParam) noexcept
     {
         loadFile(file,
                  reinterpret_cast<parseFile_f>(parseFile), reinterpret_cast<void*>(parseParam),

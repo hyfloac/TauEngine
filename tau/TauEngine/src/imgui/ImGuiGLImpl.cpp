@@ -16,7 +16,7 @@ void ImGui_ImplGL_Destroy() noexcept { }
 // #include <file/FileUtils.hpp>
 // #pragma warning(pop)
 //
-// static Ref<IShaderProgram> _shader;
+// static CPPRef<IShaderProgram> _shader;
 // // static GLProgram* _program;
 // // static GLShader*  _vertexShader;
 // // static GLShader*  _fragmentShader;
