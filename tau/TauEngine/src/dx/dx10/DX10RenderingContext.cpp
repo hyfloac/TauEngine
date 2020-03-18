@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include "dx/dx10/DX10RenderingContext.hpp"
 
+#include "TauEngine.hpp"
+
 #ifdef _WIN32
 // #include <D3DX10Core.h>
 
@@ -15,25 +17,23 @@
 #include "dx/dx10/DX10Texture.hpp"
 #include "dx/dx10/DX10TextureUploader.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
+#include "dx/dx10/DX10GraphicsInterface.hpp"
 
-DX10RenderingContext::DX10RenderingContext(const RenderingMode& mode) noexcept
-    : IRenderingContext(mode),
-      _d3d10Device(null),
-      _renderTargetView(null),
-      _depthStencilBuffer(null), _depthStencilState(null), _depthStencilView(null),
-      _rasterizerState(null),
-      _swapChain(null),
+DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const NullableRef<DX10DepthStencilState>& initialDepthStencilState, const DX10RenderingContextArgs& args) noexcept
+    : IRenderingContext(gi.renderingMode()), _gi(gi),
+      _renderTargetView(args.renderTargetView),
+      _depthStencilBuffer(args.depthStencilBuffer), _depthStencilView(args.depthStencilView),
+      _rasterizerState(args.rasterizerState),
+      _swapChain(args.swapChain),
       _vsync(false),
-      _defaultDepthStencilState(null), _currentDepthStencilState(null),
+      _defaultDepthStencilState(initialDepthStencilState), _currentDepthStencilState(initialDepthStencilState),
       _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
       _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
-      _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this)),
       _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(*this)),
       _textureNullBuilder(new(::std::nothrow) DX10NullTextureBuilder),
-      _textureCubeBuilder(new(::std::nothrow) DX10TextureCubeBuilder(*this)),
-      _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this))
+      _textureCubeBuilder(new(::std::nothrow) DX10TextureCubeBuilder(*this))
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -44,10 +44,8 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
         (_OBJ) = null; \
     } } while(0)
 
-    RELEASE(_d3d10Device);
     RELEASE(_renderTargetView);
     RELEASE(_depthStencilBuffer);
-    RELEASE(_depthStencilState);
     RELEASE(_depthStencilView);
     RELEASE(_rasterizerState);
     RELEASE(_swapChain);
@@ -62,13 +60,17 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
     RELEASE(_indexBufferBuilder);
     RELEASE(_uniformBufferBuilder);
     RELEASE(_textureSamplerBuilder);
-    RELEASE(_shaderBuilder);
     RELEASE(_texture2DBuilder);
     RELEASE(_textureNullBuilder);
     RELEASE(_textureCubeBuilder);
-    RELEASE(_depthStencilStateBuilder);
 #undef RELEASE
 }
+
+const ID3D10Device* DX10RenderingContext::d3dDevice() const noexcept
+{ return _gi.d3dDevice(); }
+
+ID3D10Device* DX10RenderingContext::d3dDevice() noexcept
+{ return _gi.d3dDevice(); }
 
 bool DX10RenderingContext::createContext(Window& window) noexcept
 {
@@ -79,8 +81,7 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     DXGI_RATIONAL refreshRate = { 0, 1 };
 
     {
-        CPPRef<IGraphicsInterface> graphicsInterface = SystemInterface::get()->createGraphicsInterface(_mode);
-        auto gpuList = graphicsInterface->graphicsAccelerators();
+        auto gpuList = _gi.graphicsAccelerators();
         if(gpuList.count() == 0) { return false; }
 
         auto displayList = gpuList[0]->graphicsDisplays();
@@ -135,7 +136,11 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.Flags = 0;
 
-        CHECK(D3D10CreateDeviceAndSwapChain(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, _mode.debugMode() ? D3D10_CREATE_DEVICE_DEBUG : 0, D3D10_SDK_VERSION, &swapChainDesc, &_swapChain, &_d3d10Device));
+        // CHECK(D3D10CreateDeviceAndSwapChain(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, _mode.debugMode() ? D3D10_CREATE_DEVICE_DEBUG : 0, D3D10_SDK_VERSION, &swapChainDesc, &_swapChain, &_d3dDevice));
+        IDXGIFactory* dxgiFactory;
+        CHECK(CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory)));
+        dxgiFactory->CreateSwapChain(_gi.d3dDevice(), &swapChainDesc, &_swapChain);
+        dxgiFactory->Release();
 
         // D3DX10DebugMute(TRUE);
     }
@@ -145,7 +150,7 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         ID3D10Texture2D* backBufferPtr;
         CHECK(_swapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBufferPtr)));
 
-        CHECK(_d3d10Device->CreateRenderTargetView(backBufferPtr, NULL, &_renderTargetView));
+        CHECK(_gi.d3dDevice()->CreateRenderTargetView(backBufferPtr, NULL, &_renderTargetView));
 
         backBufferPtr->Release();
     }
@@ -165,57 +170,34 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         depthStencilBufferDesc.CPUAccessFlags = 0;
         depthStencilBufferDesc.MiscFlags = 0;
 
-        CHECK(_d3d10Device->CreateTexture2D(&depthStencilBufferDesc, NULL, &_depthStencilBuffer));
+        CHECK(_gi.d3dDevice()->CreateTexture2D(&depthStencilBufferDesc, NULL, &_depthStencilBuffer));
     }
 
     {
-        DepthStencilParams depthStencilParams;
-        depthStencilParams.enableDepthTest = true;
-        depthStencilParams.enableStencilTest = true;
-
-        depthStencilParams.depthWriteMask = DepthStencilParams::DepthWriteMask::All;
-        depthStencilParams.depthCompareFunc = DepthStencilParams::CompareFunc::LessThan;
-
-        depthStencilParams.stencilReadMask = 0xFF;
-        depthStencilParams.stencilWriteMask = 0xFF;
-
-        depthStencilParams.frontFace.failOp = DepthStencilParams::StencilOp::Keep;
-        depthStencilParams.frontFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::IncrementClamp;
-        depthStencilParams.frontFace.passOp = DepthStencilParams::StencilOp::Keep;
-        depthStencilParams.frontFace.compareFunc = DepthStencilParams::CompareFunc::Always;
-
-        depthStencilParams.backFace.failOp = DepthStencilParams::StencilOp::Keep;
-        depthStencilParams.backFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::IncrementClamp;
-        depthStencilParams.backFace.passOp = DepthStencilParams::StencilOp::Keep;
-        depthStencilParams.backFace.compareFunc = DepthStencilParams::CompareFunc::Always;
-
-        NullableRef<IDepthStencilState> dsState = createDepthStencilState().buildTauRef(depthStencilParams, null);
-        _defaultDepthStencilState = RefCast<DX10DepthStencilState>(dsState);
-        _currentDepthStencilState = _defaultDepthStencilState;
+        // DepthStencilParams depthStencilParams {};
+        // depthStencilParams.enableDepthTest = true;
+        // depthStencilParams.enableStencilTest = true;
+        //
+        // depthStencilParams.depthWriteMask = DepthStencilParams::DepthWriteMask::All;
+        // depthStencilParams.depthCompareFunc = DepthStencilParams::CompareFunc::LessThan;
+        //
+        // depthStencilParams.stencilReadMask = 0xFF;
+        // depthStencilParams.stencilWriteMask = 0xFF;
+        //
+        // depthStencilParams.frontFace.failOp = DepthStencilParams::StencilOp::Keep;
+        // depthStencilParams.frontFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::IncrementClamp;
+        // depthStencilParams.frontFace.passOp = DepthStencilParams::StencilOp::Keep;
+        // depthStencilParams.frontFace.compareFunc = DepthStencilParams::CompareFunc::Always;
+        //
+        // depthStencilParams.backFace.failOp = DepthStencilParams::StencilOp::Keep;
+        // depthStencilParams.backFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::DecrementClamp;
+        // depthStencilParams.backFace.passOp = DepthStencilParams::StencilOp::Keep;
+        // depthStencilParams.backFace.compareFunc = DepthStencilParams::CompareFunc::Always;
+        //
+        // NullableRef<IDepthStencilState> dsState = createDepthStencilState().buildTauRef(depthStencilParams, null);
+        // _defaultDepthStencilState = RefCast<DX10DepthStencilState>(dsState);
+        // _currentDepthStencilState = _defaultDepthStencilState;
         _currentDepthStencilState->apply(*this);
-
-        // D3D10_DEPTH_STENCIL_DESC depthStencilDesc;
-        // ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-        // depthStencilDesc.DepthEnable = true;
-        // depthStencilDesc.DepthWriteMask = D3D10_DEPTH_WRITE_MASK_ALL;
-        // depthStencilDesc.DepthFunc = D3D10_COMPARISON_LESS;
-        //
-        // depthStencilDesc.StencilEnable = true;
-        // depthStencilDesc.StencilReadMask = 0xFF;
-        // depthStencilDesc.StencilWriteMask = 0xFF;
-        //
-        // depthStencilDesc.FrontFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
-        // depthStencilDesc.FrontFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
-        // depthStencilDesc.FrontFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
-        // depthStencilDesc.FrontFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
-        //
-        // depthStencilDesc.BackFace.StencilFailOp = D3D10_STENCIL_OP_KEEP;
-        // depthStencilDesc.BackFace.StencilDepthFailOp = D3D10_STENCIL_OP_INCR;
-        // depthStencilDesc.BackFace.StencilPassOp = D3D10_STENCIL_OP_KEEP;
-        // depthStencilDesc.BackFace.StencilFunc = D3D10_COMPARISON_ALWAYS;
-        //
-        // CHECK(_d3d10Device->CreateDepthStencilState(&depthStencilDesc, &_depthStencilState));
-        // _d3d10Device->OMSetDepthStencilState(_depthStencilState, 1);
     }
 
     {
@@ -228,44 +210,44 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
         depthStencilViewDesc[1].ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc[1].Texture2D.MipSlice = 0;
 
-        CHECK(_d3d10Device->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc[0], &_depthStencilView));
-        _d3d10Device->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
+        CHECK(_gi.d3dDevice()->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc[0], &_depthStencilView));
+        _gi.d3dDevice()->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
     }
 
     {
         D3D10_RASTERIZER_DESC rasterDesc;
-        rasterDesc.AntialiasedLineEnable = false;
-        // rasterDesc.CullMode = D3D10_CULL_BACK;
-        rasterDesc.CullMode = D3D10_CULL_NONE;
+        rasterDesc.FillMode = D3D10_FILL_SOLID;
+        rasterDesc.CullMode = D3D10_CULL_BACK;
+        // rasterDesc.CullMode = D3D10_CULL_NONE;
+        rasterDesc.FrontCounterClockwise = true;
         rasterDesc.DepthBias = 0;
         rasterDesc.DepthBiasClamp = 0.0f;
-        rasterDesc.DepthClipEnable = true;
-        rasterDesc.FillMode = D3D10_FILL_SOLID;
-        rasterDesc.FrontCounterClockwise = false;
-        rasterDesc.MultisampleEnable = false;
-        rasterDesc.ScissorEnable = false;
         rasterDesc.SlopeScaledDepthBias = 0.0f;
+        rasterDesc.DepthClipEnable = true;
+        rasterDesc.ScissorEnable = false;
+        rasterDesc.MultisampleEnable = false;
+        rasterDesc.AntialiasedLineEnable = false;
 
-        CHECK(_d3d10Device->CreateRasterizerState(&rasterDesc, &_rasterizerState));
-        _d3d10Device->RSSetState(_rasterizerState);
+        CHECK(_gi.d3dDevice()->CreateRasterizerState(&rasterDesc, &_rasterizerState));
+        _gi.d3dDevice()->RSSetState(_rasterizerState);
     }
 
     {
         D3D10_VIEWPORT viewport = { 0, 0, window.width(), window.height(), 0.0f, 1.0f };
-        _d3d10Device->RSSetViewports(1, &viewport);
+        _gi.d3dDevice()->RSSetViewports(1, &viewport);
     }
 
     return true;
 #undef CHECK
 }
 
-void DX10RenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
+void DX10RenderingContext::updateViewport(const u32 x, const u32 y, const u32 width, const u32 height, const float minZ, const float maxZ) noexcept
 {
     D3D10_VIEWPORT viewport = { static_cast<INT>(x), static_cast<INT>(y), width, height, minZ, maxZ };
-    _d3d10Device->RSSetViewports(1, &viewport);
+    _gi.d3dDevice()->RSSetViewports(1, &viewport);
 }
 
-void DX10RenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
+void DX10RenderingContext::clearScreen(const bool clearColorBuffer, const bool clearDepthBuffer, const bool clearStencilBuffer, const RGBAColor color, const float depthValue, const u8 stencilValue) noexcept
 {
     float colorF[4];
 
@@ -276,7 +258,7 @@ void DX10RenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuf
 
     if(clearColorBuffer)
     {
-        _d3d10Device->ClearRenderTargetView(_renderTargetView, colorF);
+        _gi.d3dDevice()->ClearRenderTargetView(_renderTargetView, colorF);
     }
 
     UINT clearFlags = 0;
@@ -289,7 +271,7 @@ void DX10RenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuf
         clearFlags |= D3D10_CLEAR_STENCIL;
     }
 
-    _d3d10Device->ClearDepthStencilView(_depthStencilView, clearFlags, depthValue, stencilValue);
+    _gi.d3dDevice()->ClearDepthStencilView(_depthStencilView, clearFlags, depthValue, stencilValue);
 }
 
 void DX10RenderingContext::setVSync(bool vsync) noexcept
@@ -333,8 +315,8 @@ void DX10RenderingContext::resetDepthStencilState() noexcept
     _currentDepthStencilState->apply(*this);
 }
 
-const DepthStencilParams& DX10RenderingContext::getDefaultDepthStencilStateParams() noexcept
-{ return _defaultDepthStencilState->params(); }
+const DepthStencilArgs& DX10RenderingContext::getDefaultDepthStencilStateParams() noexcept
+{ return _defaultDepthStencilState->args(); }
 
 void DX10RenderingContext::beginFrame() noexcept
 {
@@ -391,8 +373,218 @@ CPPRef<ISingleTextureUploaderBuilder> DX10RenderingContext::createSingleTextureU
 }
 
 IShaderBuilder& DX10RenderingContext::createShader() noexcept
-{ return *_shaderBuilder; }
+{ return _gi.createShader(); }
 
 IDepthStencilStateBuilder& DX10RenderingContext::createDepthStencilState() noexcept
-{ return *_depthStencilStateBuilder; }
+{ return _gi.createDepthStencilState(); }
+
+DX10RenderingContextBuilder::DX10RenderingContextBuilder(DX10GraphicsInterface& gi) noexcept
+    : _gi(gi)
+{ }
+
+DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* error) noexcept
+{
+    DX10RenderingContextArgs dxArgs{};
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10RenderingContext* const context = new(::std::nothrow) DX10RenderingContext(_gi, RefCast<DX10DepthStencilState>(args.depthStencilState), dxArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, context);
+}
+
+DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    DX10RenderingContextArgs dxArgs{};
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10RenderingContext* const context = allocator.allocateT<DX10RenderingContext>(_gi, RefCast<DX10DepthStencilState>(args.depthStencilState), dxArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, context);
+}
+
+CPPRef<IRenderingContext> DX10RenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* error) noexcept
+{
+    DX10RenderingContextArgs dxArgs{};
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10RenderingContext> context = CPPRef<DX10RenderingContext>(new(::std::nothrow) DX10RenderingContext(_gi, RefCast<DX10DepthStencilState>(args.depthStencilState), dxArgs));
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, context);
+}
+
+NullableRef<IRenderingContext> DX10RenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    DX10RenderingContextArgs dxArgs{};
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10RenderingContext> context(allocator, _gi, RefCast<DX10DepthStencilState>(args.depthStencilState), dxArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
+}
+
+NullableStrongRef<IRenderingContext> DX10RenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    DX10RenderingContextArgs dxArgs{};
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10RenderingContext> context(allocator, _gi, RefCast<DX10DepthStencilState>(args.depthStencilState), dxArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
+}
+
+bool DX10RenderingContextBuilder::processArgs(const RenderingContextArgs& args, DX10RenderingContextArgs* const dxArgs, Error* const error) const noexcept
+{
+    ERROR_CODE_COND_F(!RTT_CHECK(args.depthStencilState.get(), DX10DepthStencilState), Error::IncorrectGraphicsAPI);
+
+#define CHECK(_VAL) do { if(FAILED(_VAL)) { return false; } } while(0)
+
+    HWND hWnd = args.window.sysWindowContainer().windowHandle;
+
+    DXGI_RATIONAL refreshRate = { 0, 1 };
+
+    {
+        auto gpuList = _gi.graphicsAccelerators();
+        if(gpuList.count() == 0) { return false; }
+
+        auto displayList = gpuList[0]->graphicsDisplays();
+        if(displayList.count() == 0) { return false; }
+
+        auto displayModeList = displayList[0]->displayModes();
+        if(displayModeList.count() == 0) { return false; }
+
+        for(uSys i = 0; i < displayModeList.length(); ++i)
+        {
+            if(displayModeList[i].width  == args.window.width() &
+               displayModeList[i].height == args.window.height())
+            {
+                refreshRate.Numerator = displayModeList[i].refreshRateNumerator;
+                refreshRate.Denominator = displayModeList[i].refreshRateDenominator;
+                break;
+            }
+        }
+    }
+
+    {
+        DXGI_SWAP_CHAIN_DESC swapChainDesc;
+        ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+
+        swapChainDesc.BufferCount = 1;
+        swapChainDesc.BufferDesc.Width = args.window.width();
+        swapChainDesc.BufferDesc.Height = args.window.height();
+        swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+        if(args.vsync)
+        {
+            swapChainDesc.BufferDesc.RefreshRate = refreshRate;
+        }
+        else
+        {
+            swapChainDesc.BufferDesc.RefreshRate = { 0, 1 };
+        }
+
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+        swapChainDesc.OutputWindow = hWnd;
+
+        // Disable MSAA
+        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SampleDesc.Quality = 0;
+
+        constexpr bool fullScreen = false;
+        swapChainDesc.Windowed = !fullScreen;
+
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        swapChainDesc.Flags = 0;
+
+        IDXGIFactory* dxgiFactory;
+        CHECK(CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory)));
+        dxgiFactory->CreateSwapChain(_gi.d3dDevice(), &swapChainDesc, &dxArgs->swapChain);
+        dxgiFactory->Release();
+    }
+
+    {
+        // Get pointer to back buffer;
+        ID3D10Texture2D* backBufferPtr;
+        CHECK(dxArgs->swapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBufferPtr)));
+
+        CHECK(_gi.d3dDevice()->CreateRenderTargetView(backBufferPtr, NULL, &dxArgs->renderTargetView));
+
+        backBufferPtr->Release();
+    }
+
+    {
+        D3D10_TEXTURE2D_DESC depthStencilBufferDesc;
+        ZeroMemory(&depthStencilBufferDesc, sizeof(depthStencilBufferDesc));
+        depthStencilBufferDesc.Width = args.window.width();
+        depthStencilBufferDesc.Height = args.window.height();
+        depthStencilBufferDesc.MipLevels = 1;
+        depthStencilBufferDesc.ArraySize = 1;
+        depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilBufferDesc.SampleDesc.Count = 1;
+        depthStencilBufferDesc.SampleDesc.Quality = 0;
+        depthStencilBufferDesc.Usage = D3D10_USAGE_DEFAULT;
+        depthStencilBufferDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
+        depthStencilBufferDesc.CPUAccessFlags = 0;
+        depthStencilBufferDesc.MiscFlags = 0;
+
+        CHECK(_gi.d3dDevice()->CreateTexture2D(&depthStencilBufferDesc, NULL, &dxArgs->depthStencilBuffer));
+    }
+
+    {
+        ERROR_CODE_COND_F(!RTT_CHECK(args.depthStencilState.get(), DX10DepthStencilState), Error::IncorrectGraphicsAPI);
+        RefCast<DX10DepthStencilState>(args.depthStencilState)->apply(_gi.d3dDevice());
+    }
+
+    {
+        D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc[2];
+        ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+        depthStencilViewDesc[0].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc[0].ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc[0].Texture2D.MipSlice = 0;
+        depthStencilViewDesc[1].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc[1].ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc[1].Texture2D.MipSlice = 0;
+
+        CHECK(_gi.d3dDevice()->CreateDepthStencilView(dxArgs->depthStencilBuffer, &depthStencilViewDesc[0], &dxArgs->depthStencilView));
+        _gi.d3dDevice()->OMSetRenderTargets(1, &dxArgs->renderTargetView, dxArgs->depthStencilView);
+    }
+
+    {
+        D3D10_RASTERIZER_DESC rasterDesc;
+        rasterDesc.FillMode = D3D10_FILL_SOLID;
+        rasterDesc.CullMode = D3D10_CULL_BACK;
+        // rasterDesc.CullMode = D3D10_CULL_NONE;
+        rasterDesc.FrontCounterClockwise = true;
+        rasterDesc.DepthBias = 0;
+        rasterDesc.DepthBiasClamp = 0.0f;
+        rasterDesc.SlopeScaledDepthBias = 0.0f;
+        rasterDesc.DepthClipEnable = true;
+        rasterDesc.ScissorEnable = false;
+        rasterDesc.MultisampleEnable = false;
+        rasterDesc.AntialiasedLineEnable = false;
+
+        CHECK(_gi.d3dDevice()->CreateRasterizerState(&rasterDesc, &dxArgs->rasterizerState));
+        _gi.d3dDevice()->RSSetState(dxArgs->rasterizerState);
+    }
+
+    {
+        D3D10_VIEWPORT viewport = { 0, 0, args.window.width(), args.window.height(), 0.0f, 1.0f };
+        _gi.d3dDevice()->RSSetViewports(1, &viewport);
+    }
+
+    return true;
+#undef CHECK
+}
 #endif

@@ -3,7 +3,9 @@
 #include "Timings.hpp"
 
 #ifdef _WIN32
+#include <d3d11.h>
 #include "dx/dx10/DX10RenderingContext.hpp"
+#include "dx/dx11/DX11RenderingContext.hpp"
 #endif
 
 IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
@@ -12,10 +14,10 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
     {
     #ifdef _WIN32
         case RenderingMode::Mode::DirectX9:
-            return null;
         case RenderingMode::Mode::DirectX10:
-            return new(std::nothrow) DX10RenderingContext(mode);
+            return null;
         case RenderingMode::Mode::DirectX11:
+            return new(std::nothrow) DX11RenderingContext(mode);
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
             return null;
@@ -25,32 +27,30 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
         case RenderingMode::Mode::DirectX11:
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
-        return null;
+            return null;
     #endif
         case RenderingMode::Mode::Vulkan:
             return null;
-        case RenderingMode::Mode::OpenGL2:
-            return new(std::nothrow) GLRenderingContext(mode, 2, 0, GLRenderingContext::GLProfile::Neither, false);
         case RenderingMode::Mode::OpenGL3:
-            return new(std::nothrow) GLRenderingContext(mode, 3, 0, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 3, 0, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL3_1:
-            return new(std::nothrow) GLRenderingContext(mode, 3, 1, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 3, 1, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL3_2:
-            return new(std::nothrow) GLRenderingContext(mode, 3, 2, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 3, 2, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL3_3:
-            return new(std::nothrow) GLRenderingContext(mode, 3, 3, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 3, 3, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4:
-            return new(std::nothrow) GLRenderingContext(mode, 4, 0, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 4, 0, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_2:
-            return new(std::nothrow) GLRenderingContext(mode, 4, 2, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 4, 2, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_3:
-            return new(std::nothrow) GLRenderingContext(mode, 4, 3, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 4, 3, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_4:
-            return new(std::nothrow) GLRenderingContext(mode, 4, 4, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 4, 4, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_5:
-            return new(std::nothrow) GLRenderingContext(mode, 4, 5, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 4, 5, GLRenderingContext::GLProfile::Compat, true);
         case RenderingMode::Mode::OpenGL4_6:
-            return new(std::nothrow) GLRenderingContext(mode, 4, 6, GLRenderingContext::GLProfile::Compat, true);
+            // return new(std::nothrow) GLRenderingContext(mode, 4, 6, GLRenderingContext::GLProfile::Compat, true);
         default: return null;
     }
 }

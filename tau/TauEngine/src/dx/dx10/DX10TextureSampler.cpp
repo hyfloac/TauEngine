@@ -6,7 +6,7 @@
 
 void DX10TextureSampler::apply(UINT slot) noexcept
 {
-    _ctx.d3d10Device()->PSSetSamplers(slot, 1, &_samplerState);
+    _ctx.d3dDevice()->PSSetSamplers(slot, 1, &_samplerState);
 }
 
 DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error) const noexcept
@@ -16,7 +16,7 @@ DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& a
     { return null; }
 
     ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3d10Device()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
+    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
 
     ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
 
@@ -38,7 +38,7 @@ DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& a
     { return null; }
 
     ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3d10Device()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
+    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
 
     ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
 
@@ -60,7 +60,7 @@ CPPRef<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSamp
     { return null; }
 
     ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3d10Device()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
+    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
 
     ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
 
@@ -82,7 +82,7 @@ NullableReferenceCountingPointer<ITextureSampler> DX10TextureSamplerBuilder::bui
     { return null; }
 
     ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3d10Device()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
+    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
 
     ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
 
@@ -106,7 +106,7 @@ NullableStrongReferenceCountingPointer<ITextureSampler> DX10TextureSamplerBuilde
     { return null; }
 
     ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3d10Device()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
+    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
 
     ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
 

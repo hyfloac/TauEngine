@@ -2,13 +2,12 @@
 
 #include <TextHandler.hpp>
 #include <layer/LayerStack.hpp>
-#include <ResourceLoader.hpp>
 #include <camera/Camera2D.hpp>
 #include <camera/Camera3D.hpp>
-#include "State.hpp"
 #include <GameRecorder.hpp>
 #include <Timings.hpp>
 
+struct Globals;
 class Window;
 class Vector2f;
 class RenderingPipeline;
@@ -19,27 +18,23 @@ class TERenderer final
 private:
     static constexpr float textScaleConverter = 2.8571428571428571428571428571429f;
 
-    Window& _window;
+    Globals& _globals;
+
     GlyphSetHandle _consolas;
     GlyphSetHandle _consolasBold;
     GlyphSetHandle _consolasItalic;
     GlyphSetHandle _consolasBoldItalic;
     TextHandler* _th;
-    RenderingPipeline* _rp;
-    State& _state;
     Camera2DController _camera;
     Camera3D* _camera3D;
-    GameRecorder _recorder;
 
     LayerStack _layerStack;
 public:
-    TERenderer(Window& window, State& state, bool async) noexcept;
+    TERenderer(Globals& globals) noexcept;
 
     ~TERenderer() noexcept;
 
     [[nodiscard]] TextHandler& textHandler() noexcept { return *_th; }
-
-    [[nodiscard]] RenderingPipeline& renderingPipeline() noexcept { return *_rp; }
 
     [[nodiscard]] const Camera2DController& camera() const noexcept { return _camera; }
     [[nodiscard]] Camera2DController& camera() noexcept { return _camera; }

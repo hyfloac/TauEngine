@@ -2,7 +2,6 @@
 
 #include <layer/ILayer.hpp>
 #include <Objects.hpp>
-#include <RenderingPipeline.hpp>
 #include <vector>
 #include <String.hpp>
 #include <console/ConsoleController.hpp>
@@ -11,6 +10,7 @@
 #include "State.hpp"
 #include "TextHandler.hpp"
 #include "GameRecorder.hpp"
+#include "Globals.hpp"
 
 class Camera2DController;
 class ConsoleLayer;
@@ -20,15 +20,13 @@ class ConsoleLayer final : public ILayer
     DEFAULT_DESTRUCT(ConsoleLayer);
     LAYER_IMPL(ConsoleLayer);
 private:
-    Window& _window;
+    Globals& _globals;
     TextHandler& _th;
     const GlyphSetHandle& _consolas;
     const GlyphSetHandle& _consolasBold;
     const GlyphSetHandle& _consolasItalic;
     const GlyphSetHandle& _consolasBoldItalic;
     const glm::mat4& _ortho;
-    RenderingPipeline& _rp;
-    State& _state;
     Camera3D& _camera;
     float _textScale;
 
@@ -38,7 +36,7 @@ private:
     StringBuilder _inputBuilder;
     bool _columnMarker;
 public:
-    ConsoleLayer(Window& window, GameRecorder& gc, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera3D& camera, float textScale = 1.0f) noexcept;
+    ConsoleLayer(Globals& globals, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, Camera3D& camera, float textScale = 1.0f) noexcept;
 
     void print(const DynString& str) noexcept;
 

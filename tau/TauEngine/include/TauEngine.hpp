@@ -15,7 +15,9 @@
  */
 bool tauInit() noexcept;
 
-void tauMain() noexcept;
+TAU_DLL void tauMain() noexcept;
+
+TAU_DLL void tauFinalize() noexcept;
 
 struct ExceptionData final
 {

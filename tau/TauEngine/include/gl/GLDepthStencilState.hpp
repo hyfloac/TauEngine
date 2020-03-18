@@ -6,24 +6,24 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-struct GLDepthStencilParams final
+struct GLDepthStencilArgs final
 {
-    DEFAULT_CONSTRUCT_PU(GLDepthStencilParams);
-    DEFAULT_DESTRUCT(GLDepthStencilParams);
-    DEFAULT_COPY(GLDepthStencilParams);
+    DEFAULT_CONSTRUCT_PU(GLDepthStencilArgs);
+    DEFAULT_DESTRUCT(GLDepthStencilArgs);
+    DEFAULT_COPY(GLDepthStencilArgs);
 public:
-    struct GLStencilOpParams final
+    struct GLStencilOpArgs final
     {
-        DEFAULT_CONSTRUCT_PU(GLStencilOpParams);
-        DEFAULT_DESTRUCT(GLStencilOpParams);
-        DEFAULT_COPY(GLStencilOpParams);
+        DEFAULT_CONSTRUCT_PU(GLStencilOpArgs);
+        DEFAULT_DESTRUCT(GLStencilOpArgs);
+        DEFAULT_COPY(GLStencilOpArgs);
     public:
         GLenum failOp;
         GLenum stencilPassDepthFailOp;
         GLenum passOp;
         GLenum compareFunc;
     public:
-        GLStencilOpParams(const GLenum failOp, const GLenum stencilPassDepthFailOp, const GLenum passOp, const GLenum compareFunc) noexcept
+        GLStencilOpArgs(const GLenum failOp, const GLenum stencilPassDepthFailOp, const GLenum passOp, const GLenum compareFunc) noexcept
             : failOp(failOp), stencilPassDepthFailOp(stencilPassDepthFailOp),
               passOp(passOp), compareFunc(compareFunc)
         { }
@@ -38,10 +38,10 @@ public:
     GLuint stencilReadMask;
     GLuint stencilWriteMask;
 
-    GLStencilOpParams frontFace;
-    GLStencilOpParams backFace;
+    GLStencilOpArgs frontFace;
+    GLStencilOpArgs backFace;
 public:
-    GLDepthStencilParams(void(* const GLAPIENTRY depthTestControl)(GLenum), void(* const GLAPIENTRY stencilTestControl)(GLenum), const GLboolean depthWriteMask, const GLenum depthCompareFunc, const GLuint stencilReadMask, const GLuint stencilWriteMask, const GLStencilOpParams& frontFace, const GLStencilOpParams& backFace) noexcept
+    GLDepthStencilArgs(void(* const GLAPIENTRY depthTestControl)(GLenum), void(* const GLAPIENTRY stencilTestControl)(GLenum), const GLboolean depthWriteMask, const GLenum depthCompareFunc, const GLuint stencilReadMask, const GLuint stencilWriteMask, const GLStencilOpArgs& frontFace, const GLStencilOpArgs& backFace) noexcept
         : depthTestControl{ depthTestControl },
           stencilTestControl{ stencilTestControl },
           depthWriteMask(depthWriteMask),
@@ -57,9 +57,9 @@ class GLDepthStencilState final : public IDepthStencilState
 {
     DEFAULT_DESTRUCT(GLDepthStencilState);
 private:
-    GLDepthStencilParams _glParams;
+    GLDepthStencilArgs _glParams;
 public:
-    GLDepthStencilState(const DepthStencilParams& params, const GLDepthStencilParams& glParams) noexcept
+    GLDepthStencilState(const DepthStencilArgs& params, const GLDepthStencilArgs& glParams) noexcept
         : IDepthStencilState(params), _glParams(glParams)
     { }
 
@@ -74,13 +74,13 @@ class GLDepthStencilStateBuilder final : public IDepthStencilStateBuilder
     DEFAULT_DESTRUCT(GLDepthStencilStateBuilder);
     DELETE_COPY(GLDepthStencilStateBuilder);
 public:
-    [[nodiscard]] static GLenum glStencilOperation(DepthStencilParams::StencilOp stencilOp) noexcept;
+    [[nodiscard]] static GLenum glStencilOperation(DepthStencilArgs::StencilOp stencilOp) noexcept;
 public:
-    [[nodiscard]] GLDepthStencilState* build(const DepthStencilParams& args, Error* error) const noexcept override;
-    [[nodiscard]] GLDepthStencilState* build(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IDepthStencilState> buildCPPRef(const DepthStencilParams& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IDepthStencilState> buildTauRef(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IDepthStencilState> buildTauSRef(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] GLDepthStencilState* build(const DepthStencilArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] GLDepthStencilState* build(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<IDepthStencilState> buildCPPRef(const DepthStencilArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<IDepthStencilState> buildTauRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<IDepthStencilState> buildTauSRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 private:
-    static bool processArgs(const DepthStencilParams& args, [[tau::out]] GLDepthStencilParams* glArgs, [[tau::out]] Error* error) noexcept;
+    static bool processArgs(const DepthStencilArgs& args, [[tau::out]] GLDepthStencilArgs* glArgs, [[tau::out]] Error* error) noexcept;
 };

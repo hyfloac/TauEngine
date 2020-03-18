@@ -22,7 +22,7 @@ out mat3 fTBN;
 
 layout(std140, binding = 0) uniform CameraMatrices
 {
-    mat4 compoundMatrix;
+    // mat4 compoundMatrix;
     mat4 projectionMatrix;
     mat4 cameraViewMatrix;
     mat4 modelViewMatrix;

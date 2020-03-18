@@ -1,33 +1,36 @@
 #include "dx/dx10/DX10Shader.hpp"
-#include <d3d9.h>
 
 #ifdef _WIN32
 #include <d3dcompiler.h>
 #include <IFile.hpp>
+#include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 
 void DX10VertexShader::bind(DX10RenderingContext& context) noexcept
-{
-    context.d3d10Device()->VSSetShader(_shader);
-}
+{ context.d3dDevice()->VSSetShader(_shader); }
 
 void DX10GeometryShader::bind(DX10RenderingContext& context) noexcept
-{
-    context.d3d10Device()->GSSetShader(_shader);
-}
+{ context.d3dDevice()->GSSetShader(_shader); }
 
 void DX10PixelShader::bind(DX10RenderingContext& context) noexcept
-{
-    context.d3d10Device()->PSSetShader(_shader);
-}
+{ context.d3dDevice()->PSSetShader(_shader); }
 
-DX10ShaderBuilder::DX10ShaderBuilder(DX10RenderingContext& ctx) noexcept
-	: _ctx(ctx), _resIndex(IShaderBuilder::rsTransformer->transform(ctx.mode()))
+void DX10VertexShader::unbind(DX10RenderingContext& context) noexcept
+{ context.d3dDevice()->VSSetShader(NULL); }
+
+void DX10GeometryShader::unbind(DX10RenderingContext& context) noexcept
+{ context.d3dDevice()->GSSetShader(NULL); }
+
+void DX10PixelShader::unbind(DX10RenderingContext& context) noexcept
+{ context.d3dDevice()->PSSetShader(NULL); }
+
+DX10ShaderBuilder::DX10ShaderBuilder(DX10GraphicsInterface& gi) noexcept
+	: _gi(gi), _resIndex(IShaderBuilder::rsTransformer->transform(gi.renderingMode()))
 { }
 
 DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error) const noexcept
 {
-    DXShaderArgs dxArgs;
+    DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
@@ -64,7 +67,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error) const
 
 DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    DXShaderArgs dxArgs;
+    DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
@@ -101,7 +104,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error, TauAl
 
 CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
 {
-    DXShaderArgs dxArgs;
+    DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
@@ -136,9 +139,9 @@ CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* er
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-NullableReferenceCountingPointer<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    DXShaderArgs dxArgs;
+    DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
@@ -146,18 +149,18 @@ NullableReferenceCountingPointer<IShader> DX10ShaderBuilder::buildTauRef(const S
 	if(!objects.vertex)
     { return null; }
 	
-    NullableReferenceCountingPointer<IShader> shader(null);
+    NullableRef<IShader> shader;
 
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPCast<IShader>(NullableReferenceCountingPointer<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RCPCast<IShader>(NullableRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPCast<IShader>(NullableReferenceCountingPointer<DX10GeometryShader>(allocator, objects.geometry));
+            shader = RCPCast<IShader>(NullableRef<DX10GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPCast<IShader>(NullableReferenceCountingPointer<DX10PixelShader>(allocator, objects.pixel));
+            shader = RCPCast<IShader>(NullableRef<DX10PixelShader>(allocator, objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
@@ -173,9 +176,9 @@ NullableReferenceCountingPointer<IShader> DX10ShaderBuilder::buildTauRef(const S
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-NullableStrongReferenceCountingPointer<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    DXShaderArgs dxArgs;
+    DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
@@ -183,18 +186,18 @@ NullableStrongReferenceCountingPointer<IShader> DX10ShaderBuilder::buildTauSRef(
 	if(!objects.vertex)
     { return null; }
 	
-    NullableStrongReferenceCountingPointer<IShader> shader(null);
+    NullableStrongRef<IShader> shader;
 
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPCast<IShader>(NullableStrongReferenceCountingPointer<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RCPCast<IShader>(NullableStrongRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPCast<IShader>(NullableStrongReferenceCountingPointer<DX10GeometryShader>(allocator, objects.geometry));
+            shader = RCPCast<IShader>(NullableStrongRef<DX10GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPCast<IShader>(NullableStrongReferenceCountingPointer<DX10PixelShader>(allocator, objects.pixel));
+            shader = RCPCast<IShader>(NullableStrongRef<DX10PixelShader>(allocator, objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
@@ -239,15 +242,15 @@ DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const S
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            h = _ctx.d3d10Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.vertex);
+            h = _gi.d3dDevice()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.vertex);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Geometry:
-            h = _ctx.d3d10Device()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.geometry);
+            h = _gi.d3dDevice()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.geometry);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Pixel:
-            h = _ctx.d3d10Device()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.pixel);
+            h = _gi.d3dDevice()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.pixel);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::TessellationControl:

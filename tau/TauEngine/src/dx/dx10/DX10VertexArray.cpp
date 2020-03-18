@@ -92,10 +92,10 @@ void DX10VertexArray::preDraw(IRenderingContext& context) noexcept
     }
 
     auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-    dxCtx.d3d10Device()->IASetInputLayout(_inputLayout);
-    dxCtx.d3d10Device()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
-    dxCtx.d3d10Device()->IASetIndexBuffer(_dxIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-    dxCtx.d3d10Device()->IASetPrimitiveTopology(_drawTypeCache);
+    dxCtx.d3dDevice()->IASetInputLayout(_inputLayout);
+    dxCtx.d3dDevice()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
+    dxCtx.d3dDevice()->IASetIndexBuffer(_dxIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    dxCtx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
 void DX10VertexArray::postDraw(IRenderingContext& context) noexcept
@@ -114,11 +114,11 @@ void DX10VertexArray::draw(IRenderingContext& context) noexcept
 
     if(_dxIndexBuffer)
     {
-        dxCtx.d3d10Device()->DrawIndexed(_drawCount, 0, 0);
+        dxCtx.d3dDevice()->DrawIndexed(_drawCount, 0, 0);
     }
     else
     {
-        dxCtx.d3d10Device()->Draw(_drawCount, 0);
+        dxCtx.d3dDevice()->Draw(_drawCount, 0);
     }
 }
 
@@ -133,11 +133,11 @@ void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys insta
 
     if(_dxIndexBuffer)
     {
-        dxCtx.d3d10Device()->DrawIndexedInstanced(_drawCount, instanceCount, 0, 0, 0);
+        dxCtx.d3dDevice()->DrawIndexedInstanced(_drawCount, instanceCount, 0, 0, 0);
     }
     else
     {
-        dxCtx.d3d10Device()->DrawInstanced(_drawCount, instanceCount, 0, 0);
+        dxCtx.d3dDevice()->DrawInstanced(_drawCount, instanceCount, 0, 0);
     }
 }
 
@@ -383,7 +383,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
     }
 
     ID3D10InputLayout* inputLayout;
-    const HRESULT h = _ctx.d3d10Device()->CreateInputLayout(inputElements, inputElements.count(), _shaderBlobCache->GetBufferPointer(), _shaderBlobCache->GetBufferSize(), &inputLayout);
+    const HRESULT h = _ctx.d3dDevice()->CreateInputLayout(inputElements, inputElements.count(), _shaderBlobCache->GetBufferPointer(), _shaderBlobCache->GetBufferSize(), &inputLayout);
 
     if(FAILED(h))
     {

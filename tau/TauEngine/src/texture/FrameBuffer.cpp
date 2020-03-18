@@ -23,7 +23,6 @@ IFrameBufferAttachment* IFrameBufferAttachment::create(IRenderingContext& contex
         #endif
         case RenderingMode::Mode::Vulkan:
             return null;
-        case RenderingMode::Mode::OpenGL2:
         case RenderingMode::Mode::OpenGL3:
         case RenderingMode::Mode::OpenGL3_1:
         case RenderingMode::Mode::OpenGL3_2:

@@ -14,7 +14,7 @@ DX10Texture2D::~DX10Texture2D() noexcept
 
 void DX10Texture2D::set(const u32 level, const void* const data) noexcept
 {
-    _ctx.d3d10Device()->UpdateSubresource(_d3dTexture, D3D10CalcSubresource(level, 0, _mipLevels), NULL, data, _width * ETexture::bytesPerPixel(_dataFormat), 0);
+    _ctx.d3dDevice()->UpdateSubresource(_d3dTexture, D3D10CalcSubresource(level, 0, _mipLevels), NULL, data, _width * ETexture::bytesPerPixel(_dataFormat), 0);
 }
 
 void DX10Texture2D::bind(const u8 textureUnit, const EShader::Stage stage) noexcept
@@ -22,13 +22,13 @@ void DX10Texture2D::bind(const u8 textureUnit, const EShader::Stage stage) noexc
     switch(stage)
     {
         case EShader::Stage::Vertex:
-            _ctx.d3d10Device()->VSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+            _ctx.d3dDevice()->VSSetShaderResources(textureUnit, 1, &_d3dTextureView);
             break;
         case EShader::Stage::Geometry:
-            _ctx.d3d10Device()->GSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+            _ctx.d3dDevice()->GSSetShaderResources(textureUnit, 1, &_d3dTextureView);
             break;
         case EShader::Stage::Pixel:
-            _ctx.d3d10Device()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+            _ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
             break;
         default: return;
     }
@@ -39,7 +39,7 @@ void DX10Texture2D::unbind(u8, EShader::Stage) noexcept
 
 void DX10Texture2D::generateMipmaps() noexcept
 {
-    _ctx.d3d10Device()->GenerateMips(_d3dTextureView);
+    _ctx.d3dDevice()->GenerateMips(_d3dTextureView);
 }
 
 DX10TextureCube::~DX10TextureCube() noexcept
@@ -55,17 +55,17 @@ void DX10TextureCube::bind(const u8 textureUnit, const EShader::Stage stage) noe
     switch(stage)
     {
         case EShader::Stage::Vertex:
-            _ctx.d3d10Device()->VSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+            _ctx.d3dDevice()->VSSetShaderResources(textureUnit, 1, &_d3dTextureView);
             break;
         case EShader::Stage::Geometry:
-            _ctx.d3d10Device()->GSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+            _ctx.d3dDevice()->GSSetShaderResources(textureUnit, 1, &_d3dTextureView);
             break;
         case EShader::Stage::Pixel:
-            _ctx.d3d10Device()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+            _ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
             break;
         default: return;
     }
-    _ctx.d3d10Device()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
+    _ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
 }
 
 void DX10TextureCube::unbind(u8, EShader::Stage) noexcept
@@ -73,12 +73,12 @@ void DX10TextureCube::unbind(u8, EShader::Stage) noexcept
 
 void DX10TextureCube::generateMipmaps() noexcept
 {
-    _ctx.d3d10Device()->GenerateMips(_d3dTextureView);
+    _ctx.d3dDevice()->GenerateMips(_d3dTextureView);
 }
 
 void DX10TextureCube::setCube(const u32 level, const ETexture::CubeSide side, const void* const data) noexcept
 {
-    _ctx.d3d10Device()->UpdateSubresource(_d3dTexture, D3D10CalcSubresource(level, dxCubeSide(side), _mipLevels), NULL, data, _width * ETexture::bytesPerPixel(_dataFormat), 0);
+    _ctx.d3dDevice()->UpdateSubresource(_d3dTexture, D3D10CalcSubresource(level, dxCubeSide(side), _mipLevels), NULL, data, _width * ETexture::bytesPerPixel(_dataFormat), 0);
 }
 
 DX10NullTexture* DX10NullTextureBuilder::build(const TextureArgs& args, Error* error) const noexcept
@@ -231,7 +231,7 @@ bool DX10Texture2DBuilder::processArgs(const TextureArgs& args, DXTextureArgs* d
     initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
     initialDesc.SysMemSlicePitch = 0;
 
-    HRESULT res = _ctx.d3d10Device()->CreateTexture2D(&textureDesc, args.initialBuffer ? &initialDesc : NULL, &dxArgs->d3dTexture);
+    HRESULT res = _ctx.d3dDevice()->CreateTexture2D(&textureDesc, args.initialBuffer ? &initialDesc : NULL, &dxArgs->d3dTexture);
 
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
@@ -241,7 +241,7 @@ bool DX10Texture2DBuilder::processArgs(const TextureArgs& args, DXTextureArgs* d
     viewDesc.Texture2D.MostDetailedMip = 0;
     viewDesc.Texture2D.MipLevels = -1;
 
-    res = _ctx.d3d10Device()->CreateShaderResourceView(dxArgs->d3dTexture, &viewDesc, &dxArgs->d3dTextureView);
+    res = _ctx.d3dDevice()->CreateShaderResourceView(dxArgs->d3dTexture, &viewDesc, &dxArgs->d3dTextureView);
 
     if(FAILED(res))
     {
@@ -370,7 +370,7 @@ bool DX10TextureCubeBuilder::processArgs(const TextureCubeArgs& args, DXTextureC
         initialDesc[i].SysMemSlicePitch = 0;
     }
 
-    HRESULT res = _ctx.d3d10Device()->CreateTexture2D(&textureDesc, args.initialBuffer[0] ? initialDesc : NULL, &dxArgs->d3dTexture);
+    HRESULT res = _ctx.d3dDevice()->CreateTexture2D(&textureDesc, args.initialBuffer[0] ? initialDesc : NULL, &dxArgs->d3dTexture);
 
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
@@ -380,7 +380,7 @@ bool DX10TextureCubeBuilder::processArgs(const TextureCubeArgs& args, DXTextureC
     viewDesc.TextureCube.MostDetailedMip = 0;
     viewDesc.TextureCube.MipLevels = -1;
 
-    res = _ctx.d3d10Device()->CreateShaderResourceView(dxArgs->d3dTexture, &viewDesc, &dxArgs->d3dTextureView);
+    res = _ctx.d3dDevice()->CreateShaderResourceView(dxArgs->d3dTexture, &viewDesc, &dxArgs->d3dTextureView);
 
     if(FAILED(res))
     {

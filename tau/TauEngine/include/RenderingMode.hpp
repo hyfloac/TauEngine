@@ -27,7 +27,6 @@ public:
         DirectX12,
         DirectX12_1,
         Vulkan,
-        OpenGL2,
         OpenGL3,
         OpenGL3_1,
         OpenGL3_2,
@@ -52,7 +51,7 @@ private:
     bool _debugMode;
     std::vector<modeChange_f> _changeHandlers;
 public:
-    RenderingMode(Mode initialMode, bool debugMode = false) noexcept
+    RenderingMode(const Mode initialMode, const bool debugMode = false) noexcept
         : _currentMode(initialMode), _debugMode(debugMode)
     { }
 
@@ -102,7 +101,6 @@ public:
     {
         switch(_currentMode)
         {
-            case Mode::OpenGL2:
             case Mode::OpenGL3:
             case Mode::OpenGL3_1:
             case Mode::OpenGL3_2:

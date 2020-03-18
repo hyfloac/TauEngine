@@ -205,6 +205,10 @@ public:
         : _ptr(nullptr)
     { }
 
+    inline NullableReferenceCountingPointer() noexcept
+        : _ptr(nullptr)
+    { }
+
     inline ~NullableReferenceCountingPointer() noexcept
     {
         if(_ptr && --_ptr->_refCount == 0)
@@ -623,6 +627,10 @@ public:
         : _ptr(nullptr)
     { }
 
+    inline NullableStrongReferenceCountingPointer() noexcept
+        : _ptr(nullptr)
+    { }
+
     inline ~NullableStrongReferenceCountingPointer() noexcept
     {
         if(_ptr && --_ptr->_strongRefCount == 0)
@@ -840,6 +848,10 @@ public:
     { ++_ptr->_weakRefCount; }
 
     inline NullableWeakReferenceCountingPointer(const nullptr_t) noexcept
+        : _ptr(nullptr)
+    { }
+
+    inline NullableWeakReferenceCountingPointer() noexcept
         : _ptr(nullptr)
     { }
 

@@ -15,8 +15,8 @@
 #include <camera/Skybox.hpp>
 #include <shader/PointLight.hpp>
 #include <model/Material.hpp>
-#include "State.hpp"
 #include <shader/SpotLight.hpp>
+#include "Globals.hpp"
 
 class Window;
 class RenderingPipeline;
@@ -41,9 +41,7 @@ public:
         Vector3f cameraPos;
     };
 private:
-    Window& _window;
-    RenderingPipeline& _rp;
-    State& _state;
+    Globals& _globals;
     FreeCamCamera3DController _camera;
     Skybox _skybox;
 
@@ -70,7 +68,7 @@ private:
 
     std::vector<CPPRef<RenderableObject>> _objects;
 public:
-    Layer3D(Window& window, RenderingPipeline& rp, GameRecorder* recorder, State& state) noexcept;
+    Layer3D(Globals& globals) noexcept;
 
     [[nodiscard]] FreeCamCamera3DController& camera() noexcept { return _camera; }
     [[nodiscard]] const FreeCamCamera3DController& camera() const noexcept { return _camera; }

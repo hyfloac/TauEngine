@@ -1,7 +1,7 @@
 #include "dx/dx10/DX10GraphicsDisplay.hpp"
 
 #ifdef _WIN32
-DX10GraphicsDisplay* DX10GraphicsDisplayBuilder::build() const noexcept
+NullableRef<DX10GraphicsDisplay> DX10GraphicsDisplayBuilder::build() const noexcept
 {
 #define CHECK(_VAL) do { if(FAILED(_VAL)) { return null; } } while(0)
 
@@ -21,8 +21,6 @@ DX10GraphicsDisplay* DX10GraphicsDisplayBuilder::build() const noexcept
         displayModeList[i] = { mode.Width, mode.Height, mode.RefreshRate.Numerator, mode.RefreshRate.Denominator };
     }
 
-    DX10GraphicsDisplay* ret = new(::std::nothrow) DX10GraphicsDisplay(_dxgiAdapterOutput, displayModeList);
-
-    return ret;
+    return NullableRef<DX10GraphicsDisplay>(DefaultTauAllocator::Instance(), _dxgiAdapterOutput, displayModeList);
 }
 #endif

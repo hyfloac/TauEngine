@@ -8,6 +8,7 @@
 #include <Safeties.hpp>
 
 class GLRenderingContext;
+class GLGraphicsInterface;
 
 /**
  * Represents an OpenGL shader.
@@ -78,7 +79,7 @@ private:
 private:
     IResourceSelectorTransformer::ResIndex _resIndex;
 public:
-    GLShaderBuilder(GLRenderingContext& ctx) noexcept;
+    GLShaderBuilder(GLGraphicsInterface& ctx) noexcept;
 
     [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;

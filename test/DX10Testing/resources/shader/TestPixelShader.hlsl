@@ -10,8 +10,8 @@ cbuffer ColorUniform : register(b1)
     float4 color;
 };
 
-Texture2D shaderTex;
-SamplerState shaderTexSampler;
+// Texture2D shaderTex;
+// SamplerState shaderTexSampler;
 // {
 //     Filter = MIN_MAG_MIP_POINT;
 //     AddressU = Wrap;
@@ -20,10 +20,10 @@ SamplerState shaderTexSampler;
 
 float4 psMain(PSInput input) : SV_TARGET
 {
-    float4 texel = shaderTex.Sample(shaderTexSampler, input.tex);
+    // float4 texel = shaderTex.Sample(shaderTexSampler, input.tex);
 
-    return texel;
+    // return texel;
     // return float4(input.tex, 0.0f, 1.0f);
     // return input.color * color;
-    // return input.color;
+    return input.color;
 }

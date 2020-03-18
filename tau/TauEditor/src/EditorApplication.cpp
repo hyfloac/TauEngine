@@ -13,23 +13,28 @@
 #include <GL/glew.h>
 #include <ShlObj.h>
 #include <texture/FITextureLoader.hpp>
-#include <RenderingPipeline.hpp>
 #include <ResourceLoader.hpp>
 #include <ResourceSelector.hpp>
 #include <Timings.hpp>
+
+#include <system/SystemInterface.hpp>
+#include <graphics/DepthStencilState.hpp>
+
+#include "dx/dx10/DX10RasterizerState.hpp"
 
 static void setupGameFolders() noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
     : Application(32), _config { false, 800, 600 },
-      _window(null), _logger(null), _renderer(null), _gameState(State::Game)
+      _window(null), _logger(null), _renderer(null), _gameState(State::Game), _globals(nullptr)
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
 {
     delete _renderer;
     delete _window;
+    delete _globals;
 }
 
 bool TauEditorApplication::init(int argCount, char* args[]) noexcept
@@ -50,15 +55,29 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     PERF();
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
     _window->showWindow();
-    if(!_window->createContext()) { return false; }
 
-    _window->renderingContext()->activateContext();
+    _graphicsInterface = SystemInterface::get()->createGraphicsInterface(RenderingMode::getGlobalMode());
+
+    DepthStencilArgs dsArgs(tau::rec);
+    NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, null);
+
+    RenderingContextArgs rcArgs
+    {
+        *_window, dsState, RefCast<IRasterizerState>(NullableRef<DX10RasterizerState>(null)), _config.vsync || true
+    };
+
+    _renderingContext = _graphicsInterface->createRenderingContext().buildTauRef(rcArgs, null);
+    _renderingContext->activateContext();
+    _renderingContext->resetDepthStencilState();
+    // if(!_window->createContext()) { return false; }
+    //
+    // _window->renderingContext()->activateContext();
 
     _window->setEventHandler(::onWindowEvent);
     Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
@@ -70,21 +89,34 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         filterDebugOutput(GLDebugSeverity::Notification, false);
     }
 
-    _window->renderingContext()->setVSync(_config.vsync);
+    // _window->renderingContext()->setVSync(_config.vsync);
+    _renderingContext->setVSync(_config.vsync);
 
-    bool async = false;
+    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_renderingContext));
 
-    for(int i = 0; i < argCount; ++i)
+    _globals = new Globals(*_window, *_graphicsInterface, *_renderingContext, _gr, _gameState);
+
+    if(_renderingContext->mode().isOpenGL())
     {
-        if(strcmp(args[i], "-async") == 0)
-        {
-            async = true;
-        }
+        glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
+
+        enableGLDepthTest();
+
+        enableGLCullFace();
+        glCullFace(GL_BACK);
+
+        glFrontFace(GL_CW);
+
+        setGLBlend(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     }
 
-    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_window->renderingContext()));
+    _renderingContext->updateViewport(0, 0, _window->width(), _window->height());
 
-    _renderer = new TERenderer(*_window, _gameState, async);
+    _renderer = new TERenderer(*_globals);
 
     TimingsWriter::end();
     TimingsWriter::begin("TauEditor::Runtime", "|TERes/perfRuntime.json");
@@ -120,6 +152,7 @@ void TauEditorApplication::render(const DeltaTime& delta) noexcept
 {
     PERF();
     _renderer->render(delta);
+    _renderingContext->swapFrame();
 }
 
 void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
@@ -198,9 +231,7 @@ bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
             static bool vsync = _config.vsync;
 
             vsync = !vsync;
-            TAU_RENDER_1(_renderer->renderingPipeline(), vsync, {
-                context.setVSync(vsync);
-            });
+            _globals->rc.setVSync(vsync);
         }
         default: return false;
     }
@@ -227,15 +258,10 @@ bool TauEditorApplication::onKeyPress(WindowKeyEvent& e) noexcept
 bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
 {
     UNUSED(e);
-    TAU_RENDER_S(_renderer->renderingPipeline(), {
-        context.updateViewport(0, 0, window.width(), window.height());
-        self->_renderer->camera()->setProjection(window.height(), window.width(), 0.0f, 0.0f);
-        self->_renderer->camera3D().setProjection(window, 90, 0.0001f, 1000.0f);
-        Mouse::mousePos(window.width() >> 1, window.height() >> 1);
-    });
-    // _renderer->renderingPipeline().addCtxCtrl([](RenderingPipeline&, Window& window, void*)
-    // { window.renderingContext()->updateViewport(0, 0, window.width(), window.height()); }, nullptr, true);
-    // _renderer->camera()->setProjection(e.newHeight(), e.newWidth(), 0.0f, 0.0f);
+    _globals->rc.updateViewport(0, 0, e.newWidth(), e.newHeight());
+    _renderer->camera()->setProjection(e.newWidth(), e.newHeight(), 0.0f, 0.0f);
+    _renderer->camera3D().setProjection(e.window(), 90, 0.0001f, 1000.0f);
+    Mouse::mousePos(e.newWidth() >> 1, e.newHeight() >> 1);
     return false;
 }
 
@@ -299,7 +325,7 @@ static void setupGameFolders() noexcept
             }
         }
     }
-    VFS::Instance().mountDynamic("TERes", "E:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+    VFS::Instance().mountDynamic("TERes", "D:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 }
 
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept

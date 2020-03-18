@@ -136,13 +136,13 @@ void DX10UniformBuffer::bind(IRenderingContext& context, EShader::Stage stage, u
         switch(stage)
         {
             case EShader::Stage::Vertex:
-                ctx.d3d10Device()->VSSetConstantBuffers(index, 1, &_d3dBuffer);
+                ctx.d3dDevice()->VSSetConstantBuffers(index, 1, &_d3dBuffer);
                 break;
             case EShader::Stage::Geometry:
-                ctx.d3d10Device()->GSSetConstantBuffers(index, 1, &_d3dBuffer);
+                ctx.d3dDevice()->GSSetConstantBuffers(index, 1, &_d3dBuffer);
                 break;
             case EShader::Stage::Pixel:
-                ctx.d3d10Device()->PSSetConstantBuffers(index, 1, &_d3dBuffer);
+                ctx.d3dDevice()->PSSetConstantBuffers(index, 1, &_d3dBuffer);
                 break;
             default: break;
         }
@@ -304,12 +304,12 @@ bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer**
          initialBuffer.SysMemPitch = 0;
          initialBuffer.SysMemSlicePitch = 0;
 
-         const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
+         const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
          ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
      }
      else
      {
-         const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
+         const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
          ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
      }
 
@@ -419,12 +419,12 @@ bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D
         initialBuffer.SysMemPitch = 0;
         initialBuffer.SysMemSlicePitch = 0;
 
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
+        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
     else
     {
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
+        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 
@@ -534,12 +534,12 @@ bool DX10UniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, 
         initialBuffer.SysMemPitch = 0;
         initialBuffer.SysMemSlicePitch = 0;
 
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
+        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
     else
     {
-        const HRESULT h = _context.d3d10Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
+        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 

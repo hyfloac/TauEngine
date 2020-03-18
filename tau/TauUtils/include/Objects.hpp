@@ -20,3 +20,15 @@
 #define DEFAULT_CONSTRUCT_PU(_TYPE) public: DEFAULT_CONSTRUCT(_TYPE)
 #define DEFAULT_CONSTRUCT_PI(_TYPE) private: DEFAULT_CONSTRUCT(_TYPE)
 #define DEFAULT_CONSTRUCT_PO(_TYPE) protected: DEFAULT_CONSTRUCT(_TYPE)
+
+namespace tau {
+
+struct TIPDefault final { constexpr TIPDefault() noexcept = default; };
+struct TIPRecommended final { constexpr TIPRecommended() noexcept = default; };
+
+static constexpr TIPDefault Default { };
+static constexpr const TIPDefault& def = Default;
+static constexpr TIPRecommended Recommended { };
+static constexpr const TIPRecommended& rec = Recommended;
+
+}

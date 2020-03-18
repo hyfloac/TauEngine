@@ -500,69 +500,124 @@ class DynString final
 public:
     static DynString passControl(const char* str) noexcept
     {
-        return DynString(str, ::std::strlen(str));
+        const uSys len = ::std::strlen(str);
+        if(len < 16)
+        {
+            DynString tmp(str);
+            delete str;
+            return tmp;
+        }
+        return DynString(str, len);
     }
 private:
-    const char* _string;
-    uSys* _refCount;
-    uSys  _length;
-    uSys  _hash;
+    union
+    {
+        struct
+        {
+            const char* string;
+            uSys* refCount;
+        } _largeString;
+        char _stackString[sizeof(_largeString)];
+    };
+    uSys _length;
+    uSys _hash;
 private:
-    DynString(const char* string, uSys length) noexcept
-        : _string(string), _refCount(new(::std::nothrow) uSys(1)), _length(length), _hash(findHashCode(string))
+    DynString(const char* const string, const uSys length) noexcept
+        : _largeString{ string, new(::std::nothrow) uSys(1) }, _length(length), _hash(findHashCode(string))
+    { }
+
+    DynString(const uSys length) noexcept
+        : _stackString{}, _length(length), _hash(0)
     { }
 public:
     inline DynString(const NotNull<const char>& string) noexcept
-        : _string(nullptr), _refCount(new(::std::nothrow) uSys(1)), _length(strlen(string)), _hash(findHashCode(string))
+        : _largeString{ nullptr, nullptr }, _length(strlen(string)), _hash(findHashCode(string))
     {
-        char* str = new(::std::nothrow) char[_length + 1];
-        memcpy(str, string, _length + 1);
-        _string = str;
+        if(_length >= 16)
+        {
+            _largeString.refCount = new(::std::nothrow) uSys(1);
+            char* str = new(::std::nothrow) char[_length + 1];
+            memcpy(str, string, _length + 1);
+            _largeString.string = str;
+        }
+        else
+        {
+            memcpy(_stackString, string, _length + 1);
+        }
     }
 
-    inline DynString(const char* string) noexcept
-        : _string(nullptr), _refCount(new(::std::nothrow) uSys(1)), _length(strlen(string)), _hash(findHashCode(string))
+    inline DynString(const char* const string) noexcept
+        : _largeString{ nullptr, nullptr }, _length(strlen(string)), _hash(findHashCode(string))
     {
         Ensure(string != nullptr);
-        char* str = new(::std::nothrow) char[_length + 1];
-        memcpy(str, string, _length + 1);
-        _string = str;
+        if(_length >= 16)
+        {
+            _largeString.refCount = new(::std::nothrow) uSys(1);
+            char* str = new(::std::nothrow) char[_length + 1];
+            memcpy(str, string, _length + 1);
+            _largeString.string = str;
+        }
+        else
+        { memcpy(_stackString, string, _length + 1); }
     }
 
     inline ~DynString() noexcept
     {
-        if(--(*_refCount) == 0)
+        if(_length >= 16 && --(*_largeString.refCount) == 0)
         {
-            delete[] _string;
-            delete _refCount;
+            delete[] _largeString.string;
+            delete _largeString.refCount;
         }
     }
 
     inline DynString(const DynString& copy) noexcept
-        : _string(copy._string), _refCount(copy._refCount), _length(copy._length), _hash(copy._hash)
-    { ++(*_refCount); }
+        : _length(copy._length), _hash(copy._hash)
+    {
+        if(_length >= 16)
+        {
+            _largeString.string = copy._largeString.string;
+            _largeString.refCount = copy._largeString.refCount;
+            ++(*_largeString.refCount);
+        }
+        else
+        { memcpy(_stackString, copy._stackString, copy._length + 1); }
+    }
 
     inline DynString(DynString&& move) noexcept
-        : _string(move._string), _refCount(move._refCount), _length(move._length), _hash(move._hash)
-    { ++(*_refCount); }
+        : _length(move._length), _hash(move._hash)
+    {
+        if(_length >= 16)
+        {
+            _largeString.string = move._largeString.string;
+            _largeString.refCount = move._largeString.refCount;
+            ++(*_largeString.refCount);
+        }
+        else
+        { memcpy(_stackString, move._stackString, move._length + 1); }
+    }
 
     inline DynString& operator=(const DynString& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
-        if(--(*_refCount) == 0)
+        if(copy._length >= 16)
         {
-            delete[] _string;
-            delete _refCount;
-        }
+            if(_length >= 16 && --(*_largeString.refCount) == 0)
+            {
+                delete[] _largeString.string;
+                delete _largeString.refCount;
+            }
 
-        _string = copy._string;
-        _refCount = copy._refCount;
+            _largeString.string = copy._largeString.string;
+            _largeString.refCount = copy._largeString.refCount;
+            ++(*_largeString.refCount);
+        }
+        else
+        { memcpy(_stackString, copy._stackString, copy._length + 1); }
+
         _length = copy._length;
         _hash = copy._hash;
-
-        ++(*_refCount);
 
         return *this;
     }
@@ -572,36 +627,46 @@ public:
         if(this == &move)
         { return *this; }
 
-        if(--(*_refCount) == 0)
+        if(move._length >= 16)
         {
-            delete[] _string;
-            delete _refCount;
-        }
+            if(_length >= 16 && --(*_largeString.refCount) == 0)
+            {
+                delete[] _largeString.string;
+                delete _largeString.refCount;
+            }
 
-        _string = move._string;
-        _refCount = move._refCount;
+            _largeString.string = move._largeString.string;
+            _largeString.refCount = move._largeString.refCount;
+            ++(*_largeString.refCount);
+        }
+        else
+        { memcpy(_stackString, move._stackString, move._length + 1); }
+
         _length = move._length;
         _hash = move._hash;
-
-        ++(*_refCount);
 
         return *this;
     }
 
-    [[nodiscard]] inline NonNull const char* c_str() const noexcept { return _string; }
+    [[nodiscard]] inline NonNull const char* c_str() const noexcept { return _length >= 16 ? _largeString.string : _stackString; }
     [[nodiscard]] inline uSys length() const noexcept { return _length; }
 
-    inline operator const char*() const noexcept { return _string; }
+    inline operator const char*() const noexcept { return _length >= 16 ? _largeString.string : _stackString; }
     [[nodiscard]] inline uSys operator()() const noexcept { return _hash; }
 
     [[nodiscard]] inline uSys hashCode() const noexcept { return _hash; }
 
     [[nodiscard]] inline bool equals(const String& other) const noexcept
     {
-        if(_string == other._string) { return true; }
         if(this->_length == other._length && this->_hash == other._hash)
         {
-            return strcmp(this->_string, other._string) == 0;
+            if(this->_length >= 16)
+            {
+                if(this->_largeString.string == other._string) { return true; }
+                return ::std::strcmp(this->_largeString.string, other._string) == 0;
+            }
+            else
+            { return ::std::strcmp(this->_stackString, other._string) == 0; }
         }
         return false;
     }
@@ -610,81 +675,133 @@ public:
     {
         if(this->_length == other._length && this->_hash == other._hash)
         {
-            return strncmp(this->_string, other._string, other._length) == 0;
+            if(this->_length >= 16)
+            { return ::std::strncmp(this->_largeString.string, other._string, other._length) == 0; }
+            else
+            { return ::std::strncmp(this->_stackString, other._string, other._length) == 0; }
         }
         return false;
     }
 
     [[nodiscard]] inline bool equals(const DynString& other) const noexcept
     {
-        if(this == &other || this->_string == other._string) { return true; }
+        if(this == &other) { return true; }
         if(this->_length == other._length && this->_hash == other._hash)
         {
-            return strcmp(this->_string, other._string) == 0;
+            if(this->_length >= 16)
+            {
+                if(this->_largeString.string == other._largeString.string)
+                { return true; }
+                return ::std::strcmp(this->_largeString.string, other._largeString.string) == 0;
+            }
+            else
+            { return ::std::strcmp(this->_stackString, other._stackString) == 0; }
         }
         return false;
     }
 
     [[nodiscard]] inline bool equals(const DynStringView& other) const noexcept;
 
-    [[nodiscard]] inline bool equals(const char* str) const noexcept
+    [[nodiscard]] inline bool equals(const char* const str) const noexcept
     {
-        if(this->_string == str) { return true; }
-        return strcmp(this->_string, str) == 0;
+        if(this->_length >= 16)
+        {
+            if(this->_largeString.string == str) { return true; }
+            return strcmp(this->_largeString.string, str) == 0;
+        }
+        else
+        {
+            if(this->_stackString == str) { return true; }
+            return strcmp(this->_stackString, str) == 0;
+        }
     }
 
     [[nodiscard]] inline i32 compareTo(const String& other) const noexcept
     {
-        if(this->_string == other._string) { return 0; }
-        return strcmp(this->_string, other._string);
+        if(this->_length >= 16)
+        {
+            if(this->_largeString.string == other._string) { return true; }
+            return strcmp(this->_largeString.string, other._string);
+        }
+        else
+        {
+            if(this->_stackString == other._string) { return true; }
+            return strcmp(this->_stackString, other._string);
+        }
     }
 
     [[nodiscard]] inline i32 compareTo(const StringView& other) const noexcept
     {
-        if(this->_string == other._string) { return 0; }
-        return strncmp(this->_string, other._string, other._length);
+        if(this->_length >= 16)
+        {
+            if(this->_largeString.string == other._string) { return true; }
+            return strncmp(this->_largeString.string, other._string, other._length);
+        }
+        else
+        {
+            if(this->_stackString == other._string) { return true; }
+            return strncmp(this->_stackString, other._string, other._length);
+        }
     }
 
     [[nodiscard]] inline i32 compareTo(const DynString& other) const noexcept
     {
-        if(this == &other || this->_string == other._string) { return 0; }
-        return strcmp(this->_string, other._string);
+        if(this->_length >= 16)
+        {
+            if(this->_largeString.string == other._largeString.string) { return true; }
+            return strcmp(this->_largeString.string, other._largeString.string);
+        }
+        else
+        {
+            if(this->_stackString == other._stackString) { return true; }
+            return strcmp(this->_stackString, other._stackString);
+        }
     }
 
     [[nodiscard]] inline i32 compareTo(const DynStringView& other) const noexcept;
 
-    [[nodiscard]] inline i32 compareTo(const char* str) const noexcept
+    [[nodiscard]] inline i32 compareTo(const char* const str) const noexcept
     {
-        if(this->_string == str) { return 0; }
-        return strcmp(this->_string, str);
+        if(this->_length >= 16)
+        {
+            if(this->_largeString.string == str) { return true; }
+            return strcmp(this->_largeString.string, str);
+        }
+        else
+        {
+            if(this->_stackString == str) { return true; }
+            return strcmp(this->_stackString, str);
+        }
     }
 
-    [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_string, _length, 0); }
-    [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_string, _length, _length - 1); }
+    [[nodiscard]] inline StringIterator begin() const noexcept { return StringIterator(_length >= 16 ? _largeString.string : _stackString, _length, 0); }
+    [[nodiscard]] inline StringIterator   end() const noexcept { return StringIterator(_length >= 16 ? _largeString.string : _stackString, _length, _length - 1); }
 
-#define CONCAT(__OTHER_LEN, __OTHER_STR) const uSys newLen = this->_length + (__OTHER_LEN); \
-                                         char* newStr = new(::std::nothrow) char[newLen + 1]; \
-                                         newStr[newLen] = '\0'; \
-                                         memcpy(newStr, this->_string, this->_length); \
-                                         memcpy(newStr + this->_length, __OTHER_STR, __OTHER_LEN)
+#define CONCAT(_OTHER_LEN, _OTHER_STR) \
+    const uSys newLen = this->_length + (_OTHER_LEN);                       \
+    if(newLen >= 16) {                                                      \
+        char* newStr = new(::std::nothrow) char[newLen + 1];                \
+        newStr[newLen] = '\0';                                              \
+        memcpy(newStr, this->_length >= 16 ? this->_largeString.string : this->_stackString, this->_length); \
+        memcpy(newStr + this->_length, _OTHER_STR, _OTHER_LEN);             \
+        return DynString(newStr, newLen);                                   \
+    } else {                                                                \
+        DynString tmp(newLen);                                              \
+        tmp._stackString[newLen] = '\0';                                    \
+        memcpy(tmp._stackString, this->_stackString, this->_length);        \
+        memcpy(tmp._stackString + this->_length, _OTHER_STR, _OTHER_LEN);   \
+        tmp._hash = findHashCode(tmp._stackString);                         \
+        return tmp; \
+    }
 
     [[nodiscard]] inline DynString concat(const String& other) const noexcept
-    {
-        CONCAT(other._length, other._string);
-        return DynString(newStr, newLen);
-    }
+    { CONCAT(other._length, other._string); }
 
     [[nodiscard]] inline DynString concat(const StringView& other) const noexcept
-    {
-        CONCAT(other._length, other._string);
-        return DynString(newStr, newLen);
-    }
+    { CONCAT(other._length, other._string); }
 
     [[nodiscard]] inline DynString concat(const DynString& other) const noexcept
-    {
-        CONCAT(other._length, other._string);
-        return DynString(newStr, newLen);
-    }
+    { CONCAT(other._length, other._length >= 16 ? other._largeString.string : other._stackString); }
 
     [[nodiscard]] inline DynString concat(const DynStringView& other) const noexcept;
 
@@ -692,14 +809,12 @@ public:
     {
         const uSys otherLen = strlen(other);
         CONCAT(otherLen, other);
-        return DynString(newStr, newLen);
     }
 
     [[nodiscard]] inline DynString concat(const char* other) const noexcept
     {
         const uSys otherLen = strlen(other);
         CONCAT(otherLen, other);
-        return DynString(newStr, newLen);
     }
 
 #if __has_feature(__cpp_impl_three_way_comparison)
@@ -752,13 +867,13 @@ public:
     [[nodiscard]] inline DynString operator +(const char*          other) const noexcept { return concat(other); }
     [[nodiscard]] inline DynString operator +(const NotNull<const char>& other) const noexcept { return concat(other); }
 
-    [[nodiscard]] inline char operator [](uSys index) const noexcept
-    { return _string[index]; }
+    [[nodiscard]] inline char operator [](const uSys index) const noexcept
+    { return c_str()[index]; }
 
-    [[nodiscard]] inline char at(uSys index) const noexcept
+    [[nodiscard]] inline char at(const uSys index) const noexcept
     {
         if(index >= _length) { return '\0'; }
-        return _string[index];
+        return c_str()[index];
     }
 private:
     friend class String;
@@ -770,22 +885,34 @@ private:
 class DynStringView final
 {
 private:
-    const char*    _string;
+    const char* _string;
     uSys* _refCount;
     uSys  _length;
     uSys  _hash;
 private:
     inline DynStringView(const uSys begin, const uSys length, const DynString& str) noexcept
-        : _string(str._string + begin), _refCount(str._refCount), _length(length), _hash(findHashCode(_string, length))
-    { ++(*_refCount); }
+        : _string(str.c_str() + begin), _refCount(nullptr), _length(length), _hash(findHashCode(_string, length))
+    {
+        if(str._length >= 16)
+        {
+            _refCount = str._largeString.refCount;
+            ++(*_refCount);
+        }
+    }
 public:
     inline DynStringView(const DynString& str, const uSys begin, const uSys end) noexcept
-        : _string(str._string + begin), _refCount(str._refCount), _length(end - begin), _hash(findHashCode(_string, _length))
-    { ++(*_refCount); }
+        : _string(str.c_str() + begin), _refCount(nullptr), _length(end - begin), _hash(findHashCode(_string, _length))
+    {
+        if(str._length >= 16)
+        {
+            _refCount = str._largeString.refCount;
+            ++(*_refCount);
+        }
+    }
 
     inline ~DynStringView() noexcept
     {
-        if(--(*_refCount) == 0)
+        if(_refCount && --(*_refCount) == 0)
         {
             delete[] _string;
             delete _refCount;
@@ -794,18 +921,22 @@ public:
 
     inline DynStringView(const DynStringView& copy) noexcept
         : _string(copy._string), _refCount(copy._refCount), _length(copy._length), _hash(copy._hash)
-    { ++(*_refCount); }
+    {
+        if(_refCount) { ++(*_refCount); }
+    }
 
     inline DynStringView(DynStringView&& move) noexcept
         : _string(move._string), _refCount(move._refCount), _length(move._length), _hash(move._hash)
-    { ++(*_refCount); }
+    {
+        if(_refCount) { ++(*_refCount); }
+    }
 
     inline DynStringView& operator=(const DynStringView& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
-        if(--(*_refCount) == 0)
+        if(_refCount && --(*_refCount) == 0)
         {
             delete[] _string;
             delete _refCount;
@@ -816,7 +947,7 @@ public:
         _length = copy._length;
         _hash = copy._hash;
 
-        ++(*_refCount);
+        if(_refCount) { ++(*_refCount); }
 
         return *this;
     }
@@ -826,7 +957,7 @@ public:
         if(this == &move)
         { return *this; }
 
-        if(--(*_refCount) == 0)
+        if(_refCount && --(*_refCount) == 0)
         {
             delete[] _string;
             delete _refCount;
@@ -837,7 +968,7 @@ public:
         _length = move._length;
         _hash = move._hash;
 
-        ++(*_refCount);
+        if(_refCount) { ++(*_refCount); }
 
         return *this;
     }
@@ -874,7 +1005,7 @@ public:
     {
         if(this->_length == other._length && this->_hash == other._hash)
         {
-            return strncmp(this->_string, other._string, this->_length) == 0;
+            return strncmp(this->_string, other.c_str(), this->_length) == 0;
         }
         return false;
     }
@@ -912,7 +1043,7 @@ public:
 
     [[nodiscard]] inline i32 compareTo(const DynString& other) const noexcept
     {
-        return strncmp(this->_string, other._string, minT(this->_length, other._length));
+        return strncmp(this->_string, other.c_str(), minT(this->_length, other._length));
     }
 
     [[nodiscard]] inline i32 compareTo(const char* str) const noexcept
@@ -972,7 +1103,6 @@ private:
 [[nodiscard]] inline DynString DynString::concat(const DynStringView& other) const noexcept
 {
     CONCAT(other._length, other._string);
-    return DynString(newStr, newLen);
 }
 
 class StringBuilder final
@@ -1024,6 +1154,11 @@ public:
 
     inline StringBuilder& operator =(const StringBuilder& copy) noexcept
     {
+        if(this == &copy)
+        { return *this; }
+
+        delete[] _string;
+
         _string = new(::std::nothrow) char[copy._size];
         _length = copy._length;
         _size = copy._size;
@@ -1035,6 +1170,11 @@ public:
 
     inline StringBuilder& operator =(StringBuilder&& move) noexcept
     {
+        if(this == &move)
+        { return *this; }
+
+        delete[] _string;
+
         _string = new(::std::nothrow) char[move._size];
         _length = move._length;
         _size = move._size;
@@ -1081,7 +1221,7 @@ public:
 
     inline StringBuilder& append(const DynString& string) noexcept
     {
-        append(string._string, string._length);
+        append(string.c_str(), string._length);
         return *this;
     }
 
@@ -1230,6 +1370,13 @@ private:
 namespace std
 {
 template<>
+struct hash<ConstExprString>
+{
+    inline uSys operator()(const ConstExprString& str) const noexcept
+    { return str.hashCode(); }
+};
+
+template<>
 struct hash<String>
 {
     inline uSys operator()(const String& str) const noexcept
@@ -1269,10 +1416,10 @@ struct hash<DynStringView>
 
 [[nodiscard]] inline bool String::equals(const DynString& other) const noexcept
 {
-    if(_string == other._string) { return true; }
+    if(_string == other.c_str()) { return true; }
     if(this->_length == other._length && this->_hash == other._hash)
     {
-        return strcmp(this->_string, other._string) == 0;
+        return strcmp(this->_string, other.c_str()) == 0;
     }
     return false;
 }
@@ -1293,8 +1440,8 @@ struct hash<DynStringView>
 
 [[nodiscard]] inline i32 String::compareTo(const DynString& other) const noexcept
 {
-    if(_string == other._string) { return 0; }
-    return strcmp(this->_string, other._string);
+    if(_string == other.c_str()) { return 0; }
+    return strcmp(this->_string, other.c_str());
 }
 
 [[nodiscard]] inline i32 String::compareTo(const DynStringView& other) const noexcept
@@ -1306,7 +1453,7 @@ struct hash<DynStringView>
 {
     if(this->_length == other._length && this->_hash == other._hash)
     {
-        return strncmp(this->_string, other._string, this->_length) == 0;
+        return strncmp(this->_string, other.c_str(), this->_length) == 0;
     }
     return false;
 }
@@ -1322,7 +1469,7 @@ struct hash<DynStringView>
 
 [[nodiscard]] inline i32 StringView::compareTo(const DynString& other) const noexcept
 {
-    return strncmp(this->_string, other._string, other._length);
+    return strncmp(this->_string, other.c_str(), other._length);
 }
 
 [[nodiscard]] inline i32 StringView::compareTo(const DynStringView& other) const noexcept
@@ -1332,10 +1479,10 @@ struct hash<DynStringView>
 
 [[nodiscard]] inline bool DynString::equals(const DynStringView& other) const noexcept
 {
-    return strncmp(this->_string, other._string, other._length) == 0;
+    return strncmp(this->c_str(), other._string, other._length) == 0;
 }
 
 [[nodiscard]] inline i32 DynString::compareTo(const DynStringView& other) const noexcept
 {
-    return strncmp(this->_string, other._string, other._length);
+    return strncmp(this->c_str(), other._string, other._length);
 }

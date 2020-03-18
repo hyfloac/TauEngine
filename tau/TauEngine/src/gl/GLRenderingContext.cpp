@@ -13,25 +13,21 @@
 #include "gl/GLTextureUploader.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLDepthStencilState.hpp"
+#include "gl/GLGraphicsInterface.hpp"
 
 #include "gl/GLBuffer.hpp"
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 
 #include "Timings.hpp"
 
-GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile core, const bool forwardCompatible) noexcept
-    : IRenderingContext(mode),
-      _device(null), _context(null),
-      _majorVersion(majorVersion),
-      _minorVersion(minorVersion),
-      _compat(core),
-      _forwardCompatible(forwardCompatible),
-      _defaultDepthStencilState(null),
-      _currentDepthStencilState(null)
+GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept
+    : IRenderingContext(mode), _gi(glArgs.gi),
+      _device(glSysArgs.device), _context(glSysArgs.context),
+      _defaultDepthStencilState(glArgs.initialDepthStencilState),
+      _currentDepthStencilState(glArgs.initialDepthStencilState)
 {
     switch(_mode.currentMode())
     {
-        case RenderingMode::Mode::OpenGL2:
         case RenderingMode::Mode::OpenGL3:
         case RenderingMode::Mode::OpenGL3_1:
         case RenderingMode::Mode::OpenGL3_2:
@@ -54,12 +50,24 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const int majo
     }
 
     _textureSamplerBuilder = new(::std::nothrow) GLTextureSamplerBuilder;
-    _shaderBuilder = new(::std::nothrow) GLShaderBuilder(*this);
     _texture2DBuilder = new(::std::nothrow) GLTexture2DBuilder;
     _textureNullBuilder = new(::std::nothrow) GLTextureNullBuilder;
     _textureDepthBuilder = new(::std::nothrow) GLTextureDepthBuilder;
     _textureCubeBuilder = new(::std::nothrow) GLTextureCubeBuilder;
-    _depthStencilStateBuilder = new(::std::nothrow) GLDepthStencilStateBuilder;
+}
+
+GLRenderingContext::~GLRenderingContext() noexcept
+{
+    delete _bufferBuilder;
+    delete _indexBufferBuilder;
+    delete _uniformBufferBuilder;
+    delete _textureSamplerBuilder;
+    delete _texture2DBuilder;
+    delete _textureNullBuilder;
+    delete _textureDepthBuilder;
+    delete _textureCubeBuilder;
+
+    systemDestruct();
 }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
@@ -120,8 +128,8 @@ void GLRenderingContext::resetDepthStencilState() noexcept
     _currentDepthStencilState->apply();
 }
 
-const DepthStencilParams& GLRenderingContext::getDefaultDepthStencilStateParams() noexcept
-{ return _defaultDepthStencilState->params(); }
+const DepthStencilArgs& GLRenderingContext::getDefaultDepthStencilStateParams() noexcept
+{ return _defaultDepthStencilState->args(); }
 
 CPPRef<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
 {
@@ -168,7 +176,95 @@ CPPRef<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUpl
 }
 
 IShaderBuilder& GLRenderingContext::createShader() noexcept
-{ return *_shaderBuilder; }
+{ return _gi.createShader(); }
 
 IDepthStencilStateBuilder& GLRenderingContext::createDepthStencilState() noexcept
-{ return *_depthStencilStateBuilder; }
+{ return _gi.createDepthStencilState(); }
+
+GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
+{
+    GLRenderingContextArgs glArgs { _gi, null };
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLSystemRenderingContextArgs glSysArgs { };
+    if(!processSysArgs(args, glArgs, &glSysArgs, error))
+    { return null; }
+
+    GLRenderingContext* const context = new(::std::nothrow) GLRenderingContext(_gi.renderingMode(), glArgs, glSysArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, context);
+}
+
+GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
+{
+    GLRenderingContextArgs glArgs { _gi, null };
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLSystemRenderingContextArgs glSysArgs { };
+    if(!processSysArgs(args, glArgs, &glSysArgs, error))
+    { return null; }
+
+    GLRenderingContext* const context = allocator.allocateT<GLRenderingContext>(_gi.renderingMode(), glArgs, glSysArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, context);
+}
+
+CPPRef<IRenderingContext> GLRenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* const error) noexcept
+{
+    GLRenderingContextArgs glArgs { _gi, null };
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLSystemRenderingContextArgs glSysArgs { };
+    if(!processSysArgs(args, glArgs, &glSysArgs, error))
+    { return null; }
+
+    const CPPRef<GLRenderingContext> context = CPPRef<GLRenderingContext>(new(::std::nothrow) GLRenderingContext(_gi.renderingMode(), glArgs, glSysArgs));
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, context);
+}
+
+NullableRef<IRenderingContext> GLRenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
+{
+    GLRenderingContextArgs glArgs { _gi, null };
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLSystemRenderingContextArgs glSysArgs { };
+    if(!processSysArgs(args, glArgs, &glSysArgs, error))
+    { return null; }
+
+    const NullableRef<GLRenderingContext> context(allocator, _gi.renderingMode(), glArgs, glSysArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
+}
+
+NullableStrongRef<IRenderingContext> GLRenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
+{
+    GLRenderingContextArgs glArgs { _gi, null };
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLSystemRenderingContextArgs glSysArgs { };
+    if(!processSysArgs(args, glArgs, &glSysArgs, error))
+    { return null; }
+
+    const NullableStrongRef<GLRenderingContext> context(allocator, _gi.renderingMode(), glArgs, glSysArgs);
+
+    ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
+    ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
+}
+
+bool GLRenderingContextBuilder::processArgs(const RenderingContextArgs& args, GLRenderingContextArgs* const glArgs, Error* const error) const noexcept
+{
+    ERROR_CODE_COND_F(!RTT_CHECK(args.depthStencilState.get(), GLDepthStencilState), Error::IncorrectGraphicsAPI);
+
+    glArgs->initialDepthStencilState = RefCast<GLDepthStencilState>(args.depthStencilState);
+    return true;
+}

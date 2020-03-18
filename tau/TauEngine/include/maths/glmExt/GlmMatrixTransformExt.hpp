@@ -77,6 +77,30 @@ GLM_FUNC_QUALIFIER glm::mat<4, 4, _T, _Q> transpose(glm::mat<4, 4, _T, _Q> const
 }
 
 template<typename _T, glm::qualifier _Q>
+GLM_FUNC_QUALIFIER void transpose(glm::mat<4, 4, _T, _Q> const& mat, glm::mat<4, 4, _T, _Q>& store)
+{
+    store[0][0] = mat[0][0];
+    store[0][1] = mat[1][0];
+    store[0][2] = mat[2][0];
+    store[0][3] = mat[3][0];
+    
+    store[1][0] = mat[0][1];
+    store[1][1] = mat[1][1];
+    store[1][2] = mat[2][1];
+    store[1][3] = mat[3][1];
+    
+    store[2][0] = mat[0][2];
+    store[2][1] = mat[1][2];
+    store[2][2] = mat[2][2];
+    store[2][3] = mat[3][2];
+    
+    store[3][0] = mat[0][3];
+    store[3][1] = mat[1][3];
+    store[3][2] = mat[2][3];
+    store[3][3] = mat[3][3];
+}
+
+template<typename _T, glm::qualifier _Q>
 GLM_FUNC_QUALIFIER glm::mat<3, 3, _T, _Q> transpose(glm::mat<3, 3, _T, _Q> const& mat)
 {
     glm::mat<3, 3, _T, _Q> ret;
@@ -101,6 +125,26 @@ GLM_FUNC_QUALIFIER glm::mat<3, 3, _T, _Q> transpose(glm::mat<3, 3, _T, _Q> const
 }
 
 template<typename _T, glm::qualifier _Q>
+GLM_FUNC_QUALIFIER void transpose(glm::mat<3, 3, _T, _Q> const& mat, glm::mat<3, 3, _T, _Q>& store)
+{
+    store[0][0] = mat[0][0];
+    store[0][1] = mat[1][0];
+    store[0][2] = mat[2][0];
+    
+    store[1][0] = mat[0][1];
+    store[1][1] = mat[1][1];
+    store[1][2] = mat[2][1];
+    
+    store[2][0] = mat[0][2];
+    store[2][1] = mat[1][2];
+    store[2][2] = mat[2][2];
+    
+    store[3][0] = mat[0][3];
+    store[3][1] = mat[1][3];
+    store[3][2] = mat[2][3];
+}
+
+template<typename _T, glm::qualifier _Q>
 GLM_FUNC_QUALIFIER glm::mat<2, 2, _T, _Q> transpose(glm::mat<2, 2, _T, _Q> const& mat)
 {
     glm::mat<2, 2, _T, _Q> ret;
@@ -120,6 +164,22 @@ GLM_FUNC_QUALIFIER glm::mat<2, 2, _T, _Q> transpose(glm::mat<2, 2, _T, _Q> const
     return ret;
 }
 
+template<typename _T, glm::qualifier _Q>
+GLM_FUNC_QUALIFIER void transpose(glm::mat<2, 2, _T, _Q> const& mat, glm::mat<2, 2, _T, _Q>& store)
+{
+    store[0][0] = mat[0][0];
+    store[0][1] = mat[1][0];
+    
+    store[1][0] = mat[0][1];
+    store[1][1] = mat[1][1];
+    
+    store[2][0] = mat[0][2];
+    store[2][1] = mat[1][2];
+    
+    store[3][0] = mat[0][3];
+    store[3][1] = mat[1][3];
+}
+
 static inline bool useTranspose(const RenderingMode::Mode mode) noexcept
 {
     switch(mode)
@@ -132,7 +192,6 @@ static inline bool useTranspose(const RenderingMode::Mode mode) noexcept
             return true;
         case RenderingMode::Mode::Vulkan:
             return false;
-        case RenderingMode::Mode::OpenGL2:
         case RenderingMode::Mode::OpenGL3:
         case RenderingMode::Mode::OpenGL3_1:
         case RenderingMode::Mode::OpenGL3_2:

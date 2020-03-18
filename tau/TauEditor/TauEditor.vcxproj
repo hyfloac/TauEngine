@@ -135,7 +135,7 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_FORCE_LEFT_HANDED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -150,7 +150,7 @@
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImaged.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImaged.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -206,7 +206,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_FORCE_LEFT_HANDED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -221,7 +221,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -277,7 +277,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_FORCE_LEFT_HANDED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -295,7 +295,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
       <LargeAddressAware>true</LargeAddressAware>
       <SetChecksum>true</SetChecksum>
       <FixedBaseAddress>false</FixedBaseAddress>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>false</AssemblyDebug>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -323,7 +323,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
     <ClCompile>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_FORCE_LEFT_HANDED;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <OpenMPSupport>false</OpenMPSupport>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -345,7 +345,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
       <WarningLevel>Level4</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>
@@ -372,25 +372,18 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixe
     <ClCompile Include="src\ConsoleLayer.cpp" />
     <ClCompile Include="src\EditorApplication.cpp" />
     <ClCompile Include="src\Layer3D.cpp" />
-    <ClCompile Include="src\LineLayer.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\PhysWord.cpp" />
-    <ClCompile Include="src\PhysWordLayer.cpp" />
     <ClCompile Include="src\TERenderer.cpp" />
-    <ClCompile Include="src\UILayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\ConsoleLayer.hpp" />
     <ClInclude Include="include\EditorApplication.hpp" />
+    <ClInclude Include="include\Globals.hpp" />
     <ClInclude Include="include\Layer3D.hpp" />
-    <ClInclude Include="include\LineLayer.hpp" />
-    <ClInclude Include="include\PhysWord.hpp" />
-    <ClInclude Include="include\PhysWordLayer.hpp" />
     <ClInclude Include="include\State.hpp" />
     <ClInclude Include="include\TERenderer.hpp" />
     <ClInclude Include="include\TextDescriptor.hpp" />
-    <ClInclude Include="include\UILayer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\CBFillerFragmentShader.glsl" />

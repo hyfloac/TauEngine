@@ -4,6 +4,7 @@
 #include "system/RenderingContext.hpp"
 #include "gl/GLShaderProgram.hpp"
 #include "dx/dx10/DX10ShaderProgram.hpp"
+#include "dx/dx11/DX11ShaderProgram.hpp"
 
 CPPRef<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
 {
@@ -22,6 +23,11 @@ CPPRef<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexce
             return null;
         #endif
         case RenderingMode::Mode::DirectX11:
+        #ifdef _WIN32
+            return CPPRef<IShaderProgram>(new(::std::nothrow) DX11ShaderProgram);
+        #else
+            return null;
+        #endif
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
         #ifdef _WIN32
@@ -31,7 +37,6 @@ CPPRef<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexce
         #endif
         case RenderingMode::Mode::Vulkan:
             return null;
-        case RenderingMode::Mode::OpenGL2:
         case RenderingMode::Mode::OpenGL3:
         case RenderingMode::Mode::OpenGL3_1:
         case RenderingMode::Mode::OpenGL3_2:

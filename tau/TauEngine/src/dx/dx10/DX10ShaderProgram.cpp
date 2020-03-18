@@ -6,19 +6,13 @@
 #include "dx/dx10/DX10RenderingContext.hpp"
 
 CPPRef<DX10VertexShader> DX10ShaderProgram::dxVertexShader() const noexcept
-{
-    return RefCast<DX10VertexShader>(_vertexShader);
-}
+{ return RefCast<DX10VertexShader>(_vertexShader); }
 
 CPPRef<DX10GeometryShader> DX10ShaderProgram::dxGeometryShader() const noexcept
-{
-    return RefCast<DX10GeometryShader>(_geometryShader);
-}
+{ return RefCast<DX10GeometryShader>(_geometryShader); }
 
 CPPRef<DX10PixelShader> DX10ShaderProgram::dxPixelShader() const noexcept
-{
-    return RefCast<DX10PixelShader>(_pixelShader);
-}
+{ return RefCast<DX10PixelShader>(_pixelShader); }
 
 void DX10ShaderProgram::bind(IRenderingContext& context) noexcept
 {
@@ -29,22 +23,23 @@ void DX10ShaderProgram::bind(IRenderingContext& context) noexcept
     }
 
     auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-    if(_vertexShader)
-    {
-        dxVertexShader()->bind(dxCtx);
-    }
-    if(_geometryShader)
-    {
-        dxGeometryShader()->bind(dxCtx);
-    }
-    if(_pixelShader)
-    {
-        dxPixelShader()->bind(dxCtx);
-    }
+    if(_vertexShader) { dxVertexShader()->bind(dxCtx); }
+    if(_geometryShader) { dxGeometryShader()->bind(dxCtx); }
+    if(_pixelShader) { dxPixelShader()->bind(dxCtx); }
 }
 
 void DX10ShaderProgram::unbind(IRenderingContext& context) noexcept
 {
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    {
+        TAU_THROW(IncorrectContextException);
+        return;
+    }
+
+    auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
+    if(_vertexShader) { dxVertexShader()->unbind(dxCtx); }
+    if(_geometryShader) { dxGeometryShader()->unbind(dxCtx); }
+    if(_pixelShader) { dxPixelShader()->unbind(dxCtx); }
 }
 
 bool DX10ShaderProgram::link(IRenderingContext& context) noexcept
@@ -61,8 +56,6 @@ bool DX10ShaderProgram::attach(IRenderingContext& context, CPPRef<IShader> shade
     }
     if(RTT_CHECK(shader.get(), DX10Shader))
     {
-        // const CPPRef<DX10Shader> dxShader = RefCast<DX10Shader>(shader);
-        // dxShader->bind(reinterpret_cast<DX10RenderingContext&>(context));
         return true;
     }
     else

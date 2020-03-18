@@ -2,21 +2,22 @@
 #include <astdio.h>
 #include <camera/Camera2D.hpp>
 #include <TextHandler.hpp>
-#include <EnumBitFields.hpp>
 #include <Windows.h>
+#include <EnumBitFields.hpp>
+#include <system/Window.hpp>
 
-ConsoleLayer::ConsoleLayer(Window& window, GameRecorder& gr, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, RenderingPipeline& rp, State& state, Camera3D& camera, float textScale) noexcept
+ConsoleLayer::ConsoleLayer(Globals& globals, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, Camera3D& camera, float textScale) noexcept
     : ILayer(false),
-      _window(window), _th(th),
+      _globals(globals), _th(th),
       _consolas(consolas), _consolasBold(consolasBold), _consolasItalic(consolasItalic), _consolasBoldItalic(consolasBoldItalic),
-      _ortho(ortho), _rp(rp), _state(state), _camera(camera), _textScale(textScale),
+      _ortho(ortho), _camera(camera), _textScale(textScale),
       _ch({ ccPrint, ccPrintLn, ccPrintNL, ccPrintF }, this),
       _strings(), _lineBuilder(), _inputBuilder(), _columnMarker(true)
 {
     _ch.addCommand(new SetTextScaleCommand(this));
-    _ch.addCommand(new SetExclusiveCommand(state));
+    _ch.addCommand(new SetExclusiveCommand(globals.gameState));
     _ch.addCommand(new SetCameraCommand(this));
-    _ch.addCommand(new GameRecorderCommand(gr));
+    _ch.addCommand(new GameRecorderCommand(globals.gr));
     // _ch.addCommand(new LoadFontCommand(th, rl));
     _ch.addCommand(new Console::dc::BoolAliasCommand);
     _ch.addCommand(new Console::dc::ExitCommand);
@@ -39,24 +40,24 @@ void ConsoleLayer::onRender(const DeltaTime& delta) noexcept
         constexpr float xOffset = 5.0f;
         const float textOffset = 50.0f * _textScale;
         const float maxY = 0.0f;
-        float y = static_cast<float>(_window.height() / 2 - textOffset);
-        const float x = -static_cast<float>(_window.width() / 2) + xOffset;
+        float y = static_cast<float>(_globals.window.height() / 2 - textOffset);
+        const float x = -static_cast<float>(_globals.window.width() / 2) + xOffset;
 
         if(_columnMarker)
         { _inputBuilder.append('|'); }
         else
         { _inputBuilder.append(' '); }
-        y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _inputBuilder.c_str(), x, y, _textScale, 0, 255, 255, &_window, -textOffset, _ortho);
+        y += _th.renderTextLineWrapped(_globals.rc, _consolas, _inputBuilder.c_str(), x, y, _textScale, { 0, 255, 255 }, _ortho, _globals.window, -textOffset);
         _inputBuilder.backspace();
 
         if(_lineBuilder.length() > 0)
         {
-            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, _lineBuilder.c_str(), x, y, _textScale, 0, 120, 255, &_window, -textOffset, _ortho);
+            y += _th.renderTextLineWrapped(_globals.rc, _consolas, _lineBuilder.c_str(), x, y, _textScale, { 0, 120, 255 }, _ortho, _globals.window, -textOffset);
         }
 
         for(auto it = _strings.rbegin(); it != _strings.rend(); ++it)
         {
-            y += _rp.pushRenderTextLineWrapped(&_th, _consolas, *it, x, y, _textScale, 255, 255, 255, &_window, -textOffset, _ortho);
+            y += _th.renderTextLineWrapped(_globals.rc, _consolas, *it, x, y, _textScale, { 255, 255, 255 }, _ortho, _globals.window, -textOffset);
             if(y - textOffset < maxY)
             { break; }
         }
@@ -112,12 +113,12 @@ bool ConsoleLayer::onKeyPress(WindowKeyEvent& e) noexcept
         if(_visible)
         {
             Mouse::setVisible(true);
-            _state = State::Console;
+            _globals.gameState = State::Console;
         }
         else
         {
             Mouse::setVisible(false);
-            _state = State::Game;
+            _globals.gameState = State::Game;
         }
     }
     else if(_visible)

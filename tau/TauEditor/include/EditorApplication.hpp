@@ -10,6 +10,9 @@
 #include <system/RenderingContext.hpp>
 #include <Objects.hpp>
 
+#include "Globals.hpp"
+#include "system/GraphicsInterface.hpp"
+
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
 class TauEditorApplication final : public Application
@@ -19,9 +22,13 @@ private:
     static constexpr const char* CONFIG_PATH = "|game/config.bin";
     Config _config;
     Window* _window;
+    NullableRef<IGraphicsInterface> _graphicsInterface;
+    NullableRef<IRenderingContext> _renderingContext;
     CPPRef<spdlog::logger> _logger;
     TERenderer* _renderer;
     State _gameState;
+    Globals* _globals;
+    GameRecorder _gr;
 public:
     TauEditorApplication() noexcept;
 

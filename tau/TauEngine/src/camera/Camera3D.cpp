@@ -8,15 +8,21 @@
 #include <glm/gtx/quaternion.hpp>
 
 Camera3D::Camera3D(const Window& window, const float fov, const float zNear, const float zFar) noexcept
-    : _position(0.0f), _pitch(0.0f), _yaw(0.0f), _viewQuaternion(),
+    : _position(0.0f), _pitch(0.0f), _yaw(0.0f), _roll(0.0f), _viewQuaternion(),
       _projectionMatrix(glmExt::perspectiveDegrees(fov, static_cast<float>(window.width()), static_cast<float>(window.height()), zNear, zFar)),
-      _viewMatrix(1.0f), _viewRotMatrix(1.0f), _compoundedMatrix(_projectionMatrix * _viewMatrix)
+      _projectionMatrixTrans(glmExt::transpose(_projectionMatrix)),
+      _viewMatrix(1.0f), _viewMatrixTrans(glmExt::transpose(_viewMatrixTrans)),
+      _viewRotMatrix(1.0f), _viewRotMatrixTrans(glmExt::transpose(_viewRotMatrixTrans)),
+      _compoundedMatrix(_projectionMatrix * _viewMatrix), _compoundedMatrixTrans(_projectionMatrixTrans * _viewMatrixTrans)
 { }
 
 void Camera3D::setProjection(const Window& window, float fov, float zNear, float zFar) noexcept
 {
     _projectionMatrix = glmExt::perspectiveDegrees(fov, static_cast<float>(window.width()), static_cast<float>(window.height()), zNear, zFar);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
+
+    glmExt::transpose(_projectionMatrix, _projectionMatrixTrans);
+    _compoundedMatrixTrans = _projectionMatrixTrans * _viewMatrixTrans;
 }
 
 void Camera3D::recomputeMatrices() noexcept
@@ -29,7 +35,11 @@ void Camera3D::recomputeMatrices() noexcept
     _viewMatrix = glm::inverse(transform);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 
+    glmExt::transpose(_viewMatrix, _viewMatrixTrans);
+    _compoundedMatrixTrans = _projectionMatrixTrans * _viewMatrixTrans;
+
     _viewRotMatrix = glm::inverse(rotMat);
+    glmExt::transpose(_viewRotMatrix, _viewRotMatrixTrans);
 }
 
 void Camera3D::computeQuat() noexcept
@@ -37,11 +47,13 @@ void Camera3D::computeQuat() noexcept
     static constexpr glm::mat4 identity(1.0f);
     static constexpr glm::vec3 xAxis(-1.0f, 0.0f, 0.0f);
     static constexpr glm::vec3 yAxis(0.0f, -1.0f, 0.0f);
+    static constexpr glm::vec3 zAxis(0.0f, -1.0f, -1.0f);
 
     const float pitch = 180.0f - _pitch;
     const glm::quat q0 = glmExt::rotateDegrees(identity, _yaw, yAxis);
     const glm::quat q1 = glmExt::rotateDegrees(q0, pitch, xAxis);
-    _viewQuaternion = q1;
+    const glm::quat q2 = glmExt::rotateDegrees(q1, _roll, zAxis);
+    _viewQuaternion = q2;
 
     const SinCos<float> pitchSC = fastSinCosD(-_pitch);
     const SinCos<float> yawSC = fastSinCosD(-_yaw);

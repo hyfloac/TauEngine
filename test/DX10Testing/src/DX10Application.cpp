@@ -20,8 +20,12 @@
 #include <shader/bundle/PrintShaderBundleVisitor.hpp>
 #include <shader/bundle/ast/ExprAST.hpp>
 #include <maths/glmExt/GlmMatrixTransformExt.hpp>
+#include <graphics/DepthStencilState.hpp>
 
-#include "gl/GLUtils.hpp"
+#include <gl/GLUtils.hpp>
+#include <system/SystemInterface.hpp>
+
+#include "dx/dx10/DX10RasterizerState.hpp"
 
 static bool setupDebugCallback(DX10Application* tea) noexcept;
 
@@ -64,7 +68,6 @@ public:
     static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const DX10Application::Matrices& t) noexcept
     {
         buffer->beginModification(context);
-        // buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, &t.dxProjection);
         buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.projection));
         buffer->modifyBuffer(MATRIX_SIZE * 1, MATRIX_SIZE, glm::value_ptr(t.viewMatrix));
         buffer->modifyBuffer(MATRIX_SIZE * 2, MATRIX_SIZE, glm::value_ptr(t.model));
@@ -88,7 +91,7 @@ static void setupGameFolders() noexcept;
 DX10Application::DX10Application() noexcept
     : Application(32), _config { false, 800, 600 },
       _window(null), _logger(null), _r(0), _g(0), _b(0), _colorState(-1), _aa(1), _uni(null), _matrices(null),
-      _camera(null)
+      _camera(null), _camera3D(null)
 { }
 
 DX10Application::~DX10Application() noexcept
@@ -96,6 +99,7 @@ DX10Application::~DX10Application() noexcept
     delete _uni;
     delete _matrices;
     delete _camera;
+    delete _camera3D;
     delete _window;
 }
 
@@ -111,19 +115,39 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     TimingsWriter::begin("DX10Test::Initialization", "|TERes/perfInit.json");
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
 
     _window = new(std::nothrow) Window(_config.windowWidth, _config.windowHeight, "DX10 Test", this);
     _window->createWindow();
     _window->showWindow();
-    if(!_window->createContext()) { return false; }
-    _window->renderingContext()->activateContext();
+
+    _graphicsInterface = SystemInterface::get()->createGraphicsInterface(RenderingMode::getGlobalMode());
+
+    DepthStencilArgs dsArgs(tau::rec);
+    NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, null);
+
+    RenderingContextArgs rcArgs
+    {
+        *_window, dsState, RefCast<IRasterizerState>(NullableRef<DX10RasterizerState>(null)), _config.vsync || true
+    };
+    _renderingContext = _graphicsInterface->createRenderingContext().buildTauRef(rcArgs, null);
+    _renderingContext->activateContext();
+    _renderingContext->resetDepthStencilState();
+
     _window->setEventHandler(::onWindowEvent);
-    // Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
+    Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
     // Mouse::setVisible(false);
 
-    setupDebugCallback(this);
+    if(RenderingMode::getGlobalMode().isOpenGL())
+    {
+        setupDebugCallback(this);
+        filterDebugOutput(GLDebugSeverity::Notification, false);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        ctx().setFaceWinding(true);
+    }
 
     ctx().setVSync(_config.vsync || true);
 
@@ -145,7 +169,7 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     auto ast = parser.parse();
 
-    PrintSBVArgs pArgs;
+    PrintSBVArgs pArgs{};
     pArgs.indentCount = 4;
     pArgs.indentChar = PrintSBVArgs::Spaces;
     pArgs.newLineChar = PrintSBVArgs::LF;
@@ -156,52 +180,34 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     PrintShaderBundleVisitor visitor(&pArgs);
     ast->visit(visitor);
 
-    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
-
+    // TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(ctx()));
+    
     ResourceSelectorLoader::setCacheDirectory("|res/cache");
-
+    
     ShaderArgs shaderArgs;
     shaderArgs.vfsMount = "|res";
     shaderArgs.path = "/shader/";
-
+    
     shaderArgs.fileName = "TestVertexShader";
     shaderArgs.stage = EShader::Stage::Vertex;
     auto vertexShader = ctx().createShader().buildCPPRef(shaderArgs, null);
-
+    
     shaderArgs.fileName = "TestPixelShader";
     shaderArgs.stage = EShader::Stage::Pixel;
     auto pixelShader = ctx().createShader().buildCPPRef(shaderArgs, null);
-
+    
     _shader = IShaderProgram::create(ctx());
     _shader->setVertexShader(ctx(), vertexShader);
     _shader->setPixelShader(ctx(), pixelShader);
     _shader->link(ctx());
-
+    
     float positionsSquare[2 * 4] = {
          0.5f,  0.5f,
          0.5f, -0.5f,
         -0.5f, -0.5f,
         -0.5f,  0.5f
     };
-    // float positionsCube[2 * 4] = {
-    //      1.0f,  1.0f,
-    //      1.0f, -1.0f,
-    //     -1.0f, -1.0f,
-    //     -1.0f,  1.0f
-    // };
-    // float positionsCube[2 * 4] = {
-    //      10.0f,  10.0f,
-    //      10.0f, -10.0f,
-    //     -10.0f, -10.0f,
-    //     -10.0f,  10.0f
-    // };
-    // float positionsCube[2 * 4] = {
-    //     1.0f, 1.0f,
-    //     1.0f, 0.0f,
-    //     0.0f, 0.0f,
-    //     0.0f, 1.0f
-    // };
-
+    
     u32 indicesSquare[3 * 2] = {
         0, 1, 3,
         2, 3, 1
@@ -214,39 +220,39 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.initialBuffer = positionsSquare;
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     const CPPRef<IBuffer> posBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
-
+    
     IndexBufferArgs indiceArgs;
     indiceArgs.usage = EBuffer::UsageType::StaticDraw;
     indiceArgs.elementCount = 6;
     indiceArgs.initialBuffer = indicesSquare;
     const CPPRef<IIndexBuffer> indices = ctx().createIndexBuffer().buildCPPRef(indiceArgs, null);
-
+    
     float colorsSquare[4 * 4] = {
         1.0f, 0.0f, 0.0f, 1.0f,
         0.0f, 1.0f, 0.0f, 1.0f,
         0.0f, 0.0f, 1.0f, 1.0f,
         0.5f, 1.0f, 1.0f, 1.0f
     };
-
+    
     bufBuilder.initialBuffer = colorsSquare;
     bufBuilder.descriptor.reset(1);
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
     const CPPRef<IBuffer> colorBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
-
+    
     float texCoords[2 * 4] = {
         1.0f, 0.0f,
         1.0f, 1.0f,
         0.0f, 1.0f,
         0.0f, 0.0f,
     };
-
+    
     bufBuilder.initialBuffer = texCoords;
     bufBuilder.descriptor.reset(1);
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     const CPPRef<IBuffer> texBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
-
+    
     CPPRef<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(3);
-
+    
     vaBuilder->setVertexBuffer(0, posBuffer);
     vaBuilder->setVertexBuffer(1, colorBuffer);
     vaBuilder->setVertexBuffer(2, texBuffer);
@@ -255,35 +261,35 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     vaBuilder->drawCount(6);
     vaBuilder->drawType(DrawType::SeparatedTriangles);
     _va = CPPRef<IVertexArray>(vaBuilder->build());
-
+    
     _uni = new UniformBlockS<Uniforms>(ctx().createUniformBuffer(), RGBAColor { 0, 0, 0, 0 });
     _matrices = new UniformBlockS<Matrices>(ctx().createUniformBuffer());
     
     _camera = new(::std::nothrow) Camera2DController(*_window, 100.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::E, Keyboard::Key::Q);
-
-    // _matrices->data().dxProjection = DirectX::XMMatrixOrthographicOffCenterLH(0.0f, _window->width(), 0.0f, _window->height(), -1.0f, 100.0f);
-    _matrices->data().dxProjection = DirectX::XMMatrixOrthographicLH(_window->width(), _window->height(), -1.0f, 100.0f);
-    // _matrices->data().dxProjection = DirectX::XMMatrixPerspectiveFovLH(DEG_2_RAD_F(90.0f), static_cast<float>(_window->width())/static_cast<float>(_window->height()), 0.00001f, 1000.0f);
-    // _matrices->data().dxProjection = DirectX::XMMatrixTranspose(_matrices->data().dxProjection);
-    // _matrices->data().dxProjection = DirectX::XMMatrixIdentity();
-
-    TextureSamplerArgs textureSamplerArgs;
-    textureSamplerArgs.magFilter() = ETexture::Filter::Nearest;
-    textureSamplerArgs.minFilter() = ETexture::Filter::Nearest;
-    textureSamplerArgs.mipFilter() = ETexture::Filter::Nearest;
-    textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
-
-    CPPRef<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
-    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateMissingTexture(ctx())));
-    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 0)));
-    uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 5)));
-    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateWhiteTexture(ctx())));
-    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(ctx())));
-    uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
-    _texUploader = CPPRef<ISingleTextureUploader>(uploaderBuilder->build());
+    _camera3D = new(::std::nothrow) FreeCamCamera3DController(*_window, 90.0f, 0.0001f, 1000.0f, 10.0f, 40.0f, 0.03f, false,
+        Keyboard::Key::Shift, Keyboard::Key::W, Keyboard::Key::S,
+        Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Space, Keyboard::Key::Ctrl,
+        null);
+    
+    _matrices->data().model = glmExt::rotateDegrees(glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(50.0f)), glm::vec3(0.0f, 0.0f, -1.0f)), 10.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    if(glmExt::useTranspose(RenderingMode::getGlobalMode().currentMode()))
+    {
+        _matrices->data().model = glmExt::transpose(_matrices->data().model);
+    }
+    
+    // TextureSamplerArgs textureSamplerArgs;
+    // textureSamplerArgs.magFilter() = ETexture::Filter::Nearest;
+    // textureSamplerArgs.minFilter() = ETexture::Filter::Nearest;
+    // textureSamplerArgs.mipFilter() = ETexture::Filter::Nearest;
+    // textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
+    // textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
+    // textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
+    // textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
+    //
+    // CPPRef<ISingleTextureUploaderBuilder> uploaderBuilder = ctx().createSingleTextureUploader();
+    // uploaderBuilder->texture(CPPRef<ITexture>(TextureLoader::generateDebugTexture16(ctx(), 5)));
+    // uploaderBuilder->textureSampler(ctx().createTextureSampler().buildCPPRef(textureSamplerArgs, null));
+    // _texUploader = CPPRef<ISingleTextureUploader>(uploaderBuilder->build());
 
     TimingsWriter::end();
     TimingsWriter::begin("DX10Test::Runtime", "|TERes/perfRuntime.json");
@@ -293,6 +299,10 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 void DX10Application::finalize() noexcept
 {
     TimingsWriter::end();
+    if(RenderingMode::getGlobalMode().isOpenGL())
+    {
+        stopDebugOutput();
+    }
 }
 
 void DX10Application::onException(ExceptionData& ex) noexcept
@@ -302,33 +312,6 @@ void DX10Application::onException(ExceptionData& ex) noexcept
 #endif
     ExceptionDispatcher dispatcher(*ex.ex);
     dispatcher.dispatch<IncorrectContextException>(this, &DX10Application::onIncorrectContext);
-}
-
-glm::mat4 transpose(glm::mat4 mat)
-{
-    glm::mat4 ret;
-
-    ret[0][0] = mat[0][0];
-    ret[0][1] = mat[1][0];
-    ret[0][2] = mat[2][0];
-    ret[0][3] = mat[3][0];
-
-    ret[1][0] = mat[0][1];
-    ret[1][1] = mat[1][1];
-    ret[1][2] = mat[2][1];
-    ret[1][3] = mat[3][1];
-
-    ret[2][0] = mat[0][2];
-    ret[2][1] = mat[1][2];
-    ret[2][2] = mat[2][2];
-    ret[2][3] = mat[3][2];
-
-    ret[3][0] = mat[0][3];
-    ret[3][1] = mat[1][3];
-    ret[3][2] = mat[2][3];
-    ret[3][3] = mat[3][3];
-
-    return ret;
 }
 
 void DX10Application::update(float fixedDelta) noexcept
@@ -368,40 +351,54 @@ void DX10Application::update(float fixedDelta) noexcept
     { _aa *= -1; }
 
     _camera->update(fixedDelta);
+    // {
+    //     const u32 screenCenterW = _window->width() >> 1;
+    //     const u32 screenCenterH = _window->height() >> 1;
+    //     const Mouse::Pos pos = Mouse::mousePos(*_window);
+    //     Mouse::mousePos(*_window, screenCenterW, screenCenterH);
+    //     const i32 mouseDifX = static_cast<i32>(screenCenterW) - static_cast<i32>(pos.x);
+    //     const i32 mouseDifY = static_cast<i32>(screenCenterH) - static_cast<i32>(pos.y);
+    //     _camera3D->update(fixedDelta, mouseDifX, mouseDifY);
+    // }
     if(glmExt::useTranspose(ctx().mode()))
     {
-        _matrices->data().viewMatrix = _camera->camera().viewMatrixTrans();
+        _matrices->data().projection = _camera3D->camera().projectionMatrixTrans();
     }
     else
     {
-        _matrices->data().viewMatrix = _camera->camera().viewMatrix();
+        _matrices->data().projection = _camera3D->camera().projectionMatrix();
     }
-    _matrices->data().projection = _camera->camera().projectionMatrix();
-    // _matrices->data().projection =  glm::orthoLH_ZO(static_cast<float>(_window->width()), 0.0f, static_cast<float>(_window->height()), 0.0f, 0.0f, 1.0f);
-    // _matrices->data().projection = glm::perspectiveFovLH(DEG_2_RAD_F(90.0f), (float) _window->width(), (float) _window->height(), 0.00001f, 1000.0f);
-    _matrices->data().viewMatrixTrans = transpose(_camera->camera().viewMatrix()); 
-    _matrices->data().model = glm::scale(glm::mat4(1.0f), glm::vec3(200.0f)); 
 }
 
 void DX10Application::render(const DeltaTime& delta) noexcept
 {
     UNUSED(delta);
+    _camera3D->lerp(delta);
+    if(glmExt::useTranspose(ctx().mode()))
+    {
+        _matrices->data().viewMatrix = _camera3D->camera().viewMatrixTrans();
+    }
+    else
+    {
+        _matrices->data().viewMatrix = _camera3D->camera().viewMatrix();
+    }
+
     ctx().beginFrame();
       ctx().clearScreen(true, true, false, RGBAColor { _r, _g, _b, 255 });
       _shader->bind(ctx());
         _matrices->upload(ctx(), EShader::Stage::Vertex, 0);
         _uni->upload(ctx(), EShader::Stage::Pixel, 1);
-        TextureIndices ind;
-        _texUploader->upload(ctx(), ind, EShader::Stage::Pixel);
-
+        // TextureIndices ind;
+        // _texUploader->upload(ctx(), ind, EShader::Stage::Pixel);
+      
         _va->bind(ctx());
         _va->preDraw(ctx());
         _va->draw(ctx());
         _va->postDraw(ctx());
         _va->unbind(ctx());
-
-        TextureIndices ind0;
-        _texUploader->unbind(ctx(), ind0, EShader::Stage::Pixel);
+      
+        // TextureIndices ind0;
+        // _texUploader->unbind(ctx(), ind0, EShader::Stage::Pixel);
         _uni->unbind(ctx(), EShader::Stage::Pixel, 1);
         _matrices->unbind(ctx(), EShader::Stage::Vertex, 0);
       _shader->unbind(ctx());
@@ -409,7 +406,7 @@ void DX10Application::render(const DeltaTime& delta) noexcept
     ctx().swapFrame();
 }
 
-void DX10Application::renderFPS(u32 ups, u32 fps) noexcept
+void DX10Application::renderFPS(const u32 ups, const u32 fps) noexcept
 {
     char buf[256];
     snprintf(buf, 256, "DX10 Test: UPS / FPS: %u / %u", ups, fps);
@@ -419,7 +416,7 @@ void DX10Application::renderFPS(u32 ups, u32 fps) noexcept
 void DX10Application::runMessageLoop() noexcept
 {
 #ifndef NUM_MESSAGES_TO_READ
-  #define NUM_MESSAGES_TO_READ 64
+  #define NUM_MESSAGES_TO_READ 128
 #endif
 
     MSG msg;
@@ -494,10 +491,11 @@ bool DX10Application::onKeyPress(WindowKeyEvent& e) noexcept
     return false;
 }
 
-bool DX10Application::onWindowResize(WindowResizeEvent& e) const noexcept
+bool DX10Application::onWindowResize(WindowResizeEvent& e) noexcept
 {
-    _window->renderingContext()->updateViewport(0, 0, e.newWidth(), e.newHeight());
+    _renderingContext->updateViewport(0, 0, e.newWidth(), e.newHeight());
     _camera->camera().setProjection(*_window);
+    _camera3D->camera().setProjection(*_window, 90, 0.0001f, 1000.0f);
     // Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
     return false;
 }
@@ -558,7 +556,7 @@ static void setupGameFolders() noexcept
             }
         }
     }
-    VFS::Instance().mountDynamic("res", "E:/TauEngine/test/DX10Testing/resources", Win32FileLoader::Instance());
+    VFS::Instance().mountDynamic("res", "D:/TauEngine/test/DX10Testing/resources", Win32FileLoader::Instance());
 }
 
 IResourceSelectorTransformer::ResIndex RMRSTransformer::transform(const DynString& key) noexcept
@@ -583,7 +581,6 @@ IResourceSelectorTransformer::ResIndex RMRSTransformer::transform(const Renderin
             return 0;
         case RenderingMode::Mode::Vulkan:
             return 1;
-        case RenderingMode::Mode::OpenGL2:
         case RenderingMode::Mode::OpenGL3:
         case RenderingMode::Mode::OpenGL3_1:
         case RenderingMode::Mode::OpenGL3_2:

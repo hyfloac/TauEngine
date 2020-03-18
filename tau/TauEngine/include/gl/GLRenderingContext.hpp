@@ -6,6 +6,8 @@
 #include <GL/wglew.h>
 #endif
 
+class GLGraphicsInterface;
+
 class GLBufferBuilder;
 class GLIndexBufferBuilder;
 class GLUniformBufferBuilder;
@@ -18,24 +20,31 @@ class GLTextureCubeBuilder;
 class GLDepthStencilState;
 class GLDepthStencilStateBuilder;
 
+struct GLRenderingContextArgs final
+{
+    GLGraphicsInterface& gi;
+    NullableRef<GLDepthStencilState> initialDepthStencilState;
+};
+
+#if defined(_WIN32)
+struct GLSystemRenderingContextArgs final
+{
+    HDC device;
+    HGLRC context;
+};
+#else
+struct GLSystemRenderingContextArgs final { };
+#endif
+
 class GLRenderingContext final : public IRenderingContext
 {
-public:
-    enum class GLProfile
-    {
-        Core = 0,
-        Compat,
-        Neither
-    };
 private:
+    GLGraphicsInterface& _gi;
+
 #if defined(_WIN32)
     HDC _device;
     HGLRC _context;
 #endif
-    int _majorVersion;
-    int _minorVersion;
-    GLProfile _compat;
-    bool _forwardCompatible;
 
     NullableRef<GLDepthStencilState> _defaultDepthStencilState;
     NullableRef<GLDepthStencilState> _currentDepthStencilState;
@@ -44,14 +53,12 @@ private:
     GLIndexBufferBuilder* _indexBufferBuilder;
     GLUniformBufferBuilder* _uniformBufferBuilder;
     GLTextureSamplerBuilder* _textureSamplerBuilder;
-    GLShaderBuilder* _shaderBuilder;
     GLTexture2DBuilder* _texture2DBuilder;
     GLTextureNullBuilder* _textureNullBuilder;
     GLTextureDepthBuilder* _textureDepthBuilder;
     GLTextureCubeBuilder* _textureCubeBuilder;
-    GLDepthStencilStateBuilder* _depthStencilStateBuilder;
 public:
-    GLRenderingContext(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile core, bool forwardCompatible) noexcept;
+    GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept;
     ~GLRenderingContext() noexcept override final;
 
     [[nodiscard]] bool createContext(Window& window) noexcept override final;
@@ -72,7 +79,7 @@ public:
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
-    const DepthStencilParams& getDefaultDepthStencilStateParams() noexcept override;
+    const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept override;
 
     void beginFrame() noexcept override final { }
     void endFrame() noexcept override final { }
@@ -96,5 +103,29 @@ public:
 private:
     void handleCtxError(int profileMask) const noexcept;
 
+    void systemDestruct() noexcept;
+
     RC_IMPL(GLRenderingContext);
+};
+
+class TAU_DLL GLRenderingContextBuilder final : public IRenderingContextBuilder
+{
+    DEFAULT_DESTRUCT(GLRenderingContextBuilder);
+    DELETE_COPY(GLRenderingContextBuilder);
+private:
+    GLGraphicsInterface& _gi;
+public:
+    GLRenderingContextBuilder(GLGraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
+
+    [[nodiscard]] GLRenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] GLRenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] CPPRef<IRenderingContext> buildCPPRef(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] NullableRef<IRenderingContext> buildTauRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
+    [[nodiscard]] NullableStrongRef<IRenderingContext> buildTauSRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const RenderingContextArgs& args, [[tau::out]] GLRenderingContextArgs* glArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processSysArgs(const RenderingContextArgs& args, const GLRenderingContextArgs& glArgs, [[tau::out]] GLSystemRenderingContextArgs* glSysArgs, [[tau::out]] Error* error) const noexcept;
+    void handleCtxError(int profileMask) const noexcept;
 };

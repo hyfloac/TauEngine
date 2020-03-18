@@ -18,9 +18,9 @@ void GLDepthStencilState::apply() const noexcept
     glStencilFuncSeparate(GL_BACK, _glParams.backFace.compareFunc, 1, _glParams.stencilReadMask);
 }
 
-GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilParams& args, Error* error) const noexcept
+GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* error) const noexcept
 {
-    GLDepthStencilParams glArgs;
+    GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -32,9 +32,9 @@ GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilParams&
 }
 
 
-GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept
+GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    GLDepthStencilParams glArgs;
+    GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -46,9 +46,9 @@ GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilParams&
 }
 
 
-CPPRef<IDepthStencilState> GLDepthStencilStateBuilder::buildCPPRef(const DepthStencilParams& args, Error* error) const noexcept
+CPPRef<IDepthStencilState> GLDepthStencilStateBuilder::buildCPPRef(const DepthStencilArgs& args, Error* error) const noexcept
 {
-    GLDepthStencilParams glArgs;
+    GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -59,9 +59,9 @@ CPPRef<IDepthStencilState> GLDepthStencilStateBuilder::buildCPPRef(const DepthSt
     ERROR_CODE_V(Error::NoError, ret);
 }
 
-NullableRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauRef(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    GLDepthStencilParams glArgs;
+    GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -72,9 +72,9 @@ NullableRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauRef(const De
     ERROR_CODE_V(Error::NoError, RefCast<IDepthStencilState>(ret));
 }
 
-NullableStrongRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauSRef(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauSRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    GLDepthStencilParams glArgs;
+    GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -85,12 +85,12 @@ NullableStrongRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauSRef(c
     ERROR_CODE_V(Error::NoError, RefCast<IDepthStencilState>(ret));
 }
 
-bool GLDepthStencilStateBuilder::processArgs(const DepthStencilParams& args, GLDepthStencilParams* glArgs, Error* error) noexcept
+bool GLDepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, GLDepthStencilArgs* glArgs, Error* error) noexcept
 {
     glArgs->depthTestControl = args.enableDepthTest ? glEnable : glDisable;
     glArgs->stencilTestControl = args.enableStencilTest ? glEnable : glDisable;
 
-    glArgs->depthWriteMask = args.depthWriteMask == DepthStencilParams::DepthWriteMask::Zero ? GL_FALSE : GL_TRUE;
+    glArgs->depthWriteMask = args.depthWriteMask == DepthStencilArgs::DepthWriteMask::Zero ? GL_FALSE : GL_TRUE;
     glArgs->depthCompareFunc = GLTexture2D::glDepthCompareFunc(args.depthCompareFunc);
 
     glArgs->stencilReadMask = args.stencilReadMask;
@@ -106,7 +106,7 @@ bool GLDepthStencilStateBuilder::processArgs(const DepthStencilParams& args, GLD
     glArgs->backFace.passOp = glStencilOperation(args.backFace.passOp);
     glArgs->backFace.compareFunc = GLTexture2D::glDepthCompareFunc(args.backFace.compareFunc);
 
-    ERROR_CODE_COND_F(args.depthWriteMask != DepthStencilParams::DepthWriteMask::Zero && args.depthWriteMask != DepthStencilParams::DepthWriteMask::All, Error::InvalidDepthWriteMask);
+    ERROR_CODE_COND_F(args.depthWriteMask != DepthStencilArgs::DepthWriteMask::Zero && args.depthWriteMask != DepthStencilArgs::DepthWriteMask::All, Error::InvalidDepthWriteMask);
     ERROR_CODE_COND_F(glArgs->depthCompareFunc == 0, Error::InvalidDepthCompareFunc);
     ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.failOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilFailOp);
     ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.stencilPassDepthFailOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilPassDepthFailOp);
@@ -120,18 +120,18 @@ bool GLDepthStencilStateBuilder::processArgs(const DepthStencilParams& args, GLD
     return true;
 }
 
-GLenum GLDepthStencilStateBuilder::glStencilOperation(DepthStencilParams::StencilOp stencilOp) noexcept
+GLenum GLDepthStencilStateBuilder::glStencilOperation(DepthStencilArgs::StencilOp stencilOp) noexcept
 {
     switch(stencilOp)
     {
-        case DepthStencilParams::StencilOp::Keep:           return GL_KEEP;
-        case DepthStencilParams::StencilOp::Zero:           return GL_ZERO;
-        case DepthStencilParams::StencilOp::Replace:        return GL_REPLACE;
-        case DepthStencilParams::StencilOp::Invert:         return GL_INVERT;
-        case DepthStencilParams::StencilOp::IncrementClamp: return GL_INCR;
-        case DepthStencilParams::StencilOp::DecrementClamp: return GL_DECR;
-        case DepthStencilParams::StencilOp::IncrementWrap:  return GL_INCR_WRAP;
-        case DepthStencilParams::StencilOp::DecrementWrap:  return GL_DECR_WRAP;
+        case DepthStencilArgs::StencilOp::Keep:           return GL_KEEP;
+        case DepthStencilArgs::StencilOp::Zero:           return GL_ZERO;
+        case DepthStencilArgs::StencilOp::Replace:        return GL_REPLACE;
+        case DepthStencilArgs::StencilOp::Invert:         return GL_INVERT;
+        case DepthStencilArgs::StencilOp::IncrementClamp: return GL_INCR;
+        case DepthStencilArgs::StencilOp::DecrementClamp: return GL_DECR;
+        case DepthStencilArgs::StencilOp::IncrementWrap:  return GL_INCR_WRAP;
+        case DepthStencilArgs::StencilOp::DecrementWrap:  return GL_DECR_WRAP;
         default:                                            return static_cast<GLenum>(IntMaxMin<u32>::Max());
     }
 }

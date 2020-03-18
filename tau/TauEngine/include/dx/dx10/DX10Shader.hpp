@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <d3d10.h>
 
+class DX10GraphicsInterface;
 class DX10RenderingContext;
 
 class TAU_DLL NOVTABLE DX10Shader : public IShader
@@ -14,6 +15,7 @@ class TAU_DLL NOVTABLE DX10Shader : public IShader
     SHADER_IMPL(DX10Shader);
 public:
     virtual void bind(DX10RenderingContext& context) noexcept = 0;
+    virtual void unbind(DX10RenderingContext& context) noexcept = 0;
 };
 
 class TAU_DLL DX10VertexShader final : public DX10Shader
@@ -41,6 +43,7 @@ public:
     [[nodiscard]] ID3D10Blob* shaderBlob() noexcept { return _shaderBlob; }
 
     void bind(DX10RenderingContext& context) noexcept override;
+    void unbind(DX10RenderingContext& context) noexcept override;
 };
 
 class TAU_DLL DX10GeometryShader final : public DX10Shader
@@ -62,6 +65,7 @@ public:
     [[nodiscard]] ID3D10GeometryShader* shader() noexcept { return _shader; }
 
     void bind(DX10RenderingContext& context) noexcept override;
+    void unbind(DX10RenderingContext& context) noexcept override;
 };
 
 class TAU_DLL DX10PixelShader final : public DX10Shader
@@ -83,6 +87,7 @@ public:
     [[nodiscard]] ID3D10PixelShader* shader() noexcept { return _shader; }
 
     void bind(DX10RenderingContext& context) noexcept override;
+    void unbind(DX10RenderingContext& context) noexcept override;
 };
 
 class TAU_DLL DX10ShaderBuilder final : public IShaderBuilder
@@ -102,16 +107,16 @@ private:
         ID3D10PixelShader* pixel;
 	};
 private:
-    DX10RenderingContext& _ctx;
+    DX10GraphicsInterface& _gi;
     IResourceSelectorTransformer::ResIndex _resIndex;
 public:
-    DX10ShaderBuilder(DX10RenderingContext& ctx) noexcept;
+    DX10ShaderBuilder(DX10GraphicsInterface& gi) noexcept;
 
     [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] CPPRef<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 

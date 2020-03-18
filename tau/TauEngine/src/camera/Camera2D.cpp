@@ -4,8 +4,6 @@
 #include "system/Window.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <DirectXMath.h>
-
 Camera2D::Camera2D(const Window& window, float nearZ, float farZ) noexcept
     : _position(0.0f), _rotation(0.0f),
       _projectionMatrix(glmExt::ortho(static_cast<float>(window.width()), static_cast<float>(window.height()), nearZ, farZ)),
@@ -50,7 +48,7 @@ void Camera2D::recomputeMatrices() noexcept
     _viewMatrix = glm::inverse(transform);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 
-    _viewMatrixTrans = glmExt::transpose(_viewMatrix);
+    glmExt::transpose(_viewMatrix, _viewMatrixTrans);
     _compoundedMatrixTrans = _projectionMatrix * _viewMatrixTrans;
 }
 

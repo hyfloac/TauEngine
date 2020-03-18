@@ -32,6 +32,11 @@ void tauMain() noexcept
     initProgramStartTimes();
 }
 
+void tauFinalize() noexcept
+{
+    SystemInterface::finalize();
+}
+
 static ExceptionData exData = { null, 0, "", "" };
 
 #if defined(_DEBUG)

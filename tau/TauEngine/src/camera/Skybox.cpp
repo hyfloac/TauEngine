@@ -4,8 +4,9 @@
 #include "model/VertexArray.hpp"
 #include "shader/IShader.hpp"
 #include "texture/FITextureLoader.hpp"
-#include "gl/GLUtils.hpp"
 #include <glm/gtc/type_ptr.hpp>
+
+#include "maths/glmExt/GlmMatrixTransformExt.hpp"
 
 template<>
 class UniformAccessor<Skybox::Uniforms> final
@@ -131,9 +132,9 @@ Skybox::Skybox(IRenderingContext& context, const char* const vfsMount, const cha
 
     _cubeVA = CPPRef<IVertexArray>(vaBuilder->build());
 
-    DepthStencilParams params = context.getDefaultDepthStencilStateParams();
-    params.depthWriteMask = DepthStencilParams::DepthWriteMask::Zero;
-    params.depthCompareFunc = DepthStencilParams::CompareFunc::LessThanOrEqual;
+    DepthStencilArgs params = context.getDefaultDepthStencilStateParams();
+    params.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;
+    params.depthCompareFunc = DepthStencilArgs::CompareFunc::LessThanOrEqual;
     _skyboxDepthStencilState = context.createDepthStencilState().buildTauRef(params, null);
 }
 
@@ -147,8 +148,16 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     const auto tmpState = context.setDepthStencilState(_skyboxDepthStencilState);
 
     _shader->bind(context);
-    _uniforms.data().projectionMatrix = camera.projectionMatrix();
-    _uniforms.data().viewMatrix = camera.viewRotMatrix();
+    if(glmExt::useTranspose(context.mode()))
+    {
+        _uniforms.data().projectionMatrix = camera.projectionMatrixTrans();
+        _uniforms.data().viewMatrix = camera.viewRotMatrixTrans();
+    }
+    else
+    {
+        _uniforms.data().projectionMatrix = camera.projectionMatrix();
+        _uniforms.data().viewMatrix = camera.viewRotMatrix();
+    }
     _uniforms.upload(context, EShader::Stage::Vertex, 0);
     {
         auto indices = TextureIndices(0, 0, 0);

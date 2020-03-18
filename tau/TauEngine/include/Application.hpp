@@ -42,6 +42,7 @@ public:
 Application* startGame() noexcept;
 
 TAU_DLL void tauMain() noexcept;
+TAU_DLL void tauFinalize() noexcept;
 TAU_DLL i32 tauExitCode() noexcept;
 
 int main(int argCount, char* args[]) noexcept
@@ -63,6 +64,10 @@ int main(int argCount, char* args[]) noexcept
     app->finalize();
 
     delete app;
+
+#ifndef TAU_DLL_LINK
+    tauFinalize();
+#endif
 
     return tauExitCode();
 }

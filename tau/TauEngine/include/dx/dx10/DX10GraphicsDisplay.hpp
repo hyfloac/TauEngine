@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Safeties.hpp"
 #include "system/GraphicsDisplay.hpp"
 
 #ifdef _WIN32
@@ -14,14 +15,10 @@ private:
 public:
     DX10GraphicsDisplay(IDXGIOutput* const dxgiAdapterOutput, const RefDynArray<GraphicsDisplayMode>& displayModes) noexcept
         : IGraphicsDisplay(), _dxgiAdapterOutput(dxgiAdapterOutput), _displayModes(displayModes)
-    {
-        dxgiAdapterOutput->AddRef();
-    }
+    { dxgiAdapterOutput->AddRef(); }
 
     ~DX10GraphicsDisplay() noexcept
-    {
-        _dxgiAdapterOutput->Release();
-    }
+    { _dxgiAdapterOutput->Release(); }
 
     [[nodiscard]] RefDynArray<GraphicsDisplayMode> displayModes() noexcept override { return _displayModes; }
 };
@@ -36,7 +33,7 @@ private:
 public:
     void setAdapterOutput(IDXGIOutput* const dxgiAdapterOutput) noexcept { _dxgiAdapterOutput = dxgiAdapterOutput; }
 
-    [[nodiscard]] DX10GraphicsDisplay* build() const noexcept;
+    [[nodiscard]] NullableRef<DX10GraphicsDisplay> build() const noexcept;
 };
 
 #endif

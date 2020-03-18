@@ -14,8 +14,10 @@
 #include <Color.hpp>
 #include <glm/mat4x4.hpp>
 #include <camera/Camera2D.hpp>
+#include <camera/Camera3D.hpp>
 #include <DirectXMath.h>
 #include <shader/TextureUploader.hpp>
+#include <system/GraphicsInterface.hpp>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
@@ -44,6 +46,8 @@ private:
     static constexpr const char* CONFIG_PATH = "|game/config.bin";
     Config _config;
     Window* _window;
+    NullableRef<IGraphicsInterface> _graphicsInterface;
+    NullableRef<IRenderingContext> _renderingContext;
     CPPRef<spdlog::logger> _logger;
     u8 _r, _g, _b;
     int _colorState;
@@ -53,6 +57,7 @@ private:
     UniformBlockS<Uniforms>* _uni;
     UniformBlockS<Matrices>* _matrices;
     Camera2DController* _camera;
+    FreeCamCamera3DController* _camera3D;
     CPPRef<ISingleTextureUploader> _texUploader;
 public:
     DX10Application() noexcept;
@@ -75,8 +80,10 @@ protected:
 
     void runMessageLoop() noexcept override;
 private:
-    [[nodiscard]] const IRenderingContext& ctx() const noexcept { return *_window->renderingContext(); }
-    [[nodiscard]] IRenderingContext& ctx() noexcept { return *_window->renderingContext(); }
+    // [[nodiscard]] const IRenderingContext& ctx() const noexcept { return *_window->renderingContext(); }
+    // [[nodiscard]] IRenderingContext& ctx() noexcept { return *_window->renderingContext(); }
+    [[nodiscard]] const IRenderingContext& ctx() const noexcept { return *_renderingContext; }
+    [[nodiscard]] IRenderingContext& ctx() noexcept { return *_renderingContext; }
 
     void setupConfig() noexcept;
 
@@ -88,7 +95,7 @@ private:
 
     bool onKeyPress(WindowKeyEvent& e) noexcept;
 
-    bool onWindowResize(WindowResizeEvent& e) const noexcept;
+    bool onWindowResize(WindowResizeEvent& e) noexcept;
 
     void onIncorrectContext(IncorrectContextException& ex) const noexcept;
 public:

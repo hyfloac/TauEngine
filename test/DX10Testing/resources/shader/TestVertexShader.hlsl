@@ -24,10 +24,10 @@ PSInput vsMain(VSInput input)
 {
     PSInput output;
 
-    float4 pos = float4(input.position, 0.0f, 1.0f);
-    pos = mul(pos, model);
-    pos = mul(pos, view);
-    pos = mul(pos, projection);
+    float4 pos = float4(input.position, 0.1f, 1.0f);
+    // pos = mul(pos, model);
+    // pos = mul(pos, view);
+    // pos = mul(pos, projection);
 
     output.position = pos;
     output.color = input.color;

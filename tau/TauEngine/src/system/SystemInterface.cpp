@@ -1,7 +1,7 @@
 #include "system/SystemInterface.hpp"
 #include <new>
 
-SystemInterface* _g__systemInterfacePtr_;
+SystemInterface* SystemInterface::_instance;
 
 SystemInterface* SystemInterface::create() noexcept
 {
@@ -9,14 +9,19 @@ SystemInterface* SystemInterface::create() noexcept
     if(!created)
     {
         created = true;
-        _g__systemInterfacePtr_ = new(::std::nothrow) SystemInterface;
-        return _g__systemInterfacePtr_;
+        _instance = new(::std::nothrow) SystemInterface;
+        return _instance;
     }
 
     return nullptr;
 }
 
+void SystemInterface::finalize() noexcept
+{
+    delete _instance;
+}
+
 SystemInterface* SystemInterface::get() noexcept
 {
-    return _g__systemInterfacePtr_;
+    return _instance;
 }

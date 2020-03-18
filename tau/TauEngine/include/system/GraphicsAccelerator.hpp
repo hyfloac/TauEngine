@@ -46,5 +46,5 @@ public:
     [[nodiscard]] virtual bool has64BitInt() noexcept = 0;
     [[nodiscard]] virtual bool has16BitInt() noexcept = 0;
 
-    [[nodiscard]] virtual RefDynArray<CPPRef<IGraphicsDisplay>> graphicsDisplays() noexcept = 0;
+    [[nodiscard]] virtual RefDynArray<NullableRef<IGraphicsDisplay>> graphicsDisplays() noexcept = 0;
 };

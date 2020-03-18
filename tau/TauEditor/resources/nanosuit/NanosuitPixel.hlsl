@@ -1,8 +1,9 @@
 struct PSInput
 {
-    float4 svPosition : SV_Position;
+    float4 svPosition : SV_POSITION;
     float3 position : POSITION;
     float2 texCoord : TEXCOORD;
+    float3 normal : NORMAL;
     float3x3 tbn : TBN;
 };
 
@@ -56,9 +57,9 @@ cbuffer ViewPos : register(b4)
     float4 viewPos4;
 }
 
-Texture2D diffuseTexture;
-Texture2D specularTexture;
-Texture2D normalTexture;
+Texture2D diffuseTexture : register(t0);
+Texture2D specularTexture : register(t1);
+Texture2D normalTexture : register(t2);
 SamplerState textureSampler;
 
 float3 computePointLight(PointLight light, float3 cameraPos, float3 pos, float3 normal, float3 diffuseTexel, float3 specularTexel, float specExp);
@@ -75,11 +76,13 @@ float4 psMain(PSInput input) : SV_TARGET
     float3 normal = normalize(normalTexel * 2.0f - 1.0f);
     float3 normalTransformed = normalize(mul(normal, input.tbn));
 
-    float3 pointVal = computePointLight(pointLight, viewPos, input.position, normalTransformed, diffuseTexel, specularTexel, specularExponent);
+    float3 pointVal = computePointLight(pointLight, viewPos, input.position, normalize(input.normal), diffuseTexel, specularTexel, specularExponent);
     float3 spotVal  =  computeSpotLight(spotLight,  viewPos, input.position, normalTransformed, diffuseTexel, specularTexel, specularExponent);
 
-    float3 result = pointVal + spotVal;
-    result /= 2.0f;
+    // float3 result = pointVal + spotVal;
+    // result /= 2.0f;
+
+    float3 result = spotVal;
 
     return float4(result, 1.0f);
 }
@@ -90,7 +93,7 @@ float3 computePointLight(PointLight light, float3 cameraPos, float3 pos, float3 
 
     float dist = length(lightPosDelta);
     float attenuation = 1.0f / (light.constant + 
-                                light.linearVal    * dist + 
+                                light.linearVal * dist + 
                                 light.quadratic * dist * dist);
 
     float3 lightDir = normalize(lightPosDelta);
@@ -101,11 +104,12 @@ float3 computePointLight(PointLight light, float3 cameraPos, float3 pos, float3 
     float diff = max(dot(normal, lightDir), 0.0f);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), specExp);
 
-    float3 ambient  = light.ambient.rgb  *        diffuseTexel;
-    float3 diffuse  = light.diffuse.rgb  * diff * diffuseTexel  * attenuation;
+    float3 ambient  = light.ambient.rgb  *         diffuseTexel;
+    float3 diffuse  = light.diffuse.rgb  * diff *  diffuseTexel * attenuation;
     float3 specular = light.specular.rgb * spec * specularTexel * attenuation;
 
     return ambient + diffuse + specular;
+    // return specular;
 }
 
 float3 computeSpotLight(SpotLight light, float3 cameraPos, float3 pos, float3 normal, float3 diffuseTexel, float3 specularTexel, float specExp)

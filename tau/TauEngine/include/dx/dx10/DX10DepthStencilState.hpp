@@ -6,14 +6,16 @@
 
 #include <d3d10.h>
 
+class DX10GraphicsInterface;
 class DX10RenderingContext;
 
-class DX10DepthStencilState final : public IDepthStencilState
+class TAU_DLL DX10DepthStencilState final : public IDepthStencilState
 {
+    DSS_IMPL(DX10DepthStencilState);
 private:
     ID3D10DepthStencilState* _d3dDepthStencilState;
 public:
-    DX10DepthStencilState(const DepthStencilParams& params, ID3D10DepthStencilState* const d3dDepthStencilState) noexcept
+    DX10DepthStencilState(const DepthStencilArgs& params, ID3D10DepthStencilState* const d3dDepthStencilState) noexcept
         : IDepthStencilState(params), _d3dDepthStencilState(d3dDepthStencilState)
     { }
 
@@ -27,37 +29,36 @@ public:
     [[nodiscard]] ID3D10DepthStencilState* d3dDepthStencilState() noexcept { return _d3dDepthStencilState; }
 
     void apply(DX10RenderingContext& ctx) const noexcept;
-protected:
-    DSS_IMPL(DX10DepthStencilState);
+    void apply(ID3D10Device* dev) const noexcept;
 };
 
-class DX10DepthStencilStateBuilder final : public IDepthStencilStateBuilder
+class TAU_DLL DX10DepthStencilStateBuilder final : public IDepthStencilStateBuilder
 {
     DEFAULT_DESTRUCT(DX10DepthStencilStateBuilder);
     DELETE_COPY(DX10DepthStencilStateBuilder);
 public:
-    static D3D10_DEPTH_WRITE_MASK dxDepthWriteMask(DepthStencilParams::DepthWriteMask depthWriteMask) noexcept;
-    static D3D10_COMPARISON_FUNC dxComparisonFunc(DepthStencilParams::CompareFunc compareFunc) noexcept;
-    static D3D10_STENCIL_OP dxStencilOp(DepthStencilParams::StencilOp stencilOp) noexcept;
+    static D3D10_DEPTH_WRITE_MASK dxDepthWriteMask(DepthStencilArgs::DepthWriteMask depthWriteMask) noexcept;
+    static D3D10_COMPARISON_FUNC dxComparisonFunc(DepthStencilArgs::CompareFunc compareFunc) noexcept;
+    static D3D10_STENCIL_OP dxStencilOp(DepthStencilArgs::StencilOp stencilOp) noexcept;
 public:
-    struct DXDepthStencilParams final
+    struct DXDepthStencilArgs final
     {
         D3D10_DEPTH_STENCIL_DESC desc;
         ID3D10DepthStencilState* state;
     };
 private:
-    DX10RenderingContext& ctx;
+    DX10GraphicsInterface& _gi;
 public:
-    DX10DepthStencilStateBuilder(DX10RenderingContext& ctx) noexcept
-        : ctx(ctx)
+    DX10DepthStencilStateBuilder(DX10GraphicsInterface& gi) noexcept
+        : _gi(gi)
     { }
 
-    [[nodiscard]] DX10DepthStencilState* build(const DepthStencilParams& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10DepthStencilState* build(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IDepthStencilState> buildCPPRef(const DepthStencilParams& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IDepthStencilState> buildTauRef(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IDepthStencilState> buildTauSRef(const DepthStencilParams& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] DX10DepthStencilState* build(const DepthStencilArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] DX10DepthStencilState* build(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<IDepthStencilState> buildCPPRef(const DepthStencilArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<IDepthStencilState> buildTauRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<IDepthStencilState> buildTauSRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 private:
-    bool processArgs(const DepthStencilParams& args, [[tau::out]] ID3D10DepthStencilState** d3dDepthStencilState, [[tau::out]] Error* error) const noexcept;
+    bool processArgs(const DepthStencilArgs& args, [[tau::out]] ID3D10DepthStencilState** d3dDepthStencilState, [[tau::out]] Error* error) const noexcept;
 };
 #endif

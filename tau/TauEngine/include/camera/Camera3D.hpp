@@ -21,11 +21,16 @@ private:
     Vector3f _front;
     float _pitch; // Degrees
     float _yaw; // Degrees
+    float _roll; // Degrees
     glm::quat _viewQuaternion;
     glm::mat4 _projectionMatrix;
+    glm::mat4 _projectionMatrixTrans;
     glm::mat4 _viewMatrix;
+    glm::mat4 _viewMatrixTrans;
     glm::mat4 _viewRotMatrix; // A matrix that doesn't include position
+    glm::mat4 _viewRotMatrixTrans; // A matrix that doesn't include position
     glm::mat4 _compoundedMatrix;
+    glm::mat4 _compoundedMatrixTrans;
 public:
     Camera3D(const Window& window, float fov, float zNear, float zFar) noexcept;
 
@@ -33,12 +38,17 @@ public:
     [[nodiscard]] Vector3f front() const noexcept { return _front; }
     [[nodiscard]] float pitch() const noexcept { return _pitch; }
     [[nodiscard]] float yaw() const noexcept { return _yaw; }
-    [[nodiscard]] glm::quat viewQuaterion() const noexcept { return _viewQuaternion; }
+    [[nodiscard]] float roll() const noexcept { return _roll; }
+    [[nodiscard]] glm::quat viewQuaternion() const noexcept { return _viewQuaternion; }
     [[nodiscard]] glm::mat4 projectionMatrix() const noexcept { return _projectionMatrix; }
+    [[nodiscard]] glm::mat4 projectionMatrixTrans() const noexcept { return _projectionMatrixTrans; }
     [[nodiscard]] const glm::mat4& viewMatrix() const noexcept { return _viewMatrix; }
+    [[nodiscard]] const glm::mat4& viewMatrixTrans() const noexcept { return _viewMatrixTrans; }
     [[nodiscard]] const glm::mat4& viewRotMatrix() const noexcept { return _viewRotMatrix; }
+    [[nodiscard]] const glm::mat4& viewRotMatrixTrans() const noexcept { return _viewRotMatrixTrans; }
     /** _projectionMatrix * _viewMatrix */
     [[nodiscard]] const glm::mat4& compoundedMatrix() const noexcept { return _compoundedMatrix; }
+    [[nodiscard]] const glm::mat4& compoundedMatrixTrans() const noexcept { return _compoundedMatrixTrans; }
 
     void setProjection(const Window& window, float fov, float zNear, float zFar) noexcept;
 
@@ -53,23 +63,25 @@ public:
         if(pitch > 89.0f) { pitch = 89.0f; }
         else if(pitch < -89.0f) { pitch = -89.0f; }
         _pitch = pitch;
-        // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
-        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
         computeQuat();
         recomputeMatrices();
     }
 
     void yaw(float yaw) noexcept
     {
-        if(yaw > 360.0f) { yaw = fmod(yaw, 360.0f); }
-        else if(yaw < 0.0f)
-        {
-            yaw = fmod(yaw, 360.0f);
-            yaw = 360.0f - yaw;
-        }
+        if(yaw > 360.0f)    { yaw =          fmod(yaw, 360.0f); }
+        else if(yaw < 0.0f) { yaw = 360.0f - fmod(yaw, 360.0f); }
         _yaw = yaw;
-        // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
-        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        computeQuat();
+        recomputeMatrices();
+    }
+
+    void roll(float roll) noexcept
+    {
+        if(roll > 360.0f)    { roll =          fmod(roll, 360.0f); }
+        else if(roll < 0.0f) { roll = 360.0f - fmod(roll, 360.0f); }
+        _roll = roll;
+
         computeQuat();
         recomputeMatrices();
     }
@@ -79,16 +91,29 @@ public:
         if(pitch > 89.0f) { pitch = 89.0f; }
         else if(pitch < -89.0f) { pitch = -89.0f; }
 
-        if(yaw > 360.0f) { yaw = fmod(yaw, 360.0f); }
-        else if(yaw < 0.0f)
-        {
-            yaw = fmod(yaw, 360.0f);
-            yaw = 360.0f - yaw;
-        }
+        if(yaw > 360.0f)    { yaw =          fmod(yaw, 360.0f); }
+        else if(yaw < 0.0f) { yaw = 360.0f - fmod(yaw, 360.0f); }
         _pitch = pitch;
         _yaw = yaw;
-        // _viewQuaternion = glm::quat(glm::vec3(-_pitch, -_yaw, 0.0f));
-        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+        computeQuat();
+        recomputeMatrices();
+    }
+
+    void set(float pitch, float yaw, float roll) noexcept
+    {
+        if(pitch > 89.0f) { pitch = 89.0f; }
+        else if(pitch < -89.0f) { pitch = -89.0f; }
+
+        if(yaw > 360.0f)    { yaw =          fmod(yaw, 360.0f); }
+        else if(yaw < 0.0f) { yaw = 360.0f - fmod(yaw, 360.0f); }
+
+        if(roll > 360.0f)    { roll =          fmod(roll, 360.0f); }
+        else if(roll < 0.0f) { roll = 360.0f - fmod(roll, 360.0f); }
+
+        _pitch = pitch;
+        _yaw = yaw;
+        _roll = roll;
+
         computeQuat();
         recomputeMatrices();
     }
@@ -100,15 +125,33 @@ public:
         if(pitch > 89.0f) { pitch = 89.0f; }
         else if(pitch < -89.0f) { pitch = -89.0f; }
 
-        if(yaw > 360.0f) { yaw = fmod(yaw, 360.0f); }
-        else if(yaw < 0.0f)
-        {
-            yaw = fmod(yaw, 360.0f);
-            yaw = 360.0f - yaw;
-        }
+        if(yaw > 360.0f)    { yaw =          fmod(yaw, 360.0f); }
+        else if(yaw < 0.0f) { yaw = 360.0f - fmod(yaw, 360.0f); }
+
         _pitch = pitch;
         _yaw = yaw;
-        // _viewQuaternion = glm::quat(glm::vec3(DEG_2_RAD_F(_pitch), DEG_2_RAD_F(_yaw), 0.0f));
+
+        computeQuat();
+        recomputeMatrices();
+    }
+
+    void set(Vector3f pos, float pitch, float yaw, float roll) noexcept
+    {
+        _position = pos;
+
+        if(pitch > 89.0f) { pitch = 89.0f; }
+        else if(pitch < -89.0f) { pitch = -89.0f; }
+
+        if(yaw > 360.0f)    { yaw =          fmod(yaw, 360.0f); }
+        else if(yaw < 0.0f) { yaw = 360.0f - fmod(yaw, 360.0f); }
+
+        if(roll > 360.0f)    { roll =          fmod(roll, 360.0f); }
+        else if(roll < 0.0f) { roll = 360.0f - fmod(roll, 360.0f); }
+
+        _pitch = pitch;
+        _yaw = yaw;
+        _roll = roll;
+
         computeQuat();
         recomputeMatrices();
     }

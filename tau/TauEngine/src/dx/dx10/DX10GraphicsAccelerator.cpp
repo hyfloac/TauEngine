@@ -3,9 +3,9 @@
 #ifdef _WIN32
 #include "dx/dx10/DX10GraphicsDisplay.hpp"
 
-RefDynArray<CPPRef<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays() noexcept
+RefDynArray<NullableRef<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays() noexcept
 {
-#define CHECK(_VAL) do { if(FAILED(_VAL)) { return RefDynArray<CPPRef<IGraphicsDisplay>>(0); } } while(0)
+#define CHECK(_VAL) do { if(FAILED(_VAL)) { return RefDynArray<NullableRef<IGraphicsDisplay>>(0); } } while(0)
 
     IDXGIOutput* dxgiAdapterOutput;
     UINT i;
@@ -14,16 +14,16 @@ RefDynArray<CPPRef<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays(
         dxgiAdapterOutput->Release();
     }
 
-    RefDynArray<CPPRef<IGraphicsDisplay>> displays(i);
+    RefDynArray<NullableRef<IGraphicsDisplay>> displays(i);
 
-    DX10GraphicsDisplayBuilder* builder = new(std::nothrow) DX10GraphicsDisplayBuilder;
+    DX10GraphicsDisplayBuilder builder{};
 
     const UINT maxAdapterOutput = i;
     for(i = 0; i < maxAdapterOutput; ++i)
     {
         CHECK(_dxgiAdapter->EnumOutputs(i, &dxgiAdapterOutput));
-        builder->setAdapterOutput(dxgiAdapterOutput);
-        displays[i] = CPPRef<IGraphicsDisplay>(builder->build());
+        builder.setAdapterOutput(dxgiAdapterOutput);
+        displays[i] = RefCast<IGraphicsDisplay>(builder.build());
         dxgiAdapterOutput->Release();
     }
 
@@ -31,7 +31,7 @@ RefDynArray<CPPRef<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisplays(
 #undef CHECK
 }
 
-DX10GraphicsAccelerator* DX10GraphicsAcceleratorBuilder::build() const noexcept
+NullableRef<DX10GraphicsAccelerator> DX10GraphicsAcceleratorBuilder::build() const noexcept
 {
 #define CHECK(_VAL) do { if(FAILED(_VAL)) { return null; } } while(0)
 
@@ -45,20 +45,16 @@ DX10GraphicsAccelerator* DX10GraphicsAcceleratorBuilder::build() const noexcept
     uSys videoCardDescLen;
     errno_t error = wcstombs_s(&videoCardDescLen, null, 0, dxgiAdapterDesc.Description, 128);
     if(error || !videoCardDescLen)
-    {
-        return null;
-    }
+    { return null; }
 
     char* videoCardDesc = new(std::nothrow) char[videoCardDescLen + 1];
     error = wcstombs_s(&videoCardDescLen, videoCardDesc, videoCardDescLen, dxgiAdapterDesc.Description, 128);
     if(error)
-    {
-        return null;
-    }
+    { return null; }
 
     const DynString deviceName = DynString::passControl(videoCardDesc);
 
-    DX10GraphicsAccelerator* gpu = new(std::nothrow) DX10GraphicsAccelerator("", deviceName, videoCardMemory, systemVideoMemory, sharedVideoMemory, _dxgiAdapter);
+    NullableRef<DX10GraphicsAccelerator> gpu(DefaultTauAllocator::Instance(), "", deviceName, videoCardMemory, systemVideoMemory, sharedVideoMemory, _dxgiAdapter);
 
     return gpu;
 #undef CHECK

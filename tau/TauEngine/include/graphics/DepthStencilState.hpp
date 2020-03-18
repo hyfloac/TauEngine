@@ -7,13 +7,11 @@
 #include <ReferenceCountingPointer.hpp>
 #include <RunTimeType.hpp>
 
-class IRenderingContext;
-
-struct DepthStencilParams final
+struct DepthStencilArgs final
 {
-    DEFAULT_CONSTRUCT_PU(DepthStencilParams);
-    DEFAULT_DESTRUCT(DepthStencilParams);
-    DEFAULT_COPY(DepthStencilParams);
+    DEFAULT_CONSTRUCT_PU(DepthStencilArgs);
+    DEFAULT_DESTRUCT(DepthStencilArgs);
+    DEFAULT_COPY(DepthStencilArgs);
 public:
     enum class DepthWriteMask : u8
     {
@@ -35,20 +33,20 @@ public:
         DecrementWrap
     };
 
-    struct StencilOpParams final
+    struct StencilOpArgs final
     {
-        DEFAULT_CONSTRUCT_PU(StencilOpParams);
-        DEFAULT_DESTRUCT(StencilOpParams);
-        DEFAULT_COPY(StencilOpParams);
+        DEFAULT_CONSTRUCT_PU(StencilOpArgs);
+        DEFAULT_DESTRUCT(StencilOpArgs);
+        DEFAULT_COPY(StencilOpArgs);
     public:
         StencilOp failOp;
         StencilOp stencilPassDepthFailOp;
         StencilOp passOp;
         CompareFunc compareFunc;
     public:
-        StencilOpParams(const StencilOp failOp, const StencilOp stencilPassDepthFailOp, const StencilOp passOp, const CompareFunc compareFunc) noexcept
+        StencilOpArgs(const StencilOp failOp, const StencilOp stencilPassDepthFailOp, const StencilOp passOp, const CompareFunc compareFunc) noexcept
             : failOp(failOp), stencilPassDepthFailOp(stencilPassDepthFailOp),
-              passOp(passOp), compareFunc(compareFunc)
+            passOp(passOp), compareFunc(compareFunc)
         { }
     };
 public:
@@ -61,10 +59,10 @@ public:
     u8 stencilReadMask;
     u8 stencilWriteMask;
 
-    StencilOpParams frontFace;
-    StencilOpParams backFace;
+    StencilOpArgs frontFace;
+    StencilOpArgs backFace;
 public:
-    DepthStencilParams(const bool enableDepthTest, const bool enableStencilTest, const DepthWriteMask depthWriteMask, const CompareFunc depthCompareFunc, const u8 stencilReadMask, const u8 stencilWriteMask, const StencilOpParams& frontFace, const StencilOpParams& backFace) noexcept
+    DepthStencilArgs(const bool enableDepthTest, const bool enableStencilTest, const DepthWriteMask depthWriteMask, const CompareFunc depthCompareFunc, const u8 stencilReadMask, const u8 stencilWriteMask, const StencilOpArgs& frontFace, const StencilOpArgs& backFace) noexcept
         : enableDepthTest(enableDepthTest),
           enableStencilTest(enableStencilTest),
           depthWriteMask(depthWriteMask),
@@ -74,6 +72,20 @@ public:
           frontFace(frontFace),
           backFace(backFace)
     { }
+
+    explicit DepthStencilArgs(tau::TIPRecommended) noexcept
+        : enableDepthTest(true),
+          enableStencilTest(true),
+          depthWriteMask(DepthWriteMask::All),
+          depthCompareFunc(CompareFunc::LessThan),
+          stencilReadMask(0xFF),
+          stencilWriteMask(0xFF),
+          frontFace(StencilOp::Keep, StencilOp::IncrementClamp, StencilOp::Keep, CompareFunc::Always),
+          backFace(StencilOp::Keep, StencilOp::DecrementClamp, StencilOp::Keep, CompareFunc::Always)
+    { }
+
+    // ReSharper disable once CppPossiblyUninitializedMember
+    explicit DepthStencilArgs(tau::TIPDefault) noexcept { }
 };
 
 #define DSS_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
@@ -86,13 +98,13 @@ class TAU_DLL NOVTABLE IDepthStencilState
     DEFAULT_DESTRUCT_VI(IDepthStencilState);
     DELETE_COPY(IDepthStencilState);
 protected:
-    DepthStencilParams _params;
+    DepthStencilArgs _args;
 protected:
-    IDepthStencilState(const DepthStencilParams& params) noexcept
-        : _params(params)
+    IDepthStencilState(const DepthStencilArgs& args) noexcept
+        : _args(args)
     { }
 public:
-    [[nodiscard]] const DepthStencilParams& params() const noexcept { return _params; }
+    [[nodiscard]] const DepthStencilArgs& args() const noexcept { return _args; }
 
     RTT_BASE_IMPL(IDepthStencilState);
     RTT_BASE_CHECK(IDepthStencilState);
@@ -122,9 +134,9 @@ public:
         InvalidBackFaceStencilCompareFunc,
     };
 public:
-    [[nodiscard]] virtual IDepthStencilState* build(const DepthStencilParams& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IDepthStencilState* build(const DepthStencilParams& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IDepthStencilState> buildCPPRef(const DepthStencilParams& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IDepthStencilState> buildTauRef(const DepthStencilParams& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IDepthStencilState> buildTauSRef(const DepthStencilParams& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual IDepthStencilState* build(const DepthStencilArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IDepthStencilState* build(const DepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IDepthStencilState> buildCPPRef(const DepthStencilArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IDepthStencilState> buildTauRef(const DepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IDepthStencilState> buildTauSRef(const DepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

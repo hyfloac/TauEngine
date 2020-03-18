@@ -1,0 +1,93 @@
+#pragma once
+
+#include "DLL.hpp"
+#include <Objects.hpp>
+#include <NumTypes.hpp>
+#include <RunTimeType.hpp>
+#include <Safeties.hpp>
+
+struct RasterizerArgs final
+{
+    DEFAULT_CONSTRUCT_PU(RasterizerArgs);
+    DEFAULT_DESTRUCT(RasterizerArgs);
+    DEFAULT_COPY(RasterizerArgs);
+public:
+    enum class CullMode : u8
+    {
+        None = 1,
+        Front,
+        Back
+    };
+
+    enum class FillMode : u8
+    {
+        Vertices = 1,
+        Wireframe,
+        Filled
+    };
+public:
+    bool enableScissorTest;
+    bool frontFaceCounterClockwise;
+    CullMode cullMode;
+    FillMode fillMode;
+public:
+    RasterizerArgs(const bool _enableScissorTest, const bool _frontFaceCounterClockwise, const CullMode _cullMode, const FillMode _fillMode) noexcept
+        : enableScissorTest(_enableScissorTest),
+          frontFaceCounterClockwise(_frontFaceCounterClockwise),
+          cullMode(_cullMode), fillMode(_fillMode)
+    { }
+
+    explicit RasterizerArgs(tau::TIPRecommended) noexcept
+        : enableScissorTest(false),
+          frontFaceCounterClockwise(true),
+          cullMode(CullMode::Back), fillMode(FillMode::Filled)
+    { }
+
+    // ReSharper disable once CppPossiblyUninitializedMember
+    explicit RasterizerArgs(tau::TIPDefault) noexcept { }
+};
+
+#define RS_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+                            RTT_IMPL(_TYPE, IRasterizerState)
+
+#define RS_IMPL(_TYPE) RS_IMPL_BASE(_TYPE)
+
+class TAU_DLL NOVTABLE IRasterizerState
+{
+    DEFAULT_DESTRUCT_VI(IRasterizerState);
+    DELETE_COPY(IRasterizerState);
+protected:
+    RasterizerArgs _params;
+protected:
+    IRasterizerState(const RasterizerArgs& params) noexcept
+        : _params(params)
+    { }
+public:
+    [[nodiscard]] const RasterizerArgs& params() const noexcept { return _params; }
+
+    RTT_BASE_IMPL(IRasterizerState);
+    RTT_BASE_CHECK(IRasterizerState);
+    RTT_BASE_CAST(IRasterizerState);
+};
+
+class TAU_DLL NOVTABLE IRasterizerStateBuilder
+{
+    DEFAULT_CONSTRUCT_PO(IRasterizerStateBuilder);
+    DEFAULT_DESTRUCT_VI(IRasterizerStateBuilder);
+    DELETE_COPY(IRasterizerStateBuilder);
+public:
+    enum class Error
+    {
+        NoError = 0,
+        SystemMemoryAllocationFailure,
+        DriverMemoryAllocationFailure,
+        InvalidCullMode,
+        InvalidFillMode
+    };
+public:
+    [[nodiscard]] virtual IRasterizerState* build(const RasterizerArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IRasterizerState* build(const RasterizerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IRasterizerState> buildCPPRef(const RasterizerArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IRasterizerState> buildTauRef(const RasterizerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IRasterizerState> buildTauSRef(const RasterizerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+};

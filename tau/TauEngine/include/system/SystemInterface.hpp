@@ -11,9 +11,12 @@ class TAU_DLL SystemInterface final
 {
     DEFAULT_DESTRUCT(SystemInterface);
     DELETE_COPY(SystemInterface);
-public:
+private:
+    static SystemInterface* _instance;
+private:
     static SystemInterface* create() noexcept;
-
+    static void finalize() noexcept;
+public:
     static SystemInterface* get() noexcept;
 private:
     _SysContainer _sysContainer;
@@ -22,5 +25,8 @@ private:
 public:
     [[nodiscard]] const _SysContainer& sysContainer() const noexcept { return _sysContainer; }
 
-    [[nodiscard]] CPPRef<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) noexcept;
+    [[nodiscard]] NullableRef<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) const noexcept;
+private:
+    friend bool tauInit(void) noexcept;
+    friend void tauFinalize(void) noexcept;
 };

@@ -3,14 +3,14 @@
  */
 #pragma once
 
+#include <Objects.hpp>
 #include <NumTypes.hpp>
 #include <RunTimeType.hpp>
-#include <Objects.hpp>
+
 #include "Color.hpp"
 #include "DLL.hpp"
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
-// #include "model/Buffer.hpp"
 
 #define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                             RTT_IMPL(_TYPE, IRenderingContext)
@@ -32,20 +32,21 @@ class ISingleTextureUploaderBuilder;
 class IShaderBuilder;
 class IDepthStencilState;
 class IDepthStencilStateBuilder;
-struct DepthStencilParams;
+struct DepthStencilArgs;
+class IRasterizerState;
 
-class TAU_DLL IRenderingContext
+class TAU_DLL NOVTABLE IRenderingContext
 {
     DEFAULT_DESTRUCT_VI(IRenderingContext);
     DELETE_COPY(IRenderingContext);
 public:
     static IRenderingContext* create(const RenderingMode& mode) noexcept;
 
-    using ContextType = RunTimeType<IRenderingContext>;
+    // using ContextType = RunTimeType<IRenderingContext>;
 protected:
-    const RenderingMode& _mode;
+    RenderingMode _mode;
 protected:
-    IRenderingContext(const RenderingMode & mode)
+    IRenderingContext(const RenderingMode& mode)
         : _mode(mode)
     { }
 public:
@@ -102,7 +103,7 @@ public:
      * @return
      *      The default Depth-Stencil State parameters
      */
-    virtual const DepthStencilParams& getDefaultDepthStencilStateParams() noexcept = 0;
+    virtual const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept = 0;
 
     virtual void beginFrame() noexcept = 0;
     virtual void endFrame() noexcept = 0;
@@ -127,6 +128,35 @@ public:
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);
     RTT_BASE_CAST(IRenderingContext);
+};
+
+struct RenderingContextArgs final
+{
+    Window& window;
+    NullableRef<IDepthStencilState> depthStencilState;
+    NullableRef<IRasterizerState> rasterizerState;
+    bool vsync;
+};
+
+class TAU_DLL NOVTABLE IRenderingContextBuilder
+{
+    DEFAULT_CONSTRUCT_PO(IRenderingContextBuilder);
+    DEFAULT_DESTRUCT_VI(IRenderingContextBuilder);
+    DELETE_COPY(IRenderingContextBuilder);
+public:
+    enum class Error
+    {
+        NoError = 0,
+        SystemMemoryAllocationError,
+        IncorrectGraphicsAPI,
+        UnsupportedAPIVersion
+    };
+public:
+    [[nodiscard]] virtual IRenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    [[nodiscard]] virtual IRenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IRenderingContext> buildCPPRef(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IRenderingContext> buildTauRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IRenderingContext> buildTauSRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
 };
 
 class IncorrectContextException final : public Exception

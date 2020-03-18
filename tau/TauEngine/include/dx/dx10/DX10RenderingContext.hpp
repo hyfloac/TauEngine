@@ -19,14 +19,24 @@ class DX10NullTextureBuilder;
 class DX10TextureCubeBuilder;
 class DX10DepthStencilState;
 class DX10DepthStencilStateBuilder;
+class DX10GraphicsInterface;
+
+struct DX10RenderingContextArgs final
+{
+    ID3D10RenderTargetView* renderTargetView;
+    ID3D10Texture2D* depthStencilBuffer;
+    ID3D10DepthStencilView* depthStencilView;
+    ID3D10RasterizerState* rasterizerState;
+    IDXGISwapChain* swapChain;
+};
 
 class TAU_DLL DX10RenderingContext final : public IRenderingContext
 {
 private:
-    ID3D10Device* _d3d10Device;
+    DX10GraphicsInterface& _gi;
+
     ID3D10RenderTargetView* _renderTargetView;
     ID3D10Texture2D* _depthStencilBuffer;
-    ID3D10DepthStencilState* _depthStencilState;
     ID3D10DepthStencilView* _depthStencilView;
     ID3D10RasterizerState* _rasterizerState;
     IDXGISwapChain* _swapChain;
@@ -39,18 +49,16 @@ private:
     DX10IndexBufferBuilder* _indexBufferBuilder;
     DX10UniformBufferBuilder* _uniformBufferBuilder;
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
-    DX10ShaderBuilder* _shaderBuilder;
     DX10Texture2DBuilder* _texture2DBuilder;
     DX10NullTextureBuilder* _textureNullBuilder;
     DX10TextureCubeBuilder* _textureCubeBuilder;
-    DX10DepthStencilStateBuilder* _depthStencilStateBuilder;
 public:
-    DX10RenderingContext(const RenderingMode& mode) noexcept;
+    DX10RenderingContext(DX10GraphicsInterface& gi, const NullableRef<DX10DepthStencilState>& initialDepthStencilState, const DX10RenderingContextArgs& args) noexcept;
 
     ~DX10RenderingContext() noexcept override;
 
-    [[nodiscard]] const ID3D10Device* d3d10Device() const noexcept { return _d3d10Device; }
-    [[nodiscard]] ID3D10Device* d3d10Device() noexcept { return _d3d10Device; }
+    [[nodiscard]] const ID3D10Device* d3dDevice() const noexcept;
+    [[nodiscard]] ID3D10Device* d3dDevice() noexcept;
 
     [[nodiscard]] bool createContext(Window& window) noexcept override;
     void deactivateContext() noexcept override { }
@@ -64,14 +72,13 @@ public:
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
-    const DepthStencilParams& getDefaultDepthStencilStateParams() noexcept override;
+    const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept override;
 
     void beginFrame() noexcept override;
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
 
     [[nodiscard]] CPPRef<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
-    // [[nodiscard]] CPPRef<IBufferBuilder> createBuffer(uSys descriptorCount) noexcept;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
@@ -89,4 +96,21 @@ protected:
     RC_IMPL(DX10RenderingContext);
 };
 
+class TAU_DLL DX10RenderingContextBuilder final : public IRenderingContextBuilder
+{
+    DEFAULT_DESTRUCT(DX10RenderingContextBuilder);
+    DELETE_COPY(DX10RenderingContextBuilder);
+private:
+    DX10GraphicsInterface& _gi;
+public:
+    DX10RenderingContextBuilder(DX10GraphicsInterface& gi) noexcept;
+
+    [[nodiscard]] DX10RenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] DX10RenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] CPPRef<IRenderingContext> buildCPPRef(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] NullableRef<IRenderingContext> buildTauRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
+    [[nodiscard]] NullableStrongRef<IRenderingContext> buildTauSRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const RenderingContextArgs& args, [[tau::out]] DX10RenderingContextArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+};
 #endif

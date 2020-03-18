@@ -8,6 +8,7 @@
 #include "VFS.hpp"
 #include "Timings.hpp"
 #include "gl/GLRenderingContext.hpp"
+#include "gl/GLGraphicsInterface.hpp"
 
 GLShader::GLShader(const GLuint shaderID, const EShader::Stage shaderType) noexcept
     : IShader(), _shaderID(shaderID), _shaderType(shaderType)
@@ -88,13 +89,13 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
     return ret;
 }
 
-GLShaderBuilder::GLShaderBuilder(GLRenderingContext& ctx) noexcept
-	: IShaderBuilder(), _resIndex(IShaderBuilder::rsTransformer->transform(ctx.mode()))
+GLShaderBuilder::GLShaderBuilder(GLGraphicsInterface& gi) noexcept
+	: IShaderBuilder(), _resIndex(IShaderBuilder::rsTransformer->transform(gi.renderingMode()))
 { }
 
 GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error) const noexcept
 {
-    GLShaderArgs glArgs;
+    GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -110,7 +111,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error) const noe
 
 GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    GLShaderArgs glArgs;
+    GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -126,7 +127,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error, TauAlloca
 
 CPPRef<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
 {
-    GLShaderArgs glArgs;
+    GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -142,7 +143,7 @@ CPPRef<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* erro
 
 NullableReferenceCountingPointer<IShader> GLShaderBuilder::buildTauRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    GLShaderArgs glArgs;
+    GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -160,7 +161,7 @@ NullableReferenceCountingPointer<IShader> GLShaderBuilder::buildTauRef(const Sha
 
 NullableStrongReferenceCountingPointer<IShader> GLShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    GLShaderArgs glArgs;
+    GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 

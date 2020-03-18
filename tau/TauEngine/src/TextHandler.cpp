@@ -6,15 +6,21 @@
 #include <VFS.hpp>
 
 #include "TextHandler.hpp"
+
+#include <glm/gtc/type_ptr.hpp>
+
 #include "texture/Texture.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "model/VertexArray.hpp"
 #include "shader/IShaderProgram.hpp"
 #include "shader/IShader.hpp"
-#include "RenderingPipeline.hpp"
 #include <Windows.h>
 #include <winreg.h>
+
+#include "GL/glew.h"
 #include "Timings.hpp"
+#include "system/RenderingContext.hpp"
+#include "system/Window.hpp"
 
 template<>
 class UniformAccessor<TextHandler::ProjectionUniforms> final
