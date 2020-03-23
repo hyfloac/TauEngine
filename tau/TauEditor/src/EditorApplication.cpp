@@ -64,20 +64,22 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     _graphicsInterface = SystemInterface::get()->createGraphicsInterface(RenderingMode::getGlobalMode());
 
-    DepthStencilArgs dsArgs(tau::rec);
-    NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, null);
+    const DepthStencilArgs dsArgs(tau::rec);
+    const NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, null);
 
-    RenderingContextArgs rcArgs
-    {
-        *_window, dsState, RefCast<IRasterizerState>(NullableRef<DX10RasterizerState>(null)), _config.vsync || true
-    };
+    const RasterizerArgs rsArgs(tau::rec);
+    const NullableRef<IRasterizerState> rsState = _graphicsInterface->createRasterizerState().buildTauRef(rsArgs, null);
+
+    RenderingContextArgs rcArgs;
+    rcArgs.window = _window;
+    rcArgs.vsync = _config.vsync || true;
 
     _renderingContext = _graphicsInterface->createRenderingContext().buildTauRef(rcArgs, null);
     _renderingContext->activateContext();
+    _renderingContext->setDefaultDepthStencilState(dsState);
     _renderingContext->resetDepthStencilState();
-    // if(!_window->createContext()) { return false; }
-    //
-    // _window->renderingContext()->activateContext();
+    _renderingContext->setDefaultRasterizerState(rsState);
+    _renderingContext->resetRasterizerState();
 
     _window->setEventHandler(::onWindowEvent);
     Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
@@ -89,7 +91,6 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         filterDebugOutput(GLDebugSeverity::Notification, false);
     }
 
-    // _window->renderingContext()->setVSync(_config.vsync);
     _renderingContext->setVSync(_config.vsync);
 
     TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_renderingContext));
@@ -202,13 +203,13 @@ void TauEditorApplication::setupConfig() noexcept
     }
 }
 
-void TauEditorApplication::writeConfig() noexcept
+void TauEditorApplication::writeConfig() const noexcept
 {
     PERF();
     CPPRef<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
     if(file)
     {
-        file->writeBytes(reinterpret_cast<u8*>(&_config), sizeof(_config));
+        file->writeType(_config);
     }
 }
 

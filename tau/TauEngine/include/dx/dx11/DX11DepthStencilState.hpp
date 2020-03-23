@@ -6,6 +6,7 @@
 
 #include <d3d11.h>
 
+class DX11GraphicsInterface;
 class DX11RenderingContext;
 
 class TAU_DLL DX11DepthStencilState final : public IDepthStencilState
@@ -45,10 +46,10 @@ public:
         ID3D11DepthStencilState* state;
     };
 private:
-    DX11RenderingContext& ctx;
+    DX11GraphicsInterface& _gi;
 public:
-    DX11DepthStencilStateBuilder(DX11RenderingContext& ctx) noexcept
-        : ctx(ctx)
+    DX11DepthStencilStateBuilder(DX11GraphicsInterface& gi) noexcept
+        : _gi(gi)
     { }
 
     [[nodiscard]] DX11DepthStencilState* build(const DepthStencilArgs& args, Error* error) const noexcept override;

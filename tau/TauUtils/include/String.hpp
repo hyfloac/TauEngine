@@ -517,7 +517,7 @@ private:
             const char* string;
             uSys* refCount;
         } _largeString;
-        char _stackString[sizeof(_largeString)];
+        char _stackString[16];
     };
     uSys _length;
     uSys _hash;

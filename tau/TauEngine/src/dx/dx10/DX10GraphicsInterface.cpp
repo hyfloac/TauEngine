@@ -5,23 +5,26 @@
 #include "dx/dx10/DX10GraphicsAccelerator.hpp"
 #include "dx/dx10/DX10Shader.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
+#include "dx/dx10/DX10RasterizerState.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "system/Window.hpp"
 
 DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
-    : IGraphicsInterface(mode), _d3dDevice(d3dDevice),
+    : IGraphicsInterface(mode), _d3d10Device(d3dDevice),
       _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this)),
       _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this)),
+      _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this)),
       _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
 { }
 
 DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
 {
-    _d3dDevice->Release();
-    _d3dDevice = null;
+    _d3d10Device->Release();
+    _d3d10Device = null;
 
     delete _shaderBuilder;
     delete _depthStencilStateBuilder;
+    delete _rasterizerStateBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -62,6 +65,9 @@ IShaderBuilder& DX10GraphicsInterface::createShader() noexcept
 
 IDepthStencilStateBuilder& DX10GraphicsInterface::createDepthStencilState() noexcept
 { return *_depthStencilStateBuilder; }
+
+IRasterizerStateBuilder& DX10GraphicsInterface::createRasterizerState() noexcept
+{ return *_rasterizerStateBuilder; }
 
 IRenderingContextBuilder& DX10GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

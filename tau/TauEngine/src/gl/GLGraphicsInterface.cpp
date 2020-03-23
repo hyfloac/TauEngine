@@ -3,6 +3,7 @@
 #include "gl/GLShader.hpp"
 #include "gl/GLDepthStencilState.hpp"
 #include "gl/GLRenderingContext.hpp"
+#include "gl/GLRasterizerState.hpp"
 #include "system/Window.hpp"
 
 GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile compat, const bool forwardCompatible)
@@ -13,6 +14,7 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
       _forwardCompatible(forwardCompatible),
       _shaderBuilder(new(::std::nothrow) GLShaderBuilder(*this)),
       _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder),
+    _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder),
       _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
 { }
 
@@ -20,6 +22,7 @@ GLGraphicsInterface::~GLGraphicsInterface() noexcept
 {
     delete _shaderBuilder;
     delete _depthStencilStateBuilder;
+    delete _rasterizerStateBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -33,6 +36,9 @@ IShaderBuilder& GLGraphicsInterface::createShader() noexcept
 
 IDepthStencilStateBuilder& GLGraphicsInterface::createDepthStencilState() noexcept
 { return *_depthStencilStateBuilder; }
+
+IRasterizerStateBuilder& GLGraphicsInterface::createRasterizerState() noexcept
+{ return *_rasterizerStateBuilder; }
 
 IRenderingContextBuilder& GLGraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

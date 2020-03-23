@@ -57,13 +57,13 @@ class TAU_DLL NOVTABLE IRasterizerState
     DEFAULT_DESTRUCT_VI(IRasterizerState);
     DELETE_COPY(IRasterizerState);
 protected:
-    RasterizerArgs _params;
+    RasterizerArgs _args;
 protected:
-    IRasterizerState(const RasterizerArgs& params) noexcept
-        : _params(params)
+    IRasterizerState(const RasterizerArgs& args) noexcept
+        : _args(args)
     { }
 public:
-    [[nodiscard]] const RasterizerArgs& params() const noexcept { return _params; }
+    [[nodiscard]] const RasterizerArgs& args() const noexcept { return _args; }
 
     RTT_BASE_IMPL(IRasterizerState);
     RTT_BASE_CHECK(IRasterizerState);

@@ -242,15 +242,15 @@ DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const S
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            h = _gi.d3dDevice()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.vertex);
+            h = _gi.d3d10Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.vertex);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Geometry:
-            h = _gi.d3dDevice()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.geometry);
+            h = _gi.d3d10Device()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.geometry);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Pixel:
-            h = _gi.d3dDevice()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.pixel);
+            h = _gi.d3d10Device()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.pixel);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::TessellationControl:

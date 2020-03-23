@@ -102,7 +102,7 @@ public:
     Vector3f getAxis() const noexcept
     {
         const float x = 1.0f - _data.w * _data.w;
-        if(x < 0.00000001f)
+        if(x < 0.000001f)
         {
             return Vector3f(1.0f, 0.0f, 0.0f);
         }

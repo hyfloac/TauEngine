@@ -36,7 +36,7 @@ TUID TUID::generate() noexcept
 }
 
 TUID::TUID(const u64 highBits, const u64 lowBits) noexcept
-    : _highBits(highBits), _lowBits(lowBits)
+    : _lowBits(lowBits), _highBits(highBits)
 { }
 
 void TUID::toString(char str[38]) const noexcept

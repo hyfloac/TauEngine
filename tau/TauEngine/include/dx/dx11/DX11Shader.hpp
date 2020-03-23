@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <d3d11.h>
 
+class DX11GraphicsInterface;
 class DX11RenderingContext;
 
 class TAU_DLL NOVTABLE DX11Shader : public IShader
@@ -152,10 +153,10 @@ private:
         ID3D11PixelShader* pixel;
     };
 private:
-    DX11RenderingContext& _ctx;
+    DX11GraphicsInterface& _gi;
     IResourceSelectorTransformer::ResIndex _resIndex;
 public:
-    DX11ShaderBuilder(DX11RenderingContext& ctx) noexcept;
+    DX11ShaderBuilder(DX11GraphicsInterface& gi) noexcept;
 
     [[nodiscard]] DX11Shader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX11Shader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;

@@ -2,6 +2,7 @@
 
 #ifdef _WIN32
 
+#include "dx/dx11/DX11GraphicsInterface.hpp"
 #include "dx/dx11/DX11RenderingContext.hpp"
 
 #include "TauEngine.hpp"
@@ -138,7 +139,7 @@ bool DX11DepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, ID3
     ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilPassOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilPassOp);
     ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilFunc) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilCompareFunc);
 
-    const HRESULT res = ctx.d3d11Device()->CreateDepthStencilState(&depthStencilDesc, d3dDepthStencilState);
+    const HRESULT res = _gi.d3d11Device()->CreateDepthStencilState(&depthStencilDesc, d3dDepthStencilState);
 
     ERROR_CODE_COND_F(FAILED(res), Error::SystemMemoryAllocationFailure);
 

@@ -11,6 +11,7 @@ class Window;
 class IRenderingContext;
 class IRenderingContextBuilder;
 class IDepthStencilStateBuilder;
+class IRasterizerStateBuilder;
 class IShaderBuilder;
 
 class TAU_DLL NOVTABLE IGraphicsInterface
@@ -30,5 +31,6 @@ public:
 
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
+    [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;
 };

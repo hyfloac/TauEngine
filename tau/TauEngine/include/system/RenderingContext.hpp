@@ -34,6 +34,7 @@ class IDepthStencilState;
 class IDepthStencilStateBuilder;
 struct DepthStencilArgs;
 class IRasterizerState;
+struct RasterizerArgs;
 
 class TAU_DLL NOVTABLE IRenderingContext
 {
@@ -103,7 +104,12 @@ public:
      * @return
      *      The default Depth-Stencil State parameters
      */
-    virtual const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept = 0;
+    virtual const DepthStencilArgs& getDefaultDepthStencilArgs() noexcept = 0;
+
+    virtual NullableRef<IRasterizerState> setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept = 0;
+    virtual void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept = 0;
+    virtual void resetRasterizerState() noexcept = 0;
+    virtual const RasterizerArgs& getDefaultRasterizerArgs() noexcept = 0;
 
     virtual void beginFrame() noexcept = 0;
     virtual void endFrame() noexcept = 0;
@@ -123,7 +129,6 @@ public:
     [[nodiscard]] virtual CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept = 0;
     [[nodiscard]] virtual CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
-    [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
 
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);
@@ -132,9 +137,7 @@ public:
 
 struct RenderingContextArgs final
 {
-    Window& window;
-    NullableRef<IDepthStencilState> depthStencilState;
-    NullableRef<IRasterizerState> rasterizerState;
+    Window* window;
     bool vsync;
 };
 
@@ -149,7 +152,8 @@ public:
         NoError = 0,
         SystemMemoryAllocationError,
         IncorrectGraphicsAPI,
-        UnsupportedAPIVersion
+        UnsupportedAPIVersion,
+        NullWindow
     };
 public:
     [[nodiscard]] virtual IRenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept = 0;

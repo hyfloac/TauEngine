@@ -55,7 +55,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
               Keyboard::Key::Shift, Keyboard::Key::W, Keyboard::Key::S,
               Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Space, Keyboard::Key::Ctrl,
               &globals.gr),
-      _skybox(globals.rc, "|TERes", "/shader/", "SkyboxVertexShader", "SkyboxPixelShader", "|TERes/Skybox/OceanMountain/", ".png"),
+      _skybox(globals.gi, globals.rc, "|TERes", "/shader/", "SkyboxVertexShader", "SkyboxPixelShader", "|TERes/Skybox/OceanMountain/", ".png"),
       _shader(IShaderProgram::create(globals.rc)),
       _uniforms(globals.rc.createUniformBuffer()),
       _materialUniforms(globals.rc.createUniformBuffer()),

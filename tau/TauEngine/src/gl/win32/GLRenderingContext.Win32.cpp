@@ -291,7 +291,7 @@ bool GLRenderingContextBuilder::processSysArgs(const RenderingContextArgs& args,
     pfd.iLayerType = PFD_MAIN_PLANE;
 
     // ReSharper disable once CppLocalVariableMayBeConst
-    HDC hDevice = args.window.sysWindowContainer().hdc;
+    HDC hDevice = args.window->sysWindowContainer().hdc;
     glSysArgs->device = hDevice;
 
     const int pixelFormat = ChoosePixelFormat(hDevice, &pfd);

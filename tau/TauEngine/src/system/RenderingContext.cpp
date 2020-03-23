@@ -15,9 +15,7 @@ IRenderingContext* IRenderingContext::create(const RenderingMode& mode) noexcept
     #ifdef _WIN32
         case RenderingMode::Mode::DirectX9:
         case RenderingMode::Mode::DirectX10:
-            return null;
         case RenderingMode::Mode::DirectX11:
-            return new(std::nothrow) DX11RenderingContext(mode);
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
             return null;

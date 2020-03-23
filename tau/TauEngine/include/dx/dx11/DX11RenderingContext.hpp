@@ -18,40 +18,51 @@ class DX11Texture2DBuilder;
 class DX11NullTextureBuilder;
 class DX11TextureCubeBuilder;
 class DX11DepthStencilState;
+class DX11RasterizerState;
 class DX11DepthStencilStateBuilder;
+class DX11GraphicsInterface;
+
+struct DX11RenderingContextArgs final
+{
+    ID3D11DeviceContext* d3d11DeviceContext;
+    ID3D11RenderTargetView* renderTargetView;
+    ID3D11Texture2D* depthStencilBuffer;
+    ID3D11DepthStencilView* depthStencilView;
+    IDXGISwapChain* swapChain;
+};
 
 class TAU_DLL DX11RenderingContext final : public IRenderingContext
 {
 private:
-    ID3D11Device* _d3d11Device;
+    DX11GraphicsInterface& _gi;
+
     ID3D11DeviceContext* _d3d11DeviceContext;
     ID3D11RenderTargetView* _renderTargetView;
     ID3D11Texture2D* _depthStencilBuffer;
-    ID3D11DepthStencilState* _depthStencilState;
     ID3D11DepthStencilView* _depthStencilView;
-    ID3D11RasterizerState* _rasterizerState;
     IDXGISwapChain* _swapChain;
 
     bool _vsync;
+
     NullableRef<DX11DepthStencilState> _defaultDepthStencilState;
     NullableRef<DX11DepthStencilState> _currentDepthStencilState;
+    NullableRef<DX11RasterizerState> _defaultRasterizerState;
+    NullableRef<DX11RasterizerState> _currentRasterizerState;
 
     DX11BufferBuilder* _bufferBuilder;
     DX11IndexBufferBuilder* _indexBufferBuilder;
     DX11UniformBufferBuilder* _uniformBufferBuilder;
     // DX11TextureSamplerBuilder* _textureSamplerBuilder;
-    DX11ShaderBuilder* _shaderBuilder;
     // DX11Texture2DBuilder* _texture2DBuilder;
     // DX11NullTextureBuilder* _textureNullBuilder;
     // DX11TextureCubeBuilder* _textureCubeBuilder;
-    DX11DepthStencilStateBuilder* _depthStencilStateBuilder;
 public:
-    DX11RenderingContext(const RenderingMode& mode) noexcept;
+    DX11RenderingContext(DX11GraphicsInterface& gi, const DX11RenderingContextArgs& args) noexcept;
 
     ~DX11RenderingContext() noexcept override;
 
-    [[nodiscard]] const ID3D11Device* d3d11Device() const noexcept { return _d3d11Device; }
-    [[nodiscard]] ID3D11Device* d3d11Device() noexcept { return _d3d11Device; }
+    [[nodiscard]] const ID3D11Device* d3d11Device() const noexcept;
+    [[nodiscard]] ID3D11Device* d3d11Device() noexcept;
 
     [[nodiscard]] const ID3D11DeviceContext* d3d11DeviceContext() const noexcept { return _d3d11DeviceContext; }
     [[nodiscard]] ID3D11DeviceContext* d3d11DeviceContext() noexcept { return _d3d11DeviceContext; }
@@ -68,7 +79,12 @@ public:
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
-    const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept override;
+    const DepthStencilArgs& getDefaultDepthStencilArgs() noexcept override;
+
+    NullableRef<IRasterizerState> setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
+    void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
+    void resetRasterizerState() noexcept override;
+    const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
 
     void beginFrame() noexcept override;
     void endFrame() noexcept override;
@@ -88,9 +104,27 @@ public:
     [[nodiscard]] CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
-    [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
 protected:
     RC_IMPL(DX11RenderingContext);
 };
 
+class TAU_DLL DX11RenderingContextBuilder final : public IRenderingContextBuilder
+{
+    DEFAULT_DESTRUCT(DX11RenderingContextBuilder);
+    DELETE_COPY(DX11RenderingContextBuilder);
+private:
+    DX11GraphicsInterface& _gi;
+public:
+    DX11RenderingContextBuilder(DX11GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
+
+    [[nodiscard]] DX11RenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] DX11RenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] CPPRef<IRenderingContext> buildCPPRef(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] NullableRef<IRenderingContext> buildTauRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
+    [[nodiscard]] NullableStrongRef<IRenderingContext> buildTauSRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const RenderingContextArgs& args, [[tau::out]] DX11RenderingContextArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+};
 #endif

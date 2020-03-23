@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "maths/glmExt/GlmMatrixTransformExt.hpp"
+#include "system/GraphicsInterface.hpp"
 
 template<>
 class UniformAccessor<Skybox::Uniforms> final
@@ -26,7 +27,7 @@ public:
     }
 };
 
-Skybox::Skybox(IRenderingContext& context, const char* const vfsMount, const char* const shaderPath, const char* const vertexName, const char* const pixelName, const char* const skyboxPath, const char* const fileExtension) noexcept
+Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const shaderPath, const char* const vertexName, const char* const pixelName, const char* const skyboxPath, const char* const fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
       _uniforms(context.createUniformBuffer()),
       _skybox(null), _textureUploader(null), _cubeVA(null), _skyboxDepthStencilState(null)
@@ -132,10 +133,10 @@ Skybox::Skybox(IRenderingContext& context, const char* const vfsMount, const cha
 
     _cubeVA = CPPRef<IVertexArray>(vaBuilder->build());
 
-    DepthStencilArgs params = context.getDefaultDepthStencilStateParams();
+    DepthStencilArgs params = context.getDefaultDepthStencilArgs();
     params.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;
     params.depthCompareFunc = DepthStencilArgs::CompareFunc::LessThanOrEqual;
-    _skyboxDepthStencilState = context.createDepthStencilState().buildTauRef(params, null);
+    _skyboxDepthStencilState = gi.createDepthStencilState().buildTauRef(params, null);
 }
 
 void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept

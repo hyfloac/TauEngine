@@ -18,6 +18,7 @@ class DX10Texture2DBuilder;
 class DX10NullTextureBuilder;
 class DX10TextureCubeBuilder;
 class DX10DepthStencilState;
+class DX10RasterizerState;
 class DX10DepthStencilStateBuilder;
 class DX10GraphicsInterface;
 
@@ -26,7 +27,6 @@ struct DX10RenderingContextArgs final
     ID3D10RenderTargetView* renderTargetView;
     ID3D10Texture2D* depthStencilBuffer;
     ID3D10DepthStencilView* depthStencilView;
-    ID3D10RasterizerState* rasterizerState;
     IDXGISwapChain* swapChain;
 };
 
@@ -38,12 +38,14 @@ private:
     ID3D10RenderTargetView* _renderTargetView;
     ID3D10Texture2D* _depthStencilBuffer;
     ID3D10DepthStencilView* _depthStencilView;
-    ID3D10RasterizerState* _rasterizerState;
     IDXGISwapChain* _swapChain;
 
     bool _vsync;
+
     NullableRef<DX10DepthStencilState> _defaultDepthStencilState;
     NullableRef<DX10DepthStencilState> _currentDepthStencilState;
+    NullableRef<DX10RasterizerState> _defaultRasterizerState;
+    NullableRef<DX10RasterizerState> _currentRasterizerState;
 
     DX10BufferBuilder* _bufferBuilder;
     DX10IndexBufferBuilder* _indexBufferBuilder;
@@ -53,7 +55,7 @@ private:
     DX10NullTextureBuilder* _textureNullBuilder;
     DX10TextureCubeBuilder* _textureCubeBuilder;
 public:
-    DX10RenderingContext(DX10GraphicsInterface& gi, const NullableRef<DX10DepthStencilState>& initialDepthStencilState, const DX10RenderingContextArgs& args) noexcept;
+    DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept;
 
     ~DX10RenderingContext() noexcept override;
 
@@ -72,7 +74,12 @@ public:
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
-    const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept override;
+    const DepthStencilArgs& getDefaultDepthStencilArgs() noexcept override;
+
+    NullableRef<IRasterizerState> setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
+    void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
+    void resetRasterizerState() noexcept override;
+    const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
 
     void beginFrame() noexcept override;
     void endFrame() noexcept override;
@@ -91,7 +98,6 @@ public:
     [[nodiscard]] CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
-    [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);
 };
@@ -103,7 +109,9 @@ class TAU_DLL DX10RenderingContextBuilder final : public IRenderingContextBuilde
 private:
     DX10GraphicsInterface& _gi;
 public:
-    DX10RenderingContextBuilder(DX10GraphicsInterface& gi) noexcept;
+    DX10RenderingContextBuilder(DX10GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX10RenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error) noexcept override;
     [[nodiscard]] DX10RenderingContext* build(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;

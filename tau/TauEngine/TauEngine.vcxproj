@@ -32,6 +32,7 @@
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10RasterizerState.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp" />
@@ -41,6 +42,8 @@
     <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp" />
     <ClCompile Include="src\dx\dx11\DX11Buffer.cpp" />
     <ClCompile Include="src\dx\dx11\DX11DepthStencilState.cpp" />
+    <ClCompile Include="src\dx\dx11\DX11GraphicsInterface.cpp" />
+    <ClCompile Include="src\dx\dx11\DX11RasterizerState.cpp" />
     <ClCompile Include="src\dx\dx11\DX11RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx11\DX11Shader.cpp" />
     <ClCompile Include="src\dx\dx11\DX11ShaderProgram.cpp" />
@@ -51,6 +54,7 @@
     <ClCompile Include="src\gl\GLDepthStencilState.cpp" />
     <ClCompile Include="src\gl\GLGraphicsAccelerator.cpp" />
     <ClCompile Include="src\gl\GLGraphicsInterface.cpp" />
+    <ClCompile Include="src\gl\GLRasterizerState.cpp" />
     <ClCompile Include="src\gl\GLTextureCube.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
@@ -136,6 +140,8 @@
     <ClInclude Include="include\dx\dx10\DX10VertexArray.hpp" />
     <ClInclude Include="include\dx\dx11\DX11Buffer.hpp" />
     <ClInclude Include="include\dx\dx11\DX11DepthStencilState.hpp" />
+    <ClInclude Include="include\dx\dx11\DX11GraphicsInterface.hpp" />
+    <ClInclude Include="include\dx\dx11\DX11RasterizerState.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx11\DX11Shader.hpp" />
     <ClInclude Include="include\dx\dx11\DX11ShaderProgram.hpp" />
@@ -153,6 +159,7 @@
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLGraphicsAccelerator.hpp" />
     <ClInclude Include="include\gl\GLGraphicsInterface.hpp" />
+    <ClInclude Include="include\gl\GLRasterizerState.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
     <ClInclude Include="include\gl\GLShaderBundleVisitor.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />

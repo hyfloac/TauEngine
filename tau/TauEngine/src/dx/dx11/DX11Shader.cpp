@@ -4,6 +4,7 @@
 #ifdef _WIN32
 #include <d3dcompiler.h>
 #include <IFile.hpp>
+#include "dx/dx11/DX11GraphicsInterface.hpp"
 #include "dx/dx11/DX11RenderingContext.hpp"
 
 void DX11VertexShader::bind(DX11RenderingContext& context) noexcept
@@ -37,8 +38,8 @@ void DX11GeometryShader::unbind(DX11RenderingContext& context) noexcept
 void DX11PixelShader::unbind(DX11RenderingContext& context) noexcept
 { context.d3d11DeviceContext()->PSSetShader(NULL, NULL, 0); }
 
-DX11ShaderBuilder::DX11ShaderBuilder(DX11RenderingContext& ctx) noexcept
-	: _ctx(ctx), _resIndex(IShaderBuilder::rsTransformer->transform(ctx.mode()))
+DX11ShaderBuilder::DX11ShaderBuilder(DX11GraphicsInterface& gi) noexcept
+	: _gi(gi), _resIndex(IShaderBuilder::rsTransformer->transform(gi.renderingMode()))
 { }
 
 DX11Shader* DX11ShaderBuilder::build(const ShaderArgs& args, Error* error) const noexcept
@@ -275,23 +276,23 @@ DX11ShaderBuilder::D3D11ShaderObjects DX11ShaderBuilder::createD3DShader(const S
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            h = _ctx.d3d11Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.vertex);
+            h = _gi.d3d11Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.vertex);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Hull:
-            h = _ctx.d3d11Device()->CreateHullShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.hull);
+            h = _gi.d3d11Device()->CreateHullShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.hull);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Domain:
-            h = _ctx.d3d11Device()->CreateDomainShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.domain);
+            h = _gi.d3d11Device()->CreateDomainShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.domain);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Geometry:
-            h = _ctx.d3d11Device()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.geometry);
+            h = _gi.d3d11Device()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.geometry);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         case EShader::Stage::Pixel:
-            h = _ctx.d3d11Device()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.pixel);
+            h = _gi.d3d11Device()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.pixel);
             ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
             break;
         default:

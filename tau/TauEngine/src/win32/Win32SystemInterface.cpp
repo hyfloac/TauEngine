@@ -3,6 +3,7 @@
 
 #ifdef _WIN32
 #include <Windows.h>
+#include "dx/dx11/DX11GraphicsInterface.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 
 SystemInterface::SystemInterface() noexcept
@@ -29,11 +30,11 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
         }
         case RenderingMode::Mode::DirectX11:
         {
-            const DX10GraphicsInterfaceArgs dx11Params {
+            const DX11GraphicsInterfaceArgs dx11Params {
                 renderingMode
             };
 
-            return RefCast<IGraphicsInterface>(DX10GraphicsInterfaceBuilder::build(dx11Params));
+            return RefCast<IGraphicsInterface>(DX11GraphicsInterfaceBuilder::build(dx11Params));
         }
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:

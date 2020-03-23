@@ -18,12 +18,12 @@ class GLTextureNullBuilder;
 class GLTextureDepthBuilder;
 class GLTextureCubeBuilder;
 class GLDepthStencilState;
+class GLRasterizerState;
 class GLDepthStencilStateBuilder;
 
 struct GLRenderingContextArgs final
 {
     GLGraphicsInterface& gi;
-    NullableRef<GLDepthStencilState> initialDepthStencilState;
 };
 
 #if defined(_WIN32)
@@ -48,6 +48,8 @@ private:
 
     NullableRef<GLDepthStencilState> _defaultDepthStencilState;
     NullableRef<GLDepthStencilState> _currentDepthStencilState;
+    NullableRef<GLRasterizerState> _defaultRasterizerState;
+    NullableRef<GLRasterizerState> _currentRasterizerState;
 
     GLBufferBuilder* _bufferBuilder;
     GLIndexBufferBuilder* _indexBufferBuilder;
@@ -79,7 +81,12 @@ public:
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
-    const DepthStencilArgs& getDefaultDepthStencilStateParams() noexcept override;
+    const DepthStencilArgs& getDefaultDepthStencilArgs() noexcept override;
+
+    NullableRef<IRasterizerState> setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
+    void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
+    void resetRasterizerState() noexcept override;
+    const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
 
     void beginFrame() noexcept override final { }
     void endFrame() noexcept override final { }
@@ -99,7 +106,6 @@ public:
     [[nodiscard]] CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
     [[nodiscard]] CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
-    [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
 private:
     void handleCtxError(int profileMask) const noexcept;
 
@@ -125,7 +131,7 @@ public:
     [[nodiscard]] NullableRef<IRenderingContext> buildTauRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
     [[nodiscard]] NullableStrongRef<IRenderingContext> buildTauSRef(const RenderingContextArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept override;
 private:
-    [[nodiscard]] bool processArgs(const RenderingContextArgs& args, [[tau::out]] GLRenderingContextArgs* glArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] static bool processArgs(const RenderingContextArgs& args, [[tau::out]] GLRenderingContextArgs* glArgs, [[tau::out]] Error* error) noexcept;
     [[nodiscard]] bool processSysArgs(const RenderingContextArgs& args, const GLRenderingContextArgs& glArgs, [[tau::out]] GLSystemRenderingContextArgs* glSysArgs, [[tau::out]] Error* error) const noexcept;
     void handleCtxError(int profileMask) const noexcept;
 };

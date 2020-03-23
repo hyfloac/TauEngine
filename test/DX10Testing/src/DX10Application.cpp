@@ -8,7 +8,6 @@
 #include <Win32File.hpp>
 #include <Utils.hpp>
 #include <ShlObj.h>
-#include <RenderingPipeline.hpp>
 #include <ResourceLoader.hpp>
 #include <Timings.hpp>
 #include <model/VertexArray.hpp>
@@ -116,8 +115,8 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
 
     RenderingMode::getGlobalMode().setDebugMode(true);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
 
     _window = new(std::nothrow) Window(_config.windowWidth, _config.windowHeight, "DX10 Test", this);
     _window->createWindow();
@@ -128,13 +127,19 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     DepthStencilArgs dsArgs(tau::rec);
     NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, null);
 
-    RenderingContextArgs rcArgs
-    {
-        *_window, dsState, RefCast<IRasterizerState>(NullableRef<DX10RasterizerState>(null)), _config.vsync || true
-    };
+    RasterizerArgs rsArgs(tau::rec);
+    NullableRef<IRasterizerState> rsState = _graphicsInterface->createRasterizerState().buildTauRef(rsArgs, null);
+
+    RenderingContextArgs rcArgs;
+    rcArgs.window = _window;
+    rcArgs.vsync = _config.vsync || true;
+
     _renderingContext = _graphicsInterface->createRenderingContext().buildTauRef(rcArgs, null);
     _renderingContext->activateContext();
+    _renderingContext->setDefaultDepthStencilState(dsState);
     _renderingContext->resetDepthStencilState();
+    _renderingContext->setDefaultRasterizerState(rsState);
+    _renderingContext->resetRasterizerState();
 
     _window->setEventHandler(::onWindowEvent);
     Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);

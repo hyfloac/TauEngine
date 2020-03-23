@@ -4,6 +4,7 @@
 
 class GLShaderBuilder;
 class GLDepthStencilStateBuilder;
+class GLRasterizerStateBuilder;
 class GLRenderingContextBuilder;
 
 class TAU_DLL GLGraphicsInterface final : public IGraphicsInterface
@@ -24,6 +25,7 @@ private:
 
     GLShaderBuilder* _shaderBuilder;
     GLDepthStencilStateBuilder* _depthStencilStateBuilder;
+    GLRasterizerStateBuilder* _rasterizerStateBuilder;
     GLRenderingContextBuilder* _renderingContextBuilder;
 public:
     GLGraphicsInterface(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile compat, bool forwardCompatible);
@@ -38,6 +40,7 @@ public:
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
+    [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

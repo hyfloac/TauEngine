@@ -11,6 +11,7 @@
 #include "graphics/DepthStencilState.hpp"
 
 class Camera3D;
+class IGraphicsInterface;
 class IRenderingContext;
 class IVertexArray;
 
@@ -48,7 +49,7 @@ private:
 
     NullableRef<IDepthStencilState> _skyboxDepthStencilState;
 public:
-    Skybox(IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
+    Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
 
     [[nodiscard]] CPPRef<ITextureCube> skybox() const noexcept { return _skybox; }
     [[nodiscard]] const CPPRef<ITextureCube>& skybox() noexcept { return _skybox; }

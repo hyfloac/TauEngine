@@ -13,6 +13,7 @@
 #include "gl/GLTextureUploader.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLDepthStencilState.hpp"
+#include "gl/GLRasterizerState.hpp"
 #include "gl/GLGraphicsInterface.hpp"
 
 #include "gl/GLBuffer.hpp"
@@ -23,8 +24,8 @@
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept
     : IRenderingContext(mode), _gi(glArgs.gi),
       _device(glSysArgs.device), _context(glSysArgs.context),
-      _defaultDepthStencilState(glArgs.initialDepthStencilState),
-      _currentDepthStencilState(glArgs.initialDepthStencilState)
+      _defaultDepthStencilState(null), _currentDepthStencilState(null),
+      _defaultRasterizerState(null), _currentRasterizerState(null)
 {
     switch(_mode.currentMode())
     {
@@ -128,8 +129,38 @@ void GLRenderingContext::resetDepthStencilState() noexcept
     _currentDepthStencilState->apply();
 }
 
-const DepthStencilArgs& GLRenderingContext::getDefaultDepthStencilStateParams() noexcept
+const DepthStencilArgs& GLRenderingContext::getDefaultDepthStencilArgs() noexcept
 { return _defaultDepthStencilState->args(); }
+
+NullableRef<IRasterizerState> GLRenderingContext::setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
+{
+    NullableRef<IRasterizerState> ret = RefCast<IRasterizerState>(_currentRasterizerState);
+
+    if(!rsState || !RTT_CHECK(rsState.get(), GLRasterizerState))
+    { return ret; }
+
+    _currentRasterizerState = RefCast<GLRasterizerState>(rsState);
+    _currentRasterizerState->apply();
+
+    return ret;
+}
+
+void GLRenderingContext::setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
+{
+    if(!rsState || !RTT_CHECK(rsState.get(), GLRasterizerState))
+    { return; }
+
+    _defaultRasterizerState = RefCast<GLRasterizerState>(rsState);
+}
+
+void GLRenderingContext::resetRasterizerState() noexcept
+{
+    _currentRasterizerState = _defaultRasterizerState;
+    _currentRasterizerState->apply();
+}
+
+const RasterizerArgs& GLRenderingContext::getDefaultRasterizerArgs() noexcept
+{ return _defaultRasterizerState->args(); }
 
 CPPRef<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
 {
@@ -178,12 +209,9 @@ CPPRef<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUpl
 IShaderBuilder& GLRenderingContext::createShader() noexcept
 { return _gi.createShader(); }
 
-IDepthStencilStateBuilder& GLRenderingContext::createDepthStencilState() noexcept
-{ return _gi.createDepthStencilState(); }
-
 GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {
-    GLRenderingContextArgs glArgs { _gi, null };
+    GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -199,7 +227,7 @@ GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs&
 
 GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
-    GLRenderingContextArgs glArgs { _gi, null };
+    GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -215,7 +243,7 @@ GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs&
 
 CPPRef<IRenderingContext> GLRenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* const error) noexcept
 {
-    GLRenderingContextArgs glArgs { _gi, null };
+    GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -231,7 +259,7 @@ CPPRef<IRenderingContext> GLRenderingContextBuilder::buildCPPRef(const Rendering
 
 NullableRef<IRenderingContext> GLRenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
-    GLRenderingContextArgs glArgs { _gi, null };
+    GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -247,7 +275,7 @@ NullableRef<IRenderingContext> GLRenderingContextBuilder::buildTauRef(const Rend
 
 NullableStrongRef<IRenderingContext> GLRenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
-    GLRenderingContextArgs glArgs { _gi, null };
+    GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
@@ -261,10 +289,7 @@ NullableStrongRef<IRenderingContext> GLRenderingContextBuilder::buildTauSRef(con
     ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
 }
 
-bool GLRenderingContextBuilder::processArgs(const RenderingContextArgs& args, GLRenderingContextArgs* const glArgs, Error* const error) const noexcept
+bool GLRenderingContextBuilder::processArgs(const RenderingContextArgs& args, GLRenderingContextArgs* const glArgs, Error* const error) noexcept
 {
-    ERROR_CODE_COND_F(!RTT_CHECK(args.depthStencilState.get(), GLDepthStencilState), Error::IncorrectGraphicsAPI);
-
-    glArgs->initialDepthStencilState = RefCast<GLDepthStencilState>(args.depthStencilState);
     return true;
 }

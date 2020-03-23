@@ -5,12 +5,14 @@
 #ifdef _WIN32
 #include <d3d10.h>
 
+class DX10GraphicsInterface;
 class DX10RenderingContext;
 
 class TAU_DLL DX10RasterizerState final : public IRasterizerState
 {
+    RS_IMPL(DX10RasterizerState);
 private:
-    ID3D10RasterizerState * _d3dRasterizerState;
+    ID3D10RasterizerState* _d3dRasterizerState;
 public:
     DX10RasterizerState(const RasterizerArgs& params, ID3D10RasterizerState* const d3dRasterizerState) noexcept
         : IRasterizerState(params), _d3dRasterizerState(d3dRasterizerState)
@@ -42,10 +44,18 @@ public:
         ID3D10RasterizerState* state;
     };
 private:
-    DX10RenderingContext& ctx;
+    DX10GraphicsInterface& _gi;
 public:
-    DX10RasterizerStateBuilder(DX10RenderingContext& ctx) noexcept
-        : ctx(ctx)
+    DX10RasterizerStateBuilder(DX10GraphicsInterface& gi) noexcept
+        : _gi(gi)
     { }
+
+    [[nodiscard]] DX10RasterizerState* build(const RasterizerArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10RasterizerState* build(const RasterizerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<IRasterizerState> buildCPPRef(const RasterizerArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<IRasterizerState> buildTauRef(const RasterizerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<IRasterizerState> buildTauSRef(const RasterizerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const RasterizerArgs& args, [[tau::out]] DXRasterizerArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 };
 #endif

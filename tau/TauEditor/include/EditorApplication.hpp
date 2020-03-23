@@ -52,7 +52,7 @@ protected:
 private:
     void setupConfig() noexcept;
 
-    void writeConfig() noexcept;
+    void writeConfig() const noexcept;
 
     void onWindowEvent(WindowEvent& e) noexcept;
 

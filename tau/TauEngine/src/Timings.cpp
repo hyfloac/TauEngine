@@ -272,7 +272,6 @@ void PerfTimer::stop() noexcept
     _stopped = true;
 }
 
-
 DeltaTime::DeltaTime() noexcept
     : _us(0.0f), _ms(0.0f), _s(0.0f),
       _usSinceLastUpdate(0.0f), _msSinceLastUpdate(0.0f), _sSinceLastUpdate(0.0f),
