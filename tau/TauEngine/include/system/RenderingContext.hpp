@@ -40,10 +40,6 @@ class TAU_DLL NOVTABLE IRenderingContext
 {
     DEFAULT_DESTRUCT_VI(IRenderingContext);
     DELETE_COPY(IRenderingContext);
-public:
-    static IRenderingContext* create(const RenderingMode& mode) noexcept;
-
-    // using ContextType = RunTimeType<IRenderingContext>;
 protected:
     RenderingMode _mode;
 protected:
@@ -116,7 +112,7 @@ public:
 
     virtual void swapFrame() noexcept = 0;
 
-    [[nodiscard]] virtual CPPRef<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept = 0;
+    [[nodiscard]] virtual IVertexArrayBuilder& createVertexArray() noexcept = 0;
     [[nodiscard]] virtual IBufferBuilder& createBuffer() noexcept = 0;
     [[nodiscard]] virtual IIndexBufferBuilder& createIndexBuffer() noexcept = 0;
     [[nodiscard]] virtual IUniformBufferBuilder& createUniformBuffer() noexcept = 0;

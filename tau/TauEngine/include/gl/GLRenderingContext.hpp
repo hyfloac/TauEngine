@@ -8,6 +8,7 @@
 
 class GLGraphicsInterface;
 
+class GLVertexArrayBuilder;
 class GLBufferBuilder;
 class GLIndexBufferBuilder;
 class GLUniformBufferBuilder;
@@ -51,6 +52,7 @@ private:
     NullableRef<GLRasterizerState> _defaultRasterizerState;
     NullableRef<GLRasterizerState> _currentRasterizerState;
 
+    GLVertexArrayBuilder* _vertexArrayBuilder;
     GLBufferBuilder* _bufferBuilder;
     GLIndexBufferBuilder* _indexBufferBuilder;
     GLUniformBufferBuilder* _uniformBufferBuilder;
@@ -93,7 +95,7 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] CPPRef<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
+    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;

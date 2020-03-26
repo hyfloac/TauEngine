@@ -7,7 +7,8 @@
 #include "model/BufferDescriptor.hpp"
 
 class DX11RenderingContext;
-class DX11InputLayout;
+class DX11IndexBuffer;
+class DX11GraphicsInterface;
 
 class TAU_DLL DX11VertexArray final : public IVertexArray
 {
@@ -31,40 +32,68 @@ private:
     ID3D11Buffer** _iaBuffers;
     UINT* _iaStrides;
     UINT* _iaOffsets;
-    ID3D11Buffer* _dxIndexBuffer;
+    CPPRef<DX11IndexBuffer> _indexBuffer;
     D3D11_PRIMITIVE_TOPOLOGY _drawTypeCache;
 public:
-    DX11VertexArray(u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D11InputLayout* inputLayout, uSys bufferCount, ID3D11Buffer** iaBuffers,
-                    UINT* iaStrides, UINT* iaOffsets, ID3D11Buffer* indexBuffer, DrawType drawType) noexcept;
+    DX11VertexArray(uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D11InputLayout* inputLayout, uSys bufferCount, ID3D11Buffer** iaBuffers,
+                    UINT* iaStrides, UINT* iaOffsets, const CPPRef<DX11IndexBuffer>& indexBuffer, DrawType drawType) noexcept;
 
     ~DX11VertexArray() noexcept override;
 
-    void bind(IRenderingContext& context) noexcept override;
-    void unbind(IRenderingContext& context) noexcept override;
+    void bind(IRenderingContext& context) noexcept override { }
+    void unbind(IRenderingContext& context) noexcept override { }
 
     void preDraw(IRenderingContext& context) noexcept override;
-    void postDraw(IRenderingContext& context) noexcept override;
-    void draw(IRenderingContext& context) noexcept override;
-    void drawInstanced(IRenderingContext& context, uSys instanceCount) noexcept override;
+    void postDraw(IRenderingContext& context) noexcept override { }
+
+    void draw(IRenderingContext& context, uSys drawCount = 0) noexcept override;
+    void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0) noexcept override;
 };
 
 class TAU_DLL DX11VertexArrayBuilder final : public IVertexArrayBuilder
 {
     DEFAULT_DESTRUCT(DX11VertexArrayBuilder);
     DELETE_COPY(DX11VertexArrayBuilder);
-private:
-    DX11RenderingContext& _ctx;
-    ID3D11Buffer* _indexBufferCache;
-    ID3DBlob* _shaderBlobCache;
 public:
-    DX11VertexArrayBuilder(const uSys bufferCount, DX11RenderingContext& ctx) noexcept
-        : IVertexArrayBuilder(bufferCount), _ctx(ctx), _indexBufferCache(null), _shaderBlobCache(null)
+    struct DXVertexArrayArgs final
+    {
+        DELETE_COPY(DXVertexArrayArgs);
+    public:
+
+        CPPRef<DX11IndexBuffer> indexBuffer;
+        ID3D11Buffer** iaBuffers;
+        UINT* iaStrides;
+        UINT* iaOffsets;
+        ID3D11InputLayout* inputLayout;
+
+        DXVertexArrayArgs() noexcept
+            : indexBuffer(nullptr), iaBuffers(nullptr), iaStrides(nullptr), iaOffsets(nullptr),
+              inputLayout(nullptr)
+        { }
+
+        ~DXVertexArrayArgs() noexcept
+        {
+            delete[] iaBuffers;
+            delete[] iaStrides;
+            delete[] iaOffsets;
+            inputLayout->Release();
+        }
+    };
+private:
+    DX11GraphicsInterface& _gi;
+public:
+    DX11VertexArrayBuilder(DX11GraphicsInterface& gi) noexcept
+        : _gi(gi)
     { }
 
-    void shader(const CPPRef<IShader>& shader) noexcept override;
-    void setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept override;
-    void indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept override;
+    [[nodiscard]] DX11VertexArray* build([[tau::out]] Error* error) noexcept;
 
-    [[nodiscard]] DX11VertexArray* build([[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] DX11VertexArray* build(const VertexArrayArgs& args, Error* error) noexcept override;
+    [[nodiscard]] DX11VertexArray* build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] CPPRef<IVertexArray> buildCPPRef(const VertexArrayArgs& args, Error* error) noexcept override;
+    [[nodiscard]] NullableRef<IVertexArray> buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] NullableStrongRef<IVertexArray> buildTauSRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const VertexArrayArgs& args, DXVertexArrayArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 };
 #endif

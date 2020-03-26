@@ -66,9 +66,9 @@ public:
         [[nodiscard]] virtual ShaderDataType::Type dataType() noexcept = 0;
     };
 public:
-    static u32 size(Type type) noexcept;
+    static uSys size(Type type) noexcept;
 
-    static u32 componentCount(Type type) noexcept;
+    static uSys componentCount(Type type) noexcept;
 
     /**
      *   The underlying type of what needs to be passed to the
@@ -82,6 +82,40 @@ public:
      * passed to the shader.
      */
     static Type underlyingTypeND(Type type) noexcept;
+
+    /**
+     * Is this a single element. i.e. not a vector or matrix.
+     */
+    static bool isSingle(Type type) noexcept;
+
+    /**
+     * Is this a vector. i.e. not a single or a matrix.
+     */
+    static bool isVector(Type type) noexcept;
+
+    /**
+     * Is this a matrix. i.e. not a single or a vector.
+     */
+    static bool isMatrix(Type type) noexcept;
+
+    /**
+     * How many columns does the matrix have.
+     *
+     * This uses a column major format.
+     *
+     * If type is not a matrix returns 1.
+     */
+    static uSys columnCount(Type type) noexcept;
+
+    /**
+     * How many rows does the matrix have.
+     *
+     * This uses a column major format.
+     *
+     * If type is not a matrix returns 1.
+     */
+    static uSys rowCount(Type type) noexcept;
+
 };
 
 class ShaderSemantic final
@@ -111,26 +145,6 @@ public:
 
     static bool hasIndices(Semantic semantic) noexcept;
 };
-
-// class TAU_DLL InputLayoutDescriptor final
-// {
-//     DEFAULT_CONSTRUCT_PU(InputLayoutDescriptor);
-//     DEFAULT_DESTRUCT(InputLayoutDescriptor);
-//     DEFAULT_COPY(InputLayoutDescriptor);
-// private:
-//     ShaderDataType::Type _type;
-//     ShaderSemantic::Semantic _semantic;
-// public:
-//     InputLayoutDescriptor(const ShaderDataType::Type type, const ShaderSemantic::Semantic semantic) noexcept
-//         : _type(type), _semantic(semantic)
-//     { }
-//
-//     [[nodiscard]] ShaderDataType::Type type() const noexcept { return _type; }
-//     [[nodiscard]] ShaderSemantic::Semantic semantic() const noexcept { return _semantic; }
-//
-//     [[nodiscard]] ShaderDataType::Type& type() noexcept { return _type; }
-//     [[nodiscard]] ShaderSemantic::Semantic& semantic() noexcept { return _semantic; }
-// };
 
 class TAU_DLL BufferElementDescriptor final
 {

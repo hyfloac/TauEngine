@@ -68,13 +68,12 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     // }
 
 
-    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
-    vaBuilder->setVertexBuffer(0, _vbo);
-    // vaBuilder->inputLayout(_inputLayoutCache);
-    vaBuilder->drawCount(6);
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    VertexArrayArgs vaArgs(1);
+    vaArgs.buffers[0] = _vbo;
+    vaArgs.drawCount = 6;
+    vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _vao = CPPRef<IVertexArray>(vaBuilder->build());
+    _vao = context.createVertexArray().buildCPPRef(vaArgs, null);
 
     // _vao->addVertexBuffer(context, _vbo);
     // _vao->drawCount() = 6;

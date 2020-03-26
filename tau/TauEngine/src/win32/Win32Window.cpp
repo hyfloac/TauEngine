@@ -658,25 +658,4 @@ void Window::hideWindow() const noexcept
     PERF();
     ShowWindow(this->_windowContainer.windowHandle, SW_HIDE);
 }
-
-bool Window::createContext() noexcept
-{
-    PERF();
-    _context = IRenderingContext::create(this->_renderingMode);
-
-    if(!_context) { return false; }
-    // if(!_context->createContext(&this->_windowContainer.windowHandle)) { return false; }
-    if(!_context->createContext(*this)) { return false; }
-
-    return true;
-}
-
-// void Window::swapBuffers() const noexcept
-// {
-//     PERF();
-//     if(this->_windowContainer.hdc)
-//     {
-//         SwapBuffers(this->_windowContainer.hdc);
-//     }
-// }
 #endif

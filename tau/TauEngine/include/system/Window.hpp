@@ -166,20 +166,6 @@ public:
     void closeWindow() const noexcept;
     void showWindow()  const noexcept;
     void hideWindow()  const noexcept;
-
-    /**
-     * Creates a context for the window.
-     * 
-     * @return
-     *    Returns true if the context was successfully created.
-     */
-    bool createContext() noexcept;
-
-    // /**
-    //  *   Swaps the current frame buffer. Only needed if not 
-    //  * rendering in double buffered mode
-    //  */
-    // void swapBuffers() const noexcept;
 public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;

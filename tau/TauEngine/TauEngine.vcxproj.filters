@@ -231,9 +231,6 @@
     <ClCompile Include="src\gl\GLTextureUploader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\RenderingContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

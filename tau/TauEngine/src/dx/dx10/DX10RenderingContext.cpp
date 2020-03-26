@@ -28,6 +28,7 @@ DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10
       _vsync(false),
       _defaultDepthStencilState(null), _currentDepthStencilState(null),
       _defaultRasterizerState(null), _currentRasterizerState(null),
+      _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder(gi)),
       _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
@@ -56,6 +57,7 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
         (_OBJ) = null; \
     } } while(0)
 
+    RELEASE(_vertexArrayBuilder);
     RELEASE(_bufferBuilder);
     RELEASE(_indexBufferBuilder);
     RELEASE(_uniformBufferBuilder);
@@ -363,10 +365,8 @@ void DX10RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-CPPRef<IVertexArrayBuilder> DX10RenderingContext::createVertexArray(const uSys bufferCount) noexcept
-{
-    return CPPRef<IVertexArrayBuilder>(new(::std::nothrow) DX10VertexArrayBuilder(bufferCount, *this));
-}
+IVertexArrayBuilder& DX10RenderingContext::createVertexArray() noexcept
+{ return *_vertexArrayBuilder; }
 
 IBufferBuilder& DX10RenderingContext::createBuffer() noexcept
 { return *_bufferBuilder; }

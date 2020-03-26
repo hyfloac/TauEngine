@@ -1,7 +1,7 @@
 #include "model/BufferDescriptor.hpp"
 #include "Timings.hpp"
 
-u32 ShaderDataType::size(Type type) noexcept
+uSys ShaderDataType::size(const Type type) noexcept
 {
     switch(type)
     {
@@ -48,7 +48,7 @@ u32 ShaderDataType::size(Type type) noexcept
     }
 }
 
-u32 ShaderDataType::componentCount(Type type) noexcept
+uSys ShaderDataType::componentCount(const Type type) noexcept
 {
     switch(type)
     {
@@ -95,7 +95,7 @@ u32 ShaderDataType::componentCount(Type type) noexcept
     }
 }
 
-ShaderDataType::Type ShaderDataType::underlyingType(Type type) noexcept
+ShaderDataType::Type ShaderDataType::underlyingType(const Type type) noexcept
 {
     switch(type)
     {
@@ -121,7 +121,7 @@ ShaderDataType::Type ShaderDataType::underlyingType(Type type) noexcept
     }
 }
 
-ShaderDataType::Type ShaderDataType::underlyingTypeND(Type type) noexcept
+ShaderDataType::Type ShaderDataType::underlyingTypeND(const Type type) noexcept
 {
     switch(type)
     {
@@ -151,7 +151,121 @@ ShaderDataType::Type ShaderDataType::underlyingTypeND(Type type) noexcept
     }
 }
 
-ShaderDataType::Type ShaderSemantic::associatedType(Semantic semantic) noexcept
+bool ShaderDataType::isSingle(const Type type) noexcept
+{
+    switch(type)
+    {
+        case Bool:
+        case Int:  
+        case UInt: 
+        case Float:
+        case Double:  return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isVector(const Type type) noexcept
+{
+    switch(type)
+    {
+        case Vector2Bool:
+        case Vector3Bool:
+        case Vector4Bool:
+        case Vector2Int: 
+        case Vector3Int: 
+        case Vector4Int: 
+        case Vector2UInt:
+        case Vector3UInt:
+        case Vector4UInt:
+        case Vector2Float: 
+        case Vector3Float: 
+        case Vector4Float: 
+        case Vector2Double:
+        case Vector3Double:
+        case Vector4Double: return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isMatrix(const Type type) noexcept
+{
+    switch(type)
+    {
+        case Matrix2x2Float:  
+        case Matrix2x3Float:  
+        case Matrix2x4Float:  
+        case Matrix3x2Float:  
+        case Matrix3x3Float:  
+        case Matrix3x4Float:  
+        case Matrix4x2Float:  
+        case Matrix4x3Float:  
+        case Matrix4x4Float:  
+        case Matrix2x2Double: 
+        case Matrix2x3Double: 
+        case Matrix2x4Double: 
+        case Matrix3x2Double: 
+        case Matrix3x3Double: 
+        case Matrix3x4Double: 
+        case Matrix4x2Double: 
+        case Matrix4x3Double: 
+        case Matrix4x4Double: return true;
+        default: return false;
+    }
+}
+
+uSys ShaderDataType::columnCount(const Type type) noexcept
+{
+    switch(type)
+    {
+        case Matrix2x2Float:  
+        case Matrix2x3Float:  
+        case Matrix2x4Float: return 2;
+        case Matrix3x2Float: 
+        case Matrix3x3Float: 
+        case Matrix3x4Float: return 3;
+        case Matrix4x2Float: 
+        case Matrix4x3Float: 
+        case Matrix4x4Float: return 4;
+        case Matrix2x2Double: 
+        case Matrix2x3Double: 
+        case Matrix2x4Double: return 2;
+        case Matrix3x2Double: 
+        case Matrix3x3Double: 
+        case Matrix3x4Double: return 3;
+        case Matrix4x2Double: 
+        case Matrix4x3Double: 
+        case Matrix4x4Double: return 4;
+        default: return 1;
+    }
+}
+
+uSys ShaderDataType::rowCount(const Type type) noexcept
+{
+    switch(type)
+    {
+        case Matrix2x2Float:
+        case Matrix3x2Float:
+        case Matrix4x2Float: return 2;
+        case Matrix2x3Float:
+        case Matrix3x3Float:
+        case Matrix4x3Float: return 3;
+        case Matrix2x4Float: 
+        case Matrix3x4Float: 
+        case Matrix4x4Float: return 4;
+        case Matrix2x2Double:
+        case Matrix3x2Double: 
+        case Matrix4x2Double: return 2;
+        case Matrix2x3Double:
+        case Matrix3x3Double:
+        case Matrix4x3Double: return 3;
+        case Matrix2x4Double: 
+        case Matrix3x4Double: 
+        case Matrix4x4Double: return 4;
+        default: return 1;
+    }
+}
+
+ShaderDataType::Type ShaderSemantic::associatedType(const Semantic semantic) noexcept
 {
     switch(semantic)
     {
@@ -171,7 +285,7 @@ ShaderDataType::Type ShaderSemantic::associatedType(Semantic semantic) noexcept
     }
 }
 
-bool ShaderSemantic::hasIndices(Semantic semantic) noexcept
+bool ShaderSemantic::hasIndices(const Semantic semantic) noexcept
 {
     switch(semantic)
     {

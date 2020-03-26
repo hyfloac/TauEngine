@@ -21,8 +21,8 @@ void GLVertexArray::destroy(const GLuint vao) noexcept
     glDeleteVertexArrays(1, &vao);
 }
 
-GLVertexArray::GLVertexArray(const u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, const GLuint vao, const DrawType drawType, /*const RefDynArray<CPPRef<IBuffer>>& buffers,*/ const CPPRef<GLIndexBuffer>& indexBuffer, const GLuint attribCount)
-    : IVertexArray(drawCount, buffers), _vao(vao), _glDrawType(glDrawType(drawType)), /*_buffers(buffers),*/ _indexBuffer(indexBuffer), _attribCount(attribCount)
+GLVertexArray::GLVertexArray(const u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, const GLuint vao, const GLenum drawType, const CPPRef<GLIndexBuffer>& indexBuffer, const GLuint attribCount)
+    : IVertexArray(drawCount, buffers), _vao(vao), _glDrawType(drawType), _indexBuffer(indexBuffer), _attribCount(attribCount)
 { }
 
 GLVertexArray::~GLVertexArray() noexcept
@@ -30,54 +30,21 @@ GLVertexArray::~GLVertexArray() noexcept
     glDeleteVertexArrays(1, &_vao);
 }
 
-// void GLVertexArray::internalSetup(IRenderingContext& context) noexcept
-// {
-//     PERF();
-//     u32 attribIndex = 0;
-//     for(uSys i = 0; i < _buffers.size(); ++i)
-//     {
-//         auto& buffer = _buffers[i];
-//         const BufferDescriptor& descriptor = buffer->descriptor();
-//
-//         buffer->bind(context);
-//
-//         for(uSys j = 0; j < descriptor.elements().size(); ++j)
-//         {
-//             // TODO: Properly handle matrices, integer, and float64 types.
-//             // Matrices have to stored as a number of vectors
-//             // Integers require glVertexAttribIPointer
-//             // Doubles require glVertexAttribLPointer
-//
-//             auto& element = descriptor.elements()[j];
-//             glEnableVertexAttribArray(attribIndex);
-//             glVertexAttribPointer(attribIndex,
-//                                   ShaderDataType::componentCount(element.type()),
-//                                   getGLType(element.type()),
-//                                   element.normalized() ? GL_TRUE : GL_FALSE,
-//                                   descriptor.stride(),
-//                                   reinterpret_cast<const void*>(static_cast<intptr_t>(element.offset())));
-//
-//             if(buffer->instanced())
-//             {
-//                 glVertexAttribDivisor(attribIndex, 1);
-//             }
-//
-//             ++attribIndex;
-//         }
-//
-//         buffer->unbind(context);
-//     }
-//     _attribCount = attribIndex;
-// }
-
 void GLVertexArray::bind(IRenderingContext& context) noexcept
 {
-    // _bind(*context.getVertexArrayHandle<GLuint>(this));
     glBindVertexArray(_vao);
+    if(this->_indexBuffer)
+    {
+        this->_indexBuffer->bind(context);
+    }
 }
 
 void GLVertexArray::unbind(IRenderingContext& context) noexcept
 {
+    if(this->_indexBuffer)
+    {
+        this->_indexBuffer->unbind(context);
+    }
     glBindVertexArray(0);
 }
 
@@ -97,108 +64,173 @@ void GLVertexArray::postDraw(IRenderingContext& context) noexcept
     }
 }
 
-void GLVertexArray::draw(IRenderingContext& context) noexcept
+void GLVertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
 {
-    if(_indexBuffer)
+    if(drawCount == 0)
+    { drawCount = this->_drawCount; }
+
+    if(this->_indexBuffer)
     {
-        _indexBuffer->bind(context);
-        glDrawElements(_glDrawType, _drawCount, GL_UNSIGNED_INT, null);
+        glDrawElements(this->_glDrawType, drawCount, GL_UNSIGNED_INT, null);
     }
     else
     {
-        glDrawArrays(_glDrawType, 0, this->_drawCount);
+        glDrawArrays(this->_glDrawType, 0, drawCount);
     }
 }
 
-void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount) noexcept
+void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount) noexcept
 {
-    if(_indexBuffer)
+    if(drawCount == 0)
+    { drawCount = this->_drawCount; }
+
+    if(this->_indexBuffer)
     {
-        _indexBuffer->bind(context);
-        glDrawElementsInstanced(_glDrawType, _drawCount, GL_UNSIGNED_INT, null, instanceCount);
+        glDrawElementsInstanced(this->_glDrawType, drawCount, GL_UNSIGNED_INT, null, instanceCount);
     }
     else
     {
-        glDrawArraysInstanced(_glDrawType, 0, this->_drawCount, instanceCount);
+        glDrawArraysInstanced(this->_glDrawType, 0, drawCount, instanceCount);
     }
 }
 
-void GLVertexArrayBuilder::setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept
+GLVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* error) noexcept
 {
-    if(RTT_CHECK(vertexBuffer.get(), GLBuffer))
-    {
-        IVertexArrayBuilder::setVertexBuffer(index, vertexBuffer);
-    }
+    GLVertexArrayArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLVertexArray* const va = new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, va);
 }
 
-void GLVertexArrayBuilder::indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept
+GLVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
 {
-    if(!indexBuffer)
-    {
-        IVertexArrayBuilder::indexBuffer(null);
-        _indexBuffer = null;
-    }
-    else if(RTT_CHECK(indexBuffer.get(), GLIndexBuffer))
-    {
-        IVertexArrayBuilder::indexBuffer(indexBuffer);
-        _indexBuffer = RefCast<GLIndexBuffer>(indexBuffer);
-    }
+    GLVertexArrayArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    GLVertexArray* const va = allocator.allocateT<GLVertexArray>(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, va);
 }
 
-// void GLVertexArrayBuilder::inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept
-// {
-//     if(RTT_CHECK(inputLayout.get(), GLInputLayout))
-//     {
-//         IVertexArrayBuilder::inputLayout(inputLayout);
-//     }
-// }
-
-GLVertexArray* GLVertexArrayBuilder::build(Error* error) noexcept
+CPPRef<IVertexArray> GLVertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* error) noexcept
 {
-    // ERROR_CODE_COND_N(!_inputLayout, Error::InputLayoutNotSet);
-    ERROR_CODE_COND_N(_drawCount == 0, Error::DrawCountNotSet);
-    ERROR_CODE_COND_N(_drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
+    GLVertexArrayArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
 
-    for(uSys i = 0; i < _buffers.count(); ++i)
+    const CPPRef<GLVertexArray> va = CPPRef<GLVertexArray>(new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount));
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, va);
+}
+
+NullableRef<IVertexArray> GLVertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    GLVertexArrayArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    const NullableRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
+}
+
+NullableStrongRef<IVertexArray> GLVertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    GLVertexArrayArgs glArgs;
+    if(!processArgs(args, &glArgs, error))
+    { return null; }
+
+    const NullableStrongRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
+}
+
+bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArrayArgs* glArgs, Error* error) const noexcept
+{
+    ERROR_CODE_COND_F(args.drawCount == 0, Error::DrawCountNotSet);
+    ERROR_CODE_COND_F(args.drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
+
+    for(uSys i = 0; i < args.buffers.count(); ++i)
     {
-        ERROR_CODE_COND_N(!_buffers[i], Error::BuffersNotSet);
+        ERROR_CODE_COND_F(!args.buffers[i], Error::BuffersNotSet);
+        ERROR_CODE_COND_F(!RTT_CHECK(args.buffers[i].get(), GLBuffer), Error::InternalError);
     }
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-
-    glBindVertexArray(vao);
-
-    u32 attribIndex = 0;
-    for(uSys i = 0; i < _buffers.size(); ++i)
+    if(args.indexBuffer)
     {
-        auto& buffer = _buffers[i];
+        ERROR_CODE_COND_F(!RTT_CHECK(args.indexBuffer.get(), GLIndexBuffer), Error::InternalError);
+        glArgs->indexBuffer = RefCast<GLIndexBuffer>(args.indexBuffer);
+    }
+    else
+    {
+        glArgs->indexBuffer = null;
+    }
+
+    glArgs->drawType = glDrawType(args.drawType);
+
+    glGenVertexArrays(1, &glArgs->vao);
+    glBindVertexArray(glArgs->vao);
+
+    uSys attribIndex = 0;
+    for(uSys i = 0; i < args.buffers.size(); ++i)
+    {
+        auto& buffer = args.buffers[i];
         const BufferDescriptor& descriptor = buffer->descriptor();
 
         buffer->bind(reinterpret_cast<IRenderingContext&>(_ctx));
 
         for(uSys j = 0; j < descriptor.elements().size(); ++j)
         {
-            // TODO: Properly handle matrices, integer, and float64 types.
-            // Matrices have to stored as a number of vectors
-            // Integers require glVertexAttribIPointer
-            // Doubles require glVertexAttribLPointer
-
             auto& element = descriptor.elements()[j];
-            glEnableVertexAttribArray(attribIndex);
-            glVertexAttribPointer(attribIndex,
-                                  ShaderDataType::componentCount(element.type()),
-                                  GLVertexArray::getGLType(element.type()),
-                                  element.normalized() ? GL_TRUE : GL_FALSE,
-                                  descriptor.stride(),
-                                  reinterpret_cast<const void*>(static_cast<intptr_t>(element.offset())));
+            const ShaderDataType::Type uType = ShaderDataType::underlyingType(element.type());
+            const uSys columns = ShaderDataType::columnCount(element.type());
+            intptr_t offset = static_cast<intptr_t>(element.offset());
 
-            if(buffer->instanced())
+            const GLint size = ShaderDataType::componentCount(uType);
+            const GLenum type = GLVertexArray::getGLType(element.type());
+            const GLboolean normalized = element.normalized() ? GL_TRUE : GL_FALSE;
+            const GLsizei stride = descriptor.stride();
+            const void* pointer = reinterpret_cast<const void*>(offset);
+
+            for(uSys m = 0; m < columns; ++m)
             {
-                glVertexAttribDivisor(attribIndex, 1);
-            }
+                glEnableVertexAttribArray(attribIndex);
 
-            ++attribIndex;
+                if(type == GL_DOUBLE)
+                {
+                    glVertexAttribLPointer(attribIndex, size, GL_DOUBLE, stride, pointer);
+                }
+                else if((type == GL_INT || type == GL_UNSIGNED_INT) && !normalized)
+                {
+                    glVertexAttribIPointer(attribIndex, size, type, stride, pointer);
+                }
+                else
+                {
+                    glVertexAttribPointer(attribIndex, size, type, normalized, stride, pointer);
+                }
+
+                if(buffer->instanced())
+                {
+                    glVertexAttribDivisor(attribIndex, 1);
+                }
+                else
+                {
+                    glVertexAttribDivisor(attribIndex, 0);
+                }
+
+                ++attribIndex;
+                offset += ShaderDataType::size(uType);
+                pointer = reinterpret_cast<const void*>(offset);
+            }
         }
 
         buffer->unbind(reinterpret_cast<IRenderingContext&>(_ctx));
@@ -206,10 +238,9 @@ GLVertexArray* GLVertexArrayBuilder::build(Error* error) noexcept
 
     glBindVertexArray(0);
 
-    GLVertexArray* va = new(::std::nothrow) GLVertexArray(_drawCount, _buffers, vao, _drawType, RefCast<GLIndexBuffer>(_indexBuffer), attribIndex);
-    ERROR_CODE_COND_N(!va, Error::MemoryAllocationFailure);
+    glArgs->attribCount = static_cast<GLuint>(attribIndex);
 
-    ERROR_CODE_V(Error::NoError, va);
+    return true;
 }
 
 GLenum GLVertexArray::getGLType(const ShaderDataType::Type type) noexcept

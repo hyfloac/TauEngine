@@ -256,16 +256,17 @@ bool DX10Application::init(int argCount, char* args[]) noexcept
     bufBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     const CPPRef<IBuffer> texBuffer = ctx().createBuffer().buildCPPRef(bufBuilder, null);
     
-    CPPRef<IVertexArrayBuilder> vaBuilder = ctx().createVertexArray(3);
+    VertexArrayArgs vaArgs(3);
     
-    vaBuilder->setVertexBuffer(0, posBuffer);
-    vaBuilder->setVertexBuffer(1, colorBuffer);
-    vaBuilder->setVertexBuffer(2, texBuffer);
-    vaBuilder->indexBuffer(indices);
-    vaBuilder->shader(vertexShader);
-    vaBuilder->drawCount(6);
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
-    _va = CPPRef<IVertexArray>(vaBuilder->build());
+    vaArgs.buffers[0] = posBuffer;
+    vaArgs.buffers[1] = colorBuffer;
+    vaArgs.buffers[2] = texBuffer;
+    vaArgs.indexBuffer = indices;
+    vaArgs.shader = vertexShader;
+    vaArgs.drawCount = 6;
+    vaArgs.drawType = DrawType::SeparatedTriangles;
+
+    _va = ctx().createVertexArray().buildCPPRef(vaArgs, null);
     
     _uni = new UniformBlockS<Uniforms>(ctx().createUniformBuffer(), RGBAColor { 0, 0, 0, 0 });
     _matrices = new UniformBlockS<Matrices>(ctx().createUniformBuffer());

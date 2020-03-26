@@ -88,30 +88,14 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, co
     texBuf->fillBuffer(context, tex);
     indicesBuf->fillBuffer(context, indices);
 
-    // CPPRef<IVertexArray> vao = context.createVertexArray(3, DrawType::SeparatedTriangles);
-    // vao->addVertexBuffer(context, posBuf);
-    // vao->addVertexBuffer(context, normBuf);
-    // vao->addVertexBuffer(context, texBuf);
-    // vao->setIndexBuffer(context, indicesBuf);
-
-    // if(!_inputLayoutCache)
-    // {
-    //     CPPRef<IInputLayoutBuilder> ilBuilder = context.createInputLayout(3);
-    //     ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector3Float, ShaderSemantic::Position);
-    //     ilBuilder->setLayoutDescriptor(1, ShaderDataType::Vector3Float, ShaderSemantic::Normal);
-    //     ilBuilder->setLayoutDescriptor(2, ShaderDataType::Vector2Float, ShaderSemantic::TextureCoord);
-    //     _inputLayoutCache = CPPRef<IInputLayout>(ilBuilder->build());
-    // }
-
-    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(3);
-    vaBuilder->setVertexBuffer(0, posBuf);
-    vaBuilder->setVertexBuffer(1, normBuf);
-    vaBuilder->setVertexBuffer(2, texBuf);
-    vaBuilder->indexBuffer(indicesBuf);
-    // vaBuilder->inputLayout(_inputLayoutCache);
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
-    vaBuilder->drawCount(numIndices * 2);
-    CPPRef<IVertexArray> vao = CPPRef<IVertexArray>(vaBuilder->build());
+    VertexArrayArgs vaArgs(3);
+    vaArgs.buffers[0] = posBuf;
+    vaArgs.buffers[1] = normBuf;
+    vaArgs.buffers[2] = texBuf;
+    vaArgs.indexBuffer = indicesBuf;
+    vaArgs.drawType = DrawType::SeparatedTriangles;
+    vaArgs.drawCount = numIndices * 2;
+    CPPRef<IVertexArray> vao = context.createVertexArray().buildCPPRef(vaArgs, null);
 
     return vao;
 }

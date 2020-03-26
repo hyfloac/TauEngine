@@ -1,7 +1,10 @@
 #pragma once
 
-#include "model/VertexArray.hpp"
+#pragma warning(push, 0)
 #include <GL/glew.h>
+#pragma warning(pop)
+
+#include "model/VertexArray.hpp"
 #include "model/BufferDescriptor.hpp"
 
 class GLIndexBuffer;
@@ -20,27 +23,21 @@ public:
 private:
     GLuint _vao;
     GLenum _glDrawType;
-    // RefDynArray<CPPRef<IBuffer>> _buffers;
     CPPRef<GLIndexBuffer> _indexBuffer;
     GLuint _attribCount;
 public:
-    GLVertexArray(u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, GLuint vao, DrawType drawType, /*const RefDynArray<CPPRef<IBuffer>>& buffers,*/ const CPPRef<GLIndexBuffer>& indexBuffer, GLuint attribCount);
+    GLVertexArray(u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, GLuint vao, GLenum drawType, const CPPRef<GLIndexBuffer>& indexBuffer, GLuint attribCount);
 
     ~GLVertexArray() noexcept override;
 
     void bind(IRenderingContext& context) noexcept override;
-
     void unbind(IRenderingContext& context) noexcept override;
 
-    // void internalSetup(IRenderingContext& context) noexcept override;
-
     void preDraw(IRenderingContext& context) noexcept override;
-
     void postDraw(IRenderingContext& context) noexcept override;
 
-    void draw(IRenderingContext& context) noexcept override;
-
-    void drawInstanced(IRenderingContext& context, uSys instanceCount) noexcept override;
+    void draw(IRenderingContext& context, uSys drawCount = 0) noexcept override;
+    void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0) noexcept override;
 };
 
 class GLRenderingContext;
@@ -49,16 +46,26 @@ class TAU_DLL GLVertexArrayBuilder final : public IVertexArrayBuilder
 {
     DEFAULT_DESTRUCT(GLVertexArrayBuilder);
     DELETE_COPY(GLVertexArrayBuilder);
+public:
+    struct GLVertexArrayArgs final
+    {
+        GLuint vao;
+        GLuint attribCount;
+        CPPRef<GLIndexBuffer> indexBuffer;
+        GLenum drawType;
+    };
 private:
     GLRenderingContext& _ctx;
 public:
-    GLVertexArrayBuilder(const uSys bufferCount, GLRenderingContext& ctx) noexcept
-        : IVertexArrayBuilder(bufferCount), _ctx(ctx)
+    GLVertexArrayBuilder(GLRenderingContext& ctx) noexcept
+        : _ctx(ctx)
     { }
 
-    void setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept override;
-    void indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept override;
-    // void inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept override;
-
-    [[nodiscard]] GLVertexArray* build([[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] GLVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] GLVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] CPPRef<IVertexArray> buildCPPRef(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept override;
+    [[nodiscard]] NullableRef<IVertexArray> buildTauRef(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] NullableStrongRef<IVertexArray> buildTauSRef(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+private:
+    [[nodiscard]] bool processArgs(const VertexArrayArgs& args, GLVertexArrayArgs* glArgs, [[tau::out]] Error* error) const noexcept;
 };

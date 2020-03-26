@@ -8,18 +8,14 @@
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10ShaderProgram.hpp"
 #include "dx/dx10/DX10Shader.hpp"
+#include "dx/dx10/DX10GraphicsInterface.hpp"
 
-DX10VertexArray::DX10VertexArray(const u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D10InputLayout* const inputLayout, const uSys bufferCount, ID3D10Buffer** const iaBuffers,
-                                 UINT* const iaStrides, UINT* const iaOffsets, ID3D10Buffer* const indexBuffer, const DrawType drawType) noexcept
+DX10VertexArray::DX10VertexArray(const uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D10InputLayout* const inputLayout, const uSys bufferCount, ID3D10Buffer** const iaBuffers,
+                                 UINT* const iaStrides, UINT* const iaOffsets, const CPPRef<DX10IndexBuffer>& indexBuffer, const DrawType drawType) noexcept
     : IVertexArray(drawCount, buffers), _inputLayout(inputLayout), _iaBufferCount(bufferCount),
       _iaBuffers(iaBuffers), _iaStrides(iaStrides), _iaOffsets(iaOffsets),
-      _dxIndexBuffer(indexBuffer), _drawTypeCache(getDXDrawType(drawType))
-{
-    if(_dxIndexBuffer)
-    {
-        _dxIndexBuffer->AddRef();
-    }
-}
+      _indexBuffer(indexBuffer), _drawTypeCache(getDXDrawType(drawType))
+{ }
 
 DX10VertexArray::~DX10VertexArray() noexcept
 {
@@ -27,82 +23,9 @@ DX10VertexArray::~DX10VertexArray() noexcept
     delete[] _iaStrides;
     delete[] _iaOffsets;
     _inputLayout->Release();
-    if(_dxIndexBuffer)
-    {
-        _dxIndexBuffer->Release();
-        _dxIndexBuffer = null;
-    }
 }
-
-void DX10VertexArray::bind(IRenderingContext& context) noexcept
-{
-}
-
-void DX10VertexArray::unbind(IRenderingContext& context) noexcept
-{
-}
-
-// void DX10VertexArray::internalSetup(IRenderingContext& context) noexcept
-// {
-//     /**
-//      *   DirectX doesn't have the same concept of VAO's as OpenGL,
-//      * as such we have to design it around Input Layouts. OpenGL's
-//      * VAO's have the nice benefit of each buffer is bound to its
-//      * own layout, but in DirectX you have a single layout, and
-//      * all the included buffers. As such, as best as I can tell,
-//      * you have to load the same number of buffers as layout 
-//      * elements.
-//      *
-//      *   If you are using interleaved buffers (buffers which contain
-//      * more than one type of data) then you, as best as I can tell,
-//      * have to load it multiple times, once for each time it shows
-//      * up in the layout. You also have to give it a stride and
-//      * offset, where the stride is how many bytes before the next
-//      * element can be found, the offset is how many bytes to skip
-//      * from the beginning of the buffer.
-//      */
-//
-//     // if(!context.isContextType<DX10RenderingContext>())
-//     // {
-//     //     return;
-//     // }
-//     //
-//     // auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-//     //
-//     // ID3D10Blob* shaderBlob = dxCtx.tmpShaderBlob();
-//     //
-//     // ID3D10InputLayout* inputLayout;
-//     // const HRESULT h = dxCtx.d3d10Device()->CreateInputLayout(_elementDescriptors, _iaBufferCount, shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &inputLayout);
-//     //
-//     // if(!FAILED(h))
-//     // {
-//     //     dxCtx.tmpInputLayout() = inputLayout;
-//     // }
-//     // else
-//     // {
-//     //     dxCtx.tmpInputLayout() = null;
-//     // }
-// }
 
 void DX10VertexArray::preDraw(IRenderingContext& context) noexcept
-{
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-    dxCtx.d3dDevice()->IASetInputLayout(_inputLayout);
-    dxCtx.d3dDevice()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
-    dxCtx.d3dDevice()->IASetIndexBuffer(_dxIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-    dxCtx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
-}
-
-void DX10VertexArray::postDraw(IRenderingContext& context) noexcept
-{
-}
-
-void DX10VertexArray::draw(IRenderingContext& context) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
@@ -111,120 +34,59 @@ void DX10VertexArray::draw(IRenderingContext& context) noexcept
     }
 
     auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-
-    if(_dxIndexBuffer)
-    {
-        dxCtx.d3dDevice()->DrawIndexed(_drawCount, 0, 0);
-    }
-    else
-    {
-        dxCtx.d3dDevice()->Draw(_drawCount, 0);
-    }
+    dxCtx.d3dDevice()->IASetInputLayout(_inputLayout);
+    dxCtx.d3dDevice()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
+    dxCtx.d3dDevice()->IASetIndexBuffer(_indexBuffer ? _indexBuffer->d3dBuffer() : NULL, DXGI_FORMAT_R32_UINT, 0);
+    dxCtx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
-void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount) noexcept
+void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
 {
+    if(drawCount == 0)
+    { drawCount = this->_drawCount; }
+
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
+        TAU_THROW(IncorrectContextException);
         return;
     }
 
     auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
 
-    if(_dxIndexBuffer)
+    if(this->_indexBuffer)
     {
-        dxCtx.d3dDevice()->DrawIndexedInstanced(_drawCount, instanceCount, 0, 0, 0);
+        dxCtx.d3dDevice()->DrawIndexed(drawCount, 0, 0);
     }
     else
     {
-        dxCtx.d3dDevice()->DrawInstanced(_drawCount, instanceCount, 0, 0);
+        dxCtx.d3dDevice()->Draw(drawCount, 0);
     }
 }
 
-// void DX10VertexArray::addVertexBuffer(IRenderingContext& context, const CPPRef<IBuffer>& vertexBuffer) noexcept
-// {
-//     IVertexArray::addVertexBuffer(context, vertexBuffer);
-//
-//     if(_currentIndex == _buffers.count())
-//     {
-//         /**
-//          *   DirectX doesn't have the same concept of VAO's as OpenGL,
-//          * as such we have to design it around Input Layouts. OpenGL's
-//          * VAO's have the nice benefit of each buffer is bound to its
-//          * own layout, but in DirectX you have a single layout, and
-//          * all the included buffers. As such, as best as I can tell,
-//          * you have to load the same number of buffers as layout
-//          * elements.
-//          *
-//          *   If you are using interleaved buffers (buffers which contain
-//          * more than one type of data) then you, as best as I can tell,
-//          * have to load it multiple times, once for each time it shows
-//          * up in the layout. You also have to give it a stride and
-//          * offset, where the stride is how many bytes before the next
-//          * element can be found, the offset is how many bytes to skip
-//          * from the beginning of the buffer.
-//          */
-//
-//         _iaBufferCount = 0;
-//         for(uSys i = 0; i < _buffers.size(); ++i)
-//         {
-//             auto& buffer = _buffers[i];
-//             const BufferDescriptor& descriptor = buffer->descriptor();
-//
-//             for(uSys j = 0; j < descriptor.elements().size(); ++j)
-//             {
-//                 _iaBufferCount += computeNumElements(descriptor.elements()[i].type());
-//             }
-//         }
-//
-//         _iaBuffers = new(::std::nothrow) ID3D10Buffer* [_iaBufferCount];
-//         _iaStrides = new(::std::nothrow) UINT[_iaBufferCount];
-//         _iaOffsets = new(::std::nothrow) UINT[_iaBufferCount];
-//         _elementDescriptors = new(::std::nothrow) D3D10_INPUT_ELEMENT_DESC[_iaBufferCount];
-//
-//         uSys insertIndex = 0;
-//         for(uSys i = 0; i < _buffers.size(); ++i)
-//         {
-//             auto& buffer = _buffers[i];
-//             const BufferDescriptor& descriptor = buffer->descriptor();
-//
-//             CPPRef<DX10Buffer> dxBuffer = RefCast<DX10Buffer>(buffer);
-//
-//             for(uSys j = 0; j < descriptor.elements().size(); ++j)
-//             {
-//                 auto& bed = descriptor.elements()[j];
-//                 /**
-//                  *   We store the underlying DX buffer multiple times due to how
-//                  * layouts are handled in DX. The offset will start from 0, and
-//                  * the stride must include the size of the element. If we are
-//                  * using a multi-type buffer then the offset will have to account
-//                  * for every element before it, and the stride will have to
-//                  * account for every element before, as well as its own size.
-//                  * Conveniently both of these are calculated in advance, for the
-//                  * most part.
-//                  */
-//
-//                 handleInsertion(insertIndex, dxBuffer->d3dBuffer(), bed);
-//
-//                 // _iaBuffers[insertIndex] = dxBuffer->d3dBuffer();
-//                 // _iaStrides[insertIndex] = bed.offset() + bed.size();
-//                 // _iaOffsets[insertIndex] = bed.offset();
-//                 //
-//                 // _elementDescriptors[insertIndex].SemanticName = "<----UNKNOWN---->";
-//                 // _elementDescriptors[insertIndex].SemanticIndex = -1;
-//                 // _elementDescriptors[insertIndex].Format = getDXType(bed.type());
-//                 // _elementDescriptors[insertIndex].InputSlot = 0;
-//                 // _elementDescriptors[insertIndex].AlignedByteOffset = D3D10_APPEND_ALIGNED_ELEMENT;
-//                 // _elementDescriptors[insertIndex].InputSlotClass = D3D10_INPUT_PER_VERTEX_DATA;
-//                 // _elementDescriptors[insertIndex].InstanceDataStepRate = 0;
-//                 //
-//                 // ++insertIndex;
-//             }
-//         }
-//     }
-// }
+void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount) noexcept
+{
+    if(drawCount == 0)
+    { drawCount = this->_drawCount; }
 
-uSys DX10VertexArray::computeNumElements(ShaderDataType::Type type) noexcept
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    {
+        TAU_THROW(IncorrectContextException);
+        return;
+    }
+
+    auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
+
+    if(this->_indexBuffer)
+    {
+        dxCtx.d3dDevice()->DrawIndexedInstanced(drawCount, instanceCount, 0, 0, 0);
+    }
+    else
+    {
+        dxCtx.d3dDevice()->DrawInstanced(drawCount, instanceCount, 0, 0);
+    }
+}
+
+uSys DX10VertexArray::computeNumElements(const ShaderDataType::Type type) noexcept
 {
     switch(type)
     {
@@ -284,48 +146,126 @@ uSys DX10VertexArray::computeNumElements(ShaderDataType::Type type) noexcept
     return 0;
 }
 
-// void DX10VertexArray::handleInsertion(uSys& insertIndex, ID3D10Buffer* buffer, const BufferElementDescriptor& bed) const noexcept
-// {
-//     const ShaderDataType::Type underlyingType = ShaderDataType::underlyingTypeND(bed.type());
-//     const u32 underlyingSize = ShaderDataType::size(underlyingType);
-//     const uSys columns = computeNumElements(bed.type());
-//     u32 offset = bed.offset();
-//
-//     for(uSys i = 0; i < columns; ++i, ++insertIndex)
-//     {
-//         _iaBuffers[insertIndex] = buffer;
-//         _iaStrides[insertIndex] = offset + underlyingSize;
-//         _iaOffsets[insertIndex] = offset;
-//         offset += underlyingSize;
-//
-//         _elementDescriptors[insertIndex].SemanticName = "<----UNKNOWN---->";
-//         _elementDescriptors[insertIndex].SemanticIndex = -1;
-//         _elementDescriptors[insertIndex].Format = getDXType(underlyingType);
-//         _elementDescriptors[insertIndex].InputSlot = 0;
-//         _elementDescriptors[insertIndex].AlignedByteOffset = D3D10_APPEND_ALIGNED_ELEMENT;
-//         _elementDescriptors[insertIndex].InputSlotClass = D3D10_INPUT_PER_VERTEX_DATA;
-//         _elementDescriptors[insertIndex].InstanceDataStepRate = 0;
-//     }
-// }
-
 static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept;
 
-DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
+DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Error* error) noexcept
 {
-    // ERROR_CODE_COND_N(!_inputLayout, Error::InputLayoutNotSet);
-    ERROR_CODE_COND_N(_drawCount == 0, Error::DrawCountNotSet);
-    ERROR_CODE_COND_N(_drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
+    DXVertexArrayArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
 
-    for(uSys i = 0; i < _buffers.count(); ++i)
+    DX10VertexArray* const va = new(::std::nothrow) DX10VertexArray(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    // Prevent the arrays from being deleted at destruction.
+    dxArgs.iaBuffers = null;
+    dxArgs.iaStrides = null;
+    dxArgs.iaOffsets = null;
+
+    ERROR_CODE_V(Error::NoError, va);
+}
+
+DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    DXVertexArrayArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10VertexArray* const va = allocator.allocateT<DX10VertexArray>(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    // Prevent the arrays from being deleted at destruction.
+    dxArgs.iaBuffers = null;
+    dxArgs.iaStrides = null;
+    dxArgs.iaOffsets = null;
+
+    ERROR_CODE_V(Error::NoError, va);
+}
+
+CPPRef<IVertexArray> DX10VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* error) noexcept
+{
+    DXVertexArrayArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10VertexArray> va = CPPRef<DX10VertexArray>(new(::std::nothrow) DX10VertexArray(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType));
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    // Prevent the arrays from being deleted at destruction.
+    dxArgs.iaBuffers = null;
+    dxArgs.iaStrides = null;
+    dxArgs.iaOffsets = null;
+
+    ERROR_CODE_V(Error::NoError, va);
+}
+
+
+NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    DXVertexArrayArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10VertexArray> va(allocator, args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    // Prevent the arrays from being deleted at destruction.
+    dxArgs.iaBuffers = null;
+    dxArgs.iaStrides = null;
+    dxArgs.iaOffsets = null;
+
+    ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
+}
+
+NullableStrongRef<IVertexArray> DX10VertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+{
+    DXVertexArrayArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10VertexArray> va(allocator, args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
+
+    // Prevent the arrays from being deleted at destruction.
+    dxArgs.iaBuffers = null;
+    dxArgs.iaStrides = null;
+    dxArgs.iaOffsets = null;
+
+    ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
+}
+
+bool DX10VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexArrayArgs* dxArgs, Error* error) const noexcept
+{
+    ERROR_CODE_COND_F(args.drawCount == 0, Error::DrawCountNotSet);
+    ERROR_CODE_COND_F(args.drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
+
+    for(uSys i = 0; i < args.buffers.count(); ++i)
     {
-        ERROR_CODE_COND_N(!_buffers[i], Error::BuffersNotSet);
+        ERROR_CODE_COND_F(!args.buffers[i], Error::BuffersNotSet);
+        ERROR_CODE_COND_F(!RTT_CHECK(args.buffers[i].get(), DX10Buffer), Error::InternalError);
     }
+
+    if(args.indexBuffer)
+    {
+        ERROR_CODE_COND_F(!RTT_CHECK(args.indexBuffer.get(), DX10IndexBuffer), Error::InternalError);
+        dxArgs->indexBuffer = RefCast<DX10IndexBuffer>(args.indexBuffer);
+    }
+    else
+    {
+        dxArgs->indexBuffer = null;
+    }
+
+    ERROR_CODE_COND_F(!args.shader, Error::ShaderNotSet);
+    ERROR_CODE_COND_F(args.shader->shaderStage() != EShader::Stage::Vertex, Error::ShaderMustBeVertexShader);
+    ERROR_CODE_COND_F(!RTT_CHECK(args.shader.get(), DX10Shader), Error::InternalError);
+
+    ID3D10Blob* const shaderBlob = RefCast<DX10VertexShader>(args.shader)->shaderBlob();
 
     uSys bufferDescriptorCount = 0;
 
-    for(uSys i = 0; i < _buffers.size(); ++i)
+    for(uSys i = 0; i < args.buffers.size(); ++i)
     {
-        auto elements = _buffers[i]->descriptor().elements();
+        const auto& elements = args.buffers[i]->descriptor().elements();
 
         for(uSys j = 0; j < elements.size(); ++j)
         {
@@ -334,35 +274,32 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
     }
 
     DynArray<D3D10_INPUT_ELEMENT_DESC> inputElements(bufferDescriptorCount);
-    ERROR_CODE_COND_N(!inputElements, Error::MemoryAllocationFailure);
-    // DynArray<uSys> semanticIndices(static_cast<uSys>(ShaderSemantic::MAX_VALUE + 1));
-    ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1> semanticIndices{};
-    // ERROR_CODE_COND_N(!semanticIndices, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_F(!inputElements, Error::SystemMemoryAllocationFailure);
+
+    ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1> semanticIndices { };
     ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(uSys));
-    
-    auto* iaBuffers = new(::std::nothrow) ID3D10Buffer* [_buffers.size()];
-    auto* iaStrides = new(::std::nothrow) UINT[_buffers.size()];
-    auto* iaOffsets = new(::std::nothrow) UINT[_buffers.size()];
-    if(!iaBuffers || !iaStrides || !iaOffsets)
+
+    dxArgs->iaBuffers = new ID3D10Buffer* [args.buffers.size()];
+    dxArgs->iaStrides = new UINT[args.buffers.size()];
+    dxArgs->iaOffsets = new UINT[args.buffers.size()];
+
+    if(!dxArgs->iaBuffers || !dxArgs->iaStrides || !dxArgs->iaOffsets)
     {
-        delete[] iaBuffers;
-        delete[] iaStrides;
-        delete[] iaOffsets;
-        ERROR_CODE_N(Error::MemoryAllocationFailure);
+        ERROR_CODE_F(Error::SystemMemoryAllocationFailure);
     }
 
-    ::std::memset(iaOffsets, 0, _buffers.size() * sizeof(UINT));
+    ::std::memset(dxArgs->iaOffsets, 0, args.buffers.size() * sizeof(UINT));
 
     uSys insertIndex = 0;
-    for(uSys i = 0; i < _buffers.size(); ++i)
+    for(uSys i = 0; i < args.buffers.size(); ++i)
     {
-        auto& buffer = _buffers[i];
+        auto& buffer = args.buffers[i];
         auto& elements = buffer->descriptor().elements();
 
         CPPRef<DX10Buffer> dxBuffer = RefCast<DX10Buffer>(buffer);
 
-        iaBuffers[i] = dxBuffer->d3dBuffer();
-        iaStrides[i] = dxBuffer->descriptor().stride();
+        dxArgs->iaBuffers[i] = dxBuffer->d3dBuffer();
+        dxArgs->iaStrides[i] = dxBuffer->descriptor().stride();
 
         for(uSys j = 0; j < elements.size(); ++j)
         {
@@ -375,35 +312,14 @@ DX10VertexArray* DX10VertexArrayBuilder::build(Error* error) noexcept
         const ShaderSemantic::Semantic semantic = static_cast<ShaderSemantic::Semantic>(i);
         if(!ShaderSemantic::hasIndices(semantic) && semanticIndices[i] > 1)
         {
-            delete[] iaBuffers;
-            delete[] iaStrides;
-            delete[] iaOffsets;
-            ERROR_CODE_N(Error::MultipleSemanticOfInvalidType);
+            ERROR_CODE_F(Error::MultipleSemanticOfInvalidType);
         }
     }
 
-    ID3D10InputLayout* inputLayout;
-    const HRESULT h = _ctx.d3dDevice()->CreateInputLayout(inputElements, inputElements.count(), _shaderBlobCache->GetBufferPointer(), _shaderBlobCache->GetBufferSize(), &inputLayout);
+    const HRESULT h = _gi.d3d10Device()->CreateInputLayout(inputElements, inputElements.count(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &dxArgs->inputLayout);
+    ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
-    if(FAILED(h))
-    {
-        delete[] iaBuffers;
-        delete[] iaStrides;
-        delete[] iaOffsets;
-        ERROR_CODE_N(Error::InternalError);
-    }
-
-    DX10VertexArray* va = new(::std::nothrow) DX10VertexArray(_drawCount, _buffers, inputLayout, _buffers.count(), iaBuffers, iaStrides, iaOffsets, _indexBufferCache, _drawType);
-    if(!va)
-    {
-        delete[] iaBuffers;
-        delete[] iaStrides;
-        delete[] iaOffsets;
-        inputLayout->Release();
-        ERROR_CODE_N(Error::MemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, va);
+    return true;
 }
 
 static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept
@@ -424,43 +340,7 @@ static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElem
     }
 }
 
-void DX10VertexArrayBuilder::shader(const CPPRef<IShader>& shader) noexcept
-{
-    if(!shader)
-    {
-        _shaderBlobCache = null;
-        IVertexArrayBuilder::shader(shader);
-    }
-    if(shader->shaderStage() == EShader::Stage::Vertex && RTT_CHECK(shader.get(), DX10Shader))
-    {
-        _shaderBlobCache = RefCast<DX10VertexShader>(shader)->shaderBlob();
-        IVertexArrayBuilder::shader(shader);
-    }
-}
-
-void DX10VertexArrayBuilder::setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept
-{
-    if(RTT_CHECK(vertexBuffer.get(), DX10Buffer))
-    {
-        IVertexArrayBuilder::setVertexBuffer(index, vertexBuffer);
-    }
-}
-
-void DX10VertexArrayBuilder::indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept
-{
-    if(!indexBuffer)
-    {
-        IVertexArrayBuilder::indexBuffer(null);
-        _indexBufferCache = null;
-    }
-    else if(RTT_CHECK(indexBuffer.get(), DX10IndexBuffer))
-    {
-        IVertexArrayBuilder::indexBuffer(indexBuffer);
-        _indexBufferCache = RefCast<DX10IndexBuffer>(indexBuffer)->d3dBuffer();
-    }
-}
-
-DXGI_FORMAT DX10VertexArray::getDXType(ShaderDataType::Type type) noexcept
+DXGI_FORMAT DX10VertexArray::getDXType(const ShaderDataType::Type type) noexcept
 {
     switch(type)
     {
@@ -513,7 +393,7 @@ DXGI_FORMAT DX10VertexArray::getDXType(ShaderDataType::Type type) noexcept
     return DXGI_FORMAT_UNKNOWN;
 }
 
-D3D10_PRIMITIVE_TOPOLOGY DX10VertexArray::getDXDrawType(DrawType drawType) noexcept
+D3D10_PRIMITIVE_TOPOLOGY DX10VertexArray::getDXDrawType(const DrawType drawType) noexcept
 {
     switch(drawType)
     {
@@ -524,23 +404,23 @@ D3D10_PRIMITIVE_TOPOLOGY DX10VertexArray::getDXDrawType(DrawType drawType) noexc
     }
 }
 
-const char* DX10VertexArray::getDXSemanticName(ShaderSemantic::Semantic semantic) noexcept
+const char* DX10VertexArray::getDXSemanticName(const ShaderSemantic::Semantic semantic) noexcept
 {
     switch(semantic)
     {
-        case ShaderSemantic::BiNormal: return "BINORMAL";
-        case ShaderSemantic::BlendIndices: return "BLENDINDICES";
-        case ShaderSemantic::BlendWeight: return "BLENDWEIGHT";
-        case ShaderSemantic::Color: return "COLOR";
-        case ShaderSemantic::Normal: return "NORMAL";
-        case ShaderSemantic::Position: return "POSITION";
-        case ShaderSemantic::PositionTransformed: return "POSITIONT";
-        case ShaderSemantic::PointSize: return "PSIZE";
-        case ShaderSemantic::Tangent: return "TANGENT";
-        case ShaderSemantic::TextureCoord: return "TEXCOORD";
+        case ShaderSemantic::BiNormal: return "BiNormal";
+        case ShaderSemantic::BlendIndices: return "BlendIndices";
+        case ShaderSemantic::BlendWeight: return "BlendWeight";
+        case ShaderSemantic::Color: return "Color";
+        case ShaderSemantic::Normal: return "Normal";
+        case ShaderSemantic::Position: return "Position";
+        case ShaderSemantic::PositionTransformed: return "PositionT";
+        case ShaderSemantic::PointSize: return "PSize";
+        case ShaderSemantic::Tangent: return "Tangent";
+        case ShaderSemantic::TextureCoord: return "TexCoord";
 
         case ShaderSemantic::Unknown:
-        default: return "UNKNOWN";
+        default: return "Unknown";
     }
 }
 #endif

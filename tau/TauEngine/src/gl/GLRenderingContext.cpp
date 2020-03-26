@@ -50,6 +50,7 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRender
         default: break;
     }
 
+    _vertexArrayBuilder = new(::std::nothrow) GLVertexArrayBuilder(*this);
     _textureSamplerBuilder = new(::std::nothrow) GLTextureSamplerBuilder;
     _texture2DBuilder = new(::std::nothrow) GLTexture2DBuilder;
     _textureNullBuilder = new(::std::nothrow) GLTextureNullBuilder;
@@ -59,6 +60,7 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRender
 
 GLRenderingContext::~GLRenderingContext() noexcept
 {
+    delete _vertexArrayBuilder;
     delete _bufferBuilder;
     delete _indexBufferBuilder;
     delete _uniformBufferBuilder;
@@ -162,10 +164,8 @@ void GLRenderingContext::resetRasterizerState() noexcept
 const RasterizerArgs& GLRenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }
 
-CPPRef<IVertexArrayBuilder> GLRenderingContext::createVertexArray(const uSys bufferCount) noexcept
-{
-    return CPPRef<IVertexArrayBuilder>(new(::std::nothrow) GLVertexArrayBuilder(bufferCount, *this));
-}
+IVertexArrayBuilder& GLRenderingContext::createVertexArray() noexcept
+{ return *_vertexArrayBuilder; }
 
 IBufferBuilder& GLRenderingContext::createBuffer() noexcept
 { return *_bufferBuilder; }

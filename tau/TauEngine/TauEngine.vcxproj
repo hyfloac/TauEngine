@@ -96,7 +96,6 @@
     <ClCompile Include="src\model\VertexArray.cpp" />
     <ClCompile Include="src\model\OBJLoader.cpp" />
     <ClCompile Include="src\model\RenderableObject.cpp" />
-    <ClCompile Include="src\system\RenderingContext.cpp" />
     <ClCompile Include="src\ResourceLoader.cpp" />
     <ClCompile Include="src\model\SimpleOBJLoader.cpp" />
     <ClCompile Include="src\TauEngine.cpp" />

@@ -96,19 +96,18 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     // textures->fillBuffer(context, texturesLoaded);
     // indices->fillBuffer(context, mesh.indices.data());
 
-    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(4);
+    VertexArrayArgs vaArgs(4);
 
-    vaBuilder->shader(shader);
-    vaBuilder->setVertexBuffer(0, positions);
-    vaBuilder->setVertexBuffer(1, normals);
-    vaBuilder->setVertexBuffer(2, tangents);
-    vaBuilder->setVertexBuffer(3, textures);
-    vaBuilder->indexBuffer(indices);
-    // vaBuilder->inputLayout(_inputLayoutCache);
-    vaBuilder->drawCount(mesh.indices.size());
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    vaArgs.shader = shader;
+    vaArgs.buffers[0] = positions;
+    vaArgs.buffers[1] = normals;
+    vaArgs.buffers[2] = tangents;
+    vaArgs.buffers[3] = textures;
+    vaArgs.indexBuffer = indices;
+    vaArgs.drawCount = mesh.indices.size();
+    vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _va = CPPRef<IVertexArray>(vaBuilder->build());
+    _va = context.createVertexArray().buildCPPRef(vaArgs, null);
 
     // _va->addVertexBuffer(context, positions);
     // _va->addVertexBuffer(context, normals);

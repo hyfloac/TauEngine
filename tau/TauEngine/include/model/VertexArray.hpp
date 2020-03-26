@@ -22,30 +22,27 @@ class TAU_DLL NOVTABLE IVertexArray
     DEFAULT_DESTRUCT_VI(IVertexArray);
     DELETE_COPY(IVertexArray);
 protected:
-    u32 _drawCount;
+    uSys _drawCount;
     /**
      *   It is necessary to hold on to a pointer to the
      * buffers to ensure they don't get destroyed.
      */
     RefDynArray<CPPRef<IBuffer>> _buffers;
 protected:
-    inline IVertexArray(uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers) noexcept
+    inline IVertexArray(const uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers) noexcept
         : _drawCount(drawCount), _buffers(buffers)
     { }
 public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
-
     virtual void unbind(IRenderingContext& context) noexcept = 0;
-
-    // virtual void internalSetup(IRenderingContext& context) noexcept { }
 
     virtual void preDraw(IRenderingContext& context) noexcept = 0;
     virtual void postDraw(IRenderingContext& context) noexcept = 0;
 
-    virtual void draw(IRenderingContext& context) noexcept = 0;
-    virtual void drawInstanced(IRenderingContext& context, uSys instanceCount) noexcept = 0;
+    virtual void draw(IRenderingContext& context, uSys drawCount = 0) noexcept = 0;
+    virtual void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0) noexcept = 0;
 
-    [[nodiscard]] u32 drawCount() const noexcept { return _drawCount; }
+    [[nodiscard]] uSys drawCount() const noexcept { return _drawCount; }
 };
 
 class IShaderProgram;
@@ -70,6 +67,7 @@ public:
 
 class TAU_DLL NOVTABLE IVertexArrayBuilder
 {
+    DEFAULT_CONSTRUCT_PO(IVertexArrayBuilder);
     DEFAULT_DESTRUCT_VI(IVertexArrayBuilder);
     DELETE_COPY(IVertexArrayBuilder);
 public:
@@ -79,39 +77,17 @@ public:
         DrawCountNotSet,
         DrawTypeNotSet,
         BuffersNotSet,
-        MemoryAllocationFailure,
+        ShaderNotSet,
+        ShaderMustBeVertexShader,
+        SystemMemoryAllocationFailure,
+        DriverMemoryAllocationFailure,
         MultipleSemanticOfInvalidType,
-        InternalError,
+        InternalError
     };
-protected:
-    CPPRef<IShader> _shader;
-    RefDynArray<CPPRef<IBuffer>> _buffers;
-    CPPRef<IIndexBuffer> _indexBuffer;
-    u32 _drawCount;
-    DrawType _drawType;
-protected:
-    IVertexArrayBuilder(const uSys bufferCount) noexcept
-        : _shader(null), _buffers(bufferCount),
-          _indexBuffer(null), 
-          _drawCount(0), _drawType(static_cast<DrawType>(0))
-    { }
 public:
-    virtual void shader(const CPPRef<IShader>& shader) noexcept { _shader = shader; }
-
-    virtual void setVertexBuffer(uSys index, const CPPRef<IBuffer>& vertexBuffer) noexcept { _buffers[index] = vertexBuffer; }
-
-    virtual void indexBuffer(const CPPRef<IIndexBuffer>& indexBuffer) noexcept { _indexBuffer = indexBuffer; }
-
-    // virtual void inputLayout(const CPPRef<IInputLayout>& inputLayout) noexcept { _inputLayout = inputLayout; }
-
-    virtual void drawCount(u32 drawCount) noexcept { _drawCount = drawCount; }
-    virtual void drawType(DrawType drawType) noexcept { _drawType = drawType; }
-
-    [[nodiscard]] const CPPRef<IBuffer>& getVertexBuffer(uSys index) const noexcept { return _buffers[index]; }
-    [[nodiscard]] const CPPRef<IIndexBuffer>& indexBuffer() const noexcept { return _indexBuffer; }
-    // [[nodiscard]] const CPPRef<IInputLayout>& inputLayout() const noexcept { return _inputLayout; }
-    [[nodiscard]] u32 drawCount() const noexcept { return _drawCount; }
-    [[nodiscard]] DrawType drawType() const noexcept { return _drawType; }
-
-    [[nodiscard]] virtual IVertexArray* build([[tau::out]] Error* error = null) noexcept = 0;
+    [[nodiscard]] virtual IVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    [[nodiscard]] virtual IVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IVertexArray> buildCPPRef(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IVertexArray> buildTauRef(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IVertexArray> buildTauSRef(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
 };

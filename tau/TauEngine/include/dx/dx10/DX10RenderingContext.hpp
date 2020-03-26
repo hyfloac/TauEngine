@@ -9,6 +9,7 @@
 
 #include "DLL.hpp"
 
+class DX10VertexArrayBuilder;
 class DX10BufferBuilder;
 class DX10IndexBufferBuilder;
 class DX10UniformBufferBuilder;
@@ -47,6 +48,7 @@ private:
     NullableRef<DX10RasterizerState> _defaultRasterizerState;
     NullableRef<DX10RasterizerState> _currentRasterizerState;
 
+    DX10VertexArrayBuilder* _vertexArrayBuilder;
     DX10BufferBuilder* _bufferBuilder;
     DX10IndexBufferBuilder* _indexBufferBuilder;
     DX10UniformBufferBuilder* _uniformBufferBuilder;
@@ -85,7 +87,7 @@ public:
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
 
-    [[nodiscard]] CPPRef<IVertexArrayBuilder> createVertexArray(uSys bufferCount) noexcept override;
+    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;

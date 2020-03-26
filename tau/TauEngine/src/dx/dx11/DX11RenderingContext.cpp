@@ -24,6 +24,7 @@ DX11RenderingContext::DX11RenderingContext(DX11GraphicsInterface& gi, const DX11
       _vsync(false),
       _defaultDepthStencilState(null), _currentDepthStencilState(null),
       _defaultRasterizerState(null), _currentRasterizerState(null),
+      _vertexArrayBuilder(new(::std::nothrow) DX11VertexArrayBuilder(gi)),
       _bufferBuilder(new(::std::nothrow) DX11BufferBuilder(*this)),
       _indexBufferBuilder(new(::std::nothrow) DX11IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX11UniformBufferBuilder(*this))
@@ -49,6 +50,7 @@ DX11RenderingContext::~DX11RenderingContext() noexcept
         (_OBJ) = null; \
     } } while(0)
 
+    RELEASE(_vertexArrayBuilder);
     RELEASE(_bufferBuilder);
     RELEASE(_indexBufferBuilder);
     RELEASE(_uniformBufferBuilder);
@@ -349,10 +351,8 @@ void DX11RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-CPPRef<IVertexArrayBuilder> DX11RenderingContext::createVertexArray(uSys bufferCount) noexcept
-{
-    return CPPRef<IVertexArrayBuilder>(new(::std::nothrow) DX11VertexArrayBuilder(bufferCount, *this));
-}
+IVertexArrayBuilder& DX11RenderingContext::createVertexArray() noexcept
+{ return *_vertexArrayBuilder; }
 
 IBufferBuilder& DX11RenderingContext::createBuffer() noexcept
 { return *_bufferBuilder; }
@@ -453,7 +453,7 @@ bool DX11RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
 
 #define CHECK(_VAL) do { if(FAILED(_VAL)) { return false; } } while(0)
 
-    HWND hWnd = args.window->sysWindowContainer().windowHandle;
+    const HWND& hWnd = args.window->sysWindowContainer().windowHandle;
 
     DXGI_RATIONAL refreshRate = { 0, 1 };
 

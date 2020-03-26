@@ -125,13 +125,13 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     CPPRef<IBuffer> skyboxCube = context.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
     skyboxCube->fillBuffer(context, skyboxVertices);
 
-    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(1);
-    vaBuilder->shader(vertexShader);
-    vaBuilder->setVertexBuffer(0, skyboxCube);
-    vaBuilder->drawCount(36);
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    VertexArrayArgs vaArgs(1);
+    vaArgs.shader = vertexShader;
+    vaArgs.buffers[0] = skyboxCube;
+    vaArgs.drawCount = 36;
+    vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _cubeVA = CPPRef<IVertexArray>(vaBuilder->build());
+    _cubeVA = context.createVertexArray().buildCPPRef(vaArgs, null);
 
     DepthStencilArgs params = context.getDefaultDepthStencilArgs();
     params.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;

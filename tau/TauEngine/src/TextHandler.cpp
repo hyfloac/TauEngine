@@ -121,14 +121,14 @@ TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount,
     
     const CPPRef<IBuffer> textureCoordBuffer = context.createBuffer().buildCPPRef(bufferBuilder, null);
 
-    CPPRef<IVertexArrayBuilder> vaBuilder = context.createVertexArray(2);
-    vaBuilder->shader(vertexShader);
-    vaBuilder->setVertexBuffer(0, _positionBuffer);
-    vaBuilder->setVertexBuffer(1, textureCoordBuffer);
-    vaBuilder->drawCount(6);
-    vaBuilder->drawType(DrawType::SeparatedTriangles);
+    VertexArrayArgs vaArgs(2);
+    vaArgs.shader = vertexShader;
+    vaArgs.buffers[0] = _positionBuffer;
+    vaArgs.buffers[1] = textureCoordBuffer;
+    vaArgs.drawCount = 6;
+    vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _va = CPPRef<IVertexArray>(vaBuilder->build());
+    _va = context.createVertexArray().buildCPPRef(vaArgs, null);
 }
 
 TextHandler::~TextHandler() noexcept
