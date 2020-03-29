@@ -4,7 +4,7 @@ struct PSInput
     float3 texCoord : TEXCOORD;
 };
 
-TextureCube skybox;
+TextureCube skybox : register(t0);
 SamplerState skyboxSampler;
 
 float4 psMain(PSInput input) : SV_TARGET

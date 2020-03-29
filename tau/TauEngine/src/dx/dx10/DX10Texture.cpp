@@ -365,9 +365,10 @@ bool DX10TextureCubeBuilder::processArgs(const TextureCubeArgs& args, DXTextureC
     D3D10_SUBRESOURCE_DATA initialDesc[6];
     for(uSys i = 0; i < 6; ++i)
     {
-        initialDesc[i].pSysMem = args.initialBuffer[DX10TextureCube::dxCubeSide(static_cast<ETexture::CubeSide>(i + static_cast<uSys>(ETexture::CubeSide::Front)))];
-        initialDesc[i].SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
-        initialDesc[i].SysMemSlicePitch = 0;
+        const uSys index = DX10TextureCube::dxCubeSide(static_cast<ETexture::CubeSide>(i + static_cast<uSys>(ETexture::CubeSide::Front)));
+        initialDesc[index].pSysMem = args.initialBuffer[i];
+        initialDesc[index].SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
+        initialDesc[index].SysMemSlicePitch = 0;
     }
 
     HRESULT res = _ctx.d3dDevice()->CreateTexture2D(&textureDesc, args.initialBuffer[0] ? initialDesc : NULL, &dxArgs->d3dTexture);

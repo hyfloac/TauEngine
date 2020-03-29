@@ -8,7 +8,6 @@
 #include <shader/IShader.hpp>
 #include "texture/FITextureLoader.hpp"
 #include "Timings.hpp"
-#include "VFS.hpp"
 
 template<>
 class UniformAccessor<Layer3D::Uniforms> final
@@ -87,7 +86,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     {
         for(const objl::Mesh& mesh : loader.meshes())
         {
-            _objects.emplace_back(std::make_shared<RenderableObject>(globals.rc, mesh, "|TERes/nanosuit/", vertexShader));
+            _objects.emplace_back(std::make_shared<RenderableObject>(globals.gi, globals.rc, mesh, "|TERes/nanosuit/", vertexShader));
         }
     }
 
@@ -169,10 +168,6 @@ Layer3D::Layer3D(Globals& globals) noexcept
     // _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glm::translate(_modelViewMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
     _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-    if(glmExt::useTranspose(RenderingMode::getGlobalMode().currentMode()))
-    {
-        _modelViewMatrix = glmExt::transpose(_modelViewMatrix);
-    }
     _uniforms.data().modelMatrix = _modelViewMatrix;
 
     _pointLight.position() = Vector3f(0.0f, -10.0f, -5.0f);
@@ -225,14 +220,7 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
         const i32 mouseDifX = static_cast<i32>(screenCenterW) - static_cast<i32>(pos.x);
         const i32 mouseDifY = static_cast<i32>(screenCenterH) - static_cast<i32>(pos.y);
         _camera.update(fixedDelta, mouseDifX, mouseDifY);
-        if(glmExt::useTranspose(RenderingMode::getGlobalMode().currentMode()))
-        {
-            _uniforms.data().projectionMatrix = _camera->projectionMatrixTrans();
-        }
-        else
-        {
-            _uniforms.data().projectionMatrix = _camera->projectionMatrix();
-        }
+        _uniforms.data().projectionMatrix = _camera->projectionMatrix();
     }
 }
 
@@ -250,16 +238,8 @@ void Layer3D::onRender(const DeltaTime& delta) noexcept
     _shader->bind(context);
     _spotLight.position() = _camera.camera().position();
     _spotLight.direction() = _camera.camera().front();
-    if(glmExt::useTranspose(context.mode()))
-    {
-        // _uniforms.data().compoundMatrix = _camera->compoundedMatrixTrans();
-        _uniforms.data().viewMatrix = _camera->viewMatrixTrans();
-    }
-    else
-    {
-        // _uniforms.data().compoundMatrix = _camera->compoundedMatrix();
-        _uniforms.data().viewMatrix = _camera->viewMatrix();
-    }
+    // _uniforms.data().compoundMatrix = _camera->compoundedMatrix();
+    _uniforms.data().viewMatrix = _camera->viewMatrix();
     _cameraPosUni.data().cameraPos = _camera.camera().position();
     _spotLightUniforms.set(context, _spotLight);
     _uniforms.upload(context, EShader::Stage::Vertex, 0);

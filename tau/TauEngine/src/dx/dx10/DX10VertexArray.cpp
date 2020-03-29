@@ -40,7 +40,7 @@ void DX10VertexArray::preDraw(IRenderingContext& context) noexcept
     dxCtx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
-void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
+void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
@@ -55,15 +55,15 @@ void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
 
     if(this->_indexBuffer)
     {
-        dxCtx.d3dDevice()->DrawIndexed(drawCount, 0, 0);
+        dxCtx.d3dDevice()->DrawIndexed(drawCount, drawOffset, 0);
     }
     else
     {
-        dxCtx.d3dDevice()->Draw(drawCount, 0);
+        dxCtx.d3dDevice()->Draw(drawCount, drawOffset);
     }
 }
 
-void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount) noexcept
+void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
@@ -78,11 +78,11 @@ void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys insta
 
     if(this->_indexBuffer)
     {
-        dxCtx.d3dDevice()->DrawIndexedInstanced(drawCount, instanceCount, 0, 0, 0);
+        dxCtx.d3dDevice()->DrawIndexedInstanced(drawCount, instanceCount, drawOffset, 0, 0);
     }
     else
     {
-        dxCtx.d3dDevice()->DrawInstanced(drawCount, instanceCount, 0, 0);
+        dxCtx.d3dDevice()->DrawInstanced(drawCount, instanceCount, drawOffset, 0);
     }
 }
 
@@ -161,6 +161,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, va);
 }
@@ -178,6 +179,7 @@ DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, va);
 }
@@ -195,10 +197,10 @@ CPPRef<IVertexArray> DX10VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& 
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, va);
 }
-
 
 NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
 {
@@ -213,6 +215,7 @@ NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayA
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
@@ -230,6 +233,7 @@ NullableStrongRef<IVertexArray> DX10VertexArrayBuilder::buildTauSRef(const Verte
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }

@@ -75,18 +75,18 @@ public:
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override;
     void clearScreen(bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept override;
     void setVSync(bool vsync) noexcept override;
-    void setFaceWinding(bool clockwise) noexcept override;
-    void enableDepthWriting(bool writing) noexcept override;
 
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
     const DepthStencilArgs& getDefaultDepthStencilArgs() noexcept override;
+    [[nodiscard]] NullableRef<IDepthStencilState> getDefaultDepthStencilState() noexcept override;
 
     NullableRef<IRasterizerState> setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
     void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
     void resetRasterizerState() noexcept override;
     const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
+    [[nodiscard]] NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept override;
 
     void beginFrame() noexcept override;
     void endFrame() noexcept override;

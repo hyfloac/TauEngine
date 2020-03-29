@@ -46,8 +46,8 @@ public:
     void preDraw(IRenderingContext& context) noexcept override;
     void postDraw(IRenderingContext& context) noexcept override { }
 
-    void draw(IRenderingContext& context, uSys drawCount = 0) noexcept override;
-    void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0) noexcept override;
+    void draw(IRenderingContext& context, uSys drawCount = 0, uSys drawOffset = 0) noexcept override;
+    void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0, uSys drawOffset = 0) noexcept override;
 };
 
 class TAU_DLL DX11VertexArrayBuilder final : public IVertexArrayBuilder

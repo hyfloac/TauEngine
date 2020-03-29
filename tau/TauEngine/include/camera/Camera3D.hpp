@@ -24,13 +24,9 @@ private:
     float _roll; // Degrees
     glm::quat _viewQuaternion;
     glm::mat4 _projectionMatrix;
-    glm::mat4 _projectionMatrixTrans;
     glm::mat4 _viewMatrix;
-    glm::mat4 _viewMatrixTrans;
     glm::mat4 _viewRotMatrix; // A matrix that doesn't include position
-    glm::mat4 _viewRotMatrixTrans; // A matrix that doesn't include position
     glm::mat4 _compoundedMatrix;
-    glm::mat4 _compoundedMatrixTrans;
 public:
     Camera3D(const Window& window, float fov, float zNear, float zFar) noexcept;
 
@@ -41,15 +37,12 @@ public:
     [[nodiscard]] float roll() const noexcept { return _roll; }
     [[nodiscard]] glm::quat viewQuaternion() const noexcept { return _viewQuaternion; }
     [[nodiscard]] glm::mat4 projectionMatrix() const noexcept { return _projectionMatrix; }
-    [[nodiscard]] glm::mat4 projectionMatrixTrans() const noexcept { return _projectionMatrixTrans; }
     [[nodiscard]] const glm::mat4& viewMatrix() const noexcept { return _viewMatrix; }
-    [[nodiscard]] const glm::mat4& viewMatrixTrans() const noexcept { return _viewMatrixTrans; }
     [[nodiscard]] const glm::mat4& viewRotMatrix() const noexcept { return _viewRotMatrix; }
-    [[nodiscard]] const glm::mat4& viewRotMatrixTrans() const noexcept { return _viewRotMatrixTrans; }
     /** _projectionMatrix * _viewMatrix */
     [[nodiscard]] const glm::mat4& compoundedMatrix() const noexcept { return _compoundedMatrix; }
-    [[nodiscard]] const glm::mat4& compoundedMatrixTrans() const noexcept { return _compoundedMatrixTrans; }
 
+    void setProjection(float width, float height, float fov, float zNear, float zFar) noexcept;
     void setProjection(const Window& window, float fov, float zNear, float zFar) noexcept;
 
     void position(const Vector3f pos) noexcept

@@ -31,7 +31,6 @@ GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& a
     ERROR_CODE_V(Error::NoError, ret);
 }
 
-
 GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     GLDepthStencilArgs glArgs;
@@ -44,7 +43,6 @@ GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& a
 
     ERROR_CODE_V(Error::NoError, ret);
 }
-
 
 CPPRef<IDepthStencilState> GLDepthStencilStateBuilder::buildCPPRef(const DepthStencilArgs& args, Error* error) const noexcept
 {

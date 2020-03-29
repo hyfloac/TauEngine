@@ -94,16 +94,6 @@ void GLRenderingContext::clearScreen(bool clearColorBuffer, bool clearDepthBuffe
     glClear(flags);
 }
 
-void GLRenderingContext::setFaceWinding(const bool clockwise) noexcept
-{
-    glFrontFace(clockwise ? GL_CW : GL_CCW);
-}
-
-void GLRenderingContext::enableDepthWriting(bool writing) noexcept
-{
-    glDepthMask(writing ? GL_TRUE : GL_FALSE);
-}
-
 NullableRef<IDepthStencilState> GLRenderingContext::setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept
 {
     NullableRef<IDepthStencilState> ret = RefCast<IDepthStencilState>(_currentDepthStencilState);
@@ -134,6 +124,9 @@ void GLRenderingContext::resetDepthStencilState() noexcept
 const DepthStencilArgs& GLRenderingContext::getDefaultDepthStencilArgs() noexcept
 { return _defaultDepthStencilState->args(); }
 
+NullableRef<IDepthStencilState> GLRenderingContext::getDefaultDepthStencilState() noexcept
+{ return RefCast<IDepthStencilState>(_defaultDepthStencilState); }
+
 NullableRef<IRasterizerState> GLRenderingContext::setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
 {
     NullableRef<IRasterizerState> ret = RefCast<IRasterizerState>(_currentRasterizerState);
@@ -160,6 +153,9 @@ void GLRenderingContext::resetRasterizerState() noexcept
     _currentRasterizerState = _defaultRasterizerState;
     _currentRasterizerState->apply();
 }
+
+NullableRef<IRasterizerState> GLRenderingContext::getDefaultRasterizerState() noexcept
+{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
 
 const RasterizerArgs& GLRenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }

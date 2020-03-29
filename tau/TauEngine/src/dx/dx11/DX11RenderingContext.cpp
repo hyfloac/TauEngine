@@ -268,14 +268,6 @@ void DX11RenderingContext::setVSync(bool vsync) noexcept
     // TODO: Implement DX vsync changing.
 }
 
-void DX11RenderingContext::setFaceWinding(bool clockwise) noexcept
-{
-}
-
-void DX11RenderingContext::enableDepthWriting(bool writing) noexcept
-{
-}
-
 NullableRef<IDepthStencilState> DX11RenderingContext::setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept
 {
     NullableRef<IDepthStencilState> ret = RefCast<IDepthStencilState>(_currentDepthStencilState);
@@ -306,6 +298,9 @@ void DX11RenderingContext::resetDepthStencilState() noexcept
 const DepthStencilArgs& DX11RenderingContext::getDefaultDepthStencilArgs() noexcept
 { return _defaultDepthStencilState->args(); }
 
+NullableRef<IDepthStencilState> DX11RenderingContext::getDefaultDepthStencilState() noexcept
+{ return RefCast<IDepthStencilState>(_defaultDepthStencilState); }
+
 NullableRef<IRasterizerState> DX11RenderingContext::setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
 {
     NullableRef<IRasterizerState> ret = RefCast<IRasterizerState>(_currentRasterizerState);
@@ -335,6 +330,9 @@ void DX11RenderingContext::resetRasterizerState() noexcept
 
 const RasterizerArgs& DX11RenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }
+
+NullableRef<IRasterizerState> DX11RenderingContext::getDefaultRasterizerState() noexcept
+{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
 
 void DX11RenderingContext::beginFrame() noexcept
 {

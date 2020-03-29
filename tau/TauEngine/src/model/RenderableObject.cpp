@@ -1,4 +1,4 @@
-#include <model/RenderableObject.hpp>
+#include "model/RenderableObject.hpp"
 #include <DynArray.hpp>
 #include <NumTypes.hpp>
 #include "system/RenderingContext.hpp"
@@ -6,11 +6,15 @@
 #include "Timings.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "VFS.hpp"
+#include "graphics/RasterizerState.hpp"
+#include "system/GraphicsInterface.hpp"
+#include <glm/vec4.hpp>
 
-// static CPPRef<IInputLayout> _inputLayoutCache = null;
+NullableRef<IRasterizerState> RenderableObject::cwRS = nullptr;
+NullableRef<IRasterizerState> RenderableObject::ccwRS = nullptr;
 
-RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, const DrawType drawType) noexcept
-    : _va(null)
+RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, bool counterClockwise, const DrawType drawType) noexcept
+    : _va(null), _rs(cwRS)
 {
     PERF();
     const size_t cnt1 = mesh.vertices.size();
@@ -21,13 +25,11 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     DynArray<float> normalsLoaded(cnt3);
     DynArray<float> texturesLoaded(cnt2);
     DynArray<float> tangentsLoaded(cnt3);
-    // DynArray<float> bitangentsLoaded(cnt3);
 
     u32 posIndex = 0;
     u32 normIndex = 0;
     u32 texIndex = 0;
     u32 tanIndex = 0;
-    // u32 biTanIndex = 0;
 
     for(objl::Vertex vertex : mesh.vertices)
     {
@@ -42,10 +44,6 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
         tangentsLoaded[tanIndex++] = vertex.tangent.x();
         tangentsLoaded[tanIndex++] = vertex.tangent.y();
         tangentsLoaded[tanIndex++] = vertex.tangent.z();
-
-        // bitangentsLoaded[biTanIndex++] = vertex.bitangent.x();
-        // bitangentsLoaded[biTanIndex++] = vertex.bitangent.y();
-        // bitangentsLoaded[biTanIndex++] = vertex.bitangent.z();
 
         texturesLoaded[texIndex++] = vertex.textureCoordinate.x();
         texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
@@ -68,36 +66,26 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     indicesBuilder.usage = EBuffer::UsageType::StaticDraw;
     indicesBuilder.elementCount = mesh.indices.size();
 
-    // CPPRef<IBuffer> positions = CPPRef<IBuffer>(pnBuilder->build(nullptr));
     pnBuilder.initialBuffer = positionsLoaded;
     CPPRef<IBuffer> positions = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = normalsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
-    // CPPRef<IBuffer> normals = CPPRef<IBuffer>(pnBuilder->build(nullptr));
     CPPRef<IBuffer> normals = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = tangentsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
-    // CPPRef<IBuffer> tangents = CPPRef<IBuffer>(pnBuilder->build(nullptr));
     CPPRef<IBuffer> tangents = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
-    // CPPRef<IBuffer> textures = CPPRef<IBuffer>(texturesBuilder->build(nullptr));
+
     texturesBuilder.initialBuffer = texturesLoaded;
     CPPRef<IBuffer> textures = context.createBuffer().buildCPPRef(texturesBuilder, nullptr);
-    // CPPRef<IIndexBuffer> indices = CPPRef<IIndexBuffer>(indicesBuilder->build(nullptr));
+
     indicesBuilder.initialBuffer = mesh.indices.data();
     CPPRef<IIndexBuffer> indices = context.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
 
-    // positions->fillBuffer(context, positionsLoaded);
-    // normals->fillBuffer(context, normalsLoaded);
-    // tangents->fillBuffer(context, tangentsLoaded);
-    // textures->fillBuffer(context, texturesLoaded);
-    // indices->fillBuffer(context, mesh.indices.data());
-
     VertexArrayArgs vaArgs(4);
-
     vaArgs.shader = shader;
     vaArgs.buffers[0] = positions;
     vaArgs.buffers[1] = normals;
@@ -105,17 +93,8 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     vaArgs.buffers[3] = textures;
     vaArgs.indexBuffer = indices;
     vaArgs.drawCount = mesh.indices.size();
-    vaArgs.drawType = DrawType::SeparatedTriangles;
-
+    vaArgs.drawType = drawType;
     _va = context.createVertexArray().buildCPPRef(vaArgs, null);
-
-    // _va->addVertexBuffer(context, positions);
-    // _va->addVertexBuffer(context, normals);
-    // _va->addVertexBuffer(context, tangents);
-    // // _va->addVertexBuffer(context, bitangents);
-    // _va->addVertexBuffer(context, textures);
-    // _va->setIndexBuffer(context, indices);
-    // _va->drawCount() = mesh.indices.size();
 
     MaterialBuilder matBuilder(context);
 
@@ -147,12 +126,7 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     {
         matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(context)));
     }
-    // const auto ka = mesh.material.Ka;
-    // const auto kd = mesh.material.Kd;
-    // const auto ks = mesh.material.Ks;
-    // _ambientColor = glm::vec3(ka.x(), ka.y(), ka.z());
-    // _diffuseColor = glm::vec3(kd.x(), kd.y(), kd.z());
-    // _specularColor = glm::vec3(ks.x(), ks.y(), ks.z());
+
     matBuilder.specularExponent(mesh.material.Ns);
     _illumination = mesh.material.illum;
 
@@ -168,18 +142,54 @@ RenderableObject::RenderableObject(IRenderingContext& context, const objl::Mesh&
     matBuilder.textureSampler(CPPRef<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
 
     _material = matBuilder.build();
+
+    if(counterClockwise)
+    {
+        if(!ccwRS)
+        {
+            RasterizerArgs rArgs = context.getDefaultRasterizerArgs();
+            if(rArgs.frontFaceCounterClockwise)
+            {
+                ccwRS = context.getDefaultRasterizerState();
+            }
+            else
+            {
+                rArgs.frontFaceCounterClockwise = true;
+                ccwRS = gi.createRasterizerState().buildTauRef(rArgs, null);
+            }
+        }
+
+        _rs = ccwRS;
+    }
+    else
+    {
+        if(!cwRS)
+        {
+            RasterizerArgs rArgs = context.getDefaultRasterizerArgs();
+            if(!rArgs.frontFaceCounterClockwise)
+            {
+                cwRS = context.getDefaultRasterizerState();
+            }
+            else
+            {
+                rArgs.frontFaceCounterClockwise = false;
+                cwRS = gi.createRasterizerState().buildTauRef(rArgs, null);
+            }
+        }
+
+        _rs = cwRS;
+    }
 }
 
 void RenderableObject::preRender(IRenderingContext& context) const noexcept
 {
-    context.setFaceWinding(false);
+    _rs = context.setRasterizerState(_rs);
     _va->bind(context);
     _va->preDraw(context);
 }
 
 void RenderableObject::render(IRenderingContext& context) const noexcept
 {
-    // _va->drawIndexed(context);
     _va->draw(context);
 }
 
@@ -187,5 +197,5 @@ void RenderableObject::postRender(IRenderingContext& context) const noexcept
 {
     _va->postDraw(context);
     _va->unbind(context);
-    context.setFaceWinding(true);
+    _rs = context.setRasterizerState(_rs);
 }

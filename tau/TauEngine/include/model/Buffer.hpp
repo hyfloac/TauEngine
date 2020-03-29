@@ -45,6 +45,7 @@ public:
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return _type; }
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
+    [[nodiscard]] inline uSys elementCount() const noexcept { return _bufferSize / _descriptor.stride(); }
     [[nodiscard]] inline bool instanced() const noexcept { return _instanced; }
     [[nodiscard]] inline const BufferDescriptor& descriptor() const noexcept { return _descriptor; }
     [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }

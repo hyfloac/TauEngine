@@ -40,7 +40,7 @@ void DX11VertexArray::preDraw(IRenderingContext& context) noexcept
     dxCtx.d3d11DeviceContext()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
-void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
+void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
@@ -55,15 +55,15 @@ void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
 
     if(this->_indexBuffer)
     {
-        dxCtx.d3d11DeviceContext()->DrawIndexed(drawCount, 0, 0);
+        dxCtx.d3d11DeviceContext()->DrawIndexed(drawCount, drawOffset, 0);
     }
     else
     {
-        dxCtx.d3d11DeviceContext()->Draw(drawCount, 0);
+        dxCtx.d3d11DeviceContext()->Draw(drawCount, drawOffset);
     }
 }
 
-void DX11VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount) noexcept
+void DX11VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
@@ -78,11 +78,11 @@ void DX11VertexArray::drawInstanced(IRenderingContext& context, const uSys insta
 
     if(this->_indexBuffer)
     {
-        dxCtx.d3d11DeviceContext()->DrawIndexedInstanced(drawCount, instanceCount, 0, 0, 0);
+        dxCtx.d3d11DeviceContext()->DrawIndexedInstanced(drawCount, instanceCount, drawOffset, 0, 0);
     }
     else
     {
-        dxCtx.d3d11DeviceContext()->DrawInstanced(drawCount, instanceCount, 0, 0);
+        dxCtx.d3d11DeviceContext()->DrawInstanced(drawCount, instanceCount, drawOffset, 0);
     }
 }
 

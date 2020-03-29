@@ -39,8 +39,8 @@ public:
     virtual void preDraw(IRenderingContext& context) noexcept = 0;
     virtual void postDraw(IRenderingContext& context) noexcept = 0;
 
-    virtual void draw(IRenderingContext& context, uSys drawCount = 0) noexcept = 0;
-    virtual void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0) noexcept = 0;
+    virtual void draw(IRenderingContext& context, uSys drawCount = 0, uSys drawOffset = 0) noexcept = 0;
+    virtual void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0, uSys drawOffset = 0) noexcept = 0;
 
     [[nodiscard]] uSys drawCount() const noexcept { return _drawCount; }
 };

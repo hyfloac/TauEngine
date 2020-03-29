@@ -9,6 +9,7 @@
 #include "shader/Uniform.hpp"
 #include "shader/TextureUploader.hpp"
 #include "graphics/DepthStencilState.hpp"
+#include "graphics/RasterizerState.hpp"
 
 class Camera3D;
 class IGraphicsInterface;
@@ -38,9 +39,6 @@ public:
     };
 private:
     CPPRef<IShaderProgram> _shader;
-    // CPPRef<IUniform<const glm::mat4&>> _projectionUni;
-    // CPPRef<IUniform<const glm::mat4&>> _viewUni;
-    // CPPRef<IUniform<int>> _skyboxUni;
     UniformBlockS<Uniforms> _uniforms;
 
     CPPRef<ITextureCube> _skybox;
@@ -48,6 +46,7 @@ private:
     CPPRef<IVertexArray> _cubeVA;
 
     NullableRef<IDepthStencilState> _skyboxDepthStencilState;
+    NullableRef<IRasterizerState> _skyboxRasterizerState;
 public:
     Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
 

@@ -10,19 +10,19 @@
 Camera3D::Camera3D(const Window& window, const float fov, const float zNear, const float zFar) noexcept
     : _position(0.0f), _pitch(0.0f), _yaw(0.0f), _roll(0.0f), _viewQuaternion(),
       _projectionMatrix(glmExt::perspectiveDegrees(fov, static_cast<float>(window.width()), static_cast<float>(window.height()), zNear, zFar)),
-      _projectionMatrixTrans(glmExt::transpose(_projectionMatrix)),
-      _viewMatrix(1.0f), _viewMatrixTrans(glmExt::transpose(_viewMatrixTrans)),
-      _viewRotMatrix(1.0f), _viewRotMatrixTrans(glmExt::transpose(_viewRotMatrixTrans)),
-      _compoundedMatrix(_projectionMatrix * _viewMatrix), _compoundedMatrixTrans(_projectionMatrixTrans * _viewMatrixTrans)
+      _viewMatrix(1.0f), _viewRotMatrix(1.0f), 
+      _compoundedMatrix(_projectionMatrix * _viewMatrix)
 { }
+
+void Camera3D::setProjection(float width, float height, float fov, float zNear, float zFar) noexcept
+{
+    _projectionMatrix = glmExt::perspectiveDegrees(fov, width, height, zNear, zFar);
+    _compoundedMatrix = _projectionMatrix * _viewMatrix;
+}
 
 void Camera3D::setProjection(const Window& window, float fov, float zNear, float zFar) noexcept
 {
-    _projectionMatrix = glmExt::perspectiveDegrees(fov, static_cast<float>(window.width()), static_cast<float>(window.height()), zNear, zFar);
-    _compoundedMatrix = _projectionMatrix * _viewMatrix;
-
-    glmExt::transpose(_projectionMatrix, _projectionMatrixTrans);
-    _compoundedMatrixTrans = _projectionMatrixTrans * _viewMatrixTrans;
+    setProjection(static_cast<float>(window.width()), static_cast<float>(window.height()), fov, zNear, zFar);
 }
 
 void Camera3D::recomputeMatrices() noexcept
@@ -35,11 +35,7 @@ void Camera3D::recomputeMatrices() noexcept
     _viewMatrix = glm::inverse(transform);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 
-    glmExt::transpose(_viewMatrix, _viewMatrixTrans);
-    _compoundedMatrixTrans = _projectionMatrixTrans * _viewMatrixTrans;
-
     _viewRotMatrix = glm::inverse(rotMat);
-    glmExt::transpose(_viewRotMatrix, _viewRotMatrixTrans);
 }
 
 void Camera3D::computeQuat() noexcept

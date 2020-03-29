@@ -60,10 +60,6 @@ public:
 
     virtual void setVSync(bool vsync) noexcept = 0;
 
-    virtual void setFaceWinding(bool clockwise) noexcept = 0;
-
-    virtual void enableDepthWriting(bool writing) noexcept = 0;
-
     /**
      * Sets the current Depth-Stencil State.
      *
@@ -91,6 +87,7 @@ public:
      * value set by {@link setDefaultDepthStencilState(const Ref<IDepthStencilState>&) @endlink}.
      */
     virtual void resetDepthStencilState() noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IDepthStencilState> getDefaultDepthStencilState() noexcept = 0;
 
     /**
      * Retrieves the default Depth-Stencil State parameters.
@@ -106,6 +103,7 @@ public:
     virtual void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept = 0;
     virtual void resetRasterizerState() noexcept = 0;
     virtual const RasterizerArgs& getDefaultRasterizerArgs() noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept = 0;
 
     virtual void beginFrame() noexcept = 0;
     virtual void endFrame() noexcept = 0;

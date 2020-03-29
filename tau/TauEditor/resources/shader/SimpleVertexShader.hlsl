@@ -26,10 +26,10 @@ cbuffer Matrices : register(b0)
 PSInput vsMain(VSInput input)
 {
     float4 pos = float4(input.position, 1.0f);
-    pos = mul(pos, model);
+    pos = mul(model, pos);
     float4 svPos = pos;
-    svPos = mul(svPos, view);
-    svPos = mul(svPos, projection);
+    svPos = mul(view, svPos);
+    svPos = mul(projection, svPos);
 
     float3 T = normalize(mul(float4(input.tangent, 0.0f), model).xyz);
     float3 N = normalize(mul(float4(input.normal,  0.0f), model).xyz);

@@ -64,33 +64,33 @@ void GLVertexArray::postDraw(IRenderingContext& context) noexcept
     }
 }
 
-void GLVertexArray::draw(IRenderingContext& context, uSys drawCount) noexcept
+void GLVertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
 
     if(this->_indexBuffer)
     {
-        glDrawElements(this->_glDrawType, drawCount, GL_UNSIGNED_INT, null);
+        glDrawElements(this->_glDrawType, drawCount, GL_UNSIGNED_INT, reinterpret_cast<const void*>(drawOffset));
     }
     else
     {
-        glDrawArrays(this->_glDrawType, 0, drawCount);
+        glDrawArrays(this->_glDrawType, drawOffset, drawCount);
     }
 }
 
-void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount) noexcept
+void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
 
     if(this->_indexBuffer)
     {
-        glDrawElementsInstanced(this->_glDrawType, drawCount, GL_UNSIGNED_INT, null, instanceCount);
+        glDrawElementsInstanced(this->_glDrawType, drawCount, GL_UNSIGNED_INT, reinterpret_cast<const void*>(drawOffset), instanceCount);
     }
     else
     {
-        glDrawArraysInstanced(this->_glDrawType, 0, drawCount, instanceCount);
+        glDrawArraysInstanced(this->_glDrawType, drawOffset, drawCount, instanceCount);
     }
 }
 

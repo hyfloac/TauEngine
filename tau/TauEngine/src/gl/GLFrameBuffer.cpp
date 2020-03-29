@@ -70,7 +70,7 @@ void GLRenderTexture::unbind(u8, EShader::Stage) noexcept
     _unbind();
 }
 
-GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height, IRenderingContext& context) noexcept
+GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(const u32 width, const u32 height, IRenderingContext& context) noexcept
     : IFrameBufferAttachment(width, height, CPPRef<ITexture>(null))
 {
     TextureArgs args;
@@ -82,10 +82,9 @@ GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(u32 width, u32 height
     _texture = context.createTexture2D().buildCPPRef(args, null);
 }
 
-GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(u32 width, u32 height) noexcept
+GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(const u32 width, const u32 height) noexcept
     : IFrameBufferAttachment(width, height, CPPRef<ITexture>(new GLRenderTexture(width, height, ETexture::Format::Depth24Stencil8)))
 { }
-
 
 void GLFrameBufferColorAttachment::attach() noexcept
 {

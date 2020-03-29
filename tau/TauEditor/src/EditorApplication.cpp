@@ -55,8 +55,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     PERF();
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
@@ -261,8 +261,8 @@ bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
     UNUSED(e);
     _globals->rc.updateViewport(0, 0, e.newWidth(), e.newHeight());
     _renderer->camera()->setProjection(e.newWidth(), e.newHeight(), 0.0f, 0.0f);
-    _renderer->camera3D().setProjection(e.window(), 90, 0.0001f, 1000.0f);
-    Mouse::mousePos(e.newWidth() >> 1, e.newHeight() >> 1);
+    _renderer->camera3D().setProjection(static_cast<float>(e.newWidth()), static_cast<float>(e.newHeight()), 90, 0.0001f, 1000.0f);
+    // Mouse::mousePos(e.newWidth() >> 1, e.newHeight() >> 1);
     return false;
 }
 

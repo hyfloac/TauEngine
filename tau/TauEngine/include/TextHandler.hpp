@@ -25,6 +25,8 @@ class IBuffer;
 class IShaderProgram;
 class ITexture;
 class IBufferDescriptor;
+class IRasterizerState;
+class IGraphicsInterface;
 
 struct GlyphCharacter final
 {
@@ -95,6 +97,8 @@ public:
         Vector3f color;
     };
 private:
+    static NullableRef<IRasterizerState> rs;
+private:
     FT_Library _ft;
 
     std::vector<GlyphSet> _glyphSets;
@@ -111,7 +115,7 @@ private:
     // CPPRef<IUniform<const Vector3f&>> _colorUni;
     //
 public:
-    TextHandler(IRenderingContext& context, const char* vfsMount, const char* path, const char* vertexName, const char* pixelName) noexcept;
+    TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* path, const char* vertexName, const char* pixelName) noexcept;
 
     ~TextHandler() noexcept;
 

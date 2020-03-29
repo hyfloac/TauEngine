@@ -6,21 +6,26 @@
 #include <Objects.hpp>
 #include "VertexArray.hpp"
 #include "model/Material.hpp"
-#include <glm/vec4.hpp>
 
+class IGraphicsInterface;
 class IRenderingContext;
+class IRasterizerState;
 
 class TAU_DLL RenderableObject final
 {
     DEFAULT_DESTRUCT(RenderableObject);
     DEFAULT_COPY(RenderableObject);
 private:
+    static NullableRef<IRasterizerState> cwRS;
+    static NullableRef<IRasterizerState> ccwRS;
+private:
     CPPRef<IVertexArray> _va;
     CPPRef<ITexture> _reflectiveTexture;
+    NullableRef<IRasterizerState>& _rs;
     i32 _illumination;
     Material _material;
 public:
-    RenderableObject(IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
+    RenderableObject(IGraphicsInterface& gi, IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, bool counterClockwise = true, DrawType drawType = DrawType::SeparatedTriangles) noexcept;
 
     void preRender(IRenderingContext& context) const noexcept;
     void render(IRenderingContext& context) const noexcept;

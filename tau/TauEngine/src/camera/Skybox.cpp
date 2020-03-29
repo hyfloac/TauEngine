@@ -6,7 +6,6 @@
 #include "texture/FITextureLoader.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
-#include "maths/glmExt/GlmMatrixTransformExt.hpp"
 #include "system/GraphicsInterface.hpp"
 
 template<>
@@ -16,13 +15,15 @@ class UniformAccessor<Skybox::Uniforms> final
     DELETE_DESTRUCT(UniformAccessor);
     DELETE_COPY(UniformAccessor);
 public:
-    [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4 * 4 * 2; }
+    static constexpr uSys MATRIX_SIZE = sizeof(float) * 4 * 4;
+
+    [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 2; }
 
     static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Skybox::Uniforms& t) noexcept
     {
         buffer->beginModification(context);
-        buffer->modifyBuffer(0, sizeof(float) * 4 * 4, glm::value_ptr(t.projectionMatrix));
-        buffer->modifyBuffer(sizeof(float) * 4 * 4, sizeof(float) * 4 * 4, glm::value_ptr(t.viewMatrix));
+        buffer->modifyBuffer(0, MATRIX_SIZE, glm::value_ptr(t.projectionMatrix));
+        buffer->modifyBuffer(MATRIX_SIZE, MATRIX_SIZE, glm::value_ptr(t.viewMatrix));
         buffer->endModification(context);
     }
 };
@@ -120,10 +121,12 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     skyboxCubeBuilder.type = EBuffer::Type::ArrayBuffer;
     skyboxCubeBuilder.usage = EBuffer::UsageType::StaticDraw;
     skyboxCubeBuilder.elementCount = 6 * 6;
+    skyboxCubeBuilder.initialBuffer = skyboxVertices;
+    skyboxCubeBuilder.instanced = false;
     skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
     CPPRef<IBuffer> skyboxCube = context.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
-    skyboxCube->fillBuffer(context, skyboxVertices);
+    // skyboxCube->fillBuffer(context, skyboxVertices);
 
     VertexArrayArgs vaArgs(1);
     vaArgs.shader = vertexShader;
@@ -133,32 +136,25 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
 
     _cubeVA = context.createVertexArray().buildCPPRef(vaArgs, null);
 
-    DepthStencilArgs params = context.getDefaultDepthStencilArgs();
-    params.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;
-    params.depthCompareFunc = DepthStencilArgs::CompareFunc::LessThanOrEqual;
-    _skyboxDepthStencilState = gi.createDepthStencilState().buildTauRef(params, null);
+    DepthStencilArgs dsArgs = context.getDefaultDepthStencilArgs();
+    dsArgs.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;
+    dsArgs.depthCompareFunc = DepthStencilArgs::CompareFunc::LessThanOrEqual;
+    _skyboxDepthStencilState = gi.createDepthStencilState().buildTauRef(dsArgs, null);
+
+    RasterizerArgs rArgs = context.getDefaultRasterizerArgs();
+    rArgs.frontFaceCounterClockwise = true;
+    // rArgs.cullMode = RasterizerArgs::CullMode::None;
+    _skyboxRasterizerState = gi.createRasterizerState().buildTauRef(rArgs, null);
 }
 
 void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
 {
-    // context.enableDepthWriting(false);
-    context.setFaceWinding(false);
-
-    // glDepthFunc(GL_LEQUAL);
-
-    const auto tmpState = context.setDepthStencilState(_skyboxDepthStencilState);
+    const NullableRef<IDepthStencilState> tmpDepthStencilState = context.setDepthStencilState(_skyboxDepthStencilState);
+    const NullableRef<IRasterizerState> tmpRasterizerState = context.setRasterizerState(_skyboxRasterizerState);
 
     _shader->bind(context);
-    if(glmExt::useTranspose(context.mode()))
-    {
-        _uniforms.data().projectionMatrix = camera.projectionMatrixTrans();
-        _uniforms.data().viewMatrix = camera.viewRotMatrixTrans();
-    }
-    else
-    {
-        _uniforms.data().projectionMatrix = camera.projectionMatrix();
-        _uniforms.data().viewMatrix = camera.viewRotMatrix();
-    }
+    _uniforms.data().projectionMatrix = camera.projectionMatrix();
+    _uniforms.data().viewMatrix = camera.viewRotMatrix();
     _uniforms.upload(context, EShader::Stage::Vertex, 0);
     {
         auto indices = TextureIndices(0, 0, 0);
@@ -181,9 +177,6 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     // _skybox->unbind(0, EShader::Stage::Pixel);
     _shader->unbind(context);
 
-    // glDepthFunc(GL_LESS);
-
-    // context.enableDepthWriting(true);
-
-    context.setDepthStencilState(tmpState);
+    (void) context.setRasterizerState(tmpRasterizerState);
+    (void) context.setDepthStencilState(tmpDepthStencilState);
 }

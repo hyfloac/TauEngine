@@ -21,6 +21,8 @@
 #include "Timings.hpp"
 #include "system/RenderingContext.hpp"
 #include "system/Window.hpp"
+#include "graphics/RasterizerState.hpp"
+#include "system/GraphicsInterface.hpp"
 
 template<>
 class UniformAccessor<TextHandler::ProjectionUniforms> final
@@ -55,10 +57,11 @@ public:
     }
 };
 
+NullableRef<IRasterizerState> TextHandler::rs = nullptr;
 
 #define INSTANCE_COUNT 128
 
-TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
+TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
       _va(null),
       _viewUniforms(context.createUniformBuffer()),
@@ -129,6 +132,20 @@ TextHandler::TextHandler(IRenderingContext& context, const char* const vfsMount,
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
     _va = context.createVertexArray().buildCPPRef(vaArgs, null);
+
+    if(!rs)
+    {
+        RasterizerArgs rArgs = context.getDefaultRasterizerArgs();
+        if(rArgs.frontFaceCounterClockwise)
+        {
+            rs = context.getDefaultRasterizerState();
+        }
+        else
+        {
+            rArgs.frontFaceCounterClockwise = true;
+            rs = gi.createRasterizerState().buildTauRef(rArgs, null);
+        }
+    }
 }
 
 TextHandler::~TextHandler() noexcept
@@ -242,7 +259,7 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
 
 void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) noexcept
 {
-    context.setFaceWinding(false);
+    const NullableRef<IRasterizerState> tmpRS = context.setRasterizerState(rs);
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);
@@ -298,11 +315,13 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
     _viewUniforms.unbind(context, EShader::Stage::Vertex, 2);
     _colorUniforms.unbind(context, EShader::Stage::Pixel, 1);
     _shader->unbind(context);
+
+    (void) context.setRasterizerState(tmpRS);
 }
 
 float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) noexcept
 {
-    context.setFaceWinding(false);
+    const NullableRef<IRasterizerState> tmpRS = context.setRasterizerState(rs);
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);
@@ -376,6 +395,8 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
     _viewUniforms.unbind(context, EShader::Stage::Vertex, 2);
     _colorUniforms.unbind(context, EShader::Stage::Pixel, 1);
     _shader->unbind(context);
+
+    (void) context.setRasterizerState(tmpRS);
 
     return height;
 }

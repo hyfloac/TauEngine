@@ -282,14 +282,6 @@ void DX10RenderingContext::setVSync(bool vsync) noexcept
     // TODO: Implement DX vsync changing.
 }
 
-void DX10RenderingContext::setFaceWinding(bool clockwise) noexcept
-{
-}
-
-void DX10RenderingContext::enableDepthWriting(bool writing) noexcept
-{
-}
-
 NullableRef<IDepthStencilState> DX10RenderingContext::setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept
 {
     NullableRef<IDepthStencilState> ret = RefCast<IDepthStencilState>(_currentDepthStencilState);
@@ -320,6 +312,9 @@ void DX10RenderingContext::resetDepthStencilState() noexcept
 const DepthStencilArgs& DX10RenderingContext::getDefaultDepthStencilArgs() noexcept
 { return _defaultDepthStencilState->args(); }
 
+NullableRef<IDepthStencilState> DX10RenderingContext::getDefaultDepthStencilState() noexcept
+{ return RefCast<IDepthStencilState>(_defaultDepthStencilState); }
+
 NullableRef<IRasterizerState> DX10RenderingContext::setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
 {
     NullableRef<IRasterizerState> ret = RefCast<IRasterizerState>(_currentRasterizerState);
@@ -349,6 +344,9 @@ void DX10RenderingContext::resetRasterizerState() noexcept
 
 const RasterizerArgs& DX10RenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }
+
+NullableRef<IRasterizerState> DX10RenderingContext::getDefaultRasterizerState() noexcept
+{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
 
 void DX10RenderingContext::beginFrame() noexcept
 {

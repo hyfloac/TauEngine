@@ -20,10 +20,9 @@ PSInput vsMain(VSInput input)
     PSInput output;
 
     float4 pos = float4(input.position, 1.0f);
-    pos = mul(pos, view);
-    pos = mul(pos, projection);
+    pos = mul(view, pos);
+    pos = mul(projection, pos);
 
-    //output.position = pos.xyww;
     output.position = pos.xyww;
     output.texCoord = input.position;
 

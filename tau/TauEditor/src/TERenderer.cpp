@@ -45,7 +45,7 @@ TERenderer::TERenderer(Globals& globals) noexcept
       _layerStack()
 {
     PERF();
-    _th = new TextHandler(globals.rc, "|TERes", "/shader/Text/", "TextVertexShader", "TextPixelShader");
+    _th = new TextHandler(globals.gi, globals.rc, "|TERes", "/shader/Text/", "TextVertexShader", "TextPixelShader");
     (void) _th->init();
     // (void) _th->loadTTFFile("|TERes/Sansation_Regular.ttf", 0, 48, finalizeLoadSansation, this);
     // (void) _th->loadTTFFile("|TERes/MonoConsole.ttf",  0, 48, finalizeLoadMono, this);

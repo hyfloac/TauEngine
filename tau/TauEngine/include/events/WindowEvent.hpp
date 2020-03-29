@@ -97,7 +97,7 @@ public:
 
     [[nodiscard]] Keyboard::Event event() const noexcept { return _event; }
     [[nodiscard]] Keyboard::Flags flags() const noexcept { return _flags; }
-    [[nodiscard]] Keyboard::Key key() const noexcept { return _key; }
+    [[nodiscard]] Keyboard::Key     key() const noexcept { return _key; }
 };
 
 class WindowAsciiKeyEvent final : public WindowEvent

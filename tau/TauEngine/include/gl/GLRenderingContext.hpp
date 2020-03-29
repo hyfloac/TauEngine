@@ -76,19 +76,17 @@ public:
 
     void setVSync(bool vsync) noexcept override final;
 
-    void setFaceWinding(bool clockwise) noexcept override final;
-
-    void enableDepthWriting(bool writing) noexcept override final;
-
     NullableRef<IDepthStencilState> setDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept override;
     void resetDepthStencilState() noexcept override;
     const DepthStencilArgs& getDefaultDepthStencilArgs() noexcept override;
+    [[nodiscard]] NullableRef<IDepthStencilState> getDefaultDepthStencilState() noexcept override;
 
     NullableRef<IRasterizerState> setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
     void setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept override;
     void resetRasterizerState() noexcept override;
     const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
+    [[nodiscard]] NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept override;
 
     void beginFrame() noexcept override final { }
     void endFrame() noexcept override final { }
