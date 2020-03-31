@@ -38,13 +38,13 @@ public:
 
     [[nodiscard]] virtual inline ETexture::Type textureType() const noexcept = 0;
 
-    virtual void set(u32 level, const void* data) noexcept = 0;
+    virtual void set(IRenderingContext& context, u32 level, const void* data) noexcept = 0;
 
-    virtual void bind(u8 textureUnit, EShader::Stage stage) noexcept = 0;
+    virtual void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept = 0;
 
-    virtual void unbind(u8 textureUnit, EShader::Stage stage) noexcept = 0;
+    virtual void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept = 0;
 
-    virtual void generateMipmaps() noexcept = 0;
+    virtual void generateMipmaps(IRenderingContext& context) noexcept = 0;
 
     RTT_BASE_IMPL(ITexture);
     RTT_BASE_CHECK(ITexture);
@@ -62,7 +62,8 @@ protected:
 public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Cube; }
 
-    virtual void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept = 0;
+    virtual void set(IRenderingContext& context, u32 level, const void* data) noexcept override { }
+    virtual void setCube(IRenderingContext& context, u32 level, ETexture::CubeSide side, const void* data) noexcept = 0;
 };
 
 struct TextureArgs final

@@ -32,6 +32,7 @@ public:
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
+    [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

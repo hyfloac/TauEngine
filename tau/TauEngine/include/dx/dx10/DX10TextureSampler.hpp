@@ -22,7 +22,8 @@ public:
     [[nodiscard]] const ID3D10SamplerState* d3dSampler() const noexcept { return _samplerState; }
     [[nodiscard]] ID3D10SamplerState* d3dSampler() noexcept { return _samplerState; }
 
-    void apply(UINT slot) noexcept;
+    void bind(UINT slot) const noexcept;
+    void unbind(UINT slot) const noexcept;
 };
 
 class TAU_DLL DX10TextureSamplerBuilder final : public ITextureSamplerBuilder

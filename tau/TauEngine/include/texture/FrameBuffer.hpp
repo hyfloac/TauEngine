@@ -18,8 +18,8 @@ protected:
     { }
 public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-    void set(u32 level, const void* data) noexcept override final { }
-    void generateMipmaps() noexcept override final { }
+    void set(IRenderingContext& context, u32 level, const void* data) noexcept override final { }
+    void generateMipmaps(IRenderingContext& context) noexcept override final { }
 };
 
 class TAU_DLL IFrameBufferAttachment

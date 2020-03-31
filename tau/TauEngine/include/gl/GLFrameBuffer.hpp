@@ -20,9 +20,9 @@ public:
 
     [[nodiscard]] inline GLuint rbo() const noexcept { return _rbo; }
 
-    void bind(u8 textureUnit, EShader::Stage stage) noexcept override;
+    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage stage) noexcept override;
 
-    void unbind(u8 textureUnit, EShader::Stage stage) noexcept override;
+    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage stage) noexcept override;
 };
 
 class TAU_DLL GLFrameBufferColorAttachment final : public IFrameBufferAttachment

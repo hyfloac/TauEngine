@@ -17,6 +17,7 @@ class DX10TextureSamplerBuilder;
 class DX10ShaderBuilder;
 class DX10Texture2DBuilder;
 class DX10NullTextureBuilder;
+class DX10DepthTextureBuilder;
 class DX10TextureCubeBuilder;
 class DX10DepthStencilState;
 class DX10RasterizerState;
@@ -55,6 +56,7 @@ private:
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
     DX10Texture2DBuilder* _texture2DBuilder;
     DX10NullTextureBuilder* _textureNullBuilder;
+    DX10DepthTextureBuilder* _textureDepthBuilder;
     DX10TextureCubeBuilder* _textureCubeBuilder;
 public:
     DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept;

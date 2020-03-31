@@ -69,6 +69,9 @@ IDepthStencilStateBuilder& DX11GraphicsInterface::createDepthStencilState() noex
 IRasterizerStateBuilder& DX11GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
 
+ITextureBuilder& DX11GraphicsInterface::createDepthTexture() noexcept
+{ return *static_cast<ITextureBuilder*>(null); }
+
 IRenderingContextBuilder& DX11GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }
 

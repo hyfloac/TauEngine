@@ -425,8 +425,13 @@ static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcep
 {
     if(!window._eventHandler) { return; }
 
-    const u32 width  = LOWORD(lParam);
-    const u32 height = HIWORD(lParam);
+    RECT clientArea;
+    GetClientRect(window._windowContainer.windowHandle, &clientArea);
+    const u32 width = clientArea.right;
+    const u32 height = clientArea.bottom;
+
+    // const u32 width  = LOWORD(lParam);
+    // const u32 height = HIWORD(lParam);
 
     WindowResizeEvent evt(window, window._width, window._height, width, height);
     window._eventHandler(window._userContainer, evt);

@@ -4,9 +4,14 @@
 #include <cfloat>
 #include "dx/dx10/DX10RenderingContext.hpp"
 
-void DX10TextureSampler::apply(UINT slot) noexcept
+void DX10TextureSampler::bind(const UINT slot) const noexcept
 {
     _ctx.d3dDevice()->PSSetSamplers(slot, 1, &_samplerState);
+}
+
+void DX10TextureSampler::unbind(const UINT slot) const noexcept
+{
+    _ctx.d3dDevice()->PSSetSamplers(slot, 0, null);
 }
 
 DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error) const noexcept

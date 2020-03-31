@@ -33,9 +33,10 @@ DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
       _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
-      _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(*this)),
+      _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(gi)),
       _textureNullBuilder(new(::std::nothrow) DX10NullTextureBuilder),
-      _textureCubeBuilder(new(::std::nothrow) DX10TextureCubeBuilder(*this))
+      _textureDepthBuilder(new(::std::nothrow) DX10DepthTextureBuilder(gi)),
+      _textureCubeBuilder(new(::std::nothrow) DX10TextureCubeBuilder(gi))
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -176,29 +177,6 @@ bool DX10RenderingContext::createContext(Window& window) noexcept
     }
 
     {
-        // DepthStencilParams depthStencilParams {};
-        // depthStencilParams.enableDepthTest = true;
-        // depthStencilParams.enableStencilTest = true;
-        //
-        // depthStencilParams.depthWriteMask = DepthStencilParams::DepthWriteMask::All;
-        // depthStencilParams.depthCompareFunc = DepthStencilParams::CompareFunc::LessThan;
-        //
-        // depthStencilParams.stencilReadMask = 0xFF;
-        // depthStencilParams.stencilWriteMask = 0xFF;
-        //
-        // depthStencilParams.frontFace.failOp = DepthStencilParams::StencilOp::Keep;
-        // depthStencilParams.frontFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::IncrementClamp;
-        // depthStencilParams.frontFace.passOp = DepthStencilParams::StencilOp::Keep;
-        // depthStencilParams.frontFace.compareFunc = DepthStencilParams::CompareFunc::Always;
-        //
-        // depthStencilParams.backFace.failOp = DepthStencilParams::StencilOp::Keep;
-        // depthStencilParams.backFace.stencilPassDepthFailOp = DepthStencilParams::StencilOp::DecrementClamp;
-        // depthStencilParams.backFace.passOp = DepthStencilParams::StencilOp::Keep;
-        // depthStencilParams.backFace.compareFunc = DepthStencilParams::CompareFunc::Always;
-        //
-        // NullableRef<IDepthStencilState> dsState = createDepthStencilState().buildTauRef(depthStencilParams, null);
-        // _defaultDepthStencilState = RefCast<DX10DepthStencilState>(dsState);
-        // _currentDepthStencilState = _defaultDepthStencilState;
         _currentDepthStencilState->apply(*this);
     }
 
@@ -382,7 +360,7 @@ ITextureBuilder& DX10RenderingContext::createNullTexture() noexcept
 { return *_textureNullBuilder; }
 
 ITextureBuilder& DX10RenderingContext::createTextureDepth() noexcept
-{ return *static_cast<ITextureBuilder*>(null); }
+{ return *_textureDepthBuilder; }
 
 ITextureCubeBuilder& DX10RenderingContext::createTextureCube() noexcept
 { return *_textureCubeBuilder; }
@@ -565,7 +543,6 @@ bool DX10RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
 
     {
         D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc[2];
-        ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
         depthStencilViewDesc[0].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         depthStencilViewDesc[0].ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc[0].Texture2D.MipSlice = 0;

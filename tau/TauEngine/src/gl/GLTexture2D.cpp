@@ -10,7 +10,12 @@ GLTexture2D::~GLTexture2D() noexcept
     glDeleteTextures(1, &_texture);
 }
 
-void GLTexture2D::set(const u32 level, const void* data) noexcept
+void GLTexture2D::set(IRenderingContext&, const u32 level, const void* const data) noexcept
+{
+    this->set(level, data);
+}
+
+void GLTexture2D::set(const u32 level, const void* const data) const noexcept
 {
     const GLint internalFormat = glInternalFormat(_dataFormat);
     const GLenum inputFormat = glInputFormat(_dataFormat);
@@ -22,13 +27,13 @@ void GLTexture2D::set(const u32 level, const void* data) noexcept
     glTexImage2D(GL_TEXTURE_2D, level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
 
-void GLTexture2D::bind(u8 textureUnit, EShader::Stage) noexcept
+void GLTexture2D::bind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _texture);
 }
 
-void GLTexture2D::unbind(u8 textureUnit, EShader::Stage) noexcept
+void GLTexture2D::unbind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -38,12 +43,17 @@ GLDepthTexture::GLDepthTexture(const u32 width, const u32 height, const ETexture
     : GLTexture2D(width, height, dataFormat, texture)
 { }
 
-void GLDepthTexture::set(const u32 level, const void* data) noexcept
+void GLDepthTexture::set(IRenderingContext&, const u32 level, const void* data) noexcept
 {
     GLTexture2D::set(level , data);
 }
 
-void GLTexture2D::generateMipmaps() noexcept
+void GLDepthTexture::set(const u32 level, const void* data) const noexcept
+{
+    GLTexture2D::set(level, data);
+}
+
+void GLTexture2D::generateMipmaps(IRenderingContext&) noexcept
 {
     glGenerateMipmap(GL_TEXTURE_2D);
 }

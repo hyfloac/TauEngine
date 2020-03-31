@@ -60,12 +60,12 @@ void GLRenderTexture::_unbind() noexcept
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-void GLRenderTexture::bind(u8, EShader::Stage) noexcept
+void GLRenderTexture::bind(IRenderingContext&, u8, EShader::Stage) noexcept
 {
     _bind(_rbo);
 }
 
-void GLRenderTexture::unbind(u8, EShader::Stage) noexcept
+void GLRenderTexture::unbind(IRenderingContext&, u8, EShader::Stage) noexcept
 {
     _unbind();
 }
@@ -83,7 +83,7 @@ GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(const u32 width, cons
 }
 
 GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(const u32 width, const u32 height) noexcept
-    : IFrameBufferAttachment(width, height, CPPRef<ITexture>(new GLRenderTexture(width, height, ETexture::Format::Depth24Stencil8)))
+    : IFrameBufferAttachment(width, height, CPPRef<ITexture>(new(::std::nothrow) GLRenderTexture(width, height, ETexture::Format::Depth24Stencil8)))
 { }
 
 void GLFrameBufferColorAttachment::attach() noexcept

@@ -241,7 +241,7 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
 
             texture = context.createTexture2D().build(args, null);
 
-            texture->generateMipmaps();
+            texture->generateMipmaps(context);
         }
         else
         {

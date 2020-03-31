@@ -55,8 +55,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     PERF();
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();

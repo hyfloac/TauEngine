@@ -14,16 +14,27 @@ TextureIndices& DX10SingleTextureUploader::upload(IRenderingContext& context, Te
         return textureIndices;
     }
 
-    _texture->bind(textureIndices.textureStartIndex, stage);
-    RefCast<DX10TextureSampler>(_textureSampler)->apply(textureIndices.samplerStartIndex);
+    _texture->bind(context, textureIndices.textureStartIndex, stage);
+    RefCast<DX10TextureSampler>(_textureSampler)->bind(textureIndices.samplerStartIndex);
 
     ++textureIndices.textureStartIndex;
     ++textureIndices.samplerStartIndex;
     return textureIndices;
 }
 
-TextureIndices& DX10SingleTextureUploader::unbind(IRenderingContext&, TextureIndices& textureIndices, EShader::Stage) noexcept
+TextureIndices& DX10SingleTextureUploader::unbind(IRenderingContext& context, TextureIndices& textureIndices, const EShader::Stage stage) noexcept
 {
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    {
+        TAU_THROW(IncorrectContextException);
+        return textureIndices;
+    }
+
+    _texture->unbind(context, textureIndices.textureStartIndex, stage);
+    RefCast<DX10TextureSampler>(_textureSampler)->unbind(textureIndices.samplerStartIndex);
+
+    ++textureIndices.textureStartIndex;
+    ++textureIndices.samplerStartIndex;
     return textureIndices;
 }
 
@@ -37,17 +48,31 @@ TextureIndices& DX10TextureUploader::upload(IRenderingContext& context, TextureI
 
     for(uSys i = 0; i < _textures.size(); ++i)
     {
-        _textures[i]->bind(i + textureIndices.textureStartIndex, stage);
+        _textures[i]->bind(context, i + textureIndices.textureStartIndex, stage);
     }
-    RefCast<DX10TextureSampler>(_textureSampler)->apply(textureIndices.samplerStartIndex);
+    RefCast<DX10TextureSampler>(_textureSampler)->bind(textureIndices.samplerStartIndex);
 
     textureIndices.textureStartIndex += _textures.size();
     ++textureIndices.samplerStartIndex;
     return textureIndices;
 }
 
-TextureIndices& DX10TextureUploader::unbind(IRenderingContext&, TextureIndices& textureIndices, EShader::Stage) noexcept
+TextureIndices& DX10TextureUploader::unbind(IRenderingContext& context, TextureIndices& textureIndices, const EShader::Stage stage) noexcept
 {
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    {
+        TAU_THROW(IncorrectContextException);
+        return textureIndices;
+    }
+
+    for(uSys i = 0; i < _textures.size(); ++i)
+    {
+        _textures[i]->unbind(context, i + textureIndices.textureStartIndex, stage);
+    }
+    RefCast<DX10TextureSampler>(_textureSampler)->unbind(textureIndices.samplerStartIndex);
+
+    textureIndices.textureStartIndex += _textures.size();
+    ++textureIndices.samplerStartIndex;
     return textureIndices;
 }
 

@@ -16,16 +16,16 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
-    void set(u32 level, const void* data) noexcept override { }
+    void set(IRenderingContext&, u32 level, const void* data) noexcept override { }
 
-    void bind(u8 textureUnit, EShader::Stage) noexcept override
+    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override
     {
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    void unbind(u8 textureUnit, EShader::Stage) noexcept override { }
-    void generateMipmaps() noexcept override { }
+    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override { }
+    void generateMipmaps(IRenderingContext&) noexcept override { }
 };
 
 class TAU_DLL GLTexture2D : public ITexture
@@ -49,13 +49,13 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
-    void generateMipmaps() noexcept override;
+    void generateMipmaps(IRenderingContext&) noexcept override;
 
-    void set(u32 level, const void* data) noexcept override;
+    void set(IRenderingContext&, u32 level, const void* data) noexcept override;
+    void set(u32 level, const void* data) const noexcept;
 
-    void bind(u8 textureUnit, EShader::Stage) noexcept override final;
-
-    void unbind(u8 textureUnit, EShader::Stage) noexcept override final;
+    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override final;
+    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override final;
 };
 
 class TAU_DLL GLDepthTexture final : public GLTexture2D
@@ -67,7 +67,8 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Depth; }
 
-    void set(u32 level, const void* data) noexcept override;
+    void set(IRenderingContext&, u32 level, const void* data) noexcept override;
+    void set(u32 level, const void* data) const noexcept;
 };
 
 class TAU_DLL GLTextureCube final : public ITextureCube
@@ -84,15 +85,13 @@ public:
 
     [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
 
-    void setCube(u32 level, ETexture::CubeSide side, const void* data) noexcept override final;
+    void setCube(IRenderingContext&, u32 level, ETexture::CubeSide side, const void* data) noexcept override;
+    void setCube(u32 level, ETexture::CubeSide side, const void* data) const noexcept;
 
-    void generateMipmaps() noexcept override;
+    void generateMipmaps(IRenderingContext&) noexcept override;
 
-    void set(u32 level, const void*) noexcept override { }
-
-    void bind(u8 textureUnit, EShader::Stage stage) noexcept override;
-
-    void unbind(u8 textureUnit, EShader::Stage stage) noexcept override;
+    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage stage) noexcept override;
+    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage stage) noexcept override;
 };
 
 class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder

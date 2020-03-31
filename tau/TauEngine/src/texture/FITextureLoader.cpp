@@ -56,7 +56,7 @@ CPPRef<ITexture> TextureLoader::generateMissingTexture(IRenderingContext& contex
 
     const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
 
-    ret->generateMipmaps();
+    ret->generateMipmaps(context);
 
     delete[] textureData;
 
@@ -96,7 +96,7 @@ CPPRef<ITexture> TextureLoader::generateDebugTexture8(IRenderingContext& context
 
     const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
 
-    ret->generateMipmaps();
+    ret->generateMipmaps(context);
 
     delete[] textureData;
 
@@ -138,7 +138,7 @@ CPPRef<ITexture> TextureLoader::generateDebugTexture16(IRenderingContext& contex
 
     const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
 
-    ret->generateMipmaps();
+    ret->generateMipmaps(context);
 
     delete[] textureData;
 
@@ -163,7 +163,7 @@ CPPRef<ITexture> TextureLoader::generateColorTexture(IRenderingContext& context,
 
     const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
 
-    ret->generateMipmaps();
+    ret->generateMipmaps(context);
 
     delete[] textureData;
 
@@ -225,7 +225,7 @@ CPPRef<ITexture> TextureLoader::loadTextureEx(IRenderingContext& context, const 
 
     if(mipmapLevel < 0)
     {
-        ret->generateMipmaps();
+        ret->generateMipmaps(context);
     }
 
     FreeImage_Unload(texture);
@@ -342,7 +342,7 @@ CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context
 
     if(mipmapLevel < 0)
     {
-        ret->generateMipmaps();
+        ret->generateMipmaps(context);
     }
 
     if(error) { *error = TextureLoadError::NONE; }

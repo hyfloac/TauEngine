@@ -13,7 +13,12 @@ GLTextureCube::~GLTextureCube() noexcept
     glDeleteTextures(1, &_texture);
 }
 
-void GLTextureCube::setCube(const u32 level, ETexture::CubeSide side, const void* data) noexcept
+void GLTextureCube::setCube(IRenderingContext&, const u32 level, const ETexture::CubeSide side, const void* const data) noexcept
+{
+    setCube(level, side, data);
+}
+
+void GLTextureCube::setCube(const u32 level, const ETexture::CubeSide side, const void* const data) const noexcept
 {
     const GLint internalFormat = GLTexture2D::glInternalFormat(_dataFormat);
     const GLenum inputFormat = GLTexture2D::glInputFormat(_dataFormat);
@@ -25,19 +30,19 @@ void GLTextureCube::setCube(const u32 level, ETexture::CubeSide side, const void
     glTexImage2D(glCubeMapFace(side), level, internalFormat, _width, _height, 0, inputFormat, inputDataType, data);
 }
 
-void GLTextureCube::bind(const u8 textureUnit, EShader::Stage) noexcept
+void GLTextureCube::bind(IRenderingContext&, const u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, _texture);
 }
 
-void GLTextureCube::unbind(const u8 textureUnit, EShader::Stage) noexcept
+void GLTextureCube::unbind(IRenderingContext&, const u8 textureUnit, EShader::Stage) noexcept
 {
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void GLTextureCube::generateMipmaps() noexcept
+void GLTextureCube::generateMipmaps(IRenderingContext&) noexcept
 {
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
