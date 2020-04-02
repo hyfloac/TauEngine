@@ -3,7 +3,6 @@ struct PSInput
     float4 svPosition : SV_POSITION;
     float3 position : POSITION;
     float2 texCoord : TEXCOORD;
-    float3 normal : NORMAL;
     float3x3 tbn : TBN;
 };
 
@@ -76,13 +75,16 @@ float4 psMain(PSInput input) : SV_TARGET
     float3 normal = normalize(normalTexel * 2.0f - 1.0f);
     float3 normalTransformed = normalize(mul(normal, input.tbn));
 
-    float3 pointVal = computePointLight(pointLight, viewPos, input.position, normalize(input.normal), diffuseTexel, specularTexel, specularExponent);
+    float3 pointVal = computePointLight(pointLight, viewPos, input.position, normalTransformed, diffuseTexel, specularTexel, specularExponent);
     float3 spotVal  =  computeSpotLight(spotLight,  viewPos, input.position, normalTransformed, diffuseTexel, specularTexel, specularExponent);
 
     // float3 result = pointVal + spotVal;
     // result /= 2.0f;
 
-    float3 result = spotVal;
+    float3 result = pointVal + spotVal;
+
+    // result = (normalTransformed + 1.0f) / 2.0f;
+    // result = normalTransformed;
 
     return float4(result, 1.0f);
 }
@@ -126,10 +128,8 @@ float3 computeSpotLight(SpotLight light, float3 cameraPos, float3 pos, float3 no
 
         float dist = length(lightPosDelta);
         float attenuation = 1.0f / (light.constant + 
-                                    light.linearVal    * dist + 
+                                    light.linearVal * dist + 
                                     light.quadratic * dist * dist);
-
-        float3 lightDir = normalize(lightPosDelta);
 
         float3 viewDir = normalize(cameraPos - pos);
         float3 reflectDir = reflect(-lightDir, normal);

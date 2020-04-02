@@ -16,18 +16,23 @@
 #include <ResourceLoader.hpp>
 #include <ResourceSelector.hpp>
 #include <Timings.hpp>
+#include <GL/wglew.h>
 
 #include <system/SystemInterface.hpp>
 #include <graphics/DepthStencilState.hpp>
 
 #include "dx/dx10/DX10RasterizerState.hpp"
+#include <vr/VRUtils.hpp>
+
+#include "gl/GLRenderingContext.hpp"
 
 static void setupGameFolders() noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
-    : Application(32), _config { false, 800, 600 },
-      _window(null), _logger(null), _renderer(null), _gameState(State::Game), _globals(nullptr)
+    : Application(32), _config { false, true, 800, 600 },
+      _window(null), _logger(null), _renderer(null), _vr(null), _gameState(State::Game), _globals(nullptr),
+      _vrProjLeft(1.0f), _vrProjRight(1.0f), _vrLeftFB(null), _vrRightFB(null)
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
@@ -35,6 +40,8 @@ TauEditorApplication::~TauEditorApplication() noexcept
     delete _renderer;
     delete _window;
     delete _globals;
+    delete _vrLeftFB;
+    delete _vrRightFB;
 }
 
 bool TauEditorApplication::init(int argCount, char* args[]) noexcept
@@ -57,6 +64,18 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     RenderingMode::getGlobalMode().setDebugMode(true);
     RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+
+    if(argCount >= 2)
+    {
+        if(strcmp(args[1], "-gl") == 0)
+        {
+            RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+        }
+        else if(strcmp(args[1], "-dx") == 0)
+        {
+            RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+        }
+    }
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
@@ -99,25 +118,55 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     if(_renderingContext->mode().isOpenGL())
     {
-        glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
-
-        enableGLDepthTest();
-
-        enableGLCullFace();
-        glCullFace(GL_BACK);
-
-        glFrontFace(GL_CW);
-
         setGLBlend(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glEnable(GL_STENCIL_TEST);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     }
 
     _renderingContext->updateViewport(0, 0, _window->width(), _window->height());
 
     _renderer = new TERenderer(*_globals);
+
+    if(_config.useVR)
+    {
+        if(vr::VR_IsRuntimeInstalled() && vr::VR_IsHmdPresent())
+        {
+            vr::EVRInitError error;
+            _vr = vr::VR_Init(&error, vr::VRApplication_Scene);
+
+            if(error != vr::VRInitError_None)
+            {
+                _vr = null;
+                _logger->error("Unable to init VR runtime: {}", vr::VR_GetVRInitErrorAsEnglishDescription(error));
+            }
+            else if(!vr::VRCompositor())
+            {
+                _vr = null;
+            }
+            else
+            {
+                initVRControls();
+
+                vr::HmdMatrix44_t tmpLeft = _vr->GetProjectionMatrix(vr::Eye_Left, 0.0001f, 1000.0f);
+                vr::HmdMatrix44_t tmpRight = _vr->GetProjectionMatrix(vr::Eye_Right, 0.0001f, 1000.0f);
+                _vrProjLeft = reinterpret_cast<glm::mat4&>(tmpLeft);
+                _vrProjRight = reinterpret_cast<glm::mat4&>(tmpRight);
+
+                initVRFrameBuffers();
+
+                _globals->vr = _vr;
+
+                _globals->vrCamera = new VRFreeCamCamera3DController(*_window, 90.0f, 0.0001f, 1000.0f, 10.0f, 40.0f, _globals->vrHandles.moveUp,
+                    _globals->vrHandles.moveDown, _globals->vrHandles.movePlane, _globals->vrHandles.actionSet, _vr);
+
+                _vr->GetRecommendedRenderTargetSize(&_width, &_height);
+                RECT rect{ 0, 0, (LONG) _width, (LONG)_height };
+                AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+                SetWindowPos(_window->sysWindowContainer().windowHandle, null, 0, 0, static_cast<int>(rect.right), static_cast<int>(rect.bottom), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+
+                Mouse::setVisible(true);
+            }
+        }
+    }
 
     TimingsWriter::end();
     TimingsWriter::begin("TauEditor::Runtime", "|TERes/perfRuntime.json");
@@ -131,6 +180,11 @@ void TauEditorApplication::finalize() noexcept
     {
         stopDebugOutput();
     }
+    if(_vr)
+    {
+        vr::VR_Shutdown();
+        _vr = null;
+    }
 }
 
 void TauEditorApplication::onException(ExceptionData& ex) noexcept
@@ -140,6 +194,7 @@ void TauEditorApplication::onException(ExceptionData& ex) noexcept
 #endif
     ExceptionDispatcher dispatcher(*ex.ex);
     dispatcher.dispatch<IncorrectContextException>(this, &TauEditorApplication::onIncorrectContext);
+    dispatcher.dispatch<BufferSafetyException>(this, &TauEditorApplication::onBufferSafetyException);
 }
 
 void TauEditorApplication::update(const float fixedDelta) noexcept
@@ -152,8 +207,69 @@ void TauEditorApplication::update(const float fixedDelta) noexcept
 void TauEditorApplication::render(const DeltaTime& delta) noexcept
 {
     PERF();
-    _renderer->render(delta);
-    _renderingContext->swapFrame();
+
+    if(_vr)
+    {
+        _renderer->preRender(delta);
+
+        {
+            _globals->currentLeftEye = true;
+            _vrLeftFB->bind(*_renderingContext);
+            _renderer->render();
+            _vrLeftFB->unbind(*_renderingContext);
+
+            _vrLeftFB->color()->texture()->bind(*_renderingContext, 0, EShader::Stage::Pixel);
+
+            const vr::Texture_t leftTexture = {
+                tauGetVRTextureHandle(_vrLeftFB->color()->texture().get()),
+                tauGetTextureType(RenderingMode::getGlobalMode()),
+                vr::ColorSpace_Gamma
+            };
+            vr::VRCompositor()->Submit(vr::Eye_Left, &leftTexture);
+
+            _vrLeftFB->color()->texture()->bind(*_renderingContext, 0, EShader::Stage::Pixel);
+        }
+
+        {
+            _globals->currentLeftEye = false;
+            _vrRightFB->bind(*_renderingContext);
+            _renderer->render();
+
+            const vr::Texture_t rightTexture = {
+                tauGetVRTextureHandle(_vrLeftFB->color()->texture().get()),
+                tauGetTextureType(RenderingMode::getGlobalMode()),
+                vr::ColorSpace_Gamma
+            };
+            vr::VRCompositor()->Submit(vr::Eye_Right, &rightTexture);
+            _vrRightFB->unbind(*_renderingContext);
+
+            _vrRightFB->bind(*_renderingContext, IFrameBuffer::AccessMode::Read);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+            _vrRightFB->unbind(*_renderingContext);
+        }
+
+        if(RenderingMode::getGlobalMode().isOpenGL())
+        {
+            if constexpr(true)
+            {
+                glFinish();
+            }
+        }
+
+        _renderingContext->swapFrame();
+
+        _renderer->postRender();
+    }
+    else
+    {
+        _renderer->preRender(delta);
+
+        _renderer->render();
+        _renderingContext->swapFrame();
+
+        _renderer->postRender();
+    }
 }
 
 void TauEditorApplication::renderFPS(const u32 ups, const u32 fps) noexcept
@@ -186,7 +302,7 @@ void TauEditorApplication::setupConfig() noexcept
     if(VFS::Instance().fileExists(CONFIG_PATH))
     {
         CPPRef<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
-        Config tmp = { false, 0, 0 };
+        Config tmp = { false, true, 0, 0 };
         const i32 read = configFile->readBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
         if(read != sizeof(tmp))
         {
@@ -270,6 +386,68 @@ void TauEditorApplication::onIncorrectContext(IncorrectContextException& ex) con
 {
     UNUSED(ex);
     _logger->trace("Incorrect Context Detected, Exiting.");
+}
+
+void TauEditorApplication::onBufferSafetyException(BufferSafetyException& ex) const noexcept
+{
+    const char* exMsg;
+    switch(ex.type())
+    {
+        case BufferSafetyException::DoubleBufferBind: exMsg = "Buffer double bound."; break;
+        case BufferSafetyException::DoubleBufferUnbind: exMsg = "Buffer double unbound."; break;
+        case BufferSafetyException::DoubleUniformBufferBind: exMsg = "Uniform Buffer double bound to shader pipeline."; break;
+        case BufferSafetyException::DoubleUniformBufferUnbind: exMsg = "Uniform Buffer double unbound from shader pipeline."; break;
+        case BufferSafetyException::ModifiedWithoutBegin: exMsg = "Modified buffer without call to beginModification."; break;
+        case BufferSafetyException::DoubleModifyBegin: exMsg = "Attempted to begin buffer modification twice."; break;
+        case BufferSafetyException::DoubleModifyEnd: exMsg = "Attempted to end buffer modification twice."; break;
+        case BufferSafetyException::ModifiedStaticBuffer: exMsg = "Attempted to modify a static buffer."; break;
+        case BufferSafetyException::Unknown:
+        default: exMsg = "Unknown Error"; break;
+    }
+
+    _logger->trace("Buffer safety error occured: {}", exMsg);
+}
+
+void TauEditorApplication::initVRControls() const noexcept
+{
+    const auto path = VFS::Instance().resolvePath("|TERes/vr/vr_actions.json");
+    vr::VRInput()->SetActionManifestPath(path.path.c_str());
+
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/in/Up", &_globals->vrHandles.moveUp);
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/in/Down", &_globals->vrHandles.moveDown);
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/in/MovePlane", &_globals->vrHandles.movePlane);
+
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/in/TriggerLeft", &_globals->vrHandles.triggerLeft);
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/in/TriggerRight", &_globals->vrHandles.triggerRight);
+
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/out/haptic_left", &_globals->vrHandles.hapticLeft);
+    vr::VRInput()->GetActionHandle("/actions/TauEditor/out/haptic_right", &_globals->vrHandles.hapticRight);
+
+    vr::VRInput()->GetActionSetHandle("/actions/TauEditor", &_globals->vrHandles.actionSet);
+
+    vr::VRInput()->GetInputSourceHandle("/user/hand/left", &_globals->vrHandles.sourceLeft);
+    vr::VRInput()->GetInputSourceHandle("/user/hand/right", &_globals->vrHandles.sourceRight);
+}
+
+void TauEditorApplication::initVRFrameBuffers() noexcept
+{
+    u32 width;
+    u32 height;
+    _vr->GetRecommendedRenderTargetSize(&width, &height);
+
+    CPPRef<IFrameBufferBuilder> fbBuilder = _renderingContext->createFrameBuffer();
+    IFrameBufferAttachment* color = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::Color, width, height);
+    IFrameBufferAttachment* depth = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::DepthStencil, width, height);
+    fbBuilder->attach(color);
+    fbBuilder->attach(depth);
+    _vrLeftFB = fbBuilder->build();
+
+    fbBuilder = _renderingContext->createFrameBuffer();
+    color = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::Color, width, height);
+    depth = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::DepthStencil, width, height);
+    fbBuilder->attach(color);
+    fbBuilder->attach(depth);
+    _vrRightFB = fbBuilder->build();
 }
 
 Application* startGame() noexcept

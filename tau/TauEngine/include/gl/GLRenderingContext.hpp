@@ -67,6 +67,8 @@ public:
 
     [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
+    HDC getHDC() const noexcept { return _device; }
+
     void deactivateContext() noexcept override final;
     void activateContext() noexcept override final;
 

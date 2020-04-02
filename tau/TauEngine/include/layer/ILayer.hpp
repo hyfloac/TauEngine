@@ -43,9 +43,30 @@ public:
 
     virtual void onAttach() noexcept { }
     virtual void onDetach() noexcept { }
+
     virtual void onUpdate(float fixedDelta) noexcept { }
-    virtual void onRender(const DeltaTime& delta) noexcept { }
     virtual void onEvent(Event& e) noexcept { }
+
+    /**
+     *   This should be used to update the state of any world
+     * objects including lerping and camera rotation. This is
+     * called once per render cycle.
+     */
+    virtual void onPreRender(const DeltaTime& delta) noexcept { }
+    /**
+     *   This should only be used to render the scene. Any updating
+     * of the world objects should be done in
+     * {@link onPreRender(const DeltaTime&) noexcept @endlink}.
+     * This may be called multiple times in a render cycle. This
+     * is done for the use of multiple render outputs like in VR.
+     */
+    virtual void onRender() noexcept { }
+    /**
+     *   This should be used to update the state of any objects
+     * you want after {@link onRender() noexcept @endlink}.
+     * This is called once per render cycle.
+     */
+    virtual void onPostRender() noexcept { }
 
 #if LAYER_GEN_NAMES
     [[nodiscard]] virtual const char* getName() const noexcept = 0;

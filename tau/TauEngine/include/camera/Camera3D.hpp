@@ -6,9 +6,10 @@
 #include "maths/Vector3f.hpp"
 #include "system/Keyboard.hpp"
 #include "Timings.hpp"
+#include "GameRecorder.hpp"
 
 #include <Objects.hpp>
-#include <GameRecorder.hpp>
+#include <openvr.h>
 
 class Window;
 
@@ -44,6 +45,7 @@ public:
 
     void setProjection(float width, float height, float fov, float zNear, float zFar) noexcept;
     void setProjection(const Window& window, float fov, float zNear, float zFar) noexcept;
+    void setProjection(const glm::mat4& projectionMatrix) noexcept { _projectionMatrix = projectionMatrix; }
 
     void position(const Vector3f pos) noexcept
     {
@@ -155,6 +157,7 @@ private:
 private:
     friend class FPSCamera3DController;
     friend class FreeCamCamera3DController;
+    friend class VRFreeCamCamera3DController;
 };
 
 class FPSCamera3DController final
@@ -332,3 +335,79 @@ private:
     void checkKeys() noexcept;
 };
 
+class VRFreeCamCamera3DController
+{
+    DEFAULT_DESTRUCT(VRFreeCamCamera3DController);
+    DEFAULT_COPY(VRFreeCamCamera3DController);
+private:
+    Camera3D _camera;
+    float _normalSpeed;
+    float _fastSpeed;
+    Vector3f _lastPos;
+    Vector3f _nextPos;
+    float _pitch;
+    float _yaw;
+    float _roll;
+    float _lerp;
+    float _maxLerp;
+    Vector3f _velocity;
+    vr::VRActionHandle_t _moveUp;
+    vr::VRActionHandle_t _moveDown;
+    vr::VRActionHandle_t _movePlane;
+
+    vr::VRActionSetHandle_t _actionSet;
+
+    vr::IVRSystem* _vr;
+
+    glm::mat4 _leftProjection;
+    glm::mat4 _rightProjection;
+    glm::mat4 _leftPos;
+    glm::mat4 _rightPos;
+
+    glm::mat4 _leftVP;
+    glm::mat4 _rightVP;
+public:
+    VRFreeCamCamera3DController(const Window& window, float fov, float zNear, float zFar,
+        const float normalSpeed, const float fastSpeed,
+        vr::VRActionHandle_t moveUp, vr::VRActionHandle_t moveDown, 
+        vr::VRActionHandle_t movePlane, vr::VRActionSetHandle_t actionSet, vr::IVRSystem* vr)
+        : _camera(window, fov, zNear, zFar),
+          _normalSpeed(normalSpeed), _fastSpeed(fastSpeed),
+          _lastPos(0.0f), _nextPos(0.0f),
+          _pitch(0.0f), _yaw(0.0f), _roll(0.0f),
+          _lerp(0.0f), _maxLerp(1.0f),
+          _velocity(0.0f),
+          _moveUp(moveUp), _moveDown(moveDown),
+          _movePlane(movePlane), _actionSet(actionSet), _vr(vr)
+    {
+        setupCamera(zNear, zFar);
+    }
+public:
+    void update(const DeltaTime& delta, const vr::TrackedDevicePose_t& pose) noexcept;
+
+    [[nodiscard]] const Camera3D& camera() const noexcept { return _camera; }
+    [[nodiscard]] Camera3D& camera() noexcept { return _camera; }
+
+    [[nodiscard]] const Camera3D* operator->() const noexcept { return &_camera; }
+    [[nodiscard]] Camera3D* operator->() noexcept { return &_camera; }
+
+    [[nodiscard]] float normalSpeed() const noexcept { return _normalSpeed; }
+    [[nodiscard]] float& normalSpeed() noexcept { return _normalSpeed; }
+
+    [[nodiscard]] float fastSpeed() const noexcept { return _fastSpeed; }
+    [[nodiscard]] float& fastSpeed() noexcept { return _fastSpeed; }
+
+    [[nodiscard]] Vector3f velocity() const noexcept { return _velocity; }
+
+    [[nodiscard]] const glm::mat4& leftVP() const noexcept { return _leftVP; }
+    [[nodiscard]] const glm::mat4& rightVP() const noexcept { return _rightVP; }
+public:
+    static bool buttonClicked(vr::VRActionHandle_t action, vr::VRInputValueHandle_t* devicePath = null) noexcept;
+    static glm::mat4 convertMatrix(const vr::HmdMatrix34_t& matPose) noexcept;
+private:
+    void checkKeys() noexcept;
+
+    void computeMatrix(vr::Hmd_Eye eye, const vr::TrackedDevicePose_t& pose) noexcept;
+
+    void setupCamera(float zNear, float zFar) noexcept;
+};

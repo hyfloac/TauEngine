@@ -84,6 +84,8 @@ public:
 
     static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Material& t) noexcept
     {
+        buffer->beginModification(context);
         buffer->modifyBuffer(0, sizeof(float), &t._specularExponent);
+        buffer->endModification(context);
     }
 };

@@ -1,6 +1,8 @@
 #include "gl/GLBuffer.hpp"
 #include "gl/gl4_5/GLBuffer4_5.hpp"
+#include "TauEngine.hpp"
 #include <Safeties.hpp>
+
 
 GLBuffer::GLBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor, const GLuint buffer, const GLenum glType, const GLenum glUsage) noexcept
     : IBuffer(type, usage, bufferSize, instanced, descriptor),
@@ -14,12 +16,74 @@ GLBuffer::~GLBuffer() noexcept
 
 void GLBuffer::bind(IRenderingContext& context) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
     glBindBuffer(this->_glType, this->_buffer);
 }
 
 void GLBuffer::unbind(IRenderingContext& context) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
     glBindBuffer(this->_glType, 0);
+}
+
+bool GLBuffer::beginModification(IRenderingContext& context) noexcept
+{
+#if TAU_BUFFER_SAFETY
+        ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount > 1)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            return false;
+        }
+  #endif
+#endif
+    bind(context);
+    return true;
+}
+
+void GLBuffer::endModification(IRenderingContext& context) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+    if(_modificationLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+    }
+  #endif
+#endif
+    unbind(context);
+}
+
+void GLBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    glBufferSubData(this->_glType, offset, size, data);
 }
 
 void GLBuffer::fillBuffer(IRenderingContext& context, const void* const data) noexcept
@@ -27,21 +91,6 @@ void GLBuffer::fillBuffer(IRenderingContext& context, const void* const data) no
     bind(context);
     glBufferData(this->_glType, _bufferSize, data, this->_glUsage);
     unbind(context);
-}
-
-void GLBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    bind(context);
-}
-
-void GLBuffer::endModification(IRenderingContext& context) noexcept
-{
-    unbind(context);
-}
-
-void GLBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    glBufferSubData(this->_glType, offset, size, data);
 }
 
 GLIndexBuffer::GLIndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const GLuint buffer, const GLenum glUsage) noexcept
@@ -56,12 +105,74 @@ GLIndexBuffer::~GLIndexBuffer() noexcept
 
 void GLIndexBuffer::bind(IRenderingContext& context) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_buffer);
 }
 
 void GLIndexBuffer::unbind(IRenderingContext& context) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+bool GLIndexBuffer::beginModification(IRenderingContext& context) noexcept
+{
+#if TAU_BUFFER_SAFETY
+        ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount > 1)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            return false;
+        }
+  #endif
+#endif
+    bind(context);
+    return true;
+}
+
+void GLIndexBuffer::endModification(IRenderingContext& context) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+    if(_modificationLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+    }
+  #endif
+#endif
+    unbind(context);
+}
+
+void GLIndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 
 void GLIndexBuffer::fillBuffer(IRenderingContext& context, const void* const data) noexcept
@@ -69,21 +180,6 @@ void GLIndexBuffer::fillBuffer(IRenderingContext& context, const void* const dat
     bind(context);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _bufferSize, data, this->_glUsage);
     unbind(context);
-}
-
-void GLIndexBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    bind(context);
-}
-
-void GLIndexBuffer::endModification(IRenderingContext& context) noexcept
-{
-    unbind(context);
-}
-
-void GLIndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 
 GLUniformBuffer::GLUniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const GLuint buffer, const GLenum glUsage) noexcept
@@ -98,22 +194,102 @@ GLUniformBuffer::~GLUniformBuffer() noexcept
 
 void GLUniformBuffer::bind(IRenderingContext& context) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
     glBindBuffer(GL_UNIFORM_BUFFER, _buffer);
 }
 
 void GLUniformBuffer::unbind(IRenderingContext& context) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void GLUniformBuffer::bind(IRenderingContext& context, EShader::Stage, const u32 index) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    ++_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_uniformBindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferBind);
+    }
+  #endif
+#endif
     glBindBufferBase(GL_UNIFORM_BUFFER, index, _buffer);
 }
 
 void GLUniformBuffer::unbind(IRenderingContext& context, EShader::Stage, const u32 index) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    --_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_uniformBindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferUnbind);
+    }
+  #endif
+#endif
     glBindBufferBase(GL_UNIFORM_BUFFER, index, 0);
+}
+
+bool GLUniformBuffer::beginModification(IRenderingContext& context) noexcept
+{
+#if TAU_BUFFER_SAFETY
+        ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount > 1)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            return false;
+        }
+  #endif
+#endif
+    bind(context);
+    return true;
+}
+
+void GLUniformBuffer::endModification(IRenderingContext& context) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+    if(_modificationLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+    }
+  #endif
+#endif
+    unbind(context);
+}
+
+void GLUniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
 void GLUniformBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
@@ -121,21 +297,6 @@ void GLUniformBuffer::fillBuffer(IRenderingContext& context, const void* data) n
     bind(context);
     glBufferData(GL_UNIFORM_BUFFER, _bufferSize, data, this->_glUsage);
     unbind(context);
-}
-
-void GLUniformBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    bind(context);
-}
-
-void GLUniformBuffer::endModification(IRenderingContext& context) noexcept
-{
-    unbind(context);
-}
-
-void GLUniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
 GLuint GLBuffer::createBuffer() noexcept

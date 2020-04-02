@@ -52,10 +52,12 @@ public:
     void generateMipmaps(IRenderingContext&) noexcept override;
 
     void set(IRenderingContext&, u32 level, const void* data) noexcept override;
-    void set(u32 level, const void* data) const noexcept;
+    virtual void set(u32 level, const void* data) const noexcept;
 
     void bind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override final;
     void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override final;
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
 };
 
 class TAU_DLL GLDepthTexture final : public GLTexture2D
@@ -84,6 +86,8 @@ public:
     ~GLTextureCube() noexcept override;
 
     [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
 
     void setCube(IRenderingContext&, u32 level, ETexture::CubeSide side, const void* data) noexcept override;
     void setCube(u32 level, ETexture::CubeSide side, const void* data) const noexcept;

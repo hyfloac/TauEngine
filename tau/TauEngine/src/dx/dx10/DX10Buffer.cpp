@@ -16,6 +16,101 @@ DX10Buffer::~DX10Buffer() noexcept
     _d3dBuffer = null;
 }
 
+void DX10Buffer::bind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
+}
+
+void DX10Buffer::unbind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
+}
+
+bool DX10Buffer::beginModification(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        void* bufferAccess;
+
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            _currentMapping = bufferAccess;
+
+#if TAU_BUFFER_SAFETY
+            ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+            if(_modificationLockCount > 1)
+            {
+                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+                return false;
+            }
+  #endif
+#endif
+            return true;
+        }
+    }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
+    return false;
+}
+
+void DX10Buffer::endModification(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        _d3dBuffer->Unmap();
+        _currentMapping = null;
+
+#if TAU_BUFFER_SAFETY
+        --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount < 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+        }
+  #endif
+#endif
+    }
+}
+
+void DX10Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+	if(_currentMapping)
+	{
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+	}
+}
+
 void DX10Buffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
@@ -29,37 +124,12 @@ void DX10Buffer::fillBuffer(IRenderingContext& context, const void* data) noexce
             _d3dBuffer->Unmap();
         }
     }
-}
-
-void DX10Buffer::beginModification(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
+    else
     {
-        void* bufferAccess;
-
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            _currentMapping = bufferAccess;
-        }
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
     }
-}
-
-void DX10Buffer::endModification(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
-    {
-        _d3dBuffer->Unmap();
-        _currentMapping = null;
-    }
-}
-
-void DX10Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-	if(_currentMapping)
-	{
-        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
-	}
 }
 
 DX10IndexBuffer::DX10IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
@@ -70,6 +140,101 @@ DX10IndexBuffer::~DX10IndexBuffer() noexcept
 {
     _d3dBuffer->Release();
     _d3dBuffer = null;
+}
+
+void DX10IndexBuffer::bind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
+}
+
+void DX10IndexBuffer::unbind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
+}
+
+bool DX10IndexBuffer::beginModification(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        void* bufferAccess;
+
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            _currentMapping = bufferAccess;
+
+#if TAU_BUFFER_SAFETY
+            ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+            if(_modificationLockCount > 1)
+            {
+                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+                return false;
+            }
+  #endif
+#endif
+            return true;
+        }
+    }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
+    return false;
+}
+
+void DX10IndexBuffer::endModification(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        _d3dBuffer->Unmap();
+        _currentMapping = null;
+
+#if TAU_BUFFER_SAFETY
+        --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount < 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+        }
+  #endif
+#endif
+    }
+}
+
+void DX10IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    if(_currentMapping)
+    {
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+    }
 }
 
 void DX10IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
@@ -85,36 +250,11 @@ void DX10IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) n
             _d3dBuffer->Unmap();
         }
     }
-}
-
-void DX10IndexBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
+    else
     {
-        void* bufferAccess;
-
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            _currentMapping = bufferAccess;
-        }
-    }
-}
-
-void DX10IndexBuffer::endModification(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
-    {
-        _d3dBuffer->Unmap();
-        _currentMapping = null;
-    }
-}
-
-void DX10IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    if(_currentMapping)
-    {
-        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
     }
 }
 
@@ -128,8 +268,43 @@ DX10UniformBuffer::~DX10UniformBuffer() noexcept
     _d3dBuffer = null;
 }
 
-void DX10UniformBuffer::bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept
+void DX10UniformBuffer::bind(IRenderingContext&) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
+}
+
+void DX10UniformBuffer::unbind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
+}
+
+void DX10UniformBuffer::bind(IRenderingContext& context, const EShader::Stage stage, const u32 index) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    ++_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_uniformBindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferBind);
+    }
+  #endif
+#endif
     if(RTT_CHECK(context, DX10RenderingContext))
     {
         auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
@@ -153,6 +328,109 @@ void DX10UniformBuffer::bind(IRenderingContext& context, EShader::Stage stage, u
     }
 }
 
+void DX10UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_uniformBindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferUnbind);
+    }
+  #endif
+#endif
+    if(RTT_CHECK(context, DX10RenderingContext))
+    {
+        auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
+        switch(stage)
+        {
+            case EShader::Stage::Vertex:
+                ctx.d3dDevice()->VSSetConstantBuffers(index, 0, null);
+                break;
+            case EShader::Stage::Geometry:
+                ctx.d3dDevice()->GSSetConstantBuffers(index, 0, null);
+                break;
+            case EShader::Stage::Pixel:
+                ctx.d3dDevice()->PSSetConstantBuffers(index, 0, null);
+                break;
+            default: break;
+        }
+    }
+    else
+    {
+        TAU_THROW(IncorrectContextException);
+    }
+}
+
+bool DX10UniformBuffer::beginModification(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        void* bufferAccess;
+
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            _currentMapping = bufferAccess;
+
+#if TAU_BUFFER_SAFETY
+            ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+            if(_modificationLockCount > 1)
+            {
+                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+                return false;
+            }
+  #endif
+#endif
+            return true;
+        }
+    }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
+    return false;
+}
+
+void DX10UniformBuffer::endModification(IRenderingContext& context) noexcept
+{
+    if(DX10Buffer::canReWrite(_usage))
+    {
+        _d3dBuffer->Unmap();
+        _currentMapping = null;
+
+#if TAU_BUFFER_SAFETY
+        --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount < 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+        }
+  #endif
+#endif
+    }
+}
+
+void DX10UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    if(_currentMapping)
+    {
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+    }
+}
+
 void DX10UniformBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
@@ -166,36 +444,11 @@ void DX10UniformBuffer::fillBuffer(IRenderingContext& context, const void* data)
             _d3dBuffer->Unmap();
         }
     }
-}
-
-void DX10UniformBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
+    else
     {
-        void* bufferAccess;
-
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            _currentMapping = bufferAccess;
-        }
-    }
-}
-
-void DX10UniformBuffer::endModification(IRenderingContext& context) noexcept
-{
-    if(DX10Buffer::canReWrite(_usage))
-    {
-        _d3dBuffer->Unmap();
-        _currentMapping = null;
-    }
-}
-
-void DX10UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    if(_currentMapping)
-    {
-        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
     }
 }
 

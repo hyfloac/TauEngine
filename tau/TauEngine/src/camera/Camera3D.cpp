@@ -243,3 +243,134 @@ RunTimeType<GameRecorder::Blip> FreeCamCamera3DController::cameraBlip() noexcept
     static RunTimeType<GameRecorder::Blip> type = RunTimeType<GameRecorder::Blip>::define();
     return type;
 }
+
+void VRFreeCamCamera3DController::update(const DeltaTime& delta, const vr::TrackedDevicePose_t& pose) noexcept
+{
+    static constexpr float moveFactor = 1.0f;
+
+    checkKeys();
+
+    Vector3f rot(RAD_2_DEG(pose.vAngularVelocity.v[0]), RAD_2_DEG(pose.vAngularVelocity.v[1]), RAD_2_DEG(pose.vAngularVelocity.v[2]));
+    rot /= 90.0f;
+    // rot *= delta.microseconds();
+
+    _camera._pitch += -rot.x();
+    _camera._yaw += rot.y();
+    _camera._roll += rot.z();
+
+    // Vector3f vel(RAD_2_DEG(pose.vVelocity.v[0]), RAD_2_DEG(pose.vVelocity.v[1]), RAD_2_DEG(pose.vVelocity.v[2]));
+    // vel *= moveFactor;
+
+    // const Vector3f deltaVelocity = ((_velocity * delta.microseconds()) / 1000000.0f) + vel;
+    //
+    // const bool dvx = deltaVelocity.x() != 0.0f;
+    // const bool dvy = deltaVelocity.y() != 0.0f;
+    // const bool dvz = deltaVelocity.z() != 0.0f;
+    //
+    // if(dvx || dvy || dvz)
+    // {
+    //     _camera._position.y() -= deltaVelocity.y();
+    //
+    //     const SinCos<float> yawSC = fastSinCosD(_yaw);
+    //
+    //     if(dvx)
+    //     {
+    //         _camera._position.x() += deltaVelocity.x() * yawSC.sin;
+    //         _camera._position.z() -= deltaVelocity.x() * yawSC.cos;
+    //     }
+    //
+    //     if(dvz)
+    //     {
+    //         _camera._position.z() -= deltaVelocity.z() * -yawSC.sin;
+    //         _camera._position.x() += deltaVelocity.z() * yawSC.cos;
+    //     }
+    // }
+    _camera.computeQuat();
+    _camera.recomputeMatrices();
+
+    computeMatrix(vr::Eye_Left, pose);
+    computeMatrix(vr::Eye_Right, pose);
+}
+
+void VRFreeCamCamera3DController::checkKeys() noexcept
+{
+    _velocity = 0.0f;
+
+    float speed = _normalSpeed;
+
+    if constexpr(false)
+    {
+        speed = _fastSpeed;
+    }
+
+    vr::InputAnalogActionData_t analogData;
+    if(vr::VRInput()->GetAnalogActionData(_movePlane, &analogData, sizeof(analogData), vr::k_ulInvalidInputValueHandle) == vr::VRInputError_None && analogData.bActive)
+    {
+        // Pushing forward on the joystick increases its y value,
+        // but forward movement is on the x axis.
+        _velocity.x() = analogData.y;
+        _velocity.z() = analogData.x;
+    }
+
+    if(buttonClicked(_moveUp)) { _velocity.y() += speed; }
+    if(buttonClicked(_moveDown)) { _velocity.y() -= speed; }
+}
+
+bool VRFreeCamCamera3DController::buttonClicked(vr::VRActionHandle_t action, vr::VRInputValueHandle_t* devicePath) noexcept
+{
+    vr::InputDigitalActionData_t actionData;
+    vr::VRInput()->GetDigitalActionData(action, &actionData, sizeof(actionData), vr::k_ulInvalidInputValueHandle);
+    if(devicePath)
+    {
+        *devicePath = vr::k_ulInvalidInputValueHandle;
+        if(actionData.bActive)
+        {
+            vr::InputOriginInfo_t originInfo;
+            if(vr::VRInput()->GetOriginTrackedDeviceInfo(actionData.activeOrigin, &originInfo, sizeof(originInfo)) == vr::VRInputError_None)
+            {
+                *devicePath = originInfo.devicePath;
+            }
+        }
+    }
+    return actionData.bActive && actionData.bState;
+}
+
+glm::mat4 VRFreeCamCamera3DController::convertMatrix(const vr::HmdMatrix34_t& matPose) noexcept
+{
+    glm::mat4 mat(1.0f);
+
+    for(uSys y = 0; y < 4; ++y)
+    {
+        for(uSys x = 0; x < 3; ++x)
+        {
+            mat[x][y] = matPose.m[x][y];
+        }
+        mat[3][y] = 0.0f;
+    }
+    mat[3][3] = 1.0f;
+
+    return glm::inverse(mat);
+}
+
+void VRFreeCamCamera3DController::computeMatrix(const vr::Hmd_Eye eye, const vr::TrackedDevicePose_t& pose) noexcept
+{
+    if(eye == vr::Eye_Left)
+    {
+        _leftVP = _leftProjection * _leftPos * convertMatrix(pose.mDeviceToAbsoluteTracking);
+    }
+    else if(eye == vr::Eye_Right)
+    {
+        _rightVP = _rightProjection * _rightPos * convertMatrix(pose.mDeviceToAbsoluteTracking);
+    }
+}
+
+void VRFreeCamCamera3DController::setupCamera(const float zNear, const float zFar) noexcept
+{
+    vr::HmdMatrix44_t leftProj = _vr->GetProjectionMatrix(vr::Eye_Left, zNear, zFar);
+    vr::HmdMatrix44_t rightProj = _vr->GetProjectionMatrix(vr::Eye_Right, zNear, zFar);
+    _leftProjection = reinterpret_cast<glm::mat4&>(leftProj);
+    _rightProjection = reinterpret_cast<glm::mat4&>(rightProj);
+
+    _leftPos = convertMatrix(_vr->GetEyeToHeadTransform(vr::Eye_Left));
+    _rightPos = convertMatrix(_vr->GetEyeToHeadTransform(vr::Eye_Right));
+}

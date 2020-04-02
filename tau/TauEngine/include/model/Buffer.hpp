@@ -12,6 +12,57 @@
 #include "model/BufferEnums.hpp"
 #include "model/BufferDescriptor.hpp"
 
+#ifndef TAU_BUFFER_SAFETY
+  #if defined(TAU_PRODUCTION)
+    #define TAU_BUFFER_SAFETY 0
+  #else
+    #define TAU_BUFFER_SAFETY 1
+  #endif
+#endif
+
+#if TAU_BUFFER_SAFETY
+  #ifndef TAU_BUFFER_SAFETY_DOUBLE_BIND
+    #define TAU_BUFFER_SAFETY_DOUBLE_BIND 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    #define TAU_BUFFER_SAFETY_DOUBLE_UNBIND 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_BIND
+    #define TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_BIND 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_UNBIND
+    #define TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_UNBIND 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    #define TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+    #define TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_DOUBLE_MODIFY_END
+    #define TAU_BUFFER_SAFETY_DOUBLE_MODIFY_END 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+    #define TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER 1
+  #endif
+#else
+  #define TAU_BUFFER_SAFETY_DOUBLE_BIND            0
+  #define TAU_BUFFER_SAFETY_DOUBLE_UNBIND          0
+  #define TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_BIND    0
+  #define TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_UNBIND  0
+  #define TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN   0
+  #define TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN    0
+  #define TAU_BUFFER_SAFETY_DOUBLE_MODIFY_END      0
+  #define TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER 0
+#endif
+
 #define BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                 RTT_IMPL(_TYPE, IBuffer)
 
@@ -37,9 +88,17 @@ protected:
     uSys _bufferSize;
     bool _instanced;
     BufferDescriptor _descriptor;
+
+#if TAU_BUFFER_SAFETY
+    iSys _modificationLockCount;
+    iSys _bindLockCount;
+#endif
 protected:
     IBuffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor) noexcept
         : _type(type), _usage(usage), _bufferSize(bufferSize), _instanced(instanced), _descriptor(descriptor)
+#if TAU_BUFFER_SAFETY
+        , _modificationLockCount(0), _bindLockCount(0)
+#endif
     { }
 public:
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return _type; }
@@ -51,19 +110,20 @@ public:
     [[nodiscard]] inline BufferDescriptor& descriptor() noexcept { return _descriptor; }
 
     virtual void bind(IRenderingContext& context) noexcept = 0;
-
     virtual void unbind(IRenderingContext& context) noexcept = 0;
 
-    virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
-
-    virtual void beginModification(IRenderingContext& context) noexcept = 0;
+    virtual bool beginModification(IRenderingContext& context) noexcept = 0;
     virtual void endModification(IRenderingContext& context) noexcept = 0;
 
     virtual void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept = 0;
+    virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
 	template<typename _T>
-	void modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
-    { modifyBuffer(offset, sizeof(_T), &data); }
+	::std::intptr_t modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
+	{
+	    modifyBuffer(offset, sizeof(_T), &data);
+        return offset + sizeof(_T);
+	}
 	
     RTT_BASE_IMPL(IBuffer);
     RTT_BASE_CHECK(IBuffer);
@@ -77,9 +137,17 @@ class TAU_DLL NOVTABLE IIndexBuffer
 protected:
     EBuffer::UsageType _usage;
     uSys _bufferSize;
+
+#if TAU_BUFFER_SAFETY
+    iSys _modificationLockCount;
+    iSys _bindLockCount;
+#endif
 protected:
     IIndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize) noexcept
         : _usage(usage), _bufferSize(bufferSize)
+#if TAU_BUFFER_SAFETY
+        , _modificationLockCount(0), _bindLockCount(0)
+#endif
     { }
 public:
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return EBuffer::Type::IndexBuffer; }
@@ -87,15 +155,13 @@ public:
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
 
     virtual void bind(IRenderingContext& context) noexcept = 0;
-
     virtual void unbind(IRenderingContext& context) noexcept = 0;
 
-    virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
-
-    virtual void beginModification(IRenderingContext& context) noexcept = 0;
+    virtual bool beginModification(IRenderingContext& context) noexcept = 0;
     virtual void endModification(IRenderingContext& context) noexcept = 0;
 
     virtual void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept = 0;
+    virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
 	template<typename _T>
 	void modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
@@ -113,9 +179,18 @@ class TAU_DLL NOVTABLE IUniformBuffer
 protected:
     EBuffer::UsageType _usage;
     uSys _bufferSize;
+
+#if TAU_BUFFER_SAFETY
+    iSys _modificationLockCount;
+    iSys _bindLockCount;
+    iSys _uniformBindLockCount;
+#endif
 protected:
     IUniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize) noexcept
         : _usage(usage), _bufferSize(bufferSize)
+#if TAU_BUFFER_SAFETY
+        , _modificationLockCount(0), _bindLockCount(0), _uniformBindLockCount(0)
+#endif
     { }
 public:
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return EBuffer::Type::UniformBuffer; }
@@ -128,12 +203,11 @@ public:
     virtual void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
     virtual void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
 
-    virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
-	
-    virtual void beginModification(IRenderingContext& context) noexcept = 0;
+    virtual bool beginModification(IRenderingContext& context) noexcept = 0;
     virtual void endModification(IRenderingContext& context) noexcept = 0;
 
     virtual void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept = 0;
+    virtual void fillBuffer(IRenderingContext& context, const void* data) noexcept = 0;
 
 	template<typename _T>
 	void modifyBuffer(::std::intptr_t offset, const _T& data) noexcept
@@ -342,3 +416,37 @@ public:
     [[nodiscard]] virtual NullableReferenceCountingPointer<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
+
+#if TAU_BUFFER_SAFETY
+#include "events/Exception.hpp"
+
+class BufferSafetyException final : public Exception
+{
+public:
+    enum Type
+    {
+        Unknown = 0,
+        DoubleBufferBind,
+        DoubleBufferUnbind,
+        DoubleUniformBufferBind,
+        DoubleUniformBufferUnbind,
+        ModifiedWithoutBegin,
+        DoubleModifyBegin,
+        DoubleModifyEnd,
+        ModifiedStaticBuffer
+    };
+private:
+    Type _type;
+public:
+    inline BufferSafetyException(Type type) noexcept
+        : _type(type)
+    { }
+
+    ~BufferSafetyException() noexcept override = default;
+
+    [[nodiscard]] inline Type type() const noexcept { return _type; }
+
+    EXCEPTION_IMPL(BufferSafetyException);
+};
+
+#endif

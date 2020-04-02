@@ -61,7 +61,6 @@ void main(void)
     vec3 spot  =  computeSpotLight(spotLight,  viewPos, fPosition, normalTransformed, diffuseSample, specularSample, material.specularExponent);
 
     vec3 result = point + spot;
-    result /= 2.0;
 
     // if(gl_FragCoord.x < 400)
     // {
@@ -71,6 +70,8 @@ void main(void)
     // {
     //     // result = normalSample;
     // }
+
+    // result = (normalTransformed + 1.0) / 2.0;
 
     fragColor = vec4(result, 1.0);
     // fragColor = vec4(spot, 1.0);

@@ -9,9 +9,10 @@
 #include "Config.h"
 #include <system/RenderingContext.hpp>
 #include <Objects.hpp>
-
 #include "Globals.hpp"
-#include "system/GraphicsInterface.hpp"
+#include <system/GraphicsInterface.hpp>
+#include <openvr.h>
+#include <texture/FrameBuffer.hpp>
 
 static void onWindowEvent(void* param, WindowEvent& e) noexcept;
 
@@ -26,9 +27,18 @@ private:
     NullableRef<IRenderingContext> _renderingContext;
     CPPRef<spdlog::logger> _logger;
     TERenderer* _renderer;
+    vr::IVRSystem* _vr;
     State _gameState;
     Globals* _globals;
     GameRecorder _gr;
+
+    glm::mat4 _vrProjLeft;
+    glm::mat4 _vrProjRight;
+
+    IFrameBuffer* _vrLeftFB;
+    IFrameBuffer* _vrRightFB;
+
+    u32 _width, _height;
 public:
     TauEditorApplication() noexcept;
 
@@ -63,6 +73,10 @@ private:
     bool onWindowResize(WindowResizeEvent& e) const noexcept;
 
     void onIncorrectContext(IncorrectContextException& ex) const noexcept;
+    void onBufferSafetyException(BufferSafetyException& ex) const noexcept;
+
+    void initVRControls() const noexcept;
+    void initVRFrameBuffers() noexcept;
 public:
     friend void onWindowEvent(void* param, WindowEvent& e) noexcept;
 };

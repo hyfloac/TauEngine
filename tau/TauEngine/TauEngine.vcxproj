@@ -108,6 +108,7 @@
     <ClCompile Include="src\maths\Vector4f.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
     <ClCompile Include="src\VirtualIO.cpp" />
+    <ClCompile Include="src\vr\VRUtils.cpp" />
     <ClCompile Include="src\win32\Win32Mouse.cpp" />
     <ClCompile Include="src\win32\Win32Keyboard.cpp" />
     <ClCompile Include="src\win32\Win32SystemInterface.cpp" />
@@ -251,6 +252,7 @@
     <ClInclude Include="include\ui\UIElement.hpp" />
     <ClInclude Include="include\ui\UIPanel.hpp" />
     <ClInclude Include="include\ui\UIText.hpp" />
+    <ClInclude Include="include\vr\VRUtils.hpp" />
     <ClInclude Include="include\WorldObject.hpp" />
     <ClInclude Include="include\model\Material.hpp" />
   </ItemGroup>
@@ -331,29 +333,29 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
@@ -361,9 +363,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>

@@ -40,7 +40,7 @@ public:
 
     void print(const DynString& str) noexcept;
 
-    void onRender(const DeltaTime& delta) noexcept override;
+    void onRender() noexcept override;
     void onUpdate(float fixedDelta) noexcept override;
     void onEvent(Event& e) noexcept override;
 private:

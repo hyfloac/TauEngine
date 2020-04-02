@@ -6,6 +6,7 @@
 struct Config final
 {
     bool vsync;
+    bool useVR;
     u32 windowWidth;
     u32 windowHeight;
 };

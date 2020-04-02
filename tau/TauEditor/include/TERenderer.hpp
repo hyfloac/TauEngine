@@ -42,7 +42,10 @@ public:
     [[nodiscard]] const Camera3D& camera3D() const noexcept { return *_camera3D; }
     [[nodiscard]] Camera3D& camera3D() noexcept { return *_camera3D; }
 
-    void render(const DeltaTime& delta) noexcept;
+    void preRender(const DeltaTime& delta) noexcept;
+    void render() noexcept;
+    void postRender() noexcept;
+
     void update(const float fixedDelta) noexcept;
     void onEvent(Event& e) noexcept;
 private:

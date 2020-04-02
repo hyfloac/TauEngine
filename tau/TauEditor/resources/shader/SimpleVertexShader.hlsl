@@ -11,7 +11,6 @@ struct PSInput
     float4 svPosition : SV_POSITION;
     float3 position : POSITION;
     float2 texCoord : TEXCOORD;
-    float3 normal : NORMAL;
     float3x3 tbn : TBN;
 };
 
@@ -31,8 +30,8 @@ PSInput vsMain(VSInput input)
     svPos = mul(view, svPos);
     svPos = mul(projection, svPos);
 
-    float3 T = normalize(mul(float4(input.tangent, 0.0f), model).xyz);
-    float3 N = normalize(mul(float4(input.normal,  0.0f), model).xyz);
+    float3 T = normalize(mul(model, float4(input.tangent, 0.0f)).xyz);
+    float3 N = normalize(mul(model, float4(input.normal,  0.0f)).xyz);
     T = normalize(T - dot(T, N) * N);
     float3 B = cross(N, T);
 
@@ -44,7 +43,6 @@ PSInput vsMain(VSInput input)
     output.svPosition = svPos;
     output.position = pos.xyz;
     output.texCoord = input.texCoord;
-    output.normal = input.normal;
     output.tbn = TBN;
 
     return output;

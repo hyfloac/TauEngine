@@ -67,6 +67,10 @@ private:
     glm::mat4 _modelViewMatrix;
 
     std::vector<CPPRef<RenderableObject>> _objects;
+
+    vr::TrackedDevicePose_t _poses[vr::k_unMaxTrackedDeviceCount];
+    vr::TrackedDevicePose_t _validPoses[vr::k_unMaxTrackedDeviceCount];
+    uSys _validPoseCount;
 public:
     Layer3D(Globals& globals) noexcept;
 
@@ -74,10 +78,10 @@ public:
     [[nodiscard]] const FreeCamCamera3DController& camera() const noexcept { return _camera; }
 
     void onUpdate(float fixedDelta) noexcept override;
-
-    void onRender(const DeltaTime& delta) noexcept override;
-
     void onEvent(Event& e) noexcept override;
+
+    void onPreRender(const DeltaTime& delta) noexcept override;
+    void onRender() noexcept override;
 
     bool onWindowResize(WindowResizeEvent& e) noexcept;
 };

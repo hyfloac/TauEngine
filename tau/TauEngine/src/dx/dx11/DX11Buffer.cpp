@@ -21,6 +21,106 @@ DX11Buffer::~DX11Buffer() noexcept
     { TAU_THROW(IncorrectContextException); } \
     auto& ctx = reinterpret_cast<DX11RenderingContext&>(context)
 
+
+void DX11Buffer::bind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
+}
+
+void DX11Buffer::unbind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
+}
+
+bool DX11Buffer::beginModification(IRenderingContext& context) noexcept
+{
+    CTX();
+
+    if(DX11Buffer::canReWrite(_usage))
+    {
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+
+        const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            _currentMapping = bufferAccess.pData;
+
+#if TAU_BUFFER_SAFETY
+            ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+            if(_modificationLockCount > 1)
+            {
+                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+                return false;
+            }
+  #endif
+#endif
+            return true;
+        }
+    }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
+    return false;
+}
+
+void DX11Buffer::endModification(IRenderingContext& context) noexcept
+{
+    CTX();
+
+    if(DX11Buffer::canReWrite(_usage))
+    {
+        ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
+        _currentMapping = null;
+
+#if TAU_BUFFER_SAFETY
+        --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount < 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+        }
+  #endif
+#endif
+    }
+}
+
+void DX11Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+	if(_currentMapping)
+	{
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+	}
+}
+
 void DX11Buffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
 {
     CTX();
@@ -36,9 +136,51 @@ void DX11Buffer::fillBuffer(IRenderingContext& context, const void* data) noexce
             ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         }
     }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
 }
 
-void DX11Buffer::beginModification(IRenderingContext& context) noexcept
+DX11IndexBuffer::DX11IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D11Buffer* const d3dBuffer) noexcept
+    : IIndexBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer), _currentMapping(null)
+{ }
+
+DX11IndexBuffer::~DX11IndexBuffer() noexcept
+{
+    _d3dBuffer->Release();
+    _d3dBuffer = null;
+}
+
+void DX11IndexBuffer::bind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
+}
+
+void DX11IndexBuffer::unbind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
+}
+
+bool DX11IndexBuffer::beginModification(IRenderingContext& context) noexcept
 {
     CTX();
 
@@ -50,11 +192,30 @@ void DX11Buffer::beginModification(IRenderingContext& context) noexcept
         if(!FAILED(h))
         {
             _currentMapping = bufferAccess.pData;
+
+#if TAU_BUFFER_SAFETY
+            ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+            if(_modificationLockCount > 1)
+            {
+                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+                return false;
+            }
+  #endif
+#endif
+            return true;
         }
     }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
+    return false;
 }
 
-void DX11Buffer::endModification(IRenderingContext& context) noexcept
+void DX11IndexBuffer::endModification(IRenderingContext& context) noexcept
 {
     CTX();
 
@@ -62,25 +223,34 @@ void DX11Buffer::endModification(IRenderingContext& context) noexcept
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         _currentMapping = null;
+
+#if TAU_BUFFER_SAFETY
+        --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount < 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+        }
+  #endif
+#endif
     }
 }
 
-void DX11Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+void DX11IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
 {
-	if(_currentMapping)
-	{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    if(_currentMapping)
+    {
         ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
-	}
-}
-
-DX11IndexBuffer::DX11IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D11Buffer* const d3dBuffer) noexcept
-    : IIndexBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer), _currentMapping(null)
-{ }
-
-DX11IndexBuffer::~DX11IndexBuffer() noexcept
-{
-    _d3dBuffer->Release();
-    _d3dBuffer = null;
+    }
 }
 
 void DX11IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
@@ -98,40 +268,11 @@ void DX11IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) n
             ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         }
     }
-}
-
-void DX11IndexBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    CTX();
-
-    if(DX11Buffer::canReWrite(_usage))
+    else
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
-
-        const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            _currentMapping = bufferAccess.pData;
-        }
-    }
-}
-
-void DX11IndexBuffer::endModification(IRenderingContext& context) noexcept
-{
-    CTX();
-
-    if(DX11Buffer::canReWrite(_usage))
-    {
-        ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
-        _currentMapping = null;
-    }
-}
-
-void DX11IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    if(_currentMapping)
-    {
-        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
     }
 }
 
@@ -145,8 +286,43 @@ DX11UniformBuffer::~DX11UniformBuffer() noexcept
     _d3dBuffer = null;
 }
 
+void DX11UniformBuffer::bind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    ++_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_bindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
+    }
+  #endif
+#endif
+}
+
+void DX11UniformBuffer::unbind(IRenderingContext&) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_bindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
+    if(_bindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
+    }
+  #endif
+#endif
+}
+
 void DX11UniformBuffer::bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept
 {
+#if TAU_BUFFER_SAFETY
+    ++_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_uniformBindLockCount > 1)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferBind);
+    }
+  #endif
+#endif
     if(RTT_CHECK(context, DX11RenderingContext))
     {
         auto& ctx = reinterpret_cast<DX11RenderingContext&>(context);
@@ -176,6 +352,119 @@ void DX11UniformBuffer::bind(IRenderingContext& context, EShader::Stage stage, u
     }
 }
 
+void DX11UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+    if(_uniformBindLockCount < 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferBind);
+    }
+  #endif
+#endif
+    if(RTT_CHECK(context, DX11RenderingContext))
+    {
+        auto& ctx = reinterpret_cast<DX11RenderingContext&>(context);
+        switch(stage)
+        {
+            case EShader::Stage::Vertex:
+                ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 0, null);
+                break;
+            case EShader::Stage::Hull:
+                ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 0, null);
+                break;
+            case EShader::Stage::Domain:
+                ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 0, null);
+                break;
+            case EShader::Stage::Geometry:
+                ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 0, null);
+                break;
+            case EShader::Stage::Pixel:
+                ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 0, null);
+                break;
+            default: break;
+        }
+    }
+    else
+    {
+        TAU_THROW(IncorrectContextException);
+    }
+}
+
+bool DX11UniformBuffer::beginModification(IRenderingContext& context) noexcept
+{
+    CTX();
+
+    if(DX11Buffer::canReWrite(_usage))
+    {
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+
+        const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
+        if(!FAILED(h))
+        {
+            _currentMapping = bufferAccess.pData;
+
+#if TAU_BUFFER_SAFETY
+            ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+            if(_modificationLockCount > 1)
+            {
+                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+                return false;
+            }
+  #endif
+#endif
+            return true;
+        }
+    }
+    else
+    {
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
+    }
+    return false;
+}
+
+void DX11UniformBuffer::endModification(IRenderingContext& context) noexcept
+{
+    CTX();
+
+    if(DX11Buffer::canReWrite(_usage))
+    {
+        ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
+        _currentMapping = null;
+
+#if TAU_BUFFER_SAFETY
+        --_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount < 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+        }
+  #endif
+#endif
+    }
+}
+
+void DX11UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+{
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
+    if(_modificationLockCount <= 0)
+    {
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedWithoutBegin);
+        return;
+    }
+  #endif
+#endif
+    if(_currentMapping)
+    {
+        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+    }
+}
+
 void DX11UniformBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
 {
     CTX();
@@ -191,40 +480,11 @@ void DX11UniformBuffer::fillBuffer(IRenderingContext& context, const void* data)
             ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         }
     }
-}
-
-void DX11UniformBuffer::beginModification(IRenderingContext& context) noexcept
-{
-    CTX();
-
-    if(DX11Buffer::canReWrite(_usage))
+    else
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
-
-        const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
-        if(!FAILED(h))
-        {
-            _currentMapping = bufferAccess.pData;
-        }
-    }
-}
-
-void DX11UniformBuffer::endModification(IRenderingContext& context) noexcept
-{
-    CTX();
-
-    if(DX11Buffer::canReWrite(_usage))
-    {
-        ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
-        _currentMapping = null;
-    }
-}
-
-void DX11UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
-{
-    if(_currentMapping)
-    {
-        ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
+#if TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
+        TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
+#endif
     }
 }
 

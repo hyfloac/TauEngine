@@ -68,9 +68,7 @@ public:
 
     void set(IRenderingContext& context, const _T& t) noexcept
     {
-        _buffer->bind(context);
         UniformAccessor<_T>::set(context, _buffer, t);
-        _buffer->unbind(context);
     }
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
@@ -106,9 +104,7 @@ public:
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        _buffer->bind(context);
         UniformAccessor<_T>::set(context, _buffer, _t);
-        _buffer->unbind(context);
         _buffer->bind(context, stage, index);
     }
 
@@ -137,9 +133,7 @@ public:
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        _buffer->bind(context);
         UniformAccessor<_T>::set(context, _buffer, *_t);
-        _buffer->unbind(context);
         _buffer->bind(context, stage, index);
     }
 

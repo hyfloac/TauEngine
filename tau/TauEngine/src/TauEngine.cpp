@@ -5,6 +5,7 @@
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
 #include "system/SystemInterface.hpp"
+#include <Utils.hpp>
 
 bool tauInit() noexcept
 {
@@ -39,7 +40,7 @@ void tauFinalize() noexcept
 
 static ExceptionData exData = { null, 0, "", "" };
 
-#if defined(_DEBUG)
+#if !defined(TAU_PRODUCTION)
 void tauThrowException(Exception& e, const uSys line, const char* const file, const char* const func) noexcept
 {
     exData.ex = &e;
@@ -47,6 +48,7 @@ void tauThrowException(Exception& e, const uSys line, const char* const file, co
     exData.file = file;
     exData.func = func;
     tauExit(-1);
+    DEBUG_BREAK;
 }
 #else
 void tauThrowException(Exception& e) noexcept

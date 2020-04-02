@@ -45,7 +45,7 @@ GLRasterizerState* GLRasterizerStateBuilder::build(const RasterizerArgs& args, E
     { return null; }
 
     GLRasterizerState* const state = new(::std::nothrow) GLRasterizerState(args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode);
-    ERROR_CODE_COND_F(!state, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, state);
 }
@@ -57,7 +57,7 @@ GLRasterizerState* GLRasterizerStateBuilder::build(const RasterizerArgs& args, E
     { return null; }
 
     GLRasterizerState* const state = allocator.allocateT<GLRasterizerState>(args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode);
-    ERROR_CODE_COND_F(!state, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, state);
 }
@@ -69,7 +69,7 @@ CPPRef<IRasterizerState> GLRasterizerStateBuilder::buildCPPRef(const RasterizerA
     { return null; }
 
     const CPPRef<GLRasterizerState> state = CPPRef<GLRasterizerState>(new(::std::nothrow) GLRasterizerState(args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode));
-    ERROR_CODE_COND_F(!state, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, state);
 }
@@ -81,7 +81,7 @@ NullableRef<IRasterizerState> GLRasterizerStateBuilder::buildTauRef(const Raster
     { return null; }
 
     const NullableRef<GLRasterizerState> state(allocator, args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode);
-    ERROR_CODE_COND_F(!state, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, RefCast<IRasterizerState>(state));
 }
@@ -93,7 +93,7 @@ NullableStrongRef<IRasterizerState> GLRasterizerStateBuilder::buildTauSRef(const
     { return null; }
 
     const NullableStrongRef<GLRasterizerState> state(allocator, args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode);
-    ERROR_CODE_COND_F(!state, Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, RefCast<IRasterizerState>(state));
 }

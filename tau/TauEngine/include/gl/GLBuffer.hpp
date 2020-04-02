@@ -12,13 +12,9 @@ class TAU_DLL GLBuffer final : public IBuffer
     BUFFER_IMPL(GLBuffer);
 public:
     static GLenum getGLType(EBuffer::Type bt) noexcept;
-
     static EBuffer::Type getType(GLenum bt) noexcept;
-
     static GLenum getGLUsageType(EBuffer::UsageType usage) noexcept;
-
     static EBuffer::UsageType getUsageType(GLenum usage) noexcept;
-
     static GLuint createBuffer() noexcept;
 private:
     GLuint _buffer;
@@ -32,12 +28,11 @@ public:
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
 
-    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-
-    void beginModification(IRenderingContext& context) noexcept override;
+    bool beginModification(IRenderingContext& context) noexcept override;
     void endModification(IRenderingContext& context) noexcept override;
 
     void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
+    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 };
 
 class TAU_DLL GLIndexBuffer final : public IIndexBuffer
@@ -54,12 +49,11 @@ public:
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
 
-    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-
-    void beginModification(IRenderingContext& context) noexcept override;
+    bool beginModification(IRenderingContext& context) noexcept override;
     void endModification(IRenderingContext& context) noexcept override;
 
     void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
+    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 private:
     friend class GLIndexBufferBuilder;
 };
@@ -81,12 +75,11 @@ public:
     void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
     void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
 
-    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
-
-    void beginModification(IRenderingContext& context) noexcept override;
+    bool beginModification(IRenderingContext& context) noexcept override;
     void endModification(IRenderingContext& context) noexcept override;
 
     void modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept override;
+    void fillBuffer(IRenderingContext& context, const void* data) noexcept override;
 private:
     friend class GLUniformBufferBuilder;
 };

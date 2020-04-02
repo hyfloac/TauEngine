@@ -38,6 +38,8 @@ public:
 
     [[nodiscard]] virtual inline ETexture::Type textureType() const noexcept = 0;
 
+    [[nodiscard]] virtual u64 _getHandle() const noexcept { return 0; }
+
     virtual void set(IRenderingContext& context, u32 level, const void* data) noexcept = 0;
 
     virtual void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept = 0;

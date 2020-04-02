@@ -211,7 +211,7 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
 {
     PERF();
 
-    if(_globals.gameState == State::Game)
+    if(_globals.gameState == State::Game && !_globals.vr)
     {
         const u32 screenCenterW = _globals.window.width() >> 1;
         const u32 screenCenterH = _globals.window.height() >> 1;
@@ -224,44 +224,99 @@ void Layer3D::onUpdate(float fixedDelta) noexcept
     }
 }
 
-void Layer3D::onRender(const DeltaTime& delta) noexcept
+void Layer3D::onPreRender(const DeltaTime& delta) noexcept
 {
     PERF();
 
-    if(_globals.gameState == State::Game)
+    if(_globals.gameState == State::Game && !_globals.vr)
     {
         _camera.lerp(delta);
     }
 
+    if(_globals.vr && _globals.vrCamera)
+    {
+        vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
+        vr::VRCompositor()->WaitGetPoses(poses, vr::k_unMaxTrackedDeviceCount, NULL, 0);
+
+
+        _globals.vrCamera->update(delta, poses[vr::k_unTrackedDeviceIndex_Hmd]);
+    }
+}
+
+void Layer3D::onRender() noexcept
+{
+    PERF();
+
     auto& context = _globals.rc;
 
     _shader->bind(context);
-    _spotLight.position() = _camera.camera().position();
-    _spotLight.direction() = _camera.camera().front();
-    // _uniforms.data().compoundMatrix = _camera->compoundedMatrix();
-    _uniforms.data().viewMatrix = _camera->viewMatrix();
-    _cameraPosUni.data().cameraPos = _camera.camera().position();
-    _spotLightUniforms.set(context, _spotLight);
-    _uniforms.upload(context, EShader::Stage::Vertex, 0);
-    _pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
-    _spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
-    _cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
-    for(const CPPRef<RenderableObject>& ro : _objects)
+    if(_globals.vr)
     {
-        TextureIndices indices(0, 0, 0);
-        ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
-        ro->preRender(context);
-        ro->render(context);
-        ro->postRender(context);
-        indices = TextureIndices(0, 0, 0);
-        ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+        _spotLight.position() = _globals.vrCamera->camera().position();
+        _spotLight.direction() = _globals.vrCamera->camera().front();
+        if(_globals.currentLeftEye)
+        {
+            _uniforms.data().projectionMatrix = _globals.vrCamera->leftVP();
+        }
+        else
+        {
+            _uniforms.data().projectionMatrix = _globals.vrCamera->rightVP();
+        }
+        _uniforms.data().projectionMatrix = glmExt::translate(glm::mat4(1.0f), _globals.vrCamera->camera().position());
+
+        _cameraPosUni.data().cameraPos = _globals.vrCamera->camera().position();
+        _spotLightUniforms.set(context, _spotLight);
+        _uniforms.upload(context, EShader::Stage::Vertex, 0);
+        _pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
+        _spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
+        _cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
+        for(const CPPRef<RenderableObject>& ro : _objects)
+        {
+            TextureIndices indices(0, 0, 0);
+            ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+            ro->preRender(context);
+            ro->render(context);
+            ro->postRender(context);
+            indices = TextureIndices(0, 0, 0);
+            ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+        }
+        _cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
+        _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
+        _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
+        _uniforms.unbind(context, EShader::Stage::Vertex, 0);
+        _shader->unbind(context);
+        _skybox.render(context, _globals.vrCamera->camera());
     }
-    _cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
-    _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
-    _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
-    _uniforms.unbind(context, EShader::Stage::Vertex, 0);
-    _shader->unbind(context);
-    _skybox.render(context, _camera.camera());
+    else
+    {
+        _spotLight.position() = _camera.camera().position();
+        _spotLight.direction() = _camera.camera().front();
+        // _uniforms.data().compoundMatrix = _camera->compoundedMatrix();
+        _uniforms.data().viewMatrix = _camera->viewMatrix();
+
+        _cameraPosUni.data().cameraPos = _camera.camera().position();
+        _spotLightUniforms.set(context, _spotLight);
+        _uniforms.upload(context, EShader::Stage::Vertex, 0);
+        _pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
+        _spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
+        _cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
+        for(const CPPRef<RenderableObject>& ro : _objects)
+        {
+            TextureIndices indices(0, 0, 0);
+            ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+            ro->preRender(context);
+            ro->render(context);
+            ro->postRender(context);
+            indices = TextureIndices(0, 0, 0);
+            ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+        }
+        _cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
+        _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
+        _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
+        _uniforms.unbind(context, EShader::Stage::Vertex, 0);
+        _shader->unbind(context);
+        _skybox.render(context, _camera.camera());
+    }
 }
 
 void Layer3D::onEvent(Event& e) noexcept

@@ -72,20 +72,49 @@ TERenderer::~TERenderer() noexcept
     delete _th;
 }
 
-void TERenderer::render(const DeltaTime& delta) noexcept
+void TERenderer::preRender(const DeltaTime& delta) noexcept
 {
     PERF();
+
+    for(auto* layer : _layerStack.layers())
+    {
+        layer->onPreRender(delta);
+    }
+    for(auto* overlay : _layerStack.overlays())
+    {
+        overlay->onPreRender(delta);
+    }
+}
+
+void TERenderer::render() noexcept
+{
+    PERF();
+
     _globals.rc.clearScreen(true, true, false, { 127, 127, 255, 255 });
     _globals.rc.beginFrame();
     for(auto* layer : _layerStack.layers())
     {
-        layer->onRender(delta);
+        layer->onRender();
     }
     for(auto* overlay : _layerStack.overlays())
     {
-        overlay->onRender(delta);
+        overlay->onRender();
     }
     _globals.rc.endFrame();
+}
+
+void TERenderer::postRender() noexcept
+{
+    PERF();
+
+    for(auto* layer : _layerStack.layers())
+    {
+        layer->onPostRender();
+    }
+    for(auto* overlay : _layerStack.overlays())
+    {
+        overlay->onPostRender();
+    }
 }
 
 void TERenderer::update(const float fixedDelta) noexcept

@@ -32,9 +32,8 @@ void ConsoleLayer::print(const DynString& str) noexcept
     _strings.push_back(str);
 }
 
-void ConsoleLayer::onRender(const DeltaTime& delta) noexcept
+void ConsoleLayer::onRender() noexcept
 {
-    UNUSED(delta);
     if(_visible && _consolas != -1)
     {
         constexpr float xOffset = 5.0f;

@@ -47,6 +47,8 @@ public:
 
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
+    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+
     void set(IRenderingContext& context, u32 level, const void* data) noexcept override;
     void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
     void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
@@ -92,6 +94,8 @@ public:
 
     [[nodiscard]] ID3D10ShaderResourceView* d3dTextureView() noexcept { return _d3dTextureView; }
     [[nodiscard]] const ID3D10ShaderResourceView* d3dTextureView() const noexcept { return _d3dTextureView; }
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
 
     void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
     void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
