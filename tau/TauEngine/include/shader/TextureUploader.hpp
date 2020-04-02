@@ -3,6 +3,7 @@
 #include <Objects.hpp>
 #include <Safeties.hpp>
 #include <DynArray.hpp>
+
 #include "DLL.hpp"
 #include "texture/Texture.hpp"
 #include "texture/TextureSampler.hpp"
@@ -38,11 +39,9 @@ protected:
     { }
 public:
     void texture(const CPPRef<ITexture>& texture) noexcept { _texture = texture; }
-    void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
 
-    virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
-
-    virtual TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
+    virtual TextureIndices upload(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept = 0;
+    virtual TextureIndices unbind(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept = 0;
 };
 
 class TAU_DLL NOVTABLE ITextureUploader
@@ -57,13 +56,48 @@ protected:
         : _textures(textures), _textureSampler(textureSampler)
     { }
 public:
-    virtual TextureIndices& upload(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
+    virtual TextureIndices upload(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept = 0;
+    virtual TextureIndices unbind(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept = 0;
+};
 
-    virtual TextureIndices& unbind(IRenderingContext& context, TextureIndices& textureIndices, EShader::Stage stage) noexcept = 0;
+struct SingleTextureUploaderArgs final
+{
+    DEFAULT_CONSTRUCT_PU(SingleTextureUploaderArgs);
+    DEFAULT_DESTRUCT(SingleTextureUploaderArgs);
+    DEFAULT_COPY(SingleTextureUploaderArgs);
+public:
+    CPPRef<ITexture> texture;
+    CPPRef<ITextureSampler> textureSampler;
+public:
+    SingleTextureUploaderArgs(const CPPRef<ITexture>& _texture, const CPPRef<ITextureSampler>& _textureSampler)
+        : texture(_texture), textureSampler(_textureSampler)
+    { }
+};
+
+struct TextureUploaderArgs final
+{
+    DEFAULT_DESTRUCT(TextureUploaderArgs);
+    DEFAULT_COPY(TextureUploaderArgs);
+public:
+    RefDynArray<CPPRef<ITexture>> textures;
+    CPPRef<ITextureSampler> textureSampler;
+public:
+    TextureUploaderArgs(const uSys count) noexcept
+        : textures(count), textureSampler(null)
+    { }
+
+    TextureUploaderArgs(const uSys count, const CPPRef<ITextureSampler>& _textureSampler) noexcept
+        : textures(count), textureSampler(_textureSampler)
+    { }
+
+    TextureUploaderArgs(const RefDynArray<CPPRef<ITexture>>& _textures, const CPPRef<ITextureSampler>& _textureSampler)
+        : textures(_textures), textureSampler(_textureSampler)
+    { }
 };
 
 class TAU_DLL NOVTABLE ISingleTextureUploaderBuilder
 {
+    DEFAULT_CONSTRUCT_PO(ISingleTextureUploaderBuilder);
     DEFAULT_DESTRUCT_VI(ISingleTextureUploaderBuilder);
     DELETE_COPY(ISingleTextureUploaderBuilder);
 public:
@@ -87,76 +121,35 @@ public:
          * error, given that it likely won't matter in a couple of seconds
          * at most.
          */
-         SystemMemoryAllocationFailure
+        SystemMemoryAllocationFailure,
+        DriverMemoryAllocationFailure,
+        TextureSamplerNotSet,
+        TextureNotSet,
+        ZeroTextures,
+        /**
+         * Using multiple non-compatible backend graphics API's.
+         */
+        CrossAPIFailure
     };
-protected:
-    CPPRef<ITexture> _texture;
-    CPPRef<ITextureSampler> _textureSampler;
-protected:
-    inline ISingleTextureUploaderBuilder() noexcept
-        : _texture(null), _textureSampler(null)
-    { }
 public:
-    virtual void texture(const CPPRef<ITexture>& texture) noexcept
-    {
-        _texture = texture;
-    }
-
-    virtual void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
-    {
-        _textureSampler = textureSampler;
-    }
-
-    [[nodiscard]] virtual ISingleTextureUploader* build([[tau::out]] Error* error = null) noexcept = 0;
+    [[nodiscard]] virtual ISingleTextureUploader* build(const SingleTextureUploaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual ISingleTextureUploader* build(const SingleTextureUploaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<ISingleTextureUploader> buildCPPRef(const SingleTextureUploaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<ISingleTextureUploader> buildTauRef(const SingleTextureUploaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<ISingleTextureUploader> buildTauSRef(const SingleTextureUploaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 class TAU_DLL NOVTABLE ITextureUploaderBuilder
 {
+    DEFAULT_CONSTRUCT_PO(ITextureUploaderBuilder);
     DEFAULT_DESTRUCT_VI(ITextureUploaderBuilder);
     DELETE_COPY(ITextureUploaderBuilder);
 public:
-    enum class Error
-    {
-        NoError = 0,
-        /**
-         * Failed to allocate system memory.
-         *
-         *   This error is produced when a call to the system memory
-         * allocator (malloc, new, new[], HeapAlloc, LocalAlloc,
-         * GlobalAlloc) fails (returns null). This generally occurs
-         * when the system has run out of memory. It may also mean
-         * that the process itself has exceed its maximum allotted
-         * memory. It may also occur when allocating a buffer that
-         * is too large.
-         *
-         *   If this occurs its probably safe to assume that the
-         * program or system will crash shortly. As such I prescribe to
-         * the philosophy of simply exiting, or outright ignoring the
-         * error, given that it likely won't matter in a couple of seconds
-         * at most.
-         */
-        SystemMemoryAllocationFailure
-    };
-protected:
-    RefDynArray<CPPRef<ITexture>> _textures;
-    CPPRef<ITextureSampler> _textureSampler;
-protected:
-    inline ITextureUploaderBuilder(const uSys textureCount) noexcept
-        : _textures(textureCount), _textureSampler(null)
-    { }
+    using Error = ISingleTextureUploaderBuilder::Error;
 public:
-    virtual void setTexture(uSys index, const CPPRef<ITexture>& texture) noexcept
-    {
-        if(index < _textures.count())
-        {
-            _textures[index] = texture;
-        }
-    }
-
-    virtual void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept
-    {
-        _textureSampler = textureSampler;
-    }
-
-    [[nodiscard]] virtual ITextureUploader* build([[tau::out]] Error* error = null) noexcept = 0;
+    [[nodiscard]] virtual ITextureUploader* build(const TextureUploaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual ITextureUploader* build(const TextureUploaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<ITextureUploader> buildCPPRef(const TextureUploaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<ITextureUploader> buildTauRef(const TextureUploaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<ITextureUploader> buildTauSRef(const TextureUploaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

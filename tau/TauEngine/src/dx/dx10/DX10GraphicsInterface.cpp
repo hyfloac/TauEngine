@@ -8,6 +8,7 @@
 #include "dx/dx10/DX10RasterizerState.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10Texture.hpp"
+#include "dx/dx10/DX10TextureUploader.hpp"
 #include "system/Window.hpp"
 
 DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
@@ -16,6 +17,8 @@ DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10De
       _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this)),
       _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this)),
       _depthTextureBuilder(new(::std::nothrow) DX10DepthTextureBuilder(*this)),
+      _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this)),
+      _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder(*this)),
       _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
 { }
 
@@ -28,6 +31,8 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
     delete _depthTextureBuilder;
+    delete _singleTextureUploaderBuilder;
+    delete _textureUploaderBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -74,6 +79,12 @@ IRasterizerStateBuilder& DX10GraphicsInterface::createRasterizerState() noexcept
 
 ITextureBuilder& DX10GraphicsInterface::createDepthTexture() noexcept
 { return *_depthTextureBuilder; }
+
+ISingleTextureUploaderBuilder& DX10GraphicsInterface::createSingleTextureUploader() noexcept
+{ return *_singleTextureUploaderBuilder; }
+
+ITextureUploaderBuilder& DX10GraphicsInterface::createTextureUploader() noexcept
+{ return *_textureUploaderBuilder; }
 
 IRenderingContextBuilder& DX10GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

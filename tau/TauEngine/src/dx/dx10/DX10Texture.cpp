@@ -7,6 +7,60 @@
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 
+void DX10NullTexture::bind(IRenderingContext& context, const u8 textureUnit, const EShader::Stage stage) noexcept
+{
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    {
+        TAU_THROW(IncorrectContextException);
+        return;
+    }
+
+    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
+
+    ID3D10ShaderResourceView* nullSRV = null;
+
+    switch(stage)
+    {
+        case EShader::Stage::Vertex:
+            ctx.d3dDevice()->VSSetShaderResources(textureUnit, 1, &nullSRV);
+            break;
+        case EShader::Stage::Geometry:
+            ctx.d3dDevice()->GSSetShaderResources(textureUnit, 1, &nullSRV);
+            break;
+        case EShader::Stage::Pixel:
+            ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &nullSRV);
+            break;
+        default: return;
+    }
+}
+
+void DX10NullTexture::unbind(IRenderingContext& context, const u8 textureUnit, const EShader::Stage stage) noexcept
+{
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    {
+        TAU_THROW(IncorrectContextException);
+        return;
+    }
+
+    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
+
+    ID3D10ShaderResourceView* nullSRV = null;
+
+    switch(stage)
+    {
+        case EShader::Stage::Vertex:
+            ctx.d3dDevice()->VSSetShaderResources(textureUnit, 1, &nullSRV);
+            break;
+        case EShader::Stage::Geometry:
+            ctx.d3dDevice()->GSSetShaderResources(textureUnit, 1, &nullSRV);
+            break;
+        case EShader::Stage::Pixel:
+            ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &nullSRV);
+            break;
+        default: return;
+    }
+}
+
 DX10Texture2D::~DX10Texture2D() noexcept
 {
     _d3dTexture->Release();
@@ -63,16 +117,18 @@ void DX10Texture2D::unbind(IRenderingContext& context, const u8 textureUnit, con
 
     auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
 
+    ID3D10ShaderResourceView* nullSRV = null;
+
     switch(stage)
     {
         case EShader::Stage::Vertex:
-            ctx.d3dDevice()->VSSetShaderResources(textureUnit, 0, null);
+            ctx.d3dDevice()->VSSetShaderResources(textureUnit, 1, &nullSRV);
             break;
         case EShader::Stage::Geometry:
-            ctx.d3dDevice()->GSSetShaderResources(textureUnit, 0, null);
+            ctx.d3dDevice()->GSSetShaderResources(textureUnit, 1, &nullSRV);
             break;
         case EShader::Stage::Pixel:
-            ctx.d3dDevice()->PSSetShaderResources(textureUnit, 0, null);
+            ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &nullSRV);
             break;
         default: return;
     }
@@ -131,7 +187,7 @@ void DX10TextureCube::bind(IRenderingContext& context, const u8 textureUnit, con
     ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &_d3dTextureView);
 }
 
-void DX10TextureCube::unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept
+void DX10TextureCube::unbind(IRenderingContext& context, const u8 textureUnit, const EShader::Stage stage) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))
     {
@@ -141,16 +197,18 @@ void DX10TextureCube::unbind(IRenderingContext& context, u8 textureUnit, EShader
 
     auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
 
+    ID3D10ShaderResourceView* nullSRV = null;
+
     switch(stage)
     {
         case EShader::Stage::Vertex:
-            ctx.d3dDevice()->VSSetShaderResources(textureUnit, 0, null);
+            ctx.d3dDevice()->VSSetShaderResources(textureUnit, 1, &nullSRV);
             break;
         case EShader::Stage::Geometry:
-            ctx.d3dDevice()->GSSetShaderResources(textureUnit, 0, null);
+            ctx.d3dDevice()->GSSetShaderResources(textureUnit, 1, &nullSRV);
             break;
         case EShader::Stage::Pixel:
-            ctx.d3dDevice()->PSSetShaderResources(textureUnit, 0, null);
+            ctx.d3dDevice()->PSSetShaderResources(textureUnit, 1, &nullSRV);
             break;
         default: return;
     }

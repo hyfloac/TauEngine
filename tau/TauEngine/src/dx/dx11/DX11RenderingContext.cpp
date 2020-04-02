@@ -376,12 +376,6 @@ ITextureCubeBuilder& DX11RenderingContext::createTextureCube() noexcept
 ITextureSamplerBuilder& DX11RenderingContext::createTextureSampler() noexcept
 { return *static_cast<ITextureSamplerBuilder*>(null); }
 
-CPPRef<ITextureUploaderBuilder> DX11RenderingContext::createTextureUploader(uSys textureCount) noexcept
-{ return null; }
-
-CPPRef<ISingleTextureUploaderBuilder> DX11RenderingContext::createSingleTextureUploader() noexcept
-{ return null; }
-
 IShaderBuilder& DX11RenderingContext::createShader() noexcept
 { return _gi.createShader(); }
 

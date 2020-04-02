@@ -50,14 +50,14 @@ public:
           borderColor{ 0, 0, 0, 0 }
     { }
 
-    [[nodiscard]] const ETexture::Filter& magFilter() const noexcept { return magnificationFilter; }
-    [[nodiscard]] const ETexture::Filter& minFilter() const noexcept { return minificationFilter; }
-    [[nodiscard]] const ETexture::Filter& mipFilter() const noexcept { return mipmapMinificationFilter; }
+    [[nodiscard]] const ETexture::Filter&    magFilter() const noexcept { return magnificationFilter;      }
+    [[nodiscard]] const ETexture::Filter&    minFilter() const noexcept { return minificationFilter;       }
+    [[nodiscard]] const ETexture::Filter&    mipFilter() const noexcept { return mipmapMinificationFilter; }
     [[nodiscard]] const ETexture::Filter& mipMinFilter() const noexcept { return mipmapMinificationFilter; }
 
-    [[nodiscard]] ETexture::Filter& magFilter() noexcept { return magnificationFilter; }
-    [[nodiscard]] ETexture::Filter& minFilter() noexcept { return minificationFilter; }
-    [[nodiscard]] ETexture::Filter& mipFilter() noexcept { return mipmapMinificationFilter; }
+    [[nodiscard]] ETexture::Filter&    magFilter() noexcept { return magnificationFilter;      }
+    [[nodiscard]] ETexture::Filter&    minFilter() noexcept { return minificationFilter;       }
+    [[nodiscard]] ETexture::Filter&    mipFilter() noexcept { return mipmapMinificationFilter; }
     [[nodiscard]] ETexture::Filter& mipMinFilter() noexcept { return mipmapMinificationFilter; }
 };
 
@@ -104,6 +104,6 @@ public:
     [[nodiscard]] virtual ITextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error = null) const noexcept = 0;
     [[nodiscard]] virtual ITextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
     [[nodiscard]] virtual CPPRef<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableReferenceCountingPointer<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongReferenceCountingPointer<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

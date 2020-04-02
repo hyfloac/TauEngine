@@ -6,6 +6,8 @@ class GLShaderBuilder;
 class GLDepthStencilStateBuilder;
 class GLRasterizerStateBuilder;
 class GLTextureDepthBuilder;
+class GLSingleTextureUploaderBuilder;
+class GLTextureUploaderBuilder;
 class GLRenderingContextBuilder;
 
 class TAU_DLL GLGraphicsInterface final : public IGraphicsInterface
@@ -28,6 +30,8 @@ private:
     GLDepthStencilStateBuilder* _depthStencilStateBuilder;
     GLRasterizerStateBuilder* _rasterizerStateBuilder;
     GLTextureDepthBuilder* _depthTextureBuilder;
+    GLSingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
+    GLTextureUploaderBuilder* _textureUploaderBuilder;
     GLRenderingContextBuilder* _renderingContextBuilder;
 public:
     GLGraphicsInterface(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile compat, bool forwardCompatible);
@@ -44,6 +48,8 @@ public:
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
+    [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
+    [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

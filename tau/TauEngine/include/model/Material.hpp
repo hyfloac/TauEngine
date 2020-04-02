@@ -8,20 +8,7 @@
 #include "shader/TextureUploader.hpp"
 #include "shader/Uniform.hpp"
 
-// class MaterialUniforms final
-// {
-//     DEFAULT_DESTRUCT(MaterialUniforms);
-//     DEFAULT_COPY(MaterialUniforms);
-// private:
-//     CPPRef<IUniform<float>> _specularExponentUni;
-//     CPPRef<IUniform<int>> _diffuseSamplerUni;
-//     CPPRef<IUniform<int>> _specularSamplerUni;
-//     CPPRef<IUniform<int>> _normalSamplerUni;
-// public:
-//     MaterialUniforms(const CPPRef<IShaderProgram>& shader, const DynString& uniformPrefix) noexcept;
-// private:
-//     friend class Material;
-// };
+class IGraphicsInterface;
 
 class Material final
 {
@@ -36,9 +23,8 @@ private:
         : _specularExponent(specularExponent), _textureUploader(textureUploader)
     { }
 public:
-    TextureIndices& upload(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, TextureIndices& textureIndices) const noexcept;
-
-    TextureIndices& unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, TextureIndices& textureIndices) const noexcept;
+    TextureIndices upload(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, const TextureIndices& textureIndices) const noexcept;
+    TextureIndices unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, const TextureIndices& textureIndices) const noexcept;
 private:
     friend class MaterialBuilder;
     friend class UniformAccessor<Material>;
@@ -49,15 +35,15 @@ class MaterialBuilder final
     DEFAULT_DESTRUCT(MaterialBuilder);
     DEFAULT_COPY(MaterialBuilder);
 private:
-    IRenderingContext& _ctx;
+    IGraphicsInterface& _gi;
     float _specularExponent;
     CPPRef<ITexture> _diffuseTexture;
     CPPRef<ITexture> _specularTexture;
     CPPRef<ITexture> _normalTexture;
     CPPRef<ITextureSampler> _textureSampler;
 public:
-    inline MaterialBuilder(IRenderingContext& context) noexcept
-        : _ctx(context), _specularExponent(1.0f)
+    inline MaterialBuilder(IGraphicsInterface& gi) noexcept
+        : _gi(gi), _specularExponent(1.0f)
     { }
 
     inline void specularExponent(const float specularExponent) noexcept { _specularExponent = specularExponent; }
@@ -67,10 +53,6 @@ public:
     inline void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
 
     [[nodiscard]] Material build() const noexcept;
-
-    // void set(const MaterialUniforms& uniforms, int textureBeginIndex) const noexcept;
-
-    // void unbind(int textureBeginIndex) const noexcept;
 };
 
 template<>

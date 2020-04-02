@@ -1,14 +1,15 @@
 #include "model/Material.hpp"
+#include "system/GraphicsInterface.hpp"
 #include "system/RenderingContext.hpp"
 
-TextureIndices& Material::upload(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
+TextureIndices Material::upload(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, const TextureIndices& textureIndices) const noexcept
 {
     uniform.set(context, *this);
     uniform.upload(context, stage, uniformIndex);
     return _textureUploader->upload(context, textureIndices, stage);
 }
 
-TextureIndices& Material::unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, TextureIndices& textureIndices) const noexcept
+TextureIndices Material::unbind(IRenderingContext& context, UniformBlockU<Material>& uniform, const EShader::Stage stage, const u32 uniformIndex, const TextureIndices& textureIndices) const noexcept
 {
     uniform.unbind(context, stage, uniformIndex);
     return _textureUploader->unbind(context, textureIndices, stage);
@@ -16,30 +17,11 @@ TextureIndices& Material::unbind(IRenderingContext& context, UniformBlockU<Mater
 
 Material MaterialBuilder::build() const noexcept
 {
-    CPPRef<ITextureUploaderBuilder> uploaderBuilder = _ctx.createTextureUploader(3);
-    uploaderBuilder->setTexture(0, _diffuseTexture);
-    uploaderBuilder->setTexture(1, _specularTexture);
-    uploaderBuilder->setTexture(2, _normalTexture);
-    uploaderBuilder->textureSampler(_textureSampler);
+    TextureUploaderArgs uploaderArgs(3);
+    uploaderArgs.textures[0] = _diffuseTexture;
+    uploaderArgs.textures[1] = _specularTexture;
+    uploaderArgs.textures[2] = _normalTexture;
+    uploaderArgs.textureSampler = _textureSampler;
 
-    return Material(_specularExponent, CPPRef<ITextureUploader>(uploaderBuilder->build()));
+    return Material(_specularExponent, _gi.createTextureUploader().buildCPPRef(uploaderArgs, null));
 }
-
-// void Material::set(const MaterialUniforms& uniforms, const int textureBeginIndex) const noexcept
-// {
-//     uniforms._specularExponentUni->set(_specularExponent);
-//     uniforms._diffuseSamplerUni->set(textureBeginIndex);
-//     uniforms._specularSamplerUni->set(textureBeginIndex + 1);
-//     uniforms._normalSamplerUni->set(textureBeginIndex + 2);
-//
-//     _diffuseTexture->bind(textureBeginIndex);
-//     _specularTexture->bind(textureBeginIndex + 1);
-//     _normalTexture->bind(textureBeginIndex + 2);
-// }
-//
-// void Material::unbind(int textureBeginIndex) const noexcept
-// {
-//     _normalTexture->unbind(textureBeginIndex + 2);
-//     _specularTexture->unbind(textureBeginIndex + 1);
-//     _diffuseTexture->unbind(textureBeginIndex);
-// }

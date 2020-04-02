@@ -105,8 +105,6 @@ public:
     [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
     [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
-    [[nodiscard]] CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
 private:
     void handleCtxError(int profileMask) const noexcept;

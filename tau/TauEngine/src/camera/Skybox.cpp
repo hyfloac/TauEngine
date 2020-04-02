@@ -61,11 +61,10 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    CPPRef<ITextureUploaderBuilder> uploaderBuilder = context.createTextureUploader(1);
-    uploaderBuilder->setTexture(0, _skybox);
-    uploaderBuilder->textureSampler(CPPRef<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
-
-    _textureUploader = CPPRef<ITextureUploader>(uploaderBuilder->build());
+    SingleTextureUploaderArgs uploaderArgs;
+    uploaderArgs.texture = _skybox;
+    uploaderArgs.textureSampler = context.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
+    _textureUploader = gi.createSingleTextureUploader().buildTauRef(uploaderArgs, null);
 
     float skyboxVertices[] = {
         // back
@@ -143,7 +142,6 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
 
     RasterizerArgs rArgs = context.getDefaultRasterizerArgs();
     rArgs.frontFaceCounterClockwise = true;
-    // rArgs.cullMode = RasterizerArgs::CullMode::None;
     _skyboxRasterizerState = gi.createRasterizerState().buildTauRef(rArgs, null);
 }
 
@@ -161,8 +159,6 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
         (void) _textureUploader->upload(context, indices, EShader::Stage::Pixel);
     }
 
-    // _skybox->bind(0, EShader::Stage::Pixel);
-
     _cubeVA->bind(context);
     _cubeVA->preDraw(context);
     _cubeVA->draw(context);
@@ -174,7 +170,7 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
         auto indices = TextureIndices(0, 0, 0);
         (void) _textureUploader->unbind(context, indices, EShader::Stage::Pixel);
     }
-    // _skybox->unbind(0, EShader::Stage::Pixel);
+
     _shader->unbind(context);
 
     (void) context.setRasterizerState(tmpRasterizerState);

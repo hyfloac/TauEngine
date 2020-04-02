@@ -72,13 +72,18 @@ class TAU_DLL TextHandler final
 public:
     struct FileData final
     {
+        DEFAULT_CONSTRUCT_PU(FileData);
+        DEFAULT_COPY(FileData);
+    public:
         FT_Face face;
         RefDynArray<u8> data;
+    public:
+        FileData(const FT_Face _face, const RefDynArray<u8>& _data)
+            : face(_face), data(_data)
+        { }
 
         ~FileData() noexcept
-        {
-            FT_Done_Face(face);
-        }
+        { FT_Done_Face(face); }
     };
 
     struct FinalizeData final
@@ -108,12 +113,7 @@ private:
     CPPRef<IBuffer> _positionBuffer;
     UniformBlockS<ProjectionUniforms> _viewUniforms;
     UniformBlockS<ColorUniforms> _colorUniforms;
-    CPPRef<ISingleTextureUploader> _textureUploader;
-    // CPPRef<IBuffer> _translationBuffer;
-    // CPPRef<IUniform<const glm::mat4&>> _projUni;
-    // CPPRef<IUniform<int>> _texUni;
-    // CPPRef<IUniform<const Vector3f&>> _colorUni;
-    //
+    NullableRef<ISingleTextureUploader> _textureUploader;
 public:
     TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* path, const char* vertexName, const char* pixelName) noexcept;
 
@@ -121,7 +121,7 @@ public:
 
     [[nodiscard]] FT_Error init() noexcept;
 
-    [[nodiscard]] FileData* loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight) noexcept;
+    [[nodiscard]] FileData* loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight) const noexcept;
     [[nodiscard]] int loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight, ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* userParam) noexcept;
 
     GlyphSetHandle generateBitmapCharacters(IRenderingContext& context, const DynString& glyphSetName, char minChar, char maxChar, bool smooth, FT_Face face) noexcept;

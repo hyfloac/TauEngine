@@ -20,8 +20,8 @@ public:
     [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
 
     void set(IRenderingContext& context, u32 level, const void* data) noexcept override { }
-    void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage) noexcept override { }
-    void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage) noexcept override { }
+    void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
+    void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
     void generateMipmaps(IRenderingContext& context) noexcept override { }
 };
 

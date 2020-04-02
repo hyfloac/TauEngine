@@ -27,9 +27,6 @@
     <ClCompile Include="src\FileUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VirtualIO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\TUID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -314,9 +311,6 @@
     <ClInclude Include="include\file\FileHandling.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\file\VirtualIO.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\file\FileUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -429,9 +423,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ModelLoader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\physics\VelocityObject.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\events\Event.hpp">

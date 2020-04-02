@@ -42,7 +42,7 @@ private:
     UniformBlockS<Uniforms> _uniforms;
 
     CPPRef<ITextureCube> _skybox;
-    CPPRef<ITextureUploader> _textureUploader;
+    NullableRef<ISingleTextureUploader> _textureUploader;
     CPPRef<IVertexArray> _cubeVA;
 
     NullableRef<IDepthStencilState> _skyboxDepthStencilState;

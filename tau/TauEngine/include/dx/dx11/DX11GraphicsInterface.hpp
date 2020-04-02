@@ -8,6 +8,8 @@
 class DX11ShaderBuilder;
 class DX11DepthStencilStateBuilder;
 class DX11RasterizerStateBuilder;
+class DX11SingleTextureUploaderBuilder;
+class DX11TextureUploaderBuilder;
 class DX11RenderingContextBuilder;
 
 class TAU_DLL DX11GraphicsInterface final : public IGraphicsInterface
@@ -33,6 +35,8 @@ public:
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
+    [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
+    [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

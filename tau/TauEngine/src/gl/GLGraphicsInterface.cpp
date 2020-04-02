@@ -5,6 +5,7 @@
 #include "gl/GLRenderingContext.hpp"
 #include "gl/GLRasterizerState.hpp"
 #include "gl/GLTexture.hpp"
+#include "gl/GLTextureUploader.hpp"
 #include "system/Window.hpp"
 
 GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile compat, const bool forwardCompatible)
@@ -17,6 +18,8 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
       _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder),
       _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder),
       _depthTextureBuilder(new(::std::nothrow) GLTextureDepthBuilder),
+      _singleTextureUploaderBuilder(new(::std::nothrow) GLSingleTextureUploaderBuilder),
+      _textureUploaderBuilder(new(::std::nothrow) GLTextureUploaderBuilder),
       _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
 { }
 
@@ -25,6 +28,8 @@ GLGraphicsInterface::~GLGraphicsInterface() noexcept
     delete _shaderBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
+    delete _singleTextureUploaderBuilder;
+    delete _textureUploaderBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -44,6 +49,12 @@ IRasterizerStateBuilder& GLGraphicsInterface::createRasterizerState() noexcept
 
 ITextureBuilder& GLGraphicsInterface::createDepthTexture() noexcept
 { return *_depthTextureBuilder; }
+
+ISingleTextureUploaderBuilder& GLGraphicsInterface::createSingleTextureUploader() noexcept
+{ return *_singleTextureUploaderBuilder; }
+
+ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
+{ return *_textureUploaderBuilder; }
 
 IRenderingContextBuilder& GLGraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

@@ -13,6 +13,8 @@ class IRenderingContextBuilder;
 class IDepthStencilStateBuilder;
 class IRasterizerStateBuilder;
 class ITextureBuilder;
+class ISingleTextureUploaderBuilder;
+class ITextureUploaderBuilder;
 class IShaderBuilder;
 
 class TAU_DLL NOVTABLE IGraphicsInterface
@@ -34,5 +36,7 @@ public:
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
     [[nodiscard]] virtual ITextureBuilder& createDepthTexture() noexcept = 0;
+    [[nodiscard]] virtual ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept = 0;
+    [[nodiscard]] virtual ITextureUploaderBuilder& createTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;
 };

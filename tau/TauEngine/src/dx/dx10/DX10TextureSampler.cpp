@@ -3,29 +3,26 @@
 #ifdef _WIN32
 #include <cfloat>
 #include "dx/dx10/DX10RenderingContext.hpp"
+#include "dx/dx10/DX10GraphicsInterface.hpp"
 
-void DX10TextureSampler::bind(const UINT slot) const noexcept
+void DX10TextureSampler::bind(DX10RenderingContext& context, const UINT slot) const noexcept
 {
-    _ctx.d3dDevice()->PSSetSamplers(slot, 1, &_samplerState);
+    context.d3dDevice()->PSSetSamplers(slot, 1, &_samplerState);
 }
 
-void DX10TextureSampler::unbind(const UINT slot) const noexcept
+void DX10TextureSampler::unbind(DX10RenderingContext& context, const UINT slot) const noexcept
 {
-    _ctx.d3dDevice()->PSSetSamplers(slot, 0, null);
+    ID3D10SamplerState* nullSS = null;
+    context.d3dDevice()->PSSetSamplers(slot, 1, &nullSS);
 }
 
 DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error) const noexcept
 {
-    D3D10_SAMPLER_DESC d3dSamplerDesc;
-    if(!processTextureSamplerArgs(args, &d3dSamplerDesc, error))
+    ID3D10SamplerState* d3dSampler;
+    if(!processArgs(args, &d3dSampler, error))
     { return null; }
 
-    ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
-
-    ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-
-    DX10TextureSampler* const sampler = new(::std::nothrow) DX10TextureSampler(_ctx, d3dSampler);
+    DX10TextureSampler* const sampler = new(::std::nothrow) DX10TextureSampler(d3dSampler);
 
     if(!sampler)
     {
@@ -38,16 +35,11 @@ DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& a
 
 DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    D3D10_SAMPLER_DESC d3dSamplerDesc;
-    if(!processTextureSamplerArgs(args, &d3dSamplerDesc, error))
+    ID3D10SamplerState* d3dSampler;
+    if(!processArgs(args, &d3dSampler, error))
     { return null; }
 
-    ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
-
-    ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-
-    DX10TextureSampler* const sampler = allocator.allocateT<DX10TextureSampler>(_ctx, d3dSampler);
+    DX10TextureSampler* const sampler = allocator.allocateT<DX10TextureSampler>(d3dSampler);
 
     if(!sampler)
     {
@@ -60,16 +52,11 @@ DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& a
 
 CPPRef<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
 {
-    D3D10_SAMPLER_DESC d3dSamplerDesc;
-    if(!processTextureSamplerArgs(args, &d3dSamplerDesc, error))
+    ID3D10SamplerState* d3dSampler;
+    if(!processArgs(args, &d3dSampler, error))
     { return null; }
 
-    ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
-
-    ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-
-    const CPPRef<DX10TextureSampler> sampler = CPPRef<DX10TextureSampler>(new(::std::nothrow) DX10TextureSampler(_ctx, d3dSampler));
+    const CPPRef<DX10TextureSampler> sampler = CPPRef<DX10TextureSampler>(new(::std::nothrow) DX10TextureSampler(d3dSampler));
 
     if(!sampler)
     {
@@ -80,18 +67,13 @@ CPPRef<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSamp
     ERROR_CODE_V(Error::NoError, sampler);
 }
 
-NullableReferenceCountingPointer<ITextureSampler> DX10TextureSamplerBuilder::buildTauRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableRef<ITextureSampler> DX10TextureSamplerBuilder::buildTauRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    D3D10_SAMPLER_DESC d3dSamplerDesc;
-    if(!processTextureSamplerArgs(args, &d3dSamplerDesc, error))
+    ID3D10SamplerState* d3dSampler;
+    if(!processArgs(args, &d3dSampler, error))
     { return null; }
 
-    ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
-
-    ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-
-    const NullableReferenceCountingPointer<DX10TextureSampler> sampler(allocator, _ctx, d3dSampler);
+    const NullableRef<DX10TextureSampler> sampler(allocator, d3dSampler);
 
     if(!sampler)
     {
@@ -99,23 +81,16 @@ NullableReferenceCountingPointer<ITextureSampler> DX10TextureSamplerBuilder::bui
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableReferenceCountingPointer<ITextureSampler> iSampler = RCPCast<ITextureSampler>(sampler);
-
-    ERROR_CODE_V(Error::NoError, iSampler);
+    ERROR_CODE_V(Error::NoError, sampler);
 }
 
-NullableStrongReferenceCountingPointer<ITextureSampler> DX10TextureSamplerBuilder::buildTauSRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITextureSampler> DX10TextureSamplerBuilder::buildTauSRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    D3D10_SAMPLER_DESC d3dSamplerDesc;
-    if(!processTextureSamplerArgs(args, &d3dSamplerDesc, error))
+    ID3D10SamplerState* d3dSampler;
+    if(!processArgs(args, &d3dSampler, error))
     { return null; }
 
-    ID3D10SamplerState* d3dSampler;
-    const HRESULT h = _ctx.d3dDevice()->CreateSamplerState(&d3dSamplerDesc, &d3dSampler);
-
-    ERROR_CODE_COND_N(FAILED(h), Error::DriverMemoryAllocationFailure);
-
-    const NullableStrongReferenceCountingPointer<DX10TextureSampler> sampler(allocator, _ctx, d3dSampler);
+    const NullableStrongRef<DX10TextureSampler> sampler(allocator, d3dSampler);
 
     if(!sampler)
     {
@@ -123,12 +98,10 @@ NullableStrongReferenceCountingPointer<ITextureSampler> DX10TextureSamplerBuilde
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    NullableStrongReferenceCountingPointer<ITextureSampler> iSampler = RCPCast<ITextureSampler>(sampler);
-
-    ERROR_CODE_V(Error::NoError, iSampler);
+    ERROR_CODE_V(Error::NoError, sampler);
 }
 
-bool DX10TextureSamplerBuilder::processTextureSamplerArgs(const TextureSamplerArgs& args, D3D10_SAMPLER_DESC* const dxArgs, Error* const error) const noexcept
+bool DX10TextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, ID3D10SamplerState** dxArgs, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.magFilter() == static_cast<ETexture::Filter>(0), Error::FilterIsUnset);
     ERROR_CODE_COND_F(args.minFilter() == static_cast<ETexture::Filter>(0), Error::FilterIsUnset);
@@ -138,23 +111,28 @@ bool DX10TextureSamplerBuilder::processTextureSamplerArgs(const TextureSamplerAr
     ERROR_CODE_COND_F(args.wrapW == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
     ERROR_CODE_COND_F(args.depthCompareFunc == static_cast<ETexture::DepthCompareFunc>(0), Error::DepthComparisonIsUnset);
 
-    dxArgs->Filter = dxFilter(args.magFilter(), args.minFilter(), args.mipFilter());
+    D3D10_SAMPLER_DESC d3dSamplerDesc;
 
-    dxArgs->MipLODBias = 0.0f;
-    dxArgs->MaxAnisotropy = 16;
+    d3dSamplerDesc.Filter = dxFilter(args.magFilter(), args.minFilter(), args.mipFilter());
 
-    dxArgs->ComparisonFunc = dxDepthComparison(args.depthCompareFunc);
+    d3dSamplerDesc.MipLODBias = 0.0f;
+    d3dSamplerDesc.MaxAnisotropy = 16;
 
-    dxArgs->AddressU = dxWrapMode(args.wrapU);
-    dxArgs->AddressV = dxWrapMode(args.wrapV);
-    dxArgs->AddressW = dxWrapMode(args.wrapW);
-    dxArgs->BorderColor[0] = static_cast<FLOAT>(args.borderColor.r) / 255.0f;
-    dxArgs->BorderColor[1] = static_cast<FLOAT>(args.borderColor.g) / 255.0f;
-    dxArgs->BorderColor[2] = static_cast<FLOAT>(args.borderColor.b) / 255.0f;
-    dxArgs->BorderColor[3] = static_cast<FLOAT>(args.borderColor.a) / 255.0f;
+    d3dSamplerDesc.ComparisonFunc = dxDepthComparison(args.depthCompareFunc);
 
-    dxArgs->MinLOD = 0.0f;
-    dxArgs->MaxLOD = FLT_MAX;
+    d3dSamplerDesc.AddressU = dxWrapMode(args.wrapU);
+    d3dSamplerDesc.AddressV = dxWrapMode(args.wrapV);
+    d3dSamplerDesc.AddressW = dxWrapMode(args.wrapW);
+    d3dSamplerDesc.BorderColor[0] = static_cast<FLOAT>(args.borderColor.r) / 255.0f;
+    d3dSamplerDesc.BorderColor[1] = static_cast<FLOAT>(args.borderColor.g) / 255.0f;
+    d3dSamplerDesc.BorderColor[2] = static_cast<FLOAT>(args.borderColor.b) / 255.0f;
+    d3dSamplerDesc.BorderColor[3] = static_cast<FLOAT>(args.borderColor.a) / 255.0f;
+    
+    d3dSamplerDesc.MinLOD = 0.0f;
+    d3dSamplerDesc.MaxLOD = FLT_MAX;
+
+    const HRESULT h = _gi.d3d10Device()->CreateSamplerState(&d3dSamplerDesc, dxArgs);
+    ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     return true;
 }
@@ -162,9 +140,9 @@ bool DX10TextureSamplerBuilder::processTextureSamplerArgs(const TextureSamplerAr
 D3D10_FILTER DX10TextureSamplerBuilder::dxFilter(const ETexture::Filter magnificationFilter, const ETexture::Filter minificationFilter, const ETexture::Filter mipmapMinificationFilter) noexcept
 {
     uSys mask = 0;
-    if(magnificationFilter      == ETexture::Filter::Point)
-    { mask |= (1 << 0); }
-    if(minificationFilter       == ETexture::Filter::Point)
+    if(magnificationFilter == ETexture::Filter::Point)
+    { mask |= (1 << 0); }  
+    if(minificationFilter == ETexture::Filter::Point)
     { mask |= (1 << 1); }
     if(mipmapMinificationFilter == ETexture::Filter::Point)
     { mask |= (1 << 2); }

@@ -39,8 +39,8 @@ public:
     [[nodiscard]] GLTextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] GLTextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] CPPRef<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] NullableReferenceCountingPointer<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongReferenceCountingPointer<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:
-    bool processTextureSamplerArgs(const TextureSamplerArgs& args, [[tau::out]] GLTextureSampler* glArgs, [[tau::out]] Error* error) const noexcept;
+    static bool processArgs(const TextureSamplerArgs& args, [[tau::out]] GLTextureSampler* glArgs, [[tau::out]] Error* error) noexcept;
 };

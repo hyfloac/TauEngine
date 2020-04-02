@@ -5,7 +5,7 @@
 #include <NumTypes.hpp>
 #include <file/FileHandling.hpp>
 
-char* readFile(const char* filePath) noexcept
+char* readFile(const char* const filePath) noexcept
 {
     FILE* file;
     fopen_s(&file, filePath, "rb");
@@ -33,7 +33,7 @@ char* readFile(const char* filePath) noexcept
 #include <Windows.h>
 #pragma warning(pop)
 
-char* readFileFast(const char* filePath) noexcept
+char* readFileFast(const char* const filePath) noexcept
 {
     HANDLE fileHandle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(fileHandle == INVALID_HANDLE_VALUE) { return nullptr; }
@@ -75,7 +75,7 @@ char* readFileFast(const char* filePath) noexcept
         else
         {
             CloseHandle(fileHandle);
-            delete[] data;
+            free(data);
             return nullptr;
         }
     }
@@ -88,7 +88,7 @@ char* readFileFast(const char* filePath) noexcept
 }
 #endif
 
-void freeFileData(const char* fileData) noexcept
+void freeFileData(char* const fileData) noexcept
 {
-    free(const_cast<void*>(reinterpret_cast<const void*>(fileData)));
+    free(fileData);
 }

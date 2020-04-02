@@ -22,11 +22,11 @@ public:
     { }
 
     [[nodiscard]] inline u32 seed() const noexcept { return _seed; }
-    inline void seed(u32 seed) noexcept { _seed = seed; }
+    inline void seed(const u32 seed) noexcept { _seed = seed; }
 
     [[nodiscard]] inline u32 rand() noexcept
     {
-        _seed = (214013 * _seed + 2531011);
+        _seed = 214013 * _seed + 2531011;
         return (_seed >> 16) & 0x7FFF;
     }
 };
@@ -49,11 +49,11 @@ public:
     { }
 
     [[nodiscard]] inline u32 seed() const noexcept { return _seed; }
-    inline void seed(u32 seed) noexcept { _seed = seed; }
+    inline void seed(const u32 seed) noexcept { _seed = seed; }
 
     [[nodiscard]] inline u32 rand() noexcept
     {
-        _seed = (214013 * _seed + 2531011);
+        _seed = 214013 * _seed + 2531011;
         return _seed;
     }
 };
@@ -76,11 +76,11 @@ public:
     { }
 
     [[nodiscard]] inline u64 seed() const noexcept { return _seed; }
-    inline void seed(u64 seed) noexcept { _seed = seed; }
+    inline void seed(const u64 seed) noexcept { _seed = seed; }
 
     [[nodiscard]] inline u64 rand() noexcept
     {
-        _seed = (214013 * _seed + 2531011);
+        _seed = 214013 * _seed + 2531011;
         return _seed;
     }
 };

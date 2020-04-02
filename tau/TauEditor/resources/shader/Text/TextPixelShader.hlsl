@@ -9,11 +9,12 @@ cbuffer Color : register(b1)
     float4 textColor;
 };
 
-Texture2D textBMP;
+Texture2D<float> textBMP;
 SamplerState textBMPSampler;
 
 float4 psMain(PSInput input) : SV_TARGET
 {
-    float texel = textBMP.Sample(textBMPSampler, input.texCoord).r;
+    float texel = textBMP.Sample(textBMPSampler, input.texCoord);
+    
     return float4(textColor.xyz, texel);
 }

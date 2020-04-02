@@ -94,9 +94,10 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    CPPRef<ISingleTextureUploaderBuilder> tuBuilder = context.createSingleTextureUploader();
-    tuBuilder->textureSampler(CPPRef<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
-    _textureUploader = CPPRef<ISingleTextureUploader>(tuBuilder->build());
+    SingleTextureUploaderArgs tuArgs;
+    tuArgs.texture = context.createNullTexture().buildCPPRef(TextureArgs {}, null);
+    tuArgs.textureSampler = context.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
+    _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, null);
 
     BufferArgs bufferBuilder(1);
     bufferBuilder.type = EBuffer::Type::ArrayBuffer;
@@ -159,7 +160,7 @@ FT_Error TextHandler::init() noexcept
     return error;
 }
 
-TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight) noexcept
+TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight) const noexcept
 {
     PERF();
     const CPPRef<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
@@ -295,8 +296,8 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
         };
 
         _textureUploader->texture(gc->texture);
-        TextureIndices indices(0, 0, 0);
-        (void) _textureUploader->upload(context, indices, EShader::Stage::Pixel);
+
+        (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
         _positionBuffer->beginModification(context);
         _positionBuffer->modifyBuffer(0, sizeof(vertices), vertices);
@@ -304,8 +305,7 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
 
         _va->draw(context);
 
-        indices = TextureIndices(0, 0, 0);
-        (void) _textureUploader->unbind(context, indices, EShader::Stage::Pixel);
+        (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
         x += (gc->advance >> 6) * scale;
     }
@@ -325,9 +325,6 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
     const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
 
     _shader->bind(context);
-    // _projUni->set(proj);
-    // _texUni->set(0);
-    // _colorUni->set(color);
 
     _viewUniforms.data().projectionMatrix = proj;
     _viewUniforms.upload(context, EShader::Stage::Vertex, 0);
@@ -337,8 +334,6 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
 
     _va->bind(context);
     _va->preDraw(context);
-
-    glFrontFace(GL_CCW);
 
     float height = lineHeight;
 
@@ -375,8 +370,7 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
         };
 
         _textureUploader->texture(gc->texture);
-        TextureIndices indices(0, 0, 0);
-        (void) _textureUploader->upload(context, indices, EShader::Stage::Pixel);
+        (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
         _positionBuffer->beginModification(context);
         _positionBuffer->modifyBuffer(0, sizeof(vertices), vertices);
@@ -384,8 +378,7 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
 
         _va->draw(context);
 
-        indices = TextureIndices(0, 0, 0);
-        (void) _textureUploader->unbind(context, indices, EShader::Stage::Pixel);
+        (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
         x += advance;
     }

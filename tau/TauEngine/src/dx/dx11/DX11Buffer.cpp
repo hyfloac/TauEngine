@@ -498,7 +498,7 @@ DX11Buffer* DX11BufferBuilder::build(const BufferArgs& args, Error* error) const
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11Buffer* buffer = new(::std::nothrow) DX11Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    DX11Buffer* const buffer = new(::std::nothrow) DX11Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -514,7 +514,7 @@ DX11Buffer* DX11BufferBuilder::build(const BufferArgs& args, Error* error, TauAl
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11Buffer* buffer = allocator.allocateT<DX11Buffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    DX11Buffer* const buffer = allocator.allocateT<DX11Buffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -530,7 +530,7 @@ CPPRef<IBuffer> DX11BufferBuilder::buildCPPRef(const BufferArgs& args, Error* er
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    CPPRef<DX11Buffer> buffer = CPPRef<DX11Buffer>(new(::std::nothrow) DX11Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
+    const CPPRef<DX11Buffer> buffer = CPPRef<DX11Buffer>(new(::std::nothrow) DX11Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -540,13 +540,13 @@ CPPRef<IBuffer> DX11BufferBuilder::buildCPPRef(const BufferArgs& args, Error* er
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableReferenceCountingPointer<IBuffer> DX11BufferBuilder::buildTauRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IBuffer> DX11BufferBuilder::buildTauRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    NullableReferenceCountingPointer<DX11Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    const NullableRef<DX11Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -556,13 +556,13 @@ NullableReferenceCountingPointer<IBuffer> DX11BufferBuilder::buildTauRef(const B
     ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
 }
 
-NullableStrongReferenceCountingPointer<IBuffer> DX11BufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IBuffer> DX11BufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    NullableStrongReferenceCountingPointer<DX11Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    const NullableStrongRef<DX11Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -615,7 +615,7 @@ DX11IndexBuffer* DX11IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11IndexBuffer* buffer = new(::std::nothrow) DX11IndexBuffer(args.usage, args.bufferSize(), d3dBuffer);
+    DX11IndexBuffer* const buffer = new(::std::nothrow) DX11IndexBuffer(args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -631,7 +631,7 @@ DX11IndexBuffer* DX11IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11IndexBuffer* buffer = allocator.allocateT<DX11IndexBuffer>(args.usage, args.bufferSize(), d3dBuffer);
+    DX11IndexBuffer* const buffer = allocator.allocateT<DX11IndexBuffer>(args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -647,7 +647,7 @@ CPPRef<IIndexBuffer> DX11IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& 
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    CPPRef<DX11IndexBuffer> buffer = CPPRef<DX11IndexBuffer>(new(::std::nothrow) DX11IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
+    const CPPRef<DX11IndexBuffer> buffer = CPPRef<DX11IndexBuffer>(new(::std::nothrow) DX11IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -657,13 +657,13 @@ CPPRef<IIndexBuffer> DX11IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& 
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableReferenceCountingPointer<IIndexBuffer> DX11IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IIndexBuffer> DX11IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableReferenceCountingPointer<DX11IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
+    const NullableRef<DX11IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -673,13 +673,13 @@ NullableReferenceCountingPointer<IIndexBuffer> DX11IndexBufferBuilder::buildTauR
     ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
-NullableStrongReferenceCountingPointer<IIndexBuffer> DX11IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IIndexBuffer> DX11IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableStrongReferenceCountingPointer<DX11IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
+    const NullableStrongRef<DX11IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -730,7 +730,7 @@ DX11UniformBuffer* DX11UniformBufferBuilder::build(const UniformBufferArgs& args
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11UniformBuffer* buffer = new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
+    DX11UniformBuffer* const buffer = new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -746,7 +746,7 @@ DX11UniformBuffer* DX11UniformBufferBuilder::build(const UniformBufferArgs& args
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11UniformBuffer* buffer = allocator.allocateT<DX11UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
+    DX11UniformBuffer* const buffer = allocator.allocateT<DX11UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -762,7 +762,7 @@ CPPRef<IUniformBuffer> DX11UniformBufferBuilder::buildCPPRef(const UniformBuffer
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    CPPRef<DX11UniformBuffer> buffer = CPPRef<DX11UniformBuffer>(new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
+    const CPPRef<DX11UniformBuffer> buffer = CPPRef<DX11UniformBuffer>(new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -772,13 +772,13 @@ CPPRef<IUniformBuffer> DX11UniformBufferBuilder::buildCPPRef(const UniformBuffer
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableReferenceCountingPointer<IUniformBuffer> DX11UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IUniformBuffer> DX11UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableReferenceCountingPointer<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
+    const NullableRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -788,13 +788,13 @@ NullableReferenceCountingPointer<IUniformBuffer> DX11UniformBufferBuilder::build
     ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
 }
 
-NullableStrongReferenceCountingPointer<IUniformBuffer> DX11UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IUniformBuffer> DX11UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableStrongReferenceCountingPointer<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
+    const NullableStrongRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();

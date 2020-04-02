@@ -23,7 +23,7 @@
 DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept
     : IRenderingContext(gi.renderingMode()), _gi(gi),
       _renderTargetView(args.renderTargetView),
-      _depthStencilBuffer(args.depthStencilBuffer), _depthStencilView(args.depthStencilView),
+      _depthStencilBuffer(args.depthStencilBuffer), _depthStencilView(args.depthStencilView), _blendState(args.blendState),
       _swapChain(args.swapChain),
       _vsync(false),
       _defaultDepthStencilState(null), _currentDepthStencilState(null),
@@ -32,7 +32,7 @@ DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10
       _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
       _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
-      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
+      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(gi)),
       _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(gi)),
       _textureNullBuilder(new(::std::nothrow) DX10NullTextureBuilder),
       _textureDepthBuilder(new(::std::nothrow) DX10DepthTextureBuilder(gi)),
@@ -368,16 +368,6 @@ ITextureCubeBuilder& DX10RenderingContext::createTextureCube() noexcept
 ITextureSamplerBuilder& DX10RenderingContext::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
 
-CPPRef<ITextureUploaderBuilder> DX10RenderingContext::createTextureUploader(uSys textureCount) noexcept
-{
-    return CPPRef<ITextureUploaderBuilder>(new(::std::nothrow) DX10TextureUploaderBuilder(textureCount, *this));
-}
-
-CPPRef<ISingleTextureUploaderBuilder> DX10RenderingContext::createSingleTextureUploader() noexcept
-{
-    return CPPRef<ISingleTextureUploaderBuilder>(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this));
-}
-
 IShaderBuilder& DX10RenderingContext::createShader() noexcept
 { return _gi.createShader(); }
 
@@ -575,6 +565,38 @@ bool DX10RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
     {
         D3D10_VIEWPORT viewport = { 0, 0, args.window->width(), args.window->height(), 0.0f, 1.0f };
         _gi.d3d10Device()->RSSetViewports(1, &viewport);
+    }
+
+    {
+        D3D10_BLEND_DESC blendDesc;
+        blendDesc.AlphaToCoverageEnable = FALSE;
+        blendDesc.BlendEnable[0] = TRUE;
+        blendDesc.BlendEnable[1] = TRUE;
+        blendDesc.BlendEnable[2] = TRUE;
+        blendDesc.BlendEnable[3] = TRUE;
+        blendDesc.BlendEnable[4] = TRUE;
+        blendDesc.BlendEnable[5] = TRUE;
+        blendDesc.BlendEnable[6] = TRUE;
+        blendDesc.BlendEnable[7] = TRUE;
+        blendDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+        blendDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+        blendDesc.BlendOp = D3D10_BLEND_OP_ADD;
+        blendDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
+        blendDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+        blendDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+        blendDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[1] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[2] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[3] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[4] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[5] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[6] = D3D10_COLOR_WRITE_ENABLE_ALL;
+        blendDesc.RenderTargetWriteMask[7] = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+        CHECK(_gi.d3d10Device()->CreateBlendState(&blendDesc, &dxArgs->blendState));
+        float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        const UINT sampleMask = 0xffffffff;
+        _gi.d3d10Device()->OMSetBlendState(dxArgs->blendState, blendFactor, sampleMask);
     }
 
     return true;

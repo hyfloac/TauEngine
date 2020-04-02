@@ -110,6 +110,11 @@ public:
         : _ptr(allocator.allocateT<RCDO<_T>>(allocator, args...))
     { }
 
+    template<typename _TT>
+    inline ReferenceCountingPointer(const ReferenceCountingPointer<_TT>& rcp) noexcept
+        : _ptr(reinterpret_cast<RCDO<_T>*>(rcp.get()))
+    { ++_ptr->_refCount; }
+
     inline ~ReferenceCountingPointer() noexcept
     {
         if(--_ptr->_refCount == 0)
@@ -174,6 +179,8 @@ public:
 
     [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr->_refCount; }
 
+    [[nodiscard]] inline RCDO<_T>* _getBlock() const noexcept { return _ptr; }
+
     [[nodiscard]] inline operator bool() const noexcept { return true; }
     [[nodiscard]] inline bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
@@ -200,6 +207,18 @@ public:
     inline explicit NullableReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept
         : _ptr(allocator.allocateT<RCDO<_T>>(allocator, args...))
     { }
+
+    template<typename _TT>
+    inline NullableReferenceCountingPointer(const NullableReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<RCDO<_T>*>(rcp._getBlock()))
+    {
+        if(_ptr) { ++_ptr->_refCount; }
+    }
+
+    template<typename _TT>
+    inline NullableReferenceCountingPointer(const ReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<RCDO<_T>*>(rcp._getBlock()))
+    { ++_ptr->_refCount; }
 
     inline NullableReferenceCountingPointer(const nullptr_t) noexcept
         : _ptr(nullptr)
@@ -229,15 +248,11 @@ public:
 
     inline NullableReferenceCountingPointer(const ReferenceCountingPointer<_T>& copy) noexcept
         : _ptr(copy._ptr)
-    {
-        if(_ptr) { ++_ptr->_refCount; }
-    }
+    { ++_ptr->_refCount; }
 
     inline NullableReferenceCountingPointer(ReferenceCountingPointer<_T>&& move) noexcept
         : _ptr(move._ptr)
-    {
-        if(_ptr) { ++_ptr->_refCount; }
-    }
+    { ++_ptr->_refCount; }
 
     inline NullableReferenceCountingPointer<_T>& operator=(const nullptr_t) noexcept
     {
@@ -321,6 +336,8 @@ public:
 
     [[nodiscard]] inline ::std::size_t refCount() const noexcept { return _ptr ? _ptr->_refCount : 0; }
 
+    [[nodiscard]] inline RCDO<_T>* _getBlock() const noexcept { return _ptr; }
+
     [[nodiscard]] inline operator bool() const noexcept { return _ptr; }
 
     [[nodiscard]] inline bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
@@ -390,6 +407,11 @@ public:
     inline explicit StrongReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept
         : _ptr(allocator.allocateT<SWRC<_T>>(allocator, args...))
     { }
+
+    template<typename _TT>
+    inline StrongReferenceCountingPointer(const StrongReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    { ++_ptr->_strongRefCount; }
 
     inline ~StrongReferenceCountingPointer() noexcept
     {
@@ -477,6 +499,8 @@ public:
     [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr->_strongRefCount; }
     [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr->_weakRefCount;   }
 
+    [[nodiscard]] inline SWRC<_T>* _getBlock() const noexcept { return _ptr; }
+
     [[nodiscard]] inline operator bool() const noexcept { return true; }
     [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
     [[nodiscard]] inline bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
@@ -507,6 +531,16 @@ private:
 public:
     inline WeakReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& ptr) noexcept
         : _ptr(ptr._ptr)
+    { ++_ptr->_weakRefCount; }
+
+    template<typename _TT>
+    inline WeakReferenceCountingPointer(const StrongReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    { ++_ptr->_weakRefCount; }
+
+    template<typename _TT>
+    inline WeakReferenceCountingPointer(const WeakReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
     { ++_ptr->_weakRefCount; }
 
     inline ~WeakReferenceCountingPointer() noexcept
@@ -586,9 +620,11 @@ public:
     [[nodiscard]] inline       _T* get()       noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
     [[nodiscard]] inline const _T* get() const noexcept { return _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
 
-    [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_weakRefCount   : 0;   }
+    [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
     [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
-    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0;   }
+    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
+
+    [[nodiscard]] inline SWRC<_T>* _getBlock() const noexcept { return _ptr; }
 
     [[nodiscard]] inline operator bool() const noexcept { return _ptr->_strongRefCount; }
     [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
@@ -622,6 +658,18 @@ public:
     inline explicit NullableStrongReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept
         : _ptr(allocator.allocateT<SWRC<_T>>(allocator, args...))
     { }
+
+    template<typename _TT>
+    inline NullableStrongReferenceCountingPointer(const StrongReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    { ++_ptr->_strongRefCount; }
+
+    template<typename _TT>
+    inline NullableStrongReferenceCountingPointer(const NullableStrongReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    {
+        if(_ptr) { ++_ptr->_strongRefCount; }
+    }
 
     inline NullableStrongReferenceCountingPointer(const nullptr_t) noexcept
         : _ptr(nullptr)
@@ -807,7 +855,9 @@ public:
 
     [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
     [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
-    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0;  }
+    [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
+
+    [[nodiscard]] inline SWRC<_T>* _getBlock() const noexcept { return _ptr; }
 
     [[nodiscard]] inline operator bool() const noexcept { return _ptr; }
     [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
@@ -845,6 +895,30 @@ public:
 
     inline NullableWeakReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& ptr) noexcept
         : _ptr(ptr._ptr)
+    { ++_ptr->_weakRefCount; }
+
+    template<typename _TT>
+    inline NullableWeakReferenceCountingPointer(const NullableStrongReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    {
+        if(_ptr) { ++_ptr->_weakRefCount; }
+    }
+
+    template<typename _TT>
+    inline NullableWeakReferenceCountingPointer(const StrongReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    { ++_ptr->_weakRefCount; }
+
+    template<typename _TT>
+    inline NullableWeakReferenceCountingPointer(const NullableWeakReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
+    {
+        if(_ptr) { ++_ptr->_weakRefCount; }
+    }
+
+    template<typename _TT>
+    inline NullableWeakReferenceCountingPointer(const WeakReferenceCountingPointer<_TT> & rcp) noexcept
+        : _ptr(reinterpret_cast<SWRC<_T>*>(rcp._getBlock()))
     { ++_ptr->_weakRefCount; }
 
     inline NullableWeakReferenceCountingPointer(const nullptr_t) noexcept
@@ -987,6 +1061,8 @@ public:
     [[nodiscard]] inline ::std::size_t refCount()       const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
     [[nodiscard]] inline ::std::size_t strongRefCount() const noexcept { return _ptr ? _ptr->_strongRefCount : 0; }
     [[nodiscard]] inline ::std::size_t weakRefCount()   const noexcept { return _ptr ? _ptr->_weakRefCount   : 0; }
+
+    [[nodiscard]] inline SWRC<_T>* _getBlock() const noexcept { return _ptr; }
 
     [[nodiscard]] inline operator bool() const noexcept { return _ptr && _ptr->_strongRefCount; }
     [[nodiscard]] inline bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }

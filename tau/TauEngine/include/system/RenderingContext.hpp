@@ -120,8 +120,6 @@ public:
     [[nodiscard]] virtual ITextureBuilder& createTextureDepth() noexcept = 0;
     [[nodiscard]] virtual ITextureCubeBuilder& createTextureCube() noexcept = 0;
     [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
 
     RTT_BASE_IMPL(IRenderingContext);

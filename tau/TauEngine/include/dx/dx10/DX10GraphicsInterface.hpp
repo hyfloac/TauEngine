@@ -9,6 +9,8 @@ class DX10ShaderBuilder;
 class DX10DepthStencilStateBuilder;
 class DX10RasterizerStateBuilder;
 class DX10DepthTextureBuilder;
+class DX10SingleTextureUploaderBuilder;
+class DX10TextureUploaderBuilder;
 class DX10RenderingContextBuilder;
 
 class TAU_DLL DX10GraphicsInterface final : public IGraphicsInterface
@@ -21,6 +23,8 @@ private:
     DX10DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX10RasterizerStateBuilder* _rasterizerStateBuilder;
     DX10DepthTextureBuilder* _depthTextureBuilder;
+    DX10SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
+    DX10TextureUploaderBuilder* _textureUploaderBuilder;
     DX10RenderingContextBuilder* _renderingContextBuilder;
 public:
     DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* d3dDevice) noexcept;
@@ -35,6 +39,8 @@ public:
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
+    [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
+    [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

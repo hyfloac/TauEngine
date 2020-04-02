@@ -29,6 +29,7 @@ struct DX10RenderingContextArgs final
     ID3D10RenderTargetView* renderTargetView;
     ID3D10Texture2D* depthStencilBuffer;
     ID3D10DepthStencilView* depthStencilView;
+    ID3D10BlendState* blendState;
     IDXGISwapChain* swapChain;
 };
 
@@ -40,6 +41,7 @@ private:
     ID3D10RenderTargetView* _renderTargetView;
     ID3D10Texture2D* _depthStencilBuffer;
     ID3D10DepthStencilView* _depthStencilView;
+    ID3D10BlendState* _blendState;
     IDXGISwapChain* _swapChain;
 
     bool _vsync;
@@ -99,8 +101,6 @@ public:
     [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
     [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] CPPRef<ITextureUploaderBuilder> createTextureUploader(uSys textureCount) noexcept override;
-    [[nodiscard]] CPPRef<ISingleTextureUploaderBuilder> createSingleTextureUploader() noexcept override;
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);

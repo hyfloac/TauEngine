@@ -96,7 +96,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     vaArgs.drawType = drawType;
     _va = context.createVertexArray().buildCPPRef(vaArgs, null);
 
-    MaterialBuilder matBuilder(context);
+    MaterialBuilder matBuilder(gi);
 
     if(!mesh.material.map_Kd.empty())
     {

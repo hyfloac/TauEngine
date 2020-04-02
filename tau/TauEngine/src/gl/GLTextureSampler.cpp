@@ -19,10 +19,9 @@ void GLTextureSampler::apply(const GLenum target) const noexcept
 GLTextureSampler* GLTextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error) const noexcept
 {
     GLTextureSampler* const sampler = new(::std::nothrow) GLTextureSampler;
-
     ERROR_CODE_COND_N(!sampler, Error::SystemMemoryAllocationFailure);
 
-    if(!processTextureSamplerArgs(args, sampler, error))
+    if(!processArgs(args, sampler, error))
     {
         delete sampler;
         return null;
@@ -34,10 +33,9 @@ GLTextureSampler* GLTextureSamplerBuilder::build(const TextureSamplerArgs& args,
 GLTextureSampler* GLTextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     GLTextureSampler* const sampler = allocator.allocateT<GLTextureSampler>();
-
     ERROR_CODE_COND_N(!sampler, Error::SystemMemoryAllocationFailure);
 
-    if(!processTextureSamplerArgs(args, sampler, error))
+    if(!processArgs(args, sampler, error))
     {
         delete sampler;
         return null;
@@ -49,44 +47,37 @@ GLTextureSampler* GLTextureSamplerBuilder::build(const TextureSamplerArgs& args,
 CPPRef<ITextureSampler> GLTextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
 {
     CPPRef<GLTextureSampler> const sampler = CPPRef<GLTextureSampler>(new GLTextureSampler);
-
     ERROR_CODE_COND_N(!sampler, Error::SystemMemoryAllocationFailure);
 
-    if(!processTextureSamplerArgs(args, sampler.get(), error))
+    if(!processArgs(args, sampler.get(), error))
     { return null; }
 
     ERROR_CODE_V(Error::NoError, sampler);
 }
 
-NullableReferenceCountingPointer<ITextureSampler> GLTextureSamplerBuilder::buildTauRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableRef<ITextureSampler> GLTextureSamplerBuilder::buildTauRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    NullableReferenceCountingPointer<GLTextureSampler> sampler(allocator);
-
+    NullableRef<GLTextureSampler> sampler(allocator);
     ERROR_CODE_COND_N(!sampler, Error::SystemMemoryAllocationFailure);
 
-    if(!processTextureSamplerArgs(args, sampler.get(), error))
+    if(!processArgs(args, sampler.get(), error))
     { return null; }
 
-    NullableReferenceCountingPointer<ITextureSampler> iSampler = RCPCast<ITextureSampler>(sampler);
-
-    ERROR_CODE_V(Error::NoError, iSampler);
+    ERROR_CODE_V(Error::NoError, sampler);
 }
 
-NullableStrongReferenceCountingPointer<ITextureSampler> GLTextureSamplerBuilder::buildTauSRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableStrongRef<ITextureSampler> GLTextureSamplerBuilder::buildTauSRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    NullableStrongReferenceCountingPointer<GLTextureSampler> sampler(allocator);
-
+    NullableStrongRef<GLTextureSampler> sampler(allocator);
     ERROR_CODE_COND_N(!sampler, Error::SystemMemoryAllocationFailure);
 
-    if(!processTextureSamplerArgs(args, sampler.get(), error))
+    if(!processArgs(args, sampler.get(), error))
     { return null; }
 
-    NullableStrongReferenceCountingPointer<ITextureSampler> iSampler = RCPCast<ITextureSampler>(sampler);
-
-    ERROR_CODE_V(Error::NoError, iSampler);
+    ERROR_CODE_V(Error::NoError, sampler);
 }
 
-bool GLTextureSamplerBuilder::processTextureSamplerArgs(const TextureSamplerArgs& args, GLTextureSampler* const glArgs, Error* const error) const noexcept
+bool GLTextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, GLTextureSampler* const glArgs, Error* const error) noexcept
 {
     ERROR_CODE_COND_F(args.magFilter() == static_cast<ETexture::Filter>(0), Error::FilterIsUnset);
     ERROR_CODE_COND_F(args.minFilter() == static_cast<ETexture::Filter>(0), Error::FilterIsUnset);

@@ -48,7 +48,7 @@ bool DX10Buffer::beginModification(IRenderingContext& context) noexcept
     {
         void* bufferAccess;
 
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
             _currentMapping = bufferAccess;
@@ -174,7 +174,7 @@ bool DX10IndexBuffer::beginModification(IRenderingContext& context) noexcept
     {
         void* bufferAccess;
 
-        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE, 0, &bufferAccess);
+        const HRESULT h = _d3dBuffer->Map(D3D10_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
             _currentMapping = bufferAccess;
@@ -462,7 +462,7 @@ DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error) const
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX10Buffer* buffer = new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    DX10Buffer* const buffer = new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -478,7 +478,7 @@ DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error, TauAl
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX10Buffer* buffer = allocator.allocateT<DX10Buffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    DX10Buffer* const buffer = allocator.allocateT<DX10Buffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -494,7 +494,7 @@ CPPRef<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* er
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    CPPRef<DX10Buffer> buffer = CPPRef<DX10Buffer>(new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
+    const CPPRef<DX10Buffer> buffer = CPPRef<DX10Buffer>(new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -504,36 +504,36 @@ CPPRef<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* er
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableReferenceCountingPointer<IBuffer> DX10BufferBuilder::buildTauRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IBuffer> DX10BufferBuilder::buildTauRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    NullableReferenceCountingPointer<DX10Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    const NullableRef<DX10Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableStrongReferenceCountingPointer<IBuffer> DX10BufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IBuffer> DX10BufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    NullableStrongReferenceCountingPointer<DX10Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    const NullableStrongRef<DX10Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, buffer);
 }
 
 bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
@@ -579,7 +579,7 @@ DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX10IndexBuffer* buffer = new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer);
+    DX10IndexBuffer* const buffer = new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -595,7 +595,7 @@ DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX10IndexBuffer* buffer = allocator.allocateT<DX10IndexBuffer>(args.usage, args.bufferSize(), d3dBuffer);
+    DX10IndexBuffer* const buffer = allocator.allocateT<DX10IndexBuffer>(args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -611,7 +611,7 @@ CPPRef<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& 
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    CPPRef<DX10IndexBuffer> buffer = CPPRef<DX10IndexBuffer>(new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
+    const CPPRef<DX10IndexBuffer> buffer = CPPRef<DX10IndexBuffer>(new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -621,36 +621,36 @@ CPPRef<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& 
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableReferenceCountingPointer<IIndexBuffer> DX10IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableReferenceCountingPointer<DX10IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
+    const NullableRef<DX10IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableStrongReferenceCountingPointer<IIndexBuffer> DX10IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableStrongReferenceCountingPointer<DX10IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
+    const NullableStrongRef<DX10IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, buffer);
 }
 
 bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
@@ -694,7 +694,7 @@ DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX10UniformBuffer* buffer = new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
+    DX10UniformBuffer* const buffer = new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -710,7 +710,7 @@ DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX10UniformBuffer* buffer = allocator.allocateT<DX10UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
+    DX10UniformBuffer* const buffer = allocator.allocateT<DX10UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -726,7 +726,7 @@ CPPRef<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBuffer
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    CPPRef<DX10UniformBuffer> buffer = CPPRef<DX10UniformBuffer>(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
+    const CPPRef<DX10UniformBuffer> buffer = CPPRef<DX10UniformBuffer>(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -736,36 +736,36 @@ CPPRef<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBuffer
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableReferenceCountingPointer<IUniformBuffer> DX10UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableReferenceCountingPointer<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
+    const NullableRef<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableStrongReferenceCountingPointer<IUniformBuffer> DX10UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
     if(!processBufferArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableStrongReferenceCountingPointer<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
+    const NullableStrongRef<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, buffer);
 }
 
 bool DX10UniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept

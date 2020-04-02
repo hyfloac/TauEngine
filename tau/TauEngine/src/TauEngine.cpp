@@ -5,7 +5,6 @@
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
 #include "system/SystemInterface.hpp"
-#include <Utils.hpp>
 
 bool tauInit() noexcept
 {
@@ -15,10 +14,6 @@ bool tauInit() noexcept
     {
         _initializationComplete = true;
         SystemInterface::create();
-        // spdlog::set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
-        // engineLogger = spdlog::stdout_color_mt("TauEngine");
-        // engineLogger->set_level(spdlog::level::trace);
-        // engineLogger->set_pattern("[%^%H:%M:%S:%e%$] [%^%n%$] [%^%l%$]: %v");
     }
 
     return true;

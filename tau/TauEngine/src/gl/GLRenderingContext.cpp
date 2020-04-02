@@ -192,16 +192,6 @@ ITextureCubeBuilder& GLRenderingContext::createTextureCube() noexcept
 ITextureSamplerBuilder& GLRenderingContext::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
 
-CPPRef<ITextureUploaderBuilder> GLRenderingContext::createTextureUploader(const uSys textureCount) noexcept
-{
-    return CPPRef<GLTextureUploaderBuilder>(new(::std::nothrow) GLTextureUploaderBuilder(textureCount, *this));
-}
-
-CPPRef<ISingleTextureUploaderBuilder> GLRenderingContext::createSingleTextureUploader() noexcept
-{
-    return CPPRef<GLSingleTextureUploaderBuilder>(new(::std::nothrow) GLSingleTextureUploaderBuilder(*this));
-}
-
 IShaderBuilder& GLRenderingContext::createShader() noexcept
 { return _gi.createShader(); }
 

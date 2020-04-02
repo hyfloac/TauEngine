@@ -107,7 +107,6 @@
     <ClCompile Include="src\maths\Vector3i.cpp" />
     <ClCompile Include="src\maths\Vector4f.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
-    <ClCompile Include="src\VirtualIO.cpp" />
     <ClCompile Include="src\vr\VRUtils.cpp" />
     <ClCompile Include="src\win32\Win32Mouse.cpp" />
     <ClCompile Include="src\win32\Win32Keyboard.cpp" />
@@ -152,7 +151,6 @@
     <ClInclude Include="include\events\WindowEvent.hpp" />
     <ClInclude Include="include\file\FileHandling.hpp" />
     <ClInclude Include="include\file\FileUtils.hpp" />
-    <ClInclude Include="include\file\VirtualIO.hpp" />
     <ClInclude Include="include\GameRecorder.hpp" />
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
@@ -203,7 +201,6 @@
     <ClInclude Include="include\model\RenderableObject.hpp" />
     <ClInclude Include="include\model\VertexArray.hpp" />
     <ClInclude Include="include\PhysicsObject.hpp" />
-    <ClInclude Include="include\physics\VelocityObject.hpp" />
     <ClInclude Include="include\random\FastRand.hpp" />
     <ClInclude Include="include\random\Random.hpp" />
     <ClInclude Include="include\random\WyHash64.hpp" />

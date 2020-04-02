@@ -72,6 +72,12 @@ IRasterizerStateBuilder& DX11GraphicsInterface::createRasterizerState() noexcept
 ITextureBuilder& DX11GraphicsInterface::createDepthTexture() noexcept
 { return *static_cast<ITextureBuilder*>(null); }
 
+ISingleTextureUploaderBuilder& DX11GraphicsInterface::createSingleTextureUploader() noexcept
+{ return *static_cast<ISingleTextureUploaderBuilder*>(null); }
+
+ITextureUploaderBuilder& DX11GraphicsInterface::createTextureUploader() noexcept
+{ return *static_cast<ITextureUploaderBuilder*>(null); }
+
 IRenderingContextBuilder& DX11GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }
 
