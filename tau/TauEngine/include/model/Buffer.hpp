@@ -11,6 +11,7 @@
 #include "shader/EShader.hpp"
 #include "model/BufferEnums.hpp"
 #include "model/BufferDescriptor.hpp"
+#include "TauEngine.hpp"
 
 #ifndef TAU_BUFFER_SAFETY
   #if defined(TAU_PRODUCTION)
@@ -52,6 +53,18 @@
   #ifndef TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER
     #define TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER 1
   #endif
+
+  #ifndef TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_BOUND
+    #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_BOUND 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_UNIFORM_BOUND
+    #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_UNIFORM_BOUND 1
+  #endif
+
+  #ifndef TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING
+    #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING 1
+  #endif
 #else
   #define TAU_BUFFER_SAFETY_DOUBLE_BIND            0
   #define TAU_BUFFER_SAFETY_DOUBLE_UNBIND          0
@@ -61,6 +74,46 @@
   #define TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN    0
   #define TAU_BUFFER_SAFETY_DOUBLE_MODIFY_END      0
   #define TAU_BUFFER_SAFETY_MODIFIED_STATIC_BUFFER 0
+  #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_BOUND 0
+  #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_UNIFORM_BOUND 0
+  #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING     0
+#endif
+
+#if TAU_BUFFER_SAFETY
+#include "events/Exception.hpp"
+
+class BufferSafetyException final : public Exception
+{
+public:
+    enum Type
+    {
+        Unknown = 0,
+        DoubleBufferBind,
+        DoubleBufferUnbind,
+        DoubleUniformBufferBind,
+        DoubleUniformBufferUnbind,
+        ModifiedWithoutBegin,
+        DoubleModifyBegin,
+        DoubleModifyEnd,
+        ModifiedStaticBuffer,
+        DestructedWhileBound,
+        DestructedWhileUniformBound,
+        DestructedWhileModifying
+    };
+private:
+    Type _type;
+public:
+    inline BufferSafetyException(Type type) noexcept
+        : _type(type)
+    { }
+
+    ~BufferSafetyException() noexcept override = default;
+
+    [[nodiscard]] inline Type type() const noexcept { return _type; }
+
+    EXCEPTION_IMPL(BufferSafetyException);
+};
+
 #endif
 
 #define BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
@@ -80,7 +133,6 @@
 
 class TAU_DLL NOVTABLE IBuffer
 {
-    DEFAULT_DESTRUCT_VI(IBuffer);
     DELETE_COPY(IBuffer);
 protected:
     EBuffer::Type _type;
@@ -101,6 +153,24 @@ protected:
 #endif
     { }
 public:
+    virtual ~IBuffer() noexcept
+    {
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING
+        if(_modificationLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileModifying);
+        }
+  #endif
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_BOUND
+        if(_bindLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileBound);
+        }
+  #endif
+#endif
+    }
+
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return _type; }
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
@@ -132,7 +202,6 @@ public:
 
 class TAU_DLL NOVTABLE IIndexBuffer
 {
-    DEFAULT_DESTRUCT_VI(IIndexBuffer);
     DELETE_COPY(IIndexBuffer);
 protected:
     EBuffer::UsageType _usage;
@@ -150,6 +219,24 @@ protected:
 #endif
     { }
 public:
+    virtual ~IIndexBuffer() noexcept
+    {
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING
+        if(_modificationLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileModifying);
+        }
+  #endif
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_BOUND
+        if(_bindLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileBound);
+        }
+  #endif
+#endif
+    }
+
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return EBuffer::Type::IndexBuffer; }
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
@@ -174,7 +261,6 @@ public:
 
 class TAU_DLL NOVTABLE IUniformBuffer
 {
-    DEFAULT_DESTRUCT_VI(IUniformBuffer);
     DELETE_COPY(IUniformBuffer);
 protected:
     EBuffer::UsageType _usage;
@@ -193,6 +279,30 @@ protected:
 #endif
     { }
 public:
+    virtual ~IUniformBuffer() noexcept
+    {
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING
+        if(_modificationLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileModifying);
+        }
+  #endif
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_UNIFORM_BOUND
+        if(_uniformBindLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileUniformBound);
+        }
+  #endif
+  #if TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_BOUND
+        if(_bindLockCount != 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DestructedWhileBound);
+        }
+  #endif
+#endif
+    }
+
     [[nodiscard]] inline EBuffer::Type type() const noexcept { return EBuffer::Type::UniformBuffer; }
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
@@ -416,37 +526,3 @@ public:
     [[nodiscard]] virtual NullableReferenceCountingPointer<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongReferenceCountingPointer<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
-
-#if TAU_BUFFER_SAFETY
-#include "events/Exception.hpp"
-
-class BufferSafetyException final : public Exception
-{
-public:
-    enum Type
-    {
-        Unknown = 0,
-        DoubleBufferBind,
-        DoubleBufferUnbind,
-        DoubleUniformBufferBind,
-        DoubleUniformBufferUnbind,
-        ModifiedWithoutBegin,
-        DoubleModifyBegin,
-        DoubleModifyEnd,
-        ModifiedStaticBuffer
-    };
-private:
-    Type _type;
-public:
-    inline BufferSafetyException(Type type) noexcept
-        : _type(type)
-    { }
-
-    ~BufferSafetyException() noexcept override = default;
-
-    [[nodiscard]] inline Type type() const noexcept { return _type; }
-
-    EXCEPTION_IMPL(BufferSafetyException);
-};
-
-#endif
