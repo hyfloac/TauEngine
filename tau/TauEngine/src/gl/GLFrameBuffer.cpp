@@ -79,7 +79,8 @@ GLFrameBufferColorAttachment::GLFrameBufferColorAttachment(const u32 width, cons
     args.dataFormat = ETexture::Format::RedGreenBlue8UnsignedInt;
     args.mipmapLevels = 0;
 
-    _texture = context.createTexture2D().buildCPPRef(args, null);
+    // _texture = context.createTexture2D().buildCPPRef(args, null);
+    _texture = null;
 }
 
 GLFrameBufferDepthStencilAttachment::GLFrameBufferDepthStencilAttachment(const u32 width, const u32 height) noexcept

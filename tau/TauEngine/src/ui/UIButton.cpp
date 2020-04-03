@@ -1,5 +1,6 @@
 #include "ui/UIButton.hpp"
 #include "events/WindowEvent.hpp"
+#include "system/GraphicsInterface.hpp"
 
 // static CPPRef<IInputLayout> _inputLayoutCache = null;
 
@@ -30,11 +31,9 @@ bool UIRectButton::isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept
     return false;
 }
 
-UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent, bool visible) noexcept
+UIRectButton::UIRectButton(IGraphicsInterface& gi, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent, bool visible) noexcept
     : UIButton(clickHandler, x, y, parent, visible), _width(width), _height(height), _color(color),
-      _vbo(nullptr),
-      // _vao(context.createVertexArray(1, DrawType::SeparatedTriangles))
-      _vao(null)
+      _vbo(nullptr), _vao(null)
 {
     const float xx = static_cast<float>(x);
     const float yy = static_cast<float>(y);
@@ -52,36 +51,19 @@ UIRectButton::UIRectButton(IRenderingContext& context, clickHandler_f clickHandl
     };
 
     BufferArgs vboBuilder(1);
-    // CPPRef<IBufferBuilder> vboBuilder = context.createBuffer(1);
     vboBuilder.type = EBuffer::Type::ArrayBuffer;
     vboBuilder.usage = EBuffer::UsageType::StaticDraw;
     vboBuilder.elementCount = 6;
+    vboBuilder.initialBuffer = model;
     vboBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-
-    _vbo->fillBuffer(context, model);
-
-    // if(!_inputLayoutCache)
-    // {
-        // CPPRef<IInputLayoutBuilder> ilBuilder = context.createInputLayout(1);
-        // ilBuilder->setLayoutDescriptor(0, ShaderDataType::Vector2Float, ShaderSemantic::Position);
-        // _inputLayoutCache = CPPRef<IInputLayout>(ilBuilder->build());
-    // }
-
 
     VertexArrayArgs vaArgs(1);
     vaArgs.buffers[0] = _vbo;
     vaArgs.drawCount = 6;
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _vao = context.createVertexArray().buildCPPRef(vaArgs, null);
-
-    // _vao->addVertexBuffer(context, _vbo);
-    // _vao->drawCount() = 6;
+    _vao = gi.createVertexArray().buildCPPRef(vaArgs, null);
 }
 
 void UIRectButton::onRender(float delta) noexcept
-{
-    // glm::vec3 pos(_x, _y, 0);
-    // glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), pos);
-    
-}
+{ }

@@ -25,6 +25,9 @@ public:
 
     ~GLBuffer() noexcept override;
 
+    void bind() const noexcept;
+    void unbind() const noexcept;
+
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
 

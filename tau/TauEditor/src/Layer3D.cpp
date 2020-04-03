@@ -8,6 +8,7 @@
 #include <shader/IShader.hpp>
 #include "texture/FITextureLoader.hpp"
 #include "Timings.hpp"
+#include "system/GraphicsInterface.hpp"
 
 template<>
 class UniformAccessor<Layer3D::Uniforms> final
@@ -56,13 +57,13 @@ Layer3D::Layer3D(Globals& globals) noexcept
               &globals.gr),
       _skybox(globals.gi, globals.rc, "|TERes", "/shader/", "SkyboxVertexShader", "SkyboxPixelShader", "|TERes/Skybox/OceanMountain/", ".png"),
       _shader(IShaderProgram::create(globals.rc)),
-      _uniforms(globals.rc.createUniformBuffer()),
-      _materialUniforms(globals.rc.createUniformBuffer()),
-      _pointLightUniforms(globals.rc.createUniformBuffer()),
-      _spotLightUniforms(globals.rc.createUniformBuffer()), _cameraPosUni(globals.rc.createUniformBuffer()),
+      _uniforms(globals.gi.createUniformBuffer()),
+      _materialUniforms(globals.gi.createUniformBuffer()),
+      _pointLightUniforms(globals.gi.createUniformBuffer()),
+      _spotLightUniforms(globals.gi.createUniformBuffer()), _cameraPosUni(globals.gi.createUniformBuffer()),
       _frameBufferShader(IShaderProgram::create(globals.rc)),
-      _texture(TextureLoader::loadTexture(globals.rc, "|TERes/TestTexture.png")),
-      _overlay(TextureLoader::loadTexture(globals.rc, "|TERes/Overlay.png")),
+      _texture(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/TestTexture.png")),
+      _overlay(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/Overlay.png")),
       _frameBufferVA(null),
       _modelPos(0, 0, 0), _modelViewMatrix(1.0f)
 {
@@ -74,12 +75,12 @@ Layer3D::Layer3D(Globals& globals) noexcept
     shaderArgs.path = "/nanosuit/";
     shaderArgs.fileName = "NanosuitPixel";
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = globals.rc.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.path = "/shader/";
     shaderArgs.fileName = "SimpleVertexShader";
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> vertexShader = globals.rc.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
 
     objl::Loader loader;
     if(loader.loadFile("|TERes/nanosuit/nanosuit.obj"))
@@ -156,7 +157,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    const CPPRef<IBuffer> positions = globals.rc.createBuffer().buildCPPRef(positionsBuilder, nullptr);
+    const CPPRef<IBuffer> positions = globals.gi.createBuffer().buildCPPRef(positionsBuilder, nullptr);
     // const CPPRef<IBuffer> positions = CPPRef<IBuffer>(positionsBuilder->build(nullptr));
 
     // CPPRef<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);

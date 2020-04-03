@@ -8,6 +8,7 @@
 #include <RenderingMode.hpp>
 #include "VFS.hpp"
 #include "Timings.hpp"
+#include "system/GraphicsInterface.hpp"
 #include "system/RenderingContext.hpp"
 
 static CPPRef<ITexture> _missingTexture = null;
@@ -22,7 +23,7 @@ CPPRef<ITexture> TextureLoader::getMissingTexture() noexcept
     return _missingTexture;
 }
 
-CPPRef<ITexture> TextureLoader::generateMissingTexture(IRenderingContext& context) noexcept
+CPPRef<ITexture> TextureLoader::generateMissingTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
 {
     PERF();
     u8* const textureData = new u8[2 * 2 * 4];
@@ -54,7 +55,7 @@ CPPRef<ITexture> TextureLoader::generateMissingTexture(IRenderingContext& contex
     args.mipmapLevels = 0;
     args.initialBuffer = textureData;
 
-    const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+    const CPPRef<ITexture> ret = gi.createTexture2D().buildCPPRef(args, null);
 
     ret->generateMipmaps(context);
 
@@ -63,7 +64,7 @@ CPPRef<ITexture> TextureLoader::generateMissingTexture(IRenderingContext& contex
     return ret;
 }
 
-CPPRef<ITexture> TextureLoader::generateDebugTexture8(IRenderingContext& context, const uSys power) noexcept
+CPPRef<ITexture> TextureLoader::generateDebugTexture8(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
 {
     if(power > 12)
     { return  _missingTexture; }
@@ -94,7 +95,7 @@ CPPRef<ITexture> TextureLoader::generateDebugTexture8(IRenderingContext& context
     args.mipmapLevels = 0;
     args.initialBuffer = textureData;
 
-    const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+    const CPPRef<ITexture> ret = gi.createTexture2D().buildCPPRef(args, null);
 
     ret->generateMipmaps(context);
 
@@ -103,7 +104,7 @@ CPPRef<ITexture> TextureLoader::generateDebugTexture8(IRenderingContext& context
     return ret;
 }
 
-CPPRef<ITexture> TextureLoader::generateDebugTexture16(IRenderingContext& context, const uSys power) noexcept
+CPPRef<ITexture> TextureLoader::generateDebugTexture16(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
 {
     if(power > 12)
     {
@@ -136,7 +137,7 @@ CPPRef<ITexture> TextureLoader::generateDebugTexture16(IRenderingContext& contex
     args.mipmapLevels = 0;
     args.initialBuffer = textureData;
 
-    const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+    const CPPRef<ITexture> ret = gi.createTexture2D().buildCPPRef(args, null);
 
     ret->generateMipmaps(context);
 
@@ -145,7 +146,7 @@ CPPRef<ITexture> TextureLoader::generateDebugTexture16(IRenderingContext& contex
     return ret;
 }
 
-CPPRef<ITexture> TextureLoader::generateColorTexture(IRenderingContext& context, RGBColor color) noexcept
+CPPRef<ITexture> TextureLoader::generateColorTexture(IGraphicsInterface& gi, IRenderingContext& context, RGBColor color) noexcept
 {
     u8* const textureData = new u8[1 * 1 * 4];
 
@@ -161,7 +162,7 @@ CPPRef<ITexture> TextureLoader::generateColorTexture(IRenderingContext& context,
     args.mipmapLevels = 0;
     args.initialBuffer = textureData;
 
-    const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+    const CPPRef<ITexture> ret = gi.createTexture2D().buildCPPRef(args, null);
 
     ret->generateMipmaps(context);
 
@@ -170,7 +171,7 @@ CPPRef<ITexture> TextureLoader::generateColorTexture(IRenderingContext& context,
     return ret;
 }
 
-CPPRef<ITexture> TextureLoader::loadTextureEx(IRenderingContext& context, const char* RESTRICT fileName, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
+CPPRef<ITexture> TextureLoader::loadTextureEx(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -221,7 +222,7 @@ CPPRef<ITexture> TextureLoader::loadTextureEx(IRenderingContext& context, const 
     args.mipmapLevels = 0;
     args.initialBuffer = textureData;
 
-    const CPPRef<ITexture> ret = context.createTexture2D().buildCPPRef(args, null);
+    const CPPRef<ITexture> ret = gi.createTexture2D().buildCPPRef(args, null);
 
     if(mipmapLevel < 0)
     {
@@ -245,7 +246,7 @@ static const char* fileNames[6] = {
     "top",
 };
 
-CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
+CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -257,11 +258,6 @@ CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context
     TextureCubeArgs args;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
     args.mipmapLevels = 0;
-    // CPPRef<ITextureCubeBuilder> builder = context.createTextureCube();
-    // builder->dataFormat(ETexture::Format::RedGreenBlueAlpha8UnsignedInt);
-    // builder->mipmapLevels(0);
-
-    // CPPRef<ITextureCube> ret = null;
 
     u32 width = 0;
     u32 height = 0;
@@ -325,15 +321,12 @@ CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IRenderingContext& context
         {
             args.width = width;
             args.height = height;
-
-            // ret = CPPRef<ITextureCube>(builder->build(null));
         }
 
         args.initialBuffer[i] = textureData;
-        // ret->setCube(0, static_cast<ETexture::CubeSide>(i + 1), textureData);
     }
 
-    CPPRef<ITextureCube> ret = context.createTextureCube().buildCPPRef(args, null);
+    CPPRef<ITextureCube> ret = gi.createTextureCube().buildCPPRef(args, null);
 
     for(uSys i = 0; i < 6; ++i)
     {

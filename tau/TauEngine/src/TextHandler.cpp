@@ -64,8 +64,8 @@ NullableRef<IRasterizerState> TextHandler::rs = nullptr;
 TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
     : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
       _va(null),
-      _viewUniforms(context.createUniformBuffer()),
-      _colorUniforms(context.createUniformBuffer())
+      _viewUniforms(gi.createUniformBuffer()),
+      _colorUniforms(gi.createUniformBuffer())
 {
     PERF();
     ShaderArgs shaderArgs;
@@ -74,11 +74,11 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     
     shaderArgs.fileName = vertexName;
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = gi.createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.fileName = pixelName;
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = context.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = gi.createShader().buildCPPRef(shaderArgs, null);
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
@@ -95,8 +95,8 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
     SingleTextureUploaderArgs tuArgs;
-    tuArgs.texture = context.createNullTexture().buildCPPRef(TextureArgs {}, null);
-    tuArgs.textureSampler = context.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
+    tuArgs.texture = gi.createNullTexture().buildCPPRef(TextureArgs {}, null);
+    tuArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, null);
 
     BufferArgs bufferBuilder(1);
@@ -106,7 +106,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     bufferBuilder.initialBuffer = null;
     
-    _positionBuffer = context.createBuffer().buildCPPRef(bufferBuilder, nullptr);
+    _positionBuffer = gi.createBuffer().buildCPPRef(bufferBuilder, nullptr);
 
     float textureCoords[6][2] = {
         { 0.0f, 0.0f },
@@ -123,7 +123,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     bufferBuilder.descriptor.reset(1);
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     
-    const CPPRef<IBuffer> textureCoordBuffer = context.createBuffer().buildCPPRef(bufferBuilder, null);
+    const CPPRef<IBuffer> textureCoordBuffer = gi.createBuffer().buildCPPRef(bufferBuilder, null);
 
     VertexArrayArgs vaArgs(2);
     vaArgs.shader = vertexShader;
@@ -132,7 +132,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     vaArgs.drawCount = 6;
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _va = context.createVertexArray().buildCPPRef(vaArgs, null);
+    _va = gi.createVertexArray().buildCPPRef(vaArgs, null);
 
     if(!rs)
     {
@@ -219,7 +219,7 @@ TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) no
     return new FileData { face, file };
 }
 
-GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context, const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
+GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRenderingContext& context, const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
 {
     PERF();
     GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
@@ -240,13 +240,13 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IRenderingContext& context,
             args.height = face->glyph->bitmap.rows;
             args.initialBuffer = face->glyph->bitmap.buffer;
 
-            texture = context.createTexture2D().build(args, null);
+            texture = gi.createTexture2D().build(args, null);
 
             texture->generateMipmaps(context);
         }
         else
         {
-            texture = context.createNullTexture().build(args, null);
+            texture = gi.createNullTexture().build(args, null);
         }
 
         gs.glyphs[c - gs.minGlyph] = GlyphCharacter(texture,

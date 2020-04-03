@@ -14,6 +14,16 @@ GLBuffer::~GLBuffer() noexcept
     glDeleteBuffers(1, &_buffer);
 }
 
+void GLBuffer::bind() const noexcept
+{
+    glBindBuffer(this->_glType, this->_buffer);
+}
+
+void GLBuffer::unbind() const noexcept
+{
+    glBindBuffer(this->_glType, 0);
+}
+
 void GLBuffer::bind(IRenderingContext& context) noexcept
 {
 #if TAU_BUFFER_SAFETY
@@ -25,7 +35,7 @@ void GLBuffer::bind(IRenderingContext& context) noexcept
     }
   #endif
 #endif
-    glBindBuffer(this->_glType, this->_buffer);
+    bind();
 }
 
 void GLBuffer::unbind(IRenderingContext& context) noexcept
@@ -39,7 +49,7 @@ void GLBuffer::unbind(IRenderingContext& context) noexcept
     }
   #endif
 #endif
-    glBindBuffer(this->_glType, 0);
+    unbind();
 }
 
 bool GLBuffer::beginModification(IRenderingContext& context) noexcept

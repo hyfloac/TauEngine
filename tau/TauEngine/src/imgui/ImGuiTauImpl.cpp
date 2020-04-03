@@ -5,9 +5,10 @@
 #include "shader/IShaderProgram.hpp"
 #include "events/WindowEvent.hpp"
 #include "system/Keyboard.hpp"
+#include "system/GraphicsInterface.hpp"
 #include <EnumBitFields.hpp>
 
-void ImGuiTau::render(IRenderingContext& ctx, ImDrawData* const drawData) noexcept
+void ImGuiTau::render(IGraphicsInterface& gi, IRenderingContext& ctx, ImDrawData* const drawData) noexcept
 {
 
     const float fbWidthF  = drawData->DisplaySize.x * drawData->FramebufferScale.x;
@@ -23,7 +24,7 @@ void ImGuiTau::render(IRenderingContext& ctx, ImDrawData* const drawData) noexce
     const ImVec2 clipOffset = drawData->DisplayPos;
     const ImVec2 clipScale = drawData->FramebufferScale;
 
-    initBuffers(ctx, drawData);
+    initBuffers(gi, drawData);
 
     _shader->bind(ctx);
 
@@ -104,7 +105,7 @@ void ImGuiTau::onEvent(Event& e) noexcept
     dispatcher.dispatch<WindowMouseClickEvent>(this, &ImGuiTau::onMouseClick);
 }
 
-void ImGuiTau::initBuffers(IRenderingContext& ctx, ImDrawData* const drawData) noexcept
+void ImGuiTau::initBuffers(IGraphicsInterface& gi, ImDrawData* const drawData) noexcept
 {
     uSys maxVertexBufferSize = 0;
     uSys maxIndexBufferSize = 0;
@@ -136,7 +137,7 @@ void ImGuiTau::initBuffers(IRenderingContext& ctx, ImDrawData* const drawData) n
         vArgs.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
         vArgs.descriptor.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
 
-        _vertexBuffer = ctx.createBuffer().buildCPPRef(vArgs, null);
+        _vertexBuffer = gi.createBuffer().buildCPPRef(vArgs, null);
         createVA = true;
     }
 
@@ -147,7 +148,7 @@ void ImGuiTau::initBuffers(IRenderingContext& ctx, ImDrawData* const drawData) n
         iArgs.elementCount = maxIndexBufferSize + 8192;
         iArgs.initialBuffer = nullptr;
 
-        _indexBuffer = ctx.createIndexBuffer().buildCPPRef(iArgs, null);
+        _indexBuffer = gi.createIndexBuffer().buildCPPRef(iArgs, null);
         createVA = true;
     }
 
@@ -160,7 +161,7 @@ void ImGuiTau::initBuffers(IRenderingContext& ctx, ImDrawData* const drawData) n
         vaArgs.drawCount = 0;
         vaArgs.drawType = DrawType::SeparatedTriangles;
 
-        _va = ctx.createVertexArray().buildCPPRef(vaArgs, null);
+        _va = gi.createVertexArray().buildCPPRef(vaArgs, null);
     }
 }
 

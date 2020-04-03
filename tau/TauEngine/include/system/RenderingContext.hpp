@@ -19,19 +19,8 @@
 
 class Window;
 
-class IVertexArrayBuilder;
-class IBufferBuilder;
-class IIndexBufferBuilder;
-class IUniformBufferBuilder;
 class IFrameBufferBuilder;
-class ITextureBuilder;
-class ITextureCubeBuilder;
-class ITextureSamplerBuilder;
-class ITextureUploaderBuilder;
-class ISingleTextureUploaderBuilder;
-class IShaderBuilder;
 class IDepthStencilState;
-class IDepthStencilStateBuilder;
 struct DepthStencilArgs;
 class IRasterizerState;
 struct RasterizerArgs;
@@ -48,8 +37,6 @@ protected:
     { }
 public:
     [[nodiscard]] const RenderingMode& mode() const noexcept { return _mode; }
-
-    [[nodiscard]] virtual bool createContext(Window& window) noexcept = 0;
 
     virtual void deactivateContext() noexcept = 0;
     virtual void activateContext() noexcept = 0;
@@ -110,17 +97,7 @@ public:
 
     virtual void swapFrame() noexcept = 0;
 
-    [[nodiscard]] virtual IVertexArrayBuilder& createVertexArray() noexcept = 0;
-    [[nodiscard]] virtual IBufferBuilder& createBuffer() noexcept = 0;
-    [[nodiscard]] virtual IIndexBufferBuilder& createIndexBuffer() noexcept = 0;
-    [[nodiscard]] virtual IUniformBufferBuilder& createUniformBuffer() noexcept = 0;
     [[nodiscard]] virtual CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept = 0;
-    [[nodiscard]] virtual ITextureBuilder& createTexture2D() noexcept = 0;
-    [[nodiscard]] virtual ITextureBuilder& createNullTexture() noexcept = 0;
-    [[nodiscard]] virtual ITextureBuilder& createTextureDepth() noexcept = 0;
-    [[nodiscard]] virtual ITextureCubeBuilder& createTextureCube() noexcept = 0;
-    [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
-    [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
 
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);

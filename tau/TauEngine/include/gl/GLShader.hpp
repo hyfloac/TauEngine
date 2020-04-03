@@ -79,7 +79,7 @@ private:
 private:
     IResourceSelectorTransformer::ResIndex _resIndex;
 public:
-    GLShaderBuilder(GLGraphicsInterface& ctx) noexcept;
+    GLShaderBuilder(GLGraphicsInterface& gi) noexcept;
 
     [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error) const noexcept override;
     [[nodiscard]] GLShader* build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept override;

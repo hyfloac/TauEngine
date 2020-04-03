@@ -8,19 +8,8 @@
 
 class GLGraphicsInterface;
 
-class GLVertexArrayBuilder;
-class GLBufferBuilder;
-class GLIndexBufferBuilder;
-class GLUniformBufferBuilder;
-class GLTextureSamplerBuilder;
-class GLShaderBuilder;
-class GLTexture2DBuilder;
-class GLTextureNullBuilder;
-class GLTextureDepthBuilder;
-class GLTextureCubeBuilder;
 class GLDepthStencilState;
 class GLRasterizerState;
-class GLDepthStencilStateBuilder;
 
 struct GLRenderingContextArgs final
 {
@@ -51,21 +40,9 @@ private:
     NullableRef<GLDepthStencilState> _currentDepthStencilState;
     NullableRef<GLRasterizerState> _defaultRasterizerState;
     NullableRef<GLRasterizerState> _currentRasterizerState;
-
-    GLVertexArrayBuilder* _vertexArrayBuilder;
-    GLBufferBuilder* _bufferBuilder;
-    GLIndexBufferBuilder* _indexBufferBuilder;
-    GLUniformBufferBuilder* _uniformBufferBuilder;
-    GLTextureSamplerBuilder* _textureSamplerBuilder;
-    GLTexture2DBuilder* _texture2DBuilder;
-    GLTextureNullBuilder* _textureNullBuilder;
-    GLTextureDepthBuilder* _textureDepthBuilder;
-    GLTextureCubeBuilder* _textureCubeBuilder;
 public:
     GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept;
     ~GLRenderingContext() noexcept override final;
-
-    [[nodiscard]] bool createContext(Window& window) noexcept override final;
 
     HDC getHDC() const noexcept { return _device; }
 
@@ -95,17 +72,7 @@ public:
 
     void swapFrame() noexcept override final;
 
-    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
-    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override;
-    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
-    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
-    [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
-    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
-    [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] IShaderBuilder& createShader() noexcept override;
 private:
     void handleCtxError(int profileMask) const noexcept;
 

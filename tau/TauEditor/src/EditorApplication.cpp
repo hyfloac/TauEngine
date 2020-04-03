@@ -62,8 +62,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     PERF();
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     if(argCount >= 2)
     {
@@ -112,7 +112,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     _renderingContext->setVSync(_config.vsync);
 
-    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_renderingContext));
+    TextureLoader::setMissingTexture(TextureLoader::generateMissingTexture(*_graphicsInterface, *_renderingContext));
 
     _globals = new Globals(*_window, *_graphicsInterface, *_renderingContext, _gr, _gameState);
 

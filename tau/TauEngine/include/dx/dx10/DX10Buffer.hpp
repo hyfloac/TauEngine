@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <d3d10.h>
 
+class DX10GraphicsInterface;
 class DX10RenderingContext;
 
 class TAU_DLL DX10Buffer final : public IBuffer
@@ -91,9 +92,11 @@ class TAU_DLL DX10BufferBuilder final : public IBufferBuilder
     DEFAULT_DESTRUCT(DX10BufferBuilder);
     DELETE_COPY(DX10BufferBuilder);
 private:
-    DX10RenderingContext& _context;
+    DX10GraphicsInterface& _gi;
 public:
-    DX10BufferBuilder(DX10RenderingContext& context) noexcept;
+    DX10BufferBuilder(DX10GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX10Buffer* build(const BufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX10Buffer* build(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
@@ -109,9 +112,11 @@ class TAU_DLL DX10IndexBufferBuilder final : public IIndexBufferBuilder
     DEFAULT_DESTRUCT(DX10IndexBufferBuilder);
     DELETE_COPY(DX10IndexBufferBuilder);
 private:
-    DX10RenderingContext& _context;
+    DX10GraphicsInterface& _gi;
 public:
-    DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept;
+    DX10IndexBufferBuilder(DX10GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX10IndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX10IndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
@@ -127,9 +132,11 @@ class TAU_DLL DX10UniformBufferBuilder final : public IUniformBufferBuilder
     DEFAULT_DESTRUCT(DX10UniformBufferBuilder);
     DELETE_COPY(DX10UniformBufferBuilder);
 private:
-    DX10RenderingContext& _context;
+    DX10GraphicsInterface& _gi;
 public:
-    DX10UniformBufferBuilder(DX10RenderingContext& context) noexcept;
+    DX10UniformBufferBuilder(DX10GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX10UniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX10UniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;

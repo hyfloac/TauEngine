@@ -44,6 +44,7 @@ class GLRenderingContext;
 
 class TAU_DLL GLVertexArrayBuilder final : public IVertexArrayBuilder
 {
+    DEFAULT_CONSTRUCT_PU(GLVertexArrayBuilder);
     DEFAULT_DESTRUCT(GLVertexArrayBuilder);
     DELETE_COPY(GLVertexArrayBuilder);
 public:
@@ -54,13 +55,7 @@ public:
         CPPRef<GLIndexBuffer> indexBuffer;
         GLenum drawType;
     };
-private:
-    GLRenderingContext& _ctx;
 public:
-    GLVertexArrayBuilder(GLRenderingContext& ctx) noexcept
-        : _ctx(ctx)
-    { }
-
     [[nodiscard]] GLVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept override;
     [[nodiscard]] GLVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
     [[nodiscard]] CPPRef<IVertexArray> buildCPPRef(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept override;

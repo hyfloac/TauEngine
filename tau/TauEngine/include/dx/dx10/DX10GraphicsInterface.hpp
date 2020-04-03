@@ -6,9 +6,17 @@
 #include <d3d10.h>
 
 class DX10ShaderBuilder;
+class DX10VertexArrayBuilder;
+class DX10BufferBuilder;
+class DX10IndexBufferBuilder;
+class DX10UniformBufferBuilder;
 class DX10DepthStencilStateBuilder;
 class DX10RasterizerStateBuilder;
+class DX10Texture2DBuilder;
+class DX10NullTextureBuilder;
 class DX10DepthTextureBuilder;
+class DX10TextureCubeBuilder;
+class DX10TextureSamplerBuilder;
 class DX10SingleTextureUploaderBuilder;
 class DX10TextureUploaderBuilder;
 class DX10RenderingContextBuilder;
@@ -20,9 +28,17 @@ private:
     ID3D10Device* _d3d10Device;
 
     DX10ShaderBuilder* _shaderBuilder;
+    DX10VertexArrayBuilder* _vertexArrayBuilder;
+    DX10BufferBuilder* _bufferBuilder;
+    DX10IndexBufferBuilder* _indexBufferBuilder;
+    DX10UniformBufferBuilder* _uniformBufferBuilder;
     DX10DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX10RasterizerStateBuilder* _rasterizerStateBuilder;
+    DX10Texture2DBuilder* _texture2DBuilder;
+    DX10NullTextureBuilder* _nullTextureBuilder;
     DX10DepthTextureBuilder* _depthTextureBuilder;
+    DX10TextureCubeBuilder* _cubeTextureBuilder;
+    DX10TextureSamplerBuilder* _textureSamplerBuilder;
     DX10SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     DX10TextureUploaderBuilder* _textureUploaderBuilder;
     DX10RenderingContextBuilder* _renderingContextBuilder;
@@ -36,9 +52,17 @@ public:
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
+    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
+    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
+    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
+    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
+    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
     [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
+    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
+    [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;

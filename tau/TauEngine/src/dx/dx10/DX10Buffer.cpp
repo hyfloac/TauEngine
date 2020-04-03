@@ -3,6 +3,7 @@
 
 #ifdef _WIN32
 #include <Safeties.hpp>
+#include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 
 DX10Buffer::DX10Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize,
@@ -452,10 +453,6 @@ void DX10UniformBuffer::fillBuffer(IRenderingContext& context, const void* data)
     }
 }
 
-DX10BufferBuilder::DX10BufferBuilder(DX10RenderingContext& context) noexcept
-    : IBufferBuilder(), _context(context)
-{ }
-
 DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
@@ -557,21 +554,17 @@ bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer**
          initialBuffer.SysMemPitch = 0;
          initialBuffer.SysMemSlicePitch = 0;
 
-         const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
+         const HRESULT h = _gi.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
          ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
      }
      else
      {
-         const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
+         const HRESULT h = _gi.d3d10Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
          ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
      }
 
      return true;
 }
-
-DX10IndexBufferBuilder::DX10IndexBufferBuilder(DX10RenderingContext& context) noexcept
-    : IIndexBufferBuilder(), _context(context)
-{ }
 
 DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Error* const error) const noexcept
 {
@@ -672,21 +665,17 @@ bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D
         initialBuffer.SysMemPitch = 0;
         initialBuffer.SysMemSlicePitch = 0;
 
-        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
+        const HRESULT h = _gi.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
     else
     {
-        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
+        const HRESULT h = _gi.d3d10Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 
     return true;
 }
-
-DX10UniformBufferBuilder::DX10UniformBufferBuilder(DX10RenderingContext& context) noexcept
-    : IUniformBufferBuilder(), _context(context)
-{ }
 
 DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args, Error* const error) const noexcept
 {
@@ -787,12 +776,12 @@ bool DX10UniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, 
         initialBuffer.SysMemPitch = 0;
         initialBuffer.SysMemSlicePitch = 0;
 
-        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
+        const HRESULT h = _gi.d3d10Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
     else
     {
-        const HRESULT h = _context.d3dDevice()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
+        const HRESULT h = _gi.d3d10Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 

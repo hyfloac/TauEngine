@@ -9,18 +9,8 @@
 
 #include "DLL.hpp"
 
-class DX11VertexArrayBuilder;
-class DX11BufferBuilder;
-class DX11IndexBufferBuilder;
-class DX11UniformBufferBuilder;
-class DX11TextureSamplerBuilder;
-class DX11ShaderBuilder;
-class DX11Texture2DBuilder;
-class DX11NullTextureBuilder;
-class DX11TextureCubeBuilder;
 class DX11DepthStencilState;
 class DX11RasterizerState;
-class DX11DepthStencilStateBuilder;
 class DX11GraphicsInterface;
 
 struct DX11RenderingContextArgs final
@@ -49,15 +39,6 @@ private:
     NullableRef<DX11DepthStencilState> _currentDepthStencilState;
     NullableRef<DX11RasterizerState> _defaultRasterizerState;
     NullableRef<DX11RasterizerState> _currentRasterizerState;
-
-    DX11VertexArrayBuilder* _vertexArrayBuilder;
-    DX11BufferBuilder* _bufferBuilder;
-    DX11IndexBufferBuilder* _indexBufferBuilder;
-    DX11UniformBufferBuilder* _uniformBufferBuilder;
-    // DX11TextureSamplerBuilder* _textureSamplerBuilder;
-    // DX11Texture2DBuilder* _texture2DBuilder;
-    // DX11NullTextureBuilder* _textureNullBuilder;
-    // DX11TextureCubeBuilder* _textureCubeBuilder;
 public:
     DX11RenderingContext(DX11GraphicsInterface& gi, const DX11RenderingContextArgs& args) noexcept;
 
@@ -69,7 +50,6 @@ public:
     [[nodiscard]] const ID3D11DeviceContext* d3d11DeviceContext() const noexcept { return _d3d11DeviceContext; }
     [[nodiscard]] ID3D11DeviceContext* d3d11DeviceContext() noexcept { return _d3d11DeviceContext; }
 
-    [[nodiscard]] bool createContext(Window& window) noexcept override;
     void deactivateContext() noexcept override { }
     void activateContext() noexcept override { }
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override;
@@ -92,17 +72,7 @@ public:
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
 
-    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
-    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
-    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
-    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
-    [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
-    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
-    [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] IShaderBuilder& createShader() noexcept override;
 protected:
     RC_IMPL(DX11RenderingContext);
 };

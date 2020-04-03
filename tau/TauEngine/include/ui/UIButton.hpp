@@ -5,10 +5,12 @@
 #include "model/BufferDescriptor.hpp"
 #include "model/Buffer.hpp"
 #include "model/VertexArray.hpp"
-#include "system/RenderingContext.hpp"
 
 class Window;
 class WindowMouseClickEvent;
+
+class IGraphicsInterface;
+class IRenderingContext;
 
 class UIButton : public UIElement
 {
@@ -43,7 +45,7 @@ protected:
 protected:
     [[nodiscard]] virtual bool isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept override;
 public:
-    UIRectButton(IRenderingContext& context, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height,
+    UIRectButton(IGraphicsInterface& gi, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height,
                  Vector3f color, UIElement* parent = nullptr, bool visible = true) noexcept;
 
     [[nodiscard]] u32 width() const noexcept { return _width; }

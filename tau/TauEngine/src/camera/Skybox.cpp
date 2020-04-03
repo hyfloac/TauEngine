@@ -30,7 +30,7 @@ public:
 
 Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const shaderPath, const char* const vertexName, const char* const pixelName, const char* const skyboxPath, const char* const fileExtension) noexcept
     : _shader(IShaderProgram::create(context)),
-      _uniforms(context.createUniformBuffer()),
+      _uniforms(gi.createUniformBuffer()),
       _skybox(null), _textureUploader(null), _cubeVA(null), _skyboxDepthStencilState(null)
 {
     ShaderArgs shaderArgs;
@@ -39,18 +39,18 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
 
     shaderArgs.fileName = vertexName;
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> vertexShader = context.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = gi.createShader().buildCPPRef(shaderArgs, null);
 
     shaderArgs.fileName = pixelName;
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = context.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = gi.createShader().buildCPPRef(shaderArgs, null);
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
 
     _shader->link(context);
 
-    _skybox = CPPRef<ITextureCube>(TextureLoader::loadTextureCubeEx(context, skyboxPath, fileExtension, -1));
+    _skybox = CPPRef<ITextureCube>(TextureLoader::loadTextureCubeEx(gi, context, skyboxPath, fileExtension, -1));
 
     TextureSamplerArgs textureSamplerArgs;
     textureSamplerArgs.magFilter() = ETexture::Filter::Linear;
@@ -63,7 +63,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
 
     SingleTextureUploaderArgs uploaderArgs;
     uploaderArgs.texture = _skybox;
-    uploaderArgs.textureSampler = context.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
+    uploaderArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(uploaderArgs, null);
 
     float skyboxVertices[] = {
@@ -124,8 +124,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     skyboxCubeBuilder.instanced = false;
     skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
-    CPPRef<IBuffer> skyboxCube = context.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
-    // skyboxCube->fillBuffer(context, skyboxVertices);
+    const CPPRef<IBuffer> skyboxCube = gi.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
 
     VertexArrayArgs vaArgs(1);
     vaArgs.shader = vertexShader;
@@ -133,7 +132,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     vaArgs.drawCount = 36;
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _cubeVA = context.createVertexArray().buildCPPRef(vaArgs, null);
+    _cubeVA = gi.createVertexArray().buildCPPRef(vaArgs, null);
 
     DepthStencilArgs dsArgs = context.getDefaultDepthStencilArgs();
     dsArgs.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;
@@ -155,8 +154,7 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     _uniforms.data().viewMatrix = camera.viewRotMatrix();
     _uniforms.upload(context, EShader::Stage::Vertex, 0);
     {
-        auto indices = TextureIndices(0, 0, 0);
-        (void) _textureUploader->upload(context, indices, EShader::Stage::Pixel);
+        (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
     }
 
     _cubeVA->bind(context);
@@ -167,8 +165,7 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
 
     _uniforms.unbind(context, EShader::Stage::Vertex, 0);
     {
-        auto indices = TextureIndices(0, 0, 0);
-        (void) _textureUploader->unbind(context, indices, EShader::Stage::Pixel);
+        (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
     }
 
     _shader->unbind(context);

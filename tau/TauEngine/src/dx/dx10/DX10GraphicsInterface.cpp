@@ -4,19 +4,30 @@
 #include <dxgi.h>
 #include "dx/dx10/DX10GraphicsAccelerator.hpp"
 #include "dx/dx10/DX10Shader.hpp"
+#include "dx/dx10/DX10VertexArray.hpp"
+#include "dx/dx10/DX10Buffer.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
 #include "dx/dx10/DX10RasterizerState.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10Texture.hpp"
+#include "dx/dx10/DX10TextureSampler.hpp"
 #include "dx/dx10/DX10TextureUploader.hpp"
 #include "system/Window.hpp"
 
 DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
     : IGraphicsInterface(mode), _d3d10Device(d3dDevice),
       _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this)),
+      _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder(*this)),
+      _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
+      _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
+      _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
       _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this)),
       _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this)),
+      _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(*this)),
+      _nullTextureBuilder(new(::std::nothrow) DX10NullTextureBuilder),
       _depthTextureBuilder(new(::std::nothrow) DX10DepthTextureBuilder(*this)),
+      _cubeTextureBuilder(new(::std::nothrow) DX10TextureCubeBuilder(*this)),
+      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
       _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this)),
       _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder(*this)),
       _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
@@ -28,9 +39,17 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     _d3d10Device = null;
 
     delete _shaderBuilder;
+    delete _vertexArrayBuilder;
+    delete _bufferBuilder;
+    delete _indexBufferBuilder;
+    delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
+    delete _texture2DBuilder;
+    delete _nullTextureBuilder;
     delete _depthTextureBuilder;
+    delete _cubeTextureBuilder;
+    delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
     delete _renderingContextBuilder;
@@ -71,14 +90,38 @@ RefDynArray<NullableRef<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAc
 IShaderBuilder& DX10GraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
 
+IVertexArrayBuilder& DX10GraphicsInterface::createVertexArray() noexcept
+{ return *_vertexArrayBuilder; }
+
+IBufferBuilder& DX10GraphicsInterface::createBuffer() noexcept
+{ return *_bufferBuilder; }
+
+IIndexBufferBuilder& DX10GraphicsInterface::createIndexBuffer() noexcept
+{ return *_indexBufferBuilder; }
+
+IUniformBufferBuilder& DX10GraphicsInterface::createUniformBuffer() noexcept
+{ return *_uniformBufferBuilder; }
+
 IDepthStencilStateBuilder& DX10GraphicsInterface::createDepthStencilState() noexcept
 { return *_depthStencilStateBuilder; }
 
 IRasterizerStateBuilder& DX10GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
 
+ITextureBuilder& DX10GraphicsInterface::createTexture2D() noexcept
+{ return *_texture2DBuilder; }
+
+ITextureBuilder& DX10GraphicsInterface::createNullTexture() noexcept
+{ return *_nullTextureBuilder; }
+
 ITextureBuilder& DX10GraphicsInterface::createDepthTexture() noexcept
 { return *_depthTextureBuilder; }
+
+ITextureCubeBuilder& DX10GraphicsInterface::createTextureCube() noexcept
+{ return *_cubeTextureBuilder; }
+
+ITextureSamplerBuilder& DX10GraphicsInterface::createTextureSampler() noexcept
+{ return *_textureSamplerBuilder; }
 
 ISingleTextureUploaderBuilder& DX10GraphicsInterface::createSingleTextureUploader() noexcept
 { return *_singleTextureUploaderBuilder; }

@@ -9,7 +9,7 @@ void __cdecl TERenderer::finalizeLoadConsolas(TextHandler::FileData* file, TextH
 {
     TextHandler& th = finalizeParam->th;
     TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
-    renderer->_consolas = th.generateBitmapCharacters(renderer->_globals.rc, "Consolas", 32, 126, false, file->face);
+    renderer->_consolas = th.generateBitmapCharacters(renderer->_globals.gi, renderer->_globals.rc, "Consolas", 32, 126, false, file->face);
     delete file;
 }
 
@@ -17,7 +17,7 @@ void TERenderer::finalizeLoadConsolasBold(TextHandler::FileData* file, TextHandl
 {
     TextHandler& th = finalizeParam->th;
     TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
-    renderer->_consolasBold = th.generateBitmapCharacters(renderer->_globals.rc, "ConsolasBold", 32, 126, false, file->face);
+    renderer->_consolasBold = th.generateBitmapCharacters(renderer->_globals.gi, renderer->_globals.rc, "ConsolasBold", 32, 126, false, file->face);
     delete file;
 }
 
@@ -25,7 +25,7 @@ void TERenderer::finalizeLoadConsolasItalic(TextHandler::FileData* file,TextHand
 {
     TextHandler& th = finalizeParam->th;
     TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
-    renderer->_consolasItalic = th.generateBitmapCharacters(renderer->_globals.rc, "ConsolasItalic", 32, 126, false, file->face);
+    renderer->_consolasItalic = th.generateBitmapCharacters(renderer->_globals.gi, renderer->_globals.rc, "ConsolasItalic", 32, 126, false, file->face);
     delete file;
 }
 
@@ -33,7 +33,7 @@ void TERenderer::finalizeLoadConsolasBoldItalic(TextHandler::FileData* file, Tex
 {
     TextHandler& th = finalizeParam->th;
     TERenderer* renderer = reinterpret_cast<TERenderer*>(finalizeParam->param);
-    renderer->_consolasBoldItalic = th.generateBitmapCharacters(renderer->_globals.rc, "ConsolasBoldItalic", 32, 126, false, file->face);
+    renderer->_consolasBoldItalic = th.generateBitmapCharacters(renderer->_globals.gi, renderer->_globals.rc, "ConsolasBoldItalic", 32, 126, false, file->face);
     delete file;
 }
 

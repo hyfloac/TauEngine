@@ -9,19 +9,8 @@
 
 #include "DLL.hpp"
 
-class DX10VertexArrayBuilder;
-class DX10BufferBuilder;
-class DX10IndexBufferBuilder;
-class DX10UniformBufferBuilder;
-class DX10TextureSamplerBuilder;
-class DX10ShaderBuilder;
-class DX10Texture2DBuilder;
-class DX10NullTextureBuilder;
-class DX10DepthTextureBuilder;
-class DX10TextureCubeBuilder;
 class DX10DepthStencilState;
 class DX10RasterizerState;
-class DX10DepthStencilStateBuilder;
 class DX10GraphicsInterface;
 
 struct DX10RenderingContextArgs final
@@ -50,16 +39,6 @@ private:
     NullableRef<DX10DepthStencilState> _currentDepthStencilState;
     NullableRef<DX10RasterizerState> _defaultRasterizerState;
     NullableRef<DX10RasterizerState> _currentRasterizerState;
-
-    DX10VertexArrayBuilder* _vertexArrayBuilder;
-    DX10BufferBuilder* _bufferBuilder;
-    DX10IndexBufferBuilder* _indexBufferBuilder;
-    DX10UniformBufferBuilder* _uniformBufferBuilder;
-    DX10TextureSamplerBuilder* _textureSamplerBuilder;
-    DX10Texture2DBuilder* _texture2DBuilder;
-    DX10NullTextureBuilder* _textureNullBuilder;
-    DX10DepthTextureBuilder* _textureDepthBuilder;
-    DX10TextureCubeBuilder* _textureCubeBuilder;
 public:
     DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept;
 
@@ -68,7 +47,6 @@ public:
     [[nodiscard]] const ID3D10Device* d3dDevice() const noexcept;
     [[nodiscard]] ID3D10Device* d3dDevice() noexcept;
 
-    [[nodiscard]] bool createContext(Window& window) noexcept override;
     void deactivateContext() noexcept override { }
     void activateContext() noexcept override { }
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override;
@@ -91,17 +69,7 @@ public:
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
 
-    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
-    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
-    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
-    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
-    [[nodiscard]] ITextureBuilder& createTextureDepth() noexcept override;
-    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
-    [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] IShaderBuilder& createShader() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);
 };

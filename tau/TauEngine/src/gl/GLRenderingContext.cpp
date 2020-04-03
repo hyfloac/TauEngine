@@ -6,10 +6,7 @@
 #include "gl/GLRenderingContext.hpp"
 
 #include "gl/GLShader.hpp"
-#include "gl/GLTexture.hpp"
-#include "gl/GLVertexArray.hpp"
 #include "gl/GLFrameBuffer.hpp"
-#include "gl/GLTextureSampler.hpp"
 #include "gl/GLTextureUploader.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLDepthStencilState.hpp"
@@ -17,7 +14,6 @@
 #include "gl/GLGraphicsInterface.hpp"
 
 #include "gl/GLBuffer.hpp"
-#include "gl/gl4_5/GLBuffer4_5.hpp"
 
 #include "Timings.hpp"
 
@@ -26,52 +22,10 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRender
       _device(glSysArgs.device), _context(glSysArgs.context),
       _defaultDepthStencilState(null), _currentDepthStencilState(null),
       _defaultRasterizerState(null), _currentRasterizerState(null)
-{
-    switch(_mode.currentMode())
-    {
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-        case RenderingMode::Mode::OpenGL4:
-        case RenderingMode::Mode::OpenGL4_2:
-        case RenderingMode::Mode::OpenGL4_3:
-        case RenderingMode::Mode::OpenGL4_4:
-            _bufferBuilder = new(::std::nothrow) GLBufferBuilder;
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder;
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder;
-            break;
-        case RenderingMode::Mode::OpenGL4_5:
-        case RenderingMode::Mode::OpenGL4_6:
-            _bufferBuilder = new(::std::nothrow) GLBuffer4_5Builder;
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBuffer4_5Builder;
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBuffer4_5Builder;
-            break;
-        default: break;
-    }
-
-    _vertexArrayBuilder = new(::std::nothrow) GLVertexArrayBuilder(*this);
-    _textureSamplerBuilder = new(::std::nothrow) GLTextureSamplerBuilder;
-    _texture2DBuilder = new(::std::nothrow) GLTexture2DBuilder;
-    _textureNullBuilder = new(::std::nothrow) GLTextureNullBuilder;
-    _textureDepthBuilder = new(::std::nothrow) GLTextureDepthBuilder;
-    _textureCubeBuilder = new(::std::nothrow) GLTextureCubeBuilder;
-}
+{ }
 
 GLRenderingContext::~GLRenderingContext() noexcept
-{
-    delete _vertexArrayBuilder;
-    delete _bufferBuilder;
-    delete _indexBufferBuilder;
-    delete _uniformBufferBuilder;
-    delete _textureSamplerBuilder;
-    delete _texture2DBuilder;
-    delete _textureNullBuilder;
-    delete _textureDepthBuilder;
-    delete _textureCubeBuilder;
-
-    systemDestruct();
-}
+{ systemDestruct(); }
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
@@ -154,46 +108,14 @@ void GLRenderingContext::resetRasterizerState() noexcept
     _currentRasterizerState->apply();
 }
 
-NullableRef<IRasterizerState> GLRenderingContext::getDefaultRasterizerState() noexcept
-{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
-
 const RasterizerArgs& GLRenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }
 
-IVertexArrayBuilder& GLRenderingContext::createVertexArray() noexcept
-{ return *_vertexArrayBuilder; }
-
-IBufferBuilder& GLRenderingContext::createBuffer() noexcept
-{ return *_bufferBuilder; }
-
-IIndexBufferBuilder& GLRenderingContext::createIndexBuffer() noexcept
-{ return *_indexBufferBuilder; }
-
-IUniformBufferBuilder& GLRenderingContext::createUniformBuffer() noexcept
-{ return *_uniformBufferBuilder; }
+NullableRef<IRasterizerState> GLRenderingContext::getDefaultRasterizerState() noexcept
+{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
 
 CPPRef<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
-{
-    return CPPRef<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder);
-}
-
-ITextureBuilder& GLRenderingContext::createTexture2D() noexcept
-{ return *_texture2DBuilder; }
-
-ITextureBuilder& GLRenderingContext::createNullTexture() noexcept
-{ return *_textureNullBuilder; }
-
-ITextureBuilder& GLRenderingContext::createTextureDepth() noexcept
-{ return *_textureDepthBuilder; }
-
-ITextureCubeBuilder& GLRenderingContext::createTextureCube() noexcept
-{ return *_textureCubeBuilder; }
-
-ITextureSamplerBuilder& GLRenderingContext::createTextureSampler() noexcept
-{ return *_textureSamplerBuilder; }
-
-IShaderBuilder& GLRenderingContext::createShader() noexcept
-{ return _gi.createShader(); }
+{ return CPPRef<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder); }
 
 GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {

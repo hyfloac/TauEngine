@@ -67,23 +67,23 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     indicesBuilder.elementCount = mesh.indices.size();
 
     pnBuilder.initialBuffer = positionsLoaded;
-    CPPRef<IBuffer> positions = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IBuffer> positions = gi.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = normalsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
-    CPPRef<IBuffer> normals = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IBuffer> normals = gi.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = tangentsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
-    CPPRef<IBuffer> tangents = context.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IBuffer> tangents = gi.createBuffer().buildCPPRef(pnBuilder, nullptr);
 
     texturesBuilder.initialBuffer = texturesLoaded;
-    CPPRef<IBuffer> textures = context.createBuffer().buildCPPRef(texturesBuilder, nullptr);
+    CPPRef<IBuffer> textures = gi.createBuffer().buildCPPRef(texturesBuilder, nullptr);
 
     indicesBuilder.initialBuffer = mesh.indices.data();
-    CPPRef<IIndexBuffer> indices = context.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
+    CPPRef<IIndexBuffer> indices = gi.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
 
     VertexArrayArgs vaArgs(4);
     vaArgs.shader = shader;
@@ -94,37 +94,37 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     vaArgs.indexBuffer = indices;
     vaArgs.drawCount = mesh.indices.size();
     vaArgs.drawType = drawType;
-    _va = context.createVertexArray().buildCPPRef(vaArgs, null);
+    _va = gi.createVertexArray().buildCPPRef(vaArgs, null);
 
     MaterialBuilder matBuilder(gi);
 
     if(!mesh.material.map_Kd.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Kd.c_str());
-        matBuilder.diffuseTexture(CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path)));
+        matBuilder.diffuseTexture(CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path)));
     }
     if(!mesh.material.map_Ks.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ks.c_str());
-        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path)));
+        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path)));
     }
     else
     {
-        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::generateBlackTexture(context)));
+        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::generateBlackTexture(gi, context)));
     }
     if(!mesh.material.map_Ka.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ka.c_str());
-        _reflectiveTexture = CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path));
+        _reflectiveTexture = CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path));
     }
     if(!mesh.material.map_bump.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
-        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::loadTexture(context, path.path)));
+        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path)));
     }
     else
     {
-        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(context)));
+        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(gi, context)));
     }
 
     matBuilder.specularExponent(mesh.material.Ns);
@@ -139,7 +139,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
     textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
-    matBuilder.textureSampler(CPPRef<ITextureSampler>(context.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
+    matBuilder.textureSampler(CPPRef<ITextureSampler>(gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
 
     _material = matBuilder.build();
 

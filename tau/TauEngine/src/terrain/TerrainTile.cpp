@@ -1,8 +1,9 @@
 #include "terrain/TerrainTile.hpp"
+#include "model/VertexArray.hpp"
 #include "model/Buffer.hpp"
-#include "system/RenderingContext.hpp"
+#include "system/GraphicsInterface.hpp"
 
-CPPRef<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, const float size, const uSys edgeVertices) noexcept
+CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const float size, const uSys edgeVertices) noexcept
 {
     const uSys numVertices = edgeVertices * edgeVertices;
     const uSys numIndices = (edgeVertices - 1) * (edgeVertices - 1);
@@ -56,37 +57,31 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, co
         }
     }
 
-    BufferArgs buf3Builder(1);
-    BufferArgs buf2Builder(1);
-    IndexBufferArgs indiceBuilder;
-    // CPPRef<IIndexBufferBuilder> indiceBuilder = context.createIndexBuffer();
+    BufferArgs buf3Args(1);
+    BufferArgs buf2Args(1);
+    IndexBufferArgs indexArgs;
 
-    buf3Builder.type = EBuffer::Type::ArrayBuffer;
-    buf3Builder.usage = EBuffer::UsageType::StaticDraw;
-    buf3Builder.elementCount = numVertices;
-    buf3Builder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
+    buf3Args.type = EBuffer::Type::ArrayBuffer;
+    buf3Args.usage = EBuffer::UsageType::StaticDraw;
+    buf3Args.elementCount = numVertices;
+    buf3Args.initialBuffer = pos;
+    buf3Args.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
-    buf2Builder.type = EBuffer::Type::ArrayBuffer;
-    buf2Builder.usage = EBuffer::UsageType::StaticDraw;
-    buf2Builder.elementCount = numVertices;
-    buf2Builder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+    buf2Args.type = EBuffer::Type::ArrayBuffer;
+    buf2Args.usage = EBuffer::UsageType::StaticDraw;
+    buf2Args.elementCount = numVertices;
+    buf2Args.initialBuffer = tex;
+    buf2Args.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    indiceBuilder.usage = EBuffer::UsageType::StaticDraw;
-    indiceBuilder.elementCount = 6 * numIndices;
+    indexArgs.usage = EBuffer::UsageType::StaticDraw;
+    indexArgs.elementCount = 6 * numIndices;
+    indexArgs.initialBuffer = indices;
 
-    // CPPRef<IBuffer> posBuf = CPPRef<IBuffer>(buf3Builder->build(nullptr));
-    // CPPRef<IBuffer> normBuf = CPPRef<IBuffer>(buf3Builder->build(nullptr));
-    // CPPRef<IBuffer> texBuf = CPPRef<IBuffer>(buf2Builder->build(nullptr));
-    CPPRef<IBuffer> posBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
-    CPPRef<IBuffer> normBuf = context.createBuffer().buildCPPRef(buf3Builder, nullptr);
-    CPPRef<IBuffer> texBuf = context.createBuffer().buildCPPRef(buf2Builder, nullptr);
-    // CPPRef<IIndexBuffer> indicesBuf = CPPRef<IIndexBuffer>(indiceBuilder->build(nullptr));
-    CPPRef<IIndexBuffer> indicesBuf = context.createIndexBuffer().buildCPPRef(indiceBuilder, nullptr);
-
-    posBuf->fillBuffer(context, pos);
-    normBuf->fillBuffer(context, norm);
-    texBuf->fillBuffer(context, tex);
-    indicesBuf->fillBuffer(context, indices);
+    const CPPRef<IBuffer> posBuf = gi.createBuffer().buildCPPRef(buf3Args, nullptr);
+    buf3Args.initialBuffer = norm;
+    const CPPRef<IBuffer> normBuf = gi.createBuffer().buildCPPRef(buf3Args, nullptr);
+    const CPPRef<IBuffer> texBuf = gi.createBuffer().buildCPPRef(buf2Args, nullptr);
+    const CPPRef<IIndexBuffer> indicesBuf = gi.createIndexBuffer().buildCPPRef(indexArgs, nullptr);
 
     VertexArrayArgs vaArgs(3);
     vaArgs.buffers[0] = posBuf;
@@ -95,7 +90,7 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IRenderingContext& context, co
     vaArgs.indexBuffer = indicesBuf;
     vaArgs.drawType = DrawType::SeparatedTriangles;
     vaArgs.drawCount = numIndices * 2;
-    CPPRef<IVertexArray> vao = context.createVertexArray().buildCPPRef(vaArgs, null);
+    CPPRef<IVertexArray> vao = gi.createVertexArray().buildCPPRef(vaArgs, null);
 
     return vao;
 }

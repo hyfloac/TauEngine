@@ -16,6 +16,12 @@ class ITextureBuilder;
 class ISingleTextureUploaderBuilder;
 class ITextureUploaderBuilder;
 class IShaderBuilder;
+class IVertexArrayBuilder;
+class IBufferBuilder;
+class IIndexBufferBuilder;
+class IUniformBufferBuilder;
+class ITextureCubeBuilder;
+class ITextureSamplerBuilder;
 
 class TAU_DLL NOVTABLE IGraphicsInterface
 {
@@ -33,9 +39,17 @@ public:
     [[nodiscard]] virtual RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept = 0;
 
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
+    [[nodiscard]] virtual IVertexArrayBuilder& createVertexArray() noexcept = 0;
+    [[nodiscard]] virtual IBufferBuilder& createBuffer() noexcept = 0;
+    [[nodiscard]] virtual IIndexBufferBuilder& createIndexBuffer() noexcept = 0;
+    [[nodiscard]] virtual IUniformBufferBuilder& createUniformBuffer() noexcept = 0;
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
+    [[nodiscard]] virtual ITextureBuilder& createTexture2D() noexcept = 0;
+    [[nodiscard]] virtual ITextureBuilder& createNullTexture() noexcept = 0;
     [[nodiscard]] virtual ITextureBuilder& createDepthTexture() noexcept = 0;
+    [[nodiscard]] virtual ITextureCubeBuilder& createTextureCube() noexcept = 0;
+    [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
     [[nodiscard]] virtual ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept = 0;
     [[nodiscard]] virtual ITextureUploaderBuilder& createTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;

@@ -32,9 +32,17 @@ public:
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
+    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
+    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
+    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
+    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
+    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
     [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
+    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
+    [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;

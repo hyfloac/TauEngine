@@ -186,7 +186,9 @@ bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArra
         auto& buffer = args.buffers[i];
         const BufferDescriptor& descriptor = buffer->descriptor();
 
-        buffer->bind(reinterpret_cast<IRenderingContext&>(_ctx));
+        const auto glBuffer = RefCast<GLBuffer>(buffer);
+
+        glBuffer->bind();
 
         for(uSys j = 0; j < descriptor.elements().size(); ++j)
         {
@@ -233,7 +235,7 @@ bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArra
             }
         }
 
-        buffer->unbind(reinterpret_cast<IRenderingContext&>(_ctx));
+        glBuffer->unbind();
     }
 
     glBindVertexArray(0);

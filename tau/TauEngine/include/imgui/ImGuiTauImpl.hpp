@@ -15,6 +15,8 @@ class WindowKeyEvent;
 class WindowAsciiKeyEvent;
 class WindowMouseClickEvent;
 
+class IGraphicsInterface;
+
 class IMGUI_IMPL_API ImGuiTau final
 {
     DEFAULT_COPY(ImGuiTau);
@@ -35,13 +37,13 @@ public:
 
     ~ImGuiTau() noexcept = default;
 
-    void render(IRenderingContext& ctx, ImDrawData* drawData) noexcept;
+    void render(IGraphicsInterface& gi, IRenderingContext& ctx, ImDrawData* drawData) noexcept;
 
     void update() noexcept;
 
     void onEvent(Event& e) noexcept;
 private:
-    void initBuffers(IRenderingContext& ctx, ImDrawData* drawData) noexcept;
+    void initBuffers(IGraphicsInterface& gi, ImDrawData* drawData) noexcept;
 
     void initKeys() noexcept;
 
