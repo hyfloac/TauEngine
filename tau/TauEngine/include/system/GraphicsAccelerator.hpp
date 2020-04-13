@@ -7,7 +7,7 @@
 #include <NumTypes.hpp>
 #include <DynArray.hpp>
 
-class TAU_DLL NOVTABLE IGraphicsAccelerator
+class TAU_DLL TAU_NOVTABLE IGraphicsAccelerator
 {
     DEFAULT_DESTRUCT_VI(IGraphicsAccelerator);
     DELETE_COPY(IGraphicsAccelerator);

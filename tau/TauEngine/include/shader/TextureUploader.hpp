@@ -7,6 +7,7 @@
 #include "DLL.hpp"
 #include "texture/Texture.hpp"
 #include "texture/TextureSampler.hpp"
+#include "shader/EShader.hpp"
 
 struct TextureIndices final
 {
@@ -31,28 +32,28 @@ class TAU_DLL NOVTABLE ISingleTextureUploader
     DEFAULT_DESTRUCT_VI(ISingleTextureUploader);
     DELETE_COPY(ISingleTextureUploader);
 protected:
-    CPPRef<ITexture> _texture;
+    ITextureView* _texture;
     CPPRef<ITextureSampler> _textureSampler;
 protected:
-    ISingleTextureUploader(const CPPRef<ITexture>& texture, const CPPRef<ITextureSampler>& textureSampler) noexcept
+    ISingleTextureUploader(ITextureView* const texture, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : _texture(texture), _textureSampler(textureSampler)
     { }
 public:
-    void texture(const CPPRef<ITexture>& texture) noexcept { _texture = texture; }
+    void texture(ITextureView* const texture) noexcept { _texture = texture; }
 
     virtual TextureIndices upload(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept = 0;
     virtual TextureIndices unbind(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept = 0;
 };
 
-class TAU_DLL NOVTABLE ITextureUploader
+class TAU_DLL ITextureUploader
 {
     DEFAULT_DESTRUCT_VI(ITextureUploader);
     DELETE_COPY(ITextureUploader);
 protected:
-    RefDynArray<CPPRef<ITexture>> _textures;
+    RefDynArray<ITextureView*> _textures;
     CPPRef<ITextureSampler> _textureSampler;
 protected:
-    ITextureUploader(const RefDynArray<CPPRef<ITexture>>& textures, const CPPRef<ITextureSampler>& textureSampler) noexcept
+    ITextureUploader(const RefDynArray<ITextureView*>& textures, const CPPRef<ITextureSampler>& textureSampler) noexcept
         : _textures(textures), _textureSampler(textureSampler)
     { }
 public:
@@ -66,10 +67,10 @@ struct SingleTextureUploaderArgs final
     DEFAULT_DESTRUCT(SingleTextureUploaderArgs);
     DEFAULT_COPY(SingleTextureUploaderArgs);
 public:
-    CPPRef<ITexture> texture;
+    ITextureView* texture;
     CPPRef<ITextureSampler> textureSampler;
 public:
-    SingleTextureUploaderArgs(const CPPRef<ITexture>& _texture, const CPPRef<ITextureSampler>& _textureSampler)
+    SingleTextureUploaderArgs(ITextureView* const _texture, const CPPRef<ITextureSampler>& _textureSampler)
         : texture(_texture), textureSampler(_textureSampler)
     { }
 };
@@ -79,7 +80,7 @@ struct TextureUploaderArgs final
     DEFAULT_DESTRUCT(TextureUploaderArgs);
     DEFAULT_COPY(TextureUploaderArgs);
 public:
-    RefDynArray<CPPRef<ITexture>> textures;
+    RefDynArray<ITextureView*> textures;
     CPPRef<ITextureSampler> textureSampler;
 public:
     TextureUploaderArgs(const uSys count) noexcept
@@ -90,7 +91,7 @@ public:
         : textures(count), textureSampler(_textureSampler)
     { }
 
-    TextureUploaderArgs(const RefDynArray<CPPRef<ITexture>>& _textures, const CPPRef<ITextureSampler>& _textureSampler)
+    TextureUploaderArgs(const RefDynArray<ITextureView*>& _textures, const CPPRef<ITextureSampler>& _textureSampler)
         : textures(_textures), textureSampler(_textureSampler)
     { }
 };

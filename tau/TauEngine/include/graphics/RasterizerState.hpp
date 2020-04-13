@@ -52,7 +52,7 @@ public:
 
 #define RS_IMPL(_TYPE) RS_IMPL_BASE(_TYPE)
 
-class TAU_DLL NOVTABLE IRasterizerState
+class TAU_DLL TAU_NOVTABLE IRasterizerState
 {
     DEFAULT_DESTRUCT_VI(IRasterizerState);
     DELETE_COPY(IRasterizerState);

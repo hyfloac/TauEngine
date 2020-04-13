@@ -5,72 +5,74 @@
 #ifdef _WIN32
 #include <d3d10.h>
 
+#include "DX10RenderTarget.hpp"
+#include "DX10TextureView.hpp"
+
 class DX10GraphicsInterface;
 class DX10RenderingContext;
 
-class TAU_DLL DX10NullTexture final : public ITexture
-{
-    DEFAULT_DESTRUCT(DX10NullTexture);
-    TEXTURE_IMPL(DX10NullTexture);
-public:
-    DX10NullTexture() noexcept
-        : ITexture(0, 0, ETexture::Format::Red8UnsignedInt)
-    { }
-
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-
-    void set(IRenderingContext& context, u32 level, const void* data) noexcept override { }
-    void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void generateMipmaps(IRenderingContext& context) noexcept override { }
-};
-
-class TAU_DLL DX10Texture2D : public ITexture
+class TAU_DLL DX10Texture2D final : public ITexture2D
 {
     TEXTURE_IMPL(DX10Texture2D);
 private:
     ID3D10Texture2D* _d3dTexture;
-    ID3D10ShaderResourceView* _d3dTextureView;
+    DX10RenderTarget _renderTarget;
+    DX10TextureView* _textureView;
     UINT _mipLevels;
 public:
-    DX10Texture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D10Texture2D* const d3dTexture, ID3D10ShaderResourceView* const d3dTextureView, const UINT mipLevels) noexcept
-        : ITexture(width, height, dataFormat), _d3dTexture(d3dTexture), _d3dTextureView(d3dTextureView), _mipLevels(mipLevels)
+    DX10Texture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D10Texture2D* const d3dTexture, ID3D10RenderTargetView* const renderTargetView, DX10TextureView* const textureView, const UINT mipLevels) noexcept
+        : ITexture2D(width, height, dataFormat)
+        , _d3dTexture(d3dTexture)
+        , _renderTarget(renderTargetView)
+        , _textureView(textureView)
+        , _mipLevels(mipLevels)
     { }
 
     ~DX10Texture2D() noexcept;
 
-    [[nodiscard]] ID3D10Texture2D* d3dTexture() noexcept { return _d3dTexture; }
     [[nodiscard]] const ID3D10Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
+    [[nodiscard]]       ID3D10Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
 
-    [[nodiscard]] ID3D10ShaderResourceView* d3dTextureView() noexcept { return _d3dTextureView; }
-    [[nodiscard]] const ID3D10ShaderResourceView* d3dTextureView() const noexcept { return _d3dTextureView; }
-
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
+    [[nodiscard]] const DX10RenderTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       DX10RenderTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const DX10TextureView*   textureView() const noexcept override { return  _textureView;  }
+    [[nodiscard]]       DX10TextureView*   textureView()       noexcept override { return  _textureView;  }
 
     [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
 
-    void set(IRenderingContext& context, u32 level, const void* data) noexcept override;
-    void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void generateMipmaps(IRenderingContext& context) noexcept override;
+    void set(IRenderingContext& context, u32 mipLevel, const void* data) noexcept override;
 };
 
-class TAU_DLL DX10DepthTexture final : public DX10Texture2D
+class TAU_DLL DX10Texture3D final : public ITexture3D
 {
-    DELETE_COPY(DX10DepthTexture);
+    TEXTURE_IMPL(DX10Texture3D);
 private:
-    ID3D10DepthStencilView* _d3dDepthStencilView;
+    ID3D10Texture3D* _d3dTexture;
+    DX10RenderTarget _renderTarget;
+    DX10TextureView* _textureView;
+    UINT _mipLevels;
 public:
-    DX10DepthTexture(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D10Texture2D* const d3dTexture, ID3D10ShaderResourceView* const d3dTextureView, ID3D10DepthStencilView* const d3dDepthStencilView)
-        : DX10Texture2D(width, height, dataFormat, d3dTexture, d3dTextureView, 1), _d3dDepthStencilView(d3dDepthStencilView)
+    DX10Texture3D(const u32 width, const u32 height, const u32 depth, const ETexture::Format dataFormat, ID3D10Texture3D* const d3dTexture, ID3D10RenderTargetView* const renderTargetView, DX10TextureView* const textureView, const UINT mipLevels) noexcept
+        : ITexture3D(width, height, depth, dataFormat)
+        , _d3dTexture(d3dTexture)
+        , _renderTarget(renderTargetView)
+        , _textureView(textureView)
+        , _mipLevels(mipLevels)
     { }
 
-    ~DX10DepthTexture() noexcept;
+    ~DX10Texture3D() noexcept;
 
-    [[nodiscard]] ID3D10DepthStencilView* d3dDepthStencilView() noexcept { return _d3dDepthStencilView; }
-    [[nodiscard]] const ID3D10DepthStencilView* d3dDepthStencilView() const noexcept { return _d3dDepthStencilView; }
+    [[nodiscard]] const ID3D10Texture3D* d3dTexture() const noexcept { return _d3dTexture; }
+    [[nodiscard]]       ID3D10Texture3D* d3dTexture()       noexcept { return _d3dTexture; }
 
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Depth; }
+    [[nodiscard]] const DX10RenderTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       DX10RenderTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const DX10TextureView*   textureView() const noexcept override { return  _textureView;  }
+    [[nodiscard]]       DX10TextureView*   textureView()       noexcept override { return  _textureView;  }
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+
+    void set(IRenderingContext& context, u32 depthLevel, u32 mipLevel, const void* data) noexcept override;
 };
 
 class TAU_DLL DX10TextureCube final : public ITextureCube
@@ -80,116 +82,178 @@ public:
     static UINT dxCubeSide(ETexture::CubeSide side) noexcept;
 private:
     ID3D10Texture2D* _d3dTexture;
-    ID3D10ShaderResourceView* _d3dTextureView;
+    DX10RenderTarget _renderTarget;
+    DX10TextureView* _textureView;
     UINT _mipLevels;
 public:
-    DX10TextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D10Texture2D* const d3dTexture, ID3D10ShaderResourceView* const d3dTextureView, const UINT mipLevels) noexcept
-        : ITextureCube(width, height, dataFormat), _d3dTexture(d3dTexture), _d3dTextureView(d3dTextureView), _mipLevels(mipLevels)
+    DX10TextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D10Texture2D* const d3dTexture, ID3D10RenderTargetView* const renderTargetView, DX10TextureView* const textureView, const UINT mipLevels) noexcept
+        : ITextureCube(width, height, dataFormat)
+        , _d3dTexture(d3dTexture)
+        , _renderTarget(renderTargetView)
+        , _textureView(textureView)
+        , _mipLevels(mipLevels)
     { }
 
     ~DX10TextureCube() noexcept;
 
-    [[nodiscard]] ID3D10Texture2D* d3dTexture() noexcept { return _d3dTexture; }
     [[nodiscard]] const ID3D10Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
+    [[nodiscard]]       ID3D10Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
 
-    [[nodiscard]] ID3D10ShaderResourceView* d3dTextureView() noexcept { return _d3dTextureView; }
-    [[nodiscard]] const ID3D10ShaderResourceView* d3dTextureView() const noexcept { return _d3dTextureView; }
+    [[nodiscard]] const DX10RenderTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       DX10RenderTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const DX10TextureView*   textureView() const noexcept override { return  _textureView;  }
+    [[nodiscard]]       DX10TextureView*   textureView()       noexcept override { return  _textureView;  }
 
     [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
 
-    void bind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void unbind(IRenderingContext& context, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void generateMipmaps(IRenderingContext& context) noexcept override;
-    void setCube(IRenderingContext& context, u32 level, ETexture::CubeSide side, const void* data) noexcept override;
+    void set(IRenderingContext& context, u32 mipLevel, ETexture::CubeSide side, const void* data) noexcept override;
 };
 
-class TAU_DLL DX10NullTextureBuilder final : public ITextureBuilder
+class TAU_DLL DX10TextureDepthStencil final : public ITextureDepthStencil
 {
-    DEFAULT_CONSTRUCT_PU(DX10NullTextureBuilder);
-    DEFAULT_DESTRUCT(DX10NullTextureBuilder);
-    DELETE_COPY(DX10NullTextureBuilder);
+    TEXTURE_IMPL(DX10TextureDepthStencil);
+private:
+    ID3D10Texture2D* _d3dTexture;
+    DX10DepthStencilTarget _renderTarget;
+    DX10NoMipmapTextureView _depthView;
+    DX10NoMipmapTextureView _stencilView;
 public:
-    [[nodiscard]] DX10NullTexture* build(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10NullTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    DX10TextureDepthStencil(const u32 width, const u32 height, ID3D10Texture2D* const d3dTexture, ID3D10DepthStencilView* const depthStencilView, ID3D10ShaderResourceView* const depthView, ID3D10ShaderResourceView* const stencilView) noexcept
+        : ITextureDepthStencil(width, height)
+        , _d3dTexture(d3dTexture)
+        , _renderTarget(depthStencilView)
+        , _depthView(depthView)
+        , _stencilView(stencilView)
+    { }
+
+    ~DX10TextureDepthStencil() noexcept;
+
+    [[nodiscard]] const ID3D10Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
+    [[nodiscard]]       ID3D10Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
+
+    [[nodiscard]] const DX10DepthStencilTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       DX10DepthStencilTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const DX10NoMipmapTextureView*   depthView() const noexcept override { return &_depthView;    }
+    [[nodiscard]]       DX10NoMipmapTextureView*   depthView()       noexcept override { return &_depthView;    }
+    [[nodiscard]] const DX10NoMipmapTextureView* stencilView() const noexcept override { return &_stencilView;  }
+    [[nodiscard]]       DX10NoMipmapTextureView* stencilView()       noexcept override { return &_stencilView;  }
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+
+    void set(IRenderingContext& context, const void* data) noexcept override;
 };
 
-class TAU_DLL DX10Texture2DBuilder final : public ITextureBuilder
+class TAU_DLL DX10TextureBuilder final : public ITextureBuilder
 {
-    DEFAULT_DESTRUCT(DX10Texture2DBuilder);
-    DELETE_COPY(DX10Texture2DBuilder);
+    DEFAULT_DESTRUCT(DX10TextureBuilder);
+    DELETE_COPY(DX10TextureBuilder);
 public:
     static DXGI_FORMAT dxTextureFormat(ETexture::Format format) noexcept;
+    static D3D10_BIND_FLAG dxBindFlags(ETexture::BindFlags flags) noexcept;
+    static D3D10_BIND_FLAG dxBindFlags(ETexture::DepthStencilBindFlags flags) noexcept;
+    static D3D10_RESOURCE_MISC_FLAG dxMiscFlags(ETexture::BindFlags flags) noexcept;
+    static D3D10_RESOURCE_MISC_FLAG dxMiscFlags(ETexture::DepthStencilBindFlags flags) noexcept;
 public:
-    struct DXTextureArgs final
+#define RELEASE_DX(_X) \
+    if((_X)) { \
+        (_X)->Release(); \
+        (_X) = null; }
+#define RELEASE_TAU(_X) \
+    if((_X)) { \
+        delete (_X); \
+        (_X) = null; }
+
+    struct DXTexture2DArgs final
     {
+        DEFAULT_CONSTRUCT_PU(DXTexture2DArgs);
+        DEFAULT_COPY(DXTexture2DArgs);
+    public:
         ID3D10Texture2D* d3dTexture;
-        ID3D10ShaderResourceView* d3dTextureView;
+        ID3D10RenderTargetView* renderTarget;
+        DX10TextureView* textureView;
+
+        ~DXTexture2DArgs() noexcept
+        {
+            RELEASE_DX(d3dTexture);
+            RELEASE_DX(renderTarget);
+            RELEASE_TAU(textureView);
+        }
     };
-private:
-    DX10GraphicsInterface& _gi;
-public:
-    DX10Texture2DBuilder(DX10GraphicsInterface& gi) noexcept
-        : _gi(gi)
-    { }
 
-    [[nodiscard]] DX10Texture2D* build(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10Texture2D* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-private:
-    [[nodiscard]] bool processArgs(const TextureArgs& args, [[tau::out]] DXTextureArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
-};
-
-class TAU_DLL DX10DepthTextureBuilder final : public ITextureBuilder
-{
-    DEFAULT_DESTRUCT(DX10DepthTextureBuilder);
-    DELETE_COPY(DX10DepthTextureBuilder);
-public:
-    struct DXTextureArgs final
+    struct DXTexture3DArgs final
     {
-        ID3D10Texture2D* d3dTexture;
-        ID3D10ShaderResourceView* d3dTextureView;
-        ID3D10DepthStencilView* d3dDepthStencilView;
+        DEFAULT_CONSTRUCT_PU(DXTexture3DArgs);
+        DEFAULT_COPY(DXTexture3DArgs);
+    public:
+        ID3D10Texture3D* d3dTexture;
+        ID3D10RenderTargetView* renderTarget;
+        DX10TextureView* textureView;
+
+        ~DXTexture3DArgs() noexcept
+        {
+            RELEASE_DX(d3dTexture);
+            RELEASE_DX(renderTarget);
+            RELEASE_TAU(textureView);
+        }
     };
+
+    using DXTextureCubeArgs = DXTexture2DArgs;
+
+    struct DXTextureDepthStencilArgs final
+    {
+        DEFAULT_CONSTRUCT_PU(DXTextureDepthStencilArgs);
+        DEFAULT_COPY(DXTextureDepthStencilArgs);
+    public:
+        ID3D10Texture2D* d3dTexture;
+        ID3D10DepthStencilView* renderTarget;
+        ID3D10ShaderResourceView* depthView;
+        ID3D10ShaderResourceView* stencilView;
+
+        ~DXTextureDepthStencilArgs() noexcept
+        {
+            RELEASE_DX(d3dTexture);
+            RELEASE_DX(renderTarget);
+            RELEASE_DX(depthView);
+            RELEASE_DX(stencilView);
+        }
+    };
+
+#undef RELEASE_DX
+#undef RELEASE_TAU
 private:
     DX10GraphicsInterface& _gi;
 public:
-    DX10DepthTextureBuilder(DX10GraphicsInterface& gi) noexcept
+    DX10TextureBuilder(DX10GraphicsInterface& gi) noexcept
         : _gi(gi)
     { }
 
-    [[nodiscard]] DX10DepthTexture* build(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10DepthTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-private:
-    [[nodiscard]] bool processArgs(const TextureArgs& args, [[tau::out]] DXTextureArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
-};
+    [[nodiscard]] DX10Texture2D* build(const Texture2DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10Texture2D* build(const Texture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture2D> buildCPPRef(const Texture2DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture2D> buildTauRef(const Texture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture2D> buildTauSRef(const Texture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 
-class TAU_DLL DX10TextureCubeBuilder final : public ITextureCubeBuilder
-{
-    DEFAULT_DESTRUCT(DX10TextureCubeBuilder);
-    DELETE_COPY(DX10TextureCubeBuilder);
-public:
-    using DXTextureCubeArgs = DX10Texture2DBuilder::DXTextureArgs;
-private:
-    DX10GraphicsInterface& _gi;
-public:
-    DX10TextureCubeBuilder(DX10GraphicsInterface& gi) noexcept
-        : _gi(gi)
-    { }
+    [[nodiscard]] DX10Texture3D* build(const Texture3DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10Texture3D* build(const Texture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture3D> buildCPPRef(const Texture3DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture3D> buildTauRef(const Texture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture3D> buildTauSRef(const Texture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 
-    [[nodiscard]] DX10TextureCube* build(const TextureCubeArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10TextureCube* build(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITextureCube> buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITextureCube> buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITextureCube> buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] DX10TextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10TextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITextureCube> buildCPPRef(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITextureCube> buildTauRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITextureCube> buildTauSRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+
+    [[nodiscard]] DX10TextureDepthStencil* build(const TextureDepthStencilArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] DX10TextureDepthStencil* build(const TextureDepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITextureDepthStencil> buildCPPRef(const TextureDepthStencilArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITextureDepthStencil> buildTauRef(const TextureDepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITextureDepthStencil> buildTauSRef(const TextureDepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:
+    [[nodiscard]] bool processArgs(const Texture2DArgs& args, [[tau::out]] DXTexture2DArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const Texture3DArgs& args, [[tau::out]] DXTexture3DArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs(const TextureCubeArgs& args, [[tau::out]] DXTextureCubeArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const TextureDepthStencilArgs& args, [[tau::out]] DXTextureDepthStencilArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 };
 #endif

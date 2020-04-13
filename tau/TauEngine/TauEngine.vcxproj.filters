@@ -150,19 +150,10 @@
     <ClCompile Include="src\console\ConsoleController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gl\GLTexture2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gl\GLFrameBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\texture\FrameBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\texture\FITextureLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gl\GLTextureCube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\camera\Skybox.cpp">
@@ -292,6 +283,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vr\VRUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10FrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10TextureView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gl\GLTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -710,10 +710,36 @@
     <ClInclude Include="include\vr\VRUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10FrameBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\texture\RenderTarget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\texture\TextureView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10RenderTarget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10TextureView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gl\GLTextureView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gl\GLRenderTarget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\texture\NullTexture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Window.natvis" />
     <Natvis Include="natvis\Vector.natvis" />
+    <Natvis Include="natvis\DynArray.natvis" />
+    <Natvis Include="natvis\ReferenceCountingPointer.natvis" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\imgui_vertex.glsl" />

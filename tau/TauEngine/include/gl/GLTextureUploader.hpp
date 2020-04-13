@@ -9,7 +9,7 @@ class TAU_DLL GLSingleTextureUploader final : public ISingleTextureUploader
     DEFAULT_DESTRUCT(GLSingleTextureUploader);
     DELETE_COPY(GLSingleTextureUploader);
 public:
-    GLSingleTextureUploader(const CPPRef<ITexture>& texture, const CPPRef<GLTextureSampler>& textureSampler) noexcept;
+    GLSingleTextureUploader(ITextureView* texture, const CPPRef<GLTextureSampler>& textureSampler) noexcept;
 
     TextureIndices upload(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept override;
     TextureIndices unbind(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept override;
@@ -20,7 +20,7 @@ class TAU_DLL GLTextureUploader final : public ITextureUploader
     DEFAULT_DESTRUCT(GLTextureUploader);
     DELETE_COPY(GLTextureUploader);
 public:
-    GLTextureUploader(const RefDynArray<CPPRef<ITexture>>& textures, const CPPRef<GLTextureSampler>& textureSampler) noexcept;
+    GLTextureUploader(const RefDynArray<ITextureView*>& textures, const CPPRef<GLTextureSampler>& textureSampler) noexcept;
 
     TextureIndices upload(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept override;
     TextureIndices unbind(IRenderingContext& context, const TextureIndices& indices, EShader::Stage stage) noexcept override;

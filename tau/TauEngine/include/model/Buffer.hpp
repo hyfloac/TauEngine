@@ -131,7 +131,7 @@ public:
 
 #define UNIFORM_BUFFER_IMPL(_TYPE) UNIFORM_BUFFER_IMPL_BASE(_TYPE)
 
-class TAU_DLL NOVTABLE IBuffer
+class TAU_DLL TAU_NOVTABLE IBuffer
 {
     DELETE_COPY(IBuffer);
 protected:
@@ -200,7 +200,7 @@ public:
     RTT_BASE_CAST(IBuffer);
 };
 
-class TAU_DLL NOVTABLE IIndexBuffer
+class TAU_DLL TAU_NOVTABLE IIndexBuffer
 {
     DELETE_COPY(IIndexBuffer);
 protected:
@@ -259,7 +259,7 @@ public:
     RTT_BASE_CAST(IIndexBuffer);
 };
 
-class TAU_DLL NOVTABLE IUniformBuffer
+class TAU_DLL TAU_NOVTABLE IUniformBuffer
 {
     DELETE_COPY(IUniformBuffer);
 protected:
@@ -383,13 +383,13 @@ public:
     { }
 };
 
-class TAU_DLL NOVTABLE IBufferBuilder
+class TAU_DLL TAU_NOVTABLE IBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IBufferBuilder);
     DEFAULT_DESTRUCT_VI(IBufferBuilder);
     DELETE_COPY(IBufferBuilder);
 public:
-    enum class Error : u8
+    enum class Error
     {
         NoError = 0,
         /**
@@ -497,7 +497,7 @@ public:
     [[nodiscard]] virtual NullableStrongRef<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
-class TAU_DLL NOVTABLE IIndexBufferBuilder
+class TAU_DLL TAU_NOVTABLE IIndexBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IIndexBufferBuilder);
     DEFAULT_DESTRUCT_VI(IIndexBufferBuilder);
@@ -512,7 +512,7 @@ public:
     [[nodiscard]] virtual NullableStrongRef<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
-class TAU_DLL NOVTABLE IUniformBufferBuilder
+class TAU_DLL TAU_NOVTABLE IUniformBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IUniformBufferBuilder);
     DEFAULT_DESTRUCT_VI(IUniformBufferBuilder);

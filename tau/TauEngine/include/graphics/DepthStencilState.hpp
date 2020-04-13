@@ -19,7 +19,7 @@ public:
         All
     };
 
-    using CompareFunc = ::ETexture::DepthCompareFunc;
+    using CompareFunc = ::ETexture::CompareFunc;
 
     enum class StencilOp : u8
     {
@@ -93,7 +93,7 @@ public:
 
 #define DSS_IMPL(_TYPE) DSS_IMPL_BASE(_TYPE)
 
-class TAU_DLL NOVTABLE IDepthStencilState
+class TAU_DLL TAU_NOVTABLE IDepthStencilState
 {
     DEFAULT_DESTRUCT_VI(IDepthStencilState);
     DELETE_COPY(IDepthStencilState);

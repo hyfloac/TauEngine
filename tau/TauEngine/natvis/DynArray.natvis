@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="DynArray&lt;*&gt;">
+        <DisplayString>{{Size = {_size}}}</DisplayString>
+        <Expand>
+            <Item Name="[Element Count]">_size</Item>
+            <ArrayItems>
+                <Size>_size</Size>
+                <ValuePointer>_arr</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="RefDynArray&lt;*&gt;">
+        <DisplayString>{{Size = {_size}}}</DisplayString>
+        <Expand>
+            <Item Name="[Element Count]">_size</Item>
+            <Item Name="[Reference Count]">_refCount</Item>
+            <ArrayItems>
+                <Size>_size</Size>
+                <ValuePointer>_arr</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+</AutoVisualizer>

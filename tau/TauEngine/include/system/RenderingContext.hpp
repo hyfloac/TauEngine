@@ -25,7 +25,7 @@ struct DepthStencilArgs;
 class IRasterizerState;
 struct RasterizerArgs;
 
-class TAU_DLL NOVTABLE IRenderingContext
+class TAU_DLL TAU_NOVTABLE IRenderingContext
 {
     DEFAULT_DESTRUCT_VI(IRenderingContext);
     DELETE_COPY(IRenderingContext);

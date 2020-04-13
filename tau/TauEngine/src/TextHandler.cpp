@@ -23,6 +23,9 @@
 #include "system/Window.hpp"
 #include "graphics/RasterizerState.hpp"
 #include "system/GraphicsInterface.hpp"
+#include "texture/NullTexture.hpp"
+#include "texture/FITextureLoader.hpp"
+#include <EnumBitFields.hpp>
 
 template<>
 class UniformAccessor<TextHandler::ProjectionUniforms> final
@@ -92,10 +95,10 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     textureSamplerArgs.wrapU = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.wrapV = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
-    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
+    textureSamplerArgs.depthCompareFunc = ETexture::CompareFunc::Never;
 
     SingleTextureUploaderArgs tuArgs;
-    tuArgs.texture = gi.createNullTexture().buildCPPRef(TextureArgs {}, null);
+    tuArgs.texture = TextureLoader::getMissingTexture()->textureView();
     tuArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, null);
 
@@ -224,15 +227,16 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRe
     PERF();
     GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
 
-    TextureArgs args;
+    Texture2DArgs args;
+    args.mipmapLevels = 1;
     args.dataFormat = ETexture::Format::Red8UnsignedInt;
-    args.mipmapLevels = 0;
+    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
 
     for(GLchar c = minChar; c <= maxChar; ++c)
     {
         if(FT_Load_Char(face, c, FT_LOAD_RENDER)) { continue; }
 
-        ITexture* texture;
+        ITexture2D* texture;
 
         if(face->glyph->bitmap.buffer)
         {
@@ -240,13 +244,13 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRe
             args.height = face->glyph->bitmap.rows;
             args.initialBuffer = face->glyph->bitmap.buffer;
 
-            texture = gi.createTexture2D().build(args, null);
+            texture = gi.createTexture().build(args, null);
 
-            texture->generateMipmaps(context);
+            texture->textureView()->generateMipmaps(context);
         }
         else
         {
-            texture = gi.createNullTexture().build(args, null);
+            texture = new(::std::nothrow) NullTexture2D;
         }
 
         gs.glyphs[c - gs.minGlyph] = GlyphCharacter(texture,
@@ -295,7 +299,7 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
             { xpos + w, ypos + h }
         };
 
-        _textureUploader->texture(gc->texture);
+        _textureUploader->texture(gc->texture->textureView());
 
         (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
@@ -369,7 +373,7 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
             { xpos + w, ypos + h }
         };
 
-        _textureUploader->texture(gc->texture);
+        _textureUploader->texture(gc->texture->textureView());
         (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
         _positionBuffer->beginModification(context);

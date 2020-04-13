@@ -11,6 +11,15 @@ void GLRasterizerState::apply() const noexcept
         glDisable(GL_SCISSOR_TEST);
     }
 
+    if(_args.cullMode != RasterizerArgs::CullMode::None)
+    {
+        glEnable(GL_CULL_FACE);
+    }
+    else
+    {
+        glDisable(GL_CULL_FACE);
+    }
+
     glFrontFace(_frontFace);
     glCullFace(_cullMode);
     glPolygonMode(GL_FRONT_AND_BACK, _fillMode);

@@ -17,10 +17,17 @@ class Material final
     DEFAULT_COPY(Material);
 private:
     float _specularExponent;
+    CPPRef<ITexture2D> _diffuseTexture;
+    CPPRef<ITexture2D> _specularTexture;
+    CPPRef<ITexture2D> _normalTexture;
     CPPRef<ITextureUploader> _textureUploader;
 private:
-    inline Material(const float specularExponent, const CPPRef<ITextureUploader>& textureUploader) noexcept
-        : _specularExponent(specularExponent), _textureUploader(textureUploader)
+    inline Material(const float specularExponent, const CPPRef<ITexture2D>& diffuseTexture, const CPPRef<ITexture2D>& specularTexture, const CPPRef<ITexture2D>& normalTexture, const CPPRef<ITextureUploader>& textureUploader) noexcept
+        : _specularExponent(specularExponent)
+        , _diffuseTexture(diffuseTexture)
+        , _specularTexture(specularTexture)
+        , _normalTexture(normalTexture)
+        , _textureUploader(textureUploader)
     { }
 public:
     TextureIndices upload(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, const TextureIndices& textureIndices) const noexcept;
@@ -37,9 +44,9 @@ class MaterialBuilder final
 private:
     IGraphicsInterface& _gi;
     float _specularExponent;
-    CPPRef<ITexture> _diffuseTexture;
-    CPPRef<ITexture> _specularTexture;
-    CPPRef<ITexture> _normalTexture;
+    CPPRef<ITexture2D> _diffuseTexture;
+    CPPRef<ITexture2D> _specularTexture;
+    CPPRef<ITexture2D> _normalTexture;
     CPPRef<ITextureSampler> _textureSampler;
 public:
     inline MaterialBuilder(IGraphicsInterface& gi) noexcept
@@ -47,9 +54,9 @@ public:
     { }
 
     inline void specularExponent(const float specularExponent) noexcept { _specularExponent = specularExponent; }
-    inline void diffuseTexture(const CPPRef<ITexture>& diffuseTexture) noexcept { _diffuseTexture = diffuseTexture; }
-    inline void specularTexture(const CPPRef<ITexture>& specularTexture) noexcept { _specularTexture = specularTexture; }
-    inline void normalTexture(const CPPRef<ITexture>& normalTexture) noexcept { _normalTexture = normalTexture; }
+    inline void diffuseTexture(const CPPRef<ITexture2D>& diffuseTexture) noexcept { _diffuseTexture = diffuseTexture; }
+    inline void specularTexture(const CPPRef<ITexture2D>& specularTexture) noexcept { _specularTexture = specularTexture; }
+    inline void normalTexture(const CPPRef<ITexture2D>& normalTexture) noexcept { _normalTexture = normalTexture; }
     inline void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
 
     [[nodiscard]] Material build() const noexcept;

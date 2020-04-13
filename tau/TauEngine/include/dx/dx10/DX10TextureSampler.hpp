@@ -33,7 +33,7 @@ class TAU_DLL DX10TextureSamplerBuilder final : public ITextureSamplerBuilder
 public:
     [[nodiscard]] static D3D10_FILTER dxFilter(ETexture::Filter magnificationFilter, ETexture::Filter minificationFilter, ETexture::Filter mipmapMinificationFilter) noexcept;
     [[nodiscard]] static D3D10_TEXTURE_ADDRESS_MODE  dxWrapMode(ETexture::WrapMode wrapMode) noexcept;
-    [[nodiscard]] static D3D10_COMPARISON_FUNC dxDepthComparison(ETexture::DepthCompareFunc depthCompare) noexcept;
+    [[nodiscard]] static D3D10_COMPARISON_FUNC dxDepthComparison(ETexture::CompareFunc depthCompare) noexcept;
 private:
     DX10GraphicsInterface& _gi;
 public:

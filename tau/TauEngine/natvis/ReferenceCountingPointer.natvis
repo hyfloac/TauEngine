@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="ReferenceCountingPointer&lt;*&gt;">
+        <SmartPointer Usage="Minimal">($T1*)_ptr->_objRaw</SmartPointer>
+        <DisplayString IncludeView="ptr">{($T1*)_ptr->_objRaw}</DisplayString>
+        <Expand>
+            <Item Name="[ptr]">($T1*)_ptr->_objRaw</Item>
+            <Item Name="[Reference Count]">_ptr->_refCount</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="NullableReferenceCountingPointer&lt;*&gt;">
+        <SmartPointer Usage="Minimal">($T1*)_ptr->_objRaw</SmartPointer>
+        <DisplayString Condition="_ptr == 0">empty</DisplayString>
+        <DisplayString IncludeView="ptr" Condition="_ptr == 0">null</DisplayString>
+        <DisplayString IncludeView="ptr" Condition="_ptr != 0">{($T1*)_ptr->_objRaw}</DisplayString>
+        <Expand>
+            <Item Condition="_ptr != 0" Name="[ptr]">($T1*)_ptr->_objRaw</Item>
+            <Item Condition="_ptr != 0" Name="[Reference Count]">_ptr->_refCount</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="StrongReferenceCountingPointer&lt;*&gt;">
+        <SmartPointer Usage="Minimal">($T1*)_ptr->_objRaw</SmartPointer>
+        <DisplayString IncludeView="ptr">{($T1*)_ptr->_objRaw}</DisplayString>
+        <Expand>
+            <Item Name="[ptr]">($T1*)_ptr->_objRaw</Item>
+            <Item Name="[Strong Reference Count]">_ptr->_strongRefCount</Item>
+            <Item Name="[Weak Reference Count]">_ptr->_weakRefCount</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="WeakReferenceCountingPointer&lt;*&gt;">
+        <SmartPointer Usage="Minimal">($T1*)_ptr->_objRaw</SmartPointer>
+        <DisplayString Condition="_ptr->_strongRefCount == 0">empty</DisplayString>
+        <DisplayString IncludeView="ptr" Condition="_strongRefCount > 0">{($T1*)_ptr->_objRaw}</DisplayString>
+        <Expand>
+            <Item Name="[ptr]">($T1*)_ptr->_objRaw</Item>
+            <Item Name="[Strong Reference Count]">_ptr->_strongRefCount</Item>
+            <Item Name="[Weak Reference Count]">_ptr->_weakRefCount</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="NullableStrongReferenceCountingPointer&lt;*&gt;">
+        <SmartPointer Usage="Minimal">($T1*)_ptr->_objRaw</SmartPointer>
+        <DisplayString Condition="_ptr == 0">empty</DisplayString>
+        <DisplayString IncludeView="ptr" Condition="_ptr == 0">null</DisplayString>
+        <DisplayString IncludeView="ptr">{($T1*)_ptr->_objRaw}</DisplayString>
+        <Expand>
+            <Item Condition="_ptr != 0" Name="[ptr]">($T1*)_ptr->_objRaw</Item>
+            <Item Condition="_ptr != 0" Name="[Strong Reference Count]">_ptr->_strongRefCount</Item>
+            <Item Condition="_ptr != 0" Name="[Weak Reference Count]">_ptr->_weakRefCount</Item>
+        </Expand>
+    </Type>
+
+    <Type Name="NullableWeakReferenceCountingPointer&lt;*&gt;">
+        <SmartPointer Usage="Minimal">($T1*)_ptr->_objRaw</SmartPointer>
+        <DisplayString Condition="_ptr == 0">empty</DisplayString>
+        <DisplayString Condition="_ptr->_strongRefCount == 0">empty</DisplayString>
+        <DisplayString IncludeView="ptr" Condition="_ptr == 0">null</DisplayString>
+        <DisplayString IncludeView="ptr" Condition="_strongRefCount > 0">{($T1*)_ptr->_objRaw}</DisplayString>
+        <Expand>
+            <Item Condition="_ptr != 0" Name="[ptr]">($T1*)_ptr->_objRaw</Item>
+            <Item Condition="_ptr != 0" Name="[Strong Reference Count]">_ptr->_strongRefCount</Item>
+            <Item Condition="_ptr != 0" Name="[Weak Reference Count]">_ptr->_weakRefCount</Item>
+        </Expand>
+    </Type>
+
+</AutoVisualizer>

@@ -62,8 +62,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     PERF();
 
     RenderingMode::getGlobalMode().setDebugMode(true);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
 
     if(argCount >= 2)
     {
@@ -218,16 +218,16 @@ void TauEditorApplication::render(const DeltaTime& delta) noexcept
             _renderer->render();
             _vrLeftFB->unbind(*_renderingContext);
 
-            _vrLeftFB->color()->texture()->bind(*_renderingContext, 0, EShader::Stage::Pixel);
+            // _vrLeftFB->colorAttachments()[0]->bind(*_renderingContext, 0, EShader::Stage::Pixel);
 
             const vr::Texture_t leftTexture = {
-                tauGetVRTextureHandle(_vrLeftFB->color()->texture().get()),
+                tauGetVRTextureHandle(_vrLeftFB->colorAttachments()[0].get()),
                 tauGetTextureType(RenderingMode::getGlobalMode()),
                 vr::ColorSpace_Gamma
             };
             vr::VRCompositor()->Submit(vr::Eye_Left, &leftTexture);
 
-            _vrLeftFB->color()->texture()->bind(*_renderingContext, 0, EShader::Stage::Pixel);
+            // _vrLeftFB->colorAttachments()[0]->bind(*_renderingContext, 0, EShader::Stage::Pixel);
         }
 
         {
@@ -236,7 +236,7 @@ void TauEditorApplication::render(const DeltaTime& delta) noexcept
             _renderer->render();
 
             const vr::Texture_t rightTexture = {
-                tauGetVRTextureHandle(_vrLeftFB->color()->texture().get()),
+                tauGetVRTextureHandle(_vrLeftFB->colorAttachments()[0].get()),
                 tauGetTextureType(RenderingMode::getGlobalMode()),
                 vr::ColorSpace_Gamma
             };
@@ -435,19 +435,19 @@ void TauEditorApplication::initVRFrameBuffers() noexcept
     u32 height;
     _vr->GetRecommendedRenderTargetSize(&width, &height);
 
-    CPPRef<IFrameBufferBuilder> fbBuilder = _renderingContext->createFrameBuffer();
-    IFrameBufferAttachment* color = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::Color, width, height);
-    IFrameBufferAttachment* depth = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::DepthStencil, width, height);
-    fbBuilder->attach(color);
-    fbBuilder->attach(depth);
-    _vrLeftFB = fbBuilder->build();
-
-    fbBuilder = _renderingContext->createFrameBuffer();
-    color = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::Color, width, height);
-    depth = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::DepthStencil, width, height);
-    fbBuilder->attach(color);
-    fbBuilder->attach(depth);
-    _vrRightFB = fbBuilder->build();
+    // CPPRef<IFrameBufferBuilder> fbBuilder = _renderingContext->createFrameBuffer();
+    // IFrameBufferAttachment* color = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::Color, width, height);
+    // IFrameBufferAttachment* depth = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::DepthStencil, width, height);
+    // fbBuilder->attach(color);
+    // fbBuilder->attach(depth);
+    // _vrLeftFB = fbBuilder->build();
+    //
+    // fbBuilder = _renderingContext->createFrameBuffer();
+    // color = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::Color, width, height);
+    // depth = IFrameBufferAttachment::create(*_renderingContext, IFrameBufferAttachment::Type::DepthStencil, width, height);
+    // fbBuilder->attach(color);
+    // fbBuilder->attach(depth);
+    // _vrRightFB = fbBuilder->build();
 }
 
 Application* startGame() noexcept

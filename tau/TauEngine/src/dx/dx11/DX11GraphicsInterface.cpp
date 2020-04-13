@@ -81,17 +81,8 @@ IDepthStencilStateBuilder& DX11GraphicsInterface::createDepthStencilState() noex
 IRasterizerStateBuilder& DX11GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
 
-ITextureBuilder& DX11GraphicsInterface::createTexture2D() noexcept
+ITextureBuilder& DX11GraphicsInterface::createTexture() noexcept
 { return *static_cast<ITextureBuilder*>(null); }
-
-ITextureBuilder& DX11GraphicsInterface::createNullTexture() noexcept
-{ return *static_cast<ITextureBuilder*>(null); }
-
-ITextureBuilder& DX11GraphicsInterface::createDepthTexture() noexcept
-{ return *static_cast<ITextureBuilder*>(null); }
-
-ITextureCubeBuilder& DX11GraphicsInterface::createTextureCube() noexcept
-{ return *static_cast<ITextureCubeBuilder*>(null); }
 
 ITextureSamplerBuilder& DX11GraphicsInterface::createTextureSampler() noexcept
 { return *static_cast<ITextureSamplerBuilder*>(null); }

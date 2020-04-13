@@ -14,7 +14,7 @@
 
 #define TEXTURE_SAMPLER_IMPL(_TYPE) TEXTURE_SAMPLER_IMPL_BASE(_TYPE)
 
-class TAU_DLL NOVTABLE ITextureSampler
+class TAU_DLL TAU_NOVTABLE ITextureSampler
 {
     DEFAULT_CONSTRUCT_PO(ITextureSampler);
     DEFAULT_DESTRUCT_VI(ITextureSampler);
@@ -36,7 +36,7 @@ public:
     ETexture::WrapMode wrapU;
     ETexture::WrapMode wrapV;
     ETexture::WrapMode wrapW;
-    ETexture::DepthCompareFunc depthCompareFunc;
+    ETexture::CompareFunc depthCompareFunc;
     RGBAColor borderColor;
 public:
     TextureSamplerArgs() noexcept
@@ -46,7 +46,7 @@ public:
           wrapU(static_cast<ETexture::WrapMode>(0)),
           wrapV(static_cast<ETexture::WrapMode>(0)),
           wrapW(static_cast<ETexture::WrapMode>(0)),
-          depthCompareFunc(static_cast<ETexture::DepthCompareFunc>(0)),
+          depthCompareFunc(static_cast<ETexture::CompareFunc>(0)),
           borderColor{ 0, 0, 0, 0 }
     { }
 
@@ -61,7 +61,7 @@ public:
     [[nodiscard]] ETexture::Filter& mipMinFilter() noexcept { return mipmapMinificationFilter; }
 };
 
-class TAU_DLL NOVTABLE ITextureSamplerBuilder
+class TAU_DLL TAU_NOVTABLE ITextureSamplerBuilder
 {
     DEFAULT_CONSTRUCT_PO(ITextureSamplerBuilder);
     DEFAULT_DESTRUCT_VI(ITextureSamplerBuilder);

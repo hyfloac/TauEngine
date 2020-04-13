@@ -109,7 +109,7 @@ bool DX10TextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, ID3D
     ERROR_CODE_COND_F(args.wrapU == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
     ERROR_CODE_COND_F(args.wrapV == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
     ERROR_CODE_COND_F(args.wrapW == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
-    ERROR_CODE_COND_F(args.depthCompareFunc == static_cast<ETexture::DepthCompareFunc>(0), Error::DepthComparisonIsUnset);
+    ERROR_CODE_COND_F(args.depthCompareFunc == static_cast<ETexture::CompareFunc>(0), Error::DepthComparisonIsUnset);
 
     D3D10_SAMPLER_DESC d3dSamplerDesc;
 
@@ -174,18 +174,18 @@ D3D10_TEXTURE_ADDRESS_MODE DX10TextureSamplerBuilder::dxWrapMode(const ETexture:
     }
 }
 
-D3D10_COMPARISON_FUNC DX10TextureSamplerBuilder::dxDepthComparison(const ETexture::DepthCompareFunc depthCompare) noexcept
+D3D10_COMPARISON_FUNC DX10TextureSamplerBuilder::dxDepthComparison(const ETexture::CompareFunc depthCompare) noexcept
 {
     switch(depthCompare)
     {
-        case ETexture::DepthCompareFunc::LessThanOrEqual:    return D3D10_COMPARISON_LESS_EQUAL;
-        case ETexture::DepthCompareFunc::GreaterThanOrEqual: return D3D10_COMPARISON_GREATER_EQUAL;
-        case ETexture::DepthCompareFunc::LessThan:           return D3D10_COMPARISON_LESS;
-        case ETexture::DepthCompareFunc::GreaterThan:        return D3D10_COMPARISON_GREATER;
-        case ETexture::DepthCompareFunc::Equal:              return D3D10_COMPARISON_EQUAL;
-        case ETexture::DepthCompareFunc::NotEqual:           return D3D10_COMPARISON_NOT_EQUAL;
-        case ETexture::DepthCompareFunc::Always:             return D3D10_COMPARISON_ALWAYS;
-        case ETexture::DepthCompareFunc::Never:              return D3D10_COMPARISON_NEVER;
+        case ETexture::CompareFunc::LessThanOrEqual:    return D3D10_COMPARISON_LESS_EQUAL;
+        case ETexture::CompareFunc::GreaterThanOrEqual: return D3D10_COMPARISON_GREATER_EQUAL;
+        case ETexture::CompareFunc::LessThan:           return D3D10_COMPARISON_LESS;
+        case ETexture::CompareFunc::GreaterThan:        return D3D10_COMPARISON_GREATER;
+        case ETexture::CompareFunc::Equal:              return D3D10_COMPARISON_EQUAL;
+        case ETexture::CompareFunc::NotEqual:           return D3D10_COMPARISON_NOT_EQUAL;
+        case ETexture::CompareFunc::Always:             return D3D10_COMPARISON_ALWAYS;
+        case ETexture::CompareFunc::Never:              return D3D10_COMPARISON_NEVER;
         default: return static_cast<D3D10_COMPARISON_FUNC>(-1);
     }
 }

@@ -1,76 +1,76 @@
 #pragma once
 
 #include "texture/Texture.hpp"
-#pragma warning(push, 0)
-#include <GL/glew.h>
-#pragma warning(pop)
+#include "GLRenderTarget.hpp"
+#include "GLTextureView.hpp"
 
-class TAU_DLL GLNullTexture final : public ITexture
-{
-    DEFAULT_DESTRUCT(GLNullTexture);
-    TEXTURE_IMPL(GLNullTexture);
-public:
-    GLNullTexture() noexcept
-        : ITexture(0, 0, ETexture::Format::Red8UnsignedInt)
-    { }
-
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-
-    void set(IRenderingContext&, u32 level, const void* data) noexcept override { }
-
-    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override
-    {
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override { }
-    void generateMipmaps(IRenderingContext&) noexcept override { }
-};
-
-class TAU_DLL GLTexture2D : public ITexture
+class TAU_DLL GLTexture2D final : public ITexture2D
 {
     TEXTURE_IMPL(GLTexture2D);
 public:
     static GLint glInternalFormat(ETexture::Format format) noexcept;
     static GLint glFilterType(ETexture::Filter filterType) noexcept;
     static GLint glWrapMode(ETexture::WrapMode wrapMode) noexcept;
-    static GLint glDepthCompareFunc(ETexture::DepthCompareFunc func) noexcept;
+    static GLint glDepthCompareFunc(ETexture::CompareFunc func) noexcept;
     static GLenum glInputFormat(ETexture::Format format) noexcept;
     static GLenum glInputDataType(ETexture::Format format) noexcept;
-protected:
+private:
     GLuint _texture;
+    GLRenderTarget _renderTarget;
+    GLTextureView _textureView;
 public:
-    GLTexture2D(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
+    inline GLTexture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
+        : ITexture2D(width, height, dataFormat)
+        , _texture(texture)
+        , _renderTarget(texture, GL_TEXTURE_2D)
+        , _textureView(texture, GL_TEXTURE_2D)
+    { }
 
-    virtual ~GLTexture2D() noexcept override;
+    ~GLTexture2D() noexcept;
 
     [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
 
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::T2D; }
-
-    void generateMipmaps(IRenderingContext&) noexcept override;
-
-    void set(IRenderingContext&, u32 level, const void* data) noexcept override;
-    virtual void set(u32 level, const void* data) const noexcept;
-
-    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override final;
-    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage) noexcept override final;
+    [[nodiscard]] const GLRenderTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       GLRenderTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const GLTextureView*   textureView() const noexcept override { return &_textureView;  }
+    [[nodiscard]]       GLTextureView*   textureView()       noexcept override { return &_textureView;  }
 
     [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+
+    void set(u32 mipLevel, const void* data) const noexcept;
+    void set(IRenderingContext&, u32 mipLevel, const void* data) noexcept override
+    { set(mipLevel, data); }
 };
 
-class TAU_DLL GLDepthTexture final : public GLTexture2D
+class TAU_DLL GLTexture3D final : public ITexture3D
 {
-    DEFAULT_DESTRUCT(GLDepthTexture);
-    DELETE_COPY(GLDepthTexture);
+    TEXTURE_IMPL(GLTexture3D);
+private:
+    GLuint _texture;
+    GLRenderTarget _renderTarget;
+    GLTextureView _textureView;
 public:
-    GLDepthTexture(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
+    inline GLTexture3D(const u32 width, const u32 height, const u32 depth, const ETexture::Format dataFormat, const GLuint texture) noexcept
+        : ITexture3D(width, height, depth, dataFormat)
+        , _texture(texture)
+        , _renderTarget(texture, GL_TEXTURE_3D)
+        , _textureView(texture, GL_TEXTURE_3D)
+    { }
 
-    [[nodiscard]] inline ETexture::Type textureType() const noexcept override { return ETexture::Type::Depth; }
+    ~GLTexture3D() noexcept;
 
-    void set(IRenderingContext&, u32 level, const void* data) noexcept override;
-    void set(u32 level, const void* data) const noexcept;
+    [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
+
+    [[nodiscard]] const GLRenderTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       GLRenderTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const GLTextureView*   textureView() const noexcept override { return &_textureView;  }
+    [[nodiscard]]       GLTextureView*   textureView()       noexcept override { return &_textureView;  }
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+
+    void set(u32 depthLevel, u32 mipLevel, const void* data) const noexcept;
+    void set(IRenderingContext&, u32 depthLevel, u32 mipLevel, const void* data) noexcept override
+    { set(depthLevel, mipLevel, data); }
 };
 
 class TAU_DLL GLTextureCube final : public ITextureCube
@@ -80,87 +80,108 @@ public:
     static GLenum glCubeMapFace(ETexture::CubeSide cubeSide) noexcept;
 private:
     GLuint _texture;
+    GLRenderTarget _renderTarget;
+    GLTextureView _textureView;
 public:
-    GLTextureCube(u32 width, u32 height, ETexture::Format dataFormat, GLuint texture) noexcept;
+    GLTextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
+        : ITextureCube(width, height, dataFormat)
+        , _texture(texture)
+        , _renderTarget(texture, GL_TEXTURE_CUBE_MAP)
+        , _textureView(texture, GL_TEXTURE_CUBE_MAP)
+    { }
 
     ~GLTextureCube() noexcept override;
 
     [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
 
+    [[nodiscard]] const GLRenderTarget* renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       GLRenderTarget* renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const GLTextureView*   textureView() const noexcept override { return &_textureView;  }
+    [[nodiscard]]       GLTextureView*   textureView()       noexcept override { return &_textureView;  }
+
     [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
 
-    void setCube(IRenderingContext&, u32 level, ETexture::CubeSide side, const void* data) noexcept override;
-    void setCube(u32 level, ETexture::CubeSide side, const void* data) const noexcept;
-
-    void generateMipmaps(IRenderingContext&) noexcept override;
-
-    void bind(IRenderingContext&, u8 textureUnit, EShader::Stage stage) noexcept override;
-    void unbind(IRenderingContext&, u8 textureUnit, EShader::Stage stage) noexcept override;
+    void set(u32 mipLevel, ETexture::CubeSide side, const void* data) const noexcept;
+    void set(IRenderingContext&, u32 mipLevel, ETexture::CubeSide side, const void* data) noexcept override
+    { set(mipLevel, side, data); }
 };
 
-class TAU_DLL GLTexture2DBuilder final : public ITextureBuilder
+class TAU_DLL GLTextureDepthStencil final : public ITextureDepthStencil
 {
-    DEFAULT_CONSTRUCT_PU(GLTexture2DBuilder);
-    DEFAULT_DESTRUCT(GLTexture2DBuilder);
-    DELETE_COPY(GLTexture2DBuilder);
-public:
-    struct GLTextureArgs final
-    {
-        GLuint textureHandle;
-    };
-public:
-    [[nodiscard]] GLTexture2D* build(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] GLTexture2D* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-public:
-    [[nodiscard]] static bool processArgs(const TextureArgs& args, [[tau::out]] GLTextureArgs* glArgs, [[tau::out]] Error* error) noexcept;
-};
-
-class TAU_DLL GLTextureNullBuilder final : public ITextureBuilder
-{
-    DEFAULT_CONSTRUCT_PU(GLTextureNullBuilder);
-    DEFAULT_DESTRUCT(GLTextureNullBuilder);
-    DELETE_COPY(GLTextureNullBuilder);
-public:
-    [[nodiscard]] GLNullTexture* build(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] GLNullTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-};
-
-class TAU_DLL GLTextureDepthBuilder final : public ITextureBuilder
-{
-    DEFAULT_CONSTRUCT_PU(GLTextureDepthBuilder);
-    DEFAULT_DESTRUCT(GLTextureDepthBuilder);
-    DELETE_COPY(GLTextureDepthBuilder);
-public:
-    using GLTextureArgs = GLTexture2DBuilder::GLTextureArgs;
-public:
-    [[nodiscard]] GLDepthTexture* build(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] GLDepthTexture* build(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITexture> buildCPPRef(const TextureArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITexture> buildTauRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITexture> buildTauSRef(const TextureArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-};
-
-class TAU_DLL GLTextureCubeBuilder final : public ITextureCubeBuilder
-{
-    DEFAULT_CONSTRUCT_PU(GLTextureCubeBuilder);
-    DEFAULT_DESTRUCT(GLTextureCubeBuilder);
-    DELETE_COPY(GLTextureCubeBuilder);
-public:
-    using GLTextureArgs = GLTexture2DBuilder::GLTextureArgs;
-public:
-    [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITextureCube> buildCPPRef(const TextureCubeArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITextureCube> buildTauRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITextureCube> buildTauSRef(const TextureCubeArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    TEXTURE_IMPL(GLTextureDepthStencil);
 private:
-    [[nodiscard]] static bool processArgs(const TextureCubeArgs& args, [[tau::out]] GLTextureArgs* glArgs, [[tau::out]] Error* error) noexcept;
+    GLuint _texture;
+    GLRenderTarget _renderTarget;
+    GLNoMipmapTextureView _depthView;
+    GLNoMipmapTextureView _stencilView;
+public:
+    GLTextureDepthStencil(const u32 width, const u32 height, const GLuint texture) noexcept
+        : ITextureDepthStencil(width, height)
+        , _texture(texture)
+        , _renderTarget(texture, GL_TEXTURE_2D)
+        , _depthView(texture, GL_TEXTURE_2D)
+        , _stencilView(texture, GL_TEXTURE_2D)
+    { }
 
-    static void setupInitial(GLTextureCube& texture, const void* initialBuffers[6]);
+    ~GLTextureDepthStencil() noexcept;
+
+    [[nodiscard]] inline GLuint texture() const noexcept { return _texture; }
+
+    [[nodiscard]] const GLRenderTarget*       renderTarget() const noexcept override { return &_renderTarget; }
+    [[nodiscard]]       GLRenderTarget*       renderTarget()       noexcept override { return &_renderTarget; }
+    [[nodiscard]] const GLNoMipmapTextureView*   depthView() const noexcept override { return &_depthView;    }
+    [[nodiscard]]       GLNoMipmapTextureView*   depthView()       noexcept override { return &_depthView;    }
+    [[nodiscard]] const GLNoMipmapTextureView* stencilView() const noexcept override { return &_stencilView;  }
+    [[nodiscard]]       GLNoMipmapTextureView* stencilView()       noexcept override { return &_stencilView;  }
+
+    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+
+    void set(const void* data) const noexcept;
+    void set(IRenderingContext&, const void* data) noexcept override
+    { set(data); }
+};
+
+class TAU_DLL GLTextureBuilder final : public ITextureBuilder
+{
+    DEFAULT_CONSTRUCT_PU(GLTextureBuilder);
+    DEFAULT_DESTRUCT(GLTextureBuilder);
+    DELETE_COPY(GLTextureBuilder);
+public:
+    struct GLTexture2DArgs final
+    {
+        GLuint texture;
+    };
+
+    using GLTexture3DArgs = GLTexture2DArgs;
+    using GLTextureCubeArgs = GLTexture2DArgs;
+    using GLTextureDepthStencilArgs = GLTexture2DArgs;
+public:
+    [[nodiscard]] GLTexture2D* build(const Texture2DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLTexture2D* build(const Texture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture2D> buildCPPRef(const Texture2DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture2D> buildTauRef(const Texture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture2D> buildTauSRef(const Texture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+
+    [[nodiscard]] GLTexture3D* build(const Texture3DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLTexture3D* build(const Texture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITexture3D> buildCPPRef(const Texture3DArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITexture3D> buildTauRef(const Texture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITexture3D> buildTauSRef(const Texture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+
+    [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLTextureCube* build(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITextureCube> buildCPPRef(const TextureCubeArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITextureCube> buildTauRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITextureCube> buildTauSRef(const TextureCubeArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+
+    [[nodiscard]] GLTextureDepthStencil* build(const TextureDepthStencilArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] GLTextureDepthStencil* build(const TextureDepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] CPPRef<ITextureDepthStencil> buildCPPRef(const TextureDepthStencilArgs& args, [[tau::out]] Error* error) const noexcept override;
+    [[nodiscard]] NullableRef<ITextureDepthStencil> buildTauRef(const TextureDepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableStrongRef<ITextureDepthStencil> buildTauSRef(const TextureDepthStencilArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+private:
+    [[nodiscard]] static bool processArgs(const Texture2DArgs& args, [[tau::out]] GLTexture2DArgs* glArgs, [[tau::out]] Error* error) noexcept;
+    [[nodiscard]] static bool processArgs(const Texture3DArgs& args, [[tau::out]] GLTexture3DArgs* glArgs, [[tau::out]] Error* error) noexcept;
+    [[nodiscard]] static bool processArgs(const TextureCubeArgs& args, [[tau::out]] GLTextureCubeArgs* glArgs, [[tau::out]] Error* error) noexcept;
+    [[nodiscard]] static bool processArgs(const TextureDepthStencilArgs& args, [[tau::out]] GLTextureDepthStencilArgs* glArgs, [[tau::out]] Error* error) noexcept;
 };

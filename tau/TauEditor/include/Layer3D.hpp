@@ -56,12 +56,15 @@ private:
     UniformBlockS<ViewPosUniforms> _cameraPosUni;
 
     CPPRef<IShaderProgram> _frameBufferShader;
-    CPPRef<ITextureUploader> _frameBufferUploader;
+    CPPRef<ISingleTextureUploader> _frameBufferUploader;
+    CPPRef<ITextureSampler> _frameBufferSampler;
 
     CPPRef<ITexture> _texture;
     CPPRef<ITexture> _overlay;
     CPPRef<IFrameBuffer> _frameBuffer;
     CPPRef<IVertexArray> _frameBufferVA;
+
+    CPPRef<ITexture> _testTexture;
 
     Vector3f _modelPos;
     glm::mat4 _modelViewMatrix;

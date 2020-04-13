@@ -5,7 +5,7 @@
 #include <Objects.hpp>
 #include <DynArray.hpp>
 
-class TAU_DLL NOVTABLE IGraphicsDisplay
+class TAU_DLL TAU_NOVTABLE IGraphicsDisplay
 {
     DEFAULT_CONSTRUCT_PO(IGraphicsDisplay);
     DEFAULT_DESTRUCT_VI(IGraphicsDisplay);

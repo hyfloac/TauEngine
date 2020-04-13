@@ -35,7 +35,7 @@ class RenderingMode;
 /**
  * Represents an abstract, library independent shader.
  */
-class TAU_DLL NOVTABLE IShader
+class TAU_DLL TAU_NOVTABLE IShader
 {
     DEFAULT_CONSTRUCT_PO(IShader);
     DEFAULT_DESTRUCT_VI(IShader);
@@ -84,7 +84,7 @@ public:
     [[nodiscard]] static ResIndex transform(const RenderingMode& rm) noexcept;
 };
 
-class TAU_DLL NOVTABLE IShaderBuilder
+class TAU_DLL TAU_NOVTABLE IShaderBuilder
 {
     DEFAULT_CONSTRUCT_PO(IShaderBuilder);
     DEFAULT_DESTRUCT_VI(IShaderBuilder);

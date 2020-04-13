@@ -69,7 +69,7 @@ void ImGuiTau::render(IGraphicsInterface& gi, IRenderingContext& ctx, ImDrawData
                     // TODO: Setup Scissor Test
                 }
 
-                drawCmd.TextureId->bind(ctx, 0, EShader::Stage::Pixel);
+                // drawCmd.TextureId->bind(ctx, 0, EShader::Stage::Pixel);
 
                 _va->draw(ctx, drawCmd.ElemCount, drawCmd.IdxOffset * sizeof(ImDrawIdx));
             }

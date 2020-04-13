@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-
-    <Type Name="ContextSettings">
-        <DisplayString>{{OpenGL {(unsigned)majorVersion,u}.{(unsigned)minorVersion,u}}}</DisplayString>
-        <Expand>
-            <Item Name="[Major Version]">(unsigned)majorVersion,u</Item>
-            <Item Name="[Minor Version]">(unsigned)minorVersion,u</Item>
-            <Item Name="[Debug Mode]" Condition="debug">debug</Item>
-            <Item Name="[Forward Compatible]" Condition="forwardCompatible">forwardCompatible</Item>
-            <Item Name="[Core Profile]" Condition="coreProfile">coreProfile</Item>
-            <Item Name="[Compatibility Profile]" Condition="compatProfile">compatProfile</Item>
-        </Expand>
-    </Type>
     
     <Type Name="Window">
         <DisplayString>{{Title: {_title,s}}}</DisplayString>
@@ -19,7 +7,6 @@
             <Item Name="[Width]">_width,u</Item>
             <Item Name="[Height]">_height,u</Item>
             <Item Name="[Title]">_title,s</Item>
-            <Item Name="[Context Settings]">_contextSettings</Item>
             <Item Name="[Window State]" Condition="_windowState==WindowState::MINIMIZED">"Minimized"</Item>
             <Item Name="[Window State]" Condition="_windowState==WindowState::MAXIMIZED">"Maximized"</Item>
         </Expand>

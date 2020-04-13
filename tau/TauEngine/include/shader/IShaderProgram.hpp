@@ -13,7 +13,7 @@ class Vector3i;
 class Vector3f;
 class Vector4f;
 
-class TAU_DLL NOVTABLE IShaderProgram
+class TAU_DLL TAU_NOVTABLE IShaderProgram
 {
     DEFAULT_DESTRUCT_VI(IShaderProgram);
     DELETE_COPY(IShaderProgram);

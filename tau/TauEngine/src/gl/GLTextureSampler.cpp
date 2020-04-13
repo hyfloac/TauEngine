@@ -85,7 +85,7 @@ bool GLTextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, GLText
     ERROR_CODE_COND_F(args.wrapU == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
     ERROR_CODE_COND_F(args.wrapV == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
     ERROR_CODE_COND_F(args.wrapW == static_cast<ETexture::WrapMode>(0), Error::WrapModeIsUnset);
-    ERROR_CODE_COND_F(args.depthCompareFunc == static_cast<ETexture::DepthCompareFunc>(0), Error::DepthComparisonIsUnset);
+    ERROR_CODE_COND_F(args.depthCompareFunc == static_cast<ETexture::CompareFunc>(0), Error::DepthComparisonIsUnset);
 
     glArgs->_magFilter = glFilterType(args.magFilter());
     glArgs->_minFilter = glMipMinType(args.minFilter(), args.mipFilter());
@@ -94,7 +94,7 @@ bool GLTextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, GLText
     glArgs->_wrapV = glWrapMode(args.wrapV);
     glArgs->_wrapW = glWrapMode(args.wrapW);
 
-    glArgs->_depthCompareMode = args.depthCompareFunc == ETexture::DepthCompareFunc::Never ? GL_NONE : GL_COMPARE_REF_TO_TEXTURE;
+    glArgs->_depthCompareMode = args.depthCompareFunc == ETexture::CompareFunc::Never ? GL_NONE : GL_COMPARE_REF_TO_TEXTURE;
     glArgs->_depthCompareFunc = glDepthCompareFunc(args.depthCompareFunc);
 
     glArgs->_borderColor[0] = static_cast<GLfloat>(args.borderColor.r) / 255.0f;
@@ -119,11 +119,11 @@ GLint GLTextureSamplerBuilder::glMipMinType(const ETexture::Filter minFilter, co
 {
     if(minFilter == ETexture::Filter::Nearest)
     {
-        return mipFilter == ETexture::Filter::Nearest ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
+        return mipFilter == ETexture::Filter::Nearest ? GL_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
     }
     else
     {
-        return mipFilter == ETexture::Filter::Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR;
+        return mipFilter == ETexture::Filter::Nearest ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
     }
 }
 
@@ -140,18 +140,18 @@ GLint GLTextureSamplerBuilder::glWrapMode(const ETexture::WrapMode wrapMode) noe
     }
 }
 
-GLint GLTextureSamplerBuilder::glDepthCompareFunc(const ETexture::DepthCompareFunc compareFunc) noexcept
+GLint GLTextureSamplerBuilder::glDepthCompareFunc(const ETexture::CompareFunc compareFunc) noexcept
 {
     switch(compareFunc)
     {
-        case ETexture::DepthCompareFunc::LessThanOrEqual: return GL_LEQUAL;
-        case ETexture::DepthCompareFunc::GreaterThanOrEqual: return GL_GEQUAL;
-        case ETexture::DepthCompareFunc::LessThan: return GL_LESS;
-        case ETexture::DepthCompareFunc::GreaterThan: return GL_GREATER;
-        case ETexture::DepthCompareFunc::Equal: return GL_EQUAL;
-        case ETexture::DepthCompareFunc::NotEqual: return GL_NOTEQUAL;
-        case ETexture::DepthCompareFunc::Always: return GL_ALWAYS;
-        case ETexture::DepthCompareFunc::Never: return GL_NEVER;
+        case ETexture::CompareFunc::LessThanOrEqual: return GL_LEQUAL;
+        case ETexture::CompareFunc::GreaterThanOrEqual: return GL_GEQUAL;
+        case ETexture::CompareFunc::LessThan: return GL_LESS;
+        case ETexture::CompareFunc::GreaterThan: return GL_GREATER;
+        case ETexture::CompareFunc::Equal: return GL_EQUAL;
+        case ETexture::CompareFunc::NotEqual: return GL_NOTEQUAL;
+        case ETexture::CompareFunc::Always: return GL_ALWAYS;
+        case ETexture::CompareFunc::Never: return GL_NEVER;
         default: return 0;
     }
 }

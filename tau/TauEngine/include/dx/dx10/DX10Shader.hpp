@@ -8,7 +8,7 @@
 class DX10GraphicsInterface;
 class DX10RenderingContext;
 
-class TAU_DLL NOVTABLE DX10Shader : public IShader
+class TAU_DLL TAU_NOVTABLE DX10Shader : public IShader
 {
     DEFAULT_CONSTRUCT_PO(DX10Shader);
     DEFAULT_DESTRUCT_VI(DX10Shader);

@@ -47,6 +47,8 @@ public:
     [[nodiscard]] const ID3D10Device* d3dDevice() const noexcept;
     [[nodiscard]] ID3D10Device* d3dDevice() noexcept;
 
+    void resetFrameBuffer() const noexcept;
+
     void deactivateContext() noexcept override { }
     void activateContext() noexcept override { }
     void updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept override;
@@ -69,7 +71,7 @@ public:
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
 
-    [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
+    [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);
 };

@@ -59,10 +59,10 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     textureSamplerArgs.wrapU = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.wrapV = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
-    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
+    textureSamplerArgs.depthCompareFunc = ETexture::CompareFunc::Never;
 
     SingleTextureUploaderArgs uploaderArgs;
-    uploaderArgs.texture = _skybox;
+    uploaderArgs.texture = _skybox->textureView();
     uploaderArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(uploaderArgs, null);
 

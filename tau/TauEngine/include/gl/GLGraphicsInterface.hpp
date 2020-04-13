@@ -9,13 +9,10 @@ class GLIndexBufferBuilder;
 class GLUniformBufferBuilder;
 class GLDepthStencilStateBuilder;
 class GLRasterizerStateBuilder;
-class GLTexture2DBuilder;
-class GLTextureNullBuilder;
-class GLTextureDepthBuilder;
+class GLTextureBuilder;
 class GLSingleTextureUploaderBuilder;
 class GLTextureUploaderBuilder;
 class GLRenderingContextBuilder;
-class GLTextureCubeBuilder;
 class GLTextureSamplerBuilder;
 
 class TAU_DLL GLGraphicsInterface final : public IGraphicsInterface
@@ -41,10 +38,7 @@ private:
     GLUniformBufferBuilder* _uniformBufferBuilder;
     GLDepthStencilStateBuilder* _depthStencilStateBuilder;
     GLRasterizerStateBuilder* _rasterizerStateBuilder;
-    GLTexture2DBuilder* _texture2DBuilder;
-    GLTextureNullBuilder* _textureNullBuilder;
-    GLTextureDepthBuilder* _depthTextureBuilder;
-    GLTextureCubeBuilder* _textureCubeBuilder;
+    GLTextureBuilder* _textureBuilder;
     GLTextureSamplerBuilder* _textureSamplerBuilder;
     GLSingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     GLTextureUploaderBuilder* _textureUploaderBuilder;
@@ -67,10 +61,7 @@ public:
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
-    [[nodiscard]] ITextureBuilder& createTexture2D() noexcept override;
-    [[nodiscard]] ITextureBuilder& createNullTexture() noexcept override;
-    [[nodiscard]] ITextureBuilder& createDepthTexture() noexcept override;
-    [[nodiscard]] ITextureCubeBuilder& createTextureCube() noexcept override;
+    [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;

@@ -54,14 +54,14 @@ vec4 vibrancyPP(sampler2D sampler, vec2 texCoord)
 {
     vec3 color = texture(sampler, texCoord).rgb;
     vec3 hsv = rgb2hsv(color);
-    hsv.g = saturate(hsv.g * 2);
+    hsv.g = saturate(hsv.g * 1.5);
     return vec4(hsv2rgb(hsv), 1.0);
 }
 
 void main(void)
 {
     // fragColor = postProcess(frameBufferSampler, fTexCoord);
-    // fragColor = vibrancyPP(frameBufferSampler, fTexCoord);
-     fragColor = texture(frameBufferSampler, fTexCoord);
+    fragColor = vibrancyPP(frameBufferSampler, fTexCoord);
+    // fragColor = texture(frameBufferSampler, fTexCoord);
     // fragColor = vec4(nightVision(frameBufferSampler, fTexCoord), 1.0);
 }

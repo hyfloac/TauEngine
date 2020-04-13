@@ -23,10 +23,7 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
       _vertexArrayBuilder(new(::std::nothrow) GLVertexArrayBuilder),
       _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder),
       _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder),
-      _texture2DBuilder(new(::std::nothrow) GLTexture2DBuilder),
-      _textureNullBuilder(new(::std::nothrow) GLTextureNullBuilder),
-      _depthTextureBuilder(new(::std::nothrow) GLTextureDepthBuilder),
-      _textureCubeBuilder(new(::std::nothrow) GLTextureCubeBuilder),
+      _textureBuilder(new(::std::nothrow) GLTextureBuilder),
       _textureSamplerBuilder(new(::std::nothrow) GLTextureSamplerBuilder),
       _singleTextureUploaderBuilder(new(::std::nothrow) GLSingleTextureUploaderBuilder),
       _textureUploaderBuilder(new(::std::nothrow) GLTextureUploaderBuilder),
@@ -65,9 +62,7 @@ GLGraphicsInterface::~GLGraphicsInterface() noexcept
     delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
-    delete _texture2DBuilder;
-    delete _textureNullBuilder;
-    delete _depthTextureBuilder;
+    delete _textureBuilder;
     delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
@@ -98,17 +93,8 @@ IDepthStencilStateBuilder& GLGraphicsInterface::createDepthStencilState() noexce
 IRasterizerStateBuilder& GLGraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
 
-ITextureBuilder& GLGraphicsInterface::createTexture2D() noexcept
-{ return *_texture2DBuilder; }
-
-ITextureBuilder& GLGraphicsInterface::createNullTexture() noexcept
-{ return *_textureNullBuilder; }
-
-ITextureBuilder& GLGraphicsInterface::createDepthTexture() noexcept
-{ return *_depthTextureBuilder; }
-
-ITextureCubeBuilder& GLGraphicsInterface::createTextureCube() noexcept
-{ return *_textureCubeBuilder; }
+ITextureBuilder& GLGraphicsInterface::createTexture() noexcept
+{ return *_textureBuilder; }
 
 ITextureSamplerBuilder& GLGraphicsInterface::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }

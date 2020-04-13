@@ -101,30 +101,30 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     if(!mesh.material.map_Kd.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Kd.c_str());
-        matBuilder.diffuseTexture(CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path)));
+        matBuilder.diffuseTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path)));
     }
     if(!mesh.material.map_Ks.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ks.c_str());
-        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path)));
+        matBuilder.specularTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path)));
     }
     else
     {
-        matBuilder.specularTexture(CPPRef<ITexture>(TextureLoader::generateBlackTexture(gi, context)));
+        matBuilder.specularTexture(CPPRef<ITexture2D>(TextureLoader::generateBlackTexture(gi, context)));
     }
     if(!mesh.material.map_Ka.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ka.c_str());
-        _reflectiveTexture = CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path));
+        _reflectiveTexture = CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path));
     }
     if(!mesh.material.map_bump.empty())
     {
         const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
-        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::loadTexture(gi, context, path.path)));
+        matBuilder.normalTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path)));
     }
     else
     {
-        matBuilder.normalTexture(CPPRef<ITexture>(TextureLoader::generateNormalTexture(gi, context)));
+        matBuilder.normalTexture(CPPRef<ITexture2D>(TextureLoader::generateNormalTexture(gi, context)));
     }
 
     matBuilder.specularExponent(mesh.material.Ns);
@@ -137,7 +137,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
     textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
+    textureSamplerArgs.depthCompareFunc = ETexture::CompareFunc::Never;
 
     matBuilder.textureSampler(CPPRef<ITextureSampler>(gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
 

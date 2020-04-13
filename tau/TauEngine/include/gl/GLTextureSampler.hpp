@@ -34,7 +34,7 @@ public:
     static GLint glFilterType(ETexture::Filter filterType) noexcept;
     static GLint glMipMinType(ETexture::Filter minFilter, ETexture::Filter mipFilter) noexcept;
     static GLint glWrapMode(ETexture::WrapMode wrapMode) noexcept;
-    static GLint glDepthCompareFunc(ETexture::DepthCompareFunc func) noexcept;
+    static GLint glDepthCompareFunc(ETexture::CompareFunc func) noexcept;
 public:
     [[nodiscard]] GLTextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] GLTextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;

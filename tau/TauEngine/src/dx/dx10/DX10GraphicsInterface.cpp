@@ -23,10 +23,7 @@ DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10De
       _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
       _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this)),
       _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this)),
-      _texture2DBuilder(new(::std::nothrow) DX10Texture2DBuilder(*this)),
-      _nullTextureBuilder(new(::std::nothrow) DX10NullTextureBuilder),
-      _depthTextureBuilder(new(::std::nothrow) DX10DepthTextureBuilder(*this)),
-      _cubeTextureBuilder(new(::std::nothrow) DX10TextureCubeBuilder(*this)),
+      _textureBuilder(new(::std::nothrow) DX10TextureBuilder(*this)),
       _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
       _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this)),
       _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder(*this)),
@@ -45,10 +42,7 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
-    delete _texture2DBuilder;
-    delete _nullTextureBuilder;
-    delete _depthTextureBuilder;
-    delete _cubeTextureBuilder;
+    delete _textureBuilder;
     delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
@@ -108,17 +102,8 @@ IDepthStencilStateBuilder& DX10GraphicsInterface::createDepthStencilState() noex
 IRasterizerStateBuilder& DX10GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
 
-ITextureBuilder& DX10GraphicsInterface::createTexture2D() noexcept
-{ return *_texture2DBuilder; }
-
-ITextureBuilder& DX10GraphicsInterface::createNullTexture() noexcept
-{ return *_nullTextureBuilder; }
-
-ITextureBuilder& DX10GraphicsInterface::createDepthTexture() noexcept
-{ return *_depthTextureBuilder; }
-
-ITextureCubeBuilder& DX10GraphicsInterface::createTextureCube() noexcept
-{ return *_cubeTextureBuilder; }
+ITextureBuilder& DX10GraphicsInterface::createTexture() noexcept
+{ return *_textureBuilder; }
 
 ITextureSamplerBuilder& DX10GraphicsInterface::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }

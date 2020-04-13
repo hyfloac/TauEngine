@@ -30,21 +30,58 @@ class IGraphicsInterface;
 
 struct GlyphCharacter final
 {
-    DEFAULT_COPY(GlyphCharacter);
-    DEFAULT_DESTRUCT(GlyphCharacter);
 public:
-    CPPRef<ITexture> texture;
+    // CPPRef<ITexture2D> texture;
+    ITexture2D* texture;
     Vector2f size;
     Vector2f bearing; // Offset from baseline to left/top of glyph
     u32      advance; // Offset to advance to next glyph
 
     inline GlyphCharacter() noexcept
-        : texture(nullptr), size(0.0f, 0.0f), bearing(0.0f, 0.0f), advance(0)
+        : texture(null)
+        , size(0.0f, 0.0f)
+        , bearing(0.0f, 0.0f)
+        , advance(0)
     { }
 
-    inline GlyphCharacter(ITexture* _texture, Vector2f _size, Vector2f _bearing, u32 _advance) noexcept
-        : texture(_texture), size(_size), bearing(_bearing), advance(_advance)
+    inline GlyphCharacter(ITexture2D* _texture, Vector2f _size, Vector2f _bearing, u32 _advance) noexcept
+        : texture(_texture)
+        , size(_size)
+        , bearing(_bearing)
+        , advance(_advance)
     { }
+
+    inline GlyphCharacter(const GlyphCharacter& copy) noexcept = delete;
+
+    inline GlyphCharacter(GlyphCharacter&& move) noexcept
+        : texture(move.texture)
+        , size(move.size)
+        , bearing(move.bearing)
+        , advance(move.advance)
+    { move.texture = null; }
+
+    inline GlyphCharacter& operator=(const GlyphCharacter & copy) noexcept = delete;
+
+    inline GlyphCharacter& operator=(GlyphCharacter && move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        texture = move.texture;
+        size = move.size;
+        bearing = move.bearing;
+        advance = move.advance;
+
+        move.texture = null;
+
+        return *this;
+    }
+
+    inline ~GlyphCharacter() noexcept
+    {
+        delete texture;
+        texture = null;
+    }
 };
 
 struct GlyphSet final

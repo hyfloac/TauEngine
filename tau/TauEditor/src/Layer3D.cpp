@@ -9,6 +9,7 @@
 #include "texture/FITextureLoader.hpp"
 #include "Timings.hpp"
 #include "system/GraphicsInterface.hpp"
+#include <EnumBitFields.hpp>
 
 template<>
 class UniformAccessor<Layer3D::Uniforms> final
@@ -65,7 +66,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
       _texture(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/TestTexture.png")),
       _overlay(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/Overlay.png")),
       _frameBufferVA(null),
-      _modelPos(0, 0, 0), _modelViewMatrix(1.0f)
+      _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _poses{}, _validPoses{}, _validPoseCount(0)
 {
     PERF();
 
@@ -111,22 +112,45 @@ Layer3D::Layer3D(Globals& globals) noexcept
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
     // CPPRef<IShader> refractionPixelShader = CPPRef<IShader>(shaderBuilder->build());
 
-    // shaderArgs.fileName = "FrameBufferVertexShader";
-    // shaderArgs.stage = EShader::Stage::Vertex;
-    // CPPRef<IShader> frameBufferVertexShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
-    //
-    // shaderArgs.fileName = "FrameBufferPixelShader";
-    // shaderArgs.stage = EShader::Stage::Pixel;
-    // CPPRef<IShader> frameBufferPixelShader = window.renderingContext()->createShader().buildCPPRef(shaderArgs, null);
-    //
+    shaderArgs.fileName = "FrameBufferVertexShader";
+    shaderArgs.stage = EShader::Stage::Vertex;
+    CPPRef<IShader> frameBufferVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+
+    shaderArgs.fileName = "FrameBufferPixelShader";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    CPPRef<IShader> frameBufferPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+
     _shader->setVertexShader(globals.rc, vertexShader);
     _shader->setPixelShader(globals.rc, pixelShader);
-    //
-    // _frameBufferShader->setVertexShader(*window.renderingContext(), frameBufferVertexShader);
-    // _frameBufferShader->setPixelShader(*window.renderingContext(), frameBufferPixelShader);
-    //
+
+    _frameBufferShader->setVertexShader(globals.rc, frameBufferVertexShader);
+    _frameBufferShader->setPixelShader(globals.rc, frameBufferPixelShader);
+
     _shader->link(globals.rc);
-    // _frameBufferShader->link(*window.renderingContext());
+    _frameBufferShader->link(globals.rc);
+
+    Texture2DArgs tArgs;
+    tArgs.width = globals.window.width();
+    tArgs.height = globals.window.height();
+    tArgs.mipmapLevels = 1;
+    tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    tArgs.flags = ETexture::BindFlags::RenderTarget | ETexture::BindFlags::ShaderAccess;
+    tArgs.initialBuffer = null;
+
+    const CPPRef<ITexture2D> colorTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+
+    TextureDepthStencilArgs tdsArgs;
+    tdsArgs.width = globals.window.width();
+    tdsArgs.height = globals.window.height();
+    tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget;
+    tdsArgs.initialBuffer = null;
+    const CPPRef<ITextureDepthStencil> dsTexture = globals.gi.createTexture().buildCPPRef(tdsArgs, null);
+
+    FrameBufferArgs fbArgs(1);
+    fbArgs.colorAttachments[0] = colorTexture;
+    fbArgs.depthStencilAttachment = dsTexture;
+
+    _frameBuffer = globals.rc.createFrameBuffer()->buildCPPRef(fbArgs, null);
 
     // CPPRef<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
     //
@@ -139,17 +163,16 @@ Layer3D::Layer3D(Globals& globals) noexcept
     // _frameBuffer = CPPRef<IFrameBuffer>(builder->build(nullptr));
 
     float quadVertices[] = {
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, 1.0f, 0.0f,
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
+        -1.0f,  1.0f, 0.0f, 1.0f,
+         1.0f, -1.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, 1.0f, 1.0f
     };
 
     BufferArgs positionsBuilder(2);
-    // CPPRef<IBufferBuilder> positionsBuilder = window.renderingContext()->createBuffer(2);
     positionsBuilder.type = EBuffer::Type::ArrayBuffer;
     positionsBuilder.usage = EBuffer::UsageType::StaticDraw;
     positionsBuilder.elementCount = 6;
@@ -158,13 +181,30 @@ Layer3D::Layer3D(Globals& globals) noexcept
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
     const CPPRef<IBuffer> positions = globals.gi.createBuffer().buildCPPRef(positionsBuilder, nullptr);
-    // const CPPRef<IBuffer> positions = CPPRef<IBuffer>(positionsBuilder->build(nullptr));
 
-    // CPPRef<IVertexArrayBuilder> vaBuilder = window.renderingContext()->createVertexArray(1);
-    // vaBuilder->setVertexBuffer(0, positions);
-    // vaBuilder->drawCount(6);
-    // vaBuilder->drawType(DrawType::SeparatedTriangles);
-    // _frameBufferVA = CPPRef<IVertexArray>(vaBuilder->build());
+    VertexArrayArgs vaArgs(1);
+    vaArgs.shader = frameBufferVertexShader;
+    vaArgs.buffers[0] = positions;
+    vaArgs.drawCount = 6;
+    vaArgs.drawType = DrawType::SeparatedTriangles;
+    _frameBufferVA = globals.gi.createVertexArray().buildCPPRef(vaArgs, null);
+
+    TextureSamplerArgs tsArgs;
+    tsArgs.magFilter() = ETexture::Filter::Linear;
+    tsArgs.minFilter() = ETexture::Filter::Linear;
+    tsArgs.mipFilter() = ETexture::Filter::Linear;
+    tsArgs.wrapU = ETexture::WrapMode::Repeat;
+    tsArgs.wrapV = ETexture::WrapMode::Repeat;
+    tsArgs.wrapW = ETexture::WrapMode::Repeat;
+    tsArgs.depthCompareFunc = ETexture::CompareFunc::Never;
+    _frameBufferSampler = _globals.gi.createTextureSampler().buildCPPRef(tsArgs, null);
+
+    _testTexture = TextureLoader::generateDebugTexture8(globals.gi, globals.rc, 7);
+
+    SingleTextureUploaderArgs stuArgs;
+    stuArgs.texture = colorTexture->textureView();
+    stuArgs.textureSampler = _frameBufferSampler;
+    _frameBufferUploader = _globals.gi.createSingleTextureUploader().buildCPPRef(stuArgs, null);
 
     // _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glm::translate(_modelViewMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
@@ -172,18 +212,18 @@ Layer3D::Layer3D(Globals& globals) noexcept
     _uniforms.data().modelMatrix = _modelViewMatrix;
 
     _pointLight.position() = Vector3f(0.0f, -10.0f, -5.0f);
-    _pointLight.ambient({ 255, 255, 255 });
-    _pointLight.diffuse({ 255, 255, 255 });
-    _pointLight.specular({ 255, 255, 255 });
+    _pointLight.ambient({255, 255, 255});
+    _pointLight.diffuse({255, 255, 255});
+    _pointLight.specular({255, 255, 255});
     _pointLight.constant() = 1.0f;
     _pointLight.linear() = 0.007f;
     _pointLight.quadratic() = 0.0002f;
 
     _spotLight.position() = Vector3f(0.0f);
     _spotLight.direction() = Vector3f(0.0f);
-    _spotLight.ambient({ 255, 255, 255 });
-    _spotLight.diffuse({ 255, 255, 255 });
-    _spotLight.specular({ 255, 255, 255 });
+    _spotLight.ambient({255, 255, 255});
+    _spotLight.diffuse({255, 255, 255});
+    _spotLight.specular({255, 255, 255});
     _spotLight.constant() = 1.0f;
     _spotLight.linear() = 0.027f;
     _spotLight.quadratic() = 0.0028f;
@@ -192,15 +232,6 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     _pointLightUniforms.set(globals.rc, _pointLight);
     _spotLightUniforms.set(globals.rc, _spotLight);
-
-    TextureSamplerArgs textureSamplerArgs;
-    textureSamplerArgs.magFilter() = ETexture::Filter::Linear;
-    textureSamplerArgs.minFilter() = ETexture::Filter::Linear;
-    textureSamplerArgs.mipFilter() = ETexture::Filter::Linear;
-    textureSamplerArgs.wrapU = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.wrapV = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
-    textureSamplerArgs.depthCompareFunc = ETexture::DepthCompareFunc::Never;
 
     // CPPRef<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
     // uploaderBuilder->setTexture(0, colorBuffer->texture());
@@ -250,9 +281,9 @@ void Layer3D::onRender() noexcept
 
     auto& context = _globals.rc;
 
-    _shader->bind(context);
     if(_globals.vr)
     {
+        _shader->bind(context);
         _spotLight.position() = _globals.vrCamera->camera().position();
         _spotLight.direction() = _globals.vrCamera->camera().front();
         if(_globals.currentLeftEye)
@@ -290,6 +321,11 @@ void Layer3D::onRender() noexcept
     }
     else
     {
+        _frameBuffer->bind(_globals.rc);
+
+        _frameBuffer->clearFrameBuffer(_globals.rc, true, true, false, { 255, 255, 127, 255 });
+
+        _shader->bind(context);
         _spotLight.position() = _camera.camera().position();
         _spotLight.direction() = _camera.camera().front();
         // _uniforms.data().compoundMatrix = _camera->compoundedMatrix();
@@ -317,6 +353,18 @@ void Layer3D::onRender() noexcept
         _uniforms.unbind(context, EShader::Stage::Vertex, 0);
         _shader->unbind(context);
         _skybox.render(context, _camera.camera());
+
+        _frameBuffer->unbind(_globals.rc);
+
+        _frameBufferShader->bind(_globals.rc);
+        _frameBufferUploader->upload(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+        _frameBufferVA->bind(_globals.rc);
+        _frameBufferVA->preDraw(_globals.rc);
+        _frameBufferVA->draw(_globals.rc);
+        _frameBufferVA->postDraw(_globals.rc);
+        _frameBufferVA->unbind(_globals.rc);
+        _frameBufferUploader->unbind(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+        _frameBufferShader->unbind(_globals.rc);
     }
 }
 
@@ -329,6 +377,32 @@ void Layer3D::onEvent(Event& e) noexcept
 bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
 {
     UNUSED(e);
+
+    Texture2DArgs tArgs;
+    tArgs.width = e.newWidth();
+    tArgs.height = e.newHeight();
+    tArgs.mipmapLevels = 1;
+    tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
+    tArgs.flags = ETexture::BindFlags::RenderTarget | ETexture::BindFlags::ShaderAccess;
+    tArgs.initialBuffer = null;
+
+    const CPPRef<ITexture2D> colorTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+
+    TextureDepthStencilArgs tdsArgs;
+    tdsArgs.width = e.newWidth();
+    tdsArgs.height = e.newHeight();
+    tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget;
+    tdsArgs.initialBuffer = null;
+    const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, null);
+
+    FrameBufferArgs fbArgs(1);
+    fbArgs.colorAttachments[0] = colorTexture;
+    fbArgs.depthStencilAttachment = dsTexture;
+
+    _frameBuffer = _globals.rc.createFrameBuffer()->buildCPPRef(fbArgs, null);
+
+    _frameBufferUploader->texture(colorTexture->textureView());
+
     // CPPRef<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
     //
     // IFrameBufferAttachment* colorBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Color, e.newWidth(), e.newHeight());

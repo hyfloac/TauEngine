@@ -29,6 +29,7 @@
     <ClCompile Include="src\console\ConsoleController.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Buffer.cpp" />
     <ClCompile Include="src\dx\dx10\DX10DepthStencilState.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10FrameBuffer.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
@@ -39,6 +40,7 @@
     <ClCompile Include="src\dx\dx10\DX10Texture.cpp" />
     <ClCompile Include="src\dx\dx10\DX10TextureSampler.cpp" />
     <ClCompile Include="src\dx\dx10\DX10TextureUploader.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10TextureView.cpp" />
     <ClCompile Include="src\dx\dx10\DX10VertexArray.cpp" />
     <ClCompile Include="src\dx\dx11\DX11Buffer.cpp" />
     <ClCompile Include="src\dx\dx11\DX11DepthStencilState.cpp" />
@@ -55,7 +57,6 @@
     <ClCompile Include="src\gl\GLGraphicsAccelerator.cpp" />
     <ClCompile Include="src\gl\GLGraphicsInterface.cpp" />
     <ClCompile Include="src\gl\GLRasterizerState.cpp" />
-    <ClCompile Include="src\gl\GLTextureCube.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
     <ClCompile Include="src\imgui\ImGuiTauImpl.cpp" />
@@ -75,7 +76,7 @@
     <ClCompile Include="src\gl\GLRenderingContext.cpp" />
     <ClCompile Include="src\gl\GLShader.cpp" />
     <ClCompile Include="src\gl\GLShaderProgram.cpp" />
-    <ClCompile Include="src\gl\GLTexture2D.cpp" />
+    <ClCompile Include="src\gl\GLTexture.cpp" />
     <ClCompile Include="src\gl\GLUniform.cpp" />
     <ClCompile Include="src\gl\GLUniform.glm.cpp" />
     <ClCompile Include="src\gl\GLUtils.cpp" />
@@ -101,7 +102,6 @@
     <ClCompile Include="src\model\SimpleOBJLoader.cpp" />
     <ClCompile Include="src\TauEngine.cpp" />
     <ClCompile Include="src\TextHandler.cpp" />
-    <ClCompile Include="src\texture\FrameBuffer.cpp" />
     <ClCompile Include="src\Timings.cpp" />
     <ClCompile Include="src\TUID.cpp" />
     <ClCompile Include="src\maths\Vector3i.cpp" />
@@ -127,16 +127,19 @@
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Buffer.hpp" />
     <ClInclude Include="include\dx\dx10\DX10DepthStencilState.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10FrameBuffer.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsInterface.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RasterizerState.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10RenderTarget.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Texture.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureSampler.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureUploader.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10TextureView.hpp" />
     <ClInclude Include="include\dx\dx10\DX10VertexArray.hpp" />
     <ClInclude Include="include\dx\dx11\DX11Buffer.hpp" />
     <ClInclude Include="include\dx\dx11\DX11DepthStencilState.hpp" />
@@ -160,10 +163,12 @@
     <ClInclude Include="include\gl\GLGraphicsInterface.hpp" />
     <ClInclude Include="include\gl\GLRasterizerState.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
+    <ClInclude Include="include\gl\GLRenderTarget.hpp" />
     <ClInclude Include="include\gl\GLShaderBundleVisitor.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
     <ClInclude Include="include\gl\GLTextureSampler.hpp" />
     <ClInclude Include="include\gl\GLTextureUploader.hpp" />
+    <ClInclude Include="include\gl\GLTextureView.hpp" />
     <ClInclude Include="include\gl\GLUniform.hpp" />
     <ClInclude Include="include\gl\GLUtils.hpp" />
     <ClInclude Include="include\gl\GLBuffer.hpp" />
@@ -238,6 +243,9 @@
     <ClInclude Include="include\texture\FITextureLoader.hpp" />
     <ClInclude Include="include\gl\GLTexture.hpp" />
     <ClInclude Include="include\texture\FrameBuffer.hpp" />
+    <ClInclude Include="include\texture\NullTexture.hpp" />
+    <ClInclude Include="include\texture\TextureView.hpp" />
+    <ClInclude Include="include\texture\RenderTarget.hpp" />
     <ClInclude Include="include\texture\Texture.hpp" />
     <ClInclude Include="include\texture\TextureEnums.hpp" />
     <ClInclude Include="include\texture\TextureSampler.hpp" />
@@ -254,6 +262,8 @@
     <ClInclude Include="include\model\Material.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <Natvis Include="natvis\DynArray.natvis" />
+    <Natvis Include="natvis\ReferenceCountingPointer.natvis" />
     <Natvis Include="natvis\Vector.natvis" />
     <Natvis Include="natvis\Window.natvis" />
   </ItemGroup>

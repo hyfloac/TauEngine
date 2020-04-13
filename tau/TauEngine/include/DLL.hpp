@@ -9,3 +9,9 @@
 #else
   #define TAU_DLL
 #endif
+
+#if defined(TAU_PRODUCTION)
+  #define TAU_NOVTABLE NOVTABLE
+#else
+  #define TAU_NOVTABLE
+#endif

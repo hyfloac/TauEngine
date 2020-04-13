@@ -1,1 +1,2 @@
-"OpenGL": "FrameBufferVertexShader.glsl"
+"OpenGL": "FrameBufferVertexShader.glsl",
+"DirectX10": "FrameBufferVertexShader.cso"
