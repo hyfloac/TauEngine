@@ -50,8 +50,19 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _logger->set_level(spdlog::level::trace);
     _logger->set_pattern("%^[%H:%M:%S:%e] [%n] [%l]%$: %v");
 
-    volatile bool dbgVFSFolder = false;
+    bool dbgVFSFolder = false;
+    bool useVR = false;
 
+
+#ifdef TAU_PRODUCTION
+    RenderingMode::getGlobalMode().setDebugMode(false);
+#else
+    RenderingMode::getGlobalMode().setDebugMode(true);
+#endif
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+    
     if(argCount >= 2)
     {
         for(int i = 1; i < argCount; ++i)
@@ -72,21 +83,30 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
             {
                 dbgVFSFolder = true;
             }
+            else if(strcmp(args[i], "-vr") == 0)
+            {
+                useVR = true;
+            }
+            else if(strcmp(args[i], "-gDebug") == 0)
+            {
+                RenderingMode::getGlobalMode().setDebugMode(true);
+            }
+            else if(strcmp(args[i], "--gDebug") == 0)
+            {
+                RenderingMode::getGlobalMode().setDebugMode(false);
+            }
         }
     }
 
     setupGameFolders(dbgVFSFolder);
     setupConfig();
 
+    _config.useVR = useVR;
+
     ResourceSelectorLoader::setCacheDirectory("|TERes/cache");
 
     TimingsWriter::begin("TauEditor::Initialization", "|TERes/perfInit.json");
     PERF();
-
-    RenderingMode::getGlobalMode().setDebugMode(true);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
@@ -313,7 +333,7 @@ void TauEditorApplication::setupConfig() noexcept
     if(VFS::Instance().fileExists(CONFIG_PATH))
     {
         CPPRef<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
-        Config tmp = { false, true, 0, 0 };
+        Config tmp = { false, false, 0, 0 };
         const i32 read = configFile->readBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
         if(read != sizeof(tmp))
         {
