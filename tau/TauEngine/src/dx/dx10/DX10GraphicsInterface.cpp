@@ -12,22 +12,24 @@
 #include "dx/dx10/DX10Texture.hpp"
 #include "dx/dx10/DX10TextureSampler.hpp"
 #include "dx/dx10/DX10TextureUploader.hpp"
+#include "dx/dx10/DX10FrameBuffer.hpp"
 #include "system/Window.hpp"
 
 DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
-    : IGraphicsInterface(mode), _d3d10Device(d3dDevice),
-      _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this)),
-      _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder(*this)),
-      _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this)),
-      _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this)),
-      _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this)),
-      _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this)),
-      _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this)),
-      _textureBuilder(new(::std::nothrow) DX10TextureBuilder(*this)),
-      _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this)),
-      _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this)),
-      _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder(*this)),
-      _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
+    : IGraphicsInterface(mode), _d3d10Device(d3dDevice)
+    , _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this))
+    , _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder(*this))
+    , _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this))
+    , _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this))
+    , _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this))
+    , _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this))
+    , _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this))
+    , _textureBuilder(new(::std::nothrow) DX10TextureBuilder(*this))
+    , _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this))
+    , _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this))
+    , _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder(*this))
+    , _frameBufferBuilder(new(::std::nothrow) DX10FrameBufferBuilder(*this))
+    , _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
 { }
 
 DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
@@ -46,6 +48,7 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
+    delete _frameBufferBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -113,6 +116,9 @@ ISingleTextureUploaderBuilder& DX10GraphicsInterface::createSingleTextureUploade
 
 ITextureUploaderBuilder& DX10GraphicsInterface::createTextureUploader() noexcept
 { return *_textureUploaderBuilder; }
+
+IFrameBufferBuilder& DX10GraphicsInterface::createFrameBuffer() noexcept
+{ return *_frameBufferBuilder; }
 
 IRenderingContextBuilder& DX10GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

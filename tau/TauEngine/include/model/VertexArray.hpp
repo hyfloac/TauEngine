@@ -17,7 +17,7 @@ class IIndexBuffer;
 class IShader;
 class IRenderingContext;
 
-class TAU_DLL NOVTABLE IVertexArray
+class TAU_DLL TAU_NOVTABLE IVertexArray
 {
     DEFAULT_DESTRUCT_VI(IVertexArray);
     DELETE_COPY(IVertexArray);

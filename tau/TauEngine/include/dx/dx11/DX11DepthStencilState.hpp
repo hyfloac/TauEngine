@@ -3,7 +3,6 @@
 #include "graphics/DepthStencilState.hpp"
 
 #ifdef _WIN32
-
 #include <d3d11.h>
 
 class DX11GraphicsInterface;
@@ -16,7 +15,8 @@ private:
     ID3D11DepthStencilState* _d3dDepthStencilState;
 public:
     DX11DepthStencilState(const DepthStencilArgs& params, ID3D11DepthStencilState* const d3dDepthStencilState) noexcept
-        : IDepthStencilState(params), _d3dDepthStencilState(d3dDepthStencilState)
+        : IDepthStencilState(params)
+        , _d3dDepthStencilState(d3dDepthStencilState)
     { }
 
     ~DX11DepthStencilState() noexcept

@@ -71,8 +71,6 @@ public:
     void endFrame() noexcept override final { }
 
     void swapFrame() noexcept override final;
-
-    [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override;
 private:
     void handleCtxError(int profileMask) const noexcept;
 

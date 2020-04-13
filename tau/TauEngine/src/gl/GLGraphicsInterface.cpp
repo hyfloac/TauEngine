@@ -11,23 +11,25 @@
 #include "gl/GLRasterizerState.hpp"
 #include "gl/GLTexture.hpp"
 #include "gl/GLTextureUploader.hpp"
+#include "gl/GLFrameBuffer.hpp"
 #include "system/Window.hpp"
 
 GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile compat, const bool forwardCompatible)
-    : IGraphicsInterface(mode),
-      _majorVersion(majorVersion),
-      _minorVersion(minorVersion),
-      _compat(compat),
-      _forwardCompatible(forwardCompatible),
-      _shaderBuilder(new(::std::nothrow) GLShaderBuilder(*this)),
-      _vertexArrayBuilder(new(::std::nothrow) GLVertexArrayBuilder),
-      _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder),
-      _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder),
-      _textureBuilder(new(::std::nothrow) GLTextureBuilder),
-      _textureSamplerBuilder(new(::std::nothrow) GLTextureSamplerBuilder),
-      _singleTextureUploaderBuilder(new(::std::nothrow) GLSingleTextureUploaderBuilder),
-      _textureUploaderBuilder(new(::std::nothrow) GLTextureUploaderBuilder),
-      _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
+    : IGraphicsInterface(mode)
+    , _majorVersion(majorVersion)
+    , _minorVersion(minorVersion)
+    , _compat(compat)
+    , _forwardCompatible(forwardCompatible)
+    , _shaderBuilder(new(::std::nothrow) GLShaderBuilder(*this))
+    , _vertexArrayBuilder(new(::std::nothrow) GLVertexArrayBuilder)
+    , _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder)
+    , _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder)
+    , _textureBuilder(new(::std::nothrow) GLTextureBuilder)
+    , _textureSamplerBuilder(new(::std::nothrow) GLTextureSamplerBuilder)
+    , _singleTextureUploaderBuilder(new(::std::nothrow) GLSingleTextureUploaderBuilder)
+    , _textureUploaderBuilder(new(::std::nothrow) GLTextureUploaderBuilder)
+    , _frameBufferBuilder(new(::std::nothrow) GLFrameBufferBuilder)
+    , _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
 {
     switch(_mode.currentMode())
     {
@@ -66,6 +68,7 @@ GLGraphicsInterface::~GLGraphicsInterface() noexcept
     delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
+    delete _frameBufferBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -104,6 +107,9 @@ ISingleTextureUploaderBuilder& GLGraphicsInterface::createSingleTextureUploader(
 
 ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
 { return *_textureUploaderBuilder; }
+
+IFrameBufferBuilder& GLGraphicsInterface::createFrameBuffer() noexcept
+{ return *_frameBufferBuilder; }
 
 IRenderingContextBuilder& GLGraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

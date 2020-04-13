@@ -19,7 +19,6 @@
 
 class Window;
 
-class IFrameBufferBuilder;
 class IDepthStencilState;
 struct DepthStencilArgs;
 class IRasterizerState;
@@ -96,8 +95,6 @@ public:
     virtual void endFrame() noexcept = 0;
 
     virtual void swapFrame() noexcept = 0;
-
-    [[nodiscard]] virtual CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept = 0;
 
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);

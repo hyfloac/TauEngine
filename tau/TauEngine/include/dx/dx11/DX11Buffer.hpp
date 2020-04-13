@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <d3d11.h>
 
+class DX11GraphicsInterface;
 class DX11RenderingContext;
 
 class TAU_DLL DX11Buffer final : public IBuffer
@@ -18,9 +19,17 @@ private:
     ID3D11Buffer* _d3dBuffer;
     void* _currentMapping;
 public:
-    DX11Buffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, bool instanced, const BufferDescriptor& descriptor, ID3D11Buffer* d3dBuffer) noexcept;
+    DX11Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor, ID3D11Buffer* const d3dBuffer) noexcept
+        : IBuffer(type, usage, bufferSize, instanced, descriptor)
+        , _d3dBuffer(d3dBuffer)
+        , _currentMapping(null)
+    { }
 
-    ~DX11Buffer() noexcept;
+    ~DX11Buffer() noexcept
+    {
+        _d3dBuffer->Release();
+        _d3dBuffer = null;
+    }
 
     [[nodiscard]] const ID3D11Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
     [[nodiscard]] ID3D11Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
@@ -42,9 +51,17 @@ private:
     ID3D11Buffer* _d3dBuffer;
     void* _currentMapping;
 public:
-    DX11IndexBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D11Buffer* d3dBuffer) noexcept;
+    DX11IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D11Buffer* const d3dBuffer) noexcept
+        : IIndexBuffer(usage, bufferSize)
+        , _d3dBuffer(d3dBuffer)
+        , _currentMapping(null)
+    { }
 
-    ~DX11IndexBuffer() noexcept;
+    ~DX11IndexBuffer() noexcept
+    {
+        _d3dBuffer->Release();
+        _d3dBuffer = null;
+    }
 
     [[nodiscard]] const ID3D11Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
     [[nodiscard]] ID3D11Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
@@ -66,9 +83,17 @@ private:
     ID3D11Buffer* _d3dBuffer;
     void* _currentMapping;
 public:
-    DX11UniformBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D11Buffer* d3dBuffer) noexcept;
+    DX11UniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D11Buffer* const d3dBuffer) noexcept
+        : IUniformBuffer(usage, bufferSize)
+        , _d3dBuffer(d3dBuffer)
+        , _currentMapping(null)
+    { }
 
-    ~DX11UniformBuffer() noexcept;
+    ~DX11UniformBuffer() noexcept
+    {
+        _d3dBuffer->Release();
+        _d3dBuffer = null;
+    }
 
     [[nodiscard]] const ID3D11Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
     [[nodiscard]] ID3D11Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
@@ -91,9 +116,11 @@ class TAU_DLL DX11BufferBuilder final : public IBufferBuilder
     DEFAULT_DESTRUCT(DX11BufferBuilder);
     DELETE_COPY(DX11BufferBuilder);
 private:
-    DX11RenderingContext& _context;
+    DX11GraphicsInterface& _gi;
 public:
-    DX11BufferBuilder(DX11RenderingContext& context) noexcept;
+    DX11BufferBuilder(DX11GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX11Buffer* build(const BufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX11Buffer* build(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
@@ -101,7 +128,7 @@ public:
     [[nodiscard]] NullableRef<IBuffer> buildTauRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
     [[nodiscard]] NullableStrongRef<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 private:
-    [[nodiscard]] bool processBufferArgs(const BufferArgs& args, [[tau::out]] ID3D11Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const BufferArgs& args, [[tau::out]] ID3D11Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
 };
 
 class TAU_DLL DX11IndexBufferBuilder final : public IIndexBufferBuilder
@@ -109,9 +136,11 @@ class TAU_DLL DX11IndexBufferBuilder final : public IIndexBufferBuilder
     DEFAULT_DESTRUCT(DX11IndexBufferBuilder);
     DELETE_COPY(DX11IndexBufferBuilder);
 private:
-    DX11RenderingContext& _context;
+    DX11GraphicsInterface& _gi;
 public:
-    DX11IndexBufferBuilder(DX11RenderingContext& context) noexcept;
+    DX11IndexBufferBuilder(DX11GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX11IndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX11IndexBuffer* build(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
@@ -119,7 +148,7 @@ public:
     [[nodiscard]] NullableRef<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
     [[nodiscard]] NullableStrongRef<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 private:
-    [[nodiscard]] bool processBufferArgs(const IndexBufferArgs& args, [[tau::out]] ID3D11Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const IndexBufferArgs& args, [[tau::out]] ID3D11Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
 };
 
 class TAU_DLL DX11UniformBufferBuilder final : public IUniformBufferBuilder
@@ -127,9 +156,11 @@ class TAU_DLL DX11UniformBufferBuilder final : public IUniformBufferBuilder
     DEFAULT_DESTRUCT(DX11UniformBufferBuilder);
     DELETE_COPY(DX11UniformBufferBuilder);
 private:
-    DX11RenderingContext& _context;
+    DX11GraphicsInterface& _gi;
 public:
-    DX11UniformBufferBuilder(DX11RenderingContext& context) noexcept;
+    DX11UniformBufferBuilder(DX11GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
 
     [[nodiscard]] DX11UniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX11UniformBuffer* build(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
@@ -137,6 +168,6 @@ public:
     [[nodiscard]] NullableRef<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
     [[nodiscard]] NullableStrongRef<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 private:
-    [[nodiscard]] bool processBufferArgs(const UniformBufferArgs& args, [[tau::out]] ID3D11Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const UniformBufferArgs& args, [[tau::out]] ID3D11Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
 };
 #endif

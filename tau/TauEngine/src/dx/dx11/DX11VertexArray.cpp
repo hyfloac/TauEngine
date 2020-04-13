@@ -9,35 +9,25 @@
 #include "dx/dx11/DX11ShaderProgram.hpp"
 #include "dx/dx11/DX11Shader.hpp"
 #include "dx/dx11/DX11GraphicsInterface.hpp"
+#include "TauConfig.hpp"
 
-DX11VertexArray::DX11VertexArray(const uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D11InputLayout* const inputLayout, const uSys bufferCount, ID3D11Buffer** const iaBuffers,
-                                 UINT* const iaStrides, UINT* const iaOffsets, const CPPRef<DX11IndexBuffer>& indexBuffer, const DrawType drawType) noexcept
-    : IVertexArray(drawCount, buffers), _inputLayout(inputLayout), _iaBufferCount(bufferCount),
-      _iaBuffers(iaBuffers), _iaStrides(iaStrides), _iaOffsets(iaOffsets),
-      _indexBuffer(indexBuffer), _drawTypeCache(getDXDrawType(drawType))
-{ }
-
-DX11VertexArray::~DX11VertexArray() noexcept
-{
-    delete[] _iaBuffers;
-    delete[] _iaStrides;
-    delete[] _iaOffsets;
-    _inputLayout->Release();
-}
+#if TAU_RTTI_CHECK
+  #define CTX() \
+      if(!RTT_CHECK(context, DX11RenderingContext)) \
+      { TAU_THROW(IncorrectContextException); } \
+      auto& ctx = reinterpret_cast<DX11RenderingContext&>(context)
+#else
+  #define CTX() \
+      auto& ctx = reinterpret_cast<DX11RenderingContext&>(context)
+#endif
 
 void DX11VertexArray::preDraw(IRenderingContext& context) noexcept
 {
-    if(!RTT_CHECK(context, DX11RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX11RenderingContext&>(context);
-    dxCtx.d3d11DeviceContext()->IASetInputLayout(_inputLayout);
-    dxCtx.d3d11DeviceContext()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
-    dxCtx.d3d11DeviceContext()->IASetIndexBuffer(_indexBuffer ? _indexBuffer->d3dBuffer() : NULL, DXGI_FORMAT_R32_UINT, 0);
-    dxCtx.d3d11DeviceContext()->IASetPrimitiveTopology(_drawTypeCache);
+    CTX();
+    ctx.d3d11DeviceContext()->IASetInputLayout(_inputLayout);
+    ctx.d3d11DeviceContext()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
+    ctx.d3d11DeviceContext()->IASetIndexBuffer(_indexBuffer ? _indexBuffer->d3dBuffer() : NULL, DXGI_FORMAT_R32_UINT, 0);
+    ctx.d3d11DeviceContext()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
 void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
@@ -45,44 +35,32 @@ void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys draw
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
 
-    if(!RTT_CHECK(context, DX11RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX11RenderingContext&>(context);
+    CTX();
 
     if(this->_indexBuffer)
     {
-        dxCtx.d3d11DeviceContext()->DrawIndexed(drawCount, drawOffset, 0);
+        ctx.d3d11DeviceContext()->DrawIndexed(drawCount, drawOffset, 0);
     }
     else
     {
-        dxCtx.d3d11DeviceContext()->Draw(drawCount, drawOffset);
+        ctx.d3d11DeviceContext()->Draw(drawCount, drawOffset);
     }
 }
 
 void DX11VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
-    { drawCount = this->_drawCount; }
+    { drawCount = _drawCount; }
 
-    if(!RTT_CHECK(context, DX11RenderingContext))
+    CTX();
+
+    if(_indexBuffer)
     {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX11RenderingContext&>(context);
-
-    if(this->_indexBuffer)
-    {
-        dxCtx.d3d11DeviceContext()->DrawIndexedInstanced(drawCount, instanceCount, drawOffset, 0, 0);
+        ctx.d3d11DeviceContext()->DrawIndexedInstanced(drawCount, instanceCount, drawOffset, 0, 0);
     }
     else
     {
-        dxCtx.d3d11DeviceContext()->DrawInstanced(drawCount, instanceCount, drawOffset, 0);
+        ctx.d3d11DeviceContext()->DrawInstanced(drawCount, instanceCount, drawOffset, 0);
     }
 }
 
@@ -148,93 +126,98 @@ uSys DX11VertexArray::computeNumElements(const ShaderDataType::Type type) noexce
 
 static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D11_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept;
 
-DX11VertexArray* DX11VertexArrayBuilder::build(const VertexArrayArgs& args, Error* error) noexcept
+DX11VertexArray* DX11VertexArrayBuilder::build(const VertexArrayArgs& args, Error* const error) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX11VertexArray* const va = new(::std::nothrow) DX11VertexArray(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    DX11VertexArray* const va = new(::std::nothrow) DX11VertexArray(args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, va);
 }
 
-DX11VertexArray* DX11VertexArrayBuilder::build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+DX11VertexArray* DX11VertexArrayBuilder::build(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX11VertexArray* const va = allocator.allocateT<DX11VertexArray>(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    DX11VertexArray* const va = allocator.allocateT<DX11VertexArray>(args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, va);
 }
 
-CPPRef<IVertexArray> DX11VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* error) noexcept
+CPPRef<IVertexArray> DX11VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* const error) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX11VertexArray> va = CPPRef<DX11VertexArray>(new(::std::nothrow) DX11VertexArray(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType));
+    const CPPRef<DX11VertexArray> va = CPPRef<DX11VertexArray>(new(::std::nothrow) DX11VertexArray(args, dxArgs));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, va);
 }
 
 
-NullableRef<IVertexArray> DX11VertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableRef<IVertexArray> DX11VertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableRef<DX11VertexArray> va(allocator, args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    const NullableRef<DX11VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
 
-NullableStrongRef<IVertexArray> DX11VertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableStrongRef<IVertexArray> DX11VertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableStrongRef<DX11VertexArray> va(allocator, args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    const NullableStrongRef<DX11VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
     dxArgs.iaBuffers = null;
     dxArgs.iaStrides = null;
     dxArgs.iaOffsets = null;
+    dxArgs.inputLayout = null;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
 
-bool DX11VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexArrayArgs* dxArgs, Error* error) const noexcept
+bool DX11VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexArrayArgs* const dxArgs, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.drawCount == 0, Error::DrawCountNotSet);
     ERROR_CODE_COND_F(args.drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
@@ -322,7 +305,7 @@ bool DX11VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexAr
     return true;
 }
 
-static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D11_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept
+static void handleInsertion(uSys& insertIndex, const u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D11_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept
 {
     const ShaderDataType::Type underlyingType = ShaderDataType::underlyingTypeND(bed.type());
     const uSys columns = DX11VertexArray::computeNumElements(bed.type());
@@ -397,8 +380,8 @@ D3D11_PRIMITIVE_TOPOLOGY DX11VertexArray::getDXDrawType(const DrawType drawType)
 {
     switch(drawType)
     {
-        case DrawType::SeparatedTriangles: return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        case DrawType::ConnectedTriangles: return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+        case DrawType::SeparatedTriangles:      return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        case DrawType::ConnectedTriangles:      return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
         case DrawType::PointConnectedTriangles: return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
         default: return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
     }

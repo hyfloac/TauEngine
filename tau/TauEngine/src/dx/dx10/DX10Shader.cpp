@@ -28,7 +28,7 @@ DX10ShaderBuilder::DX10ShaderBuilder(DX10GraphicsInterface& gi) noexcept
 	: _gi(gi), _resIndex(IShaderBuilder::rsTransformer->transform(gi.renderingMode()))
 { }
 
-DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error) const noexcept
+DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error) const noexcept
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
@@ -65,7 +65,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error) const
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
@@ -102,7 +102,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* error, TauAl
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* error) const noexcept
+CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* const error) const noexcept
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
@@ -139,7 +139,7 @@ CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* er
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
@@ -176,7 +176,7 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
@@ -213,7 +213,7 @@ NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& arg
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* dxArgs, Error* error) const noexcept
+bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* const dxArgs, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(!args.vfsMount, Error::InvalidFile);
     ERROR_CODE_COND_F(!args.path, Error::InvalidFile);
@@ -233,7 +233,7 @@ bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* dxArgs
     return true;
 }
 
-DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, Error* error) const noexcept
+DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, Error* const error) const noexcept
 {
     D3D10ShaderObjects objects = { null };
 

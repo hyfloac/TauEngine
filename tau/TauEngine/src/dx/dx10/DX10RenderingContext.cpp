@@ -8,22 +8,23 @@
 #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
-#include "dx/dx10/DX10Shader.hpp"
-#include "dx/dx10/DX10Buffer.hpp"
-#include "dx/dx10/DX10TextureUploader.hpp"
-#include "dx/dx10/DX10DepthStencilState.hpp"
 #include "dx/dx10/DX10RasterizerState.hpp"
+#include "dx/dx10/DX10DepthStencilState.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
-#include "dx/dx10/DX10FrameBuffer.hpp"
 
 DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept
-    : IRenderingContext(gi.renderingMode()), _gi(gi),
-      _renderTargetView(args.renderTargetView),
-      _depthStencilBuffer(args.depthStencilBuffer), _depthStencilView(args.depthStencilView), _blendState(args.blendState),
-      _swapChain(args.swapChain),
-      _vsync(false),
-      _defaultDepthStencilState(null), _currentDepthStencilState(null),
-      _defaultRasterizerState(null), _currentRasterizerState(null)
+    : IRenderingContext(gi.renderingMode())
+    , _gi(gi)
+    , _renderTargetView(args.renderTargetView)
+    , _depthStencilBuffer(args.depthStencilBuffer)
+    , _depthStencilView(args.depthStencilView)
+    , _blendState(args.blendState)
+    , _swapChain(args.swapChain)
+    , _vsync(false)
+    , _defaultDepthStencilState(null)
+    , _currentDepthStencilState(null)
+    , _defaultRasterizerState(null)
+    , _currentRasterizerState(null)
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -37,6 +38,7 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
     RELEASE(_renderTargetView);
     RELEASE(_depthStencilBuffer);
     RELEASE(_depthStencilView);
+    RELEASE(_blendState);
     RELEASE(_swapChain);
 #undef RELEASE
 }
@@ -172,12 +174,7 @@ void DX10RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-CPPRef<IFrameBufferBuilder> DX10RenderingContext::createFrameBuffer() noexcept
-{
-    return CPPRef<IFrameBufferBuilder>(new(::std::nothrow) DX10FrameBufferBuilder(_gi));
-}
-
-DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* error) noexcept
+DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -189,7 +186,7 @@ DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextA
     ERROR_CODE_V(Error::NoError, context);
 }
 
-DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -201,7 +198,7 @@ DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextA
     ERROR_CODE_V(Error::NoError, context);
 }
 
-CPPRef<IRenderingContext> DX10RenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* error) noexcept
+CPPRef<IRenderingContext> DX10RenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* const error) noexcept
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -213,7 +210,7 @@ CPPRef<IRenderingContext> DX10RenderingContextBuilder::buildCPPRef(const Renderi
     ERROR_CODE_V(Error::NoError, context);
 }
 
-NullableRef<IRenderingContext> DX10RenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableRef<IRenderingContext> DX10RenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -225,7 +222,7 @@ NullableRef<IRenderingContext> DX10RenderingContextBuilder::buildTauRef(const Re
     ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
 }
 
-NullableStrongRef<IRenderingContext> DX10RenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableStrongRef<IRenderingContext> DX10RenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))

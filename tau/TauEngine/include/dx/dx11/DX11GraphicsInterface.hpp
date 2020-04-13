@@ -6,10 +6,17 @@
 #include <d3d11.h>
 
 class DX11ShaderBuilder;
+class DX11VertexArrayBuilder;
+class DX11BufferBuilder;
+class DX11IndexBufferBuilder;
+class DX11UniformBufferBuilder;
 class DX11DepthStencilStateBuilder;
 class DX11RasterizerStateBuilder;
+class DX11TextureBuilder;
+class DX11TextureSamplerBuilder;
 class DX11SingleTextureUploaderBuilder;
 class DX11TextureUploaderBuilder;
+class DX11FrameBufferBuilder;
 class DX11RenderingContextBuilder;
 
 class TAU_DLL DX11GraphicsInterface final : public IGraphicsInterface
@@ -19,8 +26,17 @@ private:
     ID3D11Device* _d3d11Device;
 
     DX11ShaderBuilder* _shaderBuilder;
+    DX11VertexArrayBuilder* _vertexArrayBuilder;
+    DX11BufferBuilder* _bufferBuilder;
+    DX11IndexBufferBuilder* _indexBufferBuilder;
+    DX11UniformBufferBuilder* _uniformBufferBuilder;
     DX11DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX11RasterizerStateBuilder* _rasterizerStateBuilder;
+    DX11TextureBuilder* _textureBuilder;
+    DX11TextureSamplerBuilder* _textureSamplerBuilder;
+    DX11SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
+    DX11TextureUploaderBuilder* _textureUploaderBuilder;
+    DX11FrameBufferBuilder* _frameBufferBuilder;
     DX11RenderingContextBuilder* _renderingContextBuilder;
 public:
     DX11GraphicsInterface(const RenderingMode& mode, ID3D11Device* d3dDevice) noexcept;
@@ -42,6 +58,7 @@ public:
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
+    [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

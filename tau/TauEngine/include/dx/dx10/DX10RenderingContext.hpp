@@ -3,11 +3,7 @@
 #include "system/RenderingContext.hpp"
 
 #ifdef _WIN32
-#pragma warning(push, 0)
 #include <d3d10.h>
-#pragma warning(pop)
-
-#include "DLL.hpp"
 
 class DX10DepthStencilState;
 class DX10RasterizerState;
@@ -70,8 +66,6 @@ public:
     void beginFrame() noexcept override;
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
-
-    [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override;
 protected:
     RC_IMPL(DX10RenderingContext);
 };

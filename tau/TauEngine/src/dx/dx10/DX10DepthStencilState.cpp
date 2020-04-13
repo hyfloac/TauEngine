@@ -1,9 +1,8 @@
 #include "dx/dx10/DX10DepthStencilState.hpp"
 
 #ifdef _WIN32
-
-#include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
+#include "dx/dx10/DX10RenderingContext.hpp"
 
 #include "TauEngine.hpp"
 
@@ -12,12 +11,7 @@ void DX10DepthStencilState::apply(DX10RenderingContext& ctx) const noexcept
     ctx.d3dDevice()->OMSetDepthStencilState(_d3dDepthStencilState, 1);
 }
 
-void DX10DepthStencilState::apply(ID3D10Device* const dev) const noexcept
-{
-    dev->OMSetDepthStencilState(_d3dDepthStencilState, 1);
-}
-
-DX10DepthStencilState* DX10DepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* error) const noexcept
+DX10DepthStencilState* DX10DepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* const error) const noexcept
 {
     ID3D10DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
@@ -34,7 +28,7 @@ DX10DepthStencilState* DX10DepthStencilStateBuilder::build(const DepthStencilArg
     ERROR_CODE_V(Error::NoError, ret);
 }
 
-DX10DepthStencilState* DX10DepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10DepthStencilState* DX10DepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
@@ -51,7 +45,7 @@ DX10DepthStencilState* DX10DepthStencilStateBuilder::build(const DepthStencilArg
     ERROR_CODE_V(Error::NoError, ret);
 }
 
-CPPRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildCPPRef(const DepthStencilArgs& args, Error* error) const noexcept
+CPPRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildCPPRef(const DepthStencilArgs& args, Error* const error) const noexcept
 {
     ID3D10DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
@@ -68,7 +62,7 @@ CPPRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildCPPRef(const Depth
     ERROR_CODE_V(Error::NoError, ret);
 }
 
-NullableRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildTauRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildTauRef(const DepthStencilArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
@@ -85,7 +79,7 @@ NullableRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildTauRef(const 
     ERROR_CODE_V(Error::NoError, RefCast<IDepthStencilState>(ret));
 }
 
-NullableStrongRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildTauSRef(const DepthStencilArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IDepthStencilState> DX10DepthStencilStateBuilder::buildTauSRef(const DepthStencilArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
@@ -147,7 +141,7 @@ D3D10_DEPTH_WRITE_MASK DX10DepthStencilStateBuilder::dxDepthWriteMask(const Dept
     {
         case DepthStencilArgs::DepthWriteMask::Zero: return D3D10_DEPTH_WRITE_MASK_ZERO;
         case DepthStencilArgs::DepthWriteMask::All:  return D3D10_DEPTH_WRITE_MASK_ALL;
-        default:                                       return static_cast<D3D10_DEPTH_WRITE_MASK>(IntMaxMin<u32>::Max());
+        default:                                     return static_cast<D3D10_DEPTH_WRITE_MASK>(IntMaxMin<u32>::Max());
     }
 }
 
@@ -163,7 +157,7 @@ D3D10_COMPARISON_FUNC DX10DepthStencilStateBuilder::dxComparisonFunc(const Depth
         case DepthStencilArgs::CompareFunc::NotEqual:           return D3D10_COMPARISON_NOT_EQUAL;
         case DepthStencilArgs::CompareFunc::Always:             return D3D10_COMPARISON_ALWAYS;
         case DepthStencilArgs::CompareFunc::Never:              return D3D10_COMPARISON_NEVER;
-        default:                                                  return static_cast<D3D10_COMPARISON_FUNC>(IntMaxMin<u32>::Max());
+        default:                                                return static_cast<D3D10_COMPARISON_FUNC>(IntMaxMin<u32>::Max());
     }
 }
 
@@ -179,7 +173,7 @@ D3D10_STENCIL_OP DX10DepthStencilStateBuilder::dxStencilOp(const DepthStencilArg
         case DepthStencilArgs::StencilOp::DecrementClamp: return D3D10_STENCIL_OP_DECR_SAT;
         case DepthStencilArgs::StencilOp::IncrementWrap:  return D3D10_STENCIL_OP_INCR;
         case DepthStencilArgs::StencilOp::DecrementWrap:  return D3D10_STENCIL_OP_DECR;
-        default:                                            return static_cast<D3D10_STENCIL_OP>(IntMaxMin<u32>::Max());
+        default:                                          return static_cast<D3D10_STENCIL_OP>(IntMaxMin<u32>::Max());
     }
 }
 #endif

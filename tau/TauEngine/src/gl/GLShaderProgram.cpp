@@ -7,11 +7,10 @@
 #include <VariableLengthArray.hpp>
 #include "Timings.hpp"
 
-GLShaderProgram::GLShaderProgram(IRenderingContext& context) noexcept
-    : IShaderProgram(), _programID(glCreateProgram())
-{
-    Ensure(_programID != 0);
-}
+GLShaderProgram::GLShaderProgram(IRenderingContext&) noexcept
+    : IShaderProgram()
+    , _programID(glCreateProgram())
+{ Ensure(_programID != 0); }
 
 GLShaderProgram::~GLShaderProgram() noexcept
 {
@@ -19,7 +18,7 @@ GLShaderProgram::~GLShaderProgram() noexcept
     _programID = 0;
 }
 
-bool GLShaderProgram::attach(IRenderingContext& context, CPPRef<IShader> shader) noexcept
+bool GLShaderProgram::attach(IRenderingContext&, const CPPRef<IShader>& shader) noexcept
 {
     if(RTT_CHECK(shader.get(), GLShader))
     {
@@ -34,23 +33,19 @@ bool GLShaderProgram::attach(IRenderingContext& context, CPPRef<IShader> shader)
     }
 }
 
-void GLShaderProgram::detach(IRenderingContext& context, CPPRef<IShader> shader) noexcept
+void GLShaderProgram::detach(IRenderingContext&, const CPPRef<IShader>& shader) noexcept
 {
     const CPPRef<GLShader> glShader = RefCast<GLShader>(shader);
     glDetachShader(_programID, glShader->shaderId());
 }
 
-void GLShaderProgram::bind(IRenderingContext& context) noexcept
-{
-    glUseProgram(_programID);
-}
+void GLShaderProgram::bind(IRenderingContext&) noexcept
+{ glUseProgram(_programID); }
 
-void GLShaderProgram::unbind(IRenderingContext& context) noexcept
-{
-    glUseProgram(0);
-}
+void GLShaderProgram::unbind(IRenderingContext&) noexcept
+{ glUseProgram(0); }
 
-static bool validateFail(GLuint& programId, const char* type) noexcept
+static bool validateFail(GLuint& programId, const char* const type) noexcept
 {
     PERF();
     GLint length;
@@ -81,7 +76,7 @@ static bool validateFail(GLuint& programId, const char* type) noexcept
     return false;
 }
 
-bool GLShaderProgram::link(IRenderingContext& context) noexcept
+bool GLShaderProgram::link(IRenderingContext&) noexcept
 {
     PERF();
     glLinkProgram(_programID);
@@ -103,56 +98,3 @@ bool GLShaderProgram::link(IRenderingContext& context) noexcept
 
     return true;
 }
-
-#define GET_GL_UNIFORM(_FUNC, _TYPE) \
-    CPPRef<IUniform<_TYPE>> GLShaderProgram::_FUNC(const char* name) noexcept \
-    { return CPPRef<IUniform<_TYPE>>(new(std::nothrow) GLUniform<_TYPE>(GLUniform<_TYPE>::create(_programID, name))); }
-
-#define GET_GL_UNIFORM_MATRIX(_FUNC, _TYPE) \
-    CPPRef<IUniform<_TYPE>> GLShaderProgram::_FUNC(const char* name, bool transpose) noexcept \
-    { return CPPRef<IUniform<_TYPE>>(new(std::nothrow) GLUniform<_TYPE>(GLUniform<_TYPE>::create(_programID, name), transpose)); }
-
-// GET_GL_UNIFORM(getUniformBool, bool);
-// GET_GL_UNIFORM(getUniformInt, int);
-// GET_GL_UNIFORM(getUniformUInt, unsigned int);
-// GET_GL_UNIFORM(getUniformFloat, float);
-// GET_GL_UNIFORM(getUniformDouble, double);
-// GET_GL_UNIFORM(getUniformVector2f, const Vector2f&);
-// GET_GL_UNIFORM(getUniformVector3i, const Vector3i&);
-// GET_GL_UNIFORM(getUniformVector3f, const Vector3f&);
-// GET_GL_UNIFORM(getUniformVector4f, const Vector4f&);
-//
-// GET_GL_UNIFORM(getUniformVector2Bool,   const glm::bvec2&);
-// GET_GL_UNIFORM(getUniformVector3Bool,   const glm::bvec3&);
-// GET_GL_UNIFORM(getUniformVector4Bool,   const glm::bvec4&);
-// GET_GL_UNIFORM(getUniformVector2Int,    const glm::ivec2&);
-// GET_GL_UNIFORM(getUniformVector3Int,    const glm::ivec3&);
-// GET_GL_UNIFORM(getUniformVector4Int,    const glm::ivec4&);
-// GET_GL_UNIFORM(getUniformVector2UInt,   const glm::uvec2&);
-// GET_GL_UNIFORM(getUniformVector3UInt,   const glm::uvec3&);
-// GET_GL_UNIFORM(getUniformVector4UInt,   const glm::uvec4&);
-// GET_GL_UNIFORM(getUniformVector2Float,  const glm:: vec2&);
-// GET_GL_UNIFORM(getUniformVector3Float,  const glm:: vec3&);
-// GET_GL_UNIFORM(getUniformVector4Float,  const glm:: vec4&);
-// GET_GL_UNIFORM(getUniformVector2Double, const glm::dvec2&);
-// GET_GL_UNIFORM(getUniformVector3Double, const glm::dvec3&);
-// GET_GL_UNIFORM(getUniformVector4Double, const glm::dvec4&);
-//
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix2x2Float,  const glm:: mat2x2&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix2x3Float,  const glm:: mat2x3&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix2x4Float,  const glm:: mat2x4&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix3x2Float,  const glm:: mat3x2&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix3x3Float,  const glm:: mat3x3&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix3x4Float,  const glm:: mat3x4&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix4x2Float,  const glm:: mat4x2&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix4x3Float,  const glm:: mat4x3&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix4x4Float,  const glm:: mat4x4&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix2x2Double, const glm::dmat2x2&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix2x3Double, const glm::dmat2x3&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix2x4Double, const glm::dmat2x4&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix3x2Double, const glm::dmat3x2&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix3x3Double, const glm::dmat3x3&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix3x4Double, const glm::dmat3x4&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix4x2Double, const glm::dmat4x2&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix4x3Double, const glm::dmat4x3&);
-// GET_GL_UNIFORM_MATRIX(getUniformMatrix4x4Double, const glm::dmat4x4&);

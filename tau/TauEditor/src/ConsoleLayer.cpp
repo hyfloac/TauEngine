@@ -34,7 +34,7 @@ void ConsoleLayer::print(const DynString& str) noexcept
 
 void ConsoleLayer::onRender() noexcept
 {
-    if(_visible && _consolas != -1)
+    if(_visible && _consolas)
     {
         constexpr float xOffset = 5.0f;
         const float textOffset = 50.0f * _textScale;

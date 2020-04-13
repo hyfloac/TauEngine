@@ -150,7 +150,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     fbArgs.colorAttachments[0] = colorTexture;
     fbArgs.depthStencilAttachment = dsTexture;
 
-    _frameBuffer = globals.rc.createFrameBuffer()->buildCPPRef(fbArgs, null);
+    _frameBuffer = globals.gi.createFrameBuffer().buildCPPRef(fbArgs, null);
 
     // CPPRef<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
     //
@@ -399,7 +399,7 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     fbArgs.colorAttachments[0] = colorTexture;
     fbArgs.depthStencilAttachment = dsTexture;
 
-    _frameBuffer = _globals.rc.createFrameBuffer()->buildCPPRef(fbArgs, null);
+    _frameBuffer = _globals.gi.createFrameBuffer().buildCPPRef(fbArgs, null);
 
     _frameBufferUploader->texture(colorTexture->textureView());
 

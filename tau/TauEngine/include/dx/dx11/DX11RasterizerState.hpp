@@ -15,7 +15,8 @@ private:
     ID3D11RasterizerState* _d3dRasterizerState;
 public:
     DX11RasterizerState(const RasterizerArgs& params, ID3D11RasterizerState* const d3dRasterizerState) noexcept
-        : IRasterizerState(params), _d3dRasterizerState(d3dRasterizerState)
+        : IRasterizerState(params)
+        , _d3dRasterizerState(d3dRasterizerState)
     { }
 
     ~DX11RasterizerState() noexcept

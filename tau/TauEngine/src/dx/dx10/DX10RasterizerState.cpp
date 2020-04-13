@@ -9,29 +9,7 @@ void DX10RasterizerState::apply(DX10RenderingContext& ctx) const noexcept
     ctx.d3dDevice()->RSSetState(_d3dRasterizerState);
 }
 
-D3D10_CULL_MODE DX10RasterizerStateBuilder::dxCullMode(RasterizerArgs::CullMode cullMode) noexcept
-{
-    switch(cullMode)
-    {
-        case RasterizerArgs::CullMode::None: return D3D10_CULL_NONE;
-        case RasterizerArgs::CullMode::Front: return D3D10_CULL_FRONT;
-        case RasterizerArgs::CullMode::Back: return D3D10_CULL_BACK;
-        default: return static_cast<D3D10_CULL_MODE>(0);
-    }
-}
-
-D3D10_FILL_MODE DX10RasterizerStateBuilder::dxFillMode(RasterizerArgs::FillMode fillMode) noexcept
-{
-    switch(fillMode)
-    {
-        case RasterizerArgs::FillMode::Vertices:
-        case RasterizerArgs::FillMode::Wireframe: return D3D10_FILL_WIREFRAME;
-        case RasterizerArgs::FillMode::Filled: return D3D10_FILL_SOLID;
-        default: return static_cast<D3D10_FILL_MODE>(0);
-    }
-}
-
-DX10RasterizerState* DX10RasterizerStateBuilder::build(const RasterizerArgs& args, Error* error) const noexcept
+DX10RasterizerState* DX10RasterizerStateBuilder::build(const RasterizerArgs& args, Error* const error) const noexcept
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -43,7 +21,7 @@ DX10RasterizerState* DX10RasterizerStateBuilder::build(const RasterizerArgs& arg
     ERROR_CODE_V(Error::NoError, state);
 }
 
-DX10RasterizerState* DX10RasterizerStateBuilder::build(const RasterizerArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10RasterizerState* DX10RasterizerStateBuilder::build(const RasterizerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -55,7 +33,7 @@ DX10RasterizerState* DX10RasterizerStateBuilder::build(const RasterizerArgs& arg
     ERROR_CODE_V(Error::NoError, state);
 }
 
-CPPRef<IRasterizerState> DX10RasterizerStateBuilder::buildCPPRef(const RasterizerArgs& args, Error* error) const noexcept
+CPPRef<IRasterizerState> DX10RasterizerStateBuilder::buildCPPRef(const RasterizerArgs& args, Error* const error) const noexcept
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -67,7 +45,7 @@ CPPRef<IRasterizerState> DX10RasterizerStateBuilder::buildCPPRef(const Rasterize
     ERROR_CODE_V(Error::NoError, state);
 }
 
-NullableRef<IRasterizerState> DX10RasterizerStateBuilder::buildTauRef(const RasterizerArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IRasterizerState> DX10RasterizerStateBuilder::buildTauRef(const RasterizerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -79,7 +57,7 @@ NullableRef<IRasterizerState> DX10RasterizerStateBuilder::buildTauRef(const Rast
     ERROR_CODE_V(Error::NoError, RefCast<IRasterizerState>(state));
 }
 
-NullableStrongRef<IRasterizerState> DX10RasterizerStateBuilder::buildTauSRef(const RasterizerArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IRasterizerState> DX10RasterizerStateBuilder::buildTauSRef(const RasterizerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -91,7 +69,7 @@ NullableStrongRef<IRasterizerState> DX10RasterizerStateBuilder::buildTauSRef(con
     ERROR_CODE_V(Error::NoError, RefCast<IRasterizerState>(state));
 }
 
-bool DX10RasterizerStateBuilder::processArgs(const RasterizerArgs& args, DXRasterizerArgs* dxArgs, Error* error) const noexcept
+bool DX10RasterizerStateBuilder::processArgs(const RasterizerArgs& args, DXRasterizerArgs* const dxArgs, Error* const error) const noexcept
 {
     dxArgs->desc.ScissorEnable = args.enableScissorTest;
     dxArgs->desc.FrontCounterClockwise = args.frontFaceCounterClockwise;
@@ -113,5 +91,27 @@ bool DX10RasterizerStateBuilder::processArgs(const RasterizerArgs& args, DXRaste
     ERROR_CODE_COND_F(!dxArgs->state, Error::DriverMemoryAllocationFailure);
 
     return true;
+}
+
+D3D10_CULL_MODE DX10RasterizerStateBuilder::dxCullMode(const RasterizerArgs::CullMode cullMode) noexcept
+{
+    switch(cullMode)
+    {
+        case RasterizerArgs::CullMode::None:  return D3D10_CULL_NONE;
+        case RasterizerArgs::CullMode::Front: return D3D10_CULL_FRONT;
+        case RasterizerArgs::CullMode::Back:  return D3D10_CULL_BACK;
+        default: return static_cast<D3D10_CULL_MODE>(0);
+    }
+}
+
+D3D10_FILL_MODE DX10RasterizerStateBuilder::dxFillMode(const RasterizerArgs::FillMode fillMode) noexcept
+{
+    switch(fillMode)
+    {
+        case RasterizerArgs::FillMode::Vertices:
+        case RasterizerArgs::FillMode::Wireframe: return D3D10_FILL_WIREFRAME;
+        case RasterizerArgs::FillMode::Filled:    return D3D10_FILL_SOLID;
+        default: return static_cast<D3D10_FILL_MODE>(0);
+    }
 }
 #endif

@@ -114,9 +114,6 @@ const RasterizerArgs& GLRenderingContext::getDefaultRasterizerArgs() noexcept
 NullableRef<IRasterizerState> GLRenderingContext::getDefaultRasterizerState() noexcept
 { return RefCast<IRasterizerState>(_defaultRasterizerState); }
 
-CPPRef<IFrameBufferBuilder> GLRenderingContext::createFrameBuffer() noexcept
-{ return CPPRef<GLFrameBufferBuilder>(new(::std::nothrow) GLFrameBufferBuilder); }
-
 GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {
     GLRenderingContextArgs glArgs { _gi };

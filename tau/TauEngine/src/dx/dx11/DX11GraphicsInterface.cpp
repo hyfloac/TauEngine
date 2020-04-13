@@ -4,17 +4,32 @@
 #include <dxgi.h>
 #include "dx/dx10/DX10GraphicsAccelerator.hpp"
 #include "dx/dx11/DX11Shader.hpp"
+#include "dx/dx11/DX11VertexArray.hpp"
+#include "dx/dx11/DX11Buffer.hpp"
 #include "dx/dx11/DX11DepthStencilState.hpp"
 #include "dx/dx11/DX11RasterizerState.hpp"
 #include "dx/dx11/DX11RenderingContext.hpp"
+#include "dx/dx11/DX11Texture.hpp"
+#include "dx/dx11/DX11TextureSampler.hpp"
+#include "dx/dx11/DX11TextureUploader.hpp"
+#include "dx/dx11/DX11FrameBuffer.hpp"
 #include "system/Window.hpp"
 
 DX11GraphicsInterface::DX11GraphicsInterface(const RenderingMode& mode, ID3D11Device* const d3dDevice) noexcept
-    : IGraphicsInterface(mode), _d3d11Device(d3dDevice),
-      _shaderBuilder(new(::std::nothrow) DX11ShaderBuilder(*this)),
-      _depthStencilStateBuilder(new(::std::nothrow) DX11DepthStencilStateBuilder(*this)),
-      _rasterizerStateBuilder(new(::std::nothrow) DX11RasterizerStateBuilder(*this)),
-      _renderingContextBuilder(new(::std::nothrow) DX11RenderingContextBuilder(*this))
+    : IGraphicsInterface(mode), _d3d11Device(d3dDevice)
+    , _shaderBuilder(new(::std::nothrow) DX11ShaderBuilder(*this))
+    , _vertexArrayBuilder(new(::std::nothrow) DX11VertexArrayBuilder(*this))
+    , _bufferBuilder(new(::std::nothrow) DX11BufferBuilder(*this))
+    , _indexBufferBuilder(new(::std::nothrow) DX11IndexBufferBuilder(*this))
+    , _uniformBufferBuilder(new(::std::nothrow) DX11UniformBufferBuilder(*this))
+    , _depthStencilStateBuilder(new(::std::nothrow) DX11DepthStencilStateBuilder(*this))
+    , _rasterizerStateBuilder(new(::std::nothrow) DX11RasterizerStateBuilder(*this))
+    , _textureBuilder(new(::std::nothrow) DX11TextureBuilder(*this))
+    , _textureSamplerBuilder(new(::std::nothrow) DX11TextureSamplerBuilder(*this))
+    , _singleTextureUploaderBuilder(new(::std::nothrow) DX11SingleTextureUploaderBuilder(*this))
+    , _textureUploaderBuilder(new(::std::nothrow) DX11TextureUploaderBuilder(*this))
+    , _frameBufferBuilder(new(::std::nothrow) DX11FrameBufferBuilder(*this))
+    , _renderingContextBuilder(new(::std::nothrow) DX11RenderingContextBuilder(*this))
 { }
 
 DX11GraphicsInterface::~DX11GraphicsInterface() noexcept
@@ -23,8 +38,17 @@ DX11GraphicsInterface::~DX11GraphicsInterface() noexcept
     _d3d11Device = null;
 
     delete _shaderBuilder;
+    delete _vertexArrayBuilder;
+    delete _bufferBuilder;
+    delete _indexBufferBuilder;
+    delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
+    delete _textureBuilder;
+    delete _textureSamplerBuilder;
+    delete _singleTextureUploaderBuilder;
+    delete _textureUploaderBuilder;
+    delete _frameBufferBuilder;
     delete _renderingContextBuilder;
 }
 
@@ -64,16 +88,16 @@ IShaderBuilder& DX11GraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
 
 IVertexArrayBuilder& DX11GraphicsInterface::createVertexArray() noexcept
-{ return *static_cast<IVertexArrayBuilder*>(null); }
+{ return *_vertexArrayBuilder; }
 
 IBufferBuilder& DX11GraphicsInterface::createBuffer() noexcept
-{ return *static_cast<IBufferBuilder*>(null); }
+{ return *_bufferBuilder; }
 
 IIndexBufferBuilder& DX11GraphicsInterface::createIndexBuffer() noexcept
-{ return *static_cast<IIndexBufferBuilder*>(null); }
+{ return *_indexBufferBuilder; }
 
 IUniformBufferBuilder& DX11GraphicsInterface::createUniformBuffer() noexcept
-{ return *static_cast<IUniformBufferBuilder*>(null); }
+{ return *_uniformBufferBuilder; }
 
 IDepthStencilStateBuilder& DX11GraphicsInterface::createDepthStencilState() noexcept
 { return *_depthStencilStateBuilder; }
@@ -82,16 +106,19 @@ IRasterizerStateBuilder& DX11GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
 
 ITextureBuilder& DX11GraphicsInterface::createTexture() noexcept
-{ return *static_cast<ITextureBuilder*>(null); }
+{ return *_textureBuilder; }
 
 ITextureSamplerBuilder& DX11GraphicsInterface::createTextureSampler() noexcept
-{ return *static_cast<ITextureSamplerBuilder*>(null); }
+{ return *_textureSamplerBuilder; }
 
 ISingleTextureUploaderBuilder& DX11GraphicsInterface::createSingleTextureUploader() noexcept
-{ return *static_cast<ISingleTextureUploaderBuilder*>(null); }
+{ return *_singleTextureUploaderBuilder; }
 
 ITextureUploaderBuilder& DX11GraphicsInterface::createTextureUploader() noexcept
-{ return *static_cast<ITextureUploaderBuilder*>(null); }
+{ return *_textureUploaderBuilder; }
+
+IFrameBufferBuilder& DX11GraphicsInterface::createFrameBuffer() noexcept
+{ return *_frameBufferBuilder; }
 
 IRenderingContextBuilder& DX11GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }

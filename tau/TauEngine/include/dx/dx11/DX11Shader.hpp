@@ -40,7 +40,7 @@ public:
     [[nodiscard]] const ID3D11VertexShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D11VertexShader* shader() noexcept { return _shader; }
 
-    [[nodiscard]] ID3DBlob* shaderBlob() noexcept { return _shaderBlob; }
+    [[nodiscard]] ID3DBlob* shaderBlob() const noexcept { return _shaderBlob; }
 
     void bind(DX11RenderingContext& context) noexcept override;
     void unbind(DX11RenderingContext& context) noexcept override;

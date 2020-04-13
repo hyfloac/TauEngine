@@ -21,6 +21,7 @@ class IBufferBuilder;
 class IIndexBufferBuilder;
 class IUniformBufferBuilder;
 class ITextureSamplerBuilder;
+class IFrameBufferBuilder;
 
 class TAU_DLL TAU_NOVTABLE IGraphicsInterface
 {
@@ -48,5 +49,6 @@ public:
     [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
     [[nodiscard]] virtual ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept = 0;
     [[nodiscard]] virtual ITextureUploaderBuilder& createTextureUploader() noexcept = 0;
+    [[nodiscard]] virtual IFrameBufferBuilder& createFrameBuffer() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;
 };

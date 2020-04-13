@@ -11,9 +11,10 @@ class GLDepthStencilStateBuilder;
 class GLRasterizerStateBuilder;
 class GLTextureBuilder;
 class GLSingleTextureUploaderBuilder;
-class GLTextureUploaderBuilder;
-class GLRenderingContextBuilder;
 class GLTextureSamplerBuilder;
+class GLTextureUploaderBuilder;
+class GLFrameBufferBuilder;
+class GLRenderingContextBuilder;
 
 class TAU_DLL GLGraphicsInterface final : public IGraphicsInterface
 {
@@ -42,6 +43,7 @@ private:
     GLTextureSamplerBuilder* _textureSamplerBuilder;
     GLSingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     GLTextureUploaderBuilder* _textureUploaderBuilder;
+    GLFrameBufferBuilder* _frameBufferBuilder;
     GLRenderingContextBuilder* _renderingContextBuilder;
 public:
     GLGraphicsInterface(const RenderingMode& mode, int majorVersion, int minorVersion, GLProfile compat, bool forwardCompatible);
@@ -65,6 +67,7 @@ public:
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
+    [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

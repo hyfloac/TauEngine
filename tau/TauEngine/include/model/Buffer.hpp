@@ -12,14 +12,7 @@
 #include "model/BufferEnums.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "TauEngine.hpp"
-
-#ifndef TAU_BUFFER_SAFETY
-  #if defined(TAU_PRODUCTION)
-    #define TAU_BUFFER_SAFETY 0
-  #else
-    #define TAU_BUFFER_SAFETY 1
-  #endif
-#endif
+#include "TauConfig.hpp"
 
 #if TAU_BUFFER_SAFETY
   #ifndef TAU_BUFFER_SAFETY_DOUBLE_BIND

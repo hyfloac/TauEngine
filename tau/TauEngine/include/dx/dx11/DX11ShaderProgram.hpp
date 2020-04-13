@@ -3,7 +3,6 @@
 #include "shader/IShaderProgram.hpp"
 
 #ifdef _WIN32
-
 class DX11Shader;
 class DX11VertexShader;
 class DX11HullShader;
@@ -27,7 +26,7 @@ public:
     void unbind(IRenderingContext& context) noexcept override;
     bool link(IRenderingContext& context) noexcept override;
 protected:
-    bool attach(IRenderingContext& context, CPPRef<IShader> shader) noexcept override;
-    void detach(IRenderingContext& context, CPPRef<IShader> shader) noexcept override;
+    bool attach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept override;
+    void detach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept override { }
 };
 #endif

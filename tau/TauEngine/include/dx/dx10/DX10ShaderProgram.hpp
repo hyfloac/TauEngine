@@ -3,7 +3,6 @@
 #include "shader/IShaderProgram.hpp"
 
 #ifdef _WIN32
-
 class DX10Shader;
 class DX10VertexShader;
 class DX10GeometryShader;
@@ -22,51 +21,8 @@ public:
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
     bool link(IRenderingContext& context) noexcept override;
-
-    // CPPRef<IUniform<bool>> getUniformBool(const char* name) noexcept override;
-    // CPPRef<IUniform<int>> getUniformInt(const char* name) noexcept override;
-    // CPPRef<IUniform<unsigned>> getUniformUInt(const char* name) noexcept override;
-    // CPPRef<IUniform<float>> getUniformFloat(const char* name) noexcept override;
-    // CPPRef<IUniform<double>> getUniformDouble(const char* name) noexcept override;
-    // CPPRef<IUniform<const Vector2f&>> getUniformVector2f(const char* name) noexcept override;
-    // CPPRef<IUniform<const Vector3i&>> getUniformVector3i(const char* name) noexcept override;
-    // CPPRef<IUniform<const Vector3f&>> getUniformVector3f(const char* name) noexcept override;
-    // CPPRef<IUniform<const Vector4f&>> getUniformVector4f(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::bvec2&>> getUniformVector2Bool(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::bvec3&>> getUniformVector3Bool(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::bvec4&>> getUniformVector4Bool(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::ivec2&>> getUniformVector2Int(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::ivec3&>> getUniformVector3Int(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::ivec4&>> getUniformVector4Int(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::uvec2&>> getUniformVector2UInt(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::uvec3&>> getUniformVector3UInt(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::uvec4&>> getUniformVector4UInt(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::vec2&>> getUniformVector2Float(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::vec3&>> getUniformVector3Float(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::vec4&>> getUniformVector4Float(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::dvec2&>> getUniformVector2Double(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::dvec3&>> getUniformVector3Double(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::dvec4&>> getUniformVector4Double(const char* name) noexcept override;
-    // CPPRef<IUniform<const glm::mat2x2&>> getUniformMatrix2x2Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat2x3&>> getUniformMatrix2x3Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat2x4&>> getUniformMatrix2x4Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat3x2&>> getUniformMatrix3x2Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat3x3&>> getUniformMatrix3x3Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat3x4&>> getUniformMatrix3x4Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat4x2&>> getUniformMatrix4x2Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat4x3&>> getUniformMatrix4x3Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::mat4x4&>> getUniformMatrix4x4Float(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat2x2&>> getUniformMatrix2x2Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat2x3&>> getUniformMatrix2x3Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat2x4&>> getUniformMatrix2x4Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat3x2&>> getUniformMatrix3x2Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat3x3&>> getUniformMatrix3x3Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat3x4&>> getUniformMatrix3x4Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat4x2&>> getUniformMatrix4x2Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat4x3&>> getUniformMatrix4x3Double(const char* name, bool transpose) noexcept override;
-    // CPPRef<IUniform<const glm::dmat4x4&>> getUniformMatrix4x4Double(const char* name, bool transpose) noexcept override;
 protected:
-    bool attach(IRenderingContext& context, CPPRef<IShader> shader) noexcept override;
-    void detach(IRenderingContext& context, CPPRef<IShader> shader) noexcept override;
+    bool attach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept override;
+    void detach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept override { }
 };
 #endif

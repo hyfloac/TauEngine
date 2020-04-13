@@ -1,21 +1,10 @@
 #include "dx/dx10/DX10Buffer.hpp"
-#include "TauEngine.hpp"
 
 #ifdef _WIN32
 #include <Safeties.hpp>
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
-
-DX10Buffer::DX10Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize,
-                       const bool instanced, const BufferDescriptor& descriptor, ID3D10Buffer* const d3dBuffer) noexcept
-    : IBuffer(type, usage, bufferSize, instanced, descriptor), _d3dBuffer(d3dBuffer), _currentMapping(null)
-{ }
-
-DX10Buffer::~DX10Buffer() noexcept
-{
-    _d3dBuffer->Release();
-    _d3dBuffer = null;
-}
+#include "TauEngine.hpp"
 
 void DX10Buffer::bind(IRenderingContext&) noexcept
 {
@@ -43,7 +32,7 @@ void DX10Buffer::unbind(IRenderingContext&) noexcept
 #endif
 }
 
-bool DX10Buffer::beginModification(IRenderingContext& context) noexcept
+bool DX10Buffer::beginModification(IRenderingContext&) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -76,7 +65,7 @@ bool DX10Buffer::beginModification(IRenderingContext& context) noexcept
     return false;
 }
 
-void DX10Buffer::endModification(IRenderingContext& context) noexcept
+void DX10Buffer::endModification(IRenderingContext&) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -95,7 +84,7 @@ void DX10Buffer::endModification(IRenderingContext& context) noexcept
     }
 }
 
-void DX10Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+void DX10Buffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff_t size, const void* const data) noexcept
 {
 #if TAU_BUFFER_SAFETY
   #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
@@ -112,7 +101,7 @@ void DX10Buffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, con
 	}
 }
 
-void DX10Buffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
+void DX10Buffer::fillBuffer(IRenderingContext&, const void* const data) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -131,16 +120,6 @@ void DX10Buffer::fillBuffer(IRenderingContext& context, const void* data) noexce
         TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
 #endif
     }
-}
-
-DX10IndexBuffer::DX10IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
-    : IIndexBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer), _currentMapping(null)
-{ }
-
-DX10IndexBuffer::~DX10IndexBuffer() noexcept
-{
-    _d3dBuffer->Release();
-    _d3dBuffer = null;
 }
 
 void DX10IndexBuffer::bind(IRenderingContext&) noexcept
@@ -169,7 +148,7 @@ void DX10IndexBuffer::unbind(IRenderingContext&) noexcept
 #endif
 }
 
-bool DX10IndexBuffer::beginModification(IRenderingContext& context) noexcept
+bool DX10IndexBuffer::beginModification(IRenderingContext&) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -202,7 +181,7 @@ bool DX10IndexBuffer::beginModification(IRenderingContext& context) noexcept
     return false;
 }
 
-void DX10IndexBuffer::endModification(IRenderingContext& context) noexcept
+void DX10IndexBuffer::endModification(IRenderingContext&) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -221,7 +200,7 @@ void DX10IndexBuffer::endModification(IRenderingContext& context) noexcept
     }
 }
 
-void DX10IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+void DX10IndexBuffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff_t size, const void* const data) noexcept
 {
 #if TAU_BUFFER_SAFETY
   #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
@@ -238,7 +217,7 @@ void DX10IndexBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size
     }
 }
 
-void DX10IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
+void DX10IndexBuffer::fillBuffer(IRenderingContext&, const void* const data) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -257,16 +236,6 @@ void DX10IndexBuffer::fillBuffer(IRenderingContext& context, const void* data) n
         TAU_THROW(BufferSafetyException, BufferSafetyException::ModifiedStaticBuffer);
 #endif
     }
-}
-
-DX10UniformBuffer::DX10UniformBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept
-    : IUniformBuffer(usage, bufferSize), _d3dBuffer(d3dBuffer), _currentMapping(null)
-{ }
-
-DX10UniformBuffer::~DX10UniformBuffer() noexcept
-{
-    _d3dBuffer->Release();
-    _d3dBuffer = null;
 }
 
 void DX10UniformBuffer::bind(IRenderingContext&) noexcept
@@ -363,7 +332,7 @@ void DX10UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage 
     }
 }
 
-bool DX10UniformBuffer::beginModification(IRenderingContext& context) noexcept
+bool DX10UniformBuffer::beginModification(IRenderingContext&) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -396,7 +365,7 @@ bool DX10UniformBuffer::beginModification(IRenderingContext& context) noexcept
     return false;
 }
 
-void DX10UniformBuffer::endModification(IRenderingContext& context) noexcept
+void DX10UniformBuffer::endModification(IRenderingContext&) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -415,7 +384,7 @@ void DX10UniformBuffer::endModification(IRenderingContext& context) noexcept
     }
 }
 
-void DX10UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t size, const void* data) noexcept
+void DX10UniformBuffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff_t size, const void* const data) noexcept
 {
 #if TAU_BUFFER_SAFETY
   #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
@@ -432,7 +401,7 @@ void DX10UniformBuffer::modifyBuffer(::std::intptr_t offset, ::std::ptrdiff_t si
     }
 }
 
-void DX10UniformBuffer::fillBuffer(IRenderingContext& context, const void* data) noexcept
+void DX10UniformBuffer::fillBuffer(IRenderingContext&, const void* const data) noexcept
 {
     if(DX10Buffer::canReWrite(_usage))
     {
@@ -453,10 +422,10 @@ void DX10UniformBuffer::fillBuffer(IRenderingContext& context, const void* data)
     }
 }
 
-DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error) const noexcept
+DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* const error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     DX10Buffer* const buffer = new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
@@ -469,10 +438,10 @@ DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error) const
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     DX10Buffer* const buffer = allocator.allocateT<DX10Buffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
@@ -485,10 +454,10 @@ DX10Buffer* DX10BufferBuilder::build(const BufferArgs& args, Error* error, TauAl
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-CPPRef<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* error) const noexcept
+CPPRef<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* const error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const CPPRef<DX10Buffer> buffer = CPPRef<DX10Buffer>(new(::std::nothrow) DX10Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
@@ -501,10 +470,10 @@ CPPRef<IBuffer> DX10BufferBuilder::buildCPPRef(const BufferArgs& args, Error* er
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableRef<IBuffer> DX10BufferBuilder::buildTauRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IBuffer> DX10BufferBuilder::buildTauRef(const BufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const NullableRef<DX10Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
@@ -517,10 +486,10 @@ NullableRef<IBuffer> DX10BufferBuilder::buildTauRef(const BufferArgs& args, Erro
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableStrongRef<IBuffer> DX10BufferBuilder::buildTauSRef(const BufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IBuffer> DX10BufferBuilder::buildTauSRef(const BufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const NullableStrongRef<DX10Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
@@ -533,7 +502,7 @@ NullableStrongRef<IBuffer> DX10BufferBuilder::buildTauSRef(const BufferArgs& arg
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
+bool DX10BufferBuilder::processArgs(const BufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
 {
      ERROR_CODE_COND_F(args.type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
      ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
@@ -569,7 +538,7 @@ bool DX10BufferBuilder::processBufferArgs(const BufferArgs& args, ID3D10Buffer**
 DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Error* const error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     DX10IndexBuffer* const buffer = new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer);
@@ -585,7 +554,7 @@ DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
 DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     DX10IndexBuffer* const buffer = allocator.allocateT<DX10IndexBuffer>(args.usage, args.bufferSize(), d3dBuffer);
@@ -598,10 +567,10 @@ DX10IndexBuffer* DX10IndexBufferBuilder::build(const IndexBufferArgs& args, Erro
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-CPPRef<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* error) const noexcept
+CPPRef<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* const error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const CPPRef<DX10IndexBuffer> buffer = CPPRef<DX10IndexBuffer>(new(::std::nothrow) DX10IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
@@ -614,10 +583,10 @@ CPPRef<IIndexBuffer> DX10IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& 
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const NullableRef<DX10IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
@@ -630,10 +599,10 @@ NullableRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauRef(const IndexBufferA
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableStrongRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const NullableStrongRef<DX10IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
@@ -646,7 +615,7 @@ NullableStrongRef<IIndexBuffer> DX10IndexBufferBuilder::buildTauSRef(const Index
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
+bool DX10IndexBufferBuilder::processArgs(const IndexBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_F(args.elementCount == 0, Error::BufferSizeIsZero);
@@ -680,7 +649,7 @@ bool DX10IndexBufferBuilder::processBufferArgs(const IndexBufferArgs& args, ID3D
 DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args, Error* const error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     DX10UniformBuffer* const buffer = new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
@@ -696,7 +665,7 @@ DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args
 DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     DX10UniformBuffer* const buffer = allocator.allocateT<DX10UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
@@ -709,10 +678,10 @@ DX10UniformBuffer* DX10UniformBufferBuilder::build(const UniformBufferArgs& args
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-CPPRef<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* error) const noexcept
+CPPRef<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* const error) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const CPPRef<DX10UniformBuffer> buffer = CPPRef<DX10UniformBuffer>(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
@@ -725,10 +694,10 @@ CPPRef<IUniformBuffer> DX10UniformBufferBuilder::buildCPPRef(const UniformBuffer
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const NullableRef<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
@@ -741,10 +710,10 @@ NullableRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauRef(const UniformB
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableStrongRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D10Buffer* d3dBuffer;
-    if(!processBufferArgs(args, &d3dBuffer, error))
+    if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
     const NullableStrongRef<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
@@ -757,7 +726,7 @@ NullableStrongRef<IUniformBuffer> DX10UniformBufferBuilder::buildTauSRef(const U
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-bool DX10UniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
+bool DX10UniformBufferBuilder::processArgs(const UniformBufferArgs& args, ID3D10Buffer** const d3dBuffer, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_F(args.bufferSize == 0, Error::BufferSizeIsZero);
@@ -788,7 +757,7 @@ bool DX10UniformBufferBuilder::processBufferArgs(const UniformBufferArgs& args, 
     return true;
 }
 
-D3D10_USAGE DX10Buffer::getDXUsage(EBuffer::UsageType usage) noexcept
+D3D10_USAGE DX10Buffer::getDXUsage(const EBuffer::UsageType usage) noexcept
 {
     switch(usage)
     {
@@ -807,7 +776,7 @@ D3D10_USAGE DX10Buffer::getDXUsage(EBuffer::UsageType usage) noexcept
     }
 }
 
-D3D10_CPU_ACCESS_FLAG DX10Buffer::getDXAccess(EBuffer::UsageType usage) noexcept
+D3D10_CPU_ACCESS_FLAG DX10Buffer::getDXAccess(const EBuffer::UsageType usage) noexcept
 {
     switch (usage)
     {
@@ -826,7 +795,7 @@ D3D10_CPU_ACCESS_FLAG DX10Buffer::getDXAccess(EBuffer::UsageType usage) noexcept
     }
 }
 
-bool DX10Buffer::canReWrite(EBuffer::UsageType usage) noexcept
+bool DX10Buffer::canReWrite(const EBuffer::UsageType usage) noexcept
 {
     switch(usage)
     {

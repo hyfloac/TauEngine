@@ -5,44 +5,35 @@
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10Texture.hpp"
 #include "TauEngine.hpp"
+#include "TauConfig.hpp"
+
+#if TAU_RTTI_CHECK
+  #define CTX() \
+      if(!RTT_CHECK(context, DX10RenderingContext)) \
+      { TAU_THROW(IncorrectContextException); } \
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
+#else
+  #define CTX() \
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
+#endif
+
 
 void DX10FrameBuffer::bind(IRenderingContext& context, AccessMode) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     auto* dsv = reinterpret_cast<DX10DepthStencilTarget*>(_depthStencilAttachment->renderTarget())->d3dDepthStencilView();
     ctx.d3dDevice()->OMSetRenderTargets(_colorAttachments.count(), _d3dColorAttachments, dsv);
 }
 
 void DX10FrameBuffer::unbind(IRenderingContext& context) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     ctx.resetFrameBuffer();
 }
 
 void DX10FrameBuffer::clearFrameBuffer(IRenderingContext& context, bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     float colorF[4];
 
     colorF[0] = static_cast<float>(color.r) / 255.0f;

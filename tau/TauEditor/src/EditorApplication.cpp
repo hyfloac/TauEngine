@@ -63,7 +63,8 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     RenderingMode::getGlobalMode().setDebugMode(true);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
 
     if(argCount >= 2)
     {
@@ -71,9 +72,13 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         {
             RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
         }
-        else if(strcmp(args[1], "-dx") == 0)
+        else if(strcmp(args[1], "-dx10") == 0)
         {
             RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+        }
+        else if(strcmp(args[1], "-dx11") == 0)
+        {
+            RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
         }
     }
 

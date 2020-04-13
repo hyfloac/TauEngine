@@ -3,26 +3,27 @@
 #include "dx/dx11/DX11RenderingContext.hpp"
 
 #ifdef _WIN32
-// #include <D3DX11Core.h>
-
 #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
-#include "dx/dx11/DX11DepthStencilState.hpp"
-#include "dx/dx11/DX11Buffer.hpp"
-#include "dx/dx11/DX11Shader.hpp"
-#include "dx/dx11/DX11GraphicsInterface.hpp"
 #include "dx/dx11/DX11RasterizerState.hpp"
+#include "dx/dx11/DX11DepthStencilState.hpp"
+#include "dx/dx11/DX11GraphicsInterface.hpp"
 
 DX11RenderingContext::DX11RenderingContext(DX11GraphicsInterface& gi, const DX11RenderingContextArgs& args) noexcept
-    : IRenderingContext(gi.renderingMode()), _gi(gi),
-      _d3d11DeviceContext(args.d3d11DeviceContext),
-      _renderTargetView(args.renderTargetView),
-      _depthStencilBuffer(args.depthStencilBuffer), _depthStencilView(args.depthStencilView),
-      _swapChain(args.swapChain),
-      _vsync(false),
-      _defaultDepthStencilState(null), _currentDepthStencilState(null),
-      _defaultRasterizerState(null), _currentRasterizerState(null)
+    : IRenderingContext(gi.renderingMode())
+    , _gi(gi)
+    , _d3d11DeviceContext(args.d3d11DeviceContext)
+    , _renderTargetView(args.renderTargetView)
+    , _depthStencilBuffer(args.depthStencilBuffer)
+    , _depthStencilView(args.depthStencilView)
+    , _blendState(args.blendState)
+    , _swapChain(args.swapChain)
+    , _vsync(false)
+    , _defaultDepthStencilState(null)
+    , _currentDepthStencilState(null)
+    , _defaultRasterizerState(null)
+    , _currentRasterizerState(null)
 { }
 
 DX11RenderingContext::~DX11RenderingContext() noexcept
@@ -37,6 +38,7 @@ DX11RenderingContext::~DX11RenderingContext() noexcept
     RELEASE(_renderTargetView);
     RELEASE(_depthStencilBuffer);
     RELEASE(_depthStencilView);
+    RELEASE(_blendState);
     RELEASE(_swapChain);
 #undef RELEASE
 }
@@ -46,6 +48,11 @@ const ID3D11Device* DX11RenderingContext::d3d11Device() const noexcept
 
 ID3D11Device* DX11RenderingContext::d3d11Device() noexcept
 { return _gi.d3d11Device(); }
+
+void DX11RenderingContext::resetFrameBuffer() const noexcept
+{
+    _d3d11DeviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
+}
 
 void DX11RenderingContext::updateViewport(const u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {
@@ -167,7 +174,7 @@ void DX11RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextArgs& args, Error* error) noexcept
+DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -179,7 +186,7 @@ DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextA
     ERROR_CODE_V(Error::NoError, context);
 }
 
-DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -191,7 +198,7 @@ DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextA
     ERROR_CODE_V(Error::NoError, context);
 }
 
-CPPRef<IRenderingContext> DX11RenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* error) noexcept
+CPPRef<IRenderingContext> DX11RenderingContextBuilder::buildCPPRef(const RenderingContextArgs& args, Error* const error) noexcept
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -203,7 +210,7 @@ CPPRef<IRenderingContext> DX11RenderingContextBuilder::buildCPPRef(const Renderi
     ERROR_CODE_V(Error::NoError, context);
 }
 
-NullableRef<IRenderingContext> DX11RenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableRef<IRenderingContext> DX11RenderingContextBuilder::buildTauRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -215,7 +222,7 @@ NullableRef<IRenderingContext> DX11RenderingContextBuilder::buildTauRef(const Re
     ERROR_CODE_V(Error::NoError, RefCast<IRenderingContext>(context));
 }
 
-NullableStrongRef<IRenderingContext> DX11RenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableStrongRef<IRenderingContext> DX11RenderingContextBuilder::buildTauSRef(const RenderingContextArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
@@ -330,40 +337,41 @@ bool DX11RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
     }
 
     {
-        D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc[2];
+        D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
         ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-        depthStencilViewDesc[0].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        depthStencilViewDesc[0].ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-        depthStencilViewDesc[0].Texture2D.MipSlice = 0;
-        depthStencilViewDesc[1].Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        depthStencilViewDesc[1].ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-        depthStencilViewDesc[1].Texture2D.MipSlice = 0;
+        depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-        CHECK(_gi.d3d11Device()->CreateDepthStencilView(dxArgs->depthStencilBuffer, &depthStencilViewDesc[0], &dxArgs->depthStencilView));
+        CHECK(_gi.d3d11Device()->CreateDepthStencilView(dxArgs->depthStencilBuffer, &depthStencilViewDesc, &dxArgs->depthStencilView));
         dxArgs->d3d11DeviceContext->OMSetRenderTargets(1, &dxArgs->renderTargetView, dxArgs->depthStencilView);
     }
-
-    // {
-    //     D3D11_RASTERIZER_DESC rasterDesc;
-    //     rasterDesc.FillMode = D3D11_FILL_SOLID;
-    //     rasterDesc.CullMode = D3D11_CULL_BACK;
-    //     // rasterDesc.CullMode = D3D11_CULL_NONE;
-    //     rasterDesc.FrontCounterClockwise = true;
-    //     rasterDesc.DepthBias = 0;
-    //     rasterDesc.DepthBiasClamp = 0.0f;
-    //     rasterDesc.SlopeScaledDepthBias = 0.0f;
-    //     rasterDesc.DepthClipEnable = true;
-    //     rasterDesc.ScissorEnable = false;
-    //     rasterDesc.MultisampleEnable = false;
-    //     rasterDesc.AntialiasedLineEnable = false;
-    //
-    //     CHECK(_gi.d3d11Device()->CreateRasterizerState(&rasterDesc, &dxArgs->rasterizerState));
-    //     _gi.d3d11Device()->RSSetState(dxArgs->rasterizerState);
-    // }
 
     {
          D3D11_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<FLOAT>(args.window->width()), static_cast<FLOAT>(args.window->height()), 0.0f, 1.0f };
         dxArgs->d3d11DeviceContext->RSSetViewports(1, &viewport);
+    }
+
+    {
+        D3D11_BLEND_DESC blendDesc;
+        blendDesc.AlphaToCoverageEnable = FALSE;
+        blendDesc.IndependentBlendEnable = FALSE;
+        for(uSys i = 0; i < 8; ++i)
+        {
+            blendDesc.RenderTarget[i].BlendEnable = TRUE;
+            blendDesc.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+            blendDesc.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+            blendDesc.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
+            blendDesc.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
+            blendDesc.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
+            blendDesc.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+            blendDesc.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        }
+
+        CHECK(_gi.d3d11Device()->CreateBlendState(&blendDesc, &dxArgs->blendState));
+        float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        const UINT sampleMask = 0xffffffff;
+        dxArgs->d3d11DeviceContext->OMSetBlendState(dxArgs->blendState, blendFactor, sampleMask);
     }
 
     return true;

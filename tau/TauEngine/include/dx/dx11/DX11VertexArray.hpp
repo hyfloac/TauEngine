@@ -6,9 +6,37 @@
 #include <d3d11.h>
 #include "model/BufferDescriptor.hpp"
 
+class DX11GraphicsInterface;
 class DX11RenderingContext;
 class DX11IndexBuffer;
-class DX11GraphicsInterface;
+
+struct DXVertexArrayArgs final
+{
+    DELETE_COPY(DXVertexArrayArgs);
+public:
+    CPPRef<DX11IndexBuffer> indexBuffer;
+    ID3D11Buffer** iaBuffers;
+    UINT* iaStrides;
+    UINT* iaOffsets;
+    ID3D11InputLayout* inputLayout;
+
+    DXVertexArrayArgs() noexcept
+        : indexBuffer(nullptr)
+        , iaBuffers(nullptr)
+        , iaStrides(nullptr)
+        , iaOffsets(nullptr)
+        , inputLayout(nullptr)
+    { }
+
+    ~DXVertexArrayArgs() noexcept
+    {
+        delete[] iaBuffers;
+        delete[] iaStrides;
+        delete[] iaOffsets;
+        if(inputLayout)
+        { inputLayout->Release(); }
+    }
+};
 
 class TAU_DLL DX11VertexArray final : public IVertexArray
 {
@@ -35,10 +63,24 @@ private:
     CPPRef<DX11IndexBuffer> _indexBuffer;
     D3D11_PRIMITIVE_TOPOLOGY _drawTypeCache;
 public:
-    DX11VertexArray(uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D11InputLayout* inputLayout, uSys bufferCount, ID3D11Buffer** iaBuffers,
-                    UINT* iaStrides, UINT* iaOffsets, const CPPRef<DX11IndexBuffer>& indexBuffer, DrawType drawType) noexcept;
+    DX11VertexArray(const VertexArrayArgs& args, const DXVertexArrayArgs& dxArgs) noexcept
+        : IVertexArray(args.drawCount, args.buffers)
+        , _inputLayout(dxArgs.inputLayout)
+        , _iaBufferCount(args.buffers.count())
+        , _iaBuffers(dxArgs.iaBuffers)
+        , _iaStrides(dxArgs.iaStrides)
+        , _iaOffsets(dxArgs.iaOffsets)
+        , _indexBuffer(dxArgs.indexBuffer)
+        , _drawTypeCache(getDXDrawType(args.drawType))
+    { }
 
-    ~DX11VertexArray() noexcept override;
+    ~DX11VertexArray() noexcept
+    {
+        delete[] _iaBuffers;
+        delete[] _iaStrides;
+        delete[] _iaOffsets;
+        _inputLayout->Release();
+    }
 
     void bind(IRenderingContext& context) noexcept override { }
     void unbind(IRenderingContext& context) noexcept override { }
@@ -55,38 +97,12 @@ class TAU_DLL DX11VertexArrayBuilder final : public IVertexArrayBuilder
     DEFAULT_DESTRUCT(DX11VertexArrayBuilder);
     DELETE_COPY(DX11VertexArrayBuilder);
 public:
-    struct DXVertexArrayArgs final
-    {
-        DELETE_COPY(DXVertexArrayArgs);
-    public:
-
-        CPPRef<DX11IndexBuffer> indexBuffer;
-        ID3D11Buffer** iaBuffers;
-        UINT* iaStrides;
-        UINT* iaOffsets;
-        ID3D11InputLayout* inputLayout;
-
-        DXVertexArrayArgs() noexcept
-            : indexBuffer(nullptr), iaBuffers(nullptr), iaStrides(nullptr), iaOffsets(nullptr),
-              inputLayout(nullptr)
-        { }
-
-        ~DXVertexArrayArgs() noexcept
-        {
-            delete[] iaBuffers;
-            delete[] iaStrides;
-            delete[] iaOffsets;
-            inputLayout->Release();
-        }
-    };
 private:
     DX11GraphicsInterface& _gi;
 public:
     DX11VertexArrayBuilder(DX11GraphicsInterface& gi) noexcept
         : _gi(gi)
     { }
-
-    [[nodiscard]] DX11VertexArray* build([[tau::out]] Error* error) noexcept;
 
     [[nodiscard]] DX11VertexArray* build(const VertexArrayArgs& args, Error* error) noexcept override;
     [[nodiscard]] DX11VertexArray* build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept override;

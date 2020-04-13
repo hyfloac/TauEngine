@@ -16,6 +16,7 @@ class DX10TextureBuilder;
 class DX10TextureSamplerBuilder;
 class DX10SingleTextureUploaderBuilder;
 class DX10TextureUploaderBuilder;
+class DX10FrameBufferBuilder;
 class DX10RenderingContextBuilder;
 
 class TAU_DLL DX10GraphicsInterface final : public IGraphicsInterface
@@ -35,6 +36,7 @@ private:
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
     DX10SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     DX10TextureUploaderBuilder* _textureUploaderBuilder;
+    DX10FrameBufferBuilder* _frameBufferBuilder;
     DX10RenderingContextBuilder* _renderingContextBuilder;
 public:
     DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* d3dDevice) noexcept;
@@ -56,6 +58,7 @@ public:
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
+    [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
 

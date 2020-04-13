@@ -3,11 +3,7 @@
 #include "system/RenderingContext.hpp"
 
 #ifdef _WIN32
-#pragma warning(push, 0)
 #include <d3d11.h>
-#pragma warning(pop)
-
-#include "DLL.hpp"
 
 class DX11DepthStencilState;
 class DX11RasterizerState;
@@ -19,6 +15,7 @@ struct DX11RenderingContextArgs final
     ID3D11RenderTargetView* renderTargetView;
     ID3D11Texture2D* depthStencilBuffer;
     ID3D11DepthStencilView* depthStencilView;
+    ID3D11BlendState* blendState;
     IDXGISwapChain* swapChain;
 };
 
@@ -31,6 +28,7 @@ private:
     ID3D11RenderTargetView* _renderTargetView;
     ID3D11Texture2D* _depthStencilBuffer;
     ID3D11DepthStencilView* _depthStencilView;
+    ID3D11BlendState* _blendState;
     IDXGISwapChain* _swapChain;
 
     bool _vsync;
@@ -49,6 +47,8 @@ public:
 
     [[nodiscard]] const ID3D11DeviceContext* d3d11DeviceContext() const noexcept { return _d3d11DeviceContext; }
     [[nodiscard]] ID3D11DeviceContext* d3d11DeviceContext() noexcept { return _d3d11DeviceContext; }
+
+    void resetFrameBuffer() const noexcept;
 
     void deactivateContext() noexcept override { }
     void activateContext() noexcept override { }
@@ -71,8 +71,6 @@ public:
     void beginFrame() noexcept override;
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
-
-    [[nodiscard]] CPPRef<IFrameBufferBuilder> createFrameBuffer() noexcept override { return null; }
 protected:
     RC_IMPL(DX11RenderingContext);
 };

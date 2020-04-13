@@ -58,7 +58,7 @@ IShaderProgram::IShaderProgram() noexcept
       _geometryShader(null), _pixelShader(null)
 { }
 
-bool IShaderProgram::setVertexShader(IRenderingContext& context, CPPRef<IShader>& vs) noexcept
+bool IShaderProgram::setVertexShader(IRenderingContext& context, const CPPRef<IShader>& vs) noexcept
 {
     if(vs)
     {
@@ -86,7 +86,7 @@ bool IShaderProgram::setVertexShader(IRenderingContext& context, CPPRef<IShader>
     return false;
 }
 
-bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, CPPRef<IShader>& tcs) noexcept
+bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, const CPPRef<IShader>& tcs) noexcept
 {
     if(tcs)
     { 
@@ -114,7 +114,7 @@ bool IShaderProgram::setTessellationControlShader(IRenderingContext& context, CP
     return false;
 }
 
-bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context, CPPRef<IShader>& tes) noexcept
+bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context, const CPPRef<IShader>& tes) noexcept
 {
     if(tes)
     {
@@ -142,7 +142,7 @@ bool IShaderProgram::setTessellationEvaluationShader(IRenderingContext& context,
     return false;
 }
 
-bool IShaderProgram::setGeometryShader(IRenderingContext& context, CPPRef<IShader>& gs) noexcept
+bool IShaderProgram::setGeometryShader(IRenderingContext& context, const CPPRef<IShader>& gs) noexcept
 {
     if(gs)
     {
@@ -170,7 +170,7 @@ bool IShaderProgram::setGeometryShader(IRenderingContext& context, CPPRef<IShade
     return false;
 }
 
-bool IShaderProgram::setPixelShader(IRenderingContext& context, CPPRef<IShader>& ps) noexcept
+bool IShaderProgram::setPixelShader(IRenderingContext& context, const CPPRef<IShader>& ps) noexcept
 {
     if(ps)
     {

@@ -40,7 +40,7 @@ public:
     [[nodiscard]] const ID3D10VertexShader* shader() const noexcept { return _shader; }
     [[nodiscard]] ID3D10VertexShader* shader() noexcept { return _shader; }
 
-    [[nodiscard]] ID3D10Blob* shaderBlob() noexcept { return _shaderBlob; }
+    [[nodiscard]] ID3D10Blob* shaderBlob() const noexcept { return _shaderBlob; }
 
     void bind(DX10RenderingContext& context) noexcept override;
     void unbind(DX10RenderingContext& context) noexcept override;

@@ -5,7 +5,18 @@
 #include "dx/dx10/DX10Texture.hpp"
 #include "dx/dx10/DX10TextureSampler.hpp"
 #include "TauEngine.hpp"
+#include "TauConfig.hpp"
 #include <TUMaths.hpp>
+
+#if TAU_RTTI_CHECK
+  #define CTX() \
+      if(!RTT_CHECK(context, DX10RenderingContext)) \
+      { TAU_THROW(IncorrectContextException); } \
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
+#else
+  #define CTX() \
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
+#endif
 
 DX10SingleTextureUploader::DX10SingleTextureUploader(ITextureView* const texture, const CPPRef<DX10TextureSampler>& textureSampler) noexcept
     : ISingleTextureUploader(texture, textureSampler)
@@ -13,14 +24,7 @@ DX10SingleTextureUploader::DX10SingleTextureUploader(ITextureView* const texture
 
 TextureIndices DX10SingleTextureUploader::upload(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return indices;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     ID3D10ShaderResourceView* srv = reinterpret_cast<DX10TextureView*>(_texture)->d3dShaderResourceView();
 
     switch(stage)
@@ -44,14 +48,7 @@ TextureIndices DX10SingleTextureUploader::upload(IRenderingContext& context, con
 
 TextureIndices DX10SingleTextureUploader::unbind(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return indices;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     ID3D10ShaderResourceView* nullSRV = null;
     switch(stage)
     {
@@ -79,14 +76,7 @@ DX10TextureUploader::DX10TextureUploader(const RefDynArray<ITextureView*>& textu
 
 TextureIndices DX10TextureUploader::upload(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return indices;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     switch(stage)
     {
         case EShader::Stage::Vertex:
@@ -108,14 +98,7 @@ TextureIndices DX10TextureUploader::upload(IRenderingContext& context, const Tex
 
 TextureIndices DX10TextureUploader::unbind(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return indices;
-    }
-
-    auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
-
+    CTX();
     ID3D10ShaderResourceView* nullSRV[16] = {
         null, null, null, null,
         null, null, null, null,

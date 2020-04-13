@@ -3,7 +3,6 @@
 #include "graphics/DepthStencilState.hpp"
 
 #ifdef _WIN32
-
 #include <d3d10.h>
 
 class DX10GraphicsInterface;
@@ -16,7 +15,8 @@ private:
     ID3D10DepthStencilState* _d3dDepthStencilState;
 public:
     DX10DepthStencilState(const DepthStencilArgs& params, ID3D10DepthStencilState* const d3dDepthStencilState) noexcept
-        : IDepthStencilState(params), _d3dDepthStencilState(d3dDepthStencilState)
+        : IDepthStencilState(params)
+        , _d3dDepthStencilState(d3dDepthStencilState)
     { }
 
     ~DX10DepthStencilState() noexcept
@@ -29,7 +29,6 @@ public:
     [[nodiscard]] ID3D10DepthStencilState* d3dDepthStencilState() noexcept { return _d3dDepthStencilState; }
 
     void apply(DX10RenderingContext& ctx) const noexcept;
-    void apply(ID3D10Device* dev) const noexcept;
 };
 
 class TAU_DLL DX10DepthStencilStateBuilder final : public IDepthStencilStateBuilder

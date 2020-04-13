@@ -16,7 +16,7 @@ private:
     ID3D10SamplerState* _samplerState;
 public:
     inline DX10TextureSampler(ID3D10SamplerState* const samplerState) noexcept
-        : ITextureSampler(), _samplerState(samplerState)
+        : _samplerState(samplerState)
     { }
 
     [[nodiscard]] const ID3D10SamplerState* d3dSampler() const noexcept { return _samplerState; }
@@ -38,7 +38,7 @@ private:
     DX10GraphicsInterface& _gi;
 public:
     DX10TextureSamplerBuilder(DX10GraphicsInterface& gi) noexcept
-        : ITextureSamplerBuilder(), _gi(gi)
+        : _gi(gi)
     { }
 
     [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;

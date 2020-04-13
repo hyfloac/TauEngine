@@ -10,79 +10,56 @@
 #include "dx/dx10/DX10Shader.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 
-DX10VertexArray::DX10VertexArray(const uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, ID3D10InputLayout* const inputLayout, const uSys bufferCount, ID3D10Buffer** const iaBuffers,
-                                 UINT* const iaStrides, UINT* const iaOffsets, const CPPRef<DX10IndexBuffer>& indexBuffer, const DrawType drawType) noexcept
-    : IVertexArray(drawCount, buffers), _inputLayout(inputLayout), _iaBufferCount(bufferCount),
-      _iaBuffers(iaBuffers), _iaStrides(iaStrides), _iaOffsets(iaOffsets),
-      _indexBuffer(indexBuffer), _drawTypeCache(getDXDrawType(drawType))
-{ }
-
-DX10VertexArray::~DX10VertexArray() noexcept
-{
-    delete[] _iaBuffers;
-    delete[] _iaStrides;
-    delete[] _iaOffsets;
-    _inputLayout->Release();
-}
+#if TAU_RTTI_CHECK
+  #define CTX() \
+      if(!RTT_CHECK(context, DX10RenderingContext)) \
+      { TAU_THROW(IncorrectContextException); } \
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
+#else
+  #define CTX() \
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
+#endif
 
 void DX10VertexArray::preDraw(IRenderingContext& context) noexcept
 {
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-    dxCtx.d3dDevice()->IASetInputLayout(_inputLayout);
-    dxCtx.d3dDevice()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
-    dxCtx.d3dDevice()->IASetIndexBuffer(_indexBuffer ? _indexBuffer->d3dBuffer() : NULL, DXGI_FORMAT_R32_UINT, 0);
-    dxCtx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
+    CTX();
+    ctx.d3dDevice()->IASetInputLayout(_inputLayout);
+    ctx.d3dDevice()->IASetVertexBuffers(0, _iaBufferCount, _iaBuffers, _iaStrides, _iaOffsets);
+    ctx.d3dDevice()->IASetIndexBuffer(_indexBuffer ? _indexBuffer->d3dBuffer() : NULL, DXGI_FORMAT_R32_UINT, 0);
+    ctx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
 void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
-    { drawCount = this->_drawCount; }
+    { drawCount = _drawCount; }
 
-    if(!RTT_CHECK(context, DX10RenderingContext))
+    CTX();
+
+    if(_indexBuffer)
     {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-
-    if(this->_indexBuffer)
-    {
-        dxCtx.d3dDevice()->DrawIndexed(drawCount, drawOffset, 0);
+        ctx.d3dDevice()->DrawIndexed(drawCount, drawOffset, 0);
     }
     else
     {
-        dxCtx.d3dDevice()->Draw(drawCount, drawOffset);
+        ctx.d3dDevice()->Draw(drawCount, drawOffset);
     }
 }
 
 void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
 {
     if(drawCount == 0)
-    { drawCount = this->_drawCount; }
+    { drawCount = _drawCount; }
 
-    if(!RTT_CHECK(context, DX10RenderingContext))
+    CTX();
+
+    if(_indexBuffer)
     {
-        TAU_THROW(IncorrectContextException);
-        return;
-    }
-
-    auto& dxCtx = reinterpret_cast<DX10RenderingContext&>(context);
-
-    if(this->_indexBuffer)
-    {
-        dxCtx.d3dDevice()->DrawIndexedInstanced(drawCount, instanceCount, drawOffset, 0, 0);
+        ctx.d3dDevice()->DrawIndexedInstanced(drawCount, instanceCount, drawOffset, 0, 0);
     }
     else
     {
-        dxCtx.d3dDevice()->DrawInstanced(drawCount, instanceCount, drawOffset, 0);
+        ctx.d3dDevice()->DrawInstanced(drawCount, instanceCount, drawOffset, 0);
     }
 }
 
@@ -148,13 +125,13 @@ uSys DX10VertexArray::computeNumElements(const ShaderDataType::Type type) noexce
 
 static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept;
 
-DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Error* error) noexcept
+DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Error* const error) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX10VertexArray* const va = new(::std::nothrow) DX10VertexArray(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    DX10VertexArray* const va = new(::std::nothrow) DX10VertexArray(args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
@@ -166,13 +143,13 @@ DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
     ERROR_CODE_V(Error::NoError, va);
 }
 
-DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX10VertexArray* const va = allocator.allocateT<DX10VertexArray>(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    DX10VertexArray* const va = allocator.allocateT<DX10VertexArray>(args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
@@ -184,13 +161,13 @@ DX10VertexArray* DX10VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
     ERROR_CODE_V(Error::NoError, va);
 }
 
-CPPRef<IVertexArray> DX10VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* error) noexcept
+CPPRef<IVertexArray> DX10VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* const error) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX10VertexArray> va = CPPRef<DX10VertexArray>(new(::std::nothrow) DX10VertexArray(args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType));
+    const CPPRef<DX10VertexArray> va = CPPRef<DX10VertexArray>(new(::std::nothrow) DX10VertexArray(args, dxArgs));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
@@ -202,13 +179,13 @@ CPPRef<IVertexArray> DX10VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& 
     ERROR_CODE_V(Error::NoError, va);
 }
 
-NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableRef<DX10VertexArray> va(allocator, args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    const NullableRef<DX10VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
@@ -220,13 +197,13 @@ NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayA
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
 
-NullableStrongRef<IVertexArray> DX10VertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableStrongRef<IVertexArray> DX10VertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableStrongRef<DX10VertexArray> va(allocator, args.drawCount, args.buffers, dxArgs.inputLayout, args.buffers.count(), dxArgs.iaBuffers, dxArgs.iaStrides, dxArgs.iaOffsets, dxArgs.indexBuffer, args.drawType);
+    const NullableStrongRef<DX10VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
@@ -326,7 +303,7 @@ bool DX10VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexAr
     return true;
 }
 
-static void handleInsertion(uSys& insertIndex, u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept
+static void handleInsertion(uSys& insertIndex, const u32 bufferIndex, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>& semanticIndices) noexcept
 {
     const ShaderDataType::Type underlyingType = ShaderDataType::underlyingTypeND(bed.type());
     const uSys columns = DX10VertexArray::computeNumElements(bed.type());
@@ -401,8 +378,8 @@ D3D10_PRIMITIVE_TOPOLOGY DX10VertexArray::getDXDrawType(const DrawType drawType)
 {
     switch(drawType)
     {
-        case DrawType::SeparatedTriangles: return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        case DrawType::ConnectedTriangles: return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+        case DrawType::SeparatedTriangles:      return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        case DrawType::ConnectedTriangles:      return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
         case DrawType::PointConnectedTriangles: return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
         default: return D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED;
     }

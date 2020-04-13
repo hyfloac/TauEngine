@@ -19,9 +19,17 @@ private:
     ID3D10Buffer* _d3dBuffer;
     void* _currentMapping;
 public:
-    DX10Buffer(EBuffer::Type type, EBuffer::UsageType usage, uSys bufferSize, bool instanced, const BufferDescriptor& descriptor, ID3D10Buffer* d3dBuffer) noexcept;
+    DX10Buffer(const EBuffer::Type type, const EBuffer::UsageType usage, const uSys bufferSize, const bool instanced, const BufferDescriptor& descriptor, ID3D10Buffer* const d3dBuffer) noexcept
+        : IBuffer(type, usage, bufferSize, instanced, descriptor)
+        , _d3dBuffer(d3dBuffer)
+        , _currentMapping(null)
+    { }
 
-    ~DX10Buffer() noexcept;
+    ~DX10Buffer() noexcept
+    {
+        _d3dBuffer->Release();
+        _d3dBuffer = null;
+    }
 
     [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
     [[nodiscard]] ID3D10Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
@@ -43,9 +51,17 @@ private:
     ID3D10Buffer* _d3dBuffer;
     void* _currentMapping;
 public:
-    DX10IndexBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept;
+    DX10IndexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
+        : IIndexBuffer(usage, bufferSize)
+        , _d3dBuffer(d3dBuffer)
+        , _currentMapping(null)
+    { }
 
-    ~DX10IndexBuffer() noexcept;
+    ~DX10IndexBuffer() noexcept
+    {
+        _d3dBuffer->Release();
+        _d3dBuffer = null;
+    }
 
     [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
     [[nodiscard]] ID3D10Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
@@ -67,9 +83,17 @@ private:
     ID3D10Buffer* _d3dBuffer;
     void* _currentMapping;
 public:
-    DX10UniformBuffer(EBuffer::UsageType usage, uSys bufferSize, ID3D10Buffer* d3dBuffer) noexcept;
+    DX10UniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
+        : IUniformBuffer(usage, bufferSize)
+        , _d3dBuffer(d3dBuffer)
+        , _currentMapping(null)
+    { }
 
-    ~DX10UniformBuffer() noexcept;
+    ~DX10UniformBuffer() noexcept
+    {
+        _d3dBuffer->Release();
+        _d3dBuffer = null;
+    }
 
     [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
     [[nodiscard]] ID3D10Buffer* d3dBuffer() noexcept { return _d3dBuffer; }
@@ -104,7 +128,7 @@ public:
     [[nodiscard]] NullableRef<IBuffer> buildTauRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
     [[nodiscard]] NullableStrongRef<IBuffer> buildTauSRef(const BufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 private:
-    [[nodiscard]] bool processBufferArgs(const BufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const BufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
 };
 
 class TAU_DLL DX10IndexBufferBuilder final : public IIndexBufferBuilder
@@ -124,7 +148,7 @@ public:
     [[nodiscard]] NullableRef<IIndexBuffer> buildTauRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
     [[nodiscard]] NullableStrongRef<IIndexBuffer> buildTauSRef(const IndexBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 private:
-    [[nodiscard]] bool processBufferArgs(const IndexBufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const IndexBufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
 };
 
 class TAU_DLL DX10UniformBufferBuilder final : public IUniformBufferBuilder
@@ -144,6 +168,6 @@ public:
     [[nodiscard]] NullableRef<IUniformBuffer> buildTauRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
     [[nodiscard]] NullableStrongRef<IUniformBuffer> buildTauSRef(const UniformBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept override;
 private:
-    [[nodiscard]] bool processBufferArgs(const UniformBufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const UniformBufferArgs& args, [[tau::out]] ID3D10Buffer** d3dBuffer, [[tau::out]] Error* error) const noexcept;
 };
 #endif
