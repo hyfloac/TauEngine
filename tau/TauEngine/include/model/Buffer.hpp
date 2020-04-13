@@ -72,7 +72,6 @@
   #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING     0
 #endif
 
-#if TAU_BUFFER_SAFETY
 #include "events/Exception.hpp"
 
 class BufferSafetyException final : public Exception
@@ -106,8 +105,6 @@ public:
 
     EXCEPTION_IMPL(BufferSafetyException);
 };
-
-#endif
 
 #define BUFFER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                 RTT_IMPL(_TYPE, IBuffer)

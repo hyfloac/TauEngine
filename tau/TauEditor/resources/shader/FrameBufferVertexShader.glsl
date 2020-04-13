@@ -7,7 +7,7 @@ out vec2 fTexCoord;
 
 void main(void)
 {
-    // 0.99999994 is the smallest representable float less than 1.0f
+    // 0.999999f is very close, but not at the far frustum
     gl_Position = vec4(position, 0.999999, 1.0);
     fTexCoord = texCoord;
 }

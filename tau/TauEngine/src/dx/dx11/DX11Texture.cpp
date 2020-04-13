@@ -759,7 +759,8 @@ D3D11_BIND_FLAG DX11TextureBuilder::dxBindFlags(const ETexture::DepthStencilBind
 
 D3D11_RESOURCE_MISC_FLAG DX11TextureBuilder::dxMiscFlags(const ETexture::BindFlags flags) noexcept
 {
-    if(hasFlag(flags, ETexture::BindFlags::GenerateMipmaps))
+    if(hasFlag(flags, ETexture::BindFlags::GenerateMipmaps) &&
+       hasFlag(flags, ETexture::BindFlags::ShaderAccess))
     {
         return D3D11_RESOURCE_MISC_GENERATE_MIPS;
     }

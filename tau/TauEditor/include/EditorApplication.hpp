@@ -42,23 +42,23 @@ private:
 public:
     TauEditorApplication() noexcept;
 
-    ~TauEditorApplication() noexcept override final;
+    ~TauEditorApplication() noexcept override;
 
     [[nodiscard]] CPPRef<spdlog::logger> logger() const noexcept { return _logger; }
 
-    bool init(int argCount, char* args[]) noexcept override final;
+    bool init(int argCount, char* args[]) noexcept override;
 
-    void finalize() noexcept override final;
+    void finalize() noexcept override;
 
     void onException(ExceptionData& ex) noexcept override;
 protected:
-    void update(float fixedDelta) noexcept override final;
+    void update(float fixedDelta) noexcept override;
 
-    void render(const DeltaTime& delta) noexcept override final;
+    void render(const DeltaTime& delta) noexcept override;
 
-    void renderFPS(u32 ups, u32 fps) noexcept override final;
+    void renderFPS(u32 ups, u32 fps) noexcept override;
 
-    void runMessageLoop() noexcept override final;
+    void runMessageLoop() noexcept override;
 private:
     void setupConfig() noexcept;
 

@@ -1,6 +1,4 @@
 #define APP_MAIN
-#include "Application.hpp"
-
 #include "EditorApplication.hpp"
 #include <TauEngine.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -512,7 +510,7 @@ static void setupGameFolders() noexcept
     VFS::Instance().mountDynamic("TERes", "D:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
 }
 
-static bool setupDebugCallback(TauEditorApplication* tea) noexcept
+static bool setupDebugCallback(TauEditorApplication*) noexcept
 {
 #ifndef TAU_PRODUCTION
     setupDefaultDebugMessageCallback(tea->logger(), true);

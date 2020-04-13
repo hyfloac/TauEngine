@@ -46,7 +46,11 @@ bool DX10ShaderProgram::link(IRenderingContext&) noexcept
 
 bool DX10ShaderProgram::attach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept
 {
-    CTX();
+#if TAU_RTTI_CHECK
+    if(!RTT_CHECK(context, DX10RenderingContext))
+    { TAU_THROW(IncorrectContextException); }
+#endif
+
     if(RTT_CHECK(shader.get(), DX10Shader))
     { return true; }
     else

@@ -78,9 +78,6 @@
     <ClCompile Include="src\Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\events\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

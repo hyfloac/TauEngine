@@ -20,7 +20,7 @@
                                      { return #_TYPE; }
   #define UI_ELEMENT_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
 #else
-  #define UI_ELEMENT_IMPL(_TYPE) UI_ELEMENT_IMPL_BASE(_TYPEs)
+  #define UI_ELEMENT_IMPL(_TYPE) UI_ELEMENT_IMPL_BASE(_TYPE)
   #define UI_ELEMENT_GET_NAME(_EVENT_PTR) ""
 #endif
 

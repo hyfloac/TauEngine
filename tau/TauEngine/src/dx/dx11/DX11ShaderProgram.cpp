@@ -58,9 +58,7 @@ bool DX11ShaderProgram::attach(IRenderingContext& context, const CPPRef<IShader>
 {
 #if TAU_RTTI_CHECK
     if(!RTT_CHECK(context, DX11RenderingContext))
-    {
-        TAU_THROW(IncorrectContextException);
-    }
+    { TAU_THROW(IncorrectContextException); }
 #endif
 
     if(RTT_CHECK(shader.get(), DX11Shader))
