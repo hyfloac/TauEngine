@@ -65,7 +65,7 @@ NullableRef<IRasterizerState> TextHandler::rs = nullptr;
 #define INSTANCE_COUNT 128
 
 TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
-    : _ft(null), _glyphSets(), _shader(IShaderProgram::create(context)),
+    : _ft(null), _shader(IShaderProgram::create(context)),
       _va(null),
       _viewUniforms(gi.createUniformBuffer()),
       _colorUniforms(gi.createUniformBuffer())
@@ -225,7 +225,9 @@ TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) no
 GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRenderingContext& context, const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
 {
     PERF();
-    GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
+    // GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
+
+    GlyphSetHandle gs(DefaultTauAllocator::Instance(), glyphSetName, minChar, maxChar);
 
     Texture2DArgs args;
     args.mipmapLevels = 1;
@@ -253,19 +255,22 @@ GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRe
             texture = new(::std::nothrow) NullTexture2D;
         }
 
-        gs.glyphs[c - gs.minGlyph] = GlyphCharacter(texture,
-                                     Vector2f(static_cast<float>(face->glyph->bitmap.width), static_cast<float>(face->glyph->bitmap.rows)),
-                                     Vector2f(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top)),
-                                     face->glyph->advance.x);
+        auto& glyph = gs->glyphs[c - gs->minGlyph];
+        glyph.texture = texture;
+        glyph.size = Vector2f(static_cast<float>(face->glyph->bitmap.width), static_cast<float>(face->glyph->bitmap.rows));
+        glyph.bearing = Vector2f(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top));
+        glyph.advance = face->glyph->advance.x;
     }
 
-    return _glyphSets.size() - 1;
+    // return _glyphSets.size() - 1;
+    return gs;
 }
 
 void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) noexcept
 {
     const NullableRef<IRasterizerState> tmpRS = context.setRasterizerState(rs);
-    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    // const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    const GlyphSet& glyphSet = *glyphSetHandle.get();
 
     _shader->bind(context);
 
@@ -282,6 +287,12 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
     {
         if(c < glyphSet.minGlyph || c > glyphSet.maxGlyph) { continue; }
         const GlyphCharacter* gc = &glyphSet.glyphs[c - glyphSet.minGlyph];
+
+        if(!gc->texture->textureView())
+        {
+            x += (gc->advance >> 6) * scale;
+            continue;
+        }
 
         const float xpos = x + gc->bearing.x() * scale;
         const float ypos = y - (gc->size.y() - gc->bearing.y()) * scale;
@@ -326,7 +337,8 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
 float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) noexcept
 {
     const NullableRef<IRasterizerState> tmpRS = context.setRasterizerState(rs);
-    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    // const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    const GlyphSet& glyphSet = *glyphSetHandle.get();
 
     _shader->bind(context);
 
@@ -355,6 +367,12 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
             x = initialX;
             y += lineHeight;
             height += lineHeight;
+        }
+
+        if(!gc->texture->textureView())
+        {
+            x += advance;
+            continue;
         }
 
         const float xpos = x + gc->bearing.x() * scale;
@@ -400,7 +418,8 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
 
 float TextHandler::computeLength(GlyphSetHandle glyphSetHandle, const char* str, float scale) const noexcept
 {
-    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    // const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    const GlyphSet& glyphSet = *glyphSetHandle.get();
 
     float length = 0.0f;
 
@@ -416,7 +435,8 @@ float TextHandler::computeLength(GlyphSetHandle glyphSetHandle, const char* str,
 
 float TextHandler::computeHeight(GlyphSetHandle glyphSetHandle, const char* str, float scale, float x, const Window& window, float lineHeight) const noexcept
 {
-    const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    // const GlyphSet& glyphSet = _glyphSets[glyphSetHandle];
+    const GlyphSet& glyphSet = *glyphSetHandle.get();
 
     float height = lineHeight;
 

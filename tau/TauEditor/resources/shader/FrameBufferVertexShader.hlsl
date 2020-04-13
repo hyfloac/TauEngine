@@ -13,7 +13,8 @@ struct PSInput
 PSInput vsMain(VSInput input)
 {
     PSInput output;
-    output.svPosition = float4(input.position, 0.0f, 1.0f);
+    // 0.999999f is very close, but not at the far frustum
+    output.svPosition = float4(input.position, 0.999999f, 1.0f);
     output.texCoord = input.texCoord;
     output.texCoord.y = 1.0f - output.texCoord.y;
     return output;

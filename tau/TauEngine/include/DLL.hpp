@@ -10,6 +10,9 @@
   #define TAU_DLL
 #endif
 
+/*
+ * Don't use NOVTABLE in debug modes as it breaks NatVis.
+ */
 #if defined(TAU_PRODUCTION)
   #define TAU_NOVTABLE NOVTABLE
 #else

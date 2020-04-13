@@ -30,6 +30,7 @@ class IGraphicsInterface;
 
 struct GlyphCharacter final
 {
+    DELETE_COPY(GlyphCharacter);
 public:
     // CPPRef<ITexture2D> texture;
     ITexture2D* texture;
@@ -51,31 +52,31 @@ public:
         , advance(_advance)
     { }
 
-    inline GlyphCharacter(const GlyphCharacter& copy) noexcept = delete;
-
-    inline GlyphCharacter(GlyphCharacter&& move) noexcept
-        : texture(move.texture)
-        , size(move.size)
-        , bearing(move.bearing)
-        , advance(move.advance)
-    { move.texture = null; }
-
-    inline GlyphCharacter& operator=(const GlyphCharacter & copy) noexcept = delete;
-
-    inline GlyphCharacter& operator=(GlyphCharacter && move) noexcept
-    {
-        if(this == &move)
-        { return *this; }
-
-        texture = move.texture;
-        size = move.size;
-        bearing = move.bearing;
-        advance = move.advance;
-
-        move.texture = null;
-
-        return *this;
-    }
+    // inline GlyphCharacter(const GlyphCharacter& copy) noexcept = delete;
+    //
+    // inline GlyphCharacter(GlyphCharacter&& move) noexcept
+    //     : texture(move.texture)
+    //     , size(move.size)
+    //     , bearing(move.bearing)
+    //     , advance(move.advance)
+    // { move.texture = null; }
+    //
+    // inline GlyphCharacter& operator=(const GlyphCharacter & copy) noexcept = delete;
+    //
+    // inline GlyphCharacter& operator=(GlyphCharacter && move) noexcept
+    // {
+    //     if(this == &move)
+    //     { return *this; }
+    //
+    //     texture = move.texture;
+    //     size = move.size;
+    //     bearing = move.bearing;
+    //     advance = move.advance;
+    //
+    //     move.texture = null;
+    //
+    //     return *this;
+    // }
 
     inline ~GlyphCharacter() noexcept
     {
@@ -95,13 +96,17 @@ public:
     size_t glyphCount;
     DynArray<GlyphCharacter> glyphs;
 
-    inline GlyphSet(DynString _setName, char _minGlyph, char _maxGlyph) noexcept
-        : setName(std::move(_setName)), minGlyph(_minGlyph), maxGlyph(_maxGlyph),
-          glyphCount(_maxGlyph - _minGlyph + 1), glyphs(glyphCount)
+    inline GlyphSet(const DynString& _setName, char _minGlyph, char _maxGlyph) noexcept
+        : setName(_setName)
+        , minGlyph(_minGlyph)
+        , maxGlyph(_maxGlyph)
+        , glyphCount(_maxGlyph - _minGlyph + 1)
+        , glyphs(glyphCount)
     { }
 };
 
-using GlyphSetHandle = i64;
+// using GlyphSetHandle = i64;
+using GlyphSetHandle = NullableRef<GlyphSet>;
 
 class TAU_DLL TextHandler final
 {
@@ -143,7 +148,7 @@ private:
 private:
     FT_Library _ft;
 
-    std::vector<GlyphSet> _glyphSets;
+    // std::vector<GlyphSet> _glyphSets;
 
     CPPRef<IShaderProgram> _shader;
     CPPRef<IVertexArray> _va;
