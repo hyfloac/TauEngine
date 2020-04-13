@@ -90,6 +90,8 @@ public:
 
     [[nodiscard]] const SelectedResource& select(const RST::ResIndex index) const noexcept
     { return _files[index]; }
+
+    [[nodiscard]] uSys count() const noexcept { return _files.count(); }
 };
 
 class ResourceSelectorLoader final

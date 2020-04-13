@@ -22,9 +22,8 @@
 #include "dx/dx10/DX10RasterizerState.hpp"
 #include <vr/VRUtils.hpp>
 
-#include "gl/GLRenderingContext.hpp"
 
-static void setupGameFolders() noexcept;
+static void setupGameFolders(bool dbgVFSFolder) noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
@@ -51,7 +50,32 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _logger->set_level(spdlog::level::trace);
     _logger->set_pattern("%^[%H:%M:%S:%e] [%n] [%l]%$: %v");
 
-    setupGameFolders();
+    volatile bool dbgVFSFolder = false;
+
+    if(argCount >= 2)
+    {
+        for(int i = 1; i < argCount; ++i)
+        {
+            if(strcmp(args[i], "-gl") == 0)
+            {
+                RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+            }
+            else if(strcmp(args[i], "-dx10") == 0)
+            {
+                RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+            }
+            else if(strcmp(args[i], "-dx11") == 0)
+            {
+                RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+            }
+            else if(strcmp(args[i], "-dbgVFS") == 0)
+            {
+                dbgVFSFolder = true;
+            }
+        }
+    }
+
+    setupGameFolders(dbgVFSFolder);
     setupConfig();
 
     ResourceSelectorLoader::setCacheDirectory("|TERes/cache");
@@ -63,22 +87,6 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
     RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
-
-    if(argCount >= 2)
-    {
-        if(strcmp(args[1], "-gl") == 0)
-        {
-            RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-        }
-        else if(strcmp(args[1], "-dx10") == 0)
-        {
-            RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-        }
-        else if(strcmp(args[1], "-dx11") == 0)
-        {
-            RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
-        }
-    }
 
     _window = new Window(_config.windowWidth, _config.windowHeight, "Tau Editor", this);
     _window->createWindow();
@@ -491,31 +499,25 @@ static bool setupWinFolder(int dir, const char* subPath, const char* mountPoint)
     return false;
 }
 
-static void setupGameFolders() noexcept
+static void setupGameFolders(const bool dbgVFSFolder) noexcept
 {
-    // if(!setupWinFolder(CSIDL_MYDOCUMENTS, "\\My Games\\TauEditor", "game"))
-    // {
-    //     VFS::Instance().mount("game", "C:\\TauEditor", Win32FileLoader::Instance());
-    // }
-    if(!setupWinFolder(CSIDL_LOCAL_APPDATA, "/TauEditor", "game"))
+    if(dbgVFSFolder)
     {
-        VFS::Instance().mountDynamic("game", "C:/TauEditor", Win32FileLoader::Instance());
-        if(!Win32FileLoader::Instance()->fileExists("C:/TauEditor"))
-        {
-            if(!Win32FileLoader::Instance()->createFolder("C:/TauEditor"))
-            {
-            }
-        }
+        VFS::Instance().mountDynamic("TERes", "D:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
     }
-    VFS::Instance().mountDynamic("TERes", "D:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+    else
+    {
+        VFS::Instance().mountDynamic("TERes", "resources", Win32FileLoader::Instance());
+    }
 }
 
-static bool setupDebugCallback(TauEditorApplication*) noexcept
+static bool setupDebugCallback(TauEditorApplication* tea) noexcept
 {
 #ifndef TAU_PRODUCTION
     setupDefaultDebugMessageCallback(tea->logger(), true);
     return true;
 #else
+    UNUSED(tea);
     return false;
 #endif
 }

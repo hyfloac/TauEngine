@@ -254,8 +254,12 @@ bool DX11ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* dxArgs
     ERROR_CODE_COND_F(!args.fileName, Error::InvalidFile);
 
     const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
-	
-    const CPPRef<IFile> shaderFile = shaderSelector.select(_resIndex).loadFile(FileProps::Read);
+
+    ERROR_CODE_COND_F(shaderSelector.count() == 0, Error::InvalidFile);
+    auto& selected = shaderSelector.select(_resIndex);
+    ERROR_CODE_COND_F(!selected.loader() || selected.path().length() == 0 || selected.name().length() == 0, Error::InvalidFile);
+    const CPPRef<IFile> shaderFile = selected.loadFile(FileProps::Read);
+
     const i64 fileSize = shaderFile->size();
 	
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);

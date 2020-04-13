@@ -3,6 +3,10 @@
 #include "VFS.hpp"
 #include "Win32File.hpp"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 VFS& VFS::Instance() noexcept
 {
     static VFS instance(Win32FileLoader::Instance());
@@ -11,7 +15,13 @@ VFS& VFS::Instance() noexcept
 
 void VFS::mount(const DynString& mountPoint, const DynString& path, const CPPRef<IFileLoader>& loader, bool canCreateFile, bool canWriteFile)
 {
-    _mountPoints.insert(MountMap::value_type(mountPoint, VFS::Container(path, loader, canCreateFile, canWriteFile)));
+#ifdef _WIN32
+    CHAR buffer[MAX_PATH];
+    GetFullPathNameA(path.c_str(), MAX_PATH, buffer, NULL);
+    const DynString absolutePath(buffer);
+#endif
+
+    _mountPoints.insert(MountMap::value_type(mountPoint, VFS::Container(absolutePath, loader, canCreateFile, canWriteFile)));
 }
 
 void VFS::unmount(const DynString& mountPoint) noexcept

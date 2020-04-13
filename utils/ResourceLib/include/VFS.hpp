@@ -42,9 +42,11 @@ public:
         bool canCreateFile;
         bool canWriteFile;
 
-        Container(DynString path, CPPRef<IFileLoader> fileLoader, const bool canCreateFile, const bool canWriteFile)
-            : path(std::move(path)), fileLoader(std::move(fileLoader)),
-              canCreateFile(canCreateFile), canWriteFile(canWriteFile)
+        Container(const DynString& path, const CPPRef<IFileLoader>& fileLoader, const bool canCreateFile, const bool canWriteFile)
+            : path(path)
+            , fileLoader(fileLoader)
+            , canCreateFile(canCreateFile)
+            , canWriteFile(canWriteFile)
         { }
 
         static Container Dynamic(const DynString& path, const CPPRef<IFileLoader>& fileLoader)

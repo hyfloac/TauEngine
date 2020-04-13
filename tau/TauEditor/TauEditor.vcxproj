@@ -362,6 +362,8 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBufferPix
       <FixedBaseAddress>false</FixedBaseAddress>
       <TargetMachine>MachineX64</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <SubSystem>
+      </SubSystem>
     </Link>
     <BuildLog>
       <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
