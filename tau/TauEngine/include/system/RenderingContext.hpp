@@ -23,6 +23,8 @@ class IDepthStencilState;
 struct DepthStencilArgs;
 class IRasterizerState;
 struct RasterizerArgs;
+class IBlendingState;
+struct BlendingArgs;
 
 class TAU_DLL TAU_NOVTABLE IRenderingContext
 {
@@ -91,6 +93,12 @@ public:
     virtual const RasterizerArgs& getDefaultRasterizerArgs() noexcept = 0;
     [[nodiscard]] virtual NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept = 0;
 
+    virtual NullableRef<IBlendingState> setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept = 0;
+    virtual void setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept = 0;
+    virtual void resetBlendingState(const float color[4]) noexcept = 0;
+    virtual const BlendingArgs& getDefaultBlendingArgs() noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IBlendingState> getDefaultBlendingState() noexcept = 0;
+
     virtual void beginFrame() noexcept = 0;
     virtual void endFrame() noexcept = 0;
 
@@ -117,7 +125,6 @@ public:
     {
         NoError = 0,
         SystemMemoryAllocationError,
-        IncorrectGraphicsAPI,
         UnsupportedAPIVersion,
         NullWindow
     };

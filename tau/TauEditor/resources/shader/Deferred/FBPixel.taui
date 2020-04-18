@@ -1,0 +1,2 @@
+"OpenGL": "FBPixel.glsl",
+"DirectX10": "FBPixel.cso"

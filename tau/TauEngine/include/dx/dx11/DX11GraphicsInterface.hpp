@@ -12,6 +12,7 @@ class DX11IndexBufferBuilder;
 class DX11UniformBufferBuilder;
 class DX11DepthStencilStateBuilder;
 class DX11RasterizerStateBuilder;
+class DX11BlendingStateBuilder;
 class DX11TextureBuilder;
 class DX11TextureSamplerBuilder;
 class DX11SingleTextureUploaderBuilder;
@@ -32,6 +33,7 @@ private:
     DX11UniformBufferBuilder* _uniformBufferBuilder;
     DX11DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX11RasterizerStateBuilder* _rasterizerStateBuilder;
+    DX11BlendingStateBuilder* _blendingStateBuilder;
     DX11TextureBuilder* _textureBuilder;
     DX11TextureSamplerBuilder* _textureSamplerBuilder;
     DX11SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
@@ -54,6 +56,7 @@ public:
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
+    [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;

@@ -8,8 +8,9 @@
 #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
-#include "dx/dx10/DX10RasterizerState.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
+#include "dx/dx10/DX10RasterizerState.hpp"
+#include "dx/dx10/DX10BlendingState.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 
 DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept
@@ -25,6 +26,8 @@ DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10
     , _currentDepthStencilState(null)
     , _defaultRasterizerState(null)
     , _currentRasterizerState(null)
+    , _defaultBlendingState(null)
+    , _currentBlendingState(null)
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -124,7 +127,7 @@ const DepthStencilArgs& DX10RenderingContext::getDefaultDepthStencilArgs() noexc
 { return _defaultDepthStencilState->args(); }
 
 NullableRef<IDepthStencilState> DX10RenderingContext::getDefaultDepthStencilState() noexcept
-{ return RefCast<IDepthStencilState>(_defaultDepthStencilState); }
+{ return _defaultDepthStencilState; }
 
 NullableRef<IRasterizerState> DX10RenderingContext::setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
 {
@@ -157,7 +160,40 @@ const RasterizerArgs& DX10RenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }
 
 NullableRef<IRasterizerState> DX10RenderingContext::getDefaultRasterizerState() noexcept
-{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
+{ return _defaultRasterizerState; }
+
+NullableRef<IBlendingState> DX10RenderingContext::setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept
+{
+    NullableRef<IBlendingState> ret = RefCast<IBlendingState>(_currentBlendingState);
+
+    if(!bsState || !RTT_CHECK(bsState.get(), DX10BlendingState))
+    { return ret; }
+
+    _currentBlendingState = RefCast<DX10BlendingState>(bsState);
+    _currentBlendingState->apply(*this, color);
+
+    return ret;
+}
+
+void DX10RenderingContext::setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept
+{
+    if(!bsState || !RTT_CHECK(bsState.get(), DX10BlendingState))
+    { return; }
+
+    _defaultBlendingState = RefCast<DX10BlendingState>(bsState);
+}
+
+void DX10RenderingContext::resetBlendingState(const float color[4]) noexcept
+{
+    _currentBlendingState = _defaultBlendingState;
+    _currentBlendingState->apply(*this, color);
+}
+
+const BlendingArgs& DX10RenderingContext::getDefaultBlendingArgs() noexcept
+{ return _defaultBlendingState->args(); }
+
+NullableRef<IBlendingState> DX10RenderingContext::getDefaultBlendingState() noexcept
+{ return _defaultBlendingState; }
 
 void DX10RenderingContext::beginFrame() noexcept
 {

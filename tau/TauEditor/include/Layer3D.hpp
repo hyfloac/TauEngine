@@ -16,6 +16,7 @@
 #include <shader/PointLight.hpp>
 #include <model/Material.hpp>
 #include <shader/SpotLight.hpp>
+#include <graphics/BlendingState.hpp>
 #include "Globals.hpp"
 
 class Window;
@@ -56,7 +57,7 @@ private:
     UniformBlockS<ViewPosUniforms> _cameraPosUni;
 
     CPPRef<IShaderProgram> _frameBufferShader;
-    CPPRef<ISingleTextureUploader> _frameBufferUploader;
+    CPPRef<ITextureUploader> _frameBufferUploader;
     CPPRef<ITextureSampler> _frameBufferSampler;
 
     CPPRef<ITexture> _texture;
@@ -65,6 +66,8 @@ private:
     CPPRef<IVertexArray> _frameBufferVA;
 
     CPPRef<ITexture> _testTexture;
+
+    NullableRef<IBlendingState> _deferredBSState;
 
     Vector3f _modelPos;
     glm::mat4 _modelViewMatrix;

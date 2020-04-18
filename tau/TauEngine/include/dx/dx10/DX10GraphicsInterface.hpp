@@ -12,6 +12,7 @@ class DX10IndexBufferBuilder;
 class DX10UniformBufferBuilder;
 class DX10DepthStencilStateBuilder;
 class DX10RasterizerStateBuilder;
+class DX10BlendingStateBuilder;
 class DX10TextureBuilder;
 class DX10TextureSamplerBuilder;
 class DX10SingleTextureUploaderBuilder;
@@ -32,6 +33,7 @@ private:
     DX10UniformBufferBuilder* _uniformBufferBuilder;
     DX10DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX10RasterizerStateBuilder* _rasterizerStateBuilder;
+    DX10BlendingStateBuilder* _blendingStateBuilder;
     DX10TextureBuilder* _textureBuilder;
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
     DX10SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
@@ -54,6 +56,7 @@ public:
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
+    [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
     [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;

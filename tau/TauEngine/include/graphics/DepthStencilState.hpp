@@ -4,7 +4,6 @@
 #include "texture/TextureEnums.hpp"
 #include <Objects.hpp>
 #include <Safeties.hpp>
-#include <ReferenceCountingPointer.hpp>
 #include <RunTimeType.hpp>
 
 struct DepthStencilArgs final
@@ -45,8 +44,10 @@ public:
         CompareFunc compareFunc;
     public:
         StencilOpArgs(const StencilOp failOp, const StencilOp stencilPassDepthFailOp, const StencilOp passOp, const CompareFunc compareFunc) noexcept
-            : failOp(failOp), stencilPassDepthFailOp(stencilPassDepthFailOp),
-            passOp(passOp), compareFunc(compareFunc)
+            : failOp(failOp)
+            , stencilPassDepthFailOp(stencilPassDepthFailOp)
+            , passOp(passOp)
+            , compareFunc(compareFunc)
         { }
     };
 public:
@@ -63,25 +64,25 @@ public:
     StencilOpArgs backFace;
 public:
     DepthStencilArgs(const bool enableDepthTest, const bool enableStencilTest, const DepthWriteMask depthWriteMask, const CompareFunc depthCompareFunc, const u8 stencilReadMask, const u8 stencilWriteMask, const StencilOpArgs& frontFace, const StencilOpArgs& backFace) noexcept
-        : enableDepthTest(enableDepthTest),
-          enableStencilTest(enableStencilTest),
-          depthWriteMask(depthWriteMask),
-          depthCompareFunc(depthCompareFunc),
-          stencilReadMask(stencilReadMask),
-          stencilWriteMask(stencilWriteMask),
-          frontFace(frontFace),
-          backFace(backFace)
+        : enableDepthTest(enableDepthTest)
+        , enableStencilTest(enableStencilTest)
+        , depthWriteMask(depthWriteMask)
+        , depthCompareFunc(depthCompareFunc)
+        , stencilReadMask(stencilReadMask)
+        , stencilWriteMask(stencilWriteMask)
+        , frontFace(frontFace)
+        , backFace(backFace)
     { }
 
     explicit DepthStencilArgs(tau::TIPRecommended) noexcept
-        : enableDepthTest(true),
-          enableStencilTest(true),
-          depthWriteMask(DepthWriteMask::All),
-          depthCompareFunc(CompareFunc::LessThan),
-          stencilReadMask(0xFF),
-          stencilWriteMask(0xFF),
-          frontFace(StencilOp::Keep, StencilOp::IncrementClamp, StencilOp::Keep, CompareFunc::Always),
-          backFace(StencilOp::Keep, StencilOp::DecrementClamp, StencilOp::Keep, CompareFunc::Always)
+        : enableDepthTest(true)
+        , enableStencilTest(true)
+        , depthWriteMask(DepthWriteMask::All)
+        , depthCompareFunc(CompareFunc::LessThan)
+        , stencilReadMask(0xFF)
+        , stencilWriteMask(0xFF)
+        , frontFace(StencilOp::Keep, StencilOp::IncrementClamp, StencilOp::Keep, CompareFunc::Always)
+        , backFace(StencilOp::Keep, StencilOp::DecrementClamp, StencilOp::Keep, CompareFunc::Always)
     { }
 
     // ReSharper disable once CppPossiblyUninitializedMember
@@ -111,7 +112,7 @@ public:
     RTT_BASE_CAST(IDepthStencilState);
 };
 
-class TAU_DLL NOVTABLE IDepthStencilStateBuilder
+class TAU_DLL TAU_NOVTABLE IDepthStencilStateBuilder
 {
     DEFAULT_CONSTRUCT_PO(IDepthStencilStateBuilder);
     DEFAULT_DESTRUCT_VI(IDepthStencilStateBuilder);

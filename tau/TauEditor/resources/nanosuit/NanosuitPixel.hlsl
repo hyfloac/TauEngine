@@ -59,7 +59,7 @@ cbuffer ViewPos : register(b4)
 Texture2D diffuseTexture : register(t0);
 Texture2D specularTexture : register(t1);
 Texture2D normalTexture : register(t2);
-SamplerState textureSampler;
+SamplerState textureSampler : register(s0);
 
 float3 computePointLight(PointLight light, float3 cameraPos, float3 pos, float3 normal, float3 diffuseTexel, float3 specularTexel, float specExp);
 float3 computeSpotLight(SpotLight light, float3 cameraPos, float3 pos, float3 normal, float3 diffuseTexel, float3 specularTexel, float specExp);

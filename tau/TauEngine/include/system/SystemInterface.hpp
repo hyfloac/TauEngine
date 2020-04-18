@@ -26,6 +26,8 @@ public:
     [[nodiscard]] const _SysContainer& sysContainer() const noexcept { return _sysContainer; }
 
     [[nodiscard]] NullableRef<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) const noexcept;
+
+    void createAlert(const char* title, const char* message) const noexcept;
 private:
     friend bool tauInit(void) noexcept;
     friend void tauFinalize(void) noexcept;

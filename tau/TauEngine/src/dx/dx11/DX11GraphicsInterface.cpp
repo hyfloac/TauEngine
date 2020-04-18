@@ -8,6 +8,7 @@
 #include "dx/dx11/DX11Buffer.hpp"
 #include "dx/dx11/DX11DepthStencilState.hpp"
 #include "dx/dx11/DX11RasterizerState.hpp"
+#include "dx/dx11/DX11BlendingState.hpp"
 #include "dx/dx11/DX11RenderingContext.hpp"
 #include "dx/dx11/DX11Texture.hpp"
 #include "dx/dx11/DX11TextureSampler.hpp"
@@ -24,6 +25,7 @@ DX11GraphicsInterface::DX11GraphicsInterface(const RenderingMode& mode, ID3D11De
     , _uniformBufferBuilder(new(::std::nothrow) DX11UniformBufferBuilder(*this))
     , _depthStencilStateBuilder(new(::std::nothrow) DX11DepthStencilStateBuilder(*this))
     , _rasterizerStateBuilder(new(::std::nothrow) DX11RasterizerStateBuilder(*this))
+    , _blendingStateBuilder(new(::std::nothrow) DX11BlendingStateBuilder(*this))
     , _textureBuilder(new(::std::nothrow) DX11TextureBuilder(*this))
     , _textureSamplerBuilder(new(::std::nothrow) DX11TextureSamplerBuilder(*this))
     , _singleTextureUploaderBuilder(new(::std::nothrow) DX11SingleTextureUploaderBuilder(*this))
@@ -44,6 +46,7 @@ DX11GraphicsInterface::~DX11GraphicsInterface() noexcept
     delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
+    delete _blendingStateBuilder;
     delete _textureBuilder;
     delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
@@ -104,6 +107,9 @@ IDepthStencilStateBuilder& DX11GraphicsInterface::createDepthStencilState() noex
 
 IRasterizerStateBuilder& DX11GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
+
+IBlendingStateBuilder& DX11GraphicsInterface::createBlendingState() noexcept
+{ return *_blendingStateBuilder; }
 
 ITextureBuilder& DX11GraphicsInterface::createTexture() noexcept
 { return *_textureBuilder; }

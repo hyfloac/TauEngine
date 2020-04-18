@@ -12,6 +12,7 @@ class IRenderingContext;
 class IRenderingContextBuilder;
 class IDepthStencilStateBuilder;
 class IRasterizerStateBuilder;
+class IBlendingStateBuilder;
 class ITextureBuilder;
 class ISingleTextureUploaderBuilder;
 class ITextureUploaderBuilder;
@@ -45,6 +46,7 @@ public:
     [[nodiscard]] virtual IUniformBufferBuilder& createUniformBuffer() noexcept = 0;
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
+    [[nodiscard]] virtual IBlendingStateBuilder& createBlendingState() noexcept = 0;
     [[nodiscard]] virtual ITextureBuilder& createTexture() noexcept = 0;
     [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
     [[nodiscard]] virtual ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept = 0;

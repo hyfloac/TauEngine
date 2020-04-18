@@ -6,13 +6,13 @@
 #include "dx/dx11/DX11GraphicsInterface.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 
+static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept;
+
 SystemInterface::SystemInterface() noexcept
     : _sysContainer({ NULL })
 {
     _sysContainer.programHandle = GetModuleHandleA(NULL);
 }
-
-static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept;
 
 NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const RenderingMode& renderingMode) const noexcept
 {
@@ -58,6 +58,11 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
         }
         default: return null;
     }
+}
+
+void SystemInterface::createAlert(const char* title, const char* message) const noexcept
+{
+    (void) MessageBoxA(NULL, title, message, MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
 }
 
 static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept

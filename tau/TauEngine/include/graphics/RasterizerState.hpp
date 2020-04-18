@@ -70,7 +70,7 @@ public:
     RTT_BASE_CAST(IRasterizerState);
 };
 
-class TAU_DLL NOVTABLE IRasterizerStateBuilder
+class TAU_DLL TAU_NOVTABLE IRasterizerStateBuilder
 {
     DEFAULT_CONSTRUCT_PO(IRasterizerStateBuilder);
     DEFAULT_DESTRUCT_VI(IRasterizerStateBuilder);

@@ -7,6 +7,7 @@
 
 class DX11DepthStencilState;
 class DX11RasterizerState;
+class DX11BlendingState;
 class DX11GraphicsInterface;
 
 struct DX11RenderingContextArgs final
@@ -37,6 +38,8 @@ private:
     NullableRef<DX11DepthStencilState> _currentDepthStencilState;
     NullableRef<DX11RasterizerState> _defaultRasterizerState;
     NullableRef<DX11RasterizerState> _currentRasterizerState;
+    NullableRef<DX11BlendingState> _defaultBlendingState;
+    NullableRef<DX11BlendingState> _currentBlendingState;
 public:
     DX11RenderingContext(DX11GraphicsInterface& gi, const DX11RenderingContextArgs& args) noexcept;
 
@@ -67,6 +70,12 @@ public:
     void resetRasterizerState() noexcept override;
     const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
     [[nodiscard]] NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept override;
+
+    NullableRef<IBlendingState> setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept override;
+    void setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept override;
+    void resetBlendingState(const float color[4]) noexcept override;
+    const BlendingArgs& getDefaultBlendingArgs() noexcept override;
+    [[nodiscard]] NullableRef<IBlendingState> getDefaultBlendingState() noexcept override;
 
     void beginFrame() noexcept override;
     void endFrame() noexcept override;

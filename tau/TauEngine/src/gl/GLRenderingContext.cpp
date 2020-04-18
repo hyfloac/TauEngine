@@ -7,10 +7,10 @@
 
 #include "gl/GLShader.hpp"
 #include "gl/GLFrameBuffer.hpp"
-#include "gl/GLTextureUploader.hpp"
 #include "gl/GLBufferDescriptor.hpp"
 #include "gl/GLDepthStencilState.hpp"
 #include "gl/GLRasterizerState.hpp"
+#include "gl/GLBlendingState.hpp"
 #include "gl/GLGraphicsInterface.hpp"
 
 #include "gl/GLBuffer.hpp"
@@ -18,10 +18,16 @@
 #include "Timings.hpp"
 
 GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept
-    : IRenderingContext(mode), _gi(glArgs.gi),
-      _device(glSysArgs.device), _context(glSysArgs.context),
-      _defaultDepthStencilState(null), _currentDepthStencilState(null),
-      _defaultRasterizerState(null), _currentRasterizerState(null)
+    : IRenderingContext(mode)
+    , _gi(glArgs.gi)
+    , _device(glSysArgs.device)
+    , _context(glSysArgs.context)
+    , _defaultDepthStencilState(null)
+    , _currentDepthStencilState(null)
+    , _defaultRasterizerState(null)
+    , _currentRasterizerState(null)
+    , _defaultBlendingState(null)
+    , _currentBlendingState(null)
 { }
 
 GLRenderingContext::~GLRenderingContext() noexcept
@@ -79,7 +85,7 @@ const DepthStencilArgs& GLRenderingContext::getDefaultDepthStencilArgs() noexcep
 { return _defaultDepthStencilState->args(); }
 
 NullableRef<IDepthStencilState> GLRenderingContext::getDefaultDepthStencilState() noexcept
-{ return RefCast<IDepthStencilState>(_defaultDepthStencilState); }
+{ return _defaultDepthStencilState; }
 
 NullableRef<IRasterizerState> GLRenderingContext::setRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
 {
@@ -112,7 +118,42 @@ const RasterizerArgs& GLRenderingContext::getDefaultRasterizerArgs() noexcept
 { return _defaultRasterizerState->args(); }
 
 NullableRef<IRasterizerState> GLRenderingContext::getDefaultRasterizerState() noexcept
-{ return RefCast<IRasterizerState>(_defaultRasterizerState); }
+{ return _defaultRasterizerState; }
+
+NullableRef<IBlendingState> GLRenderingContext::setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept
+{
+    NullableRef<IBlendingState> ret = RefCast<IBlendingState>(_currentBlendingState);
+
+    if(!bsState || !RTT_CHECK(bsState.get(), GLBlendingState))
+    { return ret; }
+
+    _currentBlendingState = RefCast<GLBlendingState>(bsState);
+    _currentBlendingState->apply();
+    glBlendColor(color[0], color[1], color[2], color[3]);
+
+    return ret;
+}
+
+void GLRenderingContext::setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept
+{
+    if(!bsState || !RTT_CHECK(bsState.get(), GLBlendingState))
+    { return; }
+
+    _defaultBlendingState = RefCast<GLBlendingState>(bsState);
+}
+
+void GLRenderingContext::resetBlendingState(const float color[4]) noexcept
+{
+    _currentBlendingState = _defaultBlendingState;
+    _currentBlendingState->apply();
+    glBlendColor(color[0], color[1], color[2], color[3]);
+}
+
+const BlendingArgs& GLRenderingContext::getDefaultBlendingArgs() noexcept
+{ return _defaultBlendingState->args(); }
+
+NullableRef<IBlendingState> GLRenderingContext::getDefaultBlendingState() noexcept
+{ return _defaultBlendingState; }
 
 GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {

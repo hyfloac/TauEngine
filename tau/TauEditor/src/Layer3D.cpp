@@ -11,6 +11,8 @@
 #include "system/GraphicsInterface.hpp"
 #include <EnumBitFields.hpp>
 
+#include "system/SystemInterface.hpp"
+
 template<>
 class UniformAccessor<Layer3D::Uniforms> final
 {
@@ -72,16 +74,15 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     ShaderArgs shaderArgs;
     shaderArgs.vfsMount = "|TERes";
+    shaderArgs.path = "/shader/Deferred/";
 
-    shaderArgs.path = "/nanosuit/";
-    shaderArgs.fileName = "NanosuitPixel";
-    shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
-
-    shaderArgs.path = "/shader/";
-    shaderArgs.fileName = "SimpleVertexShader";
+    shaderArgs.fileName = "Vertex";
     shaderArgs.stage = EShader::Stage::Vertex;
     CPPRef<IShader> vertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+
+    shaderArgs.fileName = "Pixel";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    CPPRef<IShader> pixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
 
     objl::Loader loader;
     if(loader.loadFile("|TERes/nanosuit/nanosuit.obj"))
@@ -112,11 +113,11 @@ Layer3D::Layer3D(Globals& globals) noexcept
     // shaderBuilder->file(VFS::Instance().openFile("|TERes/shader/CubeMap/RefractionPixelShader.glsl", FileProps::Read));
     // CPPRef<IShader> refractionPixelShader = CPPRef<IShader>(shaderBuilder->build());
 
-    shaderArgs.fileName = "FrameBufferVertexShader";
+    shaderArgs.fileName = "FBVertex";
     shaderArgs.stage = EShader::Stage::Vertex;
     CPPRef<IShader> frameBufferVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
 
-    shaderArgs.fileName = "FrameBufferPixelShader";
+    shaderArgs.fileName = "FBPixel";
     shaderArgs.stage = EShader::Stage::Pixel;
     CPPRef<IShader> frameBufferPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
 
@@ -138,29 +139,29 @@ Layer3D::Layer3D(Globals& globals) noexcept
     tArgs.initialBuffer = null;
 
     const CPPRef<ITexture2D> colorTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> specularTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+
+    tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha32Float;
+    const CPPRef<ITexture2D> positionTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+
+    tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha16Float;
+    const CPPRef<ITexture2D> normalTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
 
     TextureDepthStencilArgs tdsArgs;
     tdsArgs.width = globals.window.width();
     tdsArgs.height = globals.window.height();
-    tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget;
+    tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget | ETexture::DepthStencilBindFlags::DepthShaderAccess;
     tdsArgs.initialBuffer = null;
     const CPPRef<ITextureDepthStencil> dsTexture = globals.gi.createTexture().buildCPPRef(tdsArgs, null);
 
-    FrameBufferArgs fbArgs(1);
+    FrameBufferArgs fbArgs(4);
     fbArgs.colorAttachments[0] = colorTexture;
+    fbArgs.colorAttachments[1] = positionTexture;
+    fbArgs.colorAttachments[2] = normalTexture;
+    fbArgs.colorAttachments[3] = specularTexture;
     fbArgs.depthStencilAttachment = dsTexture;
 
     _frameBuffer = globals.gi.createFrameBuffer().buildCPPRef(fbArgs, null);
-
-    // CPPRef<IFrameBufferBuilder> builder = window.renderingContext()->createFrameBuffer();
-    //
-    // IFrameBufferAttachment* colorBuffer   = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::Color, window.width(), window.height());
-    // IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*window.renderingContext(), IFrameBufferAttachment::DepthStencil, window.width(), window.height());
-    //
-    // builder->attach(colorBuffer, nullptr);
-    // builder->attach(depthStencilBuffer, nullptr);
-    //
-    // _frameBuffer = CPPRef<IFrameBuffer>(builder->build(nullptr));
 
     float quadVertices[] = {
         -1.0f,  1.0f, 0.0f, 1.0f,
@@ -201,10 +202,14 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     _testTexture = TextureLoader::generateDebugTexture8(globals.gi, globals.rc, 7);
 
-    SingleTextureUploaderArgs stuArgs;
-    stuArgs.texture = colorTexture->textureView();
-    stuArgs.textureSampler = _frameBufferSampler;
-    _frameBufferUploader = _globals.gi.createSingleTextureUploader().buildCPPRef(stuArgs, null);
+    TextureUploaderArgs fbTuArgs(5);
+    fbTuArgs.textures[0] = colorTexture->textureView();
+    fbTuArgs.textures[1] = positionTexture->textureView();
+    fbTuArgs.textures[2] = normalTexture->textureView();
+    fbTuArgs.textures[3] = specularTexture->textureView();
+    fbTuArgs.textures[4] = dsTexture->depthView();
+    fbTuArgs.textureSampler = _frameBufferSampler;
+    _frameBufferUploader = _globals.gi.createTextureUploader().buildCPPRef(fbTuArgs, null);
 
     // _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glm::translate(_modelViewMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
@@ -233,10 +238,28 @@ Layer3D::Layer3D(Globals& globals) noexcept
     _pointLightUniforms.set(globals.rc, _pointLight);
     _spotLightUniforms.set(globals.rc, _spotLight);
 
-    // CPPRef<ITextureUploaderBuilder> uploaderBuilder = window.renderingContext()->createTextureUploader(1);
-    // uploaderBuilder->setTexture(0, colorBuffer->texture());
-    // uploaderBuilder->textureSampler(CPPRef<ITextureSampler>(window.renderingContext()->createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
-    // _frameBufferUploader = CPPRef<ITextureUploader>(uploaderBuilder->build());
+    {
+        BlendingArgs bsArgs(tau::rec);
+        bsArgs.independentBlending = false;
+        bsArgs.frameBuffers[0].enableBlending = false;
+        bsArgs.frameBuffers[0].colorSrcFactor = BlendingArgs::BlendFactor::SrcAlpha;
+        bsArgs.frameBuffers[0].colorDstFactor = BlendingArgs::BlendFactor::InvSrcAlpha;
+        bsArgs.frameBuffers[0].alphaSrcFactor = BlendingArgs::BlendFactor::SrcAlpha;
+        bsArgs.frameBuffers[0].alphaDstFactor = BlendingArgs::BlendFactor::InvSrcAlpha;
+
+        IBlendingStateBuilder::Error error;
+        _deferredBSState = globals.gi.createBlendingState().buildTauRef(bsArgs, &error);
+
+        if(error != IBlendingStateBuilder::Error::NoError)
+        {
+            if(error == IBlendingStateBuilder::Error::SystemMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default blending state."); }
+            else if(error == IBlendingStateBuilder::Error::DriverMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default blending state."); }
+            else
+            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default blending state."); }
+        }
+    }
 }
 
 void Layer3D::onUpdate(float fixedDelta) noexcept
@@ -269,7 +292,6 @@ void Layer3D::onPreRender(const DeltaTime& delta) noexcept
     {
         vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
         vr::VRCompositor()->WaitGetPoses(poses, vr::k_unMaxTrackedDeviceCount, NULL, 0);
-
 
         _globals.vrCamera->update(delta, poses[vr::k_unTrackedDeviceIndex_Hmd]);
     }
@@ -321,22 +343,17 @@ void Layer3D::onRender() noexcept
     }
     else
     {
-        _frameBuffer->bind(_globals.rc);
+        const float bsColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        const NullableRef<IBlendingState> storeState = _globals.rc.setBlendingState(_deferredBSState, bsColor);
+
+        _frameBuffer->bind(_globals.rc, IFrameBuffer::AccessMode::Write);
 
         _frameBuffer->clearFrameBuffer(_globals.rc, true, true, false, { 255, 255, 127, 255 });
 
         _shader->bind(context);
-        _spotLight.position() = _camera.camera().position();
-        _spotLight.direction() = _camera.camera().front();
-        // _uniforms.data().compoundMatrix = _camera->compoundedMatrix();
         _uniforms.data().viewMatrix = _camera->viewMatrix();
 
-        _cameraPosUni.data().cameraPos = _camera.camera().position();
-        _spotLightUniforms.set(context, _spotLight);
         _uniforms.upload(context, EShader::Stage::Vertex, 0);
-        _pointLightUniforms.upload(context, EShader::Stage::Pixel, 2);
-        _spotLightUniforms.upload(context, EShader::Stage::Pixel, 3);
-        _cameraPosUni.upload(context, EShader::Stage::Pixel, 4);
         for(const CPPRef<RenderableObject>& ro : _objects)
         {
             TextureIndices indices(0, 0, 0);
@@ -347,16 +364,25 @@ void Layer3D::onRender() noexcept
             indices = TextureIndices(0, 0, 0);
             ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
         }
-        _cameraPosUni.unbind(context, EShader::Stage::Pixel, 4);
-        _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 3);
-        _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 2);
         _uniforms.unbind(context, EShader::Stage::Vertex, 0);
         _shader->unbind(context);
-        _skybox.render(context, _camera.camera());
 
         _frameBuffer->unbind(_globals.rc);
 
+        (void) _globals.rc.setBlendingState(storeState, bsColor);
+
         _frameBufferShader->bind(_globals.rc);
+
+        _spotLight.position() = _camera.camera().position();
+        _spotLight.direction() = _camera.camera().front();
+        _cameraPosUni.data().cameraPos = _camera.camera().position();
+
+        _spotLightUniforms.set(context, _spotLight);
+
+        _pointLightUniforms.upload(context, EShader::Stage::Pixel, 0);
+        _spotLightUniforms.upload(context, EShader::Stage::Pixel, 1);
+        _cameraPosUni.upload(context, EShader::Stage::Pixel, 2);
+
         _frameBufferUploader->upload(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
         _frameBufferVA->bind(_globals.rc);
         _frameBufferVA->preDraw(_globals.rc);
@@ -364,7 +390,14 @@ void Layer3D::onRender() noexcept
         _frameBufferVA->postDraw(_globals.rc);
         _frameBufferVA->unbind(_globals.rc);
         _frameBufferUploader->unbind(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+
+        _cameraPosUni.unbind(context, EShader::Stage::Pixel, 2);
+        _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 1);
+        _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 0);
+
         _frameBufferShader->unbind(_globals.rc);
+
+        _skybox.render(context, _camera.camera());
     }
 }
 
@@ -387,6 +420,13 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     tArgs.initialBuffer = null;
 
     const CPPRef<ITexture2D> colorTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> specularTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+
+    tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha32Float;
+    const CPPRef<ITexture2D> positionTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+
+    tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha16Float;
+    const CPPRef<ITexture2D> normalTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
 
     TextureDepthStencilArgs tdsArgs;
     tdsArgs.width = e.newWidth();
@@ -395,23 +435,23 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     tdsArgs.initialBuffer = null;
     const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, null);
 
-    FrameBufferArgs fbArgs(1);
+    FrameBufferArgs fbArgs(4);
     fbArgs.colorAttachments[0] = colorTexture;
+    fbArgs.colorAttachments[1] = positionTexture;
+    fbArgs.colorAttachments[2] = normalTexture;
+    fbArgs.colorAttachments[3] = specularTexture;
     fbArgs.depthStencilAttachment = dsTexture;
 
     _frameBuffer = _globals.gi.createFrameBuffer().buildCPPRef(fbArgs, null);
 
-    _frameBufferUploader->texture(colorTexture->textureView());
-
-    // CPPRef<IFrameBufferBuilder> builder = _window.renderingContext()->createFrameBuffer();
-    //
-    // IFrameBufferAttachment* colorBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::Color, e.newWidth(), e.newHeight());
-    // IFrameBufferAttachment* depthStencilBuffer = IFrameBufferAttachment::create(*_window.renderingContext(), IFrameBufferAttachment::DepthStencil, e.newWidth(), e.newHeight());
-    //
-    // builder->attach(colorBuffer);
-    // builder->attach(depthStencilBuffer);
-    //
-    // _frameBuffer = CPPRef<IFrameBuffer>(builder->build());
+    TextureUploaderArgs fbTuArgs(5);
+    fbTuArgs.textures[0] = colorTexture->textureView();
+    fbTuArgs.textures[1] = positionTexture->textureView();
+    fbTuArgs.textures[2] = normalTexture->textureView();
+    fbTuArgs.textures[3] = specularTexture->textureView();
+    fbTuArgs.textures[4] = dsTexture->depthView();
+    fbTuArgs.textureSampler = _frameBufferSampler;
+    _frameBufferUploader = _globals.gi.createTextureUploader().buildCPPRef(fbTuArgs, null);
 
     return true;
 }

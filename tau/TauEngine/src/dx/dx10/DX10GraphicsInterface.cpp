@@ -8,6 +8,7 @@
 #include "dx/dx10/DX10Buffer.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
 #include "dx/dx10/DX10RasterizerState.hpp"
+#include "dx/dx10/DX10BlendingState.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10Texture.hpp"
 #include "dx/dx10/DX10TextureSampler.hpp"
@@ -24,6 +25,7 @@ DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10De
     , _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this))
     , _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this))
     , _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this))
+    , _blendingStateBuilder(new(::std::nothrow) DX10BlendingStateBuilder(*this))
     , _textureBuilder(new(::std::nothrow) DX10TextureBuilder(*this))
     , _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this))
     , _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this))
@@ -44,6 +46,7 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
+    delete _blendingStateBuilder;
     delete _textureBuilder;
     delete _textureSamplerBuilder;
     delete _singleTextureUploaderBuilder;
@@ -104,6 +107,9 @@ IDepthStencilStateBuilder& DX10GraphicsInterface::createDepthStencilState() noex
 
 IRasterizerStateBuilder& DX10GraphicsInterface::createRasterizerState() noexcept
 { return *_rasterizerStateBuilder; }
+
+IBlendingStateBuilder& DX10GraphicsInterface::createBlendingState() noexcept
+{ return *_blendingStateBuilder; }
 
 ITextureBuilder& DX10GraphicsInterface::createTexture() noexcept
 { return *_textureBuilder; }

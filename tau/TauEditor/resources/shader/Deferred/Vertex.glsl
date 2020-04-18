@@ -1,0 +1,33 @@
+#version 420 core
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec3 tangent;
+layout(location = 3) in vec2 texCoord;
+
+out vec3 fPosition;
+out vec2 fTexCoord;
+out mat3 fTBN;
+
+layout(std140, binding = 0) uniform CameraMatrices
+{
+    mat4 projectionMatrix;
+    mat4 cameraViewMatrix;
+    mat4 modelViewMatrix;
+};
+
+void main(void)
+{
+    vec4 pos4 = vec4(position, 1.0);
+    gl_Position = projectionMatrix * cameraViewMatrix * modelViewMatrix * pos4;
+
+    fPosition = vec3(modelViewMatrix * pos4);
+    fTexCoord = texCoord;
+
+    vec3 T = normalize(vec3(modelViewMatrix * vec4(tangent, 0.0)));
+    vec3 N = normalize(vec3(modelViewMatrix * vec4(normal, 0.0)));
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
+
+    fTBN = mat3(T, B, N);
+}

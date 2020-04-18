@@ -185,6 +185,10 @@ bool GLFrameBufferBuilder::processArgs(const FrameBufferArgs& args, GLFrameBuffe
         ERROR_CODE_F(Error::InternalError);
     }
 
+    const GLenum bufs[8] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+                             GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
+    glDrawBuffers(args.colorAttachments.count(), bufs);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return true;

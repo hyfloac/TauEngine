@@ -7,6 +7,7 @@
 
 class DX10DepthStencilState;
 class DX10RasterizerState;
+class DX10BlendingState;
 class DX10GraphicsInterface;
 
 struct DX10RenderingContextArgs final
@@ -35,6 +36,8 @@ private:
     NullableRef<DX10DepthStencilState> _currentDepthStencilState;
     NullableRef<DX10RasterizerState> _defaultRasterizerState;
     NullableRef<DX10RasterizerState> _currentRasterizerState;
+    NullableRef<DX10BlendingState> _defaultBlendingState;
+    NullableRef<DX10BlendingState> _currentBlendingState;
 public:
     DX10RenderingContext(DX10GraphicsInterface& gi, const DX10RenderingContextArgs& args) noexcept;
 
@@ -62,6 +65,12 @@ public:
     void resetRasterizerState() noexcept override;
     const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
     [[nodiscard]] NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept override;
+
+    NullableRef<IBlendingState> setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept override;
+    void setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept override;
+    void resetBlendingState(const float color[4]) noexcept override;
+    const BlendingArgs& getDefaultBlendingArgs() noexcept override;
+    [[nodiscard]] NullableRef<IBlendingState> getDefaultBlendingState() noexcept override;
 
     void beginFrame() noexcept override;
     void endFrame() noexcept override;

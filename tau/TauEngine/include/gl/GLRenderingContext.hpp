@@ -10,6 +10,7 @@ class GLGraphicsInterface;
 
 class GLDepthStencilState;
 class GLRasterizerState;
+class GLBlendingState;
 
 struct GLRenderingContextArgs final
 {
@@ -40,6 +41,8 @@ private:
     NullableRef<GLDepthStencilState> _currentDepthStencilState;
     NullableRef<GLRasterizerState> _defaultRasterizerState;
     NullableRef<GLRasterizerState> _currentRasterizerState;
+    NullableRef<GLBlendingState> _defaultBlendingState;
+    NullableRef<GLBlendingState> _currentBlendingState;
 public:
     GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept;
     ~GLRenderingContext() noexcept override final;
@@ -66,6 +69,12 @@ public:
     void resetRasterizerState() noexcept override;
     const RasterizerArgs& getDefaultRasterizerArgs() noexcept override;
     [[nodiscard]] NullableRef<IRasterizerState> getDefaultRasterizerState() noexcept override;
+
+    NullableRef<IBlendingState> setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept override;
+    void setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept override;
+    void resetBlendingState(const float color[4]) noexcept override;
+    const BlendingArgs& getDefaultBlendingArgs() noexcept override;
+    [[nodiscard]] NullableRef<IBlendingState> getDefaultBlendingState() noexcept override;
 
     void beginFrame() noexcept override final { }
     void endFrame() noexcept override final { }

@@ -9,6 +9,7 @@ class GLIndexBufferBuilder;
 class GLUniformBufferBuilder;
 class GLDepthStencilStateBuilder;
 class GLRasterizerStateBuilder;
+class GLBlendingStateBuilder;
 class GLTextureBuilder;
 class GLSingleTextureUploaderBuilder;
 class GLTextureSamplerBuilder;
@@ -39,6 +40,7 @@ private:
     GLUniformBufferBuilder* _uniformBufferBuilder;
     GLDepthStencilStateBuilder* _depthStencilStateBuilder;
     GLRasterizerStateBuilder* _rasterizerStateBuilder;
+    GLBlendingStateBuilder* _blendingStateBuilder;
     GLTextureBuilder* _textureBuilder;
     GLTextureSamplerBuilder* _textureSamplerBuilder;
     GLSingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
@@ -62,6 +64,7 @@ public:
     [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
     [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
+    [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;

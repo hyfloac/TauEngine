@@ -14,14 +14,13 @@
 #include <ResourceLoader.hpp>
 #include <ResourceSelector.hpp>
 #include <Timings.hpp>
-#include <GL/wglew.h>
 
 #include <system/SystemInterface.hpp>
 #include <graphics/DepthStencilState.hpp>
+#include <graphics/RasterizerState.hpp>
+#include <graphics/BlendingState.hpp>
 
-#include "dx/dx10/DX10RasterizerState.hpp"
 #include <vr/VRUtils.hpp>
-
 
 static void setupGameFolders(bool dbgVFSFolder) noexcept;
 static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
@@ -46,7 +45,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     UNUSED(argCount);
     UNUSED(args);
 
-    _logger = spdlog::stdout_color_mt("TauEditor2");
+    _logger = spdlog::stdout_color_mt("TauEditor");
     _logger->set_level(spdlog::level::trace);
     _logger->set_pattern("%^[%H:%M:%S:%e] [%n] [%l]%$: %v");
 
@@ -62,39 +61,36 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
-    
-    if(argCount >= 2)
+
+    for(int i = 1; i < argCount; ++i)
     {
-        for(int i = 1; i < argCount; ++i)
+        if(strcmp(args[i], "-gl") == 0)
         {
-            if(strcmp(args[i], "-gl") == 0)
-            {
-                RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
-            }
-            else if(strcmp(args[i], "-dx10") == 0)
-            {
-                RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-            }
-            else if(strcmp(args[i], "-dx11") == 0)
-            {
-                RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
-            }
-            else if(strcmp(args[i], "-dbgVFS") == 0)
-            {
-                dbgVFSFolder = true;
-            }
-            else if(strcmp(args[i], "-vr") == 0)
-            {
-                useVR = true;
-            }
-            else if(strcmp(args[i], "-gDebug") == 0)
-            {
-                RenderingMode::getGlobalMode().setDebugMode(true);
-            }
-            else if(strcmp(args[i], "--gDebug") == 0)
-            {
-                RenderingMode::getGlobalMode().setDebugMode(false);
-            }
+            RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+        }
+        else if(strcmp(args[i], "-dx10") == 0)
+        {
+            RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
+        }
+        else if(strcmp(args[i], "-dx11") == 0)
+        {
+            RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+        }
+        else if(strcmp(args[i], "-dbgVFS") == 0)
+        {
+            dbgVFSFolder = true;
+        }
+        else if(strcmp(args[i], "-vr") == 0)
+        {
+            useVR = true;
+        }
+        else if(strcmp(args[i], "-gDebug") == 0)
+        {
+            RenderingMode::getGlobalMode().setDebugMode(true);
+        }
+        else if(strcmp(args[i], "--gDebug") == 0)
+        {
+            RenderingMode::getGlobalMode().setDebugMode(false);
         }
     }
 
@@ -113,23 +109,113 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _window->showWindow();
 
     _graphicsInterface = SystemInterface::get()->createGraphicsInterface(RenderingMode::getGlobalMode());
+    if(!_graphicsInterface)
+    {
+        SystemInterface::get()->createAlert("Critical Error", "Failed to create graphics interface.");
+        return false;
+    }
 
-    const DepthStencilArgs dsArgs(tau::rec);
-    const NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, null);
+    {
+        RenderingContextArgs rcArgs;
+        rcArgs.window = _window;
+        rcArgs.vsync = _config.vsync || true;
 
-    const RasterizerArgs rsArgs(tau::rec);
-    const NullableRef<IRasterizerState> rsState = _graphicsInterface->createRasterizerState().buildTauRef(rsArgs, null);
+        IRenderingContextBuilder::Error error;
+        _renderingContext = _graphicsInterface->createRenderingContext().buildTauRef(rcArgs, &error);
 
-    RenderingContextArgs rcArgs;
-    rcArgs.window = _window;
-    rcArgs.vsync = _config.vsync || true;
+        if(error != IRenderingContextBuilder::Error::NoError)
+        {
+            switch(error)
+            {
+                case IRenderingContextBuilder::Error::SystemMemoryAllocationError:
+                    SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default rendering context.");
+                    break;
+                case IRenderingContextBuilder::Error::UnsupportedAPIVersion:
+                    SystemInterface::get()->createAlert("Critical Error", "Requested graphics API version is not supported by the system.");
+                    break;
+                case IRenderingContextBuilder::Error::NullWindow:
+                    SystemInterface::get()->createAlert("Critical Error", "Failed to create a window.");
+                    break;
+                default: break;
+            }
+            return false;
+        }
+    }
 
-    _renderingContext = _graphicsInterface->createRenderingContext().buildTauRef(rcArgs, null);
     _renderingContext->activateContext();
-    _renderingContext->setDefaultDepthStencilState(dsState);
+
+    {
+        const DepthStencilArgs dsArgs(tau::rec);
+
+        IDepthStencilStateBuilder::Error error;
+        const NullableRef<IDepthStencilState> dsState = _graphicsInterface->createDepthStencilState().buildTauRef(dsArgs, &error);
+
+        if(error != IDepthStencilStateBuilder::Error::NoError)
+        {
+            if(error == IDepthStencilStateBuilder::Error::SystemMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default depth stencil state."); }
+            else if(error == IDepthStencilStateBuilder::Error::DriverMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default depth stencil state."); }
+            else
+            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default depth stencil state."); }
+            return false;
+        }
+
+        _renderingContext->setDefaultDepthStencilState(dsState);
+    }
+
+    {
+        const RasterizerArgs rsArgs(tau::rec);
+
+        IRasterizerStateBuilder::Error error;
+        const NullableRef<IRasterizerState> rsState = _graphicsInterface->createRasterizerState().buildTauRef(rsArgs, &error);
+
+        if(error != IRasterizerStateBuilder::Error::NoError)
+        {
+            if(error == IRasterizerStateBuilder::Error::SystemMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default rasterizer state."); }
+            else if(error == IRasterizerStateBuilder::Error::DriverMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default rasterizer state."); }
+            else
+            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default rasterizer state."); }
+            return false;
+        }
+
+        _renderingContext->setDefaultRasterizerState(rsState);
+    }
+
+    {
+        BlendingArgs bsArgs(tau::rec);
+        bsArgs.independentBlending = false;
+        bsArgs.frameBuffers[0].enableBlending = true;
+        bsArgs.frameBuffers[0].colorSrcFactor = BlendingArgs::BlendFactor::SrcAlpha;
+        bsArgs.frameBuffers[0].colorDstFactor = BlendingArgs::BlendFactor::InvSrcAlpha;
+        bsArgs.frameBuffers[0].alphaSrcFactor = BlendingArgs::BlendFactor::SrcAlpha;
+        bsArgs.frameBuffers[0].alphaDstFactor = BlendingArgs::BlendFactor::InvSrcAlpha;
+
+        IBlendingStateBuilder::Error error;
+        const NullableRef<IBlendingState> bsState = _graphicsInterface->createBlendingState().buildTauRef(bsArgs, &error);
+
+        if(error != IBlendingStateBuilder::Error::NoError)
+        {
+            if(error == IBlendingStateBuilder::Error::SystemMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default blending state."); }
+            else if(error == IBlendingStateBuilder::Error::DriverMemoryAllocationFailure)
+            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default blending state."); }
+            else
+            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default blending state."); }
+            return false;
+        }
+
+        _renderingContext->setDefaultBlendingState(bsState);
+    }
+
     _renderingContext->resetDepthStencilState();
-    _renderingContext->setDefaultRasterizerState(rsState);
     _renderingContext->resetRasterizerState();
+    {
+        const float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        _renderingContext->resetBlendingState(color);
+    }
 
     _window->setEventHandler(::onWindowEvent);
     Mouse::mousePos(_window->width() >> 1, _window->height() >> 1);
@@ -190,7 +276,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
                     _globals->vrHandles.moveDown, _globals->vrHandles.movePlane, _globals->vrHandles.actionSet, _vr);
 
                 _vr->GetRecommendedRenderTargetSize(&_width, &_height);
-                RECT rect{ 0, 0, (LONG) _width, (LONG)_height };
+                RECT rect{ 0, 0, (LONG) _width, (LONG) _height };
                 AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
                 SetWindowPos(_window->sysWindowContainer().windowHandle, null, 0, 0, static_cast<int>(rect.right), static_cast<int>(rect.bottom), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
 

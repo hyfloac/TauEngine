@@ -42,30 +42,30 @@ public:
     GLStencilOpArgs backFace;
 public:
     GLDepthStencilArgs(void(* const GLAPIENTRY depthTestControl)(GLenum), void(* const GLAPIENTRY stencilTestControl)(GLenum), const GLboolean depthWriteMask, const GLenum depthCompareFunc, const GLuint stencilReadMask, const GLuint stencilWriteMask, const GLStencilOpArgs& frontFace, const GLStencilOpArgs& backFace) noexcept
-        : depthTestControl{ depthTestControl },
-          stencilTestControl{ stencilTestControl },
-          depthWriteMask(depthWriteMask),
-          depthCompareFunc(depthCompareFunc),
-          stencilReadMask(stencilReadMask),
-          stencilWriteMask(stencilWriteMask),
-          frontFace(frontFace),
-          backFace(backFace)
+        : depthTestControl{ depthTestControl }
+        , stencilTestControl{ stencilTestControl }
+        , depthWriteMask(depthWriteMask)
+        , depthCompareFunc(depthCompareFunc)
+        , stencilReadMask(stencilReadMask)
+        , stencilWriteMask(stencilWriteMask)
+        , frontFace(frontFace)
+        , backFace(backFace)
     { }
 };
 
 class GLDepthStencilState final : public IDepthStencilState
 {
     DEFAULT_DESTRUCT(GLDepthStencilState);
+    DSS_IMPL(GLDepthStencilState);
 private:
-    GLDepthStencilArgs _glParams;
+    GLDepthStencilArgs _glArgs;
 public:
-    GLDepthStencilState(const DepthStencilArgs& params, const GLDepthStencilArgs& glParams) noexcept
-        : IDepthStencilState(params), _glParams(glParams)
+    GLDepthStencilState(const DepthStencilArgs& args, const GLDepthStencilArgs& glArgs) noexcept
+        : IDepthStencilState(args)
+        , _glArgs(glArgs)
     { }
 
     void apply() const noexcept;
-protected:
-    DSS_IMPL(GLDepthStencilState);
 };
 
 class GLDepthStencilStateBuilder final : public IDepthStencilStateBuilder

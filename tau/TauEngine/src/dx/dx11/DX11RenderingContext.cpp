@@ -6,8 +6,9 @@
 #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
-#include "dx/dx11/DX11RasterizerState.hpp"
 #include "dx/dx11/DX11DepthStencilState.hpp"
+#include "dx/dx11/DX11RasterizerState.hpp"
+#include "dx/dx11/DX11BlendingState.hpp"
 #include "dx/dx11/DX11GraphicsInterface.hpp"
 
 DX11RenderingContext::DX11RenderingContext(DX11GraphicsInterface& gi, const DX11RenderingContextArgs& args) noexcept
@@ -24,6 +25,8 @@ DX11RenderingContext::DX11RenderingContext(DX11GraphicsInterface& gi, const DX11
     , _currentDepthStencilState(null)
     , _defaultRasterizerState(null)
     , _currentRasterizerState(null)
+    , _defaultBlendingState(null)
+    , _currentBlendingState(null)
 { }
 
 DX11RenderingContext::~DX11RenderingContext() noexcept
@@ -158,6 +161,39 @@ const RasterizerArgs& DX11RenderingContext::getDefaultRasterizerArgs() noexcept
 
 NullableRef<IRasterizerState> DX11RenderingContext::getDefaultRasterizerState() noexcept
 { return RefCast<IRasterizerState>(_defaultRasterizerState); }
+
+NullableRef<IBlendingState> DX11RenderingContext::setBlendingState(const NullableRef<IBlendingState>& bsState, const float color[4]) noexcept
+{
+    NullableRef<IBlendingState> ret = RefCast<IBlendingState>(_currentBlendingState);
+
+    if(!bsState || !RTT_CHECK(bsState.get(), DX11BlendingState))
+    { return ret; }
+
+    _currentBlendingState = RefCast<DX11BlendingState>(bsState);
+    _currentBlendingState->apply(*this, color);
+
+    return ret;
+}
+
+void DX11RenderingContext::setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept
+{
+    if(!bsState || !RTT_CHECK(bsState.get(), DX11BlendingState))
+    { return; }
+
+    _defaultBlendingState = RefCast<DX11BlendingState>(bsState);
+}
+
+void DX11RenderingContext::resetBlendingState(const float color[4]) noexcept
+{
+    _currentBlendingState = _defaultBlendingState;
+    _currentBlendingState->apply(*this, color);
+}
+
+const BlendingArgs& DX11RenderingContext::getDefaultBlendingArgs() noexcept
+{ return _defaultBlendingState->args(); }
+
+NullableRef<IBlendingState> DX11RenderingContext::getDefaultBlendingState() noexcept
+{ return _defaultBlendingState; }
 
 void DX11RenderingContext::beginFrame() noexcept
 {
