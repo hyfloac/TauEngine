@@ -97,10 +97,8 @@ public:
         CompileError,
         InvalidFile,
         InvalidInclude,
-        ShaderObjectCreationFailure,
-        MemoryAllocationFailure,
-        InputLayoutNotSpecified,
-        InputLayoutFinalizationFailure
+        SystemMemoryAllocationFailure,
+        DriverMemoryAllocationFailure
     };
 protected:
     static CPPRef<RenderingModeResourceSelectorTransformer> rsTransformer;

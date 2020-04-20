@@ -238,9 +238,9 @@ bool DX10VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexAr
 
     ERROR_CODE_COND_F(!args.shader, Error::ShaderNotSet);
     ERROR_CODE_COND_F(args.shader->shaderStage() != EShader::Stage::Vertex, Error::ShaderMustBeVertexShader);
-    ERROR_CODE_COND_F(!RTT_CHECK(args.shader.get(), DX10Shader), Error::InternalError);
+    ERROR_CODE_COND_F(!RTT_CHECK(args.shader, DX10Shader), Error::InternalError);
 
-    ID3D10Blob* const shaderBlob = RefCast<DX10VertexShader>(args.shader)->shaderBlob();
+    ID3D10Blob* const shaderBlob = reinterpret_cast<DX10VertexShader*>(args.shader)->shaderBlob();
 
     uSys bufferDescriptorCount = 0;
 

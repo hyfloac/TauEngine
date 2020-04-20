@@ -127,3 +127,18 @@ public:
     [[nodiscard]] const char* info() const noexcept override { return "Controls the game recorder."; }
     [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };
+
+class SetSaturationCommand final : public Console::Command
+{
+private:
+    Globals& _globals;
+public:
+    SetSaturationCommand(Globals& globals) noexcept
+        : _globals(globals)
+    { }
+
+    [[nodiscard]] const char* name() const noexcept override { return "saturation"; }
+    [[nodiscard]] const char* usage() const noexcept override { return "saturation <cmd{enum{set|disable|enable}}> <(set)<saturation{f32}>>"; }
+    [[nodiscard]] const char* info() const noexcept override { return "Sets the saturation level."; }
+    [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
+};

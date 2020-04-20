@@ -58,9 +58,9 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 #else
     RenderingMode::getGlobalMode().setDebugMode(true);
 #endif
-    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
 
     for(int i = 1; i < argCount; ++i)
     {
@@ -236,6 +236,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _renderingContext->updateViewport(0, 0, _window->width(), _window->height());
 
     _renderer = new TERenderer(*_globals);
+    _globals->renderer = _renderer;
 
     if(_config.useVR)
     {
@@ -447,7 +448,10 @@ void TauEditorApplication::onWindowEvent(WindowEvent& e) noexcept
     dispatcher.dispatch<WindowKeyEvent>(this, &TauEditorApplication::onKeyPress);
     dispatcher.dispatch<WindowResizeEvent>(this, &TauEditorApplication::onWindowResize);
 
-    _renderer->onEvent(e);
+    if(_renderer)
+    {
+        _renderer->onEvent(e);
+    }
 }
 
 bool TauEditorApplication::onCharPress(WindowAsciiKeyEvent& e) const noexcept
@@ -571,33 +575,6 @@ static void onWindowEvent(void* param, WindowEvent& e) noexcept
 {
     auto* app = reinterpret_cast<TauEditorApplication*>(param);
     app->onWindowEvent(e);
-}
-
-static bool setupWinFolder(int dir, const char* subPath, const char* mountPoint) noexcept
-{
-    CHAR folderPath[MAX_PATH];
-    const HRESULT result = SHGetFolderPathA(NULL, dir, NULL, SHGFP_TYPE_CURRENT, folderPath);
-
-    if(SUCCEEDED(result))
-    {
-        DynString folder(folderPath);
-        if(subPath)
-        {
-            folder = folder.concat(subPath);
-        }
-        if(!Win32FileLoader::Instance()->fileExists(folder))
-        {
-            if(!Win32FileLoader::Instance()->createFolder(folder))
-            {
-                return false;
-            }
-        }
-
-        VFS::Instance().mountDynamic(mountPoint, folder, Win32FileLoader::Instance());
-        return true;
-    }
-
-    return false;
 }
 
 static void setupGameFolders(const bool dbgVFSFolder) noexcept

@@ -6,6 +6,8 @@
 #include <camera/Camera3D.hpp>
 #include <GameRecorder.hpp>
 #include <Timings.hpp>
+#include "ControlEvent.hpp"
+#include "SaturationPPLayer.hpp"
 
 struct Globals;
 class Window;
@@ -27,6 +29,7 @@ private:
     TextHandler* _th;
     Camera2DController _camera;
     Camera3D* _camera3D;
+    SaturationPPLayer* _saturationLayer;
 
     LayerStack _layerStack;
 public:
@@ -53,4 +56,6 @@ private:
     static void __cdecl finalizeLoadConsolasBold(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept;
     static void __cdecl finalizeLoadConsolasItalic(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept;
     static void __cdecl finalizeLoadConsolasBoldItalic(TextHandler::FileData* file, TextHandler::FinalizeData* finalizeParam) noexcept;
+
+    bool onControlEvent(ControlEvent& e) noexcept;
 };

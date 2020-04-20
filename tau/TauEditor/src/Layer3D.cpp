@@ -10,6 +10,8 @@
 #include "Timings.hpp"
 #include "system/GraphicsInterface.hpp"
 #include <EnumBitFields.hpp>
+#include "TERenderer.hpp"
+#include "ControlEvent.hpp"
 
 #include "system/SystemInterface.hpp"
 
@@ -24,7 +26,7 @@ public:
 
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 3; }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Layer3D::Uniforms& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const Layer3D::Uniforms& t) noexcept
     {
         buffer->beginModification(context);
     	// buffer->modifyBuffer(MATRIX_SIZE * 0, MATRIX_SIZE, glm::value_ptr(t.compoundMatrix));
@@ -44,10 +46,10 @@ class UniformAccessor<Layer3D::ViewPosUniforms> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Layer3D::ViewPosUniforms& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const Layer3D::ViewPosUniforms& t) noexcept
     {
         const __m128 vec = t.cameraPos.data().vec;
-        buffer->fillBuffer(context, reinterpret_cast<const void*>(&vec));
+        buffer->fillBuffer(context, &vec);
     }
 };
 
@@ -184,7 +186,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     const CPPRef<IBuffer> positions = globals.gi.createBuffer().buildCPPRef(positionsBuilder, nullptr);
 
     VertexArrayArgs vaArgs(1);
-    vaArgs.shader = frameBufferVertexShader;
+    vaArgs.shader = frameBufferVertexShader.get();
     vaArgs.buffers[0] = positions;
     vaArgs.drawCount = 6;
     vaArgs.drawType = DrawType::SeparatedTriangles;
@@ -368,6 +370,8 @@ void Layer3D::onRender() noexcept
         _shader->unbind(context);
 
         _frameBuffer->unbind(_globals.rc);
+        ControlEvent ce(CE_SET_NEXT_FB);
+        _globals.renderer->onEvent(ce);
 
         (void) _globals.rc.setBlendingState(storeState, bsColor);
 

@@ -86,8 +86,6 @@
     <ClCompile Include="src\gl\GLShader.cpp" />
     <ClCompile Include="src\gl\GLShaderProgram.cpp" />
     <ClCompile Include="src\gl\GLTexture.cpp" />
-    <ClCompile Include="src\gl\GLUniform.cpp" />
-    <ClCompile Include="src\gl\GLUniform.glm.cpp" />
     <ClCompile Include="src\gl\GLUtils.cpp" />
     <ClCompile Include="src\gl\GLBuffer.cpp" />
     <ClCompile Include="src\gl\GLVertexArray.cpp" />
@@ -104,7 +102,6 @@
     <ClCompile Include="src\maths\Maths.cpp" />
     <ClCompile Include="src\maths\Matrix4x4f.cpp" />
     <ClCompile Include="src\model\BufferDescriptor.cpp" />
-    <ClCompile Include="src\model\VertexArray.cpp" />
     <ClCompile Include="src\model\OBJLoader.cpp" />
     <ClCompile Include="src\model\RenderableObject.cpp" />
     <ClCompile Include="src\ResourceLoader.cpp" />
@@ -189,7 +186,6 @@
     <ClInclude Include="include\gl\GLTextureSampler.hpp" />
     <ClInclude Include="include\gl\GLTextureUploader.hpp" />
     <ClInclude Include="include\gl\GLTextureView.hpp" />
-    <ClInclude Include="include\gl\GLUniform.hpp" />
     <ClInclude Include="include\gl\GLUtils.hpp" />
     <ClInclude Include="include\gl\GLBuffer.hpp" />
     <ClInclude Include="include\gl\GLVertexArray.hpp" />
@@ -244,6 +240,8 @@
     <ClInclude Include="include\shader\IShaderProgram.hpp" />
     <ClInclude Include="include\shader\bundle\ShaderBundleParser.hpp" />
     <ClInclude Include="include\shader\TextureUploader.hpp" />
+    <ClInclude Include="include\shader\Uniform.common.hpp" />
+    <ClInclude Include="include\shader\Uniform.glm.hpp" />
     <ClInclude Include="include\shader\Uniform.hpp" />
     <ClInclude Include="include\shader\PointLight.hpp" />
     <ClInclude Include="include\shader\SpotLight.hpp" />

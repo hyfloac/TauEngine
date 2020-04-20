@@ -62,7 +62,7 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
 
 void SystemInterface::createAlert(const char* title, const char* message) const noexcept
 {
-    (void) MessageBoxA(NULL, title, message, MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
+    (void) MessageBoxA(NULL, message, title, MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
 }
 
 static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept

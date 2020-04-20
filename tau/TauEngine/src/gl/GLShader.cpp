@@ -104,7 +104,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error) const noe
 
     GLShader* const shader = new(::std::nothrow) GLShader(glArgs.shaderID, args.stage);
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -120,7 +120,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error, TauAlloca
 
     GLShader* const shader = allocator.allocateT<GLShader>(glArgs.shaderID, args.stage);
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -136,7 +136,7 @@ CPPRef<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* erro
 
     const CPPRef<GLShader> shader = CPPRef<GLShader>(new(::std::nothrow) GLShader(glArgs.shaderID, args.stage));
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -152,7 +152,7 @@ NullableReferenceCountingPointer<IShader> GLShaderBuilder::buildTauRef(const Sha
 
     const NullableReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderID, args.stage);
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     NullableReferenceCountingPointer<IShader> iShader = RCPCast<IShader>(shader);
 	
@@ -170,7 +170,7 @@ NullableStrongReferenceCountingPointer<IShader> GLShaderBuilder::buildTauSRef(co
 
     const NullableStrongReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderID, args.stage);
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     NullableStrongReferenceCountingPointer<IShader> iShader = RCPCast<IShader>(shader);
 	
@@ -224,7 +224,7 @@ bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, 
             delete[] errorMsg;
         }
 #endif
-        ERROR_CODE_F(Error::ShaderObjectCreationFailure);
+        ERROR_CODE_F(Error::DriverMemoryAllocationFailure);
     }
 	
     return true;

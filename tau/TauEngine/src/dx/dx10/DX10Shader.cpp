@@ -60,7 +60,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error)
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -97,7 +97,7 @@ DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error,
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -134,7 +134,7 @@ CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* co
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -171,7 +171,7 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -208,7 +208,7 @@ NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& arg
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -229,7 +229,7 @@ bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* const 
     const i64 fileSize = shaderFile->size();
 	
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
-    ERROR_CODE_COND_F(FAILED(h), Error::ShaderObjectCreationFailure);
+    ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
     (void) shaderFile->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
@@ -247,15 +247,15 @@ DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const S
     {
         case EShader::Stage::Vertex:
             h = _gi.d3d10Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.vertex);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::Geometry:
             h = _gi.d3d10Device()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.geometry);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::Pixel:
             h = _gi.d3d10Device()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.pixel);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:

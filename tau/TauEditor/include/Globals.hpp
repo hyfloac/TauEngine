@@ -8,6 +8,7 @@ class IGraphicsInterface;
 class IRenderingContext;
 class GameRecorder;
 class VRFreeCamCamera3DController;
+class TERenderer;
 
 struct VRHandles final
 {
@@ -44,12 +45,13 @@ struct Globals final
     VRFreeCamCamera3DController* vrCamera;
     VRHandles vrHandles;
     State gameState;
+    TERenderer* renderer;
 
     bool currentLeftEye;
 
     Globals(Window& window, IGraphicsInterface& gi, IRenderingContext& rc, GameRecorder& gr, const State gameState) noexcept
         : window(window),
           gi(gi), rc(rc), gr(gr), vr(null), vrCamera(null), vrHandles(),
-          gameState(gameState), currentLeftEye(false)
+          gameState(gameState), currentLeftEye(false), renderer(null)
     { }
 };

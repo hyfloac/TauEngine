@@ -86,7 +86,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     CPPRef<IIndexBuffer> indices = gi.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);
 
     VertexArrayArgs vaArgs(4);
-    vaArgs.shader = shader;
+    vaArgs.shader = shader.get();
     vaArgs.buffers[0] = positions;
     vaArgs.buffers[1] = normals;
     vaArgs.buffers[2] = tangents;

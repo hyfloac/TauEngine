@@ -178,7 +178,9 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBufferPix
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\Vertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\Vertex.cso
 fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\Pixel.cso
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\FBVertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\FBVertex.cso
-fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso</Command>
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Vertex.hlsl /Fo $(ProjectDir)resources\shader\FrameBuffer\Vertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.cso</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
@@ -255,7 +257,9 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBufferPix
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\Vertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\Vertex.cso
 fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\Pixel.cso
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\FBVertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\FBVertex.cso
-fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso</Command>
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Vertex.hlsl /Fo $(ProjectDir)resources\shader\FrameBuffer\Vertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.cso</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -335,7 +339,9 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBufferPix
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\Vertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\Vertex.cso
 fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\Pixel.cso
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\FBVertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\FBVertex.cso
-fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso</Command>
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Vertex.hlsl /Fo $(ProjectDir)resources\shader\FrameBuffer\Vertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.cso</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
@@ -392,7 +398,9 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBufferPix
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\Vertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\Vertex.cso
 fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\Pixel.cso
 fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\FBVertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\FBVertex.cso
-fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso</Command>
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Vertex.hlsl /Fo $(ProjectDir)resources\shader\FrameBuffer\Vertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.cso</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -400,14 +408,17 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPix
     <ClCompile Include="src\EditorApplication.cpp" />
     <ClCompile Include="src\Layer3D.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\SaturationPPLayer.cpp" />
     <ClCompile Include="src\TERenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\ConsoleLayer.hpp" />
     <ClInclude Include="include\EditorApplication.hpp" />
+    <ClInclude Include="include\ControlEvent.hpp" />
     <ClInclude Include="include\Globals.hpp" />
     <ClInclude Include="include\Layer3D.hpp" />
+    <ClInclude Include="include\SaturationPPLayer.hpp" />
     <ClInclude Include="include\State.hpp" />
     <ClInclude Include="include\TERenderer.hpp" />
     <ClInclude Include="include\TextDescriptor.hpp" />

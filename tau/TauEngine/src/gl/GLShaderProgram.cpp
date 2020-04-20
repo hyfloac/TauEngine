@@ -2,7 +2,6 @@
 #include "gl/GLShaderProgram.hpp"
 #include "shader/IShader.hpp"
 #include "gl/GLShader.hpp"
-#include "gl/GLUniform.hpp"
 #include <Safeties.hpp>
 #include <VariableLengthArray.hpp>
 #include "Timings.hpp"

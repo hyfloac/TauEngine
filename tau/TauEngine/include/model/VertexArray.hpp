@@ -52,7 +52,7 @@ struct VertexArrayArgs final
     DEFAULT_DESTRUCT(VertexArrayArgs);
     DEFAULT_COPY(VertexArrayArgs);
 public:
-    CPPRef<IShader> shader;
+    IShader* shader;
     RefDynArray<CPPRef<IBuffer>> buffers;
     CPPRef<IIndexBuffer> indexBuffer;
     u32 drawCount;

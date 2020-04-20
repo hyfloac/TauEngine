@@ -61,10 +61,11 @@ TERenderer::TERenderer(Globals& globals) noexcept
     Layer3D* layer3D = new Layer3D(globals);
     _camera3D = &layer3D->camera().camera();
 
-    // _layerStack.pushLayer(new PhysWordLayer(150, "O", window, *_th, *_rp, _camera->compoundedMatrix(), state));
     _layerStack.pushLayer(layer3D);
     _layerStack.pushOverlay(new ConsoleLayer(globals, *_th, _consolas, _consolasBold, _consolasItalic, _consolasBoldItalic, _camera->projectionMatrix(), layer3D->camera().camera(), 0.5f));
-    
+
+    _saturationLayer = new SaturationPPLayer(globals, 1.25f);
+    _saturationLayer->init();
 }
 
 TERenderer::~TERenderer() noexcept
@@ -96,6 +97,13 @@ void TERenderer::render() noexcept
     {
         layer->onRender();
     }
+
+    if(_saturationLayer && _saturationLayer->active())
+    {
+        _saturationLayer->onFrameBufferUnbind();
+        _saturationLayer->onRender();
+    }
+
     for(auto* overlay : _layerStack.overlays())
     {
         overlay->onRender();
@@ -111,6 +119,7 @@ void TERenderer::postRender() noexcept
     {
         layer->onPostRender();
     }
+
     for(auto* overlay : _layerStack.overlays())
     {
         overlay->onPostRender();
@@ -138,12 +147,42 @@ void TERenderer::update(const float fixedDelta) noexcept
 void TERenderer::onEvent(Event& e) noexcept
 {
     PERF();
+
+    EventDispatcher dispatcher(e);
+    dispatcher.dispatch<ControlEvent>(this, &TERenderer::onControlEvent);
+
     for(auto* layer : _layerStack.layers())
     {
         layer->onEvent(e);
     }
+
+    if(_saturationLayer)
+    {
+        _saturationLayer->onEvent(e);
+    }
+
     for(auto* overlay : _layerStack.overlays())
     {
         overlay->onEvent(e);
     }
+}
+
+bool TERenderer::onControlEvent(ControlEvent& e) noexcept
+{
+    if(e.type() == CE_SET_NEXT_FB)
+    {
+        if(_saturationLayer && _saturationLayer->active())
+        {
+            _saturationLayer->onFrameBufferBind();
+        }
+    }
+    else if(e.type() == CE_ACTIVATE_SAT_FB)
+    {
+        if(_saturationLayer)
+        {
+            _saturationLayer->active(*reinterpret_cast<bool*>(e.arg()));
+        }
+    }
+
+    return false;
 }

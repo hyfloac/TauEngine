@@ -71,7 +71,7 @@ class UniformAccessor<Material> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Material& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const Material& t) noexcept
     {
         buffer->beginModification(context);
         buffer->modifyBuffer(0, sizeof(float), &t._specularExponent);

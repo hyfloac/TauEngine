@@ -477,7 +477,7 @@ public:
          * is, if you are also able to identify what the name of the error is
          * (like the macro value) that may also be useful.
          */
-        UnknownError,
+        UnknownError
     };
 public:
     [[nodiscard]] virtual IBuffer* build(const BufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;

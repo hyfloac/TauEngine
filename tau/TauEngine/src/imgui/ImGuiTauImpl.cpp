@@ -155,7 +155,7 @@ void ImGuiTau::initBuffers(IGraphicsInterface& gi, ImDrawData* const drawData) n
     if(createVA)
     {
         VertexArrayArgs vaArgs(1);
-        vaArgs.shader = _vertexShader;
+        vaArgs.shader = _vertexShader.get();
         vaArgs.buffers[0] = _vertexBuffer;
         vaArgs.indexBuffer = _indexBuffer;
         vaArgs.drawCount = 0;

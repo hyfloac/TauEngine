@@ -5,22 +5,9 @@
 
 #include "model/Buffer.hpp"
 
-template<typename _T>
-class IUniform : ShaderDataType::Typed
-{
-    DEFAULT_CONSTRUCT_PO(IUniform);
-    DEFAULT_DESTRUCT_VI(IUniform);
-    DELETE_COPY(IUniform);
-public:
-    virtual void set(_T value) noexcept = 0;
-
-    [[nodiscard]] virtual ShaderDataType::Type dataType() noexcept override
-    { return ShaderDataType::Unknown; }
-};
-
 enum UniformBlockBinding
 {
-    UBB_Upload,
+    UBB_Upload = 1,
     UBB_Store,
     UBB_Bind
 };
@@ -37,7 +24,7 @@ class UniformAccessor final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(_T); }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const _T& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const _T& t) noexcept
     { buffer->fillBuffer(context, reinterpret_cast<const void*>(&t)); }
 };
 
@@ -68,7 +55,7 @@ public:
 
     void set(IRenderingContext& context, const _T& t) noexcept
     {
-        UniformAccessor<_T>::set(context, _buffer, t);
+        UniformAccessor<_T>::set(context, _buffer.get(), t);
     }
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
@@ -104,7 +91,7 @@ public:
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        UniformAccessor<_T>::set(context, _buffer, _t);
+        UniformAccessor<_T>::set(context, _buffer.get(), _t);
         _buffer->bind(context, stage, index);
     }
 
@@ -133,7 +120,7 @@ public:
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        UniformAccessor<_T>::set(context, _buffer, *_t);
+        UniformAccessor<_T>::set(context, _buffer.get(), *_t);
         _buffer->bind(context, stage, index);
     }
 
@@ -174,7 +161,7 @@ public:
      */
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 2 + (4 * 4); }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const _ExampleUniform& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const _ExampleUniform& t) noexcept
     {
         buffer->beginModification(context);
         buffer->modifyBuffer(0, MATRIX_SIZE, glm::value_ptr(t.projectionMatrix));

@@ -38,7 +38,7 @@ public:
 
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE; }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const TextHandler::ProjectionUniforms& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const TextHandler::ProjectionUniforms& t) noexcept
     {
         buffer->fillBuffer(context, glm::value_ptr(t.projectionMatrix));
     }
@@ -53,7 +53,7 @@ class UniformAccessor<TextHandler::ColorUniforms> final
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const TextHandler::ColorUniforms& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const TextHandler::ColorUniforms& t) noexcept
     {
         const __m128 vec = t.color.data().vec;
         buffer->fillBuffer(context, reinterpret_cast<const void*>(&vec));
@@ -129,7 +129,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     const CPPRef<IBuffer> textureCoordBuffer = gi.createBuffer().buildCPPRef(bufferBuilder, null);
 
     VertexArrayArgs vaArgs(2);
-    vaArgs.shader = vertexShader;
+    vaArgs.shader = vertexShader.get();
     vaArgs.buffers[0] = _positionBuffer;
     vaArgs.buffers[1] = textureCoordBuffer;
     vaArgs.drawCount = 6;

@@ -38,7 +38,7 @@ private:
     IFrameBuffer* _vrLeftFB;
     IFrameBuffer* _vrRightFB;
 
-    u32 _width, _height;
+    u32 _width{}, _height{};
 public:
     TauEditorApplication() noexcept;
 

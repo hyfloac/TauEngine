@@ -58,7 +58,7 @@ public:
         return 4 * sizeof(float) * 4 + 4 * sizeof(float);
     }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const PointLight& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const PointLight& t) noexcept
     {
         buffer->beginModification(context);
 

@@ -78,7 +78,7 @@ DX11Shader* DX11ShaderBuilder::build(const ShaderArgs& args, Error* const error)
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -119,7 +119,7 @@ DX11Shader* DX11ShaderBuilder::build(const ShaderArgs& args, Error* const error,
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -160,7 +160,7 @@ CPPRef<IShader> DX11ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* co
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -201,7 +201,7 @@ NullableRef<IShader> DX11ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -242,7 +242,7 @@ NullableStrongRef<IShader> DX11ShaderBuilder::buildTauSRef(const ShaderArgs& arg
 
     dxArgs.dataBlob->Release();
 
-    ERROR_CODE_COND_N(!shader, Error::MemoryAllocationFailure);
+    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 	
     ERROR_CODE_V(Error::NoError, shader);
 }
@@ -263,7 +263,7 @@ bool DX11ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* dxArgs
     const i64 fileSize = shaderFile->size();
 	
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
-    ERROR_CODE_COND_F(FAILED(h), Error::ShaderObjectCreationFailure);
+    ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
     (void) shaderFile->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
@@ -281,23 +281,23 @@ DX11ShaderBuilder::D3D11ShaderObjects DX11ShaderBuilder::createD3DShader(const S
     {
         case EShader::Stage::Vertex:
             h = _gi.d3d11Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.vertex);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::Hull:
             h = _gi.d3d11Device()->CreateHullShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.hull);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::Domain:
             h = _gi.d3d11Device()->CreateDomainShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.domain);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::Geometry:
             h = _gi.d3d11Device()->CreateGeometryShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.geometry);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         case EShader::Stage::Pixel:
             h = _gi.d3d11Device()->CreatePixelShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), NULL, &objects.pixel);
-            ERROR_CODE_COND_V(FAILED(h), Error::ShaderObjectCreationFailure, objects);
+            ERROR_CODE_COND_V(FAILED(h), Error::DriverMemoryAllocationFailure, objects);
             break;
         default:
             break;

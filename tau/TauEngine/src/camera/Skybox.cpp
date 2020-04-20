@@ -19,7 +19,7 @@ public:
 
     [[nodiscard]] static inline uSys size() noexcept { return MATRIX_SIZE * 2; }
 
-    static inline void set(IRenderingContext& context, const CPPRef<IUniformBuffer>& buffer, const Skybox::Uniforms& t) noexcept
+    static inline void set(IRenderingContext& context, IUniformBuffer* const buffer, const Skybox::Uniforms& t) noexcept
     {
         buffer->beginModification(context);
         buffer->modifyBuffer(0, MATRIX_SIZE, glm::value_ptr(t.projectionMatrix));
@@ -127,7 +127,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     const CPPRef<IBuffer> skyboxCube = gi.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
 
     VertexArrayArgs vaArgs(1);
-    vaArgs.shader = vertexShader;
+    vaArgs.shader = vertexShader.get();
     vaArgs.buffers[0] = skyboxCube;
     vaArgs.drawCount = 36;
     vaArgs.drawType = DrawType::SeparatedTriangles;

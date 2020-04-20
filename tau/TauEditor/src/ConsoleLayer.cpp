@@ -6,6 +6,9 @@
 #include <EnumBitFields.hpp>
 #include <system/Window.hpp>
 
+#include "TERenderer.hpp"
+#include "ControlEvent.hpp"
+
 ConsoleLayer::ConsoleLayer(Globals& globals, TextHandler& th, const GlyphSetHandle& consolas, const GlyphSetHandle& consolasBold, const GlyphSetHandle& consolasItalic, const GlyphSetHandle& consolasBoldItalic, const glm::mat4& ortho, Camera3D& camera, float textScale) noexcept
     : ILayer(false),
       _globals(globals), _th(th),
@@ -18,6 +21,7 @@ ConsoleLayer::ConsoleLayer(Globals& globals, TextHandler& th, const GlyphSetHand
     _ch.addCommand(new SetExclusiveCommand(globals.gameState));
     _ch.addCommand(new SetCameraCommand(this));
     _ch.addCommand(new GameRecorderCommand(globals.gr));
+    _ch.addCommand(new SetSaturationCommand(globals));
     // _ch.addCommand(new LoadFontCommand(th, rl));
     _ch.addCommand(new Console::dc::BoolAliasCommand);
     _ch.addCommand(new Console::dc::ExitCommand);
@@ -273,6 +277,44 @@ i32 GameRecorderCommand::execute(const char* commandName, const char* args[], u3
     else if(strcmp(args[0], "play") == 0)
     {
         _gr.beginPlayBack();
+    }
+
+    return 0;
+}
+
+i32 SetSaturationCommand::execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept
+{
+    UNUSED(commandName);
+    if(argCount > 2 || argCount < 1)
+    {
+        consoleHandler->printf("Usage: %s", usage());
+        return 1;
+    }
+
+    if(argCount == 2 && strcmp(args[0], "set") == 0)
+    {
+        Console::ParseIntError error;
+        float saturation = consoleHandler->parseF32(args[1], &error);
+
+        ControlEvent ce(CE_SET_SATURATION, &saturation);
+        _globals.renderer->onEvent(ce);
+    }
+    else if(argCount == 1 && strcmp(args[0], "disable") == 0)
+    {
+        bool enable = false;
+        ControlEvent ce(CE_ACTIVATE_SAT_FB, &enable);
+        _globals.renderer->onEvent(ce);
+    }
+    else if(argCount == 1 && strcmp(args[0], "enable") == 0)
+    {
+        bool enable = true;
+        ControlEvent ce(CE_ACTIVATE_SAT_FB, &enable);
+        _globals.renderer->onEvent(ce);
+    }
+    else
+    {
+        consoleHandler->printf("Usage: %s", usage());
+        return 2;
     }
 
     return 0;
