@@ -4,8 +4,9 @@
 #include <vector>
 #pragma warning(pop)
 
-#include <DLL.hpp>
-#include <layer/ILayer.hpp>
+#include "DLL.hpp"
+#include "Layer.hpp"
+#include "PostProcessLayer.hpp"
 
 class TAU_DLL LayerStack final
 {

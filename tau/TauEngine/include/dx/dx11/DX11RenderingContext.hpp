@@ -80,6 +80,8 @@ public:
     void beginFrame() noexcept override;
     void endFrame() noexcept override;
     void swapFrame() noexcept override;
+
+    void resizeSwapChain(uSys width, uSys height) noexcept override;
 protected:
     RC_IMPL(DX11RenderingContext);
 };

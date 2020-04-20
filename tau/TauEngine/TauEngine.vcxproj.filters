@@ -470,9 +470,6 @@
     <ClInclude Include="include\layer\LayerStack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\layer\ILayer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\layer\ImGuiLayer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -798,6 +795,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx11\DX11BlendingState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\layer\PostProcessLayer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\layer\Layer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

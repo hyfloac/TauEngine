@@ -104,6 +104,8 @@ public:
 
     virtual void swapFrame() noexcept = 0;
 
+    virtual void resizeSwapChain(uSys width, uSys height) noexcept = 0;
+
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);
     RTT_BASE_CAST(IRenderingContext);

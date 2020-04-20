@@ -431,7 +431,7 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     TextureDepthStencilArgs tdsArgs;
     tdsArgs.width = e.newWidth();
     tdsArgs.height = e.newHeight();
-    tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget;
+    tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget | ETexture::DepthStencilBindFlags::DepthShaderAccess;
     tdsArgs.initialBuffer = null;
     const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, null);
 

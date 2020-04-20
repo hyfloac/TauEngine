@@ -1,7 +1,7 @@
 #pragma once
 
-#include <layer/ILayer.hpp>
-#include <DLL.hpp>
+#include "DLL.hpp"
+#include "Layer.hpp"
 
 class TAU_DLL ImGuiLayer final : public ILayer
 {

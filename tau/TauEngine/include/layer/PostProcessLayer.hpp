@@ -1,51 +1,57 @@
 #pragma once
 
 #include <Objects.hpp>
+#include "DLL.hpp"
 #include "Timings.hpp"
 
-#ifndef LAYER_GEN_NAMES
+
+#ifndef PP_LAYER_GEN_NAMES
   #if defined(TAU_PRODUCTION)
-    #define LAYER_GEN_NAMES 0
+    #define PP_LAYER_GEN_NAMES 0
   #else
-    #define LAYER_GEN_NAMES 1
+    #define PP_LAYER_GEN_NAMES 1
   #endif
 #endif
 
-#define LAYER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE)
+#define PP_LAYER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE)
 
-#if LAYER_GEN_NAMES
-  #define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE); \
+#if PP_LAYER_GEN_NAMES
+  #define PP_LAYER_IMPL(_TYPE) PP_LAYER_IMPL_BASE(_TYPE); \
                             public: \
                                 [[nodiscard]] virtual const char* getName() const noexcept override \
                                 { return #_TYPE; }
-  #define LAYER_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
+  #define PP_LAYER_IMPL_NAME(_TYPE, _NAME) PP_LAYER_IMPL_BASE(_TYPE); \
+                            public: \
+                                [[nodiscard]] virtual const char* getName() const noexcept override \
+                                { return _NAME; }
+  #define PP_LAYER_GET_NAME(_LAYER_PTR) (_LAYER_PTR)->getName()
 #else
-  #define LAYER_IMPL(_TYPE) LAYER_IMPL_BASE(_TYPE)
-  #define LAYER_GET_NAME(_EVENT_PTR) ""
+  #define PP_LAYER_IMPL(_TYPE) PP_LAYER_IMPL_BASE(_TYPE)
+  #define PP_LAYER_IMPL_NAME(_TYPE, _NAME) PP_LAYER_IMPL_BASE(_TYPE)
+  #define PP_LAYER_GET_NAME(_LAYER_PTR) ""
 #endif
 
 class Event;
 
-class ILayer
+class TAU_DLL TAU_NOVTABLE IPostProcessLayer
 {
-    DEFAULT_CONSTRUCT_PO(ILayer);
-    DEFAULT_DESTRUCT_VI(ILayer);
-    DELETE_COPY(ILayer);
+    DEFAULT_DESTRUCT_VI(IPostProcessLayer);
+    DELETE_COPY(IPostProcessLayer);
 protected:
-    bool _visible;
+    bool _active;
 protected:
-    ILayer(bool visible = true) noexcept
-        : _visible(visible)
+    IPostProcessLayer(bool active = true) noexcept
+        : _active(active)
     { }
 public:
-    [[nodiscard]] bool visible() const noexcept { return _visible; }
-    virtual bool visible(bool vis) noexcept { return _visible = vis; }
-
-    virtual void onAttach() noexcept { }
-    virtual void onDetach() noexcept { }
+    [[nodiscard]] bool active() const noexcept { return _active; }
+    virtual bool active(const bool ac) noexcept { return _active = ac; }
 
     virtual void onUpdate(float fixedDelta) noexcept { }
     virtual void onEvent(Event& e) noexcept { }
+
+    virtual void onFrameBufferBind() noexcept { }
+    virtual void onFrameBufferUnbind() noexcept { }
 
     /**
      *   This should be used to update the state of any world
@@ -68,7 +74,7 @@ public:
      */
     virtual void onPostRender() noexcept { }
 
-#if LAYER_GEN_NAMES
+#if PP_LAYER_GEN_NAMES
     [[nodiscard]] virtual const char* getName() const noexcept = 0;
 #endif
 };

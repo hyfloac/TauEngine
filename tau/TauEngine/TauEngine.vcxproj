@@ -205,9 +205,10 @@
     <ClInclude Include="include\imgui\imstb_rectpack.h" />
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
-    <ClInclude Include="include\layer\ILayer.hpp" />
+    <ClInclude Include="include\layer\Layer.hpp" />
     <ClInclude Include="include\layer\ImGuiLayer.hpp" />
     <ClInclude Include="include\layer\LayerStack.hpp" />
+    <ClInclude Include="include\layer\PostProcessLayer.hpp" />
     <ClInclude Include="include\maths\glmExt\GlmMatrixProjectionExt.hpp" />
     <ClInclude Include="include\maths\glmExt\GlmMatrixTransformExt.hpp" />
     <ClInclude Include="include\maths\glmExt\GlmQuaternionTransformExt.hpp" />

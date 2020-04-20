@@ -76,10 +76,12 @@ public:
     const BlendingArgs& getDefaultBlendingArgs() noexcept override;
     [[nodiscard]] NullableRef<IBlendingState> getDefaultBlendingState() noexcept override;
 
-    void beginFrame() noexcept override final { }
-    void endFrame() noexcept override final { }
+    void beginFrame() noexcept override { }
+    void endFrame() noexcept override { }
 
-    void swapFrame() noexcept override final;
+    void swapFrame() noexcept override;
+
+    void resizeSwapChain(uSys width, uSys height) noexcept override { }
 private:
     void handleCtxError(int profileMask) const noexcept;
 

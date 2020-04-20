@@ -233,12 +233,6 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
     _globals = new Globals(*_window, *_graphicsInterface, *_renderingContext, _gr, _gameState);
 
-    if(_renderingContext->mode().isOpenGL())
-    {
-        setGLBlend(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
     _renderingContext->updateViewport(0, 0, _window->width(), _window->height());
 
     _renderer = new TERenderer(*_globals);
@@ -493,6 +487,7 @@ bool TauEditorApplication::onWindowResize(WindowResizeEvent& e) const noexcept
 {
     UNUSED(e);
     _globals->rc.updateViewport(0, 0, e.newWidth(), e.newHeight());
+    _globals->rc.resizeSwapChain(e.newWidth(), e.newHeight());
     _renderer->camera()->setProjection(e.newWidth(), e.newHeight(), 0.0f, 0.0f);
     _renderer->camera3D().setProjection(static_cast<float>(e.newWidth()), static_cast<float>(e.newHeight()), 90, 0.0001f, 1000.0f);
     // Mouse::mousePos(e.newWidth() >> 1, e.newHeight() >> 1);

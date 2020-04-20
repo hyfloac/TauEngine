@@ -210,6 +210,58 @@ void DX10RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
+void DX10RenderingContext::resizeSwapChain(uSys width, uSys height) noexcept
+{
+    {
+        _gi.d3d10Device()->OMSetRenderTargets(0, NULL, NULL);
+        _renderTargetView->Release();
+        _depthStencilBuffer->Release();
+        _depthStencilView->Release();
+    }
+
+    _swapChain->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+
+    {
+    // Get pointer to back buffer;
+        ID3D10Texture2D* backBufferPtr;
+        _swapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), reinterpret_cast<void**>(&backBufferPtr));
+
+        _gi.d3d10Device()->CreateRenderTargetView(backBufferPtr, NULL, &_renderTargetView);
+
+        backBufferPtr->Release();
+    }
+
+    {
+        D3D10_TEXTURE2D_DESC depthStencilBufferDesc;
+        ZeroMemory(&depthStencilBufferDesc, sizeof(depthStencilBufferDesc));
+        depthStencilBufferDesc.Width = width;
+        depthStencilBufferDesc.Height = height;
+        depthStencilBufferDesc.MipLevels = 1;
+        depthStencilBufferDesc.ArraySize = 1;
+        depthStencilBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilBufferDesc.SampleDesc.Count = 1;
+        depthStencilBufferDesc.SampleDesc.Quality = 0;
+        depthStencilBufferDesc.Usage = D3D10_USAGE_DEFAULT;
+        depthStencilBufferDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL;
+        depthStencilBufferDesc.CPUAccessFlags = 0;
+        depthStencilBufferDesc.MiscFlags = 0;
+
+        _gi.d3d10Device()->CreateTexture2D(&depthStencilBufferDesc, NULL, &_depthStencilBuffer);
+    }
+
+    {
+        D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+        ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+        depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+        depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+        _gi.d3d10Device()->CreateDepthStencilView(_depthStencilBuffer, &depthStencilViewDesc, &_depthStencilView);
+    }
+
+    _gi.d3d10Device()->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
+}
+
 DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextArgs& args, Error* const error) noexcept
 {
     DX10RenderingContextArgs dxArgs{};
@@ -372,6 +424,7 @@ bool DX10RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
 
     {
         D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+        ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
         depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         depthStencilViewDesc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
         depthStencilViewDesc.Texture2D.MipSlice = 0;
@@ -385,37 +438,37 @@ bool DX10RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
         _gi.d3d10Device()->RSSetViewports(1, &viewport);
     }
 
-    {
-        D3D10_BLEND_DESC blendDesc;
-        blendDesc.AlphaToCoverageEnable = FALSE;
-        blendDesc.BlendEnable[0] = TRUE;
-        blendDesc.BlendEnable[1] = TRUE;
-        blendDesc.BlendEnable[2] = TRUE;
-        blendDesc.BlendEnable[3] = TRUE;
-        blendDesc.BlendEnable[4] = TRUE;
-        blendDesc.BlendEnable[5] = TRUE;
-        blendDesc.BlendEnable[6] = TRUE;
-        blendDesc.BlendEnable[7] = TRUE;
-        blendDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-        blendDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
-        blendDesc.BlendOp = D3D10_BLEND_OP_ADD;
-        blendDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
-        blendDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
-        blendDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
-        blendDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[1] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[2] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[3] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[4] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[5] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[6] = D3D10_COLOR_WRITE_ENABLE_ALL;
-        blendDesc.RenderTargetWriteMask[7] = D3D10_COLOR_WRITE_ENABLE_ALL;
-
-        CHECK(_gi.d3d10Device()->CreateBlendState(&blendDesc, &dxArgs->blendState));
-        float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        const UINT sampleMask = 0xffffffff;
-        _gi.d3d10Device()->OMSetBlendState(dxArgs->blendState, blendFactor, sampleMask);
-    }
+    // {
+    //     D3D10_BLEND_DESC blendDesc;
+    //     blendDesc.AlphaToCoverageEnable = FALSE;
+    //     blendDesc.BlendEnable[0] = TRUE;
+    //     blendDesc.BlendEnable[1] = TRUE;
+    //     blendDesc.BlendEnable[2] = TRUE;
+    //     blendDesc.BlendEnable[3] = TRUE;
+    //     blendDesc.BlendEnable[4] = TRUE;
+    //     blendDesc.BlendEnable[5] = TRUE;
+    //     blendDesc.BlendEnable[6] = TRUE;
+    //     blendDesc.BlendEnable[7] = TRUE;
+    //     blendDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+    //     blendDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+    //     blendDesc.BlendOp = D3D10_BLEND_OP_ADD;
+    //     blendDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
+    //     blendDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
+    //     blendDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+    //     blendDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[1] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[2] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[3] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[4] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[5] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[6] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //     blendDesc.RenderTargetWriteMask[7] = D3D10_COLOR_WRITE_ENABLE_ALL;
+    //
+    //     CHECK(_gi.d3d10Device()->CreateBlendState(&blendDesc, &dxArgs->blendState));
+    //     float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    //     const UINT sampleMask = 0xffffffff;
+    //     _gi.d3d10Device()->OMSetBlendState(dxArgs->blendState, blendFactor, sampleMask);
+    // }
 
     return true;
 #undef CHECK
