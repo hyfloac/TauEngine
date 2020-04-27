@@ -18,6 +18,7 @@
 #include <shader/SpotLight.hpp>
 #include <graphics/BlendingState.hpp>
 #include "Globals.hpp"
+#include "shader/ShaderBindMap.hpp"
 
 class Window;
 class RenderingPipeline;
@@ -50,6 +51,7 @@ private:
     SpotLight _spotLight;
 
     CPPRef<IShaderProgram> _shader;
+    ShaderBindMap _bindMap;
     UniformBlockS<Uniforms> _uniforms;
     UniformBlockU<Material> _materialUniforms;
     UniformBlockU<PointLight> _pointLightUniforms;
@@ -59,6 +61,9 @@ private:
     CPPRef<IShaderProgram> _frameBufferShader;
     CPPRef<ITextureUploader> _frameBufferUploader;
     CPPRef<ITextureSampler> _frameBufferSampler;
+
+    CPPRef<IShaderProgram> _modelGenShader;
+    CPPRef<IVertexArray> _modelGenVA;
 
     CPPRef<ITexture> _texture;
     CPPRef<ITexture> _overlay;

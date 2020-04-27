@@ -29,6 +29,11 @@ PrintShaderBundleVisitor::PrintShaderBundleVisitor(const PrintSBVArgs* args) noe
     }
 }
 
+void PrintShaderBundleVisitor::visit(const ExprAST* expr) noexcept
+{
+    IShaderBundleVisitor::visit(expr);
+}
+
 void PrintShaderBundleVisitor::visit(const FileExprAST& expr) noexcept
 {
     printIndent();
@@ -56,7 +61,7 @@ void PrintShaderBundleVisitor::visit(const TypedBlockExprAST& expr) noexcept
     fputs(": ", stdout);
     printBrace();
     ++_currIndent;
-    visitNext(expr.container());
+    visit(expr.container().get());
     --_currIndent;
     printIndent();
     fputc('}', stdout);
@@ -71,7 +76,7 @@ void PrintShaderBundleVisitor::visit(const NamedBlockExprAST& expr) noexcept
     fputs(": ", stdout);
     printBrace();
     ++_currIndent;
-    visitNext(expr.container());
+    visit(expr.container().get());
     --_currIndent;
     printIndent();
     fputc('}', stdout);

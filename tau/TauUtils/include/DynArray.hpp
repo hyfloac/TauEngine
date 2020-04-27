@@ -340,7 +340,7 @@ private:
     _T* _arr;
     uSys _size;
 public:
-    explicit DynArray(const uSys size)
+    explicit DynArray(const uSys size = 0)
         : _arr(new(::std::nothrow) _T[size]), _size(size)
     { }
 
@@ -418,7 +418,7 @@ private:
     uSys _size;
     uSys* _refCount;
 public:
-    explicit RefDynArray(const uSys size)
+    explicit RefDynArray(const uSys size = 0)
         : _arr(new(::std::nothrow) _T[size]), _size(size), _refCount(new(::std::nothrow) uSys(1))
     { }
 

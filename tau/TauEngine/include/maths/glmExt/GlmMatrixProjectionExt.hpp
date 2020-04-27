@@ -48,7 +48,7 @@ GLM_FUNC_QUALIFIER glm::mat<4, 4, _T, glm::defaultp> perspectiveDegrees(const _T
     static constexpr _T TWO = static_cast<_T>(2);
     static constexpr _T HALF = static_cast<_T>(0.5);
 
-    const _T cotangent = fastCotD(fov * HALF);
+    const _T cotangent = -fastCotD(fov * HALF);
     const _T aspect = height / width;
     const _T diff = farZ - nearZ;
 

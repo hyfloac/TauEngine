@@ -95,7 +95,7 @@ bool SaturationPPLayer::init() noexcept
             return false;
         }
 
-        _shader = IShaderProgram::create(_globals.rc);
+        _shader = IShaderProgram::create(_globals.gi);
         _shader->setVertexShader(_globals.rc, vertexShader);
         _shader->setPixelShader(_globals.rc, pixelShader);
         _shader->link(_globals.rc);

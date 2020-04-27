@@ -37,6 +37,8 @@ NullableStrongRef<ExprAST> ShaderBundleParser::parsePrimary() noexcept
         case SBPToken::PixelBlock:
         case SBPToken::UniformsBlock:
         case SBPToken::TexturesBlock:
+        case SBPToken::InputsBlock:
+        case SBPToken::OutputsBlock:
             return RCPCast<ExprAST>(parseBlock());
         case SBPToken::File:
             return RCPCast<ExprAST>(parseFile());
@@ -49,6 +51,7 @@ NullableStrongRef<ExprAST> ShaderBundleParser::parsePrimary() noexcept
 NullableStrongRef<BlockExprAST> ShaderBundleParser::parseBlock() noexcept
 {
     BlockType blockType;
+    const BlockType parentBlock = _currentBlock;
 
     switch(_lexer.currentToken())
     {
@@ -68,23 +71,23 @@ NullableStrongRef<BlockExprAST> ShaderBundleParser::parseBlock() noexcept
             blockType = BlockType::Pixel;
             break;
         case SBPToken::UniformsBlock:
-            if(_currentBlock < BlockType::STAGE_BLOCK_BEGIN || _currentBlock > BlockType::STAGE_BLOCK_END)
+            if(parentBlock < BlockType::STAGE_BLOCK_BEGIN || parentBlock > BlockType::STAGE_BLOCK_END)
             { return null; }
             blockType = BlockType::Uniforms;
             break;
         case SBPToken::TexturesBlock:
             // if(_currentBlock < BlockType::STAGE_BLOCK_BEGIN || _currentBlock > BlockType::STAGE_BLOCK_END)
-            if(_currentBlock != BlockType::Uniforms)
+            if(parentBlock < BlockType::STAGE_BLOCK_BEGIN || parentBlock > BlockType::STAGE_BLOCK_END)
             { return null; }
             blockType = BlockType::Textures;
             break;
         case SBPToken::InputsBlock:
-            if(_currentBlock != BlockType::Vertex)
+            if(parentBlock != BlockType::Vertex)
             { return null; }
             blockType = BlockType::Inputs;
             break;
         case SBPToken::OutputsBlock:
-            if(_currentBlock != BlockType::Pixel)
+            if(parentBlock != BlockType::Pixel)
             { return null; }
             blockType = BlockType::Outputs;
             break;
@@ -100,6 +103,7 @@ NullableStrongRef<BlockExprAST> ShaderBundleParser::parseBlock() noexcept
     _currentBlock = blockType;
     const NullableStrongRef<TypedBlockExprAST> typedBlock(DefaultTauAllocator::Instance(), null, null, blockType);
     parseNextBlockEntry(RCPCast<BlockExprAST>(typedBlock));
+    _currentBlock = parentBlock;
     return RCPCast<BlockExprAST>(typedBlock);
 }
 
@@ -115,7 +119,6 @@ void ShaderBundleParser::parseNextBlockEntry(NullableStrongRef<BlockExprAST> blo
     { return; }
 
     block->container() = parsePrimary();
-
 
     NullableStrongRef<ExprAST> expr = RCPCast<ExprAST>(block->container());
 

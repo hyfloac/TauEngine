@@ -2,13 +2,14 @@
 #include "shader/IShader.hpp"
 #include "RenderingMode.hpp"
 #include "system/RenderingContext.hpp"
+#include "system/GraphicsInterface.hpp"
 #include "gl/GLShaderProgram.hpp"
 #include "dx/dx10/DX10ShaderProgram.hpp"
 #include "dx/dx11/DX11ShaderProgram.hpp"
 
-CPPRef<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexcept
+CPPRef<IShaderProgram> IShaderProgram::create(IGraphicsInterface& gi) noexcept
 {
-    switch(context.mode().currentMode())
+    switch(gi.renderingMode().currentMode())
     {
         case RenderingMode::Mode::DirectX9:
         #ifdef _WIN32
@@ -47,7 +48,7 @@ CPPRef<IShaderProgram> IShaderProgram::create(IRenderingContext& context) noexce
         case RenderingMode::Mode::OpenGL4_4:
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            return CPPRef<IShaderProgram>(new(std::nothrow) GLShaderProgram(context));
+            return CPPRef<IShaderProgram>(new(std::nothrow) GLShaderProgram);
         default: return null;
     }
 }

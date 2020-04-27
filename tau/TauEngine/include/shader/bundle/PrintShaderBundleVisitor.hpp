@@ -72,6 +72,7 @@ private:
 public:
     PrintShaderBundleVisitor(const PrintSBVArgs* args) noexcept;
 
+    void visit(const ExprAST* expr) noexcept override;
     void visit(const FileExprAST& expr) noexcept override;
     void visit(const TypedBlockExprAST& expr) noexcept override;
     void visit(const NamedBlockExprAST& expr) noexcept override;
@@ -83,4 +84,7 @@ private:
     void printComma(const ExprAST& expr) const noexcept;
 
     void printBrace() const noexcept;
+public:
+    CPPRef<IShaderProgram> getShader(IRenderingContext& ctx, IGraphicsInterface& gi) noexcept override { return null; }
+    [[nodiscard]] ShaderBindMap getBindMap() noexcept override { return ShaderBindMap(RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}); }
 };

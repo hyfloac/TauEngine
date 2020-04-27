@@ -229,7 +229,7 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
         {
             _cl->_camera.set({ 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f);
         }
-        else if(argCount == 2 && strcmp(args[0], "rot") == 0)
+        else if(argCount == 3 && strcmp(args[0], "rot") == 0)
         {
             Console::ParseIntError error;
             const float pitch = consoleHandler->parseF32(args[1], &error);
@@ -243,6 +243,17 @@ i32 SetCameraCommand::execute(const char* commandName, const char* args[], u32 a
             const float y = consoleHandler->parseF32(args[2], &error);
             const float z = consoleHandler->parseF32(args[3], &error);
             _cl->_camera.position({ x, y, z });
+        }
+        else if(argCount == 1 && strcmp(args[0], "get") == 0)
+        {
+            auto pos = _cl->_camera.position();
+            auto pitch = _cl->_camera.pitch();
+            auto yaw = _cl->_camera.yaw();
+            auto roll = _cl->_camera.roll();
+            consoleHandler->printf("Pos: (%0.2f, %0.2f, %0.2f)", pos.x(), pos.y(), pos.z());
+            consoleHandler->printf("Pitch: %0.4f", pitch);
+            consoleHandler->printf("Yaw: %0.4f", yaw);
+            consoleHandler->printf("Roll: %0.4f", roll);
         }
         else
         {

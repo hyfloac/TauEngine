@@ -65,7 +65,7 @@ NullableRef<IRasterizerState> TextHandler::rs = nullptr;
 #define INSTANCE_COUNT 128
 
 TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
-    : _ft(null), _shader(IShaderProgram::create(context)),
+    : _ft(null), _shader(IShaderProgram::create(gi)),
       _va(null),
       _viewUniforms(gi.createUniformBuffer()),
       _colorUniforms(gi.createUniformBuffer())

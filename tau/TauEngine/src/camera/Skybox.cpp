@@ -29,7 +29,7 @@ public:
 };
 
 Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const shaderPath, const char* const vertexName, const char* const pixelName, const char* const skyboxPath, const char* const fileExtension) noexcept
-    : _shader(IShaderProgram::create(context)),
+    : _shader(IShaderProgram::create(gi)),
       _uniforms(gi.createUniformBuffer()),
       _skybox(null), _textureUploader(null), _cubeVA(null), _skyboxDepthStencilState(null)
 {

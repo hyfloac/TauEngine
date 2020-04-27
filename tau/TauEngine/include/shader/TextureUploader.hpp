@@ -8,6 +8,7 @@
 #include "texture/Texture.hpp"
 #include "texture/TextureSampler.hpp"
 #include "shader/EShader.hpp"
+#include "ShaderBindMap.hpp"
 
 struct TextureIndices final
 {
@@ -17,13 +18,14 @@ public:
     u32 textureStartIndex;
     u32 samplerStartIndex;
     u32 uniformIndex;
+    ShaderBindMap* bindMap;
 
     inline TextureIndices() noexcept
-        : textureStartIndex(0), samplerStartIndex(0), uniformIndex(0)
+        : textureStartIndex(0), samplerStartIndex(0), uniformIndex(0), bindMap(null)
     { }
 
-    inline TextureIndices(const u32 textureStartIndex, const u32 samplerStartIndex, const u32 uniformIndex) noexcept
-        : textureStartIndex(textureStartIndex), samplerStartIndex(samplerStartIndex), uniformIndex(uniformIndex)
+    inline TextureIndices(const u32 textureStartIndex, const u32 samplerStartIndex, const u32 uniformIndex, ShaderBindMap* const bindMap = null) noexcept
+        : textureStartIndex(textureStartIndex), samplerStartIndex(samplerStartIndex), uniformIndex(uniformIndex), bindMap(bindMap)
     { }
 };
 

@@ -3,10 +3,13 @@
  */
 #pragma once
 
+#include <Safeties.hpp>
 #include <Objects.hpp>
-
 #include "DLL.hpp"
+#include "shader/ShaderBindMap.hpp"
 
+class IRenderingContext;
+class IGraphicsInterface;
 class ExprAST;
 class FileExprAST;
 class BlockExprAST;
@@ -15,6 +18,7 @@ class NamedBlockExprAST;
 class ShaderIOPointExprAST;
 class ShaderIOMapPointExprAST;
 class ShaderIOBindPointExprAST;
+class IShaderProgram;
 
 /**
  * A basic visitor for shader bundles.
@@ -34,6 +38,10 @@ class TAU_DLL NOVTABLE IShaderBundleVisitor
     DEFAULT_DESTRUCT_VI(IShaderBundleVisitor);
     DELETE_COPY(IShaderBundleVisitor);
 public:
+    virtual CPPRef<IShaderProgram> getShader(IRenderingContext& ctx, IGraphicsInterface& gi) noexcept = 0;
+    [[nodiscard]] virtual ShaderBindMap getBindMap() noexcept = 0;
+
+    virtual void visit(const ExprAST* expr) noexcept;
     virtual void visit(const ExprAST& expr) noexcept;
 
     virtual void visit(const FileExprAST& expr) noexcept;

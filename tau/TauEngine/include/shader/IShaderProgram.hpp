@@ -5,6 +5,7 @@
 #include <Objects.hpp>
 #include <Safeties.hpp>
 
+class IGraphicsInterface;
 class IShader;
 class IRenderingContext;
 
@@ -18,7 +19,7 @@ class TAU_DLL TAU_NOVTABLE IShaderProgram
     DEFAULT_DESTRUCT_VI(IShaderProgram);
     DELETE_COPY(IShaderProgram);
 public:
-    static CPPRef<IShaderProgram> create(IRenderingContext& context) noexcept;
+    static CPPRef<IShaderProgram> create(IGraphicsInterface& gi) noexcept;
 protected:
     CPPRef<IShader> _vertexShader;
     CPPRef<IShader> _tessellationControlShader;

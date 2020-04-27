@@ -12,8 +12,14 @@
 #include <EnumBitFields.hpp>
 #include "TERenderer.hpp"
 #include "ControlEvent.hpp"
+#include "model/MeshGenerator.hpp"
 
 #include "system/SystemInterface.hpp"
+#include <shader/bundle/ShaderBundleParser.hpp>
+#include <shader/bundle/ShaderBundleVisitor.hpp>
+#include <gl/GLShaderBundleVisitor.hpp>
+
+#include "VFS.hpp"
 
 template<>
 class UniformAccessor<Layer3D::Uniforms> final
@@ -61,12 +67,13 @@ Layer3D::Layer3D(Globals& globals) noexcept
               Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Space, Keyboard::Key::Ctrl,
               &globals.gr),
       _skybox(globals.gi, globals.rc, "|TERes", "/shader/", "SkyboxVertexShader", "SkyboxPixelShader", "|TERes/Skybox/OceanMountain/", ".png"),
-      _shader(IShaderProgram::create(globals.rc)),
+      _shader(IShaderProgram::create(globals.gi)),
       _uniforms(globals.gi.createUniformBuffer()),
       _materialUniforms(globals.gi.createUniformBuffer()),
       _pointLightUniforms(globals.gi.createUniformBuffer()),
       _spotLightUniforms(globals.gi.createUniformBuffer()), _cameraPosUni(globals.gi.createUniformBuffer()),
-      _frameBufferShader(IShaderProgram::create(globals.rc)),
+      _frameBufferShader(IShaderProgram::create(globals.gi)),
+      _modelGenShader(IShaderProgram::create(globals.gi)),
       _texture(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/TestTexture.png")),
       _overlay(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/Overlay.png")),
       _frameBufferVA(null),
@@ -123,14 +130,37 @@ Layer3D::Layer3D(Globals& globals) noexcept
     shaderArgs.stage = EShader::Stage::Pixel;
     CPPRef<IShader> frameBufferPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
 
+    shaderArgs.path = "/shader/TestShader/";
+
+    shaderArgs.fileName = "Vertex";
+    shaderArgs.stage = EShader::Stage::Vertex;
+    CPPRef<IShader> modelGenVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+
+    shaderArgs.fileName = "Pixel";
+    shaderArgs.stage = EShader::Stage::Pixel;
+    CPPRef<IShader> modelGenPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+
     _shader->setVertexShader(globals.rc, vertexShader);
     _shader->setPixelShader(globals.rc, pixelShader);
 
     _frameBufferShader->setVertexShader(globals.rc, frameBufferVertexShader);
     _frameBufferShader->setPixelShader(globals.rc, frameBufferPixelShader);
 
+    _modelGenShader->setVertexShader(globals.rc, modelGenVertexShader);
+    _modelGenShader->setPixelShader(globals.rc, modelGenPixelShader);
+
     _shader->link(globals.rc);
     _frameBufferShader->link(globals.rc);
+    _modelGenShader->link(globals.rc);
+
+    ShaderBundleLexer lexer(VFS::Instance().openFile("|TERes/shader/Nanosuit/Nanosuit.tausi", FileProps::Read));
+    ShaderBundleParser parser(lexer);
+    NullableStrongRef<ExprAST> ast = parser.parse();
+    IShaderBundleVisitor* visitor = new GLShaderBundleVisitor;
+    visitor->visit(ast);
+    _shader = visitor->getShader(globals.rc, globals.gi);
+    _bindMap = visitor->getBindMap();
+    delete visitor;
 
     Texture2DArgs tArgs;
     tArgs.width = globals.window.width();
@@ -215,10 +245,10 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     // _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glm::translate(_modelViewMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
-    _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+    // _modelViewMatrix = glmExt::rotateDegrees(_modelViewMatrix, 180.0f, glm::vec3(1.0f, 0.0f, 0.0f));
     _uniforms.data().modelMatrix = _modelViewMatrix;
 
-    _pointLight.position() = Vector3f(0.0f, -10.0f, -5.0f);
+    _pointLight.position() = Vector3f(0.0f, 10.0f, 5.0f);
     _pointLight.ambient({255, 255, 255});
     _pointLight.diffuse({255, 255, 255});
     _pointLight.specular({255, 255, 255});
@@ -261,6 +291,52 @@ Layer3D::Layer3D(Globals& globals) noexcept
             else
             { SystemInterface::get()->createAlert("Critical Error", "Failed to create default blending state."); }
         }
+    }
+
+    if constexpr(true)
+    {
+        MeshGenerator::EditableMesh eCubeMesh = MeshGenerator::generateCube();
+        MeshGenerator::GenerationArgs genArgs;
+        genArgs.simplifyEpsilon = false;
+        MeshGenerator::Mesh cubeMesh = MeshGenerator::generateMesh(eCubeMesh, genArgs);
+        
+        BufferArgs bGenArgs(1);
+        bGenArgs.type = EBuffer::Type::ArrayBuffer;
+        bGenArgs.usage = EBuffer::UsageType::StaticDraw;
+        bGenArgs.elementCount = cubeMesh.vertexCount;
+        bGenArgs.initialBuffer = cubeMesh.positions;
+        bGenArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
+        
+        const CPPRef<IBuffer> modelGenPos = globals.gi.createBuffer().buildCPPRef(bGenArgs, null);
+        
+        bGenArgs.initialBuffer = cubeMesh.normals;
+        const CPPRef<IBuffer> modelGenNorm = globals.gi.createBuffer().buildCPPRef(bGenArgs, null);
+        
+        bGenArgs.initialBuffer = cubeMesh.textures;
+        bGenArgs.descriptor.reset(1);
+        bGenArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
+        const CPPRef<IBuffer> modelGenTex = globals.gi.createBuffer().buildCPPRef(bGenArgs, null);
+        
+        IndexBufferArgs ibGenArgs;
+        ibGenArgs.usage = EBuffer::UsageType::StaticDraw;
+        ibGenArgs.elementCount = cubeMesh.indiceCount;
+        ibGenArgs.initialBuffer = cubeMesh.indices;
+        
+        const CPPRef<IIndexBuffer> modelGenIndices = globals.gi.createIndexBuffer().buildCPPRef(ibGenArgs, null);
+        
+        VertexArrayArgs mgArgs(3);
+        mgArgs.shader = modelGenVertexShader.get();
+        mgArgs.buffers[0] = modelGenPos;
+        mgArgs.buffers[1] = modelGenNorm;
+        mgArgs.buffers[2] = modelGenTex;
+        mgArgs.indexBuffer = modelGenIndices;
+        mgArgs.drawCount = cubeMesh.indiceCount;
+        mgArgs.drawType = DrawType::SeparatedTriangles;
+        
+        _modelGenVA = globals.gi.createVertexArray().buildCPPRef(mgArgs, null);
+        
+        eCubeMesh.destroy();
+        cubeMesh.destroy();
     }
 }
 
@@ -348,58 +424,84 @@ void Layer3D::onRender() noexcept
         const float bsColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
         const NullableRef<IBlendingState> storeState = _globals.rc.setBlendingState(_deferredBSState, bsColor);
 
-        _frameBuffer->bind(_globals.rc, IFrameBuffer::AccessMode::Write);
-
-        _frameBuffer->clearFrameBuffer(_globals.rc, true, true, false, { 255, 255, 127, 255 });
-
-        _shader->bind(context);
-        _uniforms.data().viewMatrix = _camera->viewMatrix();
-
-        _uniforms.upload(context, EShader::Stage::Vertex, 0);
-        for(const CPPRef<RenderableObject>& ro : _objects)
         {
-            TextureIndices indices(0, 0, 0);
-            ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
-            ro->preRender(context);
-            ro->render(context);
-            ro->postRender(context);
-            indices = TextureIndices(0, 0, 0);
-            ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
-        }
-        _uniforms.unbind(context, EShader::Stage::Vertex, 0);
-        _shader->unbind(context);
+            _frameBuffer->bind(_globals.rc, IFrameBuffer::AccessMode::Write);
 
-        _frameBuffer->unbind(_globals.rc);
+            _frameBuffer->clearFrameBuffer(_globals.rc, true, true, false, { 255, 255, 127, 255 });
+
+            _shader->bind(context);
+            _uniforms.data().viewMatrix = _camera->viewMatrix();
+
+            _uniforms.upload(context, EShader::Stage::Vertex, _bindMap.mapUniformBindPoint(0, EShader::Stage::Vertex));
+            // _uniforms.upload(context, EShader::Stage::Vertex, 0);
+            for(const CPPRef<RenderableObject>& ro : _objects)
+            {
+                TextureIndices indices(0, 0, 0, &_bindMap);
+                // TextureIndices indices(0, 0, 0, null);
+                ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, _bindMap.mapUniformBindPoint(0, EShader::Stage::Pixel), indices);
+                // ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+                ro->preRender(context);
+                ro->render(context);
+                ro->postRender(context);
+                // indices = TextureIndices(0, 0, 0, null);
+                indices = TextureIndices(0, 0, 0, &_bindMap);
+                // ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
+                ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, _bindMap.mapUniformBindPoint(0, EShader::Stage::Pixel), indices);
+            }
+            // _uniforms.unbind(context, EShader::Stage::Vertex, 0);
+            _uniforms.unbind(context, EShader::Stage::Vertex, _bindMap.mapUniformBindPoint(0, EShader::Stage::Vertex));
+            _shader->unbind(context);
+
+            _frameBuffer->unbind(_globals.rc);
+        }
+
         ControlEvent ce(CE_SET_NEXT_FB);
         _globals.renderer->onEvent(ce);
 
         (void) _globals.rc.setBlendingState(storeState, bsColor);
 
-        _frameBufferShader->bind(_globals.rc);
+        {
+            _frameBufferShader->bind(_globals.rc);
 
-        _spotLight.position() = _camera.camera().position();
-        _spotLight.direction() = _camera.camera().front();
-        _cameraPosUni.data().cameraPos = _camera.camera().position();
+            _spotLight.position() = _camera.camera().position();
+            _spotLight.direction() = _camera.camera().front();
+            _cameraPosUni.data().cameraPos = _camera.camera().position();
 
-        _spotLightUniforms.set(context, _spotLight);
+            _spotLightUniforms.set(context, _spotLight);
 
-        _pointLightUniforms.upload(context, EShader::Stage::Pixel, 0);
-        _spotLightUniforms.upload(context, EShader::Stage::Pixel, 1);
-        _cameraPosUni.upload(context, EShader::Stage::Pixel, 2);
+            _pointLightUniforms.upload(context, EShader::Stage::Pixel, 0);
+            _spotLightUniforms.upload(context, EShader::Stage::Pixel, 1);
+            _cameraPosUni.upload(context, EShader::Stage::Pixel, 2);
 
-        _frameBufferUploader->upload(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
-        _frameBufferVA->bind(_globals.rc);
-        _frameBufferVA->preDraw(_globals.rc);
-        _frameBufferVA->draw(_globals.rc);
-        _frameBufferVA->postDraw(_globals.rc);
-        _frameBufferVA->unbind(_globals.rc);
-        _frameBufferUploader->unbind(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+            _frameBufferUploader->upload(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+            _frameBufferVA->bind(_globals.rc);
+            _frameBufferVA->preDraw(_globals.rc);
+            _frameBufferVA->draw(_globals.rc);
+            _frameBufferVA->postDraw(_globals.rc);
+            _frameBufferVA->unbind(_globals.rc);
+            _frameBufferUploader->unbind(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
-        _cameraPosUni.unbind(context, EShader::Stage::Pixel, 2);
-        _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 1);
-        _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 0);
+            _cameraPosUni.unbind(context, EShader::Stage::Pixel, 2);
+            _spotLightUniforms.unbind(context, EShader::Stage::Pixel, 1);
+            _pointLightUniforms.unbind(context, EShader::Stage::Pixel, 0);
 
-        _frameBufferShader->unbind(_globals.rc);
+            _frameBufferShader->unbind(_globals.rc);
+        }
+
+        if constexpr(true)
+        {
+            _modelGenShader->bind(_globals.rc);
+            _uniforms.upload(context, EShader::Stage::Vertex, 0);
+
+            _modelGenVA->bind(_globals.rc);
+            _modelGenVA->preDraw(_globals.rc);
+            _modelGenVA->draw(_globals.rc);
+            _modelGenVA->postDraw(_globals.rc);
+            _modelGenVA->unbind(_globals.rc);
+
+            _uniforms.unbind(context, EShader::Stage::Vertex, 0);
+            _modelGenShader->unbind(_globals.rc);
+        }
 
         _skybox.render(context, _camera.camera());
     }

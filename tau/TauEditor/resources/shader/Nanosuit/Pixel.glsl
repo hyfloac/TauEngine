@@ -1,24 +1,24 @@
-#version 430 core
+#version 330 core
 
 in vec3 fPosition;
 in vec2 fTexCoord;
 in mat3 fTBN;
 
-layout(location = 0) out vec4 color;
-layout(location = 1) out vec4 position;
-layout(location = 2) out vec4 normal;
-layout(location = 3) out vec4 specular;
+out vec4 color;
+out vec4 position;
+out vec4 normal;
+out vec4 specular;
 
 #include <|TERes/shader/include/Material.glsl>
 
-layout(std140, binding = 1) uniform MaterialUni
+layout(std140) uniform MaterialUni
 {
     Material material;
 };
 
-layout(location = 0) uniform sampler2D diffuseSampler;
-layout(location = 1) uniform sampler2D specularSampler;
-layout(location = 2) uniform sampler2D normalSampler;
+uniform sampler2D diffuseSampler;
+uniform sampler2D specularSampler;
+uniform sampler2D normalSampler;
 
 void main(void)
 {
@@ -26,11 +26,11 @@ void main(void)
     vec4 specularSample = texture(specularSampler, fTexCoord);
     vec3 normalSample = vec3(texture(normalSampler, fTexCoord));
 
-    vec3 N = normalize(normalSample * 2.0 - 1.0);
+    vec3 N = normalize(normalSample * 2.0f - 1.0f);
     N = normalize(fTBN * N);
 
     color = diffuseSample;
     position = vec4(fPosition, material.specularExponent);
-    normal = vec4(N, 0.0);
+    normal = vec4(N, 0.0f);
     specular = specularSample;
 }

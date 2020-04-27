@@ -14,7 +14,7 @@
 //     Output
 // };
 
-class TAU_DLL NOVTABLE ShaderIOPointExprAST : public ExprAST
+class TAU_DLL TAU_NOVTABLE ShaderIOPointExprAST : public ExprAST
 {
     DEFAULT_DESTRUCT_VI(ShaderIOPointExprAST);
     DELETE_COPY(ShaderIOPointExprAST);

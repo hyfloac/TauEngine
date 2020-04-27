@@ -4,6 +4,12 @@
 #include "shader/bundle/ast/BlockExprAST.hpp"
 #include "shader/bundle/ast/ShaderIOBindingExprAST.hpp"
 
+void IShaderBundleVisitor::visit(const ExprAST* expr) noexcept
+{
+    if(expr)
+    { expr->visit(*this); }
+}
+
 void IShaderBundleVisitor::visit(const ExprAST& expr) noexcept
 { expr.visit(*this); }
 

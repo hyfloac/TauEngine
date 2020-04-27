@@ -108,7 +108,7 @@ public:
     { }
 
     [[nodiscard]] const char* name() const noexcept override { return "setCamera"; }
-    [[nodiscard]] const char* usage() const noexcept override { return "setCamera <cmd{enum{reset|pos|rot}}> <(pos)<x{f32}> <y{f32}> <z{f32}>> <(rot degrees)<pitch{f32}> <yaw{f32}>>"; }
+    [[nodiscard]] const char* usage() const noexcept override { return "setCamera <cmd{enum{reset|pos|rot|get}}> <(pos)<x{f32}> <y{f32}> <z{f32}>> <(rot degrees)<pitch{f32}> <yaw{f32}>>"; }
     [[nodiscard]] const char* info() const noexcept override { return "Sets various camera properties."; }
     [[nodiscard]] i32 execute(const char* commandName, const char* args[], u32 argCount, Console::Controller* consoleHandler) noexcept override;
 };

@@ -58,9 +58,9 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 #else
     RenderingMode::getGlobalMode().setDebugMode(true);
 #endif
-    // RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
+    RenderingMode::getGlobalMode().setMode(RenderingMode::OpenGL4_3);
     // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX10);
-    RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
+    // RenderingMode::getGlobalMode().setMode(RenderingMode::DirectX11);
 
     for(int i = 1; i < argCount; ++i)
     {

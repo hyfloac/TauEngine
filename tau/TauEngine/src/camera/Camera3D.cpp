@@ -35,7 +35,7 @@ void Camera3D::recomputeMatrices() noexcept
     _viewMatrix = glm::inverse(transform);
     _compoundedMatrix = _projectionMatrix * _viewMatrix;
 
-    _viewRotMatrix = glm::inverse(rotMat);
+    _viewRotMatrix = glmExt::rotateDegrees(glm::inverse(rotMat), 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void Camera3D::computeQuat() noexcept
@@ -46,13 +46,13 @@ void Camera3D::computeQuat() noexcept
     static constexpr glm::vec3 zAxis(0.0f, -1.0f, -1.0f);
 
     const float pitch = 180.0f - _pitch;
-    const glm::quat q0 = glmExt::rotateDegrees(identity, _yaw, yAxis);
-    const glm::quat q1 = glmExt::rotateDegrees(q0, pitch, xAxis);
+    const glm::quat q0 = glmExt::rotateDegrees(identity, -_yaw, yAxis);
+    const glm::quat q1 = glmExt::rotateDegrees(q0, -pitch, xAxis);
     const glm::quat q2 = glmExt::rotateDegrees(q1, _roll, zAxis);
     _viewQuaternion = q2;
 
-    const SinCos<float> pitchSC = fastSinCosD(-_pitch);
-    const SinCos<float> yawSC = fastSinCosD(-_yaw);
+    const SinCos<float> pitchSC = fastSinCosD(_pitch);
+    const SinCos<float> yawSC = fastSinCosD(_yaw);
 
     _front.x() = yawSC.sin * pitchSC.cos;
     _front.y() = pitchSC.sin;
@@ -123,9 +123,9 @@ void FreeCamCamera3DController::update(const float fixedDelta, const Vector3f ve
 
     if(dvx || dvy || dvz)
     {
-        _nextPos.y() -= deltaVelocity.y();
+        _nextPos.y() += deltaVelocity.y();
 
-        const SinCos<float> yawSC = fastSinCosD(_nextYaw);
+        const SinCos<float> yawSC = fastSinCosD(-_nextYaw);
 
         if(_lookY)
         {
@@ -201,8 +201,8 @@ void FreeCamCamera3DController::checkKeys() noexcept
     if(Keyboard::isKeyPressed(_keyForwards))  { _velocity.x() -= speed; }
     if(Keyboard::isKeyPressed(_keyUp))        { _velocity.y() += speed; }
     if(Keyboard::isKeyPressed(_keyDown))      { _velocity.y() -= speed; }
-    if(Keyboard::isKeyPressed(_keyRight))     { _velocity.z() += speed; }
-    if(Keyboard::isKeyPressed(_keyLeft))      { _velocity.z() -= speed; }
+    if(Keyboard::isKeyPressed(_keyLeft))      { _velocity.z() += speed; }
+    if(Keyboard::isKeyPressed(_keyRight))     { _velocity.z() -= speed; }
 }
 
 bool FreeCamCamera3DController::blipHandler(GameRecorder::Blip& blip, void* userParam) noexcept

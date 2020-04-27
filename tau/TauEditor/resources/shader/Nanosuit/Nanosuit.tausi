@@ -1,0 +1,29 @@
+Vertex: {
+    File: "|TERes/shader/Nanosuit/Vertex.glsl",
+    Inputs: {
+        0: "position",
+        1: "normal",
+        2: "tangent",
+        3: "texCoord"
+    },
+    Uniforms: {
+        0: "CameraMatrices"
+    }
+},
+Fragment: {
+    File: "|TERes/shader/Nanosuit/Pixel.glsl",
+    Outputs: {
+        0: "color",
+        1: "position",
+        2: "normal",
+        3: "specular"
+    },
+    Uniforms: {
+        0: "MaterialUni"
+    },
+    Textures: {
+        0: "diffuseSampler",
+        1: "specularSampler",
+        2: "normalSampler"
+    }
+}

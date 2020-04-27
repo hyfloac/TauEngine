@@ -6,7 +6,7 @@
 #include <VariableLengthArray.hpp>
 #include "Timings.hpp"
 
-GLShaderProgram::GLShaderProgram(IRenderingContext&) noexcept
+GLShaderProgram::GLShaderProgram() noexcept
     : IShaderProgram()
     , _programID(glCreateProgram())
 { Ensure(_programID != 0); }

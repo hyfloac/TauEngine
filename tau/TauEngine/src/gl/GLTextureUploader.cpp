@@ -13,12 +13,19 @@ TextureIndices GLSingleTextureUploader::upload(IRenderingContext& context, const
     const GLuint textureHandle = reinterpret_cast<GLTextureView*>(_texture)->texture();
     const GLenum glType = reinterpret_cast<GLTextureView*>(_texture)->glType();
 
-    glUniform1i(indices.uniformIndex, indices.textureStartIndex);
+    if(indices.bindMap)
+    {
+        glUniform1i(indices.bindMap->mapTextureBindPoint(indices.uniformIndex, stage), indices.textureStartIndex);
+    }
+    else
+    {
+        glUniform1i(indices.uniformIndex, indices.textureStartIndex);
+    }
     glActiveTexture(GL_TEXTURE0 + indices.textureStartIndex);
     glBindTexture(glType, textureHandle);
     glSampler->apply(glType);
 
-    return TextureIndices(indices.textureStartIndex + 1, indices.samplerStartIndex, indices.uniformIndex + 1);
+    return TextureIndices(indices.textureStartIndex + 1, indices.samplerStartIndex, indices.uniformIndex + 1, indices.bindMap);
 }
 
 TextureIndices GLSingleTextureUploader::unbind(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
@@ -27,7 +34,7 @@ TextureIndices GLSingleTextureUploader::unbind(IRenderingContext& context, const
 
     glActiveTexture(GL_TEXTURE0 + indices.textureStartIndex);
     glBindTexture(glType, 0);
-    return TextureIndices(indices.textureStartIndex + 1, indices.samplerStartIndex, indices.uniformIndex + 1);
+    return TextureIndices(indices.textureStartIndex + 1, indices.samplerStartIndex, indices.uniformIndex + 1, indices.bindMap);
 }
 
 GLTextureUploader::GLTextureUploader(const RefDynArray<ITextureView*>& textures, const CPPRef<GLTextureSampler>& textureSampler) noexcept
@@ -45,13 +52,20 @@ TextureIndices GLTextureUploader::upload(IRenderingContext& context, const Textu
         const GLuint textureHandle = reinterpret_cast<GLTextureView*>(texture)->texture();
         const GLenum glType = reinterpret_cast<GLTextureView*>(texture)->glType();
 
-        glUniform1i(i + indices.uniformIndex, i + indices.textureStartIndex);
+        if(indices.bindMap)
+        {
+            glUniform1i(indices.bindMap->mapTextureBindPoint(i + indices.uniformIndex, stage), i + indices.textureStartIndex);
+        }
+        else
+        {
+            glUniform1i(i + indices.uniformIndex, i + indices.textureStartIndex);
+        }
         glActiveTexture(GL_TEXTURE0 + i + indices.textureStartIndex);
         glBindTexture(glType, textureHandle);
         glSampler->apply(glType);
     }
 
-    return TextureIndices(indices.textureStartIndex + _textures.size(), indices.samplerStartIndex, indices.uniformIndex + _textures.size());
+    return TextureIndices(indices.textureStartIndex + _textures.size(), indices.samplerStartIndex, indices.uniformIndex + _textures.size(), indices.bindMap);
 }
 
 TextureIndices GLTextureUploader::unbind(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
@@ -59,11 +73,12 @@ TextureIndices GLTextureUploader::unbind(IRenderingContext& context, const Textu
     for(uSys i = 0; i < _textures.size(); ++i)
     {
         const GLenum glType = reinterpret_cast<GLTextureView*>(_textures[i])->glType();
+
         glActiveTexture(GL_TEXTURE0 + i + indices.textureStartIndex);
         glBindTexture(glType, 0);
     }
 
-    return TextureIndices(indices.textureStartIndex + _textures.size(), indices.samplerStartIndex, indices.uniformIndex + _textures.size());
+    return TextureIndices(indices.textureStartIndex + _textures.size(), indices.samplerStartIndex, indices.uniformIndex + _textures.size(), indices.bindMap);
 }
 
 GLSingleTextureUploader* GLSingleTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error) const noexcept

@@ -224,7 +224,7 @@ public:
         return *this;
     }
 
-    Vector2f normalizeC() const noexcept
+    [[nodiscard]] Vector2f normalizeC() const noexcept
     {
         const float invMag = rSqrt(magnitudeSquared());
 
@@ -241,9 +241,13 @@ public:
 
     OPERATOR(Vector2f, +, Vector2f&, const noexcept, addC);
     OPERATOR(Vector2f, -, Vector2f&, const noexcept, subC);
+    OPERATOR(Vector2f, *, Vector2f&, const noexcept, mulC);
+    OPERATOR(Vector2f, /, Vector2f&, const noexcept, divC);
 
     OPERATOR(Vector2f&, +=, Vector2f&, noexcept, add);
     OPERATOR(Vector2f&, -=, Vector2f&, noexcept, sub);
+    OPERATOR(Vector2f&, *=, Vector2f&, noexcept, mul);
+    OPERATOR(Vector2f&, /=, Vector2f&, noexcept, div);
 
     OPERATOR(Vector2f, +, float, const noexcept, addC);
     OPERATOR(Vector2f, -, float, const noexcept, subC);

@@ -232,12 +232,21 @@ bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, 
 
 bool GLShaderBuilder::compileShader(const ShaderArgs& args, GLShaderArgs& glArgs, Error* error) const noexcept
 {
-    const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
+    CPPRef<IFile> shaderFile;
 
-    ERROR_CODE_COND_F(shaderSelector.count() == 0, Error::InvalidFile);
-    auto& selected = shaderSelector.select(_resIndex);
-    ERROR_CODE_COND_F(!selected.loader() || selected.path().length() == 0 || selected.name().length() == 0, Error::InvalidFile);
-    const CPPRef<IFile> shaderFile = selected.loadFile(FileProps::Read);
+    if(strcmp(args.vfsMount, "__bundle__") == 0)
+    {
+        shaderFile = VFS::Instance().openFile(args.fileName, FileProps::Read);
+    }
+    else
+    {
+        const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
+
+        ERROR_CODE_COND_F(shaderSelector.count() == 0, Error::InvalidFile);
+        auto& selected = shaderSelector.select(_resIndex);
+        ERROR_CODE_COND_F(!selected.loader() || selected.path().length() == 0 || selected.name().length() == 0, Error::InvalidFile);
+        shaderFile = selected.loadFile(FileProps::Read);
+    }
 
     ERROR_CODE_COND_F(!shaderFile, Error::InvalidFile);
 

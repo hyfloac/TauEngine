@@ -322,28 +322,28 @@ public:
         return Vector3f(CompVec4(-this->_data.x, -this->_data.y, -this->_data.z, -this->_data.w).vec);
     }
 
-    inline Vector3f& neg()           noexcept { return negate();     }
-    inline Vector3f  negCopy() const noexcept { return negateCopy(); }
+    inline Vector3f& neg()                         noexcept { return negate();     }
+    [[nodiscard]] inline Vector3f  negCopy() const noexcept { return negateCopy(); }
 #pragma endregion
 
 #pragma region Magnitude
-    float magnitudeSquared() const noexcept
+    [[nodiscard]] float magnitudeSquared() const noexcept
     {
         const CompVec4 comp(_mm_mul_ps(this->_data.vec, this->_data.vec));
 
         return comp.x + comp.y + comp.z;
     }
 
-    float magnitude() const noexcept
+    [[nodiscard]] float magnitude() const noexcept
     {
         return sqrt(this->magnitudeSquared());
     }
 
-    inline float lengthSquared() const noexcept { return magnitudeSquared(); }
-    inline float length()        const noexcept { return magnitude();        }
+    [[nodiscard]] inline float lengthSquared() const noexcept { return magnitudeSquared(); }
+    [[nodiscard]] inline float length()        const noexcept { return magnitude();        }
 #pragma endregion
 
-    Vector3f inverseSqrt() const noexcept
+    [[nodiscard]] Vector3f inverseSqrt() const noexcept
     {
         __m128 inv = _mm_rsqrt_ss(this->_data.vec);
 
@@ -430,11 +430,13 @@ public:
 
     OPERATOR(Vector3f, +, Vector3f, const noexcept, addC);
     OPERATOR(Vector3f, -, Vector3f, const noexcept, subC);
-    OPERATOR(Vector3f, *, Vector3f, const noexcept, crossC);
+    OPERATOR(Vector3f, *, Vector3f, const noexcept, mulC);
+    OPERATOR(Vector3f, /, Vector3f, const noexcept, divC);
 
     OPERATOR(Vector3f&, +=, Vector3f, noexcept, add);
     OPERATOR(Vector3f&, -=, Vector3f, noexcept, sub);
-    OPERATOR(Vector3f&, *=, Vector3f, noexcept, cross);
+    OPERATOR(Vector3f&, *=, Vector3f, noexcept, mul);
+    OPERATOR(Vector3f&, /=, Vector3f, noexcept, div);
 
     OPERATOR(Vector3f, +, float, const noexcept, addC);
     OPERATOR(Vector3f, -, float, const noexcept, subC);

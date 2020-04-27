@@ -12,9 +12,11 @@ class TAU_DLL GLShaderProgram final : public IShaderProgram
 private:
     GLuint _programID;
 public:
-    GLShaderProgram(IRenderingContext& context) noexcept;
+    GLShaderProgram() noexcept;
 
     ~GLShaderProgram() noexcept override;
+
+    [[nodiscard]] GLuint programID() const noexcept { return _programID; }
 
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
