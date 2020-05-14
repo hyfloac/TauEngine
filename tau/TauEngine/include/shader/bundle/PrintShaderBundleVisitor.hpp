@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <NumTypes.hpp>
 
 #include "ShaderBundleVisitor.hpp"
@@ -54,6 +55,7 @@ public:
     TessellationEvaluationName tessEvalName;
     PixelName pixelName;
     Braces braces;
+    FILE* file;
 };
 
 class TAU_DLL PrintShaderBundleVisitor final : public IShaderBundleVisitor
@@ -69,22 +71,30 @@ private:
     const char* _pixelName;
     bool _bracesSameLine;
     uSys _currIndent;
+    FILE* _file;
 public:
-    PrintShaderBundleVisitor(const PrintSBVArgs* args) noexcept;
+    PrintShaderBundleVisitor(const PrintSBVArgs* args = null) noexcept;
 
-    void visit(const ExprAST* expr) noexcept override;
-    void visit(const FileExprAST& expr) noexcept override;
-    void visit(const TypedBlockExprAST& expr) noexcept override;
-    void visit(const NamedBlockExprAST& expr) noexcept override;
-    void visit(const ShaderIOMapPointExprAST& expr) noexcept override;
-    void visit(const ShaderIOBindPointExprAST& expr) noexcept override;
+    void visit(const sbp::ExprAST* expr) noexcept override
+    { IShaderBundleVisitor::visit(expr); }
+
+    void visit(const sbp::ExprAST& expr) noexcept override
+    { IShaderBundleVisitor::visit(expr); }
+
+    void visit(const sbp::RootExprAST& expr) noexcept override
+    { IShaderBundleVisitor::visit(expr); }
+
+    void visit(const sbp::FileExprAST& expr) noexcept override;
+    void visit(const sbp::BlockExprAST& expr) noexcept override;
+    void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept override;
+    void visit(const sbp::OuterShaderStageBlockExprAST& expr) noexcept override;
+    void visit(const sbp::APIBlockExprAST& expr) noexcept override;
+    void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept override;
+    void visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept override;
 private:
     void printIndent() const noexcept;
 
-    void printComma(const ExprAST& expr) const noexcept;
+    void printComma(bool shouldPrint = true) const noexcept;
 
     void printBrace() const noexcept;
-public:
-    CPPRef<IShaderProgram> getShader(IRenderingContext& ctx, IGraphicsInterface& gi) noexcept override { return null; }
-    [[nodiscard]] ShaderBindMap getBindMap() noexcept override { return ShaderBindMap(RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}, RefDynArray<u32>{}); }
 };

@@ -1,5 +1,5 @@
-#include "shader/IShaderProgram.hpp"
-#include "shader/IShader.hpp"
+#include "shader/ShaderProgram.hpp"
+#include "shader/Shader.hpp"
 #include "RenderingMode.hpp"
 #include "system/RenderingContext.hpp"
 #include "system/GraphicsInterface.hpp"

@@ -30,7 +30,7 @@ void DX11VertexArray::preDraw(IRenderingContext& context) noexcept
     ctx.d3d11DeviceContext()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
-void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
+void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount, const uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = this->_drawCount; }
@@ -47,7 +47,7 @@ void DX11VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys draw
     }
 }
 
-void DX11VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
+void DX11VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, const uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = _drawCount; }

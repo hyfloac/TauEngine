@@ -44,6 +44,9 @@ typedef double f64;
   typedef ::std::size_t uSys;
 #endif
 
+typedef ::std::uintptr_t uPtr;
+typedef ::std::intptr_t  iPtr;
+
 template<typename _T>
 struct IntMaxMin final
 {

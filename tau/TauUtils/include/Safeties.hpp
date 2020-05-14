@@ -50,6 +50,7 @@ public:
     {
         Ensure(t != nullptr);
     }
+
     constexpr inline NotNull(const NotNull<_T>& copy) noexcept : _t(copy._t) { }
     constexpr inline NotNull(NotNull<_T>&& move) noexcept : _t(move._t) { }
 

@@ -29,12 +29,7 @@ enum class FileProps : u8
  */
 class IFile
 {
-private:
-    IFile(const IFile& copy) noexcept = delete;
-    IFile(IFile&& move) noexcept = delete;
-    
-    IFile& operator=(const IFile& copy) noexcept = delete;
-    IFile& operator=(IFile&& move) noexcept = delete;
+    DELETE_COPY(IFile);
 public:
     IFile() noexcept = default;
 

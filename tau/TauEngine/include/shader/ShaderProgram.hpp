@@ -43,3 +43,13 @@ protected:
     virtual bool attach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept = 0;
     virtual void detach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept = 0;
 };
+
+struct ShaderProgramArgs final
+{
+    DynString bundlePath;
+};
+
+class TAU_DLL TAU_NOVTABLE IShaderProgramBuilder
+{
+    
+};

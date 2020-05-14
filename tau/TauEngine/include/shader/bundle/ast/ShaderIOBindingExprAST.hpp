@@ -6,28 +6,24 @@
 #include "ExprAST.hpp"
 #include "shader/bundle/ShaderBundleVisitor.hpp"
 
-// enum class ShaderIO
-// {
-//     Uniform = 0,
-//     Texture,
-//     Input,
-//     Output
-// };
-
+namespace sbp {
 class TAU_DLL TAU_NOVTABLE ShaderIOPointExprAST : public ExprAST
 {
     DEFAULT_DESTRUCT_VI(ShaderIOPointExprAST);
     DELETE_COPY(ShaderIOPointExprAST);
 private:
-    // ShaderIO _ioType;
-    i32 _bindPoint;
+    NullableStrongRef<ShaderIOPointExprAST> _next;
+    u32 _virtualBindPoint;
 public:
-    inline ShaderIOPointExprAST(const NullableStrongRef<ExprAST>& next,/* const ShaderIO ioType,*/ const i32 bindPoint) noexcept
-        : ExprAST(next),/* _ioType(ioType),*/ _bindPoint(bindPoint)
+    inline ShaderIOPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const u32 virtualBindPoint) noexcept
+        : _next(next)
+        , _virtualBindPoint(virtualBindPoint)
     { }
 
-    // [[nodiscard]] ShaderIO ioType() const noexcept { return _ioType; }
-    [[nodiscard]] i32 bindPoint() const noexcept { return _bindPoint; }
+    [[nodiscard]]       NullableStrongRef<ShaderIOPointExprAST>& next()       noexcept { return _next; }
+    [[nodiscard]] const NullableStrongRef<ShaderIOPointExprAST>& next() const noexcept { return _next; }
+
+    [[nodiscard]] u32 virtualBindPoint() const noexcept { return _virtualBindPoint; }
 };
 
 class TAU_DLL ShaderIOMapPointExprAST final : public ShaderIOPointExprAST
@@ -37,8 +33,9 @@ class TAU_DLL ShaderIOMapPointExprAST final : public ShaderIOPointExprAST
 private:
     i32 _shaderBind;
 public:
-    inline ShaderIOMapPointExprAST(const NullableStrongRef<ExprAST>& next,/* const ShaderIO ioType,*/ const i32 bindPoint, const i32 shaderBind) noexcept
-        : ShaderIOPointExprAST(next,/* ioType,*/ bindPoint), _shaderBind(shaderBind)
+    inline ShaderIOMapPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const u32 virtualBindPoint, const i32 shaderBind) noexcept
+        : ShaderIOPointExprAST(next, virtualBindPoint)
+        , _shaderBind(shaderBind)
     { }
 
     [[nodiscard]] i32 shaderBind() const noexcept { return _shaderBind; }
@@ -54,8 +51,9 @@ class TAU_DLL ShaderIOBindPointExprAST final : public ShaderIOPointExprAST
 private:
     DynString _uniformName;
 public:
-    inline ShaderIOBindPointExprAST(const NullableStrongRef<ExprAST>& next,/* const ShaderIO ioType,*/ const i32 bindPoint, const DynString& uniformName) noexcept
-        : ShaderIOPointExprAST(next,/* ioType,*/ bindPoint), _uniformName(uniformName)
+    inline ShaderIOBindPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const u32 virtualBindPoint, const DynString& uniformName) noexcept
+        : ShaderIOPointExprAST(next, virtualBindPoint)
+        , _uniformName(uniformName)
     { }
 
     [[nodiscard]] const DynString& uniformName() const noexcept { return _uniformName; }
@@ -63,3 +61,4 @@ public:
     void visit(IShaderBundleVisitor& visitor) const noexcept override
     { visitor.visit(*this); }
 };
+}

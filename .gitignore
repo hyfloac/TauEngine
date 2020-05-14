@@ -8,6 +8,9 @@
 # Caching
 /tau/TauEditor/resources/cache/
 
+# VS Code
+.vscode
+
 # GLEW stuff
 glewinfo.txt
 visualinfo.txt

@@ -21,29 +21,24 @@ public:
      */
     enum Mode : u8
     {
-        DirectX9 = 0,
-        DirectX10,
+        DirectX10 = 0,
         DirectX11,
         DirectX12,
         DirectX12_1,
         Vulkan,
-        OpenGL3,
-        OpenGL3_1,
-        OpenGL3_2,
-        OpenGL3_3,
-        OpenGL4,
         OpenGL4_2,
         OpenGL4_3,
         OpenGL4_4,
         OpenGL4_5,
         OpenGL4_6,
+        _MAX_VALUE = OpenGL4_6
     };
 
     typedef void(__cdecl * modeChange_f)(Mode oldMode, bool oldDebugMode, Mode newMode, bool newDebugMode);
 
     static RenderingMode& getGlobalMode() noexcept
     {
-        static RenderingMode _currentGlobalMode(RenderingMode::Mode::OpenGL3);
+        static RenderingMode _currentGlobalMode(RenderingMode::Mode::OpenGL4_2);
         return _currentGlobalMode; 
     }
 private:
@@ -101,11 +96,6 @@ public:
     {
         switch(_currentMode)
         {
-            case Mode::OpenGL3:
-            case Mode::OpenGL3_1:
-            case Mode::OpenGL3_2:
-            case Mode::OpenGL3_3:
-            case Mode::OpenGL4:
             case Mode::OpenGL4_2:
             case Mode::OpenGL4_3:
             case Mode::OpenGL4_4:
@@ -130,7 +120,6 @@ public:
     {
         switch(_currentMode)
         {
-            case DirectX9:
             case DirectX10:
             case DirectX11:
             case DirectX12:

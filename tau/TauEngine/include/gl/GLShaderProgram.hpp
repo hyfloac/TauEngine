@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shader/IShaderProgram.hpp"
+#include "shader/ShaderProgram.hpp"
 #pragma warning(push, 0)
 #include <GL/glew.h>
 #include <Objects.hpp>

@@ -1,6 +1,6 @@
 #include "shader/ShaderBindMap.hpp"
 
-u32 ShaderBindMap::mapUniformBindPoint(const u32 index, const EShader::Stage stage) noexcept
+i32 ShaderBindMap::mapUniformBindPoint(const u32 index, const EShader::Stage stage) noexcept
 {
     switch(stage)
     {
@@ -13,7 +13,7 @@ u32 ShaderBindMap::mapUniformBindPoint(const u32 index, const EShader::Stage sta
     }
 }
 
-u32 ShaderBindMap::mapTextureBindPoint(const u32 index, const EShader::Stage stage) noexcept
+i32 ShaderBindMap::mapTextureBindPoint(const u32 index, const EShader::Stage stage) noexcept
 {
     switch(stage)
     {

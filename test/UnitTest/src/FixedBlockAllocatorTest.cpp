@@ -33,11 +33,11 @@ public:
     [[nodiscard]] float& y() noexcept { return _y; }
 };
 
-template<AllocationTracking _AllocTracking>
+template<typename _Allocator>
 void arenaAllocationValidity() noexcept
 {
     UNIT_TEST();
-    FixedBlockArenaAllocator<_AllocTracking> allocator(sizeof(AllocTestObj));
+    _Allocator allocator(sizeof(AllocTestObj));
 
     AllocTestObj* obj0 = new(allocator.allocate()) AllocTestObj(3, 6.0f);
     AllocTestObj* obj1 = new(allocator.allocate()) AllocTestObj(17, 92.0f);
@@ -58,11 +58,11 @@ void arenaAllocationValidity() noexcept
     allocator.deallocate(obj2);
 }
 
-template<AllocationTracking _AllocTracking>
+template<typename _Allocator>
 void arenaMacroAllocationValidity() noexcept
 {
     UNIT_TEST();
-    FixedBlockArenaAllocator<_AllocTracking> allocator(sizeof(AllocTestObj));
+    _Allocator allocator(sizeof(AllocTestObj));
 
     AllocTestObj* obj0 = allocator.template allocateT<AllocTestObj>(3, 6.0f);
     AllocTestObj* obj1 = allocator.template allocateT<AllocTestObj>(17, 92.0f);
@@ -80,11 +80,11 @@ void arenaMacroAllocationValidity() noexcept
     allocator.deallocateT(obj2);
 }
 
-template<AllocationTracking _AllocTracking>
+template<typename _Allocator>
 void arenaMaxPageExceed() noexcept
 {
     UNIT_TEST();
-    FixedBlockArenaAllocator<_AllocTracking, 1> allocator(sizeof(AllocTestObj));
+    _Allocator allocator(sizeof(AllocTestObj), 1);
     const uSys allocations = PageAllocator::pageSize() / allocator.blockSize() - 1;
     for(int i = 0; i < allocations; ++i)
     {
@@ -102,23 +102,23 @@ namespace FixedBlockAllocatorUnitTest {
 
 void arenaAllocationValidityTest() noexcept
 {
-    arenaAllocationValidity<AllocationTracking::None>();
-    arenaAllocationValidity<AllocationTracking::Count>();
-    arenaAllocationValidity<AllocationTracking::DoubleDeleteCount>();
+    arenaAllocationValidity<FixedBlockArenaAllocator<AllocationTracking::None>>();
+    arenaAllocationValidity<FixedBlockArenaAllocator<AllocationTracking::Count>>();
+    arenaAllocationValidity<FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount>>();
 }
 
 void arenaMacroAllocateTest() noexcept
 {
-    arenaMacroAllocationValidity<AllocationTracking::None>();
-    arenaMacroAllocationValidity<AllocationTracking::Count>();
-    arenaMacroAllocationValidity<AllocationTracking::DoubleDeleteCount>();
+    arenaMacroAllocationValidity<FixedBlockArenaAllocator<AllocationTracking::None>>();
+    arenaMacroAllocationValidity<FixedBlockArenaAllocator<AllocationTracking::Count>>();
+    arenaMacroAllocationValidity<FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount>>();
 }
 
 void arenaMaxPageExceedTest() noexcept
 {
-    arenaMaxPageExceed<AllocationTracking::None>();
-    arenaMaxPageExceed<AllocationTracking::Count>();
-    arenaMaxPageExceed<AllocationTracking::DoubleDeleteCount>();
+    arenaMaxPageExceed<FixedBlockArenaAllocator<AllocationTracking::None>>();
+    arenaMaxPageExceed<FixedBlockArenaAllocator<AllocationTracking::Count>>();
+    arenaMaxPageExceed<FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount>>();
 }
 
 void arenaCountTest() noexcept
@@ -263,6 +263,176 @@ void arenaMultipleDeleteTest() noexcept
 
     {
         FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount> allocator(sizeof(AllocTestObj));
+
+        AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            objects[i] = allocator.allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
+        }
+
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        for(int i = 0; i < 10; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        for(int i = 0; i < 10; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        delete[] objects;
+
+        Assert(allocator.allocationDifference() == -20);
+        Assert(allocator.doubleDeleteCount() == 10);
+        Assert(allocator.multipleDeleteCount() == 20);
+    }
+#undef TEST_COUNT
+}
+
+void allocationValidityTest() noexcept
+{
+    arenaAllocationValidity<FixedBlockAllocator<AllocationTracking::None>>();
+    arenaAllocationValidity<FixedBlockAllocator<AllocationTracking::Count>>();
+    arenaAllocationValidity<FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>>();
+}
+
+void macroAllocateTest() noexcept
+{
+    arenaMacroAllocationValidity<FixedBlockAllocator<AllocationTracking::None>>();
+    arenaMacroAllocationValidity<FixedBlockAllocator<AllocationTracking::Count>>();
+    arenaMacroAllocationValidity<FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>>();
+}
+
+void maxPageExceedTest() noexcept
+{
+    arenaMaxPageExceed<FixedBlockAllocator<AllocationTracking::None>>();
+    arenaMaxPageExceed<FixedBlockAllocator<AllocationTracking::Count>>();
+    arenaMaxPageExceed<FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>>();
+}
+
+void countTest() noexcept
+{
+    UNIT_TEST();
+#define TEST_COUNT 512
+    {
+        FixedBlockAllocator<AllocationTracking::Count> allocator(sizeof(AllocTestObj));
+
+        AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            objects[i] = allocator.allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
+        }
+
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        delete[] objects;
+
+        Assert(allocator.allocationDifference() == 0);
+    }
+
+    {
+        FixedBlockAllocator<AllocationTracking::Count> allocator(sizeof(AllocTestObj));
+
+        AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            objects[i] = allocator.allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
+        }
+
+        for(int i = 0; i < TEST_COUNT - 10; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        delete[] objects;
+
+        Assert(allocator.allocationDifference() == 10);
+    }
+#undef TEST_COUNT
+}
+
+void multipleDeleteTest() noexcept
+{
+    UNIT_TEST();
+#define TEST_COUNT 512
+    {
+        FixedBlockAllocator<AllocationTracking::DoubleDeleteCount> allocator(sizeof(AllocTestObj));
+
+        AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            objects[i] = allocator.allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
+        }
+
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        delete[] objects;
+
+        Assert(allocator.allocationDifference() == 0);
+        Assert(allocator.doubleDeleteCount() == 0);
+        Assert(allocator.multipleDeleteCount() == 0);
+    }
+
+    {
+        FixedBlockAllocator<AllocationTracking::DoubleDeleteCount> allocator(sizeof(AllocTestObj));
+
+        AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            objects[i] = allocator.allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
+        }
+
+        for(int i = 0; i < TEST_COUNT - 10; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        delete[] objects;
+
+        Assert(allocator.allocationDifference() == 10);
+        Assert(allocator.doubleDeleteCount() == 0);
+        Assert(allocator.multipleDeleteCount() == 0);
+    }
+
+    {
+        FixedBlockAllocator<AllocationTracking::DoubleDeleteCount> allocator(sizeof(AllocTestObj));
+
+        AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            objects[i] = allocator.allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
+        }
+
+        for(int i = 0; i < TEST_COUNT; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        for(int i = 0; i < 10; ++i)
+        {
+            allocator.deallocateT(objects[i]);
+        }
+
+        delete[] objects;
+
+        Assert(allocator.allocationDifference() == -10);
+        Assert(allocator.doubleDeleteCount() == 10);
+        Assert(allocator.multipleDeleteCount() == 10);
+    }
+
+    {
+        FixedBlockAllocator<AllocationTracking::DoubleDeleteCount> allocator(sizeof(AllocTestObj));
 
         AllocTestObj** objects = new(::std::nothrow) AllocTestObj * [TEST_COUNT];
         for(int i = 0; i < TEST_COUNT; ++i)

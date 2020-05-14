@@ -19,6 +19,8 @@
 #include <shader/bundle/ShaderBundleVisitor.hpp>
 #include <gl/GLShaderBundleVisitor.hpp>
 
+
+#include "shader/bundle/PrintShaderBundleVisitor.hpp"
 #include "VFS.hpp"
 
 template<>
@@ -153,14 +155,23 @@ Layer3D::Layer3D(Globals& globals) noexcept
     _frameBufferShader->link(globals.rc);
     _modelGenShader->link(globals.rc);
 
-    ShaderBundleLexer lexer(VFS::Instance().openFile("|TERes/shader/Nanosuit/Nanosuit.tausi", FileProps::Read));
+    ShaderBundleLexer lexer(VFS::Instance().openFile("|TERes/shader/Deferred/Deferred_Model.tausi", FileProps::Read));
     ShaderBundleParser parser(lexer);
     NullableStrongRef<ExprAST> ast = parser.parse();
-    IShaderBundleVisitor* visitor = new GLShaderBundleVisitor;
-    visitor->visit(ast);
-    _shader = visitor->getShader(globals.rc, globals.gi);
-    _bindMap = visitor->getBindMap();
-    delete visitor;
+
+    if(!ast)
+    {
+        printf("Parser Error: %s\n", parser.errorMsg());
+        printf("Line: %zu,%zu", parser.errorLine(), parser.errorLineIndex());
+    }
+
+    IShaderBundleVisitor* visitor = new PrintShaderBundleVisitor;
+    visitor->visit(ast.get());
+    // IShaderBundleVisitor* visitor = new GLShaderBundleVisitor;
+    // visitor->visit(ast);
+    // _shader = visitor->getShader(globals.rc, globals.gi);
+    // _bindMap = visitor->getBindMap();
+    // delete visitor;
 
     Texture2DArgs tArgs;
     tArgs.width = globals.window.width();

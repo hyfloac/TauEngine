@@ -3,22 +3,21 @@
  */
 #pragma once
 
-#include <Safeties.hpp>
 #include <Objects.hpp>
 #include "DLL.hpp"
-#include "shader/ShaderBindMap.hpp"
 
-class IRenderingContext;
-class IGraphicsInterface;
+namespace sbp {
 class ExprAST;
+class RootExprAST;
 class FileExprAST;
 class BlockExprAST;
-class TypedBlockExprAST;
-class NamedBlockExprAST;
+class ShaderStageBlockExprAST;
+class OuterShaderStageBlockExprAST;
+class APIBlockExprAST;
 class ShaderIOPointExprAST;
 class ShaderIOMapPointExprAST;
 class ShaderIOBindPointExprAST;
-class IShaderProgram;
+}
 
 /**
  * A basic visitor for shader bundles.
@@ -38,17 +37,15 @@ class TAU_DLL NOVTABLE IShaderBundleVisitor
     DEFAULT_DESTRUCT_VI(IShaderBundleVisitor);
     DELETE_COPY(IShaderBundleVisitor);
 public:
-    virtual CPPRef<IShaderProgram> getShader(IRenderingContext& ctx, IGraphicsInterface& gi) noexcept = 0;
-    [[nodiscard]] virtual ShaderBindMap getBindMap() noexcept = 0;
+    virtual void visit(const sbp::ExprAST* expr) noexcept;
+    virtual void visit(const sbp::ExprAST& expr) noexcept;
+    virtual void visit(const sbp::RootExprAST& expr) noexcept;
 
-    virtual void visit(const ExprAST* expr) noexcept;
-    virtual void visit(const ExprAST& expr) noexcept;
-
-    virtual void visit(const FileExprAST& expr) noexcept;
-    virtual void visit(const TypedBlockExprAST& expr) noexcept;
-    virtual void visit(const NamedBlockExprAST& expr) noexcept;
-    virtual void visit(const ShaderIOMapPointExprAST& expr) noexcept;
-    virtual void visit(const ShaderIOBindPointExprAST& expr) noexcept;
-protected:
-    virtual void visitNext(const ExprAST& expr) noexcept;
+    virtual void visit(const sbp::FileExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::BlockExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::OuterShaderStageBlockExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::APIBlockExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept = 0;
 };

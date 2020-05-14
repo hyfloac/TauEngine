@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shader/IShader.hpp"
+#include "shader/Shader.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>

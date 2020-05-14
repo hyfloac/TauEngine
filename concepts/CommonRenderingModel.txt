@@ -1,0 +1,282 @@
+Common Rendering Model
+
+Inputs (Input Location):
+    Vector3f Position : 0
+    Vector3f Normals  : 1
+    Vector3f Tangents : 2
+    Vector2f Textures : 3
+    Vector3i BoneIDs  : 4
+    Vector3f Weights  : 5
+Inputs FrameBuffer (Input Location):
+    Vector2f Position : 0
+    Vector2f Textures : 1
+Uniform Bindings (Binding Location):
+    Camera Dynamic Matrices : 0
+        Matrix4x4f compound
+        Matrix4x4f model
+    Camera Static Matrices  : 1
+        Matrix4x4f projection
+        Matrix4x4f cameraView 
+        Vector4f   cameraPos
+Textures (Texture Unit):
+    Normal           : 0
+    Diffuse / Albedo : 1
+    PBR Compound     : 2
+        R: Metalness / Specular
+        G: Roughness / Glossiness
+        B: Ambient Occulsion
+        A: Bump / Height
+    Emissivity       : 3
+    Position         : 4
+    Depth            : 5
+    Stencil          : 6
+
+PBR Deferred Model - Metalness:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector3f Normals    : 1
+            Vector3f Tangents   : 2
+            Vector2f Textures   : 3
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Tessellation:
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Pixel:
+        Outputs:
+            Position            : 0
+            Normal              : 1
+            Diffuse / Albedo    : 2
+            Compound            : 3
+                R: Metalness
+                G: Roughness
+                B: Ambient Occulsion
+                A: Bump / Height
+            Emissivity          : 4
+        Textures:
+            Diffuse / Albedo    : 0
+            Metalness           : 1
+            Roughness           : 2
+            Normal              : 3
+            Ambient Occlusion   : 4
+            Bump / Height       : 5
+            Emissivity          : 6
+
+PBR Deferred Model Animated - Metalness:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector3f Normals    : 1
+            Vector3f Tangents   : 2
+            Vector2f Textures   : 3
+            Vector3i BoneIDs    : 4
+            Vector3f Weights    : 5
+        Uniforms:
+            Camera Matrices     : 0
+                Matrix4x4f compound
+                Matrix4x4f model
+            Bone Matrices : 1
+                Matrix4x4f boneTransform[Bone Count]
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Tessellation:
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Pixel:
+        Outputs:
+            Position            : 0
+            Normal              : 1
+            Diffuse / Albedo    : 2
+            Compound            : 3
+                R: Metalness
+                G: Roughness
+                B: Ambient Occulsion
+                A: Bump / Height
+            Emissivity          : 4
+        Textures:
+            Diffuse / Albedo    : 0
+            Metalness           : 1
+            Roughness           : 2
+            Normal              : 3
+            Ambient Occlusion   : 4
+            Bump / Height       : 5
+            Emissivity          : 6
+
+PBR Deferred Lighting - Metalness:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector2f Textures   : 1
+    Pixel:
+        Uniforms:
+            Camera Position     : 0
+                Vector4f position
+            Lights [N]          : 1
+                Vector3f 
+        Textures:
+            Position            : 0
+            Normal              : 1
+            Depth               : 2
+            Diffuse / Albedo    : 3
+            Compound            : 4
+                R: Metalness
+                G: Roughness
+                B: Ambient Occulsion
+                A: Bump / Height
+            Emissivity          : 4
+            Environment Map     : 5
+            Irradiance Map      : 6
+
+PBR Deferred Model - Specular:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector3f Normals    : 1
+            Vector3f Tangents   : 2
+            Vector2f Textures   : 3
+        Uniforms:
+            Camera Matrices     : 0
+                Matrix4x4f compound
+                Matrix4x4f model
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Tessellation:
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Pixel:
+        Outputs:
+            Position            : 0
+            Normal              : 1
+            Diffuse / Albedo    : 2
+            Compound            : 3
+                R: Specular
+                G: Glossiness
+                B: Ambient Occulsion
+                A: Bump / Height
+            Emissivity          : 4
+        Textures:
+            Diffuse / Albedo    : 0
+            Specular            : 1
+            Glossiness          : 2
+            Normal              : 3
+            Ambient Occlusion   : 4
+            Bump / Height       : 5
+            Emissivity          : 6
+
+PBR Deferred Model Animated - Specular:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector3f Normals    : 1
+            Vector3f Tangents   : 2
+            Vector2f Textures   : 3
+            Vector3i BoneIDs    : 4
+            Vector3f Weights    : 5
+        Uniforms:
+            Camera Matrices     : 0
+                Matrix4x4f compound
+                Matrix4x4f model
+            Bone Matrices       : 1
+                Matrix4x4f boneTransform[Bone Count]
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Tessellation:
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Pixel:
+        Outputs:
+            Position            : 0
+            Normal              : 1
+            Diffuse / Albedo    : 2
+            Compound            : 3
+                R: Specular
+                G: Glossiness
+                B: Ambient Occulsion
+                A: Bump / Height
+            Emissivity          : 4
+        Textures:
+            Diffuse / Albedo    : 0
+            Specular            : 1
+            Glossiness          : 2
+            Normal              : 3
+            Ambient Occlusion   : 4
+            Bump / Height       : 5
+            Emissivity          : 6
+
+PBR Deferred Lighting - Specular:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector2f Textures   : 1
+    Pixel:
+        Uniforms:
+            Camera Position     : 0
+                Vector4f position
+        Textures:
+            Position            : 0
+            Normal              : 1
+            Depth               : 2
+            Diffuse / Albedo    : 3
+            Compound            : 4
+                R: Specular
+                G: Glossiness
+                B: Ambient Occulsion
+                A: Bump / Height
+            Emissivity          : 4
+            Environment Map     : 5
+            Irradiance Map      : 6
+
+Translucency:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector3f Normals    : 1
+            Vector3f Tangents   : 2
+            Vector2f Textures   : 3
+        Uniforms:
+            Camera Matrices     : 0
+                Matrix4x4f compound
+                Matrix4x4f model
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Tessellation:
+        Textures:
+            Bump / Height       : 0
+            Normal              : 1
+    Pixel:
+        Uniforms:
+            Camera Position     : 0
+                Vector4f position
+        Textures:
+            Diffuse / Albedo    : 0
+            Roughness           : 1
+            Normal              : 2
+            Bump / Height       : 3
+            Environment Map     : 5
+            Irradiance Map      : 6
+
+Post Process:
+    Vertex:
+        Inputs:
+            Vector3f Position   : 0
+            Vector2f Textures   : 1
+    Pixel:
+        Uniforms:
+            Camera Position     : 0
+                Vector4f position
+        Textures:
+            Position            : 0
+            Normal              : 1
+            Depth               : 2
+            Color               : 3
+            Emissivity          : 4

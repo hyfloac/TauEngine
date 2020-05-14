@@ -1,0 +1,40 @@
+DirectX10, DirectX11: {
+    Vertex: {
+        File: "FBVertex.cso"
+    },
+    Pixel: {
+        File: "FBPixel.cso",
+        Uniforms: {
+            0: 0,
+            1: 1,
+            2: 2
+        },
+        Textures: {
+            0: 0,
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4
+        }
+    }
+},
+OpenGL4_5, OpenGL4_6: {
+    Vertex: {
+        File: "FBVertex.glsl"
+    },
+    Pixel: {
+        File: "FBPixel.glsl",
+        Uniforms: {
+            0: 0,
+            1: 1,
+            2: 2
+        },
+        Textures: {
+            0: 0,
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4
+        }
+    }
+}

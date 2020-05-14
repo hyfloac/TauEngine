@@ -11,18 +11,18 @@ class TAU_DLL ShaderBindMap final
     DEFAULT_DESTRUCT(ShaderBindMap);
     DEFAULT_COPY(ShaderBindMap);
 private:
-    RefDynArray<u32> _vertexUniMap;
-    RefDynArray<u32> _tessCtrlUniMap;
-    RefDynArray<u32> _tessEvalUniMap;
-    RefDynArray<u32> _geometryUniMap;
-    RefDynArray<u32> _pixelUniMap;
-    RefDynArray<u32> _vertexTexMap;
-    RefDynArray<u32> _tessCtrlTexMap;
-    RefDynArray<u32> _tessEvalTexMap;
-    RefDynArray<u32> _geometryTexMap;
-    RefDynArray<u32> _pixelTexMap;
+    RefDynArray<i32> _vertexUniMap;
+    RefDynArray<i32> _tessCtrlUniMap;
+    RefDynArray<i32> _tessEvalUniMap;
+    RefDynArray<i32> _geometryUniMap;
+    RefDynArray<i32> _pixelUniMap;
+    RefDynArray<i32> _vertexTexMap;
+    RefDynArray<i32> _tessCtrlTexMap;
+    RefDynArray<i32> _tessEvalTexMap;
+    RefDynArray<i32> _geometryTexMap;
+    RefDynArray<i32> _pixelTexMap;
 public:
-    ShaderBindMap(const RefDynArray<u32>& vertexUniMap, const RefDynArray<u32>& tessCtrlUniMap, const RefDynArray<u32>& tessEvalUniMap, const RefDynArray<u32>& geometryUniMap, const RefDynArray<u32>& pixelUniMap, const RefDynArray<u32>& vertexTexMap, const RefDynArray<u32>& tessCtrlTexMap, const RefDynArray<u32>& tessEvalTexMap, const RefDynArray<u32>& geometryTexMap, const RefDynArray<u32>& pixelTexMap) noexcept
+    ShaderBindMap(const RefDynArray<i32>& vertexUniMap, const RefDynArray<i32>& tessCtrlUniMap, const RefDynArray<i32>& tessEvalUniMap, const RefDynArray<i32>& geometryUniMap, const RefDynArray<i32>& pixelUniMap, const RefDynArray<i32>& vertexTexMap, const RefDynArray<i32>& tessCtrlTexMap, const RefDynArray<i32>& tessEvalTexMap, const RefDynArray<i32>& geometryTexMap, const RefDynArray<i32>& pixelTexMap) noexcept
         : _vertexUniMap(vertexUniMap)
         , _tessCtrlUniMap(tessCtrlUniMap)
         , _tessEvalUniMap(tessEvalUniMap)
@@ -35,6 +35,6 @@ public:
         , _pixelTexMap(pixelTexMap)
     { }
 
-    [[nodiscard]] u32 mapUniformBindPoint(u32 index, EShader::Stage stage) noexcept;
-    [[nodiscard]] u32 mapTextureBindPoint(u32 index, EShader::Stage stage) noexcept;
+    [[nodiscard]] i32 mapUniformBindPoint(u32 index, EShader::Stage stage) noexcept;
+    [[nodiscard]] i32 mapTextureBindPoint(u32 index, EShader::Stage stage) noexcept;
 };

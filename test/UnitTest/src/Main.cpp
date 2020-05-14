@@ -68,6 +68,12 @@ int main(int argCount, char* args[]) noexcept
     FixedBlockAllocatorUnitTest::arenaMaxPageExceedTest();
     FixedBlockAllocatorUnitTest::arenaCountTest();
     FixedBlockAllocatorUnitTest::arenaMultipleDeleteTest();
+
+    FixedBlockAllocatorUnitTest::allocationValidityTest();
+    FixedBlockAllocatorUnitTest::macroAllocateTest();
+    FixedBlockAllocatorUnitTest::maxPageExceedTest();
+    FixedBlockAllocatorUnitTest::countTest();
+    FixedBlockAllocatorUnitTest::multipleDeleteTest();
     printf("Fixed Block Allocator Tests Finished\n");
 
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());

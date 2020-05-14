@@ -324,6 +324,12 @@
     <ClCompile Include="src\gl\GLShaderBundleVisitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\shader\ShaderInfoExtractorVisitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entity\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DLL.hpp">
@@ -333,9 +339,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Timings.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shader\IShader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\file\FileHandling.hpp">
@@ -501,9 +504,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\camera\Camera3D.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shader\IShaderProgram.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\GLShader.hpp">
@@ -816,6 +816,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\ShaderBindMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\bundle\ast\RootExprAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\bundle\ShaderInfoExtractorVisitor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\Shader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\ShaderProgram.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\renderer\Renderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\entity\Entity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

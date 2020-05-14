@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include "shader/IShader.hpp"
+#include "shader/Shader.hpp"
 #include <Safeties.hpp>
 
 class GLRenderingContext;

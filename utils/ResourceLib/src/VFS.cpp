@@ -140,7 +140,7 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const ch
     return resolvePath(pathCompound);
 }
 
-DynString VFS::win32Path(DynString path) noexcept
+DynString VFS::win32Path(const DynString& path) noexcept
 {
     char* cPath = new(::std::nothrow) char[path.length() + 1];
     ::std::memcpy(cPath, path.c_str(), path.length() + 1);
@@ -154,6 +154,110 @@ DynString VFS::win32Path(DynString path) noexcept
     }
 
     return DynString::passControl(cPath);
+}
+
+DynString VFS::unixPath(const DynString& path) noexcept
+{
+    char* cPath = new(::std::nothrow) char[path.length() + 1];
+    ::std::memcpy(cPath, path.c_str(), path.length() + 1);
+
+    for(uSys i = 0; i < path.length(); ++i)
+    {
+        if(cPath[i] == '\\')
+        {
+            cPath[i] = '/';
+        }
+    }
+
+    return DynString::passControl(cPath);
+}
+
+DynStringView VFS::getParentFolder(const DynString& path, bool includePathSeparator) noexcept
+{
+    uSys i = path.length() - 1;
+    if(path[i] == '/' || path[i] == '\\')
+    { --i; }
+
+    for(; i >= 0; --i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            if(!includePathSeparator)
+            {
+                --i;
+            }
+            break;
+        }
+    }
+
+    return DynStringView(path, 0, i);
+}
+
+DynStringView VFS::getParentFolder(const DynStringView& path, bool includePathSeparator) noexcept
+{
+    uSys i = path.length() - 1;
+    if(path[i] == '/' || path[i] == '\\')
+    { --i; }
+
+    for(; i >= 0; --i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            if(!includePathSeparator)
+            {
+                --i;
+            }
+            break;
+        }
+    }
+
+    return DynStringView(path, 0, i);
+}
+
+DynString VFS::getVFSMount(const DynString& path, bool includePathSeparator) noexcept
+{
+    if(path[0] != '|')
+    {
+        return "";
+    }
+
+    uSys i = 0;
+    for(; i < path.length(); ++i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            if(!includePathSeparator)
+            {
+                --i;
+            }
+            break;
+        }
+    }
+
+    return path.subString(0, i + 1);
+}
+
+DynString VFS::getVFSMount(const DynStringView& path, bool includePathSeparator) noexcept
+{
+    if(path[0] != '|')
+    {
+        return "";
+    }
+
+    uSys i = 0;
+    for(; i < path.length(); ++i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            if(!includePathSeparator)
+            {
+                --i;
+            }
+            break;
+        }
+    }
+
+    return path.subString(0, i + 1);
 }
 
 bool VFS::fileExists(const char* path) const noexcept

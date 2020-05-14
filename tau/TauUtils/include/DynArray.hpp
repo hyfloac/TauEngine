@@ -17,8 +17,10 @@ private:
     uSys _length;
     uSys _index;
 public:
-    inline DynArrayIterator(_T* const arr, const uSys length, const uSys index)
-        : _arr(arr), _length(length), _index(index)
+    inline DynArrayIterator(_T* const arr, const uSys length, const uSys index) noexcept
+        : _arr(arr)
+        , _length(length)
+        , _index(index)
     { }
 
     inline DynArrayIterator<_T>& operator++() noexcept
@@ -71,8 +73,10 @@ private:
     uSys _length;
     uSys _index;
 public:
-    inline ConstDynArrayIterator(_T* const arr, const uSys length, const uSys index)
-        : _arr(arr), _length(length), _index(index)
+    inline ConstDynArrayIterator(_T* const arr, const uSys length, const uSys index) noexcept
+        : _arr(arr)
+        , _length(length)
+        , _index(index)
     { }
 
     inline ConstDynArrayIterator<_T>& operator++() noexcept
@@ -122,7 +126,10 @@ private:
     uSys _index;
 public:
     inline RefDynArrayIterator(_T* const arr, uSys* const refCount, const uSys length, const uSys index)
-        : _arr(arr), _refCount(refCount), _length(length), _index(index)
+        : _arr(arr)
+        , _refCount(refCount)
+        , _length(length)
+        , _index(index)
     { ++(*_refCount); }
 
     inline ~RefDynArrayIterator() noexcept
@@ -234,7 +241,10 @@ private:
     uSys _index;
 public:
     inline ConstRefDynArrayIterator(_T* const arr, uSys* refCount, const uSys length, const uSys index)
-        : _arr(arr), _refCount(refCount), _length(length), _index(index)
+        : _arr(arr)
+        , _refCount(refCount)
+        , _length(length)
+        , _index(index)
     { ++(*_refCount); }
 
     inline ~ConstRefDynArrayIterator() noexcept
@@ -341,20 +351,23 @@ private:
     uSys _size;
 public:
     explicit DynArray(const uSys size = 0)
-        : _arr(new(::std::nothrow) _T[size]), _size(size)
+        : _arr(new(::std::nothrow) _T[size])
+        , _size(size)
     { }
 
     ~DynArray()
     { delete[] _arr; }
 
     DynArray(const DynArray<_T>& copy)
-        : _arr(new(::std::nothrow) _T[copy._size]), _size(copy._size)
+        : _arr(new(::std::nothrow) _T[copy._size])
+        , _size(copy._size)
     {
         ::std::memcpy(_arr, copy._arr, copy._size * sizeof(_T));
     }
 
     DynArray(DynArray<_T>&& move) noexcept
-        : _arr(move._arr), _size(move._size)
+        : _arr(move._arr)
+        , _size(move._size)
     {
         move._arr = nullptr;
         move._size = 0;
@@ -419,7 +432,9 @@ private:
     uSys* _refCount;
 public:
     explicit RefDynArray(const uSys size = 0)
-        : _arr(new(::std::nothrow) _T[size]), _size(size), _refCount(new(::std::nothrow) uSys(1))
+        : _arr(new(::std::nothrow) _T[size])
+        , _size(size)
+        , _refCount(new(::std::nothrow) uSys(1))
     { }
 
     ~RefDynArray()
@@ -432,11 +447,15 @@ public:
     }
 
     inline RefDynArray(const RefDynArray<_T>& copy) noexcept
-        : _arr(copy._arr), _size(copy._size), _refCount(copy._refCount)
+        : _arr(copy._arr)
+        , _size(copy._size)
+        , _refCount(copy._refCount)
     { ++(*_refCount); }
 
     inline RefDynArray(RefDynArray<_T>&& move) noexcept
-        : _arr(move._arr), _size(move._size), _refCount(move._refCount)
+        : _arr(move._arr)
+        , _size(move._size)
+        , _refCount(move._refCount)
     { ++(*_refCount); }
 
     inline RefDynArray<_T>& operator =(const RefDynArray<_T>& copy) noexcept

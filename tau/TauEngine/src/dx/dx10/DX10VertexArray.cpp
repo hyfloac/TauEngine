@@ -29,7 +29,7 @@ void DX10VertexArray::preDraw(IRenderingContext& context) noexcept
     ctx.d3dDevice()->IASetPrimitiveTopology(_drawTypeCache);
 }
 
-void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
+void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount, const uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = _drawCount; }
@@ -46,7 +46,7 @@ void DX10VertexArray::draw(IRenderingContext& context, uSys drawCount, uSys draw
     }
 }
 
-void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
+void DX10VertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, const uSys drawOffset) noexcept
 {
     if(drawCount == 0)
     { drawCount = _drawCount; }

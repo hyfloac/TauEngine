@@ -24,12 +24,12 @@
         </Expand>
     </Type>
 
-    <Type Name="ArrayList&lt;*,*&gt;">
+    <Type Name="ArrayList&lt;*&gt;">
         <DisplayString>{{Size = {_ctrlBlock->elementCount}}}</DisplayString>
         <Expand>
             <Item Name="[Element Count]">_ctrlBlock->elementCount</Item>
             <Item Name="[Reference Count]">_ctrlBlock->refCount</Item>
-            <Item Name="[Reserved Pages]">$T2</Item>
+            <Item Name="[Reserved Pages]">_ctrlBlock->numReservedPages</Item>
             <Item Name="[Committed Pages]">_ctrlBlock->committedPages</Item>
             <Item Name="[Data Size]">_ctrlBlock->dataSize</Item>
             <ArrayItems>

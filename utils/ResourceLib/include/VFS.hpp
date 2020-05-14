@@ -66,7 +66,6 @@ public:
         [[nodiscard]] bool canCreateAndWriteFile() const noexcept { return canCreateFile && canWriteFile; }
     };
 
-    // using Container = Triplet<DynString, CPPRef<IFileLoader>, bool>;
     using MountMap = std::unordered_multimap<DynString, VFS::Container>;
 private:
 
@@ -109,7 +108,14 @@ public:
     VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept;
     VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept;
 
-    static DynString win32Path(DynString path) noexcept;
+    static DynString win32Path(const DynString& path) noexcept;
+    static DynString unixPath(const DynString& path) noexcept;
+
+    static DynStringView getParentFolder(const DynString& path, bool includePathSeparator = true) noexcept;
+    static DynStringView getParentFolder(const DynStringView& path, bool includePathSeparator = true) noexcept;
+
+    static DynString getVFSMount(const DynString& path, bool includePathSeparator = true) noexcept;
+    static DynString getVFSMount(const DynStringView& path, bool includePathSeparator = true) noexcept;
 
     bool fileExists(const char* path) const noexcept;
 

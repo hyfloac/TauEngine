@@ -56,6 +56,7 @@
     <ClCompile Include="src\dx\dx11\DX11TextureUploader.cpp" />
     <ClCompile Include="src\dx\dx11\DX11TextureView.cpp" />
     <ClCompile Include="src\dx\dx11\DX11VertexArray.cpp" />
+    <ClCompile Include="src\entity\Entity.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="src\shader\ShaderBundleLexer.cpp" />
     <ClCompile Include="src\shader\ShaderBundleParser.cpp" />
     <ClCompile Include="src\shader\ShaderBundleVisitor.cpp" />
+    <ClCompile Include="src\shader\ShaderInfoExtractorVisitor.cpp" />
     <ClCompile Include="src\shader\SpotLight.cpp" />
     <ClCompile Include="src\system\SystemInterface.cpp" />
     <ClCompile Include="src\terrain\TerrainTile.cpp" />
@@ -167,6 +169,7 @@
     <ClInclude Include="include\dx\dx11\DX11TextureUploader.hpp" />
     <ClInclude Include="include\dx\dx11\DX11TextureView.hpp" />
     <ClInclude Include="include\dx\dx11\DX11VertexArray.hpp" />
+    <ClInclude Include="include\entity\Entity.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
     <ClInclude Include="include\events\WindowEvent.hpp" />
@@ -233,17 +236,20 @@
     <ClInclude Include="include\random\FastRand.hpp" />
     <ClInclude Include="include\random\Random.hpp" />
     <ClInclude Include="include\random\WyHash64.hpp" />
+    <ClInclude Include="include\renderer\Renderer.hpp" />
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\ResourceLoader.hpp" />
     <ClInclude Include="include\shader\bundle\ast\BlockExprAST.hpp" />
     <ClInclude Include="include\shader\bundle\ast\ExprAST.hpp" />
     <ClInclude Include="include\shader\bundle\ast\FileExprAST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\RootExprAST.hpp" />
     <ClInclude Include="include\shader\bundle\ast\ShaderIOBindingExprAST.hpp" />
     <ClInclude Include="include\shader\bundle\PrintShaderBundleVisitor.hpp" />
     <ClInclude Include="include\shader\bundle\ShaderBundleLexer.hpp" />
     <ClInclude Include="include\shader\bundle\ShaderBundleVisitor.hpp" />
+    <ClInclude Include="include\shader\bundle\ShaderInfoExtractorVisitor.hpp" />
     <ClInclude Include="include\shader\EShader.hpp" />
-    <ClInclude Include="include\shader\IShaderProgram.hpp" />
+    <ClInclude Include="include\shader\ShaderProgram.hpp" />
     <ClInclude Include="include\shader\bundle\ShaderBundleParser.hpp" />
     <ClInclude Include="include\shader\ShaderBindMap.hpp" />
     <ClInclude Include="include\shader\TextureUploader.hpp" />
@@ -258,7 +264,7 @@
     <ClInclude Include="include\system\Keyboard.hpp" />
     <ClInclude Include="include\system\Mouse.hpp" />
     <ClInclude Include="include\gl\GLShader.hpp" />
-    <ClInclude Include="include\shader\IShader.hpp" />
+    <ClInclude Include="include\shader\Shader.hpp" />
     <ClInclude Include="include\system\Mutex.hpp" />
     <ClInclude Include="include\system\RenderingContext.hpp" />
     <ClInclude Include="include\system\Semaphore.hpp" />

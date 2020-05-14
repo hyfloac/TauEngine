@@ -14,7 +14,7 @@ struct PSOutput
     float4 specular : SV_Target3;
 };
 
-cbuffer Material : register(b1)
+cbuffer Material : register(b0)
 {
     float specularExponent;
 }

@@ -29,6 +29,8 @@ template<typename _T>
 { return static_cast<_T&&>(ref); }
 }
 
+enum class AllocationAlignment : uSys { };
+
 enum class AllocationTracking
 {
     /**
@@ -92,7 +94,5 @@ public:
     { return malloc(size); }
 
     void deallocate(void* obj) noexcept override
-    {
-        if(obj) { free(obj); }
-    }
+    { free(obj); }
 };
