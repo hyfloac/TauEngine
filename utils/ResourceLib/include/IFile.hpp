@@ -102,12 +102,7 @@ public:
  */
 class IFileLoader
 {
-private:
-    IFileLoader(const IFileLoader& copy) noexcept = delete;
-    IFileLoader(IFileLoader&& move) noexcept = delete;
-
-    IFileLoader& operator=(const IFileLoader& copy) noexcept = delete;
-    IFileLoader& operator=(IFileLoader&& move) noexcept = delete;
+    DELETE_COPY(IFileLoader);
 public:
     IFileLoader() noexcept = default;
 

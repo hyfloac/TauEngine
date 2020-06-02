@@ -5,7 +5,6 @@ vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
 {
     switch(mode)
     {
-        case RenderingMode::DirectX9:
         case RenderingMode::DirectX10:
         case RenderingMode::DirectX11:
             return vr::TextureType_DirectX;
@@ -14,11 +13,6 @@ vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
             return vr::TextureType_DirectX12;
         case RenderingMode::Vulkan:
             return vr::TextureType_Vulkan;
-        case RenderingMode::OpenGL3:
-        case RenderingMode::OpenGL3_1:
-        case RenderingMode::OpenGL3_2:
-        case RenderingMode::OpenGL3_3:
-        case RenderingMode::OpenGL4:
         case RenderingMode::OpenGL4_2:
         case RenderingMode::OpenGL4_3:
         case RenderingMode::OpenGL4_4:

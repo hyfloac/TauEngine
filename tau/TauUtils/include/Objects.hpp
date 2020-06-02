@@ -12,6 +12,12 @@
                                 inline _TYPE& operator=(const _TYPE& copy) noexcept = default; \
                                 inline _TYPE& operator=(_TYPE&& move) noexcept = default
 
+#define DEFAULT_COPY_PO(_TYPE) protected: \
+                                   inline _TYPE(const _TYPE& copy) noexcept = default;            \
+                                   inline _TYPE(_TYPE&& move) noexcept = default;                 \
+                                   inline _TYPE& operator=(const _TYPE& copy) noexcept = default; \
+                                   inline _TYPE& operator=(_TYPE&& move) noexcept = default
+
 #define DELETE_DESTRUCT(_TYPE) public: inline ~_TYPE() noexcept = delete
 #define DEFAULT_DESTRUCT(_TYPE) public: inline ~_TYPE() noexcept = default
 #define DEFAULT_DESTRUCT_VI(_TYPE) public: inline virtual ~_TYPE() noexcept = default

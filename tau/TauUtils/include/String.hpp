@@ -1124,8 +1124,8 @@ public:
 
     [[nodiscard]] inline bool operator ==(const char* const other) const noexcept { return  equals(other); }
     [[nodiscard]] inline bool operator !=(const char* const other) const noexcept { return !equals(other); }
-    [[nodiscard]] inline bool operator < (const char* const other) const noexcept { return compareTo(other) < 0; }
-    [[nodiscard]] inline bool operator > (const char* const other) const noexcept { return compareTo(other) > 0; }
+    [[nodiscard]] inline bool operator < (const char* const other) const noexcept { return compareTo(other) <  0; }
+    [[nodiscard]] inline bool operator > (const char* const other) const noexcept { return compareTo(other) >  0; }
     [[nodiscard]] inline bool operator <=(const char* const other) const noexcept { return compareTo(other) <= 0; }
     [[nodiscard]] inline bool operator >=(const char* const other) const noexcept { return compareTo(other) >= 0; }
 

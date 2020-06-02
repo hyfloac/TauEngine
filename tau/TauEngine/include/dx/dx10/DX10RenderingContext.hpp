@@ -32,6 +32,9 @@ private:
 
     bool _vsync;
 
+    UINT* _iaStrides;
+    UINT* _iaOffsets;
+
     NullableRef<DX10DepthStencilState> _defaultDepthStencilState;
     NullableRef<DX10DepthStencilState> _currentDepthStencilState;
     NullableRef<DX10RasterizerState> _defaultRasterizerState;
@@ -47,6 +50,14 @@ public:
     [[nodiscard]] ID3D10Device* d3dDevice() noexcept;
 
     void resetFrameBuffer() const noexcept;
+
+    void setBufferData(UINT* const strides, UINT* const offsets) noexcept
+    {
+        _iaStrides = strides;
+        _iaOffsets = offsets;
+    }
+
+    void setBuffers(uSys count, ID3D10Buffer** buffers) const noexcept;
 
     void deactivateContext() noexcept override { }
     void activateContext() noexcept override { }

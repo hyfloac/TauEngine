@@ -50,7 +50,7 @@ UIRectButton::UIRectButton(IGraphicsInterface& gi, clickHandler_f clickHandler, 
         xx + ww, yy + hh
     };
 
-    BufferArgs vboBuilder(1);
+    VertexBufferArgs vboBuilder(1);
     vboBuilder.type = EBuffer::Type::ArrayBuffer;
     vboBuilder.usage = EBuffer::UsageType::StaticDraw;
     vboBuilder.elementCount = 6;

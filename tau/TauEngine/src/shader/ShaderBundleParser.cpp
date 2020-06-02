@@ -133,7 +133,6 @@ void ShaderBundleParser::parseAPIBlockContents(NullableStrongRef<sbp::APIBlockEx
             default: return;
         }
 
-
         PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
 
         if(_lexer.cValue() == '}')
@@ -171,11 +170,6 @@ NullableStrongRef<sbp::ShaderStageBlockExprAST> ShaderBundleParser::parseShaderB
     {
         case EShader::Stage::Vertex:
         case EShader::Stage::Pixel:
-        {
-            const NullableStrongRef<sbp::OuterShaderStageBlockExprAST> shaderBlock(DefaultTauAllocator::Instance(), stage);
-            parseOuterShaderContents(shaderBlock);
-            return shaderBlock;
-        }
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
         case EShader::Stage::Geometry:
@@ -209,67 +203,12 @@ void ShaderBundleParser::parseShaderContents(NullableStrongRef<sbp::ShaderStageB
                 PARSE_COND_ERROR(block->file(), Error::DuplicateDeclaration, "Duplicate `File` entry in inner shader stage block.");
                 block->file() = parseFile();
                 break;
-            case SBPToken::InputsBlock:
-                PARSE_ERROR(Error::InvalidBlock, "Inputs block can only be in `Vertex` block");
-            case SBPToken::OutputsBlock:
-                PARSE_ERROR(Error::InvalidBlock, "Outputs block can only be in `Pixel` block");
             case SBPToken::UniformsBlock:
                 PARSE_COND_ERROR(block->uniforms(), Error::DuplicateDeclaration, "Duplicate `Uniforms` block found within inner shader stage block.");
                 block->uniforms() = parseBlock();
                 break;
             case SBPToken::TexturesBlock:
                 PARSE_COND_ERROR(block->textures(), Error::DuplicateDeclaration, "Duplicate `Textures` block found within inner shader stage block.");
-                block->textures() = parseBlock();
-                break;
-            default: break;
-        }
-
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-
-        if(_lexer.cValue() == '}')
-        { return; }
-
-        PARSE_COND_ERROR(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
-    }
-}
-
-void ShaderBundleParser::parseOuterShaderContents(NullableStrongRef<sbp::OuterShaderStageBlockExprAST> block) noexcept
-{
-    static constexpr const char* ErrorInvalidToken = "Invalid token found within outer shader stage block.";
-    static constexpr const char* ErrorInvalidChar = "Invalid character found within outer shader stage block.";
-
-    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-    PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
-    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-    PARSE_COND_ERROR(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
-
-    while(true)
-    {
-        const SBPToken token = _lexer.getNextToken();
-        PARSE_COND_ERROR(token == SBPToken::EndOfFile, Error::UnexpectedEOF, "Unexpected EOF in outer shader stage block.");
-
-        switch(token)
-        {
-            case SBPToken::File:
-                PARSE_COND_ERROR(block->file(), Error::DuplicateDeclaration, "Duplicate `File` entry in outer shader stage block.");
-                block->file() = parseFile();
-                break;
-            case SBPToken::InputsBlock:
-                PARSE_COND_ERROR(block->stage() != EShader::Stage::Vertex, Error::InvalidBlock, "Inputs block can only be in `Vertex` block");
-                PARSE_COND_ERROR(block->io(), Error::DuplicateDeclaration, "Duplicate `Inputs` block found within `Vertex` shader stage block.");
-                block->io() = parseBlock();
-                break;
-            case SBPToken::OutputsBlock:
-                PARSE_COND_ERROR(block->stage() != EShader::Stage::Pixel, Error::InvalidBlock, "Outputs block can only be in `Pixel` block");
-                PARSE_COND_ERROR(block->io(), Error::DuplicateDeclaration, "Duplicate `Outputs` block found within `Pixel` shader stage block.");
-                block->io() = parseBlock();
-                break;
-            case SBPToken::UniformsBlock:
-                PARSE_COND_ERROR(block->uniforms(), Error::DuplicateDeclaration, "Duplicate `Uniforms` block found within outer shader stage block.");
-                block->uniforms() = parseBlock();
-                break;
-            case SBPToken::TexturesBlock:
-                PARSE_COND_ERROR(block->textures(), Error::DuplicateDeclaration, "Duplicate `Textures` block found within outer shader stage block.");
                 block->textures() = parseBlock();
                 break;
             default: break;
@@ -296,14 +235,10 @@ NullableStrongRef<sbp::BlockExprAST> ShaderBundleParser::parseBlock() noexcept
         case SBPToken::TexturesBlock:
             blockType = sbp::BlockType::Textures;
             break;
-        case SBPToken::InputsBlock:
-            blockType = sbp::BlockType::Inputs;
-            break;
-        case SBPToken::OutputsBlock:
-            blockType = sbp::BlockType::Outputs;
-            break;
         default: return null;
     }
+
+    _currentBlock = blockType;
 
     const NullableStrongRef<sbp::BlockExprAST> block(DefaultTauAllocator::Instance(), blockType, null);
     parseBlockContents(block);
@@ -324,7 +259,7 @@ void ShaderBundleParser::parseBlockContents(NullableStrongRef<sbp::BlockExprAST>
 
     while(true)
     {
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::UnsignedIntegerLiteral || _lexer.currentToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR(_lexer.currentToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
         NullableStrongRef<sbp::ShaderIOPointExprAST> bindPoint = parseIOPoint();
         if(!bindPoint)
         { return; }
@@ -355,94 +290,33 @@ NullableStrongRef<sbp::FileExprAST> ShaderBundleParser::parseFile() noexcept
 
 NullableStrongRef<sbp::ShaderIOPointExprAST> ShaderBundleParser::parseIOPoint() noexcept
 {
+    static constexpr const char* ErrorInvalidCRM = "Invalid Common Rendering Model token encountered while parsing io point.";
     static constexpr const char* ErrorInvalidToken = "Invalid token encountered while parsing io point.";
     static constexpr const char* ErrorInvalidChar = "Invalid character encountered while parsing io point.";
 
-    u32 bindPoint;
-    if(_lexer.currentToken() == SBPToken::UnsignedIntegerLiteral)
-    {
-        bindPoint = _lexer.uintValue();
-    }
-    else
-    {
-        PARSE_COND_ERROR(getAssociatedBlock(_lexer.crmToken()) == _currentBlock, Error::InvalidToken, ErrorInvalidToken);
-        bindPoint = mapCRM(_lexer.crmToken());
-    }
+    CommonRenderingModelToken crmTarget = _lexer.crmToken();
 
+    PARSE_COND_ERROR_N(getAssociatedBlock(crmTarget) != _currentBlock, Error::InvalidCRM, ErrorInvalidCRM);
     PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
     PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
 
     const SBPToken valToken = _lexer.getNextToken();
     if(valToken == SBPToken::IntegerLiteral || valToken == SBPToken::UnsignedIntegerLiteral)
     {
-        return NullableStrongRef<sbp::ShaderIOMapPointExprAST>(DefaultTauAllocator::Instance(), null, bindPoint, _lexer.intValue());
+        return NullableStrongRef<sbp::ShaderIOMapPointExprAST>(DefaultTauAllocator::Instance(), null, crmTarget, _lexer.intValue());
     }
     if(valToken == SBPToken::StringLiteral)
     {
-        return NullableStrongRef<sbp::ShaderIOBindPointExprAST>(DefaultTauAllocator::Instance(), null, bindPoint, _lexer.strValue());
+        return NullableStrongRef<sbp::ShaderIOBindPointExprAST>(DefaultTauAllocator::Instance(), null, crmTarget, _lexer.strValue());
     }
 
     PARSE_ERROR_N(Error::InvalidToken, ErrorInvalidToken);
-}
-
-u32 ShaderBundleParser::mapCRM(const CommonRenderingModelToken token) noexcept
-{
-    switch(token)
-    {
-        case CommonRenderingModelToken::InputPosition:     return 0;
-        case CommonRenderingModelToken::InputNormal:       return 1;
-        case CommonRenderingModelToken::InputTangent:      return 2;
-        case CommonRenderingModelToken::InputTextureCoord: return 3;
-        case CommonRenderingModelToken::InputBoneID:       return 4;
-        case CommonRenderingModelToken::InputBoneWeight:   return 5;
-
-        case CommonRenderingModelToken::OutputNormal:      return 0;
-        case CommonRenderingModelToken::OutputDiffuse:     return 1;
-        case CommonRenderingModelToken::OutputPBRCompound: return 2;
-        case CommonRenderingModelToken::OutputEmissivity:  return 3;
-        case CommonRenderingModelToken::OutputPosition:    return 4;
-
-        case CommonRenderingModelToken::InputFBPosition:     return 0;
-        case CommonRenderingModelToken::InputFBTextureCoord: return 1;
-
-        case CommonRenderingModelToken::OutputFBColor: return 0;
-
-        case CommonRenderingModelToken::UniformBindingCameraDynamic: return 0;
-        case CommonRenderingModelToken::UniformBindingCameraStatic:  return 1;
-
-        case CommonRenderingModelToken::TextureNormal:      return 0;
-        case CommonRenderingModelToken::TextureDiffuse:     return 1;
-        case CommonRenderingModelToken::TexturePBRCompound: return 2;
-        case CommonRenderingModelToken::TextureEmissivity:  return 3;
-        case CommonRenderingModelToken::TexturePosition:    return 4;
-        case CommonRenderingModelToken::TextureDepth:       return 5;
-        case CommonRenderingModelToken::TextureStencil:     return 6;
-        default: return 16;
-    }
 }
 
 sbp::BlockType ShaderBundleParser::getAssociatedBlock(const CommonRenderingModelToken token) noexcept
 {
     switch(token)
     {
-        case CommonRenderingModelToken::InputPosition:     
-        case CommonRenderingModelToken::InputNormal:       
-        case CommonRenderingModelToken::InputTangent:      
-        case CommonRenderingModelToken::InputTextureCoord: 
-        case CommonRenderingModelToken::InputBoneID:       
-        case CommonRenderingModelToken::InputBoneWeight: return sbp::BlockType::Inputs;
-
-        case CommonRenderingModelToken::OutputNormal:
-        case CommonRenderingModelToken::OutputDiffuse:
-        case CommonRenderingModelToken::OutputPBRCompound:
-        case CommonRenderingModelToken::OutputEmissivity:;
-        case CommonRenderingModelToken::OutputPosition: return sbp::BlockType::Outputs;
-
-        case CommonRenderingModelToken::InputFBPosition:
-        case CommonRenderingModelToken::InputFBTextureCoord: return sbp::BlockType::Inputs;
-
-        case CommonRenderingModelToken::OutputFBColor: return sbp::BlockType::Outputs;
-
         case CommonRenderingModelToken::UniformBindingCameraDynamic:
         case CommonRenderingModelToken::UniformBindingCameraStatic: return sbp::BlockType::Uniforms;
 

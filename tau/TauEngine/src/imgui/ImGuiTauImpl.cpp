@@ -127,7 +127,7 @@ void ImGuiTau::initBuffers(IGraphicsInterface& gi, ImDrawData* const drawData) n
 
     if(!_vertexBuffer || _vertexBuffer->elementCount() < maxVertexBufferSize)
     {
-        BufferArgs vArgs(3);
+        VertexBufferArgs vArgs(3);
         vArgs.type = EBuffer::Type::ArrayBuffer;
         vArgs.usage = EBuffer::UsageType::StreamDraw;
         vArgs.elementCount = maxVertexBufferSize + 4096;
@@ -137,7 +137,7 @@ void ImGuiTau::initBuffers(IGraphicsInterface& gi, ImDrawData* const drawData) n
         vArgs.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
         vArgs.descriptor.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
 
-        _vertexBuffer = gi.createBuffer().buildCPPRef(vArgs, null);
+        _vertexBuffer = gi.createVertexBuffer().buildCPPRef(vArgs, null);
         createVA = true;
     }
 

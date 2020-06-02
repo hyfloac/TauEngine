@@ -509,8 +509,6 @@ void TauEditorApplication::onBufferSafetyException(BufferSafetyException& ex) co
     const char* exMsg;
     switch(ex.type())
     {
-        case BufferSafetyException::DoubleBufferBind: exMsg = "Buffer double bound."; break;
-        case BufferSafetyException::DoubleBufferUnbind: exMsg = "Buffer double unbound."; break;
         case BufferSafetyException::DoubleUniformBufferBind: exMsg = "Uniform Buffer double bound to shader pipeline."; break;
         case BufferSafetyException::DoubleUniformBufferUnbind: exMsg = "Uniform Buffer double unbound from shader pipeline."; break;
         case BufferSafetyException::ModifiedWithoutBegin: exMsg = "Modified buffer without call to beginModification."; break;

@@ -8,9 +8,9 @@ class PageAllocator final
     DELETE_CONSTRUCT(PageAllocator);
     DELETE_COPY(PageAllocator);
     DELETE_DESTRUCT(PageAllocator);
-private:
-    static void init() noexcept;
 public:
+    static void init() noexcept;
+
     static void* reserve(uSys numPages) noexcept;
 
     static void* commitPage(void* page) noexcept;

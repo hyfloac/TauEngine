@@ -322,14 +322,15 @@ void BufferDescriptorBuilder::addDescriptor(const ShaderSemantic::Semantic seman
     _stride += size;
 }
 
-void BufferDescriptorBuilder::reset(const uSys descriptorCount) noexcept
+void BufferDescriptorBuilder::reset(const uSys descriptorCount, const bool instanced) noexcept
 {
     _currentIndex = 0;
-    _stride = 0;
     _elementDescriptors = RefDynArray<BufferElementDescriptor>(descriptorCount);
+    _stride = 0;
+    _instanced = instanced;
 }
 
 BufferDescriptor BufferDescriptorBuilder::build() const noexcept
 {
-    return BufferDescriptor(_elementDescriptors, _stride);
+    return BufferDescriptor(_elementDescriptors, _stride, _instanced);
 }

@@ -40,7 +40,7 @@ protected:
     u32 _width;
     u32 _height;
     Vector3f _color;
-    CPPRef<IBuffer> _vbo;
+    CPPRef<IVertexBuffer> _vbo;
     CPPRef<IVertexArray> _vao;
 protected:
     [[nodiscard]] virtual bool isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept override;

@@ -22,6 +22,8 @@ DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10
     , _blendState(args.blendState)
     , _swapChain(args.swapChain)
     , _vsync(false)
+    , _iaStrides(null)
+    , _iaOffsets(null)
     , _defaultDepthStencilState(null)
     , _currentDepthStencilState(null)
     , _defaultRasterizerState(null)
@@ -55,6 +57,11 @@ ID3D10Device* DX10RenderingContext::d3dDevice() noexcept
 void DX10RenderingContext::resetFrameBuffer() const noexcept
 {
     _gi.d3d10Device()->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
+}
+
+void DX10RenderingContext::setBuffers(const uSys count, ID3D10Buffer** const buffers) const noexcept
+{
+    _gi.d3d10Device()->IASetVertexBuffers(0, count, buffers, _iaStrides, _iaOffsets);
 }
 
 void DX10RenderingContext::updateViewport(const u32 x, const u32 y, const u32 width, const u32 height, const float minZ, const float maxZ) noexcept

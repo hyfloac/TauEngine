@@ -88,8 +88,8 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLFW-3.3\include\;$(SolutionDir)libs\glm\;E:\VulkanSDK\1.1.126.0\Include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);E:\VulkanSDK\1.1.126.0\Lib\;$(SolutionDir)libs\GLFW-3.3\build\src\Debug\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLFW-3.3\include\;$(SolutionDir)libs\glm\;D:\VulkanSDK\1.2.135.0\Include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);D:\VulkanSDK\1.2.135.0\Lib\;$(SolutionDir)libs\GLFW-3.3\build\src\Debug\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -101,8 +101,8 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLFW-3.3\include\;$(SolutionDir)libs\glm\;E:\VulkanSDK\1.1.126.0\Include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);E:\VulkanSDK\1.1.126.0\Lib\;$(SolutionDir)libs\GLFW-3.3\build\src\Release\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLFW-3.3\include\;$(SolutionDir)libs\glm\;D:\VulkanSDK\1.2.135.0\Include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);D:\VulkanSDK\1.2.135.0\Lib\;$(SolutionDir)libs\GLFW-3.3\build\src\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

@@ -12,7 +12,6 @@ class RootExprAST;
 class FileExprAST;
 class BlockExprAST;
 class ShaderStageBlockExprAST;
-class OuterShaderStageBlockExprAST;
 class APIBlockExprAST;
 class ShaderIOPointExprAST;
 class ShaderIOMapPointExprAST;
@@ -44,7 +43,6 @@ public:
     virtual void visit(const sbp::FileExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::BlockExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept = 0;
-    virtual void visit(const sbp::OuterShaderStageBlockExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::APIBlockExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept = 0;

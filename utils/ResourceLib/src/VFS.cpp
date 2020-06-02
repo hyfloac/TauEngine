@@ -172,6 +172,94 @@ DynString VFS::unixPath(const DynString& path) noexcept
     return DynString::passControl(cPath);
 }
 
+DynStringView VFS::getFileName(const DynString& path) noexcept
+{
+    uSys i = path.length() - 1;
+    if(path[i] == '/' || path[i] == '\\')
+    { return DynStringView(path, 0, 0); }
+
+    for(; i >= 0; --i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            --i;
+            break;
+        }
+    }
+
+    return DynStringView(path, i, path.length());
+}
+
+DynStringView VFS::getFileName(const DynStringView& path) noexcept
+{
+    uSys i = path.length() - 1;
+    if(path[i] == '/' || path[i] == '\\')
+    { return DynStringView(path, 0, 0); }
+
+    for(; i >= 0; --i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            --i;
+            break;
+        }
+    }
+
+    return DynStringView(path, i, path.length());
+}
+
+DynStringView VFS::getFileExt(const DynString& path, const bool includeDot) noexcept
+{
+    uSys i = path.length() - 1;
+    if(path[i] == '/' || path[i] == '\\')
+    { return DynStringView(path, 0, 0); }
+
+    for(; i >= 0; --i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            --i;
+            break;
+        }
+        if(path[i] == '.')
+        {
+            if(!includeDot)
+            {
+                --i;
+            }
+            break;
+        }
+    }
+
+    return DynStringView(path, i, path.length());
+}
+
+DynStringView VFS::getFileExt(const DynStringView& path, const bool includeDot) noexcept
+{
+    uSys i = path.length() - 1;
+    if(path[i] == '/' || path[i] == '\\')
+    { return DynStringView(path, 0, 0); }
+
+    for(; i >= 0; --i)
+    {
+        if(path[i] == '/' || path[i] == '\\')
+        {
+            --i;
+            break;
+        }
+        if(path[i] == '.')
+        {
+            if(!includeDot)
+            {
+                --i;
+            }
+            break;
+        }
+    }
+
+    return DynStringView(path, i, path.length());
+}
+
 DynStringView VFS::getParentFolder(const DynString& path, bool includePathSeparator) noexcept
 {
     uSys i = path.length() - 1;

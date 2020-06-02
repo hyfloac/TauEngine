@@ -57,8 +57,8 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const 
         }
     }
 
-    BufferArgs buf3Args(1);
-    BufferArgs buf2Args(1);
+    VertexBufferArgs buf3Args(1);
+    VertexBufferArgs buf2Args(1);
     IndexBufferArgs indexArgs;
 
     buf3Args.type = EBuffer::Type::ArrayBuffer;
@@ -77,10 +77,10 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const 
     indexArgs.elementCount = 6 * numIndices;
     indexArgs.initialBuffer = indices;
 
-    const CPPRef<IBuffer> posBuf = gi.createBuffer().buildCPPRef(buf3Args, nullptr);
+    const CPPRef<IVertexBuffer> posBuf = gi.createVertexBuffer().buildCPPRef(buf3Args, nullptr);
     buf3Args.initialBuffer = norm;
-    const CPPRef<IBuffer> normBuf = gi.createBuffer().buildCPPRef(buf3Args, nullptr);
-    const CPPRef<IBuffer> texBuf = gi.createBuffer().buildCPPRef(buf2Args, nullptr);
+    const CPPRef<IVertexBuffer> normBuf = gi.createVertexBuffer().buildCPPRef(buf3Args, nullptr);
+    const CPPRef<IVertexBuffer> texBuf = gi.createVertexBuffer().buildCPPRef(buf2Args, nullptr);
     const CPPRef<IIndexBuffer> indicesBuf = gi.createIndexBuffer().buildCPPRef(indexArgs, nullptr);
 
     VertexArrayArgs vaArgs(3);

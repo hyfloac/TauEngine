@@ -86,17 +86,23 @@ template<typename _T>
                                  { return obj._castRTType<_T>(); }
 namespace _RTT_Utils
 {
-    template<typename T> struct remove_reference { typedef T type; };
-    template<typename T> struct remove_reference<T&> { typedef T type; };
-    template<typename T> struct remove_reference<T&&> { typedef T type; };
+    template<typename _T> struct remove_reference       { typedef _T type; };
+    template<typename _T> struct remove_reference<_T&>  { typedef _T type; };
+    template<typename _T> struct remove_reference<_T&&> { typedef _T type; };
 
-    template<typename T> struct remove_pointer { typedef T type; };
-    template<typename T> struct remove_pointer<T*> { typedef T type; };
-    template<typename T> struct remove_pointer<T* const> { typedef T type; };
-    template<typename T> struct remove_pointer<T* volatile> { typedef T type; };
-    template<typename T> struct remove_pointer<T* const volatile> { typedef T type; };
+    template<typename _T>
+    using remove_reference_t = typename remove_reference<_T>::type;
+
+    template<typename _T> struct remove_pointer                     { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T*>                { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T* const>          { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T* volatile>       { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T* const volatile> { typedef _T type; };
+
+    template<typename _T>
+    using remove_pointer_t = typename remove_pointer<_T>::type;
 }
 
-#define RTT_CHECK(_VAR, _T) (_RTT_Utils::remove_reference<_RTT_Utils::remove_pointer<decltype(_VAR)>::type>::type::_isRTType<_T>(_VAR))
-#define RTT_CAST(_VAR, _T) (_RTT_Utils::remove_reference<_RTT_Utils::remove_pointer<decltype(_VAR)>::type>::type::_castRTType<_T>(_VAR))
+#define RTT_CHECK(_VAR, _T) (_RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<decltype(_VAR)>>::_isRTType<_T>(_VAR))
+#define RTT_CAST(_VAR, _T) (_RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<decltype(_VAR)>>::_castRTType<_T>(_VAR))
                              

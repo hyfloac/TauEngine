@@ -1,12 +1,13 @@
 #pragma once
 
+#include "GLBuffer.hpp"
 #include "system/GraphicsInterface.hpp"
 
 class GLShaderBuilder;
+class GLInputLayoutBuilder;
 class GLVertexArrayBuilder;
+class GLBufInterface;
 class GLBufferBuilder;
-class GLIndexBufferBuilder;
-class GLUniformBufferBuilder;
 class GLDepthStencilStateBuilder;
 class GLRasterizerStateBuilder;
 class GLBlendingStateBuilder;
@@ -34,10 +35,10 @@ private:
     bool _forwardCompatible;
 
     GLShaderBuilder* _shaderBuilder;
+    GLInputLayoutBuilder* _inputLayoutBuilder;
     GLVertexArrayBuilder* _vertexArrayBuilder;
+    GLBufInterface* _bufInterface;
     GLBufferBuilder* _bufferBuilder;
-    GLIndexBufferBuilder* _indexBufferBuilder;
-    GLUniformBufferBuilder* _uniformBufferBuilder;
     GLDepthStencilStateBuilder* _depthStencilStateBuilder;
     GLRasterizerStateBuilder* _rasterizerStateBuilder;
     GLBlendingStateBuilder* _blendingStateBuilder;
@@ -59,10 +60,9 @@ public:
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IInputLayoutBuilder& createInputLayout() noexcept override;
     [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;

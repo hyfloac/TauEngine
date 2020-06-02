@@ -1,6 +1,6 @@
 #version 430 core
 
-in vec2 fTexCoord;
+layout(location = 0) in vec2 fTexCoord;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -17,8 +17,10 @@ layout(std140, binding = 1) uniform SpotLightUni
     SpotLight spotLight;
 };
 
-layout(std140, binding = 2) uniform ViewPosUni
+layout(std140, binding = 1) uniform CameraStaticMatrices
 {
+    mat4 projectionMatrix;
+    mat4 cameraViewMatrix;
     vec4 viewPos4;
 };
 

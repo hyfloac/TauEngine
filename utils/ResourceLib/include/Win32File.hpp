@@ -28,19 +28,16 @@ class CFileLoader;
  */
 class Win32File final : public IFile
 {
+    DELETE_COPY(Win32File);
 private:
     HANDLE _file;
     const char* _name;
     FileProps _props;
-private:
-    Win32File(const Win32File& copy) noexcept = delete;
-    Win32File(Win32File&& move) noexcept = delete;
-
-    Win32File& operator=(const Win32File& copy) noexcept = delete;
-    Win32File& operator=(Win32File&& move) noexcept = delete;
 public:
-    Win32File(HANDLE file, const char* name, FileProps props) noexcept
-        : _file(file), _name(name), _props(props)
+    Win32File(const HANDLE file, const char* const name, const FileProps props) noexcept
+        : _file(file)
+        , _name(name)
+        , _props(props)
     { }
 
     ~Win32File() noexcept override
@@ -72,24 +69,17 @@ public:
  */
 class Win32FileLoader final : public IFileLoader
 {
+    DEFAULT_CONSTRUCT_PU(Win32FileLoader);
+    DEFAULT_DESTRUCT(Win32FileLoader);
+    DELETE_COPY(Win32FileLoader);
 public:
     static CPPRef<Win32FileLoader>& Instance() noexcept;
-private:
-    Win32FileLoader(const Win32FileLoader& copy) noexcept = delete;
-    Win32FileLoader(Win32FileLoader&& move) noexcept = delete;
-
-    Win32FileLoader& operator=(const Win32FileLoader& copy) noexcept = delete;
-    Win32FileLoader& operator=(Win32FileLoader&& move) noexcept = delete;
 public:
-    Win32FileLoader() noexcept = default;
-
-    ~Win32FileLoader() noexcept override = default;
-
     [[nodiscard]] bool fileExists(const char* path) const noexcept override;
 
     [[nodiscard]] CPPRef<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    [[nodiscard]] CPPRef<Win32File> load2(const char* path, FileProps props) const noexcept
+    [[nodiscard]] CPPRef<Win32File> load2(const char* const path, const FileProps props) const noexcept
     { return RefCast<Win32File>(load(path, props)); }
 
     [[nodiscard]] bool createFolder(const char* path) const noexcept override;

@@ -17,55 +17,28 @@
       auto& ctx = reinterpret_cast<DX11RenderingContext&>(context)
 #endif
 
-void DX11Buffer::bind(IRenderingContext&) noexcept
-{
-#if TAU_BUFFER_SAFETY
-    ++_bindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
-    if(_bindLockCount > 1)
-    {
-        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
-    }
-  #endif
-#endif
-}
-
-void DX11Buffer::unbind(IRenderingContext&) noexcept
-{
-#if TAU_BUFFER_SAFETY
-    --_bindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
-    if(_bindLockCount < 0)
-    {
-        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
-    }
-  #endif
-#endif
-}
-
-bool DX11Buffer::beginModification(IRenderingContext& context) noexcept
+bool DX11VertexBuffer::beginModification(IRenderingContext& context) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(DX11VertexBuffer::canReWrite(_usage))
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+#if TAU_BUFFER_SAFETY
+        ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount > 1)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            return false;
+        }
+  #endif
+#endif
 
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
         const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
             _currentMapping = bufferAccess.pData;
-
-#if TAU_BUFFER_SAFETY
-            ++_modificationLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
-            if(_modificationLockCount > 1)
-            {
-                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
-                return false;
-            }
-  #endif
-#endif
             return true;
         }
     }
@@ -78,11 +51,11 @@ bool DX11Buffer::beginModification(IRenderingContext& context) noexcept
     return false;
 }
 
-void DX11Buffer::endModification(IRenderingContext& context) noexcept
+void DX11VertexBuffer::endModification(IRenderingContext& context) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(_currentMapping)
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         _currentMapping = null;
@@ -92,14 +65,14 @@ void DX11Buffer::endModification(IRenderingContext& context) noexcept
   #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
         if(_modificationLockCount < 0)
         {
-            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyEnd);
         }
   #endif
 #endif
     }
 }
 
-void DX11Buffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff_t size, const void* const data) noexcept
+void DX11VertexBuffer::modifyBuffer(const uSys offset, const uSys size, const void* const data) noexcept
 {
 #if TAU_BUFFER_SAFETY
   #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
@@ -110,20 +83,30 @@ void DX11Buffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff
     }
   #endif
 #endif
+
 	if(_currentMapping)
 	{
         ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
 	}
 }
 
-void DX11Buffer::fillBuffer(IRenderingContext& context, const void* const data) noexcept
+void DX11VertexBuffer::fillBuffer(IRenderingContext& context, const void* const data) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(canReWrite(_usage))
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_FILLED_WHILE_MODIFYING
+        if(_modificationLockCount > 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::FilledWhileModifying);
+            return;
+        }
+  #endif
+#endif
 
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
         const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
@@ -139,55 +122,28 @@ void DX11Buffer::fillBuffer(IRenderingContext& context, const void* const data) 
     }
 }
 
-void DX11IndexBuffer::bind(IRenderingContext&) noexcept
-{
-#if TAU_BUFFER_SAFETY
-    ++_bindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
-    if(_bindLockCount > 1)
-    {
-        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
-    }
-  #endif
-#endif
-}
-
-void DX11IndexBuffer::unbind(IRenderingContext&) noexcept
-{
-#if TAU_BUFFER_SAFETY
-    --_bindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
-    if(_bindLockCount < 0)
-    {
-        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
-    }
-  #endif
-#endif
-}
-
 bool DX11IndexBuffer::beginModification(IRenderingContext& context) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(DX11VertexBuffer::canReWrite(_usage))
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+#if TAU_BUFFER_SAFETY
+        ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount > 1)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            return false;
+        }
+  #endif
+#endif
 
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
         const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
             _currentMapping = bufferAccess.pData;
-
-#if TAU_BUFFER_SAFETY
-            ++_modificationLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
-            if(_modificationLockCount > 1)
-            {
-                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
-                return false;
-            }
-  #endif
-#endif
             return true;
         }
     }
@@ -204,7 +160,7 @@ void DX11IndexBuffer::endModification(IRenderingContext& context) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(_currentMapping)
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         _currentMapping = null;
@@ -214,14 +170,14 @@ void DX11IndexBuffer::endModification(IRenderingContext& context) noexcept
   #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
         if(_modificationLockCount < 0)
         {
-            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyEnd);
         }
   #endif
 #endif
     }
 }
 
-void DX11IndexBuffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff_t size, const void* const data) noexcept
+void DX11IndexBuffer::modifyBuffer(const uSys offset, const uSys size, const void* const data) noexcept
 {
 #if TAU_BUFFER_SAFETY
   #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
@@ -232,6 +188,7 @@ void DX11IndexBuffer::modifyBuffer(const ::std::intptr_t offset, const ::std::pt
     }
   #endif
 #endif
+
     if(_currentMapping)
     {
         ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
@@ -242,10 +199,19 @@ void DX11IndexBuffer::fillBuffer(IRenderingContext& context, const void* const d
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(DX11VertexBuffer::canReWrite(_usage))
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_FILLED_WHILE_MODIFYING
+        if(_modificationLockCount > 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::FilledWhileModifying);
+            return;
+        }
+  #endif
+#endif
 
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
         const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
@@ -261,69 +227,38 @@ void DX11IndexBuffer::fillBuffer(IRenderingContext& context, const void* const d
     }
 }
 
-void DX11UniformBuffer::bind(IRenderingContext&) noexcept
-{
-#if TAU_BUFFER_SAFETY
-    ++_bindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
-    if(_bindLockCount > 1)
-    {
-        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferBind);
-    }
-  #endif
-#endif
-}
-
-void DX11UniformBuffer::unbind(IRenderingContext&) noexcept
-{
-#if TAU_BUFFER_SAFETY
-    --_bindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_UNBIND
-    if(_bindLockCount < 0)
-    {
-        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleBufferUnbind);
-    }
-  #endif
-#endif
-}
-
 void DX11UniformBuffer::bind(IRenderingContext& context, const EShader::Stage stage, const u32 index) noexcept
 {
 #if TAU_BUFFER_SAFETY
     ++_uniformBindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+  #if TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_BIND
     if(_uniformBindLockCount > 1)
     {
         TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferBind);
     }
   #endif
 #endif
-    if(RTT_CHECK(context, DX11RenderingContext))
+
+    CTX();
+
+    switch(stage)
     {
-        auto& ctx = reinterpret_cast<DX11RenderingContext&>(context);
-        switch(stage)
-        {
-            case EShader::Stage::Vertex:
-                ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 1, &_d3dBuffer);
-                break;
-            case EShader::Stage::Hull:
-                ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 1, &_d3dBuffer);
-                break;
-            case EShader::Stage::Domain:
-                ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 1, &_d3dBuffer);
-                break;
-            case EShader::Stage::Geometry:
-                ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 1, &_d3dBuffer);
-                break;
-            case EShader::Stage::Pixel:
-                ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 1, &_d3dBuffer);
-                break;
-            default: break;
-        }
-    }
-    else
-    {
-        TAU_THROW(IncorrectContextException);
+        case EShader::Stage::Vertex:
+            ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 1, &_d3dBuffer);
+            break;
+        case EShader::Stage::Hull:
+            ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 1, &_d3dBuffer);
+            break;
+        case EShader::Stage::Domain:
+            ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 1, &_d3dBuffer);
+            break;
+        case EShader::Stage::Geometry:
+            ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 1, &_d3dBuffer);
+            break;
+        case EShader::Stage::Pixel:
+            ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 1, &_d3dBuffer);
+            break;
+        default: break;
     }
 }
 
@@ -331,65 +266,72 @@ void DX11UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage 
 {
 #if TAU_BUFFER_SAFETY
     --_uniformBindLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_BIND
+  #if TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_BIND
     if(_uniformBindLockCount < 0)
     {
         TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferBind);
     }
   #endif
 #endif
-    if(RTT_CHECK(context, DX11RenderingContext))
+
+    CTX();
+
+    switch(stage)
     {
-        auto& ctx = reinterpret_cast<DX11RenderingContext&>(context);
-        switch(stage)
-        {
-            case EShader::Stage::Vertex:
-                ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 0, null);
-                break;
-            case EShader::Stage::Hull:
-                ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 0, null);
-                break;
-            case EShader::Stage::Domain:
-                ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 0, null);
-                break;
-            case EShader::Stage::Geometry:
-                ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 0, null);
-                break;
-            case EShader::Stage::Pixel:
-                ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 0, null);
-                break;
-            default: break;
-        }
+        case EShader::Stage::Vertex:
+            ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 0, null);
+            break;
+        case EShader::Stage::Hull:
+            ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 0, null);
+            break;
+        case EShader::Stage::Domain:
+            ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 0, null);
+            break;
+        case EShader::Stage::Geometry:
+            ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 0, null);
+            break;
+        case EShader::Stage::Pixel:
+            ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 0, null);
+            break;
+        default: break;
     }
-    else
+}
+
+void DX11UniformBuffer::fastUnbind() noexcept
+{
+#if TAU_BUFFER_SAFETY
+    --_uniformBindLockCount;
+  #if TAU_BUFFER_SAFETY_UNIFORM_DOUBLE_UNBIND
+    if(_uniformBindLockCount < 0)
     {
-        TAU_THROW(IncorrectContextException);
+        TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleUniformBufferUnbind);
     }
+  #endif
+#endif
 }
 
 bool DX11UniformBuffer::beginModification(IRenderingContext& context) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(DX11VertexBuffer::canReWrite(_usage))
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+#if TAU_BUFFER_SAFETY
+        ++_modificationLockCount;
+  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
+        if(_modificationLockCount > 1)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            return false;
+        }
+  #endif
+#endif
 
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
         const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
             _currentMapping = bufferAccess.pData;
-
-#if TAU_BUFFER_SAFETY
-            ++_modificationLockCount;
-  #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
-            if(_modificationLockCount > 1)
-            {
-                TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
-                return false;
-            }
-  #endif
-#endif
             return true;
         }
     }
@@ -406,7 +348,7 @@ void DX11UniformBuffer::endModification(IRenderingContext& context) noexcept
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(_currentMapping)
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
         _currentMapping = null;
@@ -416,14 +358,14 @@ void DX11UniformBuffer::endModification(IRenderingContext& context) noexcept
   #if TAU_BUFFER_SAFETY_DOUBLE_MODIFY_BEGIN
         if(_modificationLockCount < 0)
         {
-            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyBegin);
+            TAU_THROW(BufferSafetyException, BufferSafetyException::DoubleModifyEnd);
         }
   #endif
 #endif
     }
 }
 
-void DX11UniformBuffer::modifyBuffer(const ::std::intptr_t offset, const ::std::ptrdiff_t size, const void* const data) noexcept
+void DX11UniformBuffer::modifyBuffer(const uSys offset, const uSys size, const void* const data) noexcept
 {
 #if TAU_BUFFER_SAFETY
   #if TAU_BUFFER_SAFETY_MODIFY_WITHOUT_BEGIN
@@ -434,6 +376,7 @@ void DX11UniformBuffer::modifyBuffer(const ::std::intptr_t offset, const ::std::
     }
   #endif
 #endif
+
     if(_currentMapping)
     {
         ::std::memcpy(reinterpret_cast<u8*>(_currentMapping) + offset, data, size);
@@ -444,10 +387,19 @@ void DX11UniformBuffer::fillBuffer(IRenderingContext& context, const void* const
 {
     CTX();
 
-    if(DX11Buffer::canReWrite(_usage))
+    if(DX11VertexBuffer::canReWrite(_usage))
     {
-        D3D11_MAPPED_SUBRESOURCE bufferAccess;
+#if TAU_BUFFER_SAFETY
+  #if TAU_BUFFER_SAFETY_FILLED_WHILE_MODIFYING
+        if(_modificationLockCount > 0)
+        {
+            TAU_THROW(BufferSafetyException, BufferSafetyException::FilledWhileModifying);
+            return;
+        }
+  #endif
+#endif
 
+        D3D11_MAPPED_SUBRESOURCE bufferAccess;
         const HRESULT h = ctx.d3d11DeviceContext()->Map(_d3dBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &bufferAccess);
         if(!FAILED(h))
         {
@@ -463,13 +415,13 @@ void DX11UniformBuffer::fillBuffer(IRenderingContext& context, const void* const
     }
 }
 
-DX11Buffer* DX11BufferBuilder::build(const BufferArgs& args, Error* const error) const noexcept
+DX11VertexBuffer* DX11BufferBuilder::build(const VertexBufferArgs& args, Error* const error) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11Buffer* const buffer = new(::std::nothrow) DX11Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    DX11VertexBuffer* const buffer = new(::std::nothrow) DX11VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -479,13 +431,13 @@ DX11Buffer* DX11BufferBuilder::build(const BufferArgs& args, Error* const error)
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-DX11Buffer* DX11BufferBuilder::build(const BufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+DX11VertexBuffer* DX11BufferBuilder::build(const VertexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    DX11Buffer* const buffer = allocator.allocateT<DX11Buffer>(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    DX11VertexBuffer* const buffer = allocator.allocateT<DX11VertexBuffer>(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -495,13 +447,13 @@ DX11Buffer* DX11BufferBuilder::build(const BufferArgs& args, Error* const error,
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-CPPRef<IBuffer> DX11BufferBuilder::buildCPPRef(const BufferArgs& args, Error* const error) const noexcept
+CPPRef<IVertexBuffer> DX11BufferBuilder::buildCPPRef(const VertexBufferArgs& args, Error* const error) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const CPPRef<DX11Buffer> buffer = CPPRef<DX11Buffer>(new(::std::nothrow) DX11Buffer(args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer));
+    const CPPRef<DX11VertexBuffer> buffer = CPPRef<DX11VertexBuffer>(new(::std::nothrow) DX11VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -511,161 +463,208 @@ CPPRef<IBuffer> DX11BufferBuilder::buildCPPRef(const BufferArgs& args, Error* co
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableRef<IBuffer> DX11BufferBuilder::buildTauRef(const BufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableRef<IVertexBuffer> DX11BufferBuilder::buildTauRef(const VertexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableRef<DX11Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    const NullableRef<DX11VertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPCast<IVertexBuffer>(buffer));
 }
 
-NullableStrongRef<IBuffer> DX11BufferBuilder::buildTauSRef(const BufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IVertexBuffer> DX11BufferBuilder::buildTauSRef(const VertexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const NullableStrongRef<DX11Buffer> buffer(allocator, args.type, args.usage, args.bufferSize(), args.instanced, args.descriptor.build(), d3dBuffer);
+    const NullableStrongRef<DX11VertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
     {
         d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPCast<IVertexBuffer>(buffer));
 }
 
-bool DX11BufferBuilder::processArgs(const BufferArgs& args, ID3D11Buffer** const d3dBuffer, Error* const error) const noexcept
+DX11IndexBuffer* DX11BufferBuilder::build(const IndexBufferArgs& args, Error* const error) const noexcept
 {
-     ERROR_CODE_COND_F(args.type == static_cast<EBuffer::Type>(0), Error::TypeIsUnset);
-     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
-     ERROR_CODE_COND_F(args.type == EBuffer::Type::IndexBuffer, Error::BufferCannotBeIndexBuffer);
-     ERROR_CODE_COND_F(args.elementCount == 0, Error::BufferSizeIsZero);
-
-     D3D11_BUFFER_DESC bufferDesc;
-     bufferDesc.ByteWidth = args.bufferSize();
-     bufferDesc.Usage = DX11Buffer::getDXUsage(args.usage);
-     bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-     bufferDesc.CPUAccessFlags = DX11Buffer::getDXAccess(args.usage);
-     bufferDesc.MiscFlags = 0;
-
-     if(args.initialBuffer)
-     {
-         D3D11_SUBRESOURCE_DATA initialBuffer;
-         initialBuffer.pSysMem = args.initialBuffer;
-         initialBuffer.SysMemPitch = 0;
-         initialBuffer.SysMemSlicePitch = 0;
-
-         const HRESULT h = _gi.d3d11Device()->CreateBuffer(&bufferDesc, &initialBuffer, d3dBuffer);
-         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
-     }
-     else
-     {
-         const HRESULT h = _gi.d3d11Device()->CreateBuffer(&bufferDesc, NULL, d3dBuffer);
-         ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
-     }
-
-     return true;
-}
-
-DX11IndexBuffer* DX11IndexBufferBuilder::build(const IndexBufferArgs& args, Error* const error) const noexcept
-{
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
+    DXIndexBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX11IndexBuffer* const buffer = new(::std::nothrow) DX11IndexBuffer(args.usage, args.bufferSize(), d3dBuffer);
+    DX11IndexBuffer* const buffer = new(::std::nothrow) DX11IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
     {
-        d3dBuffer->Release();
+        dxArgs.d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
     
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-DX11IndexBuffer* DX11IndexBufferBuilder::build(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+DX11IndexBuffer* DX11BufferBuilder::build(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
+    DXIndexBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX11IndexBuffer* const buffer = allocator.allocateT<DX11IndexBuffer>(args.usage, args.bufferSize(), d3dBuffer);
+    DX11IndexBuffer* const buffer = allocator.allocateT<DX11IndexBuffer>(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
     {
-        d3dBuffer->Release();
+        dxArgs.d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
     
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-CPPRef<IIndexBuffer> DX11IndexBufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* const error) const noexcept
+CPPRef<IIndexBuffer> DX11BufferBuilder::buildCPPRef(const IndexBufferArgs& args, Error* const error) const noexcept
 {
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
+    DXIndexBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX11IndexBuffer> buffer = CPPRef<DX11IndexBuffer>(new(::std::nothrow) DX11IndexBuffer(args.usage, args.bufferSize(), d3dBuffer));
+    const CPPRef<DX11IndexBuffer> buffer = CPPRef<DX11IndexBuffer>(new(::std::nothrow) DX11IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer));
     if(!buffer)
     {
-        d3dBuffer->Release();
+        dxArgs.d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
     
     ERROR_CODE_V(Error::NoError, buffer);
 }
 
-NullableRef<IIndexBuffer> DX11IndexBufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableRef<IIndexBuffer> DX11BufferBuilder::buildTauRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
+    DXIndexBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableRef<DX11IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
+    const NullableRef<DX11IndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
     {
-        d3dBuffer->Release();
+        dxArgs.d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
     ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
-NullableStrongRef<IIndexBuffer> DX11IndexBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IIndexBuffer> DX11BufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
+    DXIndexBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableStrongRef<DX11IndexBuffer> buffer(allocator, args.usage, args.bufferSize(), d3dBuffer);
+    const NullableStrongRef<DX11IndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
     {
-        d3dBuffer->Release();
+        dxArgs.d3dBuffer->Release();
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
     ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
 }
 
-bool DX11IndexBufferBuilder::processArgs(const IndexBufferArgs& args, ID3D11Buffer** const d3dBuffer, Error* const error) const noexcept
+DX11UniformBuffer* DX11BufferBuilder::build(const UniformBufferArgs& args, Error* const error) const noexcept
+{
+    ID3D11Buffer* d3dBuffer;
+    if(!processArgs(args, &d3dBuffer, error))
+    { return null; }
+
+    DX11UniformBuffer* const buffer = new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
+    if(!buffer)
+    {
+        d3dBuffer->Release();
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+    
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+DX11UniformBuffer* DX11BufferBuilder::build(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+{
+    ID3D11Buffer* d3dBuffer;
+    if(!processArgs(args, &d3dBuffer, error))
+    { return null; }
+
+    DX11UniformBuffer* const buffer = allocator.allocateT<DX11UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
+    if(!buffer)
+    {
+        d3dBuffer->Release();
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+    
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+CPPRef<IUniformBuffer> DX11BufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* const error) const noexcept
+{
+    ID3D11Buffer* d3dBuffer;
+    if(!processArgs(args, &d3dBuffer, error))
+    { return null; }
+
+    const CPPRef<DX11UniformBuffer> buffer = CPPRef<DX11UniformBuffer>(new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
+    if(!buffer)
+    {
+        d3dBuffer->Release();
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+    
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+NullableRef<IUniformBuffer> DX11BufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+{
+    ID3D11Buffer* d3dBuffer;
+    if(!processArgs(args, &d3dBuffer, error))
+    { return null; }
+
+    const NullableRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
+    if(!buffer)
+    {
+        d3dBuffer->Release();
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+}
+
+NullableStrongRef<IUniformBuffer> DX11BufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+{
+    ID3D11Buffer* d3dBuffer;
+    if(!processArgs(args, &d3dBuffer, error))
+    { return null; }
+
+    const NullableStrongRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
+    if(!buffer)
+    {
+        d3dBuffer->Release();
+        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+    }
+
+    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+}
+
+bool DX11BufferBuilder::processArgs(const VertexBufferArgs& args, ID3D11Buffer** const d3dBuffer, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_F(args.elementCount == 0, Error::BufferSizeIsZero);
 
     D3D11_BUFFER_DESC bufferDesc;
     bufferDesc.ByteWidth = args.bufferSize();
-    bufferDesc.Usage = DX11Buffer::getDXUsage(args.usage);
-    bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bufferDesc.CPUAccessFlags = DX11Buffer::getDXAccess(args.usage);
+    bufferDesc.Usage = DX11VertexBuffer::getDXUsage(args.usage);
+    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bufferDesc.CPUAccessFlags = DX11VertexBuffer::getDXAccess(args.usage);
     bufferDesc.MiscFlags = 0;
 
     if(args.initialBuffer)
@@ -687,94 +686,47 @@ bool DX11IndexBufferBuilder::processArgs(const IndexBufferArgs& args, ID3D11Buff
     return true;
 }
 
-DX11UniformBuffer* DX11UniformBufferBuilder::build(const UniformBufferArgs& args, Error* const error) const noexcept
+bool DX11BufferBuilder::processArgs(const IndexBufferArgs& args, DXIndexBufferArgs* const dxArgs, Error* const error) const noexcept
 {
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
+    ERROR_CODE_COND_F(args.elementCount == 0, Error::BufferSizeIsZero);
 
-    DX11UniformBuffer* const buffer = new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
-    if(!buffer)
+    dxArgs->indexSize = DX11IndexBuffer::dxIndexSize(args.indexSize);
+
+    D3D11_BUFFER_DESC bufferDesc;
+    bufferDesc.ByteWidth = args.bufferSize();
+    bufferDesc.Usage = DX11VertexBuffer::getDXUsage(args.usage);
+    bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bufferDesc.CPUAccessFlags = DX11VertexBuffer::getDXAccess(args.usage);
+    bufferDesc.MiscFlags = 0;
+
+    if(args.initialBuffer)
     {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+        D3D11_SUBRESOURCE_DATA initialBuffer;
+        initialBuffer.pSysMem = args.initialBuffer;
+        initialBuffer.SysMemPitch = 0;
+        initialBuffer.SysMemSlicePitch = 0;
+
+        const HRESULT h = _gi.d3d11Device()->CreateBuffer(&bufferDesc, &initialBuffer, &dxArgs->d3dBuffer);
+        ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
-    
-    ERROR_CODE_V(Error::NoError, buffer);
-}
-
-DX11UniformBuffer* DX11UniformBufferBuilder::build(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
-
-    DX11UniformBuffer* const buffer = allocator.allocateT<DX11UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
-    if(!buffer)
+    else
     {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-    
-    ERROR_CODE_V(Error::NoError, buffer);
-}
-
-CPPRef<IUniformBuffer> DX11UniformBufferBuilder::buildCPPRef(const UniformBufferArgs& args, Error* const error) const noexcept
-{
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
-
-    const CPPRef<DX11UniformBuffer> buffer = CPPRef<DX11UniformBuffer>(new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
-    if(!buffer)
-    {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-    
-    ERROR_CODE_V(Error::NoError, buffer);
-}
-
-NullableRef<IUniformBuffer> DX11UniformBufferBuilder::buildTauRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
-
-    const NullableRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
-    if(!buffer)
-    {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
+        const HRESULT h = _gi.d3d11Device()->CreateBuffer(&bufferDesc, NULL, &dxArgs->d3dBuffer);
+        ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    return true;
 }
 
-NullableStrongRef<IUniformBuffer> DX11UniformBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    ID3D11Buffer* d3dBuffer;
-    if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
-
-    const NullableStrongRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
-    if(!buffer)
-    {
-        d3dBuffer->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
-}
-
-bool DX11UniformBufferBuilder::processArgs(const UniformBufferArgs& args, ID3D11Buffer** const d3dBuffer, Error* const error) const noexcept
+bool DX11BufferBuilder::processArgs(const UniformBufferArgs& args, ID3D11Buffer** const d3dBuffer, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.usage == static_cast<EBuffer::UsageType>(0), Error::UsageIsUnset);
     ERROR_CODE_COND_F(args.bufferSize == 0, Error::BufferSizeIsZero);
 
     D3D11_BUFFER_DESC bufferDesc;
     bufferDesc.ByteWidth = args.bufferSize;
-    bufferDesc.Usage = DX11Buffer::getDXUsage(args.usage);
+    bufferDesc.Usage = DX11VertexBuffer::getDXUsage(args.usage);
     bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     bufferDesc.MiscFlags = 0;
@@ -798,7 +750,7 @@ bool DX11UniformBufferBuilder::processArgs(const UniformBufferArgs& args, ID3D11
     return true;
 }
 
-D3D11_USAGE DX11Buffer::getDXUsage(const EBuffer::UsageType usage) noexcept
+D3D11_USAGE DX11VertexBuffer::getDXUsage(const EBuffer::UsageType usage) noexcept
 {
     switch(usage)
     {
@@ -817,7 +769,7 @@ D3D11_USAGE DX11Buffer::getDXUsage(const EBuffer::UsageType usage) noexcept
     }
 }
 
-D3D11_CPU_ACCESS_FLAG DX11Buffer::getDXAccess(const EBuffer::UsageType usage) noexcept
+D3D11_CPU_ACCESS_FLAG DX11VertexBuffer::getDXAccess(const EBuffer::UsageType usage) noexcept
 {
     switch (usage)
     {
@@ -836,7 +788,7 @@ D3D11_CPU_ACCESS_FLAG DX11Buffer::getDXAccess(const EBuffer::UsageType usage) no
     }
 }
 
-bool DX11Buffer::canReWrite(const EBuffer::UsageType usage) noexcept
+bool DX11VertexBuffer::canReWrite(const EBuffer::UsageType usage) noexcept
 {
     switch(usage)
     {
@@ -851,6 +803,16 @@ bool DX11Buffer::canReWrite(const EBuffer::UsageType usage) noexcept
         case EBuffer::UsageType::DynamicRead:
         case EBuffer::UsageType::StreamRead:
         default: return false;
+    }
+}
+
+DXGI_FORMAT DX11IndexBuffer::dxIndexSize(const EBuffer::IndexSize indexSize) noexcept
+{
+    switch(indexSize)
+    {
+        case EBuffer::IndexSize::Uint32: return DXGI_FORMAT_R32_UINT;
+        case EBuffer::IndexSize::Uint16: return DXGI_FORMAT_R16_UINT;
+        default: return static_cast<DXGI_FORMAT>(0);
     }
 }
 #endif

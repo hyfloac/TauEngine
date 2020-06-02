@@ -22,19 +22,16 @@ class Win32FileLoader;
  */
 class CFile final : public IFile
 {
+    DELETE_COPY(CFile);
 private:
     FILE* _file;
     const char* _name;
     FileProps _props;
-private:
-    CFile(const CFile& copy) noexcept = delete;
-    CFile(CFile&& move) noexcept = delete;
-
-    CFile& operator=(const CFile& copy) noexcept = delete;
-    CFile& operator=(CFile&& move) noexcept = delete;
 public:
-    CFile(FILE* file, const char* name, FileProps props) noexcept
-        : _file(file), _name(name), _props(props)
+    CFile(FILE* const file, const char* const name, const FileProps props) noexcept
+        : _file(file)
+        , _name(name)
+        , _props(props)
     { }
 
     ~CFile() noexcept override
@@ -65,24 +62,17 @@ public:
  */
 class CFileLoader final : public IFileLoader
 {
+    DEFAULT_CONSTRUCT_PU(CFileLoader);
+    DEFAULT_DESTRUCT(CFileLoader);
+    DELETE_COPY(CFileLoader);
 public:
     static CPPRef<CFileLoader>& Instance() noexcept;
-private:
-    CFileLoader(const CFileLoader& copy) noexcept = delete;
-    CFileLoader(CFileLoader&& move) noexcept = delete;
-
-    CFileLoader& operator=(const CFileLoader& copy) noexcept = delete;
-    CFileLoader& operator=(CFileLoader&& move) noexcept = delete;
 public:
-    CFileLoader() noexcept = default;
-
-    ~CFileLoader() noexcept override = default;
-
     [[nodiscard]] bool fileExists(const char* path) const noexcept override;
 
     [[nodiscard]] CPPRef<IFile> load(const char* path, FileProps props) const noexcept override;
 
-    [[nodiscard]] CPPRef<CFile> load2(const char* path, FileProps props) const noexcept
+    [[nodiscard]] CPPRef<CFile> load2(const char* const path, const FileProps props) const noexcept
     { return RefCast<CFile>(load(path, props)); }
 
     [[nodiscard]] bool createFolder(const char* path) const noexcept override;

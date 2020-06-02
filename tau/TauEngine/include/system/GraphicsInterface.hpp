@@ -17,10 +17,9 @@ class ITextureBuilder;
 class ISingleTextureUploaderBuilder;
 class ITextureUploaderBuilder;
 class IShaderBuilder;
+class IInputLayoutBuilder;
 class IVertexArrayBuilder;
 class IBufferBuilder;
-class IIndexBufferBuilder;
-class IUniformBufferBuilder;
 class ITextureSamplerBuilder;
 class IFrameBufferBuilder;
 
@@ -40,10 +39,9 @@ public:
     [[nodiscard]] virtual RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept = 0;
 
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
+    [[nodiscard]] virtual IInputLayoutBuilder& createInputLayout() noexcept = 0;
     [[nodiscard]] virtual IVertexArrayBuilder& createVertexArray() noexcept = 0;
     [[nodiscard]] virtual IBufferBuilder& createBuffer() noexcept = 0;
-    [[nodiscard]] virtual IIndexBufferBuilder& createIndexBuffer() noexcept = 0;
-    [[nodiscard]] virtual IUniformBufferBuilder& createUniformBuffer() noexcept = 0;
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
     [[nodiscard]] virtual IBlendingStateBuilder& createBlendingState() noexcept = 0;

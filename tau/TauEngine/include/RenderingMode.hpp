@@ -26,6 +26,7 @@ public:
         DirectX12,
         DirectX12_1,
         Vulkan,
+        OpenGL4_1,
         OpenGL4_2,
         OpenGL4_3,
         OpenGL4_4,
@@ -96,6 +97,7 @@ public:
     {
         switch(_currentMode)
         {
+            case Mode::OpenGL4_1:
             case Mode::OpenGL4_2:
             case Mode::OpenGL4_3:
             case Mode::OpenGL4_4:

@@ -6,7 +6,7 @@
 #include <DynArray.hpp>
 
 class IRenderingContext;
-class IBuffer;
+class IVertexBuffer;
 
 class ShaderDataType final
 {
@@ -159,13 +159,19 @@ private:
     bool _normalized;
 private:
     BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const u32 offsetCache, const bool normalized = false)
-        : _semantic(semantic), _type(type), _sizeCache(ShaderDataType::size(type)),
-          _offsetCache(offsetCache), _normalized(normalized)
+        : _semantic(semantic)
+        , _type(type)
+        , _sizeCache(ShaderDataType::size(type))
+        , _offsetCache(offsetCache)
+        , _normalized(normalized)
     { }
 public:
     BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const bool normalized = false)
-        : _semantic(semantic), _type(type), _sizeCache(ShaderDataType::size(type)),
-          _offsetCache(0), _normalized(normalized)
+        : _semantic(semantic)
+        , _type(type)
+        , _sizeCache(ShaderDataType::size(type))
+        , _offsetCache(0)
+        , _normalized(normalized)
     { }
 
     [[nodiscard]] ShaderSemantic::Semantic semantic() const noexcept { return _semantic; }
@@ -184,13 +190,17 @@ class TAU_DLL BufferDescriptor final
 private:
     RefDynArray<BufferElementDescriptor> _elementDescriptors;
     u32 _stride;
+    bool _instanced;
 private:
-    BufferDescriptor(const RefDynArray<BufferElementDescriptor>& elementDescriptors, const u32 stride) noexcept
-        : _elementDescriptors(elementDescriptors), _stride(stride)
+    BufferDescriptor(const RefDynArray<BufferElementDescriptor>& elementDescriptors, const u32 stride, const bool instanced) noexcept
+        : _elementDescriptors(elementDescriptors)
+        , _stride(stride)
+        , _instanced(instanced)
     { }
 public:
     [[nodiscard]] const RefDynArray<BufferElementDescriptor>& elements() const noexcept { return _elementDescriptors; }
     [[nodiscard]] u32 stride() const noexcept { return _stride; }
+    [[nodiscard]] bool instanced() const noexcept { return _instanced; }
 private:
     friend class BufferDescriptorBuilder;
 };
@@ -203,18 +213,23 @@ private:
     u32 _currentIndex;
     RefDynArray<BufferElementDescriptor> _elementDescriptors;
     u32 _stride;
+    bool _instanced;
 public:
-    BufferDescriptorBuilder(const uSys descriptorCount) noexcept
-        : _currentIndex(0), _elementDescriptors(descriptorCount), _stride(0)
+    BufferDescriptorBuilder(const uSys descriptorCount, const bool instanced) noexcept
+        : _currentIndex(0)
+        , _elementDescriptors(descriptorCount)
+        , _stride(0)
+        , _instanced(instanced)
     { }
 
     [[nodiscard]] const RefDynArray<BufferElementDescriptor>& elements() const noexcept { return _elementDescriptors; }
     [[nodiscard]] u32 stride() const noexcept { return _stride; }
+    [[nodiscard]] bool instanced() const noexcept { return _instanced; }
 
     void addDescriptor(BufferElementDescriptor bed) noexcept;
     void addDescriptor(ShaderSemantic::Semantic semantic, ShaderDataType::Type type, bool normalized = false) noexcept;
 
-    void reset(uSys descriptorCount) noexcept;
+    void reset(uSys descriptorCount, bool instanced) noexcept;
 
     [[nodiscard]] BufferDescriptor build() const noexcept;
 };

@@ -114,7 +114,7 @@ bool SaturationPPLayer::init() noexcept
              1.0f,  1.0f, 1.0f, 1.0f
         };
 
-        BufferArgs posArgs(2);
+        VertexBufferArgs posArgs(2);
         posArgs.type = EBuffer::Type::ArrayBuffer;
         posArgs.usage = EBuffer::UsageType::StaticDraw;
         posArgs.elementCount = 6;
@@ -122,21 +122,21 @@ bool SaturationPPLayer::init() noexcept
         posArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
         posArgs.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-        IBufferBuilder::Error bufferError;
-        const CPPRef<IBuffer> positions = _globals.gi.createBuffer().buildCPPRef(posArgs, &bufferError);
+        IVertexBufferBuilder::Error bufferError;
+        const CPPRef<IVertexBuffer> positions = _globals.gi.createVertexBuffer().buildCPPRef(posArgs, &bufferError);
 
-        if(bufferError != IBufferBuilder::Error::NoError)
+        if(bufferError != IVertexBufferBuilder::Error::NoError)
         {
             switch(bufferError)
             {
-                case IBufferBuilder::Error::SystemMemoryAllocationFailure:
+                case IVertexBufferBuilder::Error::SystemMemoryAllocationFailure:
                     SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for vertex buffer in saturation post processing.");
                     break;
-                case IBufferBuilder::Error::DriverMemoryAllocationFailure:
+                case IVertexBufferBuilder::Error::DriverMemoryAllocationFailure:
                     SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex buffer in saturation post processing.");
                     break;
-                case IBufferBuilder::Error::LibImplementationError:
-                case IBufferBuilder::Error::UnknownError:
+                case IVertexBufferBuilder::Error::LibImplementationError:
+                case IVertexBufferBuilder::Error::UnknownError:
                 default:
                     SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating vertex buffer for saturation post processing.");
                     break;

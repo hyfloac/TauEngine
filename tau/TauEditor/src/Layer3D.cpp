@@ -216,7 +216,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
          1.0f,  1.0f, 1.0f, 1.0f
     };
 
-    BufferArgs positionsBuilder(2);
+    VertexBufferArgs positionsBuilder(2);
     positionsBuilder.type = EBuffer::Type::ArrayBuffer;
     positionsBuilder.usage = EBuffer::UsageType::StaticDraw;
     positionsBuilder.elementCount = 6;
@@ -224,7 +224,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     positionsBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-    const CPPRef<IBuffer> positions = globals.gi.createBuffer().buildCPPRef(positionsBuilder, nullptr);
+    const CPPRef<IVertexBuffer> positions = globals.gi.createVertexBuffer().buildCPPRef(positionsBuilder, nullptr);
 
     VertexArrayArgs vaArgs(1);
     vaArgs.shader = frameBufferVertexShader.get();
@@ -311,22 +311,22 @@ Layer3D::Layer3D(Globals& globals) noexcept
         genArgs.simplifyEpsilon = false;
         MeshGenerator::Mesh cubeMesh = MeshGenerator::generateMesh(eCubeMesh, genArgs);
         
-        BufferArgs bGenArgs(1);
+        VertexBufferArgs bGenArgs(1);
         bGenArgs.type = EBuffer::Type::ArrayBuffer;
         bGenArgs.usage = EBuffer::UsageType::StaticDraw;
         bGenArgs.elementCount = cubeMesh.vertexCount;
         bGenArgs.initialBuffer = cubeMesh.positions;
         bGenArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
         
-        const CPPRef<IBuffer> modelGenPos = globals.gi.createBuffer().buildCPPRef(bGenArgs, null);
+        const CPPRef<IVertexBuffer> modelGenPos = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, null);
         
         bGenArgs.initialBuffer = cubeMesh.normals;
-        const CPPRef<IBuffer> modelGenNorm = globals.gi.createBuffer().buildCPPRef(bGenArgs, null);
+        const CPPRef<IVertexBuffer> modelGenNorm = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, null);
         
         bGenArgs.initialBuffer = cubeMesh.textures;
         bGenArgs.descriptor.reset(1);
         bGenArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-        const CPPRef<IBuffer> modelGenTex = globals.gi.createBuffer().buildCPPRef(bGenArgs, null);
+        const CPPRef<IVertexBuffer> modelGenTex = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, null);
         
         IndexBufferArgs ibGenArgs;
         ibGenArgs.usage = EBuffer::UsageType::StaticDraw;

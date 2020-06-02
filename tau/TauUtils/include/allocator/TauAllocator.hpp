@@ -1,8 +1,11 @@
 #pragma once
 
+#pragma warning(push, 0)
+#include <cstdlib>
+#pragma warning(pop)
+
 #include "Objects.hpp"
 #include "NumTypes.hpp"
-#include <cstdlib>
 
 namespace _TauAllocatorUtils {
 template<typename _T>
@@ -30,6 +33,7 @@ template<typename _T>
 }
 
 enum class AllocationAlignment : uSys { };
+enum class PageCountVal : uSys { };
 
 enum class AllocationTracking
 {
@@ -67,16 +71,14 @@ public:
     _T* allocateT(_Args&&... args) noexcept
     {
         void* const allocation = allocate(sizeof(_T));
-        if(!allocation)
-        { return nullptr; }
+        if(!allocation) { return nullptr; }
         return new(allocation) _T(_TauAllocatorUtils::_forward<_Args>(args)...);
     }
 
     template<typename _T>
-    void deallocateT(_T* obj) noexcept
+    void deallocateT(_T* const obj) noexcept
     {
-        if(!obj)
-        { return; }
+        if(!obj) { return; }
         obj->~_T();
         deallocate(obj);
     }
@@ -93,6 +95,6 @@ public:
     [[nodiscard]] void* allocate(const uSys size) noexcept override
     { return malloc(size); }
 
-    void deallocate(void* obj) noexcept override
+    void deallocate(void* const obj) noexcept override
     { free(obj); }
 };

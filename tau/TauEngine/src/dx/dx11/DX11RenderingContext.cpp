@@ -21,6 +21,8 @@ DX11RenderingContext::DX11RenderingContext(DX11GraphicsInterface& gi, const DX11
     , _blendState(args.blendState)
     , _swapChain(args.swapChain)
     , _vsync(false)
+    , _iaStrides(null)
+    , _iaOffsets(null)
     , _defaultDepthStencilState(null)
     , _currentDepthStencilState(null)
     , _defaultRasterizerState(null)
@@ -55,6 +57,11 @@ ID3D11Device* DX11RenderingContext::d3d11Device() noexcept
 void DX11RenderingContext::resetFrameBuffer() const noexcept
 {
     _d3d11DeviceContext->OMSetRenderTargets(1, &_renderTargetView, _depthStencilView);
+}
+
+void DX11RenderingContext::setBuffers(const uSys count, ID3D11Buffer** const buffers) const noexcept
+{
+    _d3d11DeviceContext->IASetVertexBuffers(0, count, buffers, _iaStrides, _iaOffsets);
 }
 
 void DX11RenderingContext::updateViewport(const u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept

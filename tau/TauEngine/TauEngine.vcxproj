@@ -33,6 +33,7 @@
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10InputLayout.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RasterizerState.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
@@ -47,6 +48,7 @@
     <ClCompile Include="src\dx\dx11\DX11DepthStencilState.cpp" />
     <ClCompile Include="src\dx\dx11\DX11FrameBuffer.cpp" />
     <ClCompile Include="src\dx\dx11\DX11GraphicsInterface.cpp" />
+    <ClCompile Include="src\dx\dx11\DX11InputLayout.cpp" />
     <ClCompile Include="src\dx\dx11\DX11RasterizerState.cpp" />
     <ClCompile Include="src\dx\dx11\DX11RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx11\DX11Shader.cpp" />
@@ -62,10 +64,13 @@
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\gl\GL3_0BlendingState.cpp" />
     <ClCompile Include="src\gl\GL4_0BlendingState.cpp" />
+    <ClCompile Include="src\gl\GL4_3VertexArray.cpp" />
     <ClCompile Include="src\gl\GLBlendingState.cpp" />
     <ClCompile Include="src\gl\GLDepthStencilState.cpp" />
     <ClCompile Include="src\gl\GLGraphicsAccelerator.cpp" />
     <ClCompile Include="src\gl\GLGraphicsInterface.cpp" />
+    <ClCompile Include="src\gl\GL4_3InputLayout.cpp" />
+    <ClCompile Include="src\gl\GLInputLayout.cpp" />
     <ClCompile Include="src\gl\GLRasterizerState.cpp" />
     <ClCompile Include="src\gl\GLShaderBundleVisitor.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
@@ -102,8 +107,7 @@
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\shader\IShader.cpp" />
-    <ClCompile Include="src\shader\IShaderProgram.cpp" />
+    <ClCompile Include="src\shader\ShaderProgram.cpp" />
     <ClCompile Include="src\LayerStack.cpp" />
     <ClCompile Include="src\maths\Maths.cpp" />
     <ClCompile Include="src\maths\Matrix4x4f.cpp" />
@@ -144,6 +148,7 @@
     <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsInterface.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10InputLayout.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RasterizerState.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx10\DX10RenderTarget.hpp" />
@@ -159,6 +164,7 @@
     <ClInclude Include="include\dx\dx11\DX11DepthStencilState.hpp" />
     <ClInclude Include="include\dx\dx11\DX11FrameBuffer.hpp" />
     <ClInclude Include="include\dx\dx11\DX11GraphicsInterface.hpp" />
+    <ClInclude Include="include\dx\dx11\DX11InputLayout.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RasterizerState.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RenderTarget.hpp" />
@@ -178,6 +184,8 @@
     <ClInclude Include="include\GameRecorder.hpp" />
     <ClInclude Include="include\gl\gl3_0\GL3_0BlendingState.hpp" />
     <ClInclude Include="include\gl\gl4_0\GL4_0BlendingState.hpp" />
+    <ClInclude Include="include\gl\gl4_3\GL4_3InputLayout.hpp" />
+    <ClInclude Include="include\gl\gl4_3\GL4_3VertexArray.hpp" />
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp" />
     <ClInclude Include="include\gl\GLBlendingState.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
@@ -185,6 +193,7 @@
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLGraphicsAccelerator.hpp" />
     <ClInclude Include="include\gl\GLGraphicsInterface.hpp" />
+    <ClInclude Include="include\gl\GLInputLayout.hpp" />
     <ClInclude Include="include\gl\GLRasterizerState.hpp" />
     <ClInclude Include="include\gl\GLRenderingContext.hpp" />
     <ClInclude Include="include\gl\GLRenderTarget.hpp" />
@@ -225,10 +234,13 @@
     <ClInclude Include="include\maths\Vector4f.hpp" />
     <ClInclude Include="include\model\BufferDescriptor.hpp" />
     <ClInclude Include="include\model\BufferEnums.hpp" />
+    <ClInclude Include="include\model\InputLayout.hpp" />
+    <ClInclude Include="include\model\Mesh.hpp" />
     <ClInclude Include="include\model\MeshGenerator.hpp" />
     <ClInclude Include="include\model\ModelLoader.hpp" />
     <ClInclude Include="include\model\Buffer.hpp" />
     <ClInclude Include="include\model\OBJLoader.hpp" />
+    <ClInclude Include="include\model\OcclusionQuery.hpp" />
     <ClInclude Include="include\model\RenderableObject.hpp" />
     <ClInclude Include="include\model\VertexArray.hpp" />
     <ClInclude Include="include\pbr\SphereGenerator.hpp" />
@@ -318,6 +330,7 @@
     <PlatformToolset>ClangCL</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -419,11 +432,11 @@
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview </ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'" Label="LLVM">
-    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview </ClangClAdditionalOptions>
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
     <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -470,7 +483,7 @@
       <EnableModules>false</EnableModules>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -557,7 +570,7 @@
       <EnableModules>false</EnableModules>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -644,7 +657,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <MinimalRebuild>false</MinimalRebuild>
-      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -728,7 +741,7 @@
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

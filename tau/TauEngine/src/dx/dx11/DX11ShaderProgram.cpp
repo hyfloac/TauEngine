@@ -20,10 +20,10 @@ CPPRef<DX11VertexShader> DX11ShaderProgram::dxVertexShader() const noexcept
 { return RefCast<DX11VertexShader>(_vertexShader); }
 
 CPPRef<DX11HullShader> DX11ShaderProgram::dxHullShader() const noexcept
-{ return RefCast<DX11HullShader>(_tessellationControlShader); }
+{ return RefCast<DX11HullShader>(_tessCtrlShader); }
 
 CPPRef<DX11DomainShader> DX11ShaderProgram::dxDomainShader() const noexcept
-{ return RefCast<DX11DomainShader>(_tessellationEvaluationShader); }
+{ return RefCast<DX11DomainShader>(_tessEvalShader); }
 
 CPPRef<DX11GeometryShader> DX11ShaderProgram::dxGeometryShader() const noexcept
 { return RefCast<DX11GeometryShader>(_geometryShader); }
@@ -35,8 +35,8 @@ void DX11ShaderProgram::bind(IRenderingContext& context) noexcept
 {
     CTX();
     if(_vertexShader) { dxVertexShader()->bind(ctx); }
-    if(_tessellationControlShader) { dxHullShader()->bind(ctx); }
-    if(_tessellationEvaluationShader) { dxDomainShader()->bind(ctx); }
+    if(_tessCtrlShader) { dxHullShader()->bind(ctx); }
+    if(_tessEvalShader) { dxDomainShader()->bind(ctx); }
     if(_geometryShader) { dxGeometryShader()->bind(ctx); }
     if(_pixelShader) { dxPixelShader()->bind(ctx); }
 }
@@ -45,8 +45,8 @@ void DX11ShaderProgram::unbind(IRenderingContext& context) noexcept
 {
     CTX();
     if(_vertexShader) { dxVertexShader()->unbind(ctx); }
-    if(_tessellationControlShader) { dxHullShader()->unbind(ctx); }
-    if(_tessellationEvaluationShader) { dxDomainShader()->unbind(ctx); }
+    if(_tessCtrlShader) { dxHullShader()->unbind(ctx); }
+    if(_tessEvalShader) { dxDomainShader()->unbind(ctx); }
     if(_geometryShader) { dxGeometryShader()->unbind(ctx); }
     if(_pixelShader) { dxPixelShader()->unbind(ctx); }
 }

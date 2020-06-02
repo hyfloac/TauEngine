@@ -32,11 +32,12 @@ protected:
     CPPRef<ITextureDepthStencil> _depthStencilAttachment;
 protected:
     inline IFrameBuffer(const RefDynArray<CPPRef<ITexture>>& colorAttachments, const CPPRef<ITextureDepthStencil>& depthStencilAttachment) noexcept
-        : _colorAttachments(colorAttachments), _depthStencilAttachment(depthStencilAttachment)
+        : _colorAttachments(colorAttachments)
+        , _depthStencilAttachment(depthStencilAttachment)
     { }
 public:
     [[nodiscard]] inline const RefDynArray<CPPRef<ITexture>>& colorAttachments() const noexcept { return _colorAttachments; }
-    [[nodiscard]] inline const CPPRef<ITextureDepthStencil> depthStencilAttachment() const noexcept { return _depthStencilAttachment; }
+    [[nodiscard]] inline const CPPRef<ITextureDepthStencil>& depthStencilAttachment() const noexcept { return _depthStencilAttachment; }
 
     virtual void bind(IRenderingContext& context, AccessMode mode = AccessMode::ReadWrite) noexcept = 0;
     virtual void unbind(IRenderingContext& context) noexcept = 0;
@@ -53,8 +54,8 @@ public:
     CPPRef<ITextureDepthStencil> depthStencilAttachment;
 public:
     FrameBufferArgs(const uSys colorAttachmentCount = TAU_MAX_FRAME_BUFFER_ATTACHMENTS) noexcept
-        : colorAttachments(minT(colorAttachmentCount, TAU_MAX_FRAME_BUFFER_ATTACHMENTS)),
-          depthStencilAttachment(null)
+        : colorAttachments(minT(colorAttachmentCount, TAU_MAX_FRAME_BUFFER_ATTACHMENTS))
+        , depthStencilAttachment(null)
     { }
 };
 

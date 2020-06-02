@@ -2,7 +2,8 @@ DirectX10, DirectX11: {
     Vertex: {
         File: "Vertex.cso",
         Uniforms: {
-            0: 0
+            CRMUniformBindingCameraDynamic: 0,
+            CRMUniformBindingCameraStatic: 1
         }
     },
     Pixel: {
@@ -19,20 +20,17 @@ DirectX10, DirectX11: {
 },
 OpenGL4_5, OpenGL4_6: {
     Vertex: {
-        File: "Vertex.glsl",
-        Uniforms: {
-            0: 0
-        }
+        File: "Vertex.glsl"
     },
     Pixel: {
         File: "Pixel.glsl",
         Uniforms: {
-            0: 1
+            0: 0
         },
         Textures: {
-            0: 0,
-            1: 1,
-            2: 2
+            CRMTextureDiffuse: 0,
+            CRMTexturePBRCompound: 1,
+            CRMTextureNormal: 2
         }
     }
 }

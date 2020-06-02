@@ -22,7 +22,6 @@ void PageAllocator::init() noexcept
 
 void* PageAllocator::reserve(const uSys numPages) noexcept
 {
-    init();
     return VirtualAlloc(NULL, numPages * _pageSize, MEM_RESERVE, PAGE_NOACCESS);
 }
 

@@ -25,7 +25,8 @@ public:
         UnexpectedEOF,
         DuplicateDeclaration,
         InvalidBlock,
-        InvalidToken
+        InvalidToken,
+        InvalidCRM
     };
 private:
     ShaderBundleLexer _lexer;
@@ -67,7 +68,6 @@ private:
 
     NullableStrongRef<sbp::ShaderStageBlockExprAST> parseShaderBlock() noexcept;
     void parseShaderContents(NullableStrongRef<sbp::ShaderStageBlockExprAST> block) noexcept;
-    void parseOuterShaderContents(NullableStrongRef<sbp::OuterShaderStageBlockExprAST> block) noexcept;
 
     NullableStrongRef<sbp::BlockExprAST> parseBlock() noexcept;
     void parseBlockContents(NullableStrongRef<sbp::BlockExprAST> block) noexcept;
@@ -76,6 +76,5 @@ private:
 
     NullableStrongRef<sbp::ShaderIOPointExprAST> parseIOPoint() noexcept;
 
-    [[nodiscard]] static u32 mapCRM(CommonRenderingModelToken token) noexcept;
     [[nodiscard]] static sbp::BlockType getAssociatedBlock(CommonRenderingModelToken token) noexcept;
 };

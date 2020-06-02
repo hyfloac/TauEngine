@@ -1,19 +1,32 @@
 #version 420 core
 
+out gl_PerVertex
+{
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+};
+
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec3 tangent;
 layout(location = 3) in vec2 texCoord;
 
-out vec3 fPosition;
-out vec2 fTexCoord;
-out mat3 fTBN;
+layout(location = 0) out vec3 fPosition;
+layout(location = 1) out vec2 fTexCoord;
+layout(location = 2) out mat3 fTBN;
 
-layout(std140, binding = 0) uniform CameraMatrices
+layout(std140, binding = 0) uniform CameraDynamicMatrices
+{
+    mat4 mvpMatrix;
+    mat4 modelViewMatrix;
+};
+
+layout(std140, binding = 1) uniform CameraStaticMatrices
 {
     mat4 projectionMatrix;
     mat4 cameraViewMatrix;
-    mat4 modelViewMatrix;
+    vec4 cameraPos;
 };
 
 void main(void)

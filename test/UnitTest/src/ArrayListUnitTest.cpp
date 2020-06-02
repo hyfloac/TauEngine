@@ -17,7 +17,7 @@ struct TestStruct final
 void addTest() noexcept
 {
     UNIT_TEST();
-    ArrayList<TestStruct> list;
+    ArrayList<TestStruct> list(65000);
 
     for(int i = 0; i < 65000; ++i)
     {
@@ -37,7 +37,7 @@ void addTest() noexcept
 void emplaceTest() noexcept
 {
     UNIT_TEST();
-    ArrayList<TestStruct> list;
+    ArrayList<TestStruct> list(1000);
 
     for(int i = 0; i < 1000; ++i)
     {
@@ -57,7 +57,7 @@ void emplaceTest() noexcept
 void copyTest() noexcept
 {
     UNIT_TEST();
-    ArrayList<TestStruct> list;
+    ArrayList<TestStruct> list(1000);
 
     for(int i = 0; i < 1000; ++i)
     {

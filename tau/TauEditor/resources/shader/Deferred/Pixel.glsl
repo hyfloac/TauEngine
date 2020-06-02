@@ -1,17 +1,17 @@
 #version 430 core
 
-in vec3 fPosition;
-in vec2 fTexCoord;
-in mat3 fTBN;
+layout(location = 0) in vec3 fPosition;
+layout(location = 1) in vec2 fTexCoord;
+layout(location = 2) in mat3 fTBN;
 
-layout(location = 0) out vec4 color;
-layout(location = 1) out vec4 position;
-layout(location = 2) out vec4 normal;
-layout(location = 3) out vec4 specular;
+layout(location = 0) out vec4 normal;
+layout(location = 1) out vec4 color;
+layout(location = 2) out vec4 specular;
+layout(location = 4) out vec4 position;
 
 #include <|TERes/shader/include/Material.glsl>
 
-layout(std140, binding = 1) uniform MaterialUni
+layout(std140, location = 0) uniform MaterialUni
 {
     Material material;
 };

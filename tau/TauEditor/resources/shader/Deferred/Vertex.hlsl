@@ -14,12 +14,18 @@ struct PSInput
     float3x3 tbn : TBN;
 };
 
-cbuffer Matrices : register(b0)
+cbuffer CameraDynamicMatrices : register(b0)
+{
+    float4x4 mvp;
+    float4x4 model;
+};
+
+cbuffer CameraStaticMatrices : register(b1)
 {
     float4x4 projection;
     float4x4 view;
-    float4x4 model;
-};
+    float4 viewPos4;
+}
 
 PSInput vsMain(VSInput input)
 {

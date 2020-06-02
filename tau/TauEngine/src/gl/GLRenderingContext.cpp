@@ -13,7 +13,7 @@
 #include "gl/GLBlendingState.hpp"
 #include "gl/GLGraphicsInterface.hpp"
 
-#include "gl/GLBuffer.hpp"
+#include "gl/GLVertexBuffer.hpp"
 
 #include "Timings.hpp"
 
@@ -22,6 +22,8 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRender
     , _gi(glArgs.gi)
     , _device(glSysArgs.device)
     , _context(glSysArgs.context)
+    , _iaOffsets(null)
+    , _iaStrides(null)
     , _defaultDepthStencilState(null)
     , _currentDepthStencilState(null)
     , _defaultRasterizerState(null)
@@ -32,6 +34,11 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRender
 
 GLRenderingContext::~GLRenderingContext() noexcept
 { systemDestruct(); }
+
+void GLRenderingContext::setBuffers(uSys count, const GLuint* buffers) const noexcept
+{
+    glBindVertexBuffers(0, count, buffers, _iaOffsets, _iaStrides);
+}
 
 void GLRenderingContext::updateViewport(u32 x, u32 y, u32 width, u32 height, float minZ, float maxZ) noexcept
 {

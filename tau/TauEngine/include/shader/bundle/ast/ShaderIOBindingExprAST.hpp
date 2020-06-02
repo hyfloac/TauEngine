@@ -4,6 +4,7 @@
 #include <String.hpp>
 
 #include "ExprAST.hpp"
+#include "shader/bundle/ShaderBundleLexer.hpp"
 #include "shader/bundle/ShaderBundleVisitor.hpp"
 
 namespace sbp {
@@ -13,17 +14,17 @@ class TAU_DLL TAU_NOVTABLE ShaderIOPointExprAST : public ExprAST
     DELETE_COPY(ShaderIOPointExprAST);
 private:
     NullableStrongRef<ShaderIOPointExprAST> _next;
-    u32 _virtualBindPoint;
+    CommonRenderingModelToken _crmTarget;
 public:
-    inline ShaderIOPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const u32 virtualBindPoint) noexcept
+    inline ShaderIOPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const CommonRenderingModelToken crmTarget) noexcept
         : _next(next)
-        , _virtualBindPoint(virtualBindPoint)
+        , _crmTarget(crmTarget)
     { }
 
     [[nodiscard]]       NullableStrongRef<ShaderIOPointExprAST>& next()       noexcept { return _next; }
     [[nodiscard]] const NullableStrongRef<ShaderIOPointExprAST>& next() const noexcept { return _next; }
 
-    [[nodiscard]] u32 virtualBindPoint() const noexcept { return _virtualBindPoint; }
+    [[nodiscard]] CommonRenderingModelToken crmTarget() const noexcept { return _crmTarget; }
 };
 
 class TAU_DLL ShaderIOMapPointExprAST final : public ShaderIOPointExprAST
@@ -33,8 +34,8 @@ class TAU_DLL ShaderIOMapPointExprAST final : public ShaderIOPointExprAST
 private:
     i32 _shaderBind;
 public:
-    inline ShaderIOMapPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const u32 virtualBindPoint, const i32 shaderBind) noexcept
-        : ShaderIOPointExprAST(next, virtualBindPoint)
+    inline ShaderIOMapPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const CommonRenderingModelToken crmTarget, const i32 shaderBind) noexcept
+        : ShaderIOPointExprAST(next, crmTarget)
         , _shaderBind(shaderBind)
     { }
 
@@ -51,8 +52,8 @@ class TAU_DLL ShaderIOBindPointExprAST final : public ShaderIOPointExprAST
 private:
     DynString _uniformName;
 public:
-    inline ShaderIOBindPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const u32 virtualBindPoint, const DynString& uniformName) noexcept
-        : ShaderIOPointExprAST(next, virtualBindPoint)
+    inline ShaderIOBindPointExprAST(const NullableStrongRef<ShaderIOPointExprAST>& next, const CommonRenderingModelToken crmTarget, const DynString& uniformName) noexcept
+        : ShaderIOPointExprAST(next, crmTarget)
         , _uniformName(uniformName)
     { }
 

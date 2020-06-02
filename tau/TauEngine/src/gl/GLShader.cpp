@@ -1,25 +1,23 @@
 #pragma warning(push, 0)
 #include <GL/glew.h>
 #include <cstring>
+#include <cstdio>
 #pragma warning(pop)
 #include <gl/GLShader.hpp>
 #include <Utils.hpp>
-#include <cstdio>
-#include "VFS.hpp"
+#include <VFS.hpp>
 #include "Timings.hpp"
 #include "gl/GLRenderingContext.hpp"
-#include "gl/GLGraphicsInterface.hpp"
-
-GLShader::GLShader(const GLuint shaderID, const EShader::Stage shaderType) noexcept
-    : IShader(), _shaderID(shaderID), _shaderType(shaderType)
-{ }
+#include "shader/bundle/ShaderBundleParser.hpp"
+#include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
+#include <VariableLengthArray.hpp>
 
 GLShader::~GLShader() noexcept
 {
-    if(this->_shaderID)
+    if(_shaderID)
     {
-        glDeleteShader(this->_shaderID);
-        this->_shaderID = 0;
+        glDeleteProgram(_shaderID);
+        _shaderID = 0;
     }
 }
 
@@ -63,7 +61,7 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
                         const uSys includeLen = readInclude(i, ret.count(), ret.arr());
                         char* includePath = new char[includeLen + 1];
                         includePath[includeLen] = '\0';
-                        memcpy(includePath, ret.arr() + i, includeLen);
+                        ::std::memcpy(includePath, ret.arr() + i, includeLen);
 
                         i += includeLen + 1;
 
@@ -75,9 +73,9 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
 
                         RefDynArray<u8> includedFileData(ret.count() - includeLineLen + includeFileData.count());
 
-                        memcpy(includedFileData.arr(), ret.arr(), includeBegin);
-                        memcpy(includedFileData.arr() + includeBegin, includeFileData.arr(), includeFileData.count() - 1);
-                        memcpy(includedFileData.arr() + includeBegin + includeFileData.count() - 1, ret.arr() + i, ret.count() - i);
+                        ::std::memcpy(includedFileData.arr(), ret.arr(), includeBegin);
+                        ::std::memcpy(includedFileData.arr() + includeBegin, includeFileData.arr(), includeFileData.count() - 1);
+                        ::std::memcpy(includedFileData.arr() + includeBegin + includeFileData.count() - 1, ret.arr() + i, ret.count() - i);
 
                         ret = includedFileData;
                     }
@@ -89,20 +87,13 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
     return ret;
 }
 
-GLShaderBuilder::GLShaderBuilder(GLGraphicsInterface& gi) noexcept
-	: IShaderBuilder(), _resIndex(IShaderBuilder::rsTransformer->transform(gi.renderingMode()))
-{ }
-
 GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error) const noexcept
 {
     GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    if(!compileShader(args, glArgs, error))
-    { return null; }
-
-    GLShader* const shader = new(::std::nothrow) GLShader(glArgs.shaderID, args.stage);
+    GLShader* const shader = new(::std::nothrow) GLShader(glArgs.shaderHandle, args.stage);
 
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
@@ -115,11 +106,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error, TauAlloca
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    if(!compileShader(args, glArgs, error))
-    { return null; }
-
-    GLShader* const shader = allocator.allocateT<GLShader>(glArgs.shaderID, args.stage);
-
+    GLShader* const shader = allocator.allocateT<GLShader>(glArgs.shaderHandle, args.stage);
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, shader);
@@ -131,11 +118,7 @@ CPPRef<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* erro
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    if(!compileShader(args, glArgs, error))
-    { return null; }
-
-    const CPPRef<GLShader> shader = CPPRef<GLShader>(new(::std::nothrow) GLShader(glArgs.shaderID, args.stage));
-
+    const CPPRef<GLShader> shader = CPPRef<GLShader>(new(::std::nothrow) GLShader(glArgs.shaderHandle, args.stage));
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, shader);
@@ -147,16 +130,10 @@ NullableReferenceCountingPointer<IShader> GLShaderBuilder::buildTauRef(const Sha
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    if(!compileShader(args, glArgs, error))
-    { return null; }
-
-    const NullableReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderID, args.stage);
-
+    const NullableReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderHandle, args.stage);
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
-    NullableReferenceCountingPointer<IShader> iShader = RCPCast<IShader>(shader);
-	
-    ERROR_CODE_V(Error::NoError, iShader);
+    ERROR_CODE_V(Error::NoError, shader);
 }
 
 NullableStrongReferenceCountingPointer<IShader> GLShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
@@ -165,23 +142,15 @@ NullableStrongReferenceCountingPointer<IShader> GLShaderBuilder::buildTauSRef(co
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    if(!compileShader(args, glArgs, error))
-    { return null; }
-
-    const NullableStrongReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderID, args.stage);
-
+    const NullableStrongReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderHandle, args.stage);
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
 
-    NullableStrongReferenceCountingPointer<IShader> iShader = RCPCast<IShader>(shader);
-	
-    ERROR_CODE_V(Error::NoError, iShader);
+    ERROR_CODE_V(Error::NoError, shader);
 }
 
-bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, Error* error) noexcept
+bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, Error* error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.vfsMount, Error::InvalidFile);
-    ERROR_CODE_COND_F(!args.path, Error::InvalidFile);
-    ERROR_CODE_COND_F(!args.fileName, Error::InvalidFile);
+    ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 	
     GLenum glShaderStage;
 	
@@ -205,9 +174,122 @@ bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, 
 	    default: ERROR_CODE_F(Error::InvalidShaderStage);
     }
 
-    glArgs->shaderID = glCreateShader(glShaderStage);
+    const DynString path = args.file->name();
 
-    if(glArgs->shaderID == GL_FALSE)
+    if(VFS::getFileExt(path, false) == "tausi")
+    {
+        return processBundle(args, glArgs, glShaderStage, error);
+    }
+    else
+    {
+        return processShader(args.file, glArgs, glShaderStage, error);
+    }
+}
+
+bool GLShaderBuilder::processBundle(const ShaderArgs& args, GLShaderArgs* const glArgs, const GLenum shaderStage, Error* const error) const noexcept
+{
+    ShaderBundleParser parser(args.file);
+
+    ShaderBundleParser::Error parseError;
+    auto ast = parser.parse(&parseError);
+
+    _visitor->reset();
+    _visitor->visit(ast.get());
+    const sbp::ShaderInfo& info = _visitor->get(args.stage);
+
+    const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
+    if(!processShader(file, glArgs, shaderStage, error))
+    { return false; }
+
+    for(auto& uniPoint : info.uniformPoints)
+    {
+        GLuint index;
+
+        if(uniPoint.type == sbp::BindPointUnion::Str)
+        {
+            index = glGetUniformBlockIndex(glArgs->shaderHandle, uniPoint.bindName);
+            
+        }
+        else if(uniPoint.type == sbp::BindPointUnion::Number)
+        {
+            index = uniPoint.mapPoint;
+        }
+        else
+        {
+            continue;
+        }
+
+        switch(uniPoint.crmTarget)
+        {
+            case CommonRenderingModelToken::UniformBindingCameraDynamic:
+                glUniformBlockBinding(glArgs->shaderHandle, index, 0);
+                break;
+            case CommonRenderingModelToken::UniformBindingCameraStatic:
+                glUniformBlockBinding(glArgs->shaderHandle, index, 1);
+                break;
+            default: break;
+        }
+    }
+
+    for(auto& texPoint : info.texturePoints)
+    {
+        GLuint location;
+
+        if(texPoint.type == sbp::BindPointUnion::Str)
+        {
+            location = glGetUniformLocation(glArgs->shaderHandle, texPoint.bindName);
+        }
+        else if(texPoint.type == sbp::BindPointUnion::Number)
+        {
+            location = texPoint.mapPoint;
+        }
+        else
+        {
+            continue;
+        }
+
+        switch(texPoint.crmTarget)
+        {
+            case CommonRenderingModelToken::TextureNormal:
+                glProgramUniform1i(glArgs->shaderHandle, location, 0);
+                break;
+            case CommonRenderingModelToken::TextureDiffuse:
+                glProgramUniform1i(glArgs->shaderHandle, location, 1);
+                break;
+            case CommonRenderingModelToken::TexturePBRCompound:
+                glProgramUniform1i(glArgs->shaderHandle, location, 2);
+                break;
+            case CommonRenderingModelToken::TextureEmissivity:
+                glProgramUniform1i(glArgs->shaderHandle, location, 3);
+                break;
+            case CommonRenderingModelToken::TexturePosition:
+                glProgramUniform1i(glArgs->shaderHandle, location, 4);
+                break;
+            case CommonRenderingModelToken::TextureDepth:
+                glProgramUniform1i(glArgs->shaderHandle, location, 5);
+                break;
+            case CommonRenderingModelToken::TextureStencil:
+                glProgramUniform1i(glArgs->shaderHandle, location, 6);
+                break;
+            default: break;
+        }
+    }
+
+    ERROR_CODE_T(Error::NoError);
+}
+
+static bool validateFail(GLuint& programId, const char* type) noexcept;
+
+bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* const glArgs, const GLenum shaderStage, Error* const error) const noexcept
+{
+    RefDynArray<u8> data = file->readFile();
+    data = handleIncludes(data);
+
+    const GLchar* const shaderSrc = reinterpret_cast<GLchar*>(data.arr());
+
+    glArgs->shaderHandle = glCreateShaderProgramv(shaderStage, 1, &shaderSrc);
+
+    if(glArgs->shaderHandle == GL_FALSE)
     {
 #if !defined(TAU_PRODUCTION)
         GLint result;
@@ -219,58 +301,20 @@ bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, 
         else
         {
             GLchar* errorMsg = new GLchar[result];
-            glGetShaderInfoLog(glArgs->shaderID, result, &result, errorMsg);
+            glGetShaderInfoLog(glArgs->shaderHandle, result, &result, errorMsg);
             fprintf(stderr, "OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
         }
 #endif
         ERROR_CODE_F(Error::DriverMemoryAllocationFailure);
     }
-	
-    return true;
-}
-
-bool GLShaderBuilder::compileShader(const ShaderArgs& args, GLShaderArgs& glArgs, Error* error) const noexcept
-{
-    CPPRef<IFile> shaderFile;
-
-    if(strcmp(args.vfsMount, "__bundle__") == 0)
-    {
-        shaderFile = VFS::Instance().openFile(args.fileName, FileProps::Read);
-    }
-    else
-    {
-        const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
-
-        ERROR_CODE_COND_F(shaderSelector.count() == 0, Error::InvalidFile);
-        auto& selected = shaderSelector.select(_resIndex);
-        ERROR_CODE_COND_F(!selected.loader() || selected.path().length() == 0 || selected.name().length() == 0, Error::InvalidFile);
-        shaderFile = selected.loadFile(FileProps::Read);
-    }
-
-    ERROR_CODE_COND_F(!shaderFile, Error::InvalidFile);
-
-#if defined(TAU_PRODUCTION)
-    {
-#endif
-    RefDynArray<u8> data = shaderFile->readFile();
-    data = handleIncludes(data);
-
-    const GLchar* const shaderSrc = reinterpret_cast<GLchar*>(data.arr());
-    const GLint length = static_cast<GLint>(data.length());
-
-    glShaderSource(glArgs.shaderID, 1, &shaderSrc, &length);
-    glCompileShader(glArgs.shaderID);
-#if defined(TAU_PRODUCTION)
-    }
-#endif
 
     GLint result;
-    glGetShaderiv(glArgs.shaderID, GL_COMPILE_STATUS, &result);
+    glGetShaderiv(glArgs->shaderHandle, GL_COMPILE_STATUS, &result);
     if(result == GL_FALSE)
     {
 #if !defined(TAU_PRODUCTION)
-        glGetShaderiv(glArgs.shaderID, GL_INFO_LOG_LENGTH, &result);
+        glGetShaderiv(glArgs->shaderHandle, GL_INFO_LOG_LENGTH, &result);
         if(result <= 0)
         {
             fprintf(stderr, "OpenGL failed to compile a shader, but no error message was generated.\n");
@@ -278,17 +322,54 @@ bool GLShaderBuilder::compileShader(const ShaderArgs& args, GLShaderArgs& glArgs
         else
         {
             GLchar* errorMsg = new GLchar[result];
-            glGetShaderInfoLog(glArgs.shaderID, result, &result, errorMsg);
+            glGetShaderInfoLog(glArgs->shaderHandle, result, &result, errorMsg);
             fprintf(stderr, "OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
             delete[] errorMsg;
-            fprintf(stderr, "File Path: %s%s%s\n", args.vfsMount, args.path, args.fileName);
+            fprintf(stderr, "File Path: %s\n", file->name());
             fprintf(stderr, "File Data: \n%s\n", shaderSrc);
         }
 #endif
 
-        glDeleteShader(glArgs.shaderID);
+        glDeleteProgram(glArgs->shaderHandle);
         ERROR_CODE_F(Error::CompileError);
     }
-	
-    return true;
+
+    glGetProgramiv(glArgs->shaderHandle, GL_LINK_STATUS, &result);
+    if(result == GL_FALSE)
+    {
+        return validateFail(glArgs->shaderHandle, "link");
+    }
+
+    ERROR_CODE_T(Error::NoError);
+}
+
+static bool validateFail(GLuint& programId, const char* const type) noexcept
+{
+    PERF();
+    GLint length;
+
+    glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &length);
+
+    if(!length)
+    {
+        fprintf(stderr, "OpenGL failed to %s program, but no error message was generated.\n", type);
+    }
+    else if(length >= VLA_MAX_LEN)
+    {
+        GLchar* errorMsg = new GLchar[length];
+        glGetShaderInfoLog(programId, length, &length, errorMsg);
+        fprintf(stderr, "OpenGL failed to %s program.\n  Error Message: %s\n", type, errorMsg);
+        delete[] errorMsg;
+    }
+    else
+    {
+        VLA(GLchar, errorMsg, length);
+        glGetShaderInfoLog(programId, length, &length, errorMsg);
+        fprintf(stderr, "OpenGL failed to %s program.\n  Error Message: %s\n", type, errorMsg);
+    }
+
+    glDeleteProgram(programId);
+    programId = 0;
+
+    return false;
 }

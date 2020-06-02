@@ -6,10 +6,9 @@
 #include <d3d11.h>
 
 class DX11ShaderBuilder;
+class DX11InputLayoutBuilder;
 class DX11VertexArrayBuilder;
 class DX11BufferBuilder;
-class DX11IndexBufferBuilder;
-class DX11UniformBufferBuilder;
 class DX11DepthStencilStateBuilder;
 class DX11RasterizerStateBuilder;
 class DX11BlendingStateBuilder;
@@ -27,10 +26,9 @@ private:
     ID3D11Device* _d3d11Device;
 
     DX11ShaderBuilder* _shaderBuilder;
+    DX11InputLayoutBuilder* _inputLayoutBuilder;
     DX11VertexArrayBuilder* _vertexArrayBuilder;
     DX11BufferBuilder* _bufferBuilder;
-    DX11IndexBufferBuilder* _indexBufferBuilder;
-    DX11UniformBufferBuilder* _uniformBufferBuilder;
     DX11DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX11RasterizerStateBuilder* _rasterizerStateBuilder;
     DX11BlendingStateBuilder* _blendingStateBuilder;
@@ -50,10 +48,9 @@ public:
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IInputLayoutBuilder& createInputLayout() noexcept override;
     [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
-    [[nodiscard]] IIndexBufferBuilder& createIndexBuffer() noexcept override;
-    [[nodiscard]] IUniformBufferBuilder& createUniformBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;

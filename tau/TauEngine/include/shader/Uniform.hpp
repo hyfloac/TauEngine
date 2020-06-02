@@ -43,7 +43,7 @@ class UniformBlock<_T, UniformBlockBinding::UBB_Upload> final
 private:
     CPPRef<IUniformBuffer> _buffer;
 public:
-    inline UniformBlock(const IUniformBufferBuilder& builder) noexcept
+    inline UniformBlock(const IBufferBuilder& builder) noexcept
         : _buffer(null)
     {
         UniformBufferArgs args;
@@ -77,7 +77,7 @@ private:
     _T _t;
 public:
     template<typename... _Args>
-    UniformBlock(const IUniformBufferBuilder& builder, _Args&&... args) noexcept
+    UniformBlock(const IBufferBuilder& builder, _Args&&... args) noexcept
         : _buffer(null), _t(std::forward<_Args>(args)...)
     {
         UniformBufferArgs bufArgs;
@@ -108,7 +108,7 @@ private:
     CPPRef<IUniformBuffer> _buffer;
     const _T* _t;
 public:
-    UniformBlock(const IUniformBufferBuilder& builder, const _T* t) noexcept
+    UniformBlock(const IBufferBuilder& builder, const _T* t) noexcept
         : _buffer(null), _t(t)
     {
         UniformBufferArgs args;

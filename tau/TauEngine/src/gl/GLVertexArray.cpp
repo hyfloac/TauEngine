@@ -4,157 +4,115 @@
 
 static GLenum glDrawType(DrawType drawType) noexcept;
 
-GLuint GLVertexArray::generate() noexcept
-{
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    return vao;
-}
-
-void GLVertexArray::_bind(GLuint vao) noexcept
-{
-    glBindVertexArray(vao);
-}
-
-void GLVertexArray::destroy(const GLuint vao) noexcept
-{
-    glDeleteVertexArrays(1, &vao);
-}
-
-GLVertexArray::GLVertexArray(const u32 drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers, const GLuint vao, const GLenum drawType, const CPPRef<GLIndexBuffer>& indexBuffer, const GLuint attribCount)
-    : IVertexArray(drawCount, buffers), _vao(vao), _glDrawType(drawType), _indexBuffer(indexBuffer), _attribCount(attribCount)
-{ }
-
-GLVertexArray::~GLVertexArray() noexcept
-{
-    glDeleteVertexArrays(1, &_vao);
-}
-
 void GLVertexArray::bind(IRenderingContext& context) noexcept
 {
     glBindVertexArray(_vao);
-    if(this->_indexBuffer)
+    if(_indexBuffer)
     {
-        this->_indexBuffer->bind(context);
+        _indexBuffer->bind(context);
     }
 }
 
 void GLVertexArray::unbind(IRenderingContext& context) noexcept
 {
-    if(this->_indexBuffer)
+    if(_indexBuffer)
     {
-        this->_indexBuffer->unbind(context);
+        _indexBuffer->unbind(context);
     }
     glBindVertexArray(0);
 }
 
-void GLVertexArray::preDraw(IRenderingContext& context) noexcept
-{
-    for(GLuint attrib = 0; attrib < _attribCount; ++attrib)
-    {
-        glEnableVertexAttribArray(attrib);
-    }
-}
-
-void GLVertexArray::postDraw(IRenderingContext& context) noexcept
-{
-    for(GLuint attrib = _attribCount; attrib > 0; --attrib)
-    {
-        glDisableVertexAttribArray(attrib - 1);
-    }
-}
-
-void GLVertexArray::draw(IRenderingContext& context, uSys drawCount, uSys drawOffset) noexcept
+void GLVertexArray::draw(IRenderingContext& context, uSys drawCount, const uSys drawOffset) noexcept
 {
     if(drawCount == 0)
-    { drawCount = this->_drawCount; }
+    { drawCount = _drawCount; }
 
-    if(this->_indexBuffer)
+    if(_indexBuffer)
     {
-        glDrawElements(this->_glDrawType, drawCount, GL_UNSIGNED_INT, reinterpret_cast<const void*>(drawOffset));
+        glDrawElements(_glDrawType, drawCount, _indexBuffer->glIndexSize(), reinterpret_cast<const void*>(drawOffset));
     }
     else
     {
-        glDrawArrays(this->_glDrawType, drawOffset, drawCount);
+        glDrawArrays(_glDrawType, drawOffset, drawCount);
     }
 }
 
-void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, uSys drawOffset) noexcept
+void GLVertexArray::drawInstanced(IRenderingContext& context, const uSys instanceCount, uSys drawCount, const uSys drawOffset) noexcept
 {
     if(drawCount == 0)
-    { drawCount = this->_drawCount; }
+    { drawCount = _drawCount; }
 
     if(this->_indexBuffer)
     {
-        glDrawElementsInstanced(this->_glDrawType, drawCount, GL_UNSIGNED_INT, reinterpret_cast<const void*>(drawOffset), instanceCount);
+        glDrawElementsInstanced(_glDrawType, drawCount, _indexBuffer->glIndexSize(), reinterpret_cast<const void*>(drawOffset), instanceCount);
     }
     else
     {
-        glDrawArraysInstanced(this->_glDrawType, drawOffset, drawCount, instanceCount);
+        glDrawArraysInstanced(_glDrawType, drawOffset, drawCount, instanceCount);
     }
 }
 
-GLVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* error) noexcept
+IVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* const error) noexcept
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    GLVertexArray* const va = new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    GLVertexArray* const va = new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, va);
 }
 
-GLVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+IVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    GLVertexArray* const va = allocator.allocateT<GLVertexArray>(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    GLVertexArray* const va = allocator.allocateT<GLVertexArray>(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, va);
 }
 
-CPPRef<IVertexArray> GLVertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* error) noexcept
+CPPRef<IVertexArray> GLVertexArrayBuilder::buildCPPRef(const VertexArrayArgs& args, Error* const error) noexcept
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLVertexArray> va = CPPRef<GLVertexArray>(new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount));
+    const CPPRef<GLVertexArray> va = CPPRef<GLVertexArray>(new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, va);
 }
 
-NullableRef<IVertexArray> GLVertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableRef<IVertexArray> GLVertexArrayBuilder::buildTauRef(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const NullableRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    const NullableRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
 
-NullableStrongRef<IVertexArray> GLVertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableStrongRef<IVertexArray> GLVertexArrayBuilder::buildTauSRef(const VertexArrayArgs& args, Error* const error, TauAllocator& allocator) noexcept
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const NullableStrongRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer, glArgs.attribCount);
+    const NullableStrongRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
 
-bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArrayArgs* glArgs, Error* error) const noexcept
+bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArrayArgs* glArgs, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(args.drawCount == 0, Error::DrawCountNotSet);
     ERROR_CODE_COND_F(args.drawType == static_cast<DrawType>(0), Error::DrawTypeNotSet);
@@ -162,7 +120,7 @@ bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArra
     for(uSys i = 0; i < args.buffers.count(); ++i)
     {
         ERROR_CODE_COND_F(!args.buffers[i], Error::BuffersNotSet);
-        ERROR_CODE_COND_F(!RTT_CHECK(args.buffers[i].get(), GLBuffer), Error::InternalError);
+        ERROR_CODE_COND_F(!RTT_CHECK(args.buffers[i].get(), GLVertexBuffer), Error::InternalError);
     }
 
     if(args.indexBuffer)
@@ -186,7 +144,7 @@ bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArra
         auto& buffer = args.buffers[i];
         const BufferDescriptor& descriptor = buffer->descriptor();
 
-        const auto glBuffer = RefCast<GLBuffer>(buffer);
+        const auto glBuffer = RefCast<GLVertexBuffer>(buffer);
 
         glBuffer->bind();
 
@@ -220,7 +178,7 @@ bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArra
                     glVertexAttribPointer(attribIndex, size, type, normalized, stride, pointer);
                 }
 
-                if(buffer->instanced())
+                if(descriptor.instanced())
                 {
                     glVertexAttribDivisor(attribIndex, 1);
                 }

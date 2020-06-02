@@ -4,7 +4,7 @@
 #include "imgui.h"
 
 class Window;
-class IBuffer;
+class IVertexBuffer;
 class IIndexBuffer;
 class IVertexArray;
 class IRenderingContext;
@@ -22,7 +22,7 @@ class IMGUI_IMPL_API ImGuiTau final
     DEFAULT_COPY(ImGuiTau);
 private:
     Window& _window;
-    CPPRef<IBuffer> _vertexBuffer;
+    CPPRef<IVertexBuffer> _vertexBuffer;
     CPPRef<IIndexBuffer> _indexBuffer;
     CPPRef<IVertexArray> _va;
     CPPRef<IShader> _vertexShader;

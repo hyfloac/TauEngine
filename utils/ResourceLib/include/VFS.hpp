@@ -32,11 +32,16 @@
  */
 class VFS final
 {
+    DEFAULT_DESTRUCT(VFS);
+    DEFAULT_COPY(VFS);
 public:
     static VFS& Instance() noexcept;
 
     struct Container final
     {
+        DEFAULT_DESTRUCT(Container);
+        DEFAULT_COPY(Container);
+    public:
         DynString path;
         CPPRef<IFileLoader> fileLoader;
         bool canCreateFile;
@@ -55,34 +60,17 @@ public:
         static Container Static(const DynString& path, const  CPPRef<IFileLoader>& fileLoader)
         { return Container(path, fileLoader, false, false); }
 
-        ~Container() = default;
-
-        Container(const Container& copy) noexcept = default;
-        Container(Container&& move) noexcept = default;
-
-        Container& operator=(const Container& copy) noexcept = default;
-        Container& operator=(Container&& move) noexcept = default;
-
         [[nodiscard]] bool canCreateAndWriteFile() const noexcept { return canCreateFile && canWriteFile; }
     };
 
-    using MountMap = std::unordered_multimap<DynString, VFS::Container>;
+    using MountMap = std::unordered_multimap<DynString, Container>;
 private:
-
     CPPRef<IFileLoader> _defaultLoader;
     MountMap _mountPoints;
 public:
-    explicit VFS(CPPRef<IFileLoader> defaultLoader) noexcept
-        : _defaultLoader(std::move(defaultLoader)), _mountPoints()
+    explicit VFS(const CPPRef<IFileLoader>& defaultLoader) noexcept
+        : _defaultLoader(defaultLoader)
     { }
-
-    ~VFS() noexcept = default;
-
-    VFS(const VFS& copy) noexcept = default;
-    VFS(VFS&& move) noexcept = default;
-
-    VFS& operator=(const VFS& copy) noexcept = default;
-    VFS& operator=(VFS&& move) noexcept = default;
 
     void mount(const DynString& mountPoint, const DynString& path, const CPPRef<IFileLoader>& loader, bool canCreateFile, bool canWriteFile);
     
@@ -102,14 +90,20 @@ public:
      * was chosen as it is generally an illegal character to
      * show up in a path, especially at the beginning.
      */
-    VFS::Container resolvePath(const char* path) const noexcept;
+    Container resolvePath(const char* path) const noexcept;
 
-    VFS::Container resolvePath(const char* path, const char* subPath0) const noexcept;
-    VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept;
-    VFS::Container resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept;
+    Container resolvePath(const char* path, const char* subPath0) const noexcept;
+    Container resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept;
+    Container resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept;
 
     static DynString win32Path(const DynString& path) noexcept;
     static DynString unixPath(const DynString& path) noexcept;
+
+    static DynStringView getFileName(const DynString& path) noexcept;
+    static DynStringView getFileName(const DynStringView& path) noexcept;
+
+    static DynStringView getFileExt(const DynString& path, bool includeDot = true) noexcept;
+    static DynStringView getFileExt(const DynStringView& path, bool includeDot = true) noexcept;
 
     static DynStringView getParentFolder(const DynString& path, bool includePathSeparator = true) noexcept;
     static DynStringView getParentFolder(const DynStringView& path, bool includePathSeparator = true) noexcept;

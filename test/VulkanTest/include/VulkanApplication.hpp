@@ -10,7 +10,7 @@ class VulkanApplication
 {
     DELETE_COPY(VulkanApplication);
 public:
-    enum Error
+    enum class Error
     {
         Success,
         ValidationLayersUnavailable,

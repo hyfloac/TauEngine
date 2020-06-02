@@ -4,7 +4,7 @@
 #include <vector>
 #include <Safeties.hpp>
 #include <camera/Camera3D.hpp>
-#include <shader/IShaderProgram.hpp>
+#include <shader/ShaderProgram.hpp>
 #include <shader/Uniform.hpp>
 #include <texture/Texture.hpp>
 #include <texture/FrameBuffer.hpp>

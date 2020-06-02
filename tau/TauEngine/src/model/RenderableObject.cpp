@@ -49,8 +49,8 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
         texturesLoaded[texIndex++] = vertex.textureCoordinate.y();
     }
 
-    BufferArgs pnBuilder(1);
-    BufferArgs texturesBuilder(1);
+    VertexBufferArgs pnBuilder(1);
+    VertexBufferArgs texturesBuilder(1);
     IndexBufferArgs indicesBuilder;
 
     pnBuilder.type = EBuffer::Type::ArrayBuffer;
@@ -67,20 +67,20 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     indicesBuilder.elementCount = mesh.indices.size();
 
     pnBuilder.initialBuffer = positionsLoaded;
-    CPPRef<IBuffer> positions = gi.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IVertexBuffer> positions = gi.createVertexBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = normalsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Normal, ShaderDataType::Vector3Float);
-    CPPRef<IBuffer> normals = gi.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IVertexBuffer> normals = gi.createVertexBuffer().buildCPPRef(pnBuilder, nullptr);
 
     pnBuilder.initialBuffer = tangentsLoaded;
     pnBuilder.descriptor.reset(1);
     pnBuilder.descriptor.addDescriptor(ShaderSemantic::Tangent, ShaderDataType::Vector3Float);
-    CPPRef<IBuffer> tangents = gi.createBuffer().buildCPPRef(pnBuilder, nullptr);
+    CPPRef<IVertexBuffer> tangents = gi.createVertexBuffer().buildCPPRef(pnBuilder, nullptr);
 
     texturesBuilder.initialBuffer = texturesLoaded;
-    CPPRef<IBuffer> textures = gi.createBuffer().buildCPPRef(texturesBuilder, nullptr);
+    CPPRef<IVertexBuffer> textures = gi.createVertexBuffer().buildCPPRef(texturesBuilder, nullptr);
 
     indicesBuilder.initialBuffer = mesh.indices.data();
     CPPRef<IIndexBuffer> indices = gi.createIndexBuffer().buildCPPRef(indicesBuilder, nullptr);

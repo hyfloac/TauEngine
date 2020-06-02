@@ -12,9 +12,8 @@ enum class DrawType : u8
     PointConnectedTriangles
 };
 
-class IBuffer;
+class IVertexBuffer;
 class IIndexBuffer;
-class IShader;
 class IRenderingContext;
 
 class TAU_DLL TAU_NOVTABLE IVertexArray
@@ -27,17 +26,14 @@ protected:
      *   It is necessary to hold on to a pointer to the
      * buffers to ensure they don't get destroyed.
      */
-    RefDynArray<CPPRef<IBuffer>> _buffers;
+    DynArray<NullableRef<IVertexBuffer>> _buffers;
 protected:
-    inline IVertexArray(const uSys drawCount, const RefDynArray<CPPRef<IBuffer>>& buffers) noexcept
+    inline IVertexArray(const uSys drawCount, const DynArray<NullableRef<IVertexBuffer>>& buffers) noexcept
         : _drawCount(drawCount), _buffers(buffers)
     { }
 public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
     virtual void unbind(IRenderingContext& context) noexcept = 0;
-
-    virtual void preDraw(IRenderingContext& context) noexcept = 0;
-    virtual void postDraw(IRenderingContext& context) noexcept = 0;
 
     virtual void draw(IRenderingContext& context, uSys drawCount = 0, uSys drawOffset = 0) noexcept = 0;
     virtual void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0, uSys drawOffset = 0) noexcept = 0;
@@ -52,16 +48,16 @@ struct VertexArrayArgs final
     DEFAULT_DESTRUCT(VertexArrayArgs);
     DEFAULT_COPY(VertexArrayArgs);
 public:
-    IShader* shader;
-    RefDynArray<CPPRef<IBuffer>> buffers;
-    CPPRef<IIndexBuffer> indexBuffer;
+    DynArray<NullableRef<IVertexBuffer>> buffers;
+    NullableRef<IIndexBuffer> indexBuffer;
     u32 drawCount;
     DrawType drawType;
 public:
     inline VertexArrayArgs(const uSys bufferCount) noexcept
-        : shader(null), buffers(bufferCount),
-          indexBuffer(null),
-          drawCount(0), drawType(static_cast<DrawType>(0))
+        : buffers(bufferCount)
+        , indexBuffer(null)
+        , drawCount(0)
+        , drawType(static_cast<DrawType>(0))
     { }
 };
 
@@ -77,11 +73,8 @@ public:
         DrawCountNotSet,
         DrawTypeNotSet,
         BuffersNotSet,
-        ShaderNotSet,
-        ShaderMustBeVertexShader,
         SystemMemoryAllocationFailure,
         DriverMemoryAllocationFailure,
-        MultipleSemanticOfInvalidType,
         InternalError
     };
 public:

@@ -4,6 +4,7 @@
 #include <dxgi.h>
 #include "dx/dx10/DX10GraphicsAccelerator.hpp"
 #include "dx/dx10/DX10Shader.hpp"
+#include "dx/dx10/DX10InputLayout.hpp"
 #include "dx/dx10/DX10VertexArray.hpp"
 #include "dx/dx10/DX10Buffer.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
@@ -19,10 +20,9 @@
 DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
     : IGraphicsInterface(mode), _d3d10Device(d3dDevice)
     , _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this))
-    , _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder(*this))
+    , _inputLayoutBuilder(new(::std::nothrow) DX10InputLayoutBuilder(*this))
+    , _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder)
     , _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this))
-    , _indexBufferBuilder(new(::std::nothrow) DX10IndexBufferBuilder(*this))
-    , _uniformBufferBuilder(new(::std::nothrow) DX10UniformBufferBuilder(*this))
     , _depthStencilStateBuilder(new(::std::nothrow) DX10DepthStencilStateBuilder(*this))
     , _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this))
     , _blendingStateBuilder(new(::std::nothrow) DX10BlendingStateBuilder(*this))
@@ -40,10 +40,9 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     _d3d10Device = null;
 
     delete _shaderBuilder;
+    delete _inputLayoutBuilder;
     delete _vertexArrayBuilder;
     delete _bufferBuilder;
-    delete _indexBufferBuilder;
-    delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
     delete _blendingStateBuilder;
@@ -90,17 +89,14 @@ RefDynArray<NullableRef<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAc
 IShaderBuilder& DX10GraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
 
+IInputLayoutBuilder& DX10GraphicsInterface::createInputLayout() noexcept
+{ return *_inputLayoutBuilder; }
+
 IVertexArrayBuilder& DX10GraphicsInterface::createVertexArray() noexcept
 { return *_vertexArrayBuilder; }
 
 IBufferBuilder& DX10GraphicsInterface::createBuffer() noexcept
 { return *_bufferBuilder; }
-
-IIndexBufferBuilder& DX10GraphicsInterface::createIndexBuffer() noexcept
-{ return *_indexBufferBuilder; }
-
-IUniformBufferBuilder& DX10GraphicsInterface::createUniformBuffer() noexcept
-{ return *_uniformBufferBuilder; }
 
 IDepthStencilStateBuilder& DX10GraphicsInterface::createDepthStencilState() noexcept
 { return *_depthStencilStateBuilder; }

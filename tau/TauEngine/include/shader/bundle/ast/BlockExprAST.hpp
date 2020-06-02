@@ -14,9 +14,7 @@ namespace sbp {
 enum class BlockType
 {
     Uniforms = 1,
-    Textures,
-    Inputs,
-    Outputs
+    Textures
 };
 
 class TAU_DLL BlockExprAST final : public ExprAST
@@ -41,7 +39,7 @@ public:
     { visitor.visit(*this); }
 };
 
-class TAU_DLL ShaderStageBlockExprAST : public ExprAST
+class TAU_DLL ShaderStageBlockExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT_VI(ShaderStageBlockExprAST);
     DELETE_COPY(ShaderStageBlockExprAST);
@@ -60,32 +58,13 @@ public:
 
     [[nodiscard]] EShader::Stage stage() const noexcept { return _stage; }
 
-    [[nodiscard]] NullableStrongRef<FileExprAST>& file() noexcept { return _file; }
+    [[nodiscard]] NullableStrongRef<FileExprAST>&      file() noexcept { return _file;     }
     [[nodiscard]] NullableStrongRef<BlockExprAST>& uniforms() noexcept { return _uniforms; }
     [[nodiscard]] NullableStrongRef<BlockExprAST>& textures() noexcept { return _textures; }
 
-    [[nodiscard]] const NullableStrongRef<FileExprAST>& file() const noexcept { return _file; }
+    [[nodiscard]] const NullableStrongRef<FileExprAST>&      file() const noexcept { return _file;     }
     [[nodiscard]] const NullableStrongRef<BlockExprAST>& uniforms() const noexcept { return _uniforms; }
     [[nodiscard]] const NullableStrongRef<BlockExprAST>& textures() const noexcept { return _textures; }
-
-    void visit(IShaderBundleVisitor& visitor) const noexcept override
-    { visitor.visit(*this); }
-};
-
-class TAU_DLL OuterShaderStageBlockExprAST final : public ShaderStageBlockExprAST
-{
-    DEFAULT_DESTRUCT(OuterShaderStageBlockExprAST);
-    DELETE_COPY(OuterShaderStageBlockExprAST);
-private:
-    NullableStrongRef<BlockExprAST> _io;
-public:
-    inline OuterShaderStageBlockExprAST(const EShader::Stage stage) noexcept
-        : ShaderStageBlockExprAST(stage)
-        , _io(null)
-    { }
-
-    [[nodiscard]]       NullableStrongRef<BlockExprAST>& io()       noexcept { return _io; }
-    [[nodiscard]] const NullableStrongRef<BlockExprAST>& io() const noexcept { return _io; }
 
     void visit(IShaderBundleVisitor& visitor) const noexcept override
     { visitor.visit(*this); }
@@ -99,11 +78,11 @@ public:
     using APISet = ::std::bitset<static_cast<uSys>(RenderingMode::Mode::_MAX_VALUE) + 1>;
 private:
     APISet _apis;
-    NullableStrongRef<OuterShaderStageBlockExprAST> _vertex;
+    NullableStrongRef<ShaderStageBlockExprAST> _vertex;
     NullableStrongRef<ShaderStageBlockExprAST> _tessCtrl;
     NullableStrongRef<ShaderStageBlockExprAST> _tessEval;
     NullableStrongRef<ShaderStageBlockExprAST> _geometry;
-    NullableStrongRef<OuterShaderStageBlockExprAST> _pixel;
+    NullableStrongRef<ShaderStageBlockExprAST> _pixel;
     NullableStrongRef<APIBlockExprAST> _next;
 public:
     inline APIBlockExprAST() noexcept
@@ -145,19 +124,19 @@ public:
         return false;
     }
 
-    [[nodiscard]] NullableStrongRef<OuterShaderStageBlockExprAST>& vertex() noexcept { return _vertex; }
+    [[nodiscard]] NullableStrongRef<ShaderStageBlockExprAST>&   vertex() noexcept { return _vertex;   }
     [[nodiscard]] NullableStrongRef<ShaderStageBlockExprAST>& tessCtrl() noexcept { return _tessCtrl; }
     [[nodiscard]] NullableStrongRef<ShaderStageBlockExprAST>& tessEval() noexcept { return _tessEval; }
     [[nodiscard]] NullableStrongRef<ShaderStageBlockExprAST>& geometry() noexcept { return _geometry; }
-    [[nodiscard]] NullableStrongRef<OuterShaderStageBlockExprAST>& pixel() noexcept { return _pixel; }
+    [[nodiscard]] NullableStrongRef<ShaderStageBlockExprAST>&    pixel() noexcept { return _pixel;    }
 
-    [[nodiscard]] const NullableStrongRef<OuterShaderStageBlockExprAST>& vertex() const noexcept { return _vertex; }
+    [[nodiscard]] const NullableStrongRef<ShaderStageBlockExprAST>&   vertex() const noexcept { return _vertex;   }
     [[nodiscard]] const NullableStrongRef<ShaderStageBlockExprAST>& tessCtrl() const noexcept { return _tessCtrl; }
     [[nodiscard]] const NullableStrongRef<ShaderStageBlockExprAST>& tessEval() const noexcept { return _tessEval; }
     [[nodiscard]] const NullableStrongRef<ShaderStageBlockExprAST>& geometry() const noexcept { return _geometry; }
-    [[nodiscard]] const NullableStrongRef<OuterShaderStageBlockExprAST>& pixel() const noexcept { return _pixel; }
+    [[nodiscard]] const NullableStrongRef<ShaderStageBlockExprAST>&    pixel() const noexcept { return _pixel;    }
 
-    [[nodiscard]] NullableStrongRef<APIBlockExprAST>& next()       noexcept { return _next; }
+    [[nodiscard]]       NullableStrongRef<APIBlockExprAST>& next()       noexcept { return _next; }
     [[nodiscard]] const NullableStrongRef<APIBlockExprAST>& next() const noexcept { return _next; }
 
     void visit(IShaderBundleVisitor& visitor) const noexcept override

@@ -18,8 +18,6 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
 {
     switch(renderingMode.currentMode())
     {
-        case RenderingMode::Mode::DirectX9:
-            return null;
         case RenderingMode::Mode::DirectX10:
         {
             const DX10GraphicsInterfaceArgs dx10Params {
@@ -41,11 +39,6 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
             return null;
         case RenderingMode::Mode::Vulkan:
             return null;
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-        case RenderingMode::Mode::OpenGL4:
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:

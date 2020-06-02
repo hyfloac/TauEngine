@@ -2,6 +2,7 @@
 
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 #include "gl/GLShader.hpp"
+#include "gl/GLInputLayout.hpp"
 #include "gl/GLVertexArray.hpp"
 #include "gl/GLBuffer.hpp"
 #include "gl/GLTextureSampler.hpp"
@@ -13,6 +14,8 @@
 #include "gl/GLFrameBuffer.hpp"
 #include "gl/gl4_0/GL4_0BlendingState.hpp"
 #include "gl/gl3_0/GL3_0BlendingState.hpp"
+#include "gl/gl4_3/GL4_3InputLayout.hpp"
+#include "gl/gl4_3/GL4_3VertexArray.hpp"
 #include "system/Window.hpp"
 
 GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile compat, const bool forwardCompatible)
@@ -22,7 +25,6 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
     , _compat(compat)
     , _forwardCompatible(forwardCompatible)
     , _shaderBuilder(new(::std::nothrow) GLShaderBuilder(*this))
-    , _vertexArrayBuilder(new(::std::nothrow) GLVertexArrayBuilder)
     , _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder)
     , _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder)
     , _textureBuilder(new(::std::nothrow) GLTextureBuilder)
@@ -34,47 +36,38 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
 {
     switch(_mode.currentMode())
     {
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-            _bufferBuilder = new(::std::nothrow) GLBufferBuilder;
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder;
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder;
-            _blendingStateBuilder = new(::std::nothrow) GL3_0BlendingStateBuilder;
-            break;
-        case RenderingMode::Mode::OpenGL4:
-            _bufferBuilder = new(::std::nothrow) GLBufferBuilder;
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder;
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder;
+        case RenderingMode::Mode::OpenGL4_2:
+            _inputLayoutBuilder = new(::std::nothrow) GLInputLayoutBuilder;
+            _vertexArrayBuilder = new(::std::nothrow) GLVertexArrayBuilder;
+            _bufInterface = new(::std::nothrow) GLBufInterface;
             _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
             break;
-        case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:
-            _bufferBuilder = new(::std::nothrow) GLBufferBuilder;
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBufferBuilder;
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBufferBuilder;
+            _inputLayoutBuilder = new(::std::nothrow) GL4_3InputLayoutBuilder;
+            _vertexArrayBuilder = new(::std::nothrow) GL4_3VertexArrayBuilder;
+            _bufInterface = new(::std::nothrow) GLBufInterface;
             _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
             break;
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
-            _bufferBuilder = new(::std::nothrow) GLBuffer4_5Builder;
-            _indexBufferBuilder = new(::std::nothrow) GLIndexBuffer4_5Builder;
-            _uniformBufferBuilder = new(::std::nothrow) GLUniformBuffer4_5Builder;
+            _inputLayoutBuilder = new(::std::nothrow) GL4_3InputLayoutBuilder;
+            _vertexArrayBuilder = new(::std::nothrow) GL4_3VertexArrayBuilder;
+            _bufInterface = new(::std::nothrow) GLBuf4_5Interface;
             _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
             break;
         default: break;
     }
+
+    _bufferBuilder = new(::std::nothrow) GLBufferBuilder(*_bufInterface);
 }
 
 GLGraphicsInterface::~GLGraphicsInterface() noexcept
 {
     delete _shaderBuilder;
+    delete _inputLayoutBuilder;
     delete _vertexArrayBuilder;
     delete _bufferBuilder;
-    delete _indexBufferBuilder;
-    delete _uniformBufferBuilder;
     delete _depthStencilStateBuilder;
     delete _rasterizerStateBuilder;
     delete _blendingStateBuilder;
@@ -92,17 +85,14 @@ RefDynArray<NullableRef<IGraphicsAccelerator>> GLGraphicsInterface::graphicsAcce
 IShaderBuilder& GLGraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
 
+IInputLayoutBuilder& GLGraphicsInterface::createInputLayout() noexcept
+{ return *_inputLayoutBuilder; }
+
 IVertexArrayBuilder& GLGraphicsInterface::createVertexArray() noexcept
 { return *_vertexArrayBuilder; }
 
 IBufferBuilder& GLGraphicsInterface::createBuffer() noexcept
 { return *_bufferBuilder; }
-
-IIndexBufferBuilder& GLGraphicsInterface::createIndexBuffer() noexcept
-{ return *_indexBufferBuilder; }
-
-IUniformBufferBuilder& GLGraphicsInterface::createUniformBuffer() noexcept
-{ return *_uniformBufferBuilder; }
 
 IDepthStencilStateBuilder& GLGraphicsInterface::createDepthStencilState() noexcept
 { return *_depthStencilStateBuilder; }

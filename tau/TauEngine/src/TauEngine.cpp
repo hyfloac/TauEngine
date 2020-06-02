@@ -1,6 +1,8 @@
 #include "TauEngine.hpp"
 #include <NumTypes.hpp>
 #include <Utils.hpp>
+
+#include "allocator/PageAllocator.hpp"
 #include "Timings.hpp"
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
@@ -14,6 +16,7 @@ bool tauInit() noexcept
     {
         _initializationComplete = true;
         SystemInterface::create();
+        PageAllocator::init();
     }
 
     return true;

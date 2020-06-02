@@ -21,7 +21,7 @@
 struct LoadData;
 class Window;
 class IVertexArray;
-class IBuffer;
+class IVertexBuffer;
 class IShaderProgram;
 class ITexture;
 class IBufferDescriptor;
@@ -152,7 +152,7 @@ private:
 
     CPPRef<IShaderProgram> _shader;
     CPPRef<IVertexArray> _va;
-    CPPRef<IBuffer> _positionBuffer;
+    CPPRef<IVertexBuffer> _positionBuffer;
     UniformBlockS<ProjectionUniforms> _viewUniforms;
     UniformBlockS<ColorUniforms> _colorUniforms;
     NullableRef<ISingleTextureUploader> _textureUploader;

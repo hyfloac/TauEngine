@@ -95,6 +95,22 @@
     <IncludePath>$(ProjectDir)include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
+    <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="LLVM">
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
+    <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Label="LLVM" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
+    <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'" Label="LLVM">
+    <ClangClAdditionalOptions>-Wno-unused-command-line-argument -Wno-unused-parameter -gcodeview -flto -fwhole-program-vtables</ClangClAdditionalOptions>
+    <LldLinkAdditionalOptions>-debug</LldLinkAdditionalOptions>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -255,6 +271,7 @@
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\allocator\TauAllocator.hpp" />
     <ClInclude Include="include\ArrayList.hpp" />
+    <ClInclude Include="include\ConPrinter.hpp" />
     <ClInclude Include="include\CVersion.hpp" />
     <ClInclude Include="include\allocator\FixedBlockAllocator.hpp" />
     <ClInclude Include="include\allocator\PageAllocator.hpp" />

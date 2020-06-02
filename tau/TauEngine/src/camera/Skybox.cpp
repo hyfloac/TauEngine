@@ -116,7 +116,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
          1.0f, -1.0f,  1.0f
     };
 
-    BufferArgs skyboxCubeBuilder(1);
+    VertexBufferArgs skyboxCubeBuilder(1);
     skyboxCubeBuilder.type = EBuffer::Type::ArrayBuffer;
     skyboxCubeBuilder.usage = EBuffer::UsageType::StaticDraw;
     skyboxCubeBuilder.elementCount = 6 * 6;
@@ -124,7 +124,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     skyboxCubeBuilder.instanced = false;
     skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
-    const CPPRef<IBuffer> skyboxCube = gi.createBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
+    const CPPRef<IVertexBuffer> skyboxCube = gi.createVertexBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
 
     VertexArrayArgs vaArgs(1);
     vaArgs.shader = vertexShader.get();

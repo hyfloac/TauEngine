@@ -50,8 +50,10 @@ cbuffer SpotLightUni : register(b1)
     SpotLight spotLight;
 }
 
-cbuffer ViewPos : register(b2)
+cbuffer CameraStaticMatrices : register(b2)
 {
+    float4x4 projectionMatrix;
+    float4x4 cameraViewMatrix;
     float4 viewPos4;
 }
 

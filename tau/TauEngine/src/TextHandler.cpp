@@ -102,14 +102,14 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     tuArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, null);
 
-    BufferArgs bufferBuilder(1);
+    VertexBufferArgs bufferBuilder(1);
     bufferBuilder.type = EBuffer::Type::ArrayBuffer;
     bufferBuilder.usage = EBuffer::UsageType::DynamicDraw;
     bufferBuilder.elementCount = 6;
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
     bufferBuilder.initialBuffer = null;
     
-    _positionBuffer = gi.createBuffer().buildCPPRef(bufferBuilder, nullptr);
+    _positionBuffer = gi.createVertexBuffer().buildCPPRef(bufferBuilder, nullptr);
 
     float textureCoords[6][2] = {
         { 0.0f, 0.0f },
@@ -126,7 +126,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     bufferBuilder.descriptor.reset(1);
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     
-    const CPPRef<IBuffer> textureCoordBuffer = gi.createBuffer().buildCPPRef(bufferBuilder, null);
+    const CPPRef<IVertexBuffer> textureCoordBuffer = gi.createVertexBuffer().buildCPPRef(bufferBuilder, null);
 
     VertexArrayArgs vaArgs(2);
     vaArgs.shader = vertexShader.get();

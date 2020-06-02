@@ -34,6 +34,9 @@ private:
 
     bool _vsync;
 
+    UINT* _iaStrides;
+    UINT* _iaOffsets;
+
     NullableRef<DX11DepthStencilState> _defaultDepthStencilState;
     NullableRef<DX11DepthStencilState> _currentDepthStencilState;
     NullableRef<DX11RasterizerState> _defaultRasterizerState;
@@ -45,13 +48,21 @@ public:
 
     ~DX11RenderingContext() noexcept override;
 
+    [[nodiscard]]       ID3D11Device* d3d11Device()       noexcept;
     [[nodiscard]] const ID3D11Device* d3d11Device() const noexcept;
-    [[nodiscard]] ID3D11Device* d3d11Device() noexcept;
 
+    [[nodiscard]]       ID3D11DeviceContext* d3d11DeviceContext()       noexcept { return _d3d11DeviceContext; }
     [[nodiscard]] const ID3D11DeviceContext* d3d11DeviceContext() const noexcept { return _d3d11DeviceContext; }
-    [[nodiscard]] ID3D11DeviceContext* d3d11DeviceContext() noexcept { return _d3d11DeviceContext; }
 
     void resetFrameBuffer() const noexcept;
+
+    void setBufferData(UINT* const strides, UINT* const offsets) noexcept
+    {
+        _iaStrides = strides;
+        _iaOffsets = offsets;
+    }
+
+    void setBuffers(uSys count, ID3D11Buffer** buffers) const noexcept;
 
     void deactivateContext() noexcept override { }
     void activateContext() noexcept override { }

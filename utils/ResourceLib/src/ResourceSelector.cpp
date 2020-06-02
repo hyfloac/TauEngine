@@ -259,7 +259,7 @@ ParseData parseTextFile(const VFS::Container& con, const CPPRef<RST>& rst) noexc
     const CPPRef<IFile> textFile = _loadFile(con);
     Lexer lexer(textFile);
 
-    ArrayList<TextParseKV> entries;
+    ArrayList<TextParseKV> entries(4096);
 
     while(true)
     {

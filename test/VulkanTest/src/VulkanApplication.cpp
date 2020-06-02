@@ -23,10 +23,16 @@ static void printLayers(const DynArray<VkLayerProperties>& layers) noexcept;
 static VkDebugUtilsMessengerCreateInfoEXT getDebugCreateInfo(void* userParam) noexcept;
 
 VulkanApplication::VulkanApplication(const u32 width, const u32 height, const bool useValidationLayers) noexcept
-    : _width(width), _height(height), _useValidationLayers(useValidationLayers),
-      _window(nullptr), _instance(nullptr), _debugMessenger(nullptr),
-      _physicalDevice(VK_NULL_HANDLE), _logicalDevice(VK_NULL_HANDLE),
-      _graphicsQueue(VK_NULL_HANDLE), _presentQueue(VK_NULL_HANDLE)
+    : _width(width)
+    , _height(height)
+    , _useValidationLayers(useValidationLayers)
+    , _window(nullptr)
+    , _instance(nullptr)
+    , _debugMessenger(nullptr)
+    , _physicalDevice(VK_NULL_HANDLE)
+    , _logicalDevice(VK_NULL_HANDLE)
+    , _graphicsQueue(VK_NULL_HANDLE)
+    , _presentQueue(VK_NULL_HANDLE)
       
 {
     initWindow();
@@ -84,7 +90,7 @@ VulkanApplication::Error VulkanApplication::initVulkan(VkResult* vkRes) noexcept
         return Error::ValidationLayersUnavailable;
     }
 
-    VkApplicationInfo appInfo = { };
+    VkApplicationInfo appInfo { };
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Vulkan Test";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -98,7 +104,7 @@ VulkanApplication::Error VulkanApplication::initVulkan(VkResult* vkRes) noexcept
     printExtensions(extensions);
 #endif
 
-    VkInstanceCreateInfo createInfo = { };
+    VkInstanceCreateInfo createInfo { };
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
     createInfo.enabledExtensionCount = extensions.count();
@@ -383,7 +389,7 @@ VulkanApplication::Error VulkanApplication::createLogicalDevice(VkResult* vkRes)
     return Error::Success;
 }
 
-VulkanApplication::Error VulkanApplication::createSurface(VkResult* vkRes) noexcept
+VulkanApplication::Error VulkanApplication::createSurface(VkResult* const vkRes) noexcept
 {
     const VkResult res = glfwCreateWindowSurface(_instance, _window, nullptr, &_surface);
     if(vkRes) { *vkRes = res; }
@@ -435,7 +441,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
 
 VkDebugUtilsMessengerCreateInfoEXT getDebugCreateInfo(void* userParam) noexcept
 {
-    VkDebugUtilsMessengerCreateInfoEXT createInfo = { };
+    VkDebugUtilsMessengerCreateInfoEXT createInfo { };
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
                                  VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |

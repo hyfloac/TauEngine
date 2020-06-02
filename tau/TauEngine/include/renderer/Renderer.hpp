@@ -34,7 +34,7 @@ private:
 public:
     RenderGroup(const NullableRef<IShaderProgram>& shader, const uSys maxEntities) noexcept
         : _shader(shader)
-        , _renderMapAllocator(sizeof(uSys*), PageAllocator::pageSize() / (maxEntities * sizeof(uSys)) + 1)
+        , _renderMapAllocator(sizeof(uSys), PageAllocator::pageSize() / (maxEntities * sizeof(uSys)) + 1)
         , _entities(PageAllocator::pageSize() / (maxEntities * sizeof(EntityPair)) + 1)
         , _isDirty(false)
     { }

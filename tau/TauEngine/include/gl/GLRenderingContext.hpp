@@ -37,6 +37,9 @@ private:
     HGLRC _context;
 #endif
 
+    GLintptr* _iaOffsets;
+    GLsizei* _iaStrides;
+
     NullableRef<GLDepthStencilState> _defaultDepthStencilState;
     NullableRef<GLDepthStencilState> _currentDepthStencilState;
     NullableRef<GLRasterizerState> _defaultRasterizerState;
@@ -48,6 +51,14 @@ public:
     ~GLRenderingContext() noexcept override final;
 
     HDC getHDC() const noexcept { return _device; }
+
+    void setBufferData(GLintptr* const offsets, GLsizei* const strides) noexcept
+    {
+        _iaOffsets = offsets;
+        _iaStrides = strides;
+    }
+
+    void setBuffers(uSys count, const GLuint* buffers) const noexcept;
 
     void deactivateContext() noexcept override final;
     void activateContext() noexcept override final;

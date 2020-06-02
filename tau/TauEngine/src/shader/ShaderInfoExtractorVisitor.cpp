@@ -40,16 +40,6 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderStageBlockExprAST& expr)
     visit(expr.textures().get());
 }
 
-void ShaderInfoExtractorVisitor::visit(const sbp::OuterShaderStageBlockExprAST& expr) noexcept
-{
-    _currentStage = expr.stage();
-
-    visit(expr.file().get());
-    visit(expr.uniforms().get());
-    visit(expr.textures().get());
-    visit(expr.io().get());
-}
-
 void ShaderInfoExtractorVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
 {
     const sbp::APIBlockExprAST* curr = &expr;
@@ -73,10 +63,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr)
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _vertexInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _vertexInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 case sbp::BlockType::Textures:
-                    _vertexInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _vertexInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 default: break;
             }
@@ -85,10 +75,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr)
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _tessCtrlInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _tessCtrlInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 case sbp::BlockType::Textures:
-                    _tessCtrlInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _tessCtrlInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 default: break;
             }
@@ -97,10 +87,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr)
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _tessEvalInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _tessEvalInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 case sbp::BlockType::Textures:
-                    _tessEvalInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _tessEvalInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 default: break;
             }
@@ -109,10 +99,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr)
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _geometryInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _geometryInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 case sbp::BlockType::Textures:
-                    _geometryInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _geometryInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 default: break;
             }
@@ -121,10 +111,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr)
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _pixelInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _pixelInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 case sbp::BlockType::Textures:
-                    _pixelInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.shaderBind());
+                    _pixelInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
                     break;
                 default: break;
             }
@@ -142,14 +132,11 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr
         case EShader::Stage::Vertex:
             switch(_currentBlock)
             {
-                case sbp::BlockType::Inputs:
-                    _vertexInfo.ioPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
-                    break;
                 case sbp::BlockType::Uniforms:
-                    _vertexInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _vertexInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 case sbp::BlockType::Textures:
-                    _vertexInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _vertexInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 default: break;
             }
@@ -158,10 +145,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _tessCtrlInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _tessCtrlInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 case sbp::BlockType::Textures:
-                    _tessCtrlInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _tessCtrlInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 default: break;
             }
@@ -170,10 +157,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _tessEvalInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _tessEvalInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 case sbp::BlockType::Textures:
-                    _tessEvalInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _tessEvalInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 default: break;
             }
@@ -182,10 +169,10 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr
             switch(_currentBlock)
             {
                 case sbp::BlockType::Uniforms:
-                    _geometryInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _geometryInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 case sbp::BlockType::Textures:
-                    _geometryInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _geometryInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 default: break;
             }
@@ -193,14 +180,11 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr
         case EShader::Stage::Pixel:
             switch(_currentBlock)
             {
-                case sbp::BlockType::Outputs:
-                    _pixelInfo.ioPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
-                    break;
                 case sbp::BlockType::Uniforms:
-                    _pixelInfo.uniformPoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _pixelInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 case sbp::BlockType::Textures:
-                    _pixelInfo.texturePoints.emplace(expr.virtualBindPoint(), expr.uniformName());
+                    _pixelInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
                     break;
                 default: break;
             }
