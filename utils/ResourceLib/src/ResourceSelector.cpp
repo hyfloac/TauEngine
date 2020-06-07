@@ -304,7 +304,7 @@ void writeCache(const VFS::Container& con, const ParseData& parseData, const uSy
     writeBinaryData(cacheFile, parseData);
 }
 
-void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept
+void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept  // NOLINT(clang-diagnostic-unused-function)
 {
     const CPPRef<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
 

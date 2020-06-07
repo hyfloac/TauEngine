@@ -53,6 +53,38 @@ public:
         if(type == Str)
         { delete[] bindName; }
     }
+
+    BindPointUnion(BindPointUnion&& move) noexcept
+        : type(move.type)
+        , crmTarget(move.crmTarget)
+    {
+        if(type == Str)
+        {
+            bindName = move.bindName;
+            move.bindName = null;
+        }
+        else if(type == Number)
+        { mapPoint = move.mapPoint; }
+    }
+
+    BindPointUnion& operator=(BindPointUnion&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        type = move.type;
+        crmTarget = move.crmTarget;
+
+        if(type == Str)
+        {
+            bindName = move.bindName;
+            move.bindName = null;
+        }
+        else if(type == Number)
+        { mapPoint = move.mapPoint; }
+
+        return *this;
+    }
 };
 
 struct ShaderInfo final
@@ -73,7 +105,7 @@ enum class BlockType;
 class ShaderInfoIterator final
 {
     DEFAULT_DESTRUCT(ShaderInfoIterator);
-    DEFAULT_COPY(ShaderInfoIterator);
+    DEFAULT_CM(ShaderInfoIterator);
 private:
     const ShaderInfoExtractorVisitor* _visitor;
     const ShaderInfo* _shaderInfo;
@@ -104,7 +136,7 @@ public:
 class TAU_DLL ShaderInfoExtractorVisitor final : public IShaderBundleVisitor
 {
     DEFAULT_DESTRUCT(ShaderInfoExtractorVisitor);
-    DELETE_COPY(ShaderInfoExtractorVisitor);
+    DEFAULT_CM_PU(ShaderInfoExtractorVisitor);
 private:
     RenderingMode::Mode _targetMode;
     EShader::Stage _currentStage;

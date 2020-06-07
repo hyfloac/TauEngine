@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DLL.hpp"
-#include "model/Buffer.hpp"
 #include <Objects.hpp>
 #include <Safeties.hpp>
 #include <IFile.hpp>
@@ -10,31 +9,12 @@ class IGraphicsInterface;
 class IRenderingContext;
 class IShader;
 
-class TAU_DLL IShaderProgram
+class TAU_DLL TAU_NOVTABLE IShaderProgram
 {
+    DEFAULT_CONSTRUCT_PO(IShaderProgram);
     DEFAULT_DESTRUCT_VI(IShaderProgram);
-    DELETE_COPY(IShaderProgram);
-protected:
-    NullableRef<IShader> _vertexShader;
-    NullableRef<IShader> _tessCtrlShader;
-    NullableRef<IShader> _tessEvalShader;
-    NullableRef<IShader> _geometryShader;
-    NullableRef<IShader> _pixelShader;
-protected:
-    IShaderProgram() noexcept
-        : _vertexShader(null)
-        , _tessCtrlShader(null)
-        , _tessEvalShader(null)
-        , _geometryShader(null)
-        , _pixelShader(null)
-    { }
+    DEFAULT_CM_PO(IShaderProgram);
 public:
-    virtual bool setVertexShader(IRenderingContext& context, const NullableRef<IShader>& vs) noexcept;
-    virtual bool setTessCtrlShader(IRenderingContext& context, const NullableRef<IShader>& tcs) noexcept;
-    virtual bool setTessEvalShader(IRenderingContext& context, const NullableRef<IShader>& tes) noexcept;
-    virtual bool setGeometryShader(IRenderingContext& context, const NullableRef<IShader>& gs) noexcept;
-    virtual bool setPixelShader(IRenderingContext& context, const NullableRef<IShader>& ps) noexcept;
-
     virtual void bind(IRenderingContext& context) noexcept = 0;
     virtual void unbind(IRenderingContext& context) noexcept = 0;
 };
@@ -48,7 +28,7 @@ class TAU_DLL TAU_NOVTABLE IShaderProgramBuilder
 {
     DEFAULT_CONSTRUCT_PO(IShaderProgramBuilder);
     DEFAULT_DESTRUCT_VI(IShaderProgramBuilder);
-    DELETE_COPY(IShaderProgramBuilder);
+    DEFAULT_CM_PO(IShaderProgramBuilder);
 public:
     enum class Error
     {

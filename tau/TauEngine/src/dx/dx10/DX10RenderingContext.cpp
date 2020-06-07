@@ -217,7 +217,7 @@ void DX10RenderingContext::swapFrame() noexcept
     _swapChain->Present(_vsync ? 1 : 0, 0);
 }
 
-void DX10RenderingContext::resizeSwapChain(uSys width, uSys height) noexcept
+void DX10RenderingContext::resizeSwapChain(const uSys width, const uSys height) noexcept
 {
     {
         _gi.d3d10Device()->OMSetRenderTargets(0, NULL, NULL);
@@ -299,7 +299,7 @@ CPPRef<IRenderingContext> DX10RenderingContextBuilder::buildCPPRef(const Renderi
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX10RenderingContext> context = CPPRef<DX10RenderingContext>(new(::std::nothrow) DX10RenderingContext(_gi, dxArgs));
+    const CPPRef<DX10RenderingContext> context(new(::std::nothrow) DX10RenderingContext(_gi, dxArgs));
 
     ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
     ERROR_CODE_V(Error::NoError, context);
@@ -444,38 +444,6 @@ bool DX10RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
         D3D10_VIEWPORT viewport = { 0, 0, args.window->width(), args.window->height(), 0.0f, 1.0f };
         _gi.d3d10Device()->RSSetViewports(1, &viewport);
     }
-
-    // {
-    //     D3D10_BLEND_DESC blendDesc;
-    //     blendDesc.AlphaToCoverageEnable = FALSE;
-    //     blendDesc.BlendEnable[0] = TRUE;
-    //     blendDesc.BlendEnable[1] = TRUE;
-    //     blendDesc.BlendEnable[2] = TRUE;
-    //     blendDesc.BlendEnable[3] = TRUE;
-    //     blendDesc.BlendEnable[4] = TRUE;
-    //     blendDesc.BlendEnable[5] = TRUE;
-    //     blendDesc.BlendEnable[6] = TRUE;
-    //     blendDesc.BlendEnable[7] = TRUE;
-    //     blendDesc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-    //     blendDesc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
-    //     blendDesc.BlendOp = D3D10_BLEND_OP_ADD;
-    //     blendDesc.SrcBlendAlpha = D3D10_BLEND_ONE;
-    //     blendDesc.DestBlendAlpha = D3D10_BLEND_ZERO;
-    //     blendDesc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
-    //     blendDesc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[1] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[2] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[3] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[4] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[5] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[6] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //     blendDesc.RenderTargetWriteMask[7] = D3D10_COLOR_WRITE_ENABLE_ALL;
-    //
-    //     CHECK(_gi.d3d10Device()->CreateBlendState(&blendDesc, &dxArgs->blendState));
-    //     float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    //     const UINT sampleMask = 0xffffffff;
-    //     _gi.d3d10Device()->OMSetBlendState(dxArgs->blendState, blendFactor, sampleMask);
-    // }
 
     return true;
 #undef CHECK

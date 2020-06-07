@@ -34,7 +34,7 @@ class TAU_DLL NOVTABLE IShaderBundleVisitor
 {
     DEFAULT_CONSTRUCT_PO(IShaderBundleVisitor);
     DEFAULT_DESTRUCT_VI(IShaderBundleVisitor);
-    DELETE_COPY(IShaderBundleVisitor);
+    DEFAULT_CM_PO(IShaderBundleVisitor);
 public:
     virtual void visit(const sbp::ExprAST* expr) noexcept;
     virtual void visit(const sbp::ExprAST& expr) noexcept;

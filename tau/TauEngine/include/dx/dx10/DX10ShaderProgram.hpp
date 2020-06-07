@@ -12,17 +12,13 @@ class TAU_DLL DX10ShaderProgram final : public IShaderProgram
 {
     DEFAULT_CONSTRUCT_PU(DX10ShaderProgram);
     DEFAULT_DESTRUCT(DX10ShaderProgram);
-    DELETE_COPY(DX10ShaderProgram);
+    DEFAULT_CM_PU(DX10ShaderProgram);
 public:
-    [[nodiscard]] CPPRef<DX10VertexShader> dxVertexShader() const noexcept;
-    [[nodiscard]] CPPRef<DX10GeometryShader> dxGeometryShader() const noexcept;
-    [[nodiscard]] CPPRef<DX10PixelShader> dxPixelShader() const noexcept;
+    [[nodiscard]] NullableRef<DX10VertexShader>     dxVertexShader() const noexcept;
+    [[nodiscard]] NullableRef<DX10GeometryShader> dxGeometryShader() const noexcept;
+    [[nodiscard]] NullableRef<DX10PixelShader>       dxPixelShader() const noexcept;
 
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
-    bool link(IRenderingContext& context) noexcept override;
-protected:
-    bool attach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept override;
-    void detach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept override { }
 };
 #endif

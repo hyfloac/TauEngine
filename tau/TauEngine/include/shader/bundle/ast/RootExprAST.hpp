@@ -8,7 +8,7 @@ namespace sbp {
 class TAU_DLL RootExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT(RootExprAST);
-    DELETE_COPY(RootExprAST);
+    DEFAULT_CM_PU(RootExprAST);
 private:
     NullableStrongRef<APIBlockExprAST> _node;
 public:

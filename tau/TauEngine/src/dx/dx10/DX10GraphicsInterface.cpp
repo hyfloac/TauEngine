@@ -2,8 +2,8 @@
 
 #ifdef _WIN32
 #include <dxgi.h>
-#include "dx/dx10/DX10GraphicsAccelerator.hpp"
 #include "dx/dx10/DX10Shader.hpp"
+#include "dx/dx10/DX10ShaderProgram.hpp"
 #include "dx/dx10/DX10InputLayout.hpp"
 #include "dx/dx10/DX10VertexArray.hpp"
 #include "dx/dx10/DX10Buffer.hpp"
@@ -18,8 +18,11 @@
 #include "system/Window.hpp"
 
 DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
-    : IGraphicsInterface(mode), _d3d10Device(d3dDevice)
-    , _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this))
+    : IGraphicsInterface(mode)
+    , _d3d10Device(d3dDevice)
+    , _shaderInfoExtractor(mode.currentMode())
+    , _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this, &_shaderInfoExtractor))
+    , _shaderBuilder(new(::std::nothrow) DX10ShaderProgramBuilder(&_shaderInfoExtractor))
     , _inputLayoutBuilder(new(::std::nothrow) DX10InputLayoutBuilder(*this))
     , _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder)
     , _bufferBuilder(new(::std::nothrow) DX10BufferBuilder(*this))
@@ -28,8 +31,7 @@ DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10De
     , _blendingStateBuilder(new(::std::nothrow) DX10BlendingStateBuilder(*this))
     , _textureBuilder(new(::std::nothrow) DX10TextureBuilder(*this))
     , _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this))
-    , _singleTextureUploaderBuilder(new(::std::nothrow) DX10SingleTextureUploaderBuilder(*this))
-    , _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder(*this))
+    , _textureUploaderBuilder(new(::std::nothrow) DX10TextureUploaderBuilder)
     , _frameBufferBuilder(new(::std::nothrow) DX10FrameBufferBuilder(*this))
     , _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
 { }
@@ -48,7 +50,6 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     delete _blendingStateBuilder;
     delete _textureBuilder;
     delete _textureSamplerBuilder;
-    delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
     delete _frameBufferBuilder;
     delete _renderingContextBuilder;
@@ -89,6 +90,9 @@ RefDynArray<NullableRef<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAc
 IShaderBuilder& DX10GraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
 
+IShaderProgramBuilder& DX10GraphicsInterface::createShaderProgram() noexcept
+{ return *_shaderProgramBuilder; }
+
 IInputLayoutBuilder& DX10GraphicsInterface::createInputLayout() noexcept
 { return *_inputLayoutBuilder; }
 
@@ -112,9 +116,6 @@ ITextureBuilder& DX10GraphicsInterface::createTexture() noexcept
 
 ITextureSamplerBuilder& DX10GraphicsInterface::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
-
-ISingleTextureUploaderBuilder& DX10GraphicsInterface::createSingleTextureUploader() noexcept
-{ return *_singleTextureUploaderBuilder; }
 
 ITextureUploaderBuilder& DX10GraphicsInterface::createTextureUploader() noexcept
 { return *_textureUploaderBuilder; }

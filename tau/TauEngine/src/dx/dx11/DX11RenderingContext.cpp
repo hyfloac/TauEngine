@@ -299,7 +299,7 @@ CPPRef<IRenderingContext> DX11RenderingContextBuilder::buildCPPRef(const Renderi
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX11RenderingContext> context = CPPRef<DX11RenderingContext>(new(::std::nothrow) DX11RenderingContext(_gi, dxArgs));
+    const CPPRef<DX11RenderingContext> context(new(::std::nothrow) DX11RenderingContext(_gi, dxArgs));
 
     ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
     ERROR_CODE_V(Error::NoError, context);
@@ -446,28 +446,6 @@ bool DX11RenderingContextBuilder::processArgs(const RenderingContextArgs& args, 
          D3D11_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<FLOAT>(args.window->width()), static_cast<FLOAT>(args.window->height()), 0.0f, 1.0f };
         dxArgs->d3d11DeviceContext->RSSetViewports(1, &viewport);
     }
-
-    // {
-    //     D3D11_BLEND_DESC blendDesc;
-    //     blendDesc.AlphaToCoverageEnable = FALSE;
-    //     blendDesc.IndependentBlendEnable = FALSE;
-    //     for(uSys i = 0; i < 8; ++i)
-    //     {
-    //         blendDesc.RenderTarget[i].BlendEnable = TRUE;
-    //         blendDesc.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    //         blendDesc.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    //         blendDesc.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
-    //         blendDesc.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
-    //         blendDesc.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
-    //         blendDesc.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    //         blendDesc.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    //     }
-    //
-    //     CHECK(_gi.d3d11Device()->CreateBlendState(&blendDesc, &dxArgs->blendState));
-    //     float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    //     const UINT sampleMask = 0xffffffff;
-    //     dxArgs->d3d11DeviceContext->OMSetBlendState(dxArgs->blendState, blendFactor, sampleMask);
-    // }
 
     return true;
 #undef CHECK

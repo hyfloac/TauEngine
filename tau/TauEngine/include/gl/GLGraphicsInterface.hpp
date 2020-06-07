@@ -1,9 +1,11 @@
 #pragma once
 
 #include "GLBuffer.hpp"
+#include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 #include "system/GraphicsInterface.hpp"
 
 class GLShaderBuilder;
+class GLShaderProgramBuilder;
 class GLInputLayoutBuilder;
 class GLVertexArrayBuilder;
 class GLBufInterface;
@@ -20,7 +22,7 @@ class GLRenderingContextBuilder;
 
 class TAU_DLL GLGraphicsInterface final : public IGraphicsInterface
 {
-    DELETE_COPY(GLGraphicsInterface);
+    DELETE_CM(GLGraphicsInterface);
 public:
     enum class GLProfile
     {
@@ -34,7 +36,10 @@ private:
     GLProfile _compat;
     bool _forwardCompatible;
 
+    ShaderInfoExtractorVisitor _shaderInfoExtractor;
+
     GLShaderBuilder* _shaderBuilder;
+    GLShaderProgramBuilder* _shaderProgramBuilder;
     GLInputLayoutBuilder* _inputLayoutBuilder;
     GLVertexArrayBuilder* _vertexArrayBuilder;
     GLBufInterface* _bufInterface;
@@ -44,7 +49,6 @@ private:
     GLBlendingStateBuilder* _blendingStateBuilder;
     GLTextureBuilder* _textureBuilder;
     GLTextureSamplerBuilder* _textureSamplerBuilder;
-    GLSingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     GLTextureUploaderBuilder* _textureUploaderBuilder;
     GLFrameBufferBuilder* _frameBufferBuilder;
     GLRenderingContextBuilder* _renderingContextBuilder;
@@ -60,6 +64,7 @@ public:
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IShaderProgramBuilder& createShaderProgram() noexcept override;
     [[nodiscard]] IInputLayoutBuilder& createInputLayout() noexcept override;
     [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
@@ -68,7 +73,6 @@ public:
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
@@ -87,7 +91,7 @@ class GLGraphicsInterfaceBuilder final
 {
     DEFAULT_CONSTRUCT_PU(GLGraphicsInterfaceBuilder);
     DEFAULT_DESTRUCT(GLGraphicsInterfaceBuilder);
-    DEFAULT_COPY(GLGraphicsInterfaceBuilder);
+    DEFAULT_CM(GLGraphicsInterfaceBuilder);
 public:
     [[nodiscard]] static NullableRef<GLGraphicsInterface> build(const GLGraphicsInterfaceArgs& args, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept;
 };

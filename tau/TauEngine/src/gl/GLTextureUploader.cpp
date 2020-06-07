@@ -81,72 +81,6 @@ TextureIndices GLTextureUploader::unbind(IRenderingContext& context, const Textu
     return TextureIndices(indices.textureStartIndex + _textures.size(), indices.samplerStartIndex, indices.uniformIndex + _textures.size(), indices.bindMap);
 }
 
-GLSingleTextureUploader* GLSingleTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error) const noexcept
-{
-    if(!processArgs(args, error))
-    { return null; }
-
-    GLSingleTextureUploader* const uploader = new(::std::nothrow) GLSingleTextureUploader(args.texture, RefCast<GLTextureSampler>(args.textureSampler));
-    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, uploader);
-}
-
-GLSingleTextureUploader* GLSingleTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    if(!processArgs(args, error))
-    { return null; }
-
-    GLSingleTextureUploader* const uploader = allocator.allocateT<GLSingleTextureUploader>(args.texture, RefCast<GLTextureSampler>(args.textureSampler));
-    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, uploader);
-}
-
-CPPRef<ISingleTextureUploader> GLSingleTextureUploaderBuilder::buildCPPRef(const SingleTextureUploaderArgs& args, Error* const error) const noexcept
-{
-    if(!processArgs(args, error))
-    { return null; }
-
-    const CPPRef<GLSingleTextureUploader> uploader = CPPRef<GLSingleTextureUploader>(new(::std::nothrow) GLSingleTextureUploader(args.texture, RefCast<GLTextureSampler>(args.textureSampler)));
-    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, uploader);
-}
-
-NullableRef<ISingleTextureUploader> GLSingleTextureUploaderBuilder::buildTauRef(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    if(!processArgs(args, error))
-    { return null; }
-
-    const NullableRef<GLSingleTextureUploader> uploader(allocator, args.texture, RefCast<GLTextureSampler>(args.textureSampler));
-    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, uploader);
-}
-
-NullableStrongRef<ISingleTextureUploader> GLSingleTextureUploaderBuilder::buildTauSRef(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    if(!processArgs(args, error))
-    { return null; }
-
-    const NullableStrongRef<GLSingleTextureUploader> uploader(allocator, args.texture, RefCast<GLTextureSampler>(args.textureSampler));
-    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, uploader);
-}
-
-bool GLSingleTextureUploaderBuilder::processArgs(const SingleTextureUploaderArgs& args, Error* const error) noexcept
-{
-    ERROR_CODE_COND_F(!args.textureSampler, Error::TextureSamplerNotSet);
-    ERROR_CODE_COND_F(!RTT_CHECK(args.textureSampler.get(), GLTextureSampler), Error::CrossAPIFailure);
-    ERROR_CODE_COND_F(!args.texture, Error::TextureNotSet);
-
-    ERROR_CODE_COND_F(!RTT_CHECK(args.texture, GLTextureView), Error::CrossAPIFailure);
-
-    return true;
-}
-
 GLTextureUploader* GLTextureUploaderBuilder::build(const TextureUploaderArgs& args, Error* const error) const noexcept
 {
     if(!processArgs(args, error))
@@ -214,6 +148,72 @@ bool GLTextureUploaderBuilder::processArgs(const TextureUploaderArgs& args, Erro
         ERROR_CODE_COND_F(!texture, Error::TextureNotSet);
         ERROR_CODE_COND_F(!RTT_CHECK(texture, GLTextureView), Error::CrossAPIFailure);
     }
+
+    return true;
+}
+
+GLSingleTextureUploader* GLTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error) const noexcept
+{
+    if(!processArgs(args, error))
+    { return null; }
+
+    GLSingleTextureUploader* const uploader = new(::std::nothrow) GLSingleTextureUploader(args.texture, RefCast<GLTextureSampler>(args.textureSampler));
+    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, uploader);
+}
+
+GLSingleTextureUploader* GLTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+{
+    if(!processArgs(args, error))
+    { return null; }
+
+    GLSingleTextureUploader* const uploader = allocator.allocateT<GLSingleTextureUploader>(args.texture, RefCast<GLTextureSampler>(args.textureSampler));
+    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, uploader);
+}
+
+CPPRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildCPPRef(const SingleTextureUploaderArgs& args, Error* const error) const noexcept
+{
+    if(!processArgs(args, error))
+    { return null; }
+
+    const CPPRef<GLSingleTextureUploader> uploader = CPPRef<GLSingleTextureUploader>(new(::std::nothrow) GLSingleTextureUploader(args.texture, RefCast<GLTextureSampler>(args.textureSampler)));
+    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, uploader);
+}
+
+NullableRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildTauRef(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+{
+    if(!processArgs(args, error))
+    { return null; }
+
+    const NullableRef<GLSingleTextureUploader> uploader(allocator, args.texture, RefCast<GLTextureSampler>(args.textureSampler));
+    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, uploader);
+}
+
+NullableStrongRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildTauSRef(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+{
+    if(!processArgs(args, error))
+    { return null; }
+
+    const NullableStrongRef<GLSingleTextureUploader> uploader(allocator, args.texture, RefCast<GLTextureSampler>(args.textureSampler));
+    ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, uploader);
+}
+
+bool GLTextureUploaderBuilder::processArgs(const SingleTextureUploaderArgs& args, Error* const error) noexcept
+{
+    ERROR_CODE_COND_F(!args.textureSampler, Error::TextureSamplerNotSet);
+    ERROR_CODE_COND_F(!RTT_CHECK(args.textureSampler.get(), GLTextureSampler), Error::CrossAPIFailure);
+    ERROR_CODE_COND_F(!args.texture, Error::TextureNotSet);
+
+    ERROR_CODE_COND_F(!RTT_CHECK(args.texture, GLTextureView), Error::CrossAPIFailure);
 
     return true;
 }

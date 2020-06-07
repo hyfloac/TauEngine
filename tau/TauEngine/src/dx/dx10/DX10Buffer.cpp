@@ -213,7 +213,7 @@ void DX10IndexBuffer::fillBuffer(IRenderingContext&, const void* const data) noe
     }
 }
 
-void DX10UniformBuffer::bind(IRenderingContext& context, const EShader::Stage stage, const u32 index) noexcept
+void DX10UniformBuffer::bind(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
 {
 #if TAU_BUFFER_SAFETY
     ++_uniformBindLockCount;
@@ -241,7 +241,7 @@ void DX10UniformBuffer::bind(IRenderingContext& context, const EShader::Stage st
     }
 }
 
-void DX10UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) noexcept
+void DX10UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
 {
 #if TAU_BUFFER_SAFETY
     --_uniformBindLockCount;
@@ -269,7 +269,7 @@ void DX10UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage 
     }
 }
 
-void DX10UniformBuffer::fastUnbind() noexcept
+void DX10UniformBuffer::fastUnbind() const noexcept
 {
 #if TAU_BUFFER_SAFETY
     --_uniformBindLockCount;
@@ -418,7 +418,7 @@ CPPRef<IVertexBuffer> DX10BufferBuilder::buildCPPRef(const VertexBufferArgs& arg
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const CPPRef<DX10VertexBuffer> buffer = CPPRef<DX10VertexBuffer>(new(::std::nothrow) DX10VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer));
+    const CPPRef<DX10VertexBuffer> buffer(new(::std::nothrow) DX10VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();
@@ -498,7 +498,7 @@ CPPRef<IIndexBuffer> DX10BufferBuilder::buildCPPRef(const IndexBufferArgs& args,
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX10IndexBuffer> buffer = CPPRef<DX10IndexBuffer>(new(::std::nothrow) DX10IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer));
+    const CPPRef<DX10IndexBuffer> buffer(new(::std::nothrow) DX10IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer));
     if(!buffer)
     {
         dxArgs.d3dBuffer->Release();
@@ -578,7 +578,7 @@ CPPRef<IUniformBuffer> DX10BufferBuilder::buildCPPRef(const UniformBufferArgs& a
     if(!processArgs(args, &d3dBuffer, error))
     { return null; }
 
-    const CPPRef<DX10UniformBuffer> buffer = CPPRef<DX10UniformBuffer>(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
+    const CPPRef<DX10UniformBuffer> buffer(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
     if(!buffer)
     {
         d3dBuffer->Release();

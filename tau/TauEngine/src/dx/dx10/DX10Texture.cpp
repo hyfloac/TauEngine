@@ -120,7 +120,7 @@ CPPRef<ITexture2D> DX10TextureBuilder::buildCPPRef(const Texture2DArgs& args, Er
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX10Texture2D> texture = CPPRef<DX10Texture2D>(new(::std::nothrow) DX10Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
+    const CPPRef<DX10Texture2D> texture(new(::std::nothrow) DX10Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;
@@ -206,7 +206,7 @@ CPPRef<ITexture3D> DX10TextureBuilder::buildCPPRef(const Texture3DArgs& args, Er
         return null;
     }
 
-    const CPPRef<DX10Texture3D> texture = CPPRef<DX10Texture3D>(new(::std::nothrow) DX10Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
+    const CPPRef<DX10Texture3D> texture(new(::std::nothrow) DX10Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;
@@ -290,7 +290,7 @@ CPPRef<ITextureCube> DX10TextureBuilder::buildCPPRef(const TextureCubeArgs& args
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX10TextureCube> texture = CPPRef<DX10TextureCube>(new(::std::nothrow) DX10TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
+    const CPPRef<DX10TextureCube> texture(new(::std::nothrow) DX10TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;
@@ -372,7 +372,7 @@ CPPRef<ITextureDepthStencil> DX10TextureBuilder::buildCPPRef(const TextureDepthS
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX10TextureDepthStencil> texture = CPPRef<DX10TextureDepthStencil>(new(::std::nothrow) DX10TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView));
+    const CPPRef<DX10TextureDepthStencil> texture(new(::std::nothrow) DX10TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;

@@ -11,7 +11,7 @@ namespace sbp {
 class TAU_DLL TAU_NOVTABLE ShaderIOPointExprAST : public ExprAST
 {
     DEFAULT_DESTRUCT_VI(ShaderIOPointExprAST);
-    DELETE_COPY(ShaderIOPointExprAST);
+    DEFAULT_CM_PU(ShaderIOPointExprAST);
 private:
     NullableStrongRef<ShaderIOPointExprAST> _next;
     CommonRenderingModelToken _crmTarget;
@@ -30,7 +30,7 @@ public:
 class TAU_DLL ShaderIOMapPointExprAST final : public ShaderIOPointExprAST
 {
     DEFAULT_DESTRUCT(ShaderIOMapPointExprAST);
-    DELETE_COPY(ShaderIOMapPointExprAST);
+    DEFAULT_CM_PU(ShaderIOMapPointExprAST);
 private:
     i32 _shaderBind;
 public:
@@ -48,7 +48,7 @@ public:
 class TAU_DLL ShaderIOBindPointExprAST final : public ShaderIOPointExprAST
 {
     DEFAULT_DESTRUCT(ShaderIOBindPointExprAST);
-    DELETE_COPY(ShaderIOBindPointExprAST);
+    DEFAULT_CM_PU(ShaderIOBindPointExprAST);
 private:
     DynString _uniformName;
 public:

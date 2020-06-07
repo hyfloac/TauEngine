@@ -8,15 +8,15 @@
 
 class TAU_DLL GLShaderProgram final : public IShaderProgram
 {
-    DELETE_COPY(GLShaderProgram);
+    DELETE_CM(GLShaderProgram);
 private:
-    GLuint _programID;
+    GLuint _pipelineHandle;
 public:
     GLShaderProgram() noexcept;
 
     ~GLShaderProgram() noexcept override;
 
-    [[nodiscard]] GLuint programID() const noexcept { return _programID; }
+    [[nodiscard]] GLuint programID() const noexcept { return _pipelineHandle; }
 
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
@@ -28,7 +28,7 @@ namespace sbp { struct ShaderInfo; }
 class TAU_DLL GLShaderProgramBuilder final : public IShaderProgramBuilder
 {
     DEFAULT_DESTRUCT(GLShaderProgramBuilder);
-    DELETE_COPY(GLShaderProgramBuilder);
+    DELETE_CM(GLShaderProgramBuilder);
 private:
     struct GLShaderProgramArgs final
     {

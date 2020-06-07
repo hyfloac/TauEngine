@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Safeties.hpp>
-
 #include "shader/Uniform.hpp"
 #include "maths/Vector3f.hpp"
 #include "Color.hpp"
@@ -10,7 +8,7 @@ class SpotLight final
 {
     DEFAULT_CONSTRUCT_PU(SpotLight);
     DEFAULT_DESTRUCT(SpotLight);
-    DEFAULT_COPY(SpotLight);
+    DEFAULT_CM(SpotLight);
 private:
     Vector3f _position;
     Vector3f _direction;
@@ -63,7 +61,7 @@ class UniformAccessor<SpotLight> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept
     {

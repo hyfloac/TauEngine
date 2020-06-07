@@ -13,18 +13,19 @@
   #endif
 #endif
 
-#define EXCEPTION_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                                   public: \
-                                       [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
-                                       { static Exception::ExceptionType type = Exception::ExceptionType::define(); \
-                                         return type; } \
-                                       [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
-                                       { return _TYPE::getStaticType(); }
+#define EXCEPTION_IMPL_BASE(_TYPE) \
+    public: \
+        [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
+        { static Exception::ExceptionType type = Exception::ExceptionType::define(); \
+          return type; } \
+        [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
+        { return _TYPE::getStaticType(); }
 
 #if EXCEPTION_GEN_NAMES
-  #define EXCEPTION_IMPL(_TYPE) EXCEPTION_IMPL_BASE(_TYPE); \
-                                [[nodiscard]] virtual const char* getName() const noexcept override \
-                                { return #_TYPE; }
+  #define EXCEPTION_IMPL(_TYPE) \
+      EXCEPTION_IMPL_BASE(_TYPE); \
+      [[nodiscard]] virtual const char* getName() const noexcept override \
+      { return #_TYPE; }
   #define EXCEPTION_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
 #else
   #define EXCEPTION_IMPL(_TYPE) EXCEPTION_IMPL_BASE(_TYPE)
@@ -35,7 +36,7 @@ class TAU_DLL Exception
 {
     DEFAULT_CONSTRUCT_PO(Exception);
     DEFAULT_DESTRUCT_VI(Exception);
-    DELETE_COPY(Exception);
+    DEFAULT_CM_PO(Exception);
 public:
     using ExceptionType = RunTimeType<Exception>;
 public:
@@ -56,7 +57,7 @@ private:
 class ExceptionDispatcher final
 {
     DEFAULT_DESTRUCT(ExceptionDispatcher);
-    DEFAULT_COPY(ExceptionDispatcher);
+    DEFAULT_CM_PU(ExceptionDispatcher);
 private:
     Exception& _ex;
     Exception::ExceptionType _cache;

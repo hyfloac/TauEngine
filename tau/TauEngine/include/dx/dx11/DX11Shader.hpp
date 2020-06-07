@@ -4,14 +4,17 @@
 
 #ifdef _WIN32
 #include <d3d11.h>
+#include "dx/DXUtils.hpp"
 
 class DX11GraphicsInterface;
 class DX11RenderingContext;
+class ShaderInfoExtractorVisitor;
 
 class TAU_DLL NOVTABLE DX11Shader : public IShader
 {
     DEFAULT_CONSTRUCT_PO(DX11Shader);
     DEFAULT_DESTRUCT_VI(DX11Shader);
+    DEFAULT_CM_PO(DX11Shader);
     SHADER_IMPL(DX11Shader);
 public:
     virtual void bind(DX11RenderingContext& context) noexcept = 0;
@@ -20,19 +23,68 @@ public:
 
 class TAU_DLL DX11VertexShader final : public DX11Shader
 {
-    DELETE_COPY(DX11VertexShader);
 private:
     ID3D11VertexShader* _shader;
     ID3DBlob* _shaderBlob;
 public:
-    DX11VertexShader(ID3D11VertexShader* shader, ID3DBlob* shaderBlob) noexcept
+    DX11VertexShader(ID3D11VertexShader* const shader, ID3DBlob* const shaderBlob) noexcept
         : _shader(shader), _shaderBlob(shaderBlob)
     { shaderBlob->AddRef(); }
 
     ~DX11VertexShader() noexcept
     {
-        _shader->Release();
-        _shaderBlob->Release();
+        RELEASE_DX(_shader);
+        RELEASE_DX(_shaderBlob);
+    }
+
+    DX11VertexShader(const DX11VertexShader& copy) noexcept
+        : DX11Shader(copy)
+        , _shader(copy._shader)
+        , _shaderBlob(copy._shaderBlob)
+    {
+        _shader->AddRef();
+        _shaderBlob->AddRef();
+    }
+
+    DX11VertexShader(DX11VertexShader&& move) noexcept
+        : DX11Shader(::std::move(move))
+        , _shader(move._shader)
+        , _shaderBlob(move._shaderBlob)
+    {
+        move._shader = null;
+        move._shaderBlob = null;
+    }
+
+    DX11VertexShader& operator=(const DX11VertexShader& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        DX11Shader::operator=(copy);
+
+        _shader = copy._shader;
+        _shaderBlob = copy._shaderBlob;
+
+        _shader->AddRef();
+        _shaderBlob->AddRef();
+
+        return *this;
+    }
+
+    DX11VertexShader& operator=(DX11VertexShader&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        DX11Shader::operator=(::std::move(move));
+
+        _shader = move._shader;
+        _shaderBlob = move._shaderBlob;
+
+        move._shader = null;
+        move._shaderBlob = null;
+
+        return *this;
     }
 
     [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Vertex; }
@@ -48,16 +100,51 @@ public:
 
 class TAU_DLL DX11HullShader final : public DX11Shader
 {
-    DELETE_COPY(DX11HullShader);
 private:
     ID3D11HullShader* _shader;
 public:
-    DX11HullShader(ID3D11HullShader* shader) noexcept
+    DX11HullShader(ID3D11HullShader* const shader) noexcept
         : _shader(shader)
     { }
 
     ~DX11HullShader() noexcept
-    { _shader->Release(); }
+    { RELEASE_DX(_shader); }
+
+    DX11HullShader(const DX11HullShader& copy) noexcept
+        : DX11Shader(copy)
+        , _shader(copy._shader)
+    { _shader->AddRef(); }
+
+    DX11HullShader(DX11HullShader&& move) noexcept
+        : DX11Shader(::std::move(move))
+        , _shader(move._shader)
+    { move._shader = null; }
+
+    DX11HullShader& operator=(const DX11HullShader& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        DX11Shader::operator=(copy);
+
+        _shader = copy._shader;
+        _shader->AddRef();
+
+        return *this;
+    }
+
+    DX11HullShader& operator=(DX11HullShader&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        DX11Shader::operator=(::std::move(move));
+
+        _shader = move._shader;
+        move._shader = null;
+
+        return *this;
+    }
 
     [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Hull; }
 
@@ -70,16 +157,51 @@ public:
 
 class TAU_DLL DX11DomainShader final : public DX11Shader
 {
-    DELETE_COPY(DX11DomainShader);
 private:
     ID3D11DomainShader* _shader;
 public:
-    DX11DomainShader(ID3D11DomainShader* shader) noexcept
+    DX11DomainShader(ID3D11DomainShader* const shader) noexcept
         : _shader(shader)
     { }
 
     ~DX11DomainShader() noexcept
-    { _shader->Release(); }
+    { RELEASE_DX(_shader); }
+
+    DX11DomainShader(const DX11DomainShader& copy) noexcept
+        : DX11Shader(copy)
+        , _shader(copy._shader)
+    { _shader->AddRef(); }
+
+    DX11DomainShader(DX11DomainShader&& move) noexcept
+        : DX11Shader(::std::move(move))
+        , _shader(move._shader)
+    { move._shader = null; }
+
+    DX11DomainShader& operator=(const DX11DomainShader& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        DX11Shader::operator=(copy);
+
+        _shader = copy._shader;
+        _shader->AddRef();
+
+        return *this;
+    }
+
+    DX11DomainShader& operator=(DX11DomainShader&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        DX11Shader::operator=(::std::move(move));
+
+        _shader = move._shader;
+        move._shader = null;
+
+        return *this;
+    }
 
     [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Domain; }
 
@@ -92,16 +214,51 @@ public:
 
 class TAU_DLL DX11GeometryShader final : public DX11Shader
 {
-    DELETE_COPY(DX11GeometryShader);
 private:
     ID3D11GeometryShader* _shader;
 public:
-    DX11GeometryShader(ID3D11GeometryShader* shader) noexcept
+    DX11GeometryShader(ID3D11GeometryShader* const shader) noexcept
         : _shader(shader)
     { }
 
     ~DX11GeometryShader() noexcept
-    { _shader->Release(); }
+    { RELEASE_DX(_shader); }
+
+    DX11GeometryShader(const DX11GeometryShader& copy) noexcept
+        : DX11Shader(copy)
+        , _shader(copy._shader)
+    { _shader->AddRef(); }
+
+    DX11GeometryShader(DX11GeometryShader&& move) noexcept
+        : DX11Shader(::std::move(move))
+        , _shader(move._shader)
+    { move._shader = null; }
+
+    DX11GeometryShader& operator=(const DX11GeometryShader& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        DX11Shader::operator=(copy);
+
+        _shader = copy._shader;
+        _shader->AddRef();
+
+        return *this;
+    }
+
+    DX11GeometryShader& operator=(DX11GeometryShader&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        DX11Shader::operator=(::std::move(move));
+
+        _shader = move._shader;
+        move._shader = null;
+
+        return *this;
+    }
 
     [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Geometry; }
 
@@ -114,7 +271,6 @@ public:
 
 class TAU_DLL DX11PixelShader final : public DX11Shader
 {
-    DELETE_COPY(DX11PixelShader);
 private:
     ID3D11PixelShader* _shader;
 public:
@@ -123,7 +279,43 @@ public:
     { }
 
     ~DX11PixelShader() noexcept
-    { _shader->Release(); }
+    { RELEASE_DX(_shader); }
+
+    DX11PixelShader(const DX11PixelShader& copy) noexcept
+        : DX11Shader(copy)
+        , _shader(copy._shader)
+    { _shader->AddRef(); }
+
+    DX11PixelShader(DX11PixelShader&& move) noexcept
+        : DX11Shader(::std::move(move))
+        , _shader(move._shader)
+    { move._shader = null; }
+
+    DX11PixelShader& operator=(const DX11PixelShader& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        DX11Shader::operator=(copy);
+
+        _shader = copy._shader;
+        _shader->AddRef();
+
+        return *this;
+    }
+
+    DX11PixelShader& operator=(DX11PixelShader&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        DX11Shader::operator=(::std::move(move));
+
+        _shader = move._shader;
+        move._shader = null;
+
+        return *this;
+    }
 
     [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return EShader::Stage::Pixel; }
 
@@ -137,7 +329,7 @@ public:
 class TAU_DLL DX11ShaderBuilder final : public IShaderBuilder
 {
     DEFAULT_DESTRUCT(DX11ShaderBuilder);
-    DELETE_COPY(DX11ShaderBuilder);
+    DEFAULT_CM_PU(DX11ShaderBuilder);
 private:
     struct DXShaderArgs final
     {
@@ -154,9 +346,12 @@ private:
     };
 private:
     DX11GraphicsInterface& _gi;
-    IResourceSelectorTransformer::ResIndex _resIndex;
+    ShaderInfoExtractorVisitor* _visitor;
 public:
-    DX11ShaderBuilder(DX11GraphicsInterface& gi) noexcept;
+    DX11ShaderBuilder(DX11GraphicsInterface& gi, ShaderInfoExtractorVisitor* const visitor) noexcept
+        : _gi(gi)
+        , _visitor(visitor)
+    { }
 
     [[nodiscard]] DX11Shader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] DX11Shader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
@@ -165,6 +360,9 @@ public:
     [[nodiscard]] NullableStrongRef<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+
+    [[nodiscard]] bool processBundle(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processShader(const CPPRef<IFile>& file, EShader::Stage stage, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
     [[nodiscard]] D3D11ShaderObjects createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, [[tau::out]] Error* error) const noexcept;
 };

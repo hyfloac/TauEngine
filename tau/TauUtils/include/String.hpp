@@ -643,6 +643,12 @@ private:
         _hash = findHashCode(_stackString);
     }
 public:
+    inline DynString() noexcept
+        : _largeString{ null, null}
+        , _length(0)
+        , _hash(0)
+    { }
+
     inline DynString(const NotNull<const char>& string) noexcept
         : _largeString{ null, null }
         , _length(::std::strlen(string))

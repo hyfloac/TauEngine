@@ -6,8 +6,11 @@
 #include <Windows.h>
 #pragma warning(pop)
 
+#include <Objects.hpp>
+
 class Win32Event final
 {
+    DELETE_CM(Win32Event);
 private:
     HANDLE _handle;
 public:
@@ -19,12 +22,6 @@ public:
     {
         CloseHandle(_handle);
     }
-
-    Win32Event(const Win32Event& copy) noexcept = delete;
-    Win32Event(Win32Event&& move) noexcept = delete;
-
-    Win32Event& operator=(const Win32Event& copy) noexcept = delete;
-    Win32Event& operator=(Win32Event&& move) noexcept = delete;
 
     inline void signal() const noexcept
     {

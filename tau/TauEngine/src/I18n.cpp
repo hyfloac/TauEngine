@@ -1,18 +1,4 @@
 #include <I18n.hpp>
-#include <cstdio>
-
-I18n::I18n() noexcept
-    : _language(null)
-{ }
-
-I18n::~I18n() noexcept
-{
-    delete _language;
-    for(const auto& el : _translations)
-    {
-        delete el.first.c_str();
-    }
-}
 
 #pragma pack(push, 1)
 struct LangHeader
@@ -31,51 +17,44 @@ struct TranslationHeader
 };
 #pragma pack(pop)
 
-void I18n::loadTranslations(const char* fileName) noexcept
+void I18n::loadTranslations(const CPPRef<IFile>& file) noexcept
 {
-    FILE* file;
-    fopen_s(&file, fileName, "rbe");
-
-    LangHeader header = { };
-    fread(&header, sizeof(LangHeader), 1, file);
+    LangHeader header;
+    file->readType(&header);
 
     if(header.magic == 0x4C614E67)
     {
         char* languageName = new char[header.languageNameLength + 1];
-        fread(languageName, header.languageNameLength, 1, file);
+        file->readString(languageName, header.languageNameLength);
         languageName[header.languageNameLength] = '\0';
-        this->_language = languageName;
+
+        _language = DynString::passControl(languageName);
 
         for(u32 i = 0; i < header.translationCount; ++i)
         {
-            TranslationHeader tHeader = { };
-            fread(&tHeader, sizeof(TranslationHeader), 1, file);
+            TranslationHeader tHeader;
+            file->readType(&tHeader);
 
             char* key = new char[tHeader.keyLength + 1];
-            fread(key, tHeader.keyLength, 1, file);
+            file->readString(key, tHeader.keyLength);
             key[tHeader.keyLength] = '\0';
 
             char* value = new char[tHeader.keyLength + 1];
-            fread(value, tHeader.valueLength, 1, file);
+            file->readString(value, tHeader.valueLength);
             value[tHeader.valueLength] = '\0';
 
-            std::shared_ptr<char> y = std::shared_ptr<char>(value);
-
-            this->_translations.insert({ key, *(std::shared_ptr<const char>*) &y });
+            _translations.insert({ DynString::passControl(key), DynString::passControl(value) });
         }
     }
-
-    fclose(file);
 }
 
-std::shared_ptr<const char> I18n::translate(String key, ErrorCode* success) const noexcept
+const DynString& I18n::translate(const DynString& key, Error* const error) const noexcept
 {
     if(this->_translations.find(key) != this->_translations.end())
     {
-        if(success) { *success = SUCCESS; }
-        return this->_translations.at(key);
+        const DynString& translation = _translations.at(key);
+        ERROR_CODE_V(Error::NoError, translation);
     }
 
-    if(success) { *success = UNKNOWN_TRANSLATION_KEY; }
-    return std::shared_ptr<const char>(key.c_str());
+    ERROR_CODE_V(Error::UnknownTranslationKey, key);
 }

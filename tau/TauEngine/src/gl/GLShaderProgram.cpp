@@ -1,85 +1,30 @@
-#include "TauEngine.hpp"
-#include "gl/GLShaderProgram.hpp"
-#include "shader/Shader.hpp"
-#include "gl/GLShader.hpp"
 #include <Safeties.hpp>
 #include <VariableLengthArray.hpp>
+#include <VFS.hpp>
 
+#include "gl/GLShader.hpp"
+#include "gl/GLShaderProgram.hpp"
 #include "shader/bundle/ShaderBundleParser.hpp"
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
-#include "Timings.hpp"
-#include "VFS.hpp"
 
 GLShaderProgram::GLShaderProgram() noexcept
     : IShaderProgram()
-    , _programID(glCreateProgram())
-{ Ensure(_programID != 0); }
+    , _pipelineHandle(glCreateProgram())
+{ Ensure(_pipelineHandle != 0); }
 
 GLShaderProgram::~GLShaderProgram() noexcept
 {
-    glDeleteProgram(_programID);
-    _programID = 0;
+    glDeleteProgramPipelines(1, &_pipelineHandle);
+    _pipelineHandle = 0;
 }
 
 void GLShaderProgram::bind(IRenderingContext&) noexcept
-{ glUseProgram(_programID); }
+{
+    glUseProgramStages(_pipelineHandle);
+}
 
 void GLShaderProgram::unbind(IRenderingContext&) noexcept
 { glUseProgram(0); }
-
-static bool validateFail(GLuint& programId, const char* const type) noexcept
-{
-    PERF();
-    GLint length;
-
-    glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &length);
-
-    if(!length)
-    {
-        printf("OpenGL failed to %s program, but no error message was generated.\n", type);
-    }
-    else if(length >= VLA_MAX_LEN)
-    {
-        GLchar* errorMsg = new GLchar[length];
-        glGetShaderInfoLog(programId, length, &length, errorMsg);
-        printf("OpenGL failed to %s program.\n  Error Message: %s\n", type, errorMsg);
-        delete[] errorMsg;
-    }
-    else
-    {
-        VLA(GLchar, errorMsg, length);
-        glGetShaderInfoLog(programId, length, &length, errorMsg);
-        printf("OpenGL failed to %s program.\n  Error Message: %s\n", type, errorMsg);
-    }
-
-    glDeleteProgram(programId);
-    programId = 0;
-
-    return false;
-}
-
-bool GLShaderProgram::link(IRenderingContext&) noexcept
-{
-    PERF();
-    glLinkProgram(_programID);
-
-    GLint result;
-    glGetProgramiv(_programID, GL_LINK_STATUS, &result);
-    if(result == GL_FALSE)
-    {
-        return validateFail(_programID, "link");
-    }
-
-    glValidateProgram(_programID);
-
-    glGetProgramiv(_programID, GL_VALIDATE_STATUS, &result);
-    if(result == GL_FALSE)
-    {
-        return validateFail(_programID, "validate");
-    }
-
-    return true;
-}
 
 bool GLShaderProgramBuilder::processArgs(const ShaderProgramArgs& args, GLShaderProgramArgs* glArgs, Error* error) const noexcept
 {

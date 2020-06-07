@@ -57,17 +57,15 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const 
         }
     }
 
-    VertexBufferArgs buf3Args(1);
-    VertexBufferArgs buf2Args(1);
+    VertexBufferArgs buf3Args(1, false);
+    VertexBufferArgs buf2Args(1, false);
     IndexBufferArgs indexArgs;
 
-    buf3Args.type = EBuffer::Type::ArrayBuffer;
     buf3Args.usage = EBuffer::UsageType::StaticDraw;
     buf3Args.elementCount = numVertices;
     buf3Args.initialBuffer = pos;
     buf3Args.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
 
-    buf2Args.type = EBuffer::Type::ArrayBuffer;
     buf2Args.usage = EBuffer::UsageType::StaticDraw;
     buf2Args.elementCount = numVertices;
     buf2Args.initialBuffer = tex;
@@ -77,11 +75,11 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const 
     indexArgs.elementCount = 6 * numIndices;
     indexArgs.initialBuffer = indices;
 
-    const CPPRef<IVertexBuffer> posBuf = gi.createVertexBuffer().buildCPPRef(buf3Args, nullptr);
+    const NullableRef<IVertexBuffer> posBuf = gi.createBuffer().buildTauRef(buf3Args, nullptr);
     buf3Args.initialBuffer = norm;
-    const CPPRef<IVertexBuffer> normBuf = gi.createVertexBuffer().buildCPPRef(buf3Args, nullptr);
-    const CPPRef<IVertexBuffer> texBuf = gi.createVertexBuffer().buildCPPRef(buf2Args, nullptr);
-    const CPPRef<IIndexBuffer> indicesBuf = gi.createIndexBuffer().buildCPPRef(indexArgs, nullptr);
+    const NullableRef<IVertexBuffer> normBuf = gi.createBuffer().buildTauRef(buf3Args, nullptr);
+    const NullableRef<IVertexBuffer> texBuf = gi.createBuffer().buildTauRef(buf2Args, nullptr);
+    const NullableRef<IIndexBuffer> indicesBuf = gi.createBuffer().buildTauRef(indexArgs, nullptr);
 
     VertexArrayArgs vaArgs(3);
     vaArgs.buffers[0] = posBuf;

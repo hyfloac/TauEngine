@@ -20,7 +20,7 @@ class UniformAccessor final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(_T); }
 
@@ -39,9 +39,10 @@ template<typename _T>
 class UniformBlock<_T, UniformBlockBinding::UBB_Upload> final
 {
     DEFAULT_DESTRUCT(UniformBlock);
-    DEFAULT_COPY(UniformBlock);
+    DELETE_COPY(UniformBlock);
+    DEFAULT_MOVE_PU(UniformBlock);
 private:
-    CPPRef<IUniformBuffer> _buffer;
+    NullableRef<IUniformBuffer> _buffer;
 public:
     inline UniformBlock(const IBufferBuilder& builder) noexcept
         : _buffer(null)
@@ -50,7 +51,7 @@ public:
         args.usage = EBuffer::UsageType::DynamicDraw;
         args.bufferSize = UniformAccessor<_T>::size();
         args.initialBuffer = null;
-        _buffer = builder.buildCPPRef(args, null);
+        _buffer = builder.buildTauRef(args, null);
     }
 
     void set(IRenderingContext& context, const _T& t) noexcept
@@ -72,19 +73,23 @@ public:
 template<typename _T>
 class UniformBlock<_T, UniformBlockBinding::UBB_Store> final
 {
+    DEFAULT_DESTRUCT(UniformBlock);
+    DELETE_COPY(UniformBlock);
+    DEFAULT_MOVE_PU(UniformBlock);
 private:
-    CPPRef<IUniformBuffer> _buffer;
+    NullableRef<IUniformBuffer> _buffer;
     _T _t;
 public:
     template<typename... _Args>
     UniformBlock(const IBufferBuilder& builder, _Args&&... args) noexcept
-        : _buffer(null), _t(std::forward<_Args>(args)...)
+        : _buffer(null)
+        , _t(std::forward<_Args>(args)...)
     {
         UniformBufferArgs bufArgs;
         bufArgs.usage = EBuffer::UsageType::DynamicDraw;
         bufArgs.bufferSize = UniformAccessor<_T>::size();
         bufArgs.initialBuffer = null;
-        _buffer = builder.buildCPPRef(bufArgs, null);
+        _buffer = builder.buildTauRef(bufArgs, null);
     }
 
     [[nodiscard]] _T& data() noexcept { return _t; }
@@ -104,18 +109,22 @@ public:
 template<typename _T>
 class UniformBlock<_T, UniformBlockBinding::UBB_Bind> final
 {
+    DEFAULT_DESTRUCT(UniformBlock);
+    DELETE_COPY(UniformBlock);
+    DEFAULT_MOVE_PU(UniformBlock);
 private:
-    CPPRef<IUniformBuffer> _buffer;
+    NullableRef<IUniformBuffer> _buffer;
     const _T* _t;
 public:
     UniformBlock(const IBufferBuilder& builder, const _T* t) noexcept
-        : _buffer(null), _t(t)
+        : _buffer(null)
+        , _t(t)
     {
         UniformBufferArgs args;
         args.usage = EBuffer::UsageType::DynamicDraw;
         args.bufferSize = UniformAccessor<_T>::size();
         args.initialBuffer = null;
-        _buffer = builder.buildCPPRef(args, null);
+        _buffer = builder.buildTauRef(args, null);
     }
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
@@ -151,7 +160,7 @@ class UniformAccessor<_ExampleUniform> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 private:
     static constexpr uSys MATRIX_SIZE = 4 * 4 * 4;
 public:

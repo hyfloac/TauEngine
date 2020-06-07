@@ -1,11 +1,13 @@
 #pragma once
 
+#include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 #include "system/GraphicsInterface.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>
 
 class DX10ShaderBuilder;
+class DX10ShaderProgramBuilder;
 class DX10InputLayoutBuilder;
 class DX10VertexArrayBuilder;
 class DX10BufferBuilder;
@@ -21,11 +23,14 @@ class DX10RenderingContextBuilder;
 
 class TAU_DLL DX10GraphicsInterface final : public IGraphicsInterface
 {
-    DELETE_COPY(DX10GraphicsInterface);
+    DELETE_CM(DX10GraphicsInterface);
 private:
     ID3D10Device* _d3d10Device;
 
+    ShaderInfoExtractorVisitor _shaderInfoExtractor;
+
     DX10ShaderBuilder* _shaderBuilder;
+    DX10ShaderProgramBuilder* _shaderProgramBuilder;
     DX10InputLayoutBuilder* _inputLayoutBuilder;
     DX10VertexArrayBuilder* _vertexArrayBuilder;
     DX10BufferBuilder* _bufferBuilder;
@@ -34,7 +39,6 @@ private:
     DX10BlendingStateBuilder* _blendingStateBuilder;
     DX10TextureBuilder* _textureBuilder;
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
-    DX10SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     DX10TextureUploaderBuilder* _textureUploaderBuilder;
     DX10FrameBufferBuilder* _frameBufferBuilder;
     DX10RenderingContextBuilder* _renderingContextBuilder;
@@ -48,6 +52,7 @@ public:
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
+    [[nodiscard]] IShaderProgramBuilder& createShaderProgram() noexcept override;
     [[nodiscard]] IInputLayoutBuilder& createInputLayout() noexcept override;
     [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
     [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
@@ -56,7 +61,6 @@ public:
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;

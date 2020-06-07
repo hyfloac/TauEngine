@@ -17,6 +17,9 @@ enum class BlockType;
 
 class TAU_DLL ShaderBundleParser
 {
+    DEFAULT_DESTRUCT(ShaderBundleParser);
+    DELETE_COPY(ShaderBundleParser);
+    DEFAULT_MOVE_PU(ShaderBundleParser);
 public:
     enum Error
     {

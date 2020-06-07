@@ -115,9 +115,9 @@ public:
     void bind(u32 index) const noexcept;
     void unbind(u32 index) const noexcept;
 
-    void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
-    void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept override;
-    void fastUnbind() noexcept override;
+    void bind(IRenderingContext& context, EShader::Stage stage, u32 index) const noexcept override;
+    void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) const noexcept override;
+    void fastUnbind() const noexcept override;
 
     bool beginModification(IRenderingContext& context) noexcept override;
     void endModification(IRenderingContext& context) noexcept override;

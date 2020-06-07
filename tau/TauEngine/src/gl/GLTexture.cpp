@@ -98,7 +98,7 @@ CPPRef<ITexture2D> GLTextureBuilder::buildCPPRef(const Texture2DArgs& args, Erro
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLTexture2D> texture = CPPRef<GLTexture2D>(new(::std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.texture));
+    const CPPRef<GLTexture2D> texture(new(::std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.texture));
     if(!texture)
     {
         glDeleteTextures(1, &glArgs.texture);
@@ -178,7 +178,7 @@ CPPRef<ITexture3D> GLTextureBuilder::buildCPPRef(const Texture3DArgs& args, Erro
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLTexture3D> texture = CPPRef<GLTexture3D>(new(::std::nothrow) GLTexture3D(args.width, args.height, args.depth, args.dataFormat, glArgs.texture));
+    const CPPRef<GLTexture3D> texture(new(::std::nothrow) GLTexture3D(args.width, args.height, args.depth, args.dataFormat, glArgs.texture));
     if(!texture)
     {
         glDeleteTextures(1, &glArgs.texture);
@@ -258,7 +258,7 @@ CPPRef<ITextureCube> GLTextureBuilder::buildCPPRef(const TextureCubeArgs& args, 
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLTextureCube> texture = CPPRef<GLTextureCube>(new(::std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.texture));
+    const CPPRef<GLTextureCube> texture(new(::std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.texture));
     if(!texture)
     {
         glDeleteTextures(1, &glArgs.texture);
@@ -338,7 +338,7 @@ CPPRef<ITextureDepthStencil> GLTextureBuilder::buildCPPRef(const TextureDepthSte
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLTextureDepthStencil> texture = CPPRef<GLTextureDepthStencil>(new(::std::nothrow) GLTextureDepthStencil(args.width, args.height, glArgs.texture));
+    const CPPRef<GLTextureDepthStencil> texture(new(::std::nothrow) GLTextureDepthStencil(args.width, args.height, glArgs.texture));
     if(!texture)
     {
         glDeleteTextures(1, &glArgs.texture);

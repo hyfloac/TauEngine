@@ -1,5 +1,6 @@
 #pragma once
 
+#include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 #include "system/GraphicsInterface.hpp"
 
 #ifdef _WIN32
@@ -21,9 +22,11 @@ class DX11RenderingContextBuilder;
 
 class TAU_DLL DX11GraphicsInterface final : public IGraphicsInterface
 {
-    DELETE_COPY(DX11GraphicsInterface);
+    DELETE_CM(DX11GraphicsInterface);
 private:
     ID3D11Device* _d3d11Device;
+
+    ShaderInfoExtractorVisitor _shaderInfoExtractor;
 
     DX11ShaderBuilder* _shaderBuilder;
     DX11InputLayoutBuilder* _inputLayoutBuilder;
@@ -34,7 +37,6 @@ private:
     DX11BlendingStateBuilder* _blendingStateBuilder;
     DX11TextureBuilder* _textureBuilder;
     DX11TextureSamplerBuilder* _textureSamplerBuilder;
-    DX11SingleTextureUploaderBuilder* _singleTextureUploaderBuilder;
     DX11TextureUploaderBuilder* _textureUploaderBuilder;
     DX11FrameBufferBuilder* _frameBufferBuilder;
     DX11RenderingContextBuilder* _renderingContextBuilder;
@@ -56,7 +58,6 @@ public:
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] ISingleTextureUploaderBuilder& createSingleTextureUploader() noexcept override;
     [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;

@@ -12,8 +12,8 @@
 #include "texture/Texture.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "model/VertexArray.hpp"
-#include "shader/IShaderProgram.hpp"
-#include "shader/IShader.hpp"
+#include "shader/ShaderProgram.hpp"
+#include "shader/Shader.hpp"
 #include <Windows.h>
 #include <winreg.h>
 
@@ -65,10 +65,11 @@ NullableRef<IRasterizerState> TextHandler::rs = nullptr;
 #define INSTANCE_COUNT 128
 
 TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
-    : _ft(null), _shader(IShaderProgram::create(gi)),
-      _va(null),
-      _viewUniforms(gi.createUniformBuffer()),
-      _colorUniforms(gi.createUniformBuffer())
+    : _ft(null)
+    , _shader(IShaderProgram::create(gi))
+    , _va(null)
+    , _viewUniforms(gi.createBuffer())
+    , _colorUniforms(gi.createBuffer())
 {
     PERF();
     ShaderArgs shaderArgs;

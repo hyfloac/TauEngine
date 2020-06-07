@@ -6,30 +6,6 @@
 #include "TauEngine.hpp"
 #include <EnumBitFields.hpp>
 
-DX11Texture2D::~DX11Texture2D() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
-DX11Texture3D::~DX11Texture3D() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
-DX11TextureCube::~DX11TextureCube() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
-DX11TextureDepthStencil::~DX11TextureDepthStencil() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
 void DX11Texture2D::set(IRenderingContext& context, const u32 level, const void* const data) noexcept
 {
     if(!RTT_CHECK(context, DX11RenderingContext))
@@ -120,7 +96,7 @@ CPPRef<ITexture2D> DX11TextureBuilder::buildCPPRef(const Texture2DArgs& args, Er
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX11Texture2D> texture = CPPRef<DX11Texture2D>(new(::std::nothrow) DX11Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
+    const CPPRef<DX11Texture2D> texture(new(::std::nothrow) DX11Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;
@@ -206,7 +182,7 @@ CPPRef<ITexture3D> DX11TextureBuilder::buildCPPRef(const Texture3DArgs& args, Er
         return null;
     }
 
-    const CPPRef<DX11Texture3D> texture = CPPRef<DX11Texture3D>(new(::std::nothrow) DX11Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
+    const CPPRef<DX11Texture3D> texture(new(::std::nothrow) DX11Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;
@@ -290,7 +266,7 @@ CPPRef<ITextureCube> DX11TextureBuilder::buildCPPRef(const TextureCubeArgs& args
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX11TextureCube> texture = CPPRef<DX11TextureCube>(new(::std::nothrow) DX11TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
+    const CPPRef<DX11TextureCube> texture(new(::std::nothrow) DX11TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;
@@ -372,7 +348,7 @@ CPPRef<ITextureDepthStencil> DX11TextureBuilder::buildCPPRef(const TextureDepthS
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const CPPRef<DX11TextureDepthStencil> texture = CPPRef<DX11TextureDepthStencil>(new(::std::nothrow) DX11TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView));
+    const CPPRef<DX11TextureDepthStencil> texture(new(::std::nothrow) DX11TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     dxArgs.d3dTexture = null;

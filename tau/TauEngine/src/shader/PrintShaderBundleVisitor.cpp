@@ -4,7 +4,7 @@
 #include "shader/bundle/ast/ShaderIOBindingExprAST.hpp"
 
 PrintShaderBundleVisitor::PrintShaderBundleVisitor(const PrintSBVArgs* args) noexcept
-    : IShaderBundleVisitor(), _currIndent(0)
+    : _currIndent(0)
 {
     if(args)
     {
@@ -33,7 +33,7 @@ PrintShaderBundleVisitor::PrintShaderBundleVisitor(const PrintSBVArgs* args) noe
 void PrintShaderBundleVisitor::visit(const sbp::FileExprAST& expr) noexcept
 {
     printIndent();
-    fprintf(_file, "File: \"%s\"", expr.filePath().c_str());
+    ConPrinter::print(_file, "File: \"%\"", expr.filePath());
 }
 
 void PrintShaderBundleVisitor::visit(const sbp::BlockExprAST& expr) noexcept
@@ -41,21 +41,19 @@ void PrintShaderBundleVisitor::visit(const sbp::BlockExprAST& expr) noexcept
     printIndent();
     switch(expr.type())
     {
-        case sbp::BlockType::Uniforms: fputs("Uniforms", _file); break;
-        case sbp::BlockType::Textures: fputs("Textures", _file); break;
-        case sbp::BlockType::Inputs:   fputs("Inputs", _file); break;
-        case sbp::BlockType::Outputs:  fputs("Outputs", _file); break;
+        case sbp::BlockType::Uniforms: ConPrinter::print(_file, "Uniforms"); break;
+        case sbp::BlockType::Textures: ConPrinter::print(_file, "Textures"); break;
     }
-    fputs(": ", _file);
+    ConPrinter::print(_file, ": ");
     printBrace();
     ++_currIndent;
 
     visit(expr.container().get());
 
     --_currIndent;
-    fputs(_newLine, _file);
+    ConPrinter::print(_file, _newLine);
     printIndent();
-    fputc('}', _file);
+    ConPrinter::print(_file, '}');
 }
 
 void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) noexcept
@@ -63,12 +61,14 @@ void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) n
     printIndent();
     switch(expr.stage())
     {
-        case EShader::Stage::TessellationControl:    fputs(_tessCtrlName, _file); break;
-        case EShader::Stage::TessellationEvaluation: fputs(_tessEvalName, _file); break;
-        case EShader::Stage::Geometry:               fputs("Geometry", _file); break;
-        default:                                     fputs("UnknownShader", _file); break;
+        case EShader::Stage::Vertex:   ConPrinter::print(_file, "Vertex"); break;
+        case EShader::Stage::Hull:     ConPrinter::print(_file, _tessCtrlName); break;
+        case EShader::Stage::Domain:   ConPrinter::print(_file, _tessEvalName); break;
+        case EShader::Stage::Geometry: ConPrinter::print(_file, "Geometry"); break;
+        case EShader::Stage::Pixel:    ConPrinter::print(_file, _pixelName); break;
+        default:                       ConPrinter::print(_file, "UnknownShader"); break;
     }
-    fputs(": ", stdout);
+    ConPrinter::print(_file, ": ");
     printBrace();
     ++_currIndent;
 
@@ -90,68 +90,21 @@ void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) n
     }
 
     --_currIndent;
-    fputs(_newLine, _file);
+    ConPrinter::print(_file, _newLine);
     printIndent();
-    fputc('}', stdout);
-}
-
-void PrintShaderBundleVisitor::visit(const sbp::OuterShaderStageBlockExprAST& expr) noexcept
-{
-    printIndent();
-    switch(expr.stage())
-    {
-        case EShader::Stage::Vertex: fputs("Vertex", _file); break;
-        case EShader::Stage::Pixel:  fputs(_pixelName, _file); break;
-        default:                     fputs("UnknownShader", _file); break;
-    }
-    fputs(": ", _file);
-    printBrace();
-    ++_currIndent;
-
-    if(expr.file())
-    {
-        visit(*expr.file().get());
-        printComma(expr.io() || expr.uniforms() || expr.textures());
-    }
-
-    if(expr.io())
-    {
-        visit(*expr.io().get());
-        printComma(expr.uniforms() || expr.textures());
-    }
-
-    if(expr.uniforms())
-    {
-        visit(*expr.uniforms().get());
-        printComma(expr.textures());
-    }
-
-    if(expr.textures())
-    {
-        visit(*expr.textures().get());
-    }
-
-    --_currIndent;
-    fputs(_newLine, _file);
-    printIndent();
-    fputc('}', _file);
+    ConPrinter::print(_file, '}');
 }
 
 static const char* renderingModeName(const RenderingMode::Mode mode) noexcept
 {
     switch(mode)
     {
-        case RenderingMode::Mode::DirectX9:    return "DirectX9";
         case RenderingMode::Mode::DirectX10:   return "DirectX10";
         case RenderingMode::Mode::DirectX11:   return "DirectX11";
         case RenderingMode::Mode::DirectX12:   return "DirectX12";
         case RenderingMode::Mode::DirectX12_1: return "DirectX12_1";
         case RenderingMode::Mode::Vulkan:      return "Vulkan";
-        case RenderingMode::Mode::OpenGL3:     return "OpenGL3";
-        case RenderingMode::Mode::OpenGL3_1:   return "OpenGL3_1";
-        case RenderingMode::Mode::OpenGL3_2:   return "OpenGL3_2";
-        case RenderingMode::Mode::OpenGL3_3:   return "OpenGL3_3";
-        case RenderingMode::Mode::OpenGL4:     return "OpenGL4";
+        case RenderingMode::Mode::OpenGL4_1:   return "OpenGL4_1";
         case RenderingMode::Mode::OpenGL4_2:   return "OpenGL4_2";
         case RenderingMode::Mode::OpenGL4_3:   return "OpenGL4_3";
         case RenderingMode::Mode::OpenGL4_4:   return "OpenGL4_4";
@@ -185,15 +138,15 @@ void PrintShaderBundleVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
 
             if(shouldPrintComma)
             {
-                fputs(", ", _file);
+                ConPrinter::print(_file, ", ");
             }
             const RenderingMode::Mode api = static_cast<RenderingMode::Mode>(bit);
-            fputs(renderingModeName(api), _file);
+            ConPrinter::print(_file, renderingModeName(api));
             shouldPrintComma = true;
         }
     }
 
-    fputs(": ", _file);
+    ConPrinter::print(_file, ": ");
     printBrace();
     ++_currIndent;
 
@@ -227,9 +180,9 @@ void PrintShaderBundleVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
     }
 
     --_currIndent;
-    fputs(_newLine, _file);
+    ConPrinter::print(_file, _newLine);
     printIndent();
-    fputc('}', _file);
+    ConPrinter::print(_file, '}');
 
     if(expr.next())
     {
@@ -238,10 +191,27 @@ void PrintShaderBundleVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
     }
 }
 
+static const char* crmTargetName(const CommonRenderingModelToken crmTarget) noexcept
+{
+    switch(crmTarget)
+    {
+        case CommonRenderingModelToken::UniformBindingCameraDynamic: return "UniformBindingCameraDynamic";
+        case CommonRenderingModelToken::UniformBindingCameraStatic:  return "UniformBindingCameraStatic";
+        case CommonRenderingModelToken::TextureNormal:               return "TextureNormal";
+        case CommonRenderingModelToken::TextureDiffuse:              return "TextureDiffuse";
+        case CommonRenderingModelToken::TexturePBRCompound:          return "TexturePBRCompound";
+        case CommonRenderingModelToken::TextureEmissivity:           return "TextureEmissivity";
+        case CommonRenderingModelToken::TexturePosition:             return "TexturePosition";
+        case CommonRenderingModelToken::TextureDepth:                return "TextureDepth";
+        case CommonRenderingModelToken::TextureStencil:              return "TextureStencil";
+        default:                                                     return "UnknownCRMTarget";
+    }
+}
+
 void PrintShaderBundleVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept
 {
     printIndent();
-    fprintf(_file, "%d: %d", expr.virtualBindPoint(), expr.shaderBind());
+    ConPrinter::print(_file, "%: %", crmTargetName(expr.crmTarget()), expr.shaderBind());
     printComma(expr.next());
     visit(expr.next().get());
 }
@@ -249,7 +219,7 @@ void PrintShaderBundleVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr) n
 void PrintShaderBundleVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept
 {
     printIndent();
-    fprintf(_file, "%d: \"%s\"", expr.virtualBindPoint(), expr.uniformName().c_str());
+    ConPrinter::print(_file, "%: \"%\"", crmTargetName(expr.crmTarget()), expr.uniformName());
     printComma(expr.next());
     visit(expr.next().get());
 }
@@ -260,7 +230,7 @@ void PrintShaderBundleVisitor::printIndent() const noexcept
 
     for(uSys i = 0; i < numSpaces; ++i)
     {
-        fputc(_indentChar, _file);
+        ConPrinter::print(_file, _indentChar);
     }
 }
 
@@ -268,8 +238,8 @@ void PrintShaderBundleVisitor::printComma(const bool shouldPrint) const noexcept
 {
     if(shouldPrint)
     {
-        fputc(',', _file);
-        fputs(_newLine, _file);
+        ConPrinter::print(_file, ',');
+        ConPrinter::print(_file, _newLine);
     }
 }
 
@@ -277,15 +247,14 @@ void PrintShaderBundleVisitor::printBrace() const noexcept
 {
     if(_bracesSameLine)
     {
-        fputc('{', _file);
-        fputs(_newLine, _file);
+        ConPrinter::print(_file, '{');
+        ConPrinter::print(_file, _newLine);
     }
     else
     {
-        fputs(_newLine, _file);
+        ConPrinter::print(_file, _newLine);
         printIndent();
-        fputc('{', _file);
-        fputs(_newLine, _file);
+        ConPrinter::print(_file, '{');
+        ConPrinter::print(_file, _newLine);
     }
 }
-

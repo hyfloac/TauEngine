@@ -4,21 +4,25 @@
 
 #ifdef _WIN32
 #include <d3d11.h>
+#include "dx/DXUtils.hpp"
 
 #include "DX11RenderTarget.hpp"
 #include "DX11TextureView.hpp"
+#include "DX11TextureRawInterface.hpp"
 
 class DX11GraphicsInterface;
 class DX11RenderingContext;
 
 class TAU_DLL DX11Texture2D final : public ITexture2D
 {
+    DELETE_CM(DX11Texture2D);
     TEXTURE_IMPL(DX11Texture2D);
 private:
     ID3D11Texture2D* _d3dTexture;
     DX11RenderTarget _renderTarget;
     DX11TextureView* _textureView;
     UINT _mipLevels;
+    DX11TextureRawInterface _rawInterface;
 public:
     DX11Texture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D11Texture2D* const d3dTexture, ID3D11RenderTargetView* const renderTargetView, DX11TextureView* const textureView, const UINT mipLevels) noexcept
         : ITexture2D(width, height, dataFormat)
@@ -26,9 +30,14 @@ public:
         , _renderTarget(renderTargetView)
         , _textureView(textureView)
         , _mipLevels(mipLevels)
+        , _rawInterface(d3dTexture)
     { }
 
-    ~DX11Texture2D() noexcept;
+    ~DX11Texture2D() noexcept
+    {
+        RELEASE_DX(_d3dTexture);
+        delete _textureView;
+    }
 
     [[nodiscard]] const ID3D11Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
     [[nodiscard]]       ID3D11Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
@@ -38,19 +47,21 @@ public:
     [[nodiscard]] const DX11TextureView*   textureView() const noexcept override { return  _textureView;  }
     [[nodiscard]]       DX11TextureView*   textureView()       noexcept override { return  _textureView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(IRenderingContext& context, u32 mipLevel, const void* data) noexcept override;
 };
 
 class TAU_DLL DX11Texture3D final : public ITexture3D
 {
+    DELETE_CM(DX11Texture3D);
     TEXTURE_IMPL(DX11Texture3D);
 private:
     ID3D11Texture3D* _d3dTexture;
     DX11RenderTarget _renderTarget;
     DX11TextureView* _textureView;
     UINT _mipLevels;
+    DX11TextureRawInterface _rawInterface;
 public:
     DX11Texture3D(const u32 width, const u32 height, const u32 depth, const ETexture::Format dataFormat, ID3D11Texture3D* const d3dTexture, ID3D11RenderTargetView* const renderTargetView, DX11TextureView* const textureView, const UINT mipLevels) noexcept
         : ITexture3D(width, height, depth, dataFormat)
@@ -58,9 +69,14 @@ public:
         , _renderTarget(renderTargetView)
         , _textureView(textureView)
         , _mipLevels(mipLevels)
+        , _rawInterface(d3dTexture)
     { }
 
-    ~DX11Texture3D() noexcept;
+    ~DX11Texture3D() noexcept
+    {
+        RELEASE_DX(_d3dTexture);
+        delete _textureView;
+    }
 
     [[nodiscard]] const ID3D11Texture3D* d3dTexture() const noexcept { return _d3dTexture; }
     [[nodiscard]]       ID3D11Texture3D* d3dTexture()       noexcept { return _d3dTexture; }
@@ -70,13 +86,14 @@ public:
     [[nodiscard]] const DX11TextureView*   textureView() const noexcept override { return  _textureView;  }
     [[nodiscard]]       DX11TextureView*   textureView()       noexcept override { return  _textureView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(IRenderingContext& context, u32 depthLevel, u32 mipLevel, const void* data) noexcept override;
 };
 
 class TAU_DLL DX11TextureCube final : public ITextureCube
 {
+    DELETE_CM(DX11TextureCube);
     TEXTURE_IMPL(DX11TextureCube);
 public:
     static UINT dxCubeSide(ETexture::CubeSide side) noexcept;
@@ -85,6 +102,7 @@ private:
     DX11RenderTarget _renderTarget;
     DX11TextureView* _textureView;
     UINT _mipLevels;
+    DX11TextureRawInterface _rawInterface;
 public:
     DX11TextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, ID3D11Texture2D* const d3dTexture, ID3D11RenderTargetView* const renderTargetView, DX11TextureView* const textureView, const UINT mipLevels) noexcept
         : ITextureCube(width, height, dataFormat)
@@ -92,9 +110,14 @@ public:
         , _renderTarget(renderTargetView)
         , _textureView(textureView)
         , _mipLevels(mipLevels)
+        , _rawInterface(d3dTexture)
     { }
 
-    ~DX11TextureCube() noexcept;
+    ~DX11TextureCube() noexcept
+    {
+        RELEASE_DX(_d3dTexture);
+        delete _textureView;
+    }
 
     [[nodiscard]] const ID3D11Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
     [[nodiscard]]       ID3D11Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
@@ -104,19 +127,21 @@ public:
     [[nodiscard]] const DX11TextureView*   textureView() const noexcept override { return  _textureView;  }
     [[nodiscard]]       DX11TextureView*   textureView()       noexcept override { return  _textureView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(IRenderingContext& context, u32 mipLevel, ETexture::CubeSide side, const void* data) noexcept override;
 };
 
 class TAU_DLL DX11TextureDepthStencil final : public ITextureDepthStencil
 {
+    DELETE_CM(DX11TextureDepthStencil);
     TEXTURE_IMPL(DX11TextureDepthStencil);
 private:
     ID3D11Texture2D* _d3dTexture;
     DX11DepthStencilTarget _renderTarget;
     DX11NoMipmapTextureView _depthView;
     DX11NoMipmapTextureView _stencilView;
+    DX11TextureRawInterface _rawInterface;
 public:
     DX11TextureDepthStencil(const u32 width, const u32 height, ID3D11Texture2D* const d3dTexture, ID3D11DepthStencilView* const depthStencilView, ID3D11ShaderResourceView* const depthView, ID3D11ShaderResourceView* const stencilView) noexcept
         : ITextureDepthStencil(width, height)
@@ -124,9 +149,11 @@ public:
         , _renderTarget(depthStencilView)
         , _depthView(depthView)
         , _stencilView(stencilView)
+        , _rawInterface(d3dTexture)
     { }
 
-    ~DX11TextureDepthStencil() noexcept;
+    ~DX11TextureDepthStencil() noexcept
+    { RELEASE_DX(_d3dTexture); }
 
     [[nodiscard]] const ID3D11Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
     [[nodiscard]]       ID3D11Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
@@ -138,7 +165,7 @@ public:
     [[nodiscard]] const DX11NoMipmapTextureView* stencilView() const noexcept override { return &_stencilView;  }
     [[nodiscard]]       DX11NoMipmapTextureView* stencilView()       noexcept override { return &_stencilView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return reinterpret_cast<uintptr_t>(_d3dTexture); }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(IRenderingContext& context, const void* data) noexcept override;
 };
@@ -146,7 +173,7 @@ public:
 class TAU_DLL DX11TextureBuilder final : public ITextureBuilder
 {
     DEFAULT_DESTRUCT(DX11TextureBuilder);
-    DELETE_COPY(DX11TextureBuilder);
+    DEFAULT_CM_PU(DX11TextureBuilder);
 public:
     static DXGI_FORMAT dxTextureFormat(ETexture::Format format) noexcept;
     static D3D11_BIND_FLAG dxBindFlags(ETexture::BindFlags flags) noexcept;
@@ -154,19 +181,10 @@ public:
     static D3D11_RESOURCE_MISC_FLAG dxMiscFlags(ETexture::BindFlags flags) noexcept;
     static D3D11_RESOURCE_MISC_FLAG dxMiscFlags(ETexture::DepthStencilBindFlags flags) noexcept;
 public:
-#define RELEASE_DX(_X) \
-    if((_X)) { \
-        (_X)->Release(); \
-        (_X) = null; }
-#define RELEASE_TAU(_X) \
-    if((_X)) { \
-        delete (_X); \
-        (_X) = null; }
-
     struct DXTexture2DArgs final
     {
         DEFAULT_CONSTRUCT_PU(DXTexture2DArgs);
-        DEFAULT_COPY(DXTexture2DArgs);
+        DELETE_COPY(DXTexture2DArgs);
     public:
         ID3D11Texture2D* d3dTexture;
         ID3D11RenderTargetView* renderTarget;
@@ -176,14 +194,40 @@ public:
         {
             RELEASE_DX(d3dTexture);
             RELEASE_DX(renderTarget);
-            RELEASE_TAU(textureView);
+            delete textureView;
+        }
+
+        DXTexture2DArgs(DXTexture2DArgs&& move) noexcept
+            : d3dTexture(move.d3dTexture)
+            , renderTarget(move.renderTarget)
+            , textureView(move.textureView)
+        {
+            move.d3dTexture = null;
+            move.renderTarget = null;
+            move.textureView = null;
+        }
+
+        DXTexture2DArgs& operator=(DXTexture2DArgs&& move) noexcept
+        {
+            if(this == &move)
+            { return *this; }
+
+            d3dTexture = move.d3dTexture;
+            renderTarget = move.renderTarget;
+            textureView = move.textureView;
+
+            move.d3dTexture = null;
+            move.renderTarget = null;
+            move.textureView = null;
+
+            return *this;
         }
     };
 
     struct DXTexture3DArgs final
     {
         DEFAULT_CONSTRUCT_PU(DXTexture3DArgs);
-        DEFAULT_COPY(DXTexture3DArgs);
+        DELETE_COPY(DXTexture3DArgs);
     public:
         ID3D11Texture3D* d3dTexture;
         ID3D11RenderTargetView* renderTarget;
@@ -193,7 +237,33 @@ public:
         {
             RELEASE_DX(d3dTexture);
             RELEASE_DX(renderTarget);
-            RELEASE_TAU(textureView);
+            delete textureView;
+        }
+
+        DXTexture3DArgs(DXTexture3DArgs&& move) noexcept
+            : d3dTexture(move.d3dTexture)
+            , renderTarget(move.renderTarget)
+            , textureView(move.textureView)
+        {
+            move.d3dTexture = null;
+            move.renderTarget = null;
+            move.textureView = null;
+        }
+
+        DXTexture3DArgs& operator=(DXTexture3DArgs&& move) noexcept
+        {
+            if(this == &move)
+            { return *this; }
+
+            d3dTexture = move.d3dTexture;
+            renderTarget = move.renderTarget;
+            textureView = move.textureView;
+
+            move.d3dTexture = null;
+            move.renderTarget = null;
+            move.textureView = null;
+
+            return *this;
         }
     };
 
@@ -202,7 +272,6 @@ public:
     struct DXTextureDepthStencilArgs final
     {
         DEFAULT_CONSTRUCT_PU(DXTextureDepthStencilArgs);
-        DEFAULT_COPY(DXTextureDepthStencilArgs);
     public:
         ID3D11Texture2D* d3dTexture;
         ID3D11DepthStencilView* renderTarget;
@@ -216,10 +285,67 @@ public:
             RELEASE_DX(depthView);
             RELEASE_DX(stencilView);
         }
-    };
 
-#undef RELEASE_DX
-#undef RELEASE_TAU
+        DXTextureDepthStencilArgs(const DXTextureDepthStencilArgs& copy) noexcept
+            : d3dTexture(copy.d3dTexture)
+            , renderTarget(copy.renderTarget)
+            , depthView(copy.depthView)
+            , stencilView(copy.stencilView)
+        {
+            d3dTexture->AddRef();
+            renderTarget->AddRef();
+            depthView->AddRef();
+            stencilView->AddRef();
+        }
+
+        DXTextureDepthStencilArgs(DXTextureDepthStencilArgs&& move) noexcept
+            : d3dTexture(move.d3dTexture)
+            , renderTarget(move.renderTarget)
+            , depthView(move.depthView)
+            , stencilView(move.stencilView)
+        {
+            move.d3dTexture = null;
+            move.renderTarget = null;
+            move.depthView = null;
+            move.stencilView = null;
+        }
+
+        DXTextureDepthStencilArgs& operator=(const DXTextureDepthStencilArgs& copy) noexcept
+        {
+            if(this == &copy)
+            { return *this; }
+
+            d3dTexture = copy.d3dTexture;
+            renderTarget = copy.renderTarget;
+            depthView = copy.depthView;
+            stencilView = copy.stencilView;
+
+            d3dTexture->AddRef();
+            renderTarget->AddRef();
+            depthView->AddRef();
+            stencilView->AddRef();
+
+            return *this;
+        }
+
+        DXTextureDepthStencilArgs& operator=(DXTextureDepthStencilArgs&& copy) noexcept
+        {
+            if(this == &copy)
+            { return *this; }
+
+            d3dTexture = copy.d3dTexture;
+            renderTarget = copy.renderTarget;
+            depthView = copy.depthView;
+            stencilView = copy.stencilView;
+
+            copy.d3dTexture = null;
+            copy.renderTarget = null;
+            copy.depthView = null;
+            copy.stencilView = null;
+
+            return *this;
+        }
+    };
 private:
     DX11GraphicsInterface& _gi;
 public:

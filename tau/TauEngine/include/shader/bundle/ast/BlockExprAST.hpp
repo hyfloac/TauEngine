@@ -20,7 +20,7 @@ enum class BlockType
 class TAU_DLL BlockExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT(BlockExprAST);
-    DELETE_COPY(BlockExprAST);
+    DEFAULT_CM_PU(BlockExprAST);
 private:
     BlockType _type;
     NullableStrongRef<ShaderIOPointExprAST> _container;
@@ -32,7 +32,7 @@ public:
 
     [[nodiscard]] BlockType type() const noexcept { return _type; }
 
-    [[nodiscard]]       NullableStrongRef<ShaderIOPointExprAST>& container() noexcept { return _container; }
+    [[nodiscard]]       NullableStrongRef<ShaderIOPointExprAST>& container()       noexcept { return _container; }
     [[nodiscard]] const NullableStrongRef<ShaderIOPointExprAST>& container() const noexcept { return _container; }
 
     void visit(IShaderBundleVisitor& visitor) const noexcept override
@@ -42,7 +42,7 @@ public:
 class TAU_DLL ShaderStageBlockExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT_VI(ShaderStageBlockExprAST);
-    DELETE_COPY(ShaderStageBlockExprAST);
+DEFAULT_CM_PU(ShaderStageBlockExprAST);
 private:
     EShader::Stage _stage;
     NullableStrongRef<FileExprAST> _file;
@@ -73,7 +73,7 @@ public:
 class TAU_DLL APIBlockExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT(APIBlockExprAST);
-    DELETE_COPY(APIBlockExprAST);
+DEFAULT_CM_PU(APIBlockExprAST);
 public:
     using APISet = ::std::bitset<static_cast<uSys>(RenderingMode::Mode::_MAX_VALUE) + 1>;
 private:

@@ -168,9 +168,6 @@
     <ClCompile Include="src\win32\Win32SystemInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\system\SystemInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -870,6 +867,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\DXUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\ResourceView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\texture\TextureRawInterface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx11\DX11TextureRawInterface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

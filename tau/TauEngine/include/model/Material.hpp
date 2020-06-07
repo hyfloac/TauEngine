@@ -2,7 +2,7 @@
 
 #include <Safeties.hpp>
 
-#include "shader/IShaderProgram.hpp"
+#include "shader/ShaderProgram.hpp"
 #include "texture/Texture.hpp"
 
 #include "shader/TextureUploader.hpp"

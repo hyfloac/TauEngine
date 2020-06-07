@@ -87,7 +87,6 @@
     <ClCompile Include="src\shader\ShaderBundleVisitor.cpp" />
     <ClCompile Include="src\shader\ShaderInfoExtractorVisitor.cpp" />
     <ClCompile Include="src\shader\SpotLight.cpp" />
-    <ClCompile Include="src\system\SystemInterface.cpp" />
     <ClCompile Include="src\terrain\TerrainTile.cpp" />
     <ClCompile Include="src\texture\FITextureLoader.cpp" />
     <ClCompile Include="src\GameRecorder.cpp" />
@@ -166,6 +165,7 @@
     <ClInclude Include="include\dx\dx11\DX11GraphicsInterface.hpp" />
     <ClInclude Include="include\dx\dx11\DX11InputLayout.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RasterizerState.hpp" />
+    <ClInclude Include="include\dx\dx11\DX11TextureRawInterface.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RenderingContext.hpp" />
     <ClInclude Include="include\dx\dx11\DX11RenderTarget.hpp" />
     <ClInclude Include="include\dx\dx11\DX11Shader.hpp" />
@@ -175,6 +175,7 @@
     <ClInclude Include="include\dx\dx11\DX11TextureUploader.hpp" />
     <ClInclude Include="include\dx\dx11\DX11TextureView.hpp" />
     <ClInclude Include="include\dx\dx11\DX11VertexArray.hpp" />
+    <ClInclude Include="include\dx\DXUtils.hpp" />
     <ClInclude Include="include\entity\Entity.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="include\graphics\BlendingState.hpp" />
     <ClInclude Include="include\graphics\DepthStencilState.hpp" />
     <ClInclude Include="include\graphics\RasterizerState.hpp" />
+    <ClInclude Include="include\graphics\ResourceView.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
@@ -290,6 +292,7 @@
     <ClInclude Include="include\gl\GLTexture.hpp" />
     <ClInclude Include="include\texture\FrameBuffer.hpp" />
     <ClInclude Include="include\texture\NullTexture.hpp" />
+    <ClInclude Include="include\texture\TextureRawInterface.hpp" />
     <ClInclude Include="include\texture\TextureView.hpp" />
     <ClInclude Include="include\texture\RenderTarget.hpp" />
     <ClInclude Include="include\texture\Texture.hpp" />

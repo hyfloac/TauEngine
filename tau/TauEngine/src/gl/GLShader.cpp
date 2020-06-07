@@ -148,7 +148,7 @@ NullableStrongReferenceCountingPointer<IShader> GLShaderBuilder::buildTauSRef(co
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* glArgs, Error* error) const noexcept
+bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* const glArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 	
@@ -275,7 +275,7 @@ bool GLShaderBuilder::processBundle(const ShaderArgs& args, GLShaderArgs* const 
         }
     }
 
-    ERROR_CODE_T(Error::NoError);
+    return true;
 }
 
 static bool validateFail(GLuint& programId, const char* type) noexcept;
@@ -340,7 +340,7 @@ bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* con
         return validateFail(glArgs->shaderHandle, "link");
     }
 
-    ERROR_CODE_T(Error::NoError);
+    return true;
 }
 
 static bool validateFail(GLuint& programId, const char* const type) noexcept

@@ -3,8 +3,8 @@
 #include <model/VertexArray.hpp>
 #include <texture/FrameBuffer.hpp>
 #include <shader/TextureUploader.hpp>
-#include <shader/IShader.hpp>
-#include <shader/IShaderProgram.hpp>
+#include <shader/Shader.hpp>
+#include <shader/ShaderProgram.hpp>
 #include <system/SystemInterface.hpp>
 #include <system/Window.hpp>
 #include <events/WindowEvent.hpp>
@@ -20,7 +20,7 @@ SaturationPPLayer::SaturationPPLayer(Globals& globals, float saturation) noexcep
     , _frameBuffer(null)
     , _textureSampler(null)
     , _fbUploader(null)
-    , _saturationUniform(globals.gi.createUniformBuffer())
+    , _saturationUniform(globals.gi.createBuffer())
 { _saturationUniform.set(_globals.rc, _saturation); }
 
 bool SaturationPPLayer::init() noexcept
@@ -43,22 +43,22 @@ bool SaturationPPLayer::init() noexcept
             switch(error)
             {
                 case IShaderBuilder::Error::CompileError:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to compile saturation post processing vertex shader.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to compile saturation post processing vertex shader.");
                     break;
                 case IShaderBuilder::Error::InvalidFile:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Invalid vertex shader file for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Invalid vertex shader file for saturation post processing.");
                     break;
                 case IShaderBuilder::Error::InvalidInclude:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Invalid include in vertex shader file for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Invalid include in vertex shader file for saturation post processing.");
                     break;
                 case IShaderBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for vertex shader in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for vertex shader in saturation post processing.");
                     break;
                 case IShaderBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex shader in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex shader in saturation post processing.");
                     break;
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating vertex shader for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating vertex shader for saturation post processing.");
                     break;
             }
             return false;
@@ -74,22 +74,22 @@ bool SaturationPPLayer::init() noexcept
             switch(error)
             {
                 case IShaderBuilder::Error::CompileError:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to compile saturation post processing pixel shader.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to compile saturation post processing pixel shader.");
                     break;
                 case IShaderBuilder::Error::InvalidFile:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Invalid pixel shader file for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Invalid pixel shader file for saturation post processing.");
                     break;
                 case IShaderBuilder::Error::InvalidInclude:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Invalid include in pixel shader file for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Invalid include in pixel shader file for saturation post processing.");
                     break;
                 case IShaderBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for pixel shader in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for pixel shader in saturation post processing.");
                     break;
                 case IShaderBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for pixel shader in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for pixel shader in saturation post processing.");
                     break;
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating pixel shader for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating pixel shader for saturation post processing.");
                     break;
             }
             return false;
@@ -98,7 +98,6 @@ bool SaturationPPLayer::init() noexcept
         _shader = IShaderProgram::create(_globals.gi);
         _shader->setVertexShader(_globals.rc, vertexShader);
         _shader->setPixelShader(_globals.rc, pixelShader);
-        _shader->link(_globals.rc);
 
         vaShader = vertexShader.get();
     }
@@ -114,38 +113,35 @@ bool SaturationPPLayer::init() noexcept
              1.0f,  1.0f, 1.0f, 1.0f
         };
 
-        VertexBufferArgs posArgs(2);
-        posArgs.type = EBuffer::Type::ArrayBuffer;
+        VertexBufferArgs posArgs(2, false);
         posArgs.usage = EBuffer::UsageType::StaticDraw;
         posArgs.elementCount = 6;
         posArgs.initialBuffer = quadVertices;
         posArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
         posArgs.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-        IVertexBufferBuilder::Error bufferError;
-        const CPPRef<IVertexBuffer> positions = _globals.gi.createVertexBuffer().buildCPPRef(posArgs, &bufferError);
+        IBufferBuilder::Error bufferError;
+        const NullableRef<IVertexBuffer> positions = _globals.gi.createBuffer().buildTauRef(posArgs, &bufferError);
 
-        if(bufferError != IVertexBufferBuilder::Error::NoError)
+        if(bufferError != IBufferBuilder::Error::NoError)
         {
             switch(bufferError)
             {
-                case IVertexBufferBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for vertex buffer in saturation post processing.");
+                case IBufferBuilder::Error::SystemMemoryAllocationFailure:
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for vertex buffer in saturation post processing.");
                     break;
-                case IVertexBufferBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex buffer in saturation post processing.");
+                case IBufferBuilder::Error::DriverMemoryAllocationFailure:
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex buffer in saturation post processing.");
                     break;
-                case IVertexBufferBuilder::Error::LibImplementationError:
-                case IVertexBufferBuilder::Error::UnknownError:
+                case IBufferBuilder::Error::UnknownError:
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating vertex buffer for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating vertex buffer for saturation post processing.");
                     break;
             }
             return false;
         }
 
         VertexArrayArgs vaArgs(1);
-        vaArgs.shader = vaShader;
         vaArgs.buffers[0] = positions;
         vaArgs.drawCount = 6;
         vaArgs.drawType = DrawType::SeparatedTriangles;
@@ -158,14 +154,14 @@ bool SaturationPPLayer::init() noexcept
             switch(vaError)
             {
                 case IVertexArrayBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for vertex array in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for vertex array in saturation post processing.");
                     break;
                 case IVertexArrayBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex array in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for vertex array in saturation post processing.");
                     break;
                 case IVertexArrayBuilder::Error::InternalError:
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating vertex array for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating vertex array for saturation post processing.");
                     break;
             }
             return false;
@@ -189,23 +185,23 @@ bool SaturationPPLayer::init() noexcept
             switch(error)
             {
                 case ITextureBuilder::Error::WidthIsZero:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Width is 0 for color texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Width is 0 for color texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::HeightIsZero:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Height is 0 for color texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Height is 0 for color texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::DataFormatIsInvalid:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Data format is invalid for color texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Data format is invalid for color texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for color texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for color texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for color texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for color texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::InternalError:
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating color texture for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating color texture for saturation post processing.");
                     break;
             }
             return false;
@@ -224,23 +220,23 @@ bool SaturationPPLayer::init() noexcept
             switch(error)
             {
                 case ITextureBuilder::Error::WidthIsZero:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Width is 0 for depth texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Width is 0 for depth texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::HeightIsZero:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Height is 0 for depth texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Height is 0 for depth texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::DataFormatIsInvalid:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Data format is invalid for depth texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Data format is invalid for depth texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for depth texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for depth texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for depth texture in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for depth texture in saturation post processing.");
                     break;
                 case ITextureBuilder::Error::InternalError:
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating depth texture for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating depth texture for saturation post processing.");
                     break;
             }
             return false;
@@ -258,18 +254,18 @@ bool SaturationPPLayer::init() noexcept
             switch(fbError)
             {
                 case IFrameBufferBuilder::Error::BufferSizeDoesNotMatch:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Buffer sizes do not match for framebuffer in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Buffer sizes do not match for framebuffer in saturation post processing.");
                     break;
                 case IFrameBufferBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for framebuffer in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for framebuffer in saturation post processing.");
                     break;
                 case IFrameBufferBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for framebuffer in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for framebuffer in saturation post processing.");
                     break;
                 case IFrameBufferBuilder::Error::CrossAPIFailure:
                 case IFrameBufferBuilder::Error::InternalError:
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating framebuffer for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating framebuffer for saturation post processing.");
                     break;
             }
             return false;
@@ -292,13 +288,13 @@ bool SaturationPPLayer::init() noexcept
             switch(samplerError)
             {
                 case ITextureSamplerBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for texture sampler in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for texture sampler in saturation post processing.");
                     break;
                 case ITextureSamplerBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for texture sampler in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for texture sampler in saturation post processing.");
                     break;
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating texture sampler for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating texture sampler for saturation post processing.");
                     break;
             }
             return false;
@@ -317,14 +313,14 @@ bool SaturationPPLayer::init() noexcept
             switch(uploaderError)
             {
                 case ITextureUploaderBuilder::Error::SystemMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for texture uploader in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for texture uploader in saturation post processing.");
                     break;
                 case ITextureUploaderBuilder::Error::DriverMemoryAllocationFailure:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for texture uploader in saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for texture uploader in saturation post processing.");
                     break;
                 case ITextureUploaderBuilder::Error::CrossAPIFailure:
                 default:
-                    SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating texture uploader for saturation post processing.");
+                    SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating texture uploader for saturation post processing.");
                     break;
             }
             return false;
@@ -359,9 +355,7 @@ void SaturationPPLayer::onRender() noexcept
     _fbUploader->upload(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
 
     _va->bind(_globals.rc);
-    _va->preDraw(_globals.rc);
     _va->draw(_globals.rc);
-    _va->postDraw(_globals.rc);
     _va->unbind(_globals.rc);
 
     _fbUploader->unbind(_globals.rc, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
@@ -387,23 +381,23 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
         switch(error)
         {
             case ITextureBuilder::Error::WidthIsZero:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Width is 0 for color texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Width is 0 for color texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::HeightIsZero:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Height is 0 for color texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Height is 0 for color texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::DataFormatIsInvalid:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Data format is invalid for color texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Data format is invalid for color texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::SystemMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for color texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for color texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::DriverMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for color texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for color texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::InternalError:
             default:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating color texture for saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating color texture for saturation post processing.");
                 break;
         }
         return false;
@@ -422,23 +416,23 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
         switch(error)
         {
             case ITextureBuilder::Error::WidthIsZero:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Width is 0 for depth texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Width is 0 for depth texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::HeightIsZero:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Height is 0 for depth texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Height is 0 for depth texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::DataFormatIsInvalid:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Data format is invalid for depth texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Data format is invalid for depth texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::SystemMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for depth texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for depth texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::DriverMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for depth texture in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for depth texture in saturation post processing.");
                 break;
             case ITextureBuilder::Error::InternalError:
             default:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating depth texture for saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating depth texture for saturation post processing.");
                 break;
         }
         return false;
@@ -456,18 +450,18 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
         switch(fbError)
         {
             case IFrameBufferBuilder::Error::BufferSizeDoesNotMatch:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Buffer sizes do not match for framebuffer in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Buffer sizes do not match for framebuffer in saturation post processing.");
                 break;
             case IFrameBufferBuilder::Error::SystemMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for framebuffer in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for framebuffer in saturation post processing.");
                 break;
             case IFrameBufferBuilder::Error::DriverMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for framebuffer in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for framebuffer in saturation post processing.");
                 break;
             case IFrameBufferBuilder::Error::CrossAPIFailure:
             case IFrameBufferBuilder::Error::InternalError:
             default:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating framebuffer for saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating framebuffer for saturation post processing.");
                 break;
         }
         return false;
@@ -486,14 +480,14 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
         switch(uploaderError)
         {
             case ITextureUploaderBuilder::Error::SystemMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Failed to allocate memory for texture uploader in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Failed to allocate memory for texture uploader in saturation post processing.");
                 break;
             case ITextureUploaderBuilder::Error::DriverMemoryAllocationFailure:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Driver failed to allocate memory for texture uploader in saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Driver failed to allocate memory for texture uploader in saturation post processing.");
                 break;
             case ITextureUploaderBuilder::Error::CrossAPIFailure:
             default:
-                SystemInterface::get()->createAlert("Non-Critical Error", "Unknown error when creating texture uploader for saturation post processing.");
+                SystemInterface::createAlert("Non-Critical Error", "Unknown error when creating texture uploader for saturation post processing.");
                 break;
         }
         return false;

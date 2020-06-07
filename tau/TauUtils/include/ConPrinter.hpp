@@ -11,11 +11,11 @@ struct TPrinter final
     static i32 print(FILE* const file, const _T& t) noexcept { return 0; }
 };
 
-class Console final
+class ConPrinter final
 {
-    DELETE_CONSTRUCT(Console);
-    DELETE_DESTRUCT(Console);
-    DELETE_COPY(Console);
+    DELETE_CONSTRUCT(ConPrinter);
+    DELETE_DESTRUCT(ConPrinter);
+    DELETE_CM(ConPrinter);
 public:
     static i32 print(const char* str) noexcept { return fputs(str, stdout); }
     static i32 print(const char c) noexcept { return fputc(c, stdout); }

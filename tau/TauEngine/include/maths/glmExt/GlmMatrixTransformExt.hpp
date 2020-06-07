@@ -184,7 +184,6 @@ static inline bool useTranspose(const RenderingMode::Mode mode) noexcept
 {
     switch(mode)
     {
-        case RenderingMode::Mode::DirectX9:
         case RenderingMode::Mode::DirectX10:
         case RenderingMode::Mode::DirectX11:
         case RenderingMode::Mode::DirectX12:
@@ -192,11 +191,7 @@ static inline bool useTranspose(const RenderingMode::Mode mode) noexcept
             return true;
         case RenderingMode::Mode::Vulkan:
             return false;
-        case RenderingMode::Mode::OpenGL3:
-        case RenderingMode::Mode::OpenGL3_1:
-        case RenderingMode::Mode::OpenGL3_2:
-        case RenderingMode::Mode::OpenGL3_3:
-        case RenderingMode::Mode::OpenGL4:
+        case RenderingMode::Mode::OpenGL4_1:
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:

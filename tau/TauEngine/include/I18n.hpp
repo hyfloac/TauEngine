@@ -2,34 +2,37 @@
 
 #pragma warning(push, 0)
 #include <unordered_map>
-#include <memory>
 #pragma warning(pop)
-#include <String.hpp>
-#include <DLL.hpp>
 
-class TAU_DLL I18n
+#include <Objects.hpp>
+#include <IFile.hpp>
+
+#include "String.hpp"
+#include "DLL.hpp"
+
+class TAU_DLL I18n final
 {
-private:
-    std::unordered_map<String, std::shared_ptr<const char>> _translations;
-    const char* _language;
+    DEFAULT_CONSTRUCT_PU(I18n);
+    DEFAULT_DESTRUCT(I18n);
+    DEFAULT_COPY(I18n);
 public:
-    enum ErrorCode : u8
+    using I18nMap = ::std::unordered_map<DynString, DynString>;
+private:
+    I18nMap _translations;
+    DynString _language;
+public:
+    enum class Error
     {
-        SUCCESS = 0,
-        UNKNOWN_TRANSLATION_KEY,
+        NoError = 0,
+        UnknownTranslationKey
     };
 public:
-    I18n() noexcept;
+    [[nodiscard]] inline const char* language() const noexcept { return _language; }
+    [[nodiscard]] inline const I18nMap& operator()() const noexcept { return _translations; }
 
-    ~I18n() noexcept;
+    [[nodiscard]] inline const DynString& operator[](const DynString& key) const noexcept { return translate(key); }
 
-    void loadTranslations(const char* fileName) noexcept;
+    void loadTranslations(const CPPRef<IFile>& file) noexcept;
 
-    std::shared_ptr<const char> translate(String key, ErrorCode* success = null) const noexcept;
-
-    inline std::shared_ptr<const char> operator [](String key) const noexcept { return translate(key); }
-
-    inline const std::unordered_map<String, std::shared_ptr<const char>>& operator()() const noexcept { return _translations; }
-
-    inline const char* language() const noexcept { return _language; }
+    [[nodiscard]] const DynString& translate(const DynString& key, [[tau::out]] Error* error = null) const noexcept;
 };

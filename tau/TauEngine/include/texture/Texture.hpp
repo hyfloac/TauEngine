@@ -10,8 +10,9 @@
 #include "RenderTarget.hpp"
 #include "TextureView.hpp"
 
+class ITextureRawInterface;
+
 #define TEXTURE_IMPL_BASE(_TYPE) \
-    DELETE_COPY(_TYPE); \
     RTT_IMPL(_TYPE, ITexture)
 
 #define TEXTURE_IMPL(_TYPE) TEXTURE_IMPL_BASE(_TYPE)
@@ -20,7 +21,7 @@ class TAU_DLL TAU_NOVTABLE ITexture
 {
     DEFAULT_CONSTRUCT_PO(ITexture);
     DEFAULT_DESTRUCT_VI(ITexture);
-    DELETE_COPY(ITexture);
+    DEFAULT_CM_PO(ITexture);
 public:
     [[nodiscard]] virtual const IRenderTarget* renderTarget() const noexcept { return null; }
     [[nodiscard]] virtual       IRenderTarget* renderTarget()       noexcept { return null; }
@@ -28,7 +29,7 @@ public:
     [[nodiscard]] virtual ETexture::Format dataFormat() const noexcept = 0;
     [[nodiscard]] virtual ETexture::Type  textureType() const noexcept = 0;
 
-    [[nodiscard]] virtual u64 _getHandle() const noexcept { return 0; }
+    [[nodiscard]] virtual const ITextureRawInterface& _getRawHandle() const noexcept = 0;
 
     RTT_BASE_IMPL(ITexture);
     RTT_BASE_CHECK(ITexture);
@@ -38,7 +39,7 @@ public:
 class TAU_DLL TAU_NOVTABLE ITexture2D : public ITexture
 {
     DEFAULT_DESTRUCT_VI(ITexture2D);
-    DELETE_COPY(ITexture2D);
+    DEFAULT_CM_PO(ITexture2D);
 protected:
     u32 _width;
     u32 _height;
@@ -66,7 +67,7 @@ public:
 class TAU_DLL TAU_NOVTABLE ITexture3D : public ITexture
 {
     DEFAULT_DESTRUCT_VI(ITexture3D);
-    DELETE_COPY(ITexture3D);
+    DEFAULT_CM_PO(ITexture3D);
 protected:
     u32 _width;
     u32 _height;
@@ -97,7 +98,7 @@ public:
 class TAU_DLL TAU_NOVTABLE ITextureCube : public ITexture
 {
     DEFAULT_DESTRUCT_VI(ITextureCube);
-    DELETE_COPY(ITextureCube);
+    DEFAULT_CM_PO(ITextureCube);
 protected:
     u32 _width;
     u32 _height;
@@ -125,7 +126,7 @@ public:
 class TAU_DLL TAU_NOVTABLE ITextureDepthStencil : public ITexture
 {
     DEFAULT_DESTRUCT_VI(ITextureDepthStencil);
-    DELETE_COPY(ITextureDepthStencil);
+    DEFAULT_CM_PO(ITextureDepthStencil);
 protected:
     u32 _width;
     u32 _height;
@@ -154,7 +155,7 @@ public:
 struct Texture2DArgs final
 {
     DEFAULT_DESTRUCT(Texture2DArgs);
-    DEFAULT_COPY(Texture2DArgs);
+    DEFAULT_CM_PU(Texture2DArgs);
 public:
     u32 width;
     u32 height;
@@ -176,7 +177,7 @@ public:
 struct Texture3DArgs final
 {
     DEFAULT_DESTRUCT(Texture3DArgs);
-    DEFAULT_COPY(Texture3DArgs);
+    DEFAULT_CM_PU(Texture3DArgs);
 public:
     u32 width;
     u32 height;
@@ -198,7 +199,7 @@ public:
 struct TextureCubeArgs final
 {
     DEFAULT_DESTRUCT(TextureCubeArgs);
-    DEFAULT_COPY(TextureCubeArgs);
+    DEFAULT_CM_PU(TextureCubeArgs);
 public:
     u32 width;
     u32 height;
@@ -220,7 +221,7 @@ public:
 struct TextureDepthStencilArgs final
 {
     DEFAULT_DESTRUCT(TextureDepthStencilArgs);
-    DEFAULT_COPY(TextureDepthStencilArgs);
+    DEFAULT_CM_PU(TextureDepthStencilArgs);
 public:
     u32 width;
     u32 height;
@@ -239,7 +240,7 @@ class TAU_DLL TAU_NOVTABLE ITextureBuilder
 {
     DEFAULT_CONSTRUCT_PO(ITextureBuilder);
     DEFAULT_DESTRUCT_VI(ITextureBuilder);
-    DELETE_COPY(ITextureBuilder);
+    DEFAULT_CM_PO(ITextureBuilder);
 public:
     enum class Error
     {

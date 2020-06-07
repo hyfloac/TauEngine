@@ -12,7 +12,7 @@ class ShaderDataType final
 {
     DELETE_CONSTRUCT(ShaderDataType);
     DELETE_DESTRUCT(ShaderDataType);
-    DELETE_COPY(ShaderDataType);
+    DELETE_CM(ShaderDataType);
 public:
     enum Type : u8
     {
@@ -61,7 +61,7 @@ public:
     {
         DEFAULT_CONSTRUCT_PO(Typed);
         DEFAULT_DESTRUCT_VI(Typed);
-        DELETE_COPY(Typed);
+        DELETE_CM(Typed);
     public:
         [[nodiscard]] virtual ShaderDataType::Type dataType() noexcept = 0;
     };
@@ -122,7 +122,7 @@ class ShaderSemantic final
 {
     DELETE_CONSTRUCT(ShaderSemantic);
     DELETE_DESTRUCT(ShaderSemantic);
-    DELETE_COPY(ShaderSemantic);
+    DELETE_CM(ShaderSemantic);
 public:
     enum Semantic
     {
@@ -150,7 +150,7 @@ class TAU_DLL BufferElementDescriptor final
 {
     DEFAULT_CONSTRUCT_PU(BufferElementDescriptor);
     DEFAULT_DESTRUCT(BufferElementDescriptor);
-    DEFAULT_COPY(BufferElementDescriptor);
+    DEFAULT_CM_PU(BufferElementDescriptor);
 private:
     ShaderSemantic::Semantic _semantic;
     ShaderDataType::Type _type;
@@ -158,7 +158,7 @@ private:
     u32 _offsetCache;
     bool _normalized;
 private:
-    BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const u32 offsetCache, const bool normalized = false)
+    BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const u32 offsetCache, const bool normalized = false) noexcept
         : _semantic(semantic)
         , _type(type)
         , _sizeCache(ShaderDataType::size(type))
@@ -166,7 +166,7 @@ private:
         , _normalized(normalized)
     { }
 public:
-    BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const bool normalized = false)
+    BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const bool normalized = false) noexcept
         : _semantic(semantic)
         , _type(type)
         , _sizeCache(ShaderDataType::size(type))
@@ -185,8 +185,9 @@ private:
 
 class TAU_DLL BufferDescriptor final
 {
+    DEFAULT_CONSTRUCT_PU(BufferDescriptor);
     DEFAULT_DESTRUCT(BufferDescriptor);
-    DEFAULT_COPY(BufferDescriptor);
+    DEFAULT_CM_PU(BufferDescriptor);
 private:
     RefDynArray<BufferElementDescriptor> _elementDescriptors;
     u32 _stride;
@@ -208,7 +209,7 @@ private:
 class TAU_DLL BufferDescriptorBuilder final
 {
     DEFAULT_DESTRUCT(BufferDescriptorBuilder);
-    DEFAULT_COPY(BufferDescriptorBuilder);
+    DEFAULT_CM_PU(BufferDescriptorBuilder);
 private:
     u32 _currentIndex;
     RefDynArray<BufferElementDescriptor> _elementDescriptors;

@@ -18,10 +18,12 @@ protected:
     uSys _systemMemory;
     uSys _sharedMemory;
 protected:
-    IGraphicsAccelerator(const DynString& vendor, const DynString& deviceName, 
-                         u64 videoMemory, u64 systemMemory, u64 sharedMemory)
-        : _vendor(vendor), _deviceName(deviceName),
-          _videoMemory(videoMemory), _systemMemory(systemMemory), _sharedMemory(sharedMemory)
+    IGraphicsAccelerator(const DynString& vendor, const DynString& deviceName, const u64 videoMemory, const u64 systemMemory, const u64 sharedMemory) noexcept
+        : _vendor(vendor)
+        , _deviceName(deviceName)
+        , _videoMemory(videoMemory)
+        , _systemMemory(systemMemory)
+        , _sharedMemory(sharedMemory)
     { }
 public:
     [[nodiscard]] const DynString& vendor() const noexcept { return _vendor; }

@@ -1,20 +1,25 @@
-#include "gl/GLGraphicsInterface.hpp"
 #include "system/SystemInterface.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>
-#include "dx/dx11/DX11GraphicsInterface.hpp"
+#include "gl/GLGraphicsInterface.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
+#include "dx/dx11/DX11GraphicsInterface.hpp"
+
+_SysContainer SystemInterface::_sysContainer;
+
+const _SysContainer& SystemInterface::sysContainer() noexcept
+{
+    if(_sysContainer.programHandle == NULL)
+    {
+        _sysContainer.programHandle = GetModuleHandleA(NULL);
+    }
+    return _sysContainer;
+}
 
 static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept;
 
-SystemInterface::SystemInterface() noexcept
-    : _sysContainer({ NULL })
-{
-    _sysContainer.programHandle = GetModuleHandleA(NULL);
-}
-
-NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const RenderingMode& renderingMode) const noexcept
+NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const RenderingMode& renderingMode) noexcept
 {
     switch(renderingMode.currentMode())
     {
@@ -39,6 +44,7 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
             return null;
         case RenderingMode::Mode::Vulkan:
             return null;
+        case RenderingMode::Mode::OpenGL4_1:
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
         case RenderingMode::Mode::OpenGL4_4:
@@ -53,7 +59,7 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
     }
 }
 
-void SystemInterface::createAlert(const char* title, const char* message) const noexcept
+void SystemInterface::createAlert(const char* const title, const char* const message) noexcept
 {
     (void) MessageBoxA(NULL, message, title, MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
 }
@@ -62,25 +68,9 @@ static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) 
 {
     switch(mode)
     {
-        case RenderingMode::Mode::OpenGL3:
-            args.majorVersion = 3;
-            args.minorVersion = 0;
-            break;
-        case RenderingMode::Mode::OpenGL3_1:
-            args.majorVersion = 3;
-            args.minorVersion = 1;
-            break;
-        case RenderingMode::Mode::OpenGL3_2:
-            args.majorVersion = 3;
-            args.minorVersion = 2;
-            break;
-        case RenderingMode::Mode::OpenGL3_3:
-            args.majorVersion = 3;
-            args.minorVersion = 3;
-            break;
-        case RenderingMode::Mode::OpenGL4:
+        case RenderingMode::Mode::OpenGL4_1:
             args.majorVersion = 4;
-            args.minorVersion = 0;
+            args.minorVersion = 1;
             break;
         case RenderingMode::Mode::OpenGL4_2:
             args.majorVersion = 4;

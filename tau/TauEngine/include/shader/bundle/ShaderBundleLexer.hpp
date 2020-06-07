@@ -59,7 +59,7 @@ enum class CommonRenderingModelToken
 class TAU_DLL ShaderBundleLexer final
 {
     DEFAULT_DESTRUCT(ShaderBundleLexer);
-    DEFAULT_COPY(ShaderBundleLexer);
+    DEFAULT_CM(ShaderBundleLexer);
 private:
     CPPRef<IFile> _file;
     SBPToken _currentToken;

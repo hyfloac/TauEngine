@@ -20,7 +20,7 @@ void GL4_3VertexArray::bind(IRenderingContext& context) noexcept
 
     if(_indexBuffer)
     {
-        _indexBuffer->bind(context);
+        _indexBuffer->bind();
     }
 }
 
@@ -28,7 +28,7 @@ void GL4_3VertexArray::unbind(IRenderingContext& context) noexcept
 {
     if(_indexBuffer)
     {
-        _indexBuffer->unbind(context);
+        _indexBuffer->unbind();
     }
 }
 

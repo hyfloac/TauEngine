@@ -2,8 +2,7 @@
 
 #include <Objects.hpp>
 #include <RunTimeType.hpp>
-#include <ResourceSelector.hpp>
-#include <ReferenceCountingPointer.hpp>
+#include <IFile.hpp>
 
 #include "DLL.hpp"
 #include "events/Exception.hpp"
@@ -11,10 +10,10 @@
 
 class IRenderingContext;
 
-#define SHADER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                                RTT_IMPL(_TYPE, IShader)
+#define SHADER_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IShader)
 
-#define SHADER_IMPL(_TYPE) SHADER_IMPL_BASE(_TYPE);
+#define SHADER_IMPL(_TYPE) SHADER_IMPL_BASE(_TYPE)
 
 /**
  * Represents an abstract, library independent shader.
@@ -23,7 +22,7 @@ class TAU_DLL TAU_NOVTABLE IShader
 {
     DEFAULT_CONSTRUCT_PO(IShader);
     DEFAULT_DESTRUCT_VI(IShader);
-    DELETE_COPY(IShader);
+    DEFAULT_CM_PO(IShader);
 public:
     [[nodiscard]] virtual EShader::Stage shaderStage() const noexcept = 0;
 
@@ -38,7 +37,7 @@ public:
 struct ShaderArgs final
 {
     DEFAULT_DESTRUCT(ShaderArgs);
-    DEFAULT_COPY(ShaderArgs);
+    DEFAULT_CM(ShaderArgs);
 public:
     CPPRef<IFile> file;
     EShader::Stage stage;
@@ -53,7 +52,7 @@ class TAU_DLL TAU_NOVTABLE IShaderBuilder
 {
     DEFAULT_CONSTRUCT_PO(IShaderBuilder);
     DEFAULT_DESTRUCT_VI(IShaderBuilder);
-    DELETE_COPY(IShaderBuilder);
+    DEFAULT_CM_PO(IShaderBuilder);
 public:
     enum class Error
     {
@@ -75,9 +74,8 @@ public:
 
 class IncorrectAPIShaderException final : public Exception
 {
-public:
-    IncorrectAPIShaderException() noexcept = default;
-    ~IncorrectAPIShaderException() noexcept override = default;
-
+    DEFAULT_CONSTRUCT_PU(IncorrectAPIShaderException);
+    DEFAULT_DESTRUCT(IncorrectAPIShaderException);
+    DEFAULT_CM_PU(IncorrectAPIShaderException);
     EXCEPTION_IMPL(IncorrectAPIShaderException);
 };

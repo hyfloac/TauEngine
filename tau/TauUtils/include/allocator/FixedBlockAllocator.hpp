@@ -32,7 +32,7 @@ class FixedBlockAllocator final : public TauAllocator
 {
     DELETE_CONSTRUCT(FixedBlockAllocator);
     DEFAULT_DESTRUCT(FixedBlockAllocator);
-    DELETE_COPY(FixedBlockAllocator);
+    DELETE_CM(FixedBlockAllocator);
 public:
     FixedBlockAllocator(uSys blockSize, uSys numReservePages) noexcept = delete;
 
@@ -53,7 +53,7 @@ public:
 template<>
 class FixedBlockAllocator<AllocationTracking::None> final : public TauAllocator
 {
-    DELETE_COPY(FixedBlockAllocator);
+    DELETE_CM(FixedBlockAllocator);
 private:
     void* _pages;
     uSys _committedPages;
@@ -163,7 +163,7 @@ private:
 template<>
 class FixedBlockAllocator<AllocationTracking::Count> final : public TauAllocator
 {
-    DELETE_COPY(FixedBlockAllocator);
+    DELETE_CM(FixedBlockAllocator);
 private:
     void* _pages;
     uSys _committedPages;
@@ -290,7 +290,7 @@ private:
 template<>
 class FixedBlockAllocator<AllocationTracking::DoubleDeleteCount> final : public TauAllocator
 {
-    DELETE_COPY(FixedBlockAllocator);
+    DELETE_CM(FixedBlockAllocator);
 private:
     void* _pages;
     uSys _committedPages;
@@ -463,7 +463,7 @@ class FixedBlockArenaAllocator final : public TauAllocator
 {
     DELETE_CONSTRUCT(FixedBlockArenaAllocator);
     DEFAULT_DESTRUCT(FixedBlockArenaAllocator);
-    DELETE_COPY(FixedBlockArenaAllocator);
+    DELETE_CM(FixedBlockArenaAllocator);
 public:
     FixedBlockArenaAllocator(uSys blockSize, uSys numReservePages = 1024) noexcept = delete;
 
@@ -484,7 +484,7 @@ public:
 template<>
 class FixedBlockArenaAllocator<AllocationTracking::None> final : public TauAllocator
 {
-    DELETE_COPY(FixedBlockArenaAllocator);
+    DELETE_CM(FixedBlockArenaAllocator);
 private:
     void* _pages;
     uSys _allocatedPages;
@@ -542,7 +542,7 @@ private:
 template<>
 class FixedBlockArenaAllocator<AllocationTracking::Count> final : public TauAllocator
 {
-    DELETE_COPY(FixedBlockArenaAllocator);
+    DELETE_CM(FixedBlockArenaAllocator);
 private:
     void* _pages;
     uSys _allocatedPages;
@@ -617,7 +617,7 @@ private:
 template<>
 class FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount> final : public TauAllocator
 {
-    DELETE_COPY(FixedBlockArenaAllocator);
+    DELETE_CM(FixedBlockArenaAllocator);
 private:
     void* _pages;
     uSys _allocatedPages;

@@ -2,9 +2,11 @@
 
 #ifdef _WIN32
 #include <d3dcompiler.h>
-#include <IFile.hpp>
+#include <VFS.hpp>
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
+#include "shader/bundle/ShaderBundleParser.hpp"
+#include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 
 void DX10VertexShader::bind(DX10RenderingContext& context) noexcept
 { context.d3dDevice()->VSSetShader(_shader); }
@@ -23,10 +25,6 @@ void DX10GeometryShader::unbind(DX10RenderingContext& context) noexcept
 
 void DX10PixelShader::unbind(DX10RenderingContext& context) noexcept
 { context.d3dDevice()->PSSetShader(NULL); }
-
-DX10ShaderBuilder::DX10ShaderBuilder(DX10GraphicsInterface& gi) noexcept
-	: _gi(gi), _resIndex(IShaderBuilder::rsTransformer->transform(gi.renderingMode()))
-{ }
 
 DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error) const noexcept
 {
@@ -215,24 +213,47 @@ NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& arg
 
 bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* const dxArgs, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.vfsMount, Error::InvalidFile);
-    ERROR_CODE_COND_F(!args.path, Error::InvalidFile);
-    ERROR_CODE_COND_F(!args.fileName, Error::InvalidFile);
+    ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 
-    const ResourceSelector shaderSelector = ResourceSelectorLoader::load(args.vfsMount, args.path, args.fileName, IShaderBuilder::rsTransformer);
+    const DynString path = args.file->name();
 
-    ERROR_CODE_COND_F(shaderSelector.count() == 0, Error::InvalidFile);
-    auto& selected = shaderSelector.select(_resIndex);
-    ERROR_CODE_COND_F(!selected.loader() || selected.path().length() == 0 || selected.name().length() == 0, Error::InvalidFile);
-    const CPPRef<IFile> shaderFile = selected.loadFile(FileProps::Read);
+    if(VFS::getFileExt(path, false) == "tausi")
+    {
+        return processBundle(args, dxArgs, error);
+    }
+    else
+    {
+        return processShader(args.file, args.stage, dxArgs, error);
+    }
+}
 
-    const i64 fileSize = shaderFile->size();
-	
+bool DX10ShaderBuilder::processBundle(const ShaderArgs& args, DXShaderArgs* dxArgs, Error* error) const noexcept
+{
+    ShaderBundleParser parser(args.file);
+
+    ShaderBundleParser::Error parseError;
+    auto ast = parser.parse(&parseError);
+
+    _visitor->reset();
+    _visitor->visit(ast.get());
+    const sbp::ShaderInfo& info = _visitor->get(args.stage);
+
+    const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
+    if(!processShader(file, args.stage, dxArgs, error))
+    { return false; }
+
+    return true;
+}
+
+bool DX10ShaderBuilder::processShader(const CPPRef<IFile>& file, const EShader::Stage stage, DXShaderArgs* dxArgs, Error* error) const noexcept
+{
+    const i64 fileSize = file->size();
+
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
     ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
-    (void) shaderFile->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
+    (void)file->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
 
     return true;
 }

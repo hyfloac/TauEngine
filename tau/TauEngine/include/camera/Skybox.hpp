@@ -4,7 +4,7 @@
 #include <Objects.hpp>
 
 #include "DLL.hpp"
-#include "shader/IShaderProgram.hpp"
+#include "shader/ShaderProgram.hpp"
 #include "texture/Texture.hpp"
 #include "shader/Uniform.hpp"
 #include "shader/TextureUploader.hpp"
@@ -19,7 +19,7 @@ class IVertexArray;
 class TAU_DLL Skybox final
 {
     DEFAULT_DESTRUCT(Skybox);
-    DEFAULT_COPY(Skybox);
+    DEFAULT_CM(Skybox);
 public:
     struct Uniforms final
     {

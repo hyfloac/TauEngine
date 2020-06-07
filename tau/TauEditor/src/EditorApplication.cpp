@@ -108,10 +108,10 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
     _window->createWindow();
     _window->showWindow();
 
-    _graphicsInterface = SystemInterface::get()->createGraphicsInterface(RenderingMode::getGlobalMode());
+    _graphicsInterface = SystemInterface::createGraphicsInterface(RenderingMode::getGlobalMode());
     if(!_graphicsInterface)
     {
-        SystemInterface::get()->createAlert("Critical Error", "Failed to create graphics interface.");
+        SystemInterface::createAlert("Critical Error", "Failed to create graphics interface.");
         return false;
     }
 
@@ -128,13 +128,13 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
             switch(error)
             {
                 case IRenderingContextBuilder::Error::SystemMemoryAllocationError:
-                    SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default rendering context.");
+                    SystemInterface::createAlert("Critical Error", "System failed to allocate default rendering context.");
                     break;
                 case IRenderingContextBuilder::Error::UnsupportedAPIVersion:
-                    SystemInterface::get()->createAlert("Critical Error", "Requested graphics API version is not supported by the system.");
+                    SystemInterface::createAlert("Critical Error", "Requested graphics API version is not supported by the system.");
                     break;
                 case IRenderingContextBuilder::Error::NullWindow:
-                    SystemInterface::get()->createAlert("Critical Error", "Failed to create a window.");
+                    SystemInterface::createAlert("Critical Error", "Failed to create a window.");
                     break;
                 default: break;
             }
@@ -153,11 +153,11 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         if(error != IDepthStencilStateBuilder::Error::NoError)
         {
             if(error == IDepthStencilStateBuilder::Error::SystemMemoryAllocationFailure)
-            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default depth stencil state."); }
+            { SystemInterface::createAlert("Critical Error", "System failed to allocate default depth stencil state."); }
             else if(error == IDepthStencilStateBuilder::Error::DriverMemoryAllocationFailure)
-            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default depth stencil state."); }
+            { SystemInterface::createAlert("Critical Error", "Graphics driver failed to allocate default depth stencil state."); }
             else
-            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default depth stencil state."); }
+            { SystemInterface::createAlert("Critical Error", "Failed to create default depth stencil state."); }
             return false;
         }
 
@@ -173,11 +173,11 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         if(error != IRasterizerStateBuilder::Error::NoError)
         {
             if(error == IRasterizerStateBuilder::Error::SystemMemoryAllocationFailure)
-            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default rasterizer state."); }
+            { SystemInterface::createAlert("Critical Error", "System failed to allocate default rasterizer state."); }
             else if(error == IRasterizerStateBuilder::Error::DriverMemoryAllocationFailure)
-            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default rasterizer state."); }
+            { SystemInterface::createAlert("Critical Error", "Graphics driver failed to allocate default rasterizer state."); }
             else
-            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default rasterizer state."); }
+            { SystemInterface::createAlert("Critical Error", "Failed to create default rasterizer state."); }
             return false;
         }
 
@@ -199,11 +199,11 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
         if(error != IBlendingStateBuilder::Error::NoError)
         {
             if(error == IBlendingStateBuilder::Error::SystemMemoryAllocationFailure)
-            { SystemInterface::get()->createAlert("Critical Error", "System failed to allocate default blending state."); }
+            { SystemInterface::createAlert("Critical Error", "System failed to allocate default blending state."); }
             else if(error == IBlendingStateBuilder::Error::DriverMemoryAllocationFailure)
-            { SystemInterface::get()->createAlert("Critical Error", "Graphics driver failed to allocate default blending state."); }
+            { SystemInterface::createAlert("Critical Error", "Graphics driver failed to allocate default blending state."); }
             else
-            { SystemInterface::get()->createAlert("Critical Error", "Failed to create default blending state."); }
+            { SystemInterface::createAlert("Critical Error", "Failed to create default blending state."); }
             return false;
         }
 

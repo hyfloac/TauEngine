@@ -16,47 +16,28 @@
       auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
 #endif
 
-CPPRef<DX10VertexShader> DX10ShaderProgram::dxVertexShader() const noexcept
-{ return RefCast<DX10VertexShader>(_vertexShader); }
+NullableRef<DX10VertexShader> DX10ShaderProgram::dxVertexShader() const noexcept
+{ return _vertexShader; }
 
-CPPRef<DX10GeometryShader> DX10ShaderProgram::dxGeometryShader() const noexcept
-{ return RefCast<DX10GeometryShader>(_geometryShader); }
+NullableRef<DX10GeometryShader> DX10ShaderProgram::dxGeometryShader() const noexcept
+{ return _geometryShader; }
 
-CPPRef<DX10PixelShader> DX10ShaderProgram::dxPixelShader() const noexcept
-{ return RefCast<DX10PixelShader>(_pixelShader); }
+NullableRef<DX10PixelShader> DX10ShaderProgram::dxPixelShader() const noexcept
+{ return _pixelShader; }
 
 void DX10ShaderProgram::bind(IRenderingContext& context) noexcept
 {
     CTX();
-    if(_vertexShader) { dxVertexShader()->bind(ctx); }
+    if(_vertexShader)   { dxVertexShader()->bind(ctx);   }
     if(_geometryShader) { dxGeometryShader()->bind(ctx); }
-    if(_pixelShader) { dxPixelShader()->bind(ctx); }
+    if(_pixelShader)    { dxPixelShader()->bind(ctx);    }
 }
 
 void DX10ShaderProgram::unbind(IRenderingContext& context) noexcept
 {
     CTX();
-    if(_vertexShader) { dxVertexShader()->unbind(ctx); }
+    if(_vertexShader)   { dxVertexShader()->unbind(ctx);   }
     if(_geometryShader) { dxGeometryShader()->unbind(ctx); }
-    if(_pixelShader) { dxPixelShader()->unbind(ctx); }
-}
-
-bool DX10ShaderProgram::link(IRenderingContext&) noexcept
-{ return true; }
-
-bool DX10ShaderProgram::attach(IRenderingContext& context, const CPPRef<IShader>& shader) noexcept
-{
-#if TAU_RTTI_CHECK
-    if(!RTT_CHECK(context, DX10RenderingContext))
-    { TAU_THROW(IncorrectContextException); }
-#endif
-
-    if(RTT_CHECK(shader.get(), DX10Shader))
-    { return true; }
-    else
-    {
-        TAU_THROW(IncorrectAPIShaderException);
-        return false;
-    }
+    if(_pixelShader)    { dxPixelShader()->unbind(ctx);    }
 }
 #endif

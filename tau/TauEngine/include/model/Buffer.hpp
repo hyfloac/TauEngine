@@ -4,11 +4,10 @@
 #include <NumTypes.hpp>
 #include <Safeties.hpp>
 #include <RunTimeType.hpp>
-#include <allocator/TauAllocator.hpp>
-#include <ReferenceCountingPointer.hpp>
 
 #include "DLL.hpp"
 #include "shader/EShader.hpp"
+#include "events/Exception.hpp"
 #include "model/BufferEnums.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "TauEngine.hpp"
@@ -62,10 +61,10 @@
   #define TAU_BUFFER_SAFETY_DESTRUCTED_WHILE_MODIFYING     0
 #endif
 
-#include "events/Exception.hpp"
-
 class BufferSafetyException final : public Exception
 {
+    DEFAULT_CM_PU(BufferSafetyException);
+    EXCEPTION_IMPL(BufferSafetyException);
 public:
     enum Type
     {
@@ -90,38 +89,31 @@ public:
     ~BufferSafetyException() noexcept override = default;
 
     [[nodiscard]] inline Type type() const noexcept { return _type; }
-
-    EXCEPTION_IMPL(BufferSafetyException);
 };
 
 #define VERTEX_BUFFER_IMPL_BASE(_TYPE) \
-    DELETE_COPY(_TYPE); \
     RTT_IMPL(_TYPE, IVertexBuffer)
 
-#define VERTEX_BUFFER_IMPL(_TYPE) VERTEX_BUFFER_IMPL_BASE(_TYPE)
-
 #define INDEX_BUFFER_IMPL_BASE(_TYPE) \
-    DELETE_COPY(_TYPE); \
     RTT_IMPL(_TYPE, IIndexBuffer)
 
-#define INDEX_BUFFER_IMPL(_TYPE) INDEX_BUFFER_IMPL_BASE(_TYPE)
-
 #define UNIFORM_BUFFER_IMPL_BASE(_TYPE) \
-    DELETE_COPY(_TYPE); \
     RTT_IMPL(_TYPE, IUniformBuffer)
 
+#define VERTEX_BUFFER_IMPL(_TYPE) VERTEX_BUFFER_IMPL_BASE(_TYPE)
+#define INDEX_BUFFER_IMPL(_TYPE) INDEX_BUFFER_IMPL_BASE(_TYPE)
 #define UNIFORM_BUFFER_IMPL(_TYPE) UNIFORM_BUFFER_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE IVertexBuffer
 {
-    DELETE_COPY(IVertexBuffer);
+    DEFAULT_CM_PO(IVertexBuffer);
 protected:
     EBuffer::UsageType _usage;
     uSys _bufferSize;
     BufferDescriptor _descriptor;
 
 #if TAU_BUFFER_SAFETY
-    iSys _modificationLockCount;
+    mutable iSys _modificationLockCount;
 #endif
 protected:
     IVertexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor) noexcept
@@ -171,14 +163,14 @@ public:
 
 class TAU_DLL TAU_NOVTABLE IIndexBuffer
 {
-    DELETE_COPY(IIndexBuffer);
+    DEFAULT_CM_PO(IIndexBuffer);
 protected:
     EBuffer::UsageType _usage;
     EBuffer::IndexSize _indexSize;
     uSys _bufferSize;
 
 #if TAU_BUFFER_SAFETY
-    iSys _modificationLockCount;
+    mutable iSys _modificationLockCount;
 #endif
 protected:
     IIndexBuffer(const EBuffer::UsageType usage, const EBuffer::IndexSize indexSize, const uSys bufferSize) noexcept
@@ -226,14 +218,14 @@ public:
 
 class TAU_DLL TAU_NOVTABLE IUniformBuffer
 {
-    DELETE_COPY(IUniformBuffer);
+    DEFAULT_CM_PO(IUniformBuffer);
 protected:
     EBuffer::UsageType _usage;
     uSys _bufferSize;
 
 #if TAU_BUFFER_SAFETY
-    iSys _modificationLockCount;
-    iSys _uniformBindLockCount;
+    mutable iSys _modificationLockCount;
+    mutable iSys _uniformBindLockCount;
 #endif
 protected:
     IUniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize) noexcept
@@ -266,13 +258,13 @@ public:
     [[nodiscard]] inline EBuffer::UsageType usage() const noexcept { return _usage; }
     [[nodiscard]] inline uSys bufferSize() const noexcept { return _bufferSize; }
 
-    virtual void bind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
-    virtual void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) noexcept = 0;
+    virtual void bind(IRenderingContext& context, EShader::Stage stage, u32 index) const noexcept = 0;
+    virtual void unbind(IRenderingContext& context, EShader::Stage stage, u32 index) const noexcept = 0;
 
     /**
      * A stateless unbind used purely for buffer bind safety tracking.
      */
-    virtual void fastUnbind() noexcept = 0;
+    virtual void fastUnbind() const noexcept = 0;
 
     virtual bool beginModification(IRenderingContext& context) noexcept = 0;
     virtual void endModification(IRenderingContext& context) noexcept = 0;
@@ -295,7 +287,7 @@ public:
 struct VertexBufferArgs final
 {
     DEFAULT_DESTRUCT(VertexBufferArgs);
-    DEFAULT_COPY(VertexBufferArgs);
+    DEFAULT_CM_PU(VertexBufferArgs);
 public:
     EBuffer::UsageType usage;
     uSys elementCount;
@@ -315,7 +307,7 @@ public:
 struct IndexBufferArgs final
 {
     DEFAULT_DESTRUCT(IndexBufferArgs);
-    DEFAULT_COPY(IndexBufferArgs);
+    DEFAULT_CM_PU(IndexBufferArgs);
 public:
     EBuffer::UsageType usage;
     EBuffer::IndexSize indexSize;
@@ -335,7 +327,7 @@ public:
 struct UniformBufferArgs final
 {
     DEFAULT_DESTRUCT(UniformBufferArgs);
-    DEFAULT_COPY(UniformBufferArgs);
+    DEFAULT_CM_PU(UniformBufferArgs);
 public:
     EBuffer::UsageType usage;
     uSys bufferSize;
@@ -352,7 +344,7 @@ class TAU_DLL TAU_NOVTABLE IBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IBufferBuilder);
     DEFAULT_DESTRUCT_VI(IBufferBuilder);
-    DELETE_COPY(IBufferBuilder);
+    DEFAULT_CM_PO(IBufferBuilder);
 public:
     enum class Error
     {

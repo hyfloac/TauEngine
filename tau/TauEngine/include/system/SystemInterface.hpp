@@ -3,32 +3,21 @@
 #include <Objects.hpp>
 #include "DLL.hpp"
 #include "_SysContainer.hpp"
-#include "system/GraphicsAccelerator.hpp"
-#include "system/GraphicsInterface.hpp"
-#include "RenderingMode.hpp"
+
+class IGraphicsInterface;
+class RenderingMode;
 
 class TAU_DLL SystemInterface final
 {
-    DEFAULT_DESTRUCT(SystemInterface);
+    DELETE_CONSTRUCT(SystemInterface);
+    DELETE_DESTRUCT(SystemInterface);
     DELETE_COPY(SystemInterface);
 private:
-    static SystemInterface* _instance;
-private:
-    static SystemInterface* create() noexcept;
-    static void finalize() noexcept;
+    static _SysContainer _sysContainer;
 public:
-    static SystemInterface* get() noexcept;
-private:
-    _SysContainer _sysContainer;
-private:
-    SystemInterface() noexcept;
-public:
-    [[nodiscard]] const _SysContainer& sysContainer() const noexcept { return _sysContainer; }
+    [[nodiscard]] static const _SysContainer& sysContainer() noexcept;
 
-    [[nodiscard]] NullableRef<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) const noexcept;
+    [[nodiscard]] static NullableRef<IGraphicsInterface> createGraphicsInterface(const RenderingMode& renderingMode) noexcept;
 
-    void createAlert(const char* title, const char* message) const noexcept;
-private:
-    friend bool tauInit(void) noexcept;
-    friend void tauFinalize(void) noexcept;
+    static void createAlert(const char* title, const char* message) noexcept;
 };

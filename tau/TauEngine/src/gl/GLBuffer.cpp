@@ -182,7 +182,7 @@ void GLUniformBuffer::unbind(const u32 index) const noexcept
     glBindBufferBase(GL_UNIFORM_BUFFER, index, 0);
 }
 
-void GLUniformBuffer::bind(IRenderingContext&, EShader::Stage, const u32 index) noexcept
+void GLUniformBuffer::bind(IRenderingContext&, EShader::Stage, const u32 index) const noexcept
 {
 #if TAU_BUFFER_SAFETY
     ++_uniformBindLockCount;
@@ -196,7 +196,7 @@ void GLUniformBuffer::bind(IRenderingContext&, EShader::Stage, const u32 index) 
     bind(index);
 }
 
-void GLUniformBuffer::unbind(IRenderingContext&, EShader::Stage, const u32 index) noexcept
+void GLUniformBuffer::unbind(IRenderingContext&, EShader::Stage, const u32 index) const noexcept
 {
 #if TAU_BUFFER_SAFETY
     --_uniformBindLockCount;
@@ -210,7 +210,7 @@ void GLUniformBuffer::unbind(IRenderingContext&, EShader::Stage, const u32 index
     unbind(index);
 }
 
-void GLUniformBuffer::fastUnbind() noexcept
+void GLUniformBuffer::fastUnbind() const noexcept
 {
 #if TAU_BUFFER_SAFETY
     --_uniformBindLockCount;
@@ -343,7 +343,7 @@ CPPRef<IVertexBuffer> GLBufferBuilder::buildCPPRef(const VertexBufferArgs& args,
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLVertexBuffer> buffer = CPPRef<GLVertexBuffer>(new(std::nothrow) GLVertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), glArgs));
+    const CPPRef<GLVertexBuffer> buffer(new(std::nothrow) GLVertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), glArgs));
 
     if(!buffer)
     {
@@ -438,7 +438,7 @@ CPPRef<IIndexBuffer> GLBufferBuilder::buildCPPRef(const IndexBufferArgs& args, E
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLIndexBuffer> buffer = CPPRef<GLIndexBuffer>(new(std::nothrow) GLIndexBuffer(args.usage, args.indexSize, args.bufferSize(), glArgs));
+    const CPPRef<GLIndexBuffer> buffer(new(std::nothrow) GLIndexBuffer(args.usage, args.indexSize, args.bufferSize(), glArgs));
 
     if(!buffer)
     {
@@ -533,7 +533,7 @@ CPPRef<IUniformBuffer> GLBufferBuilder::buildCPPRef(const UniformBufferArgs& arg
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GLUniformBuffer> buffer = CPPRef<GLUniformBuffer>(new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs));
+    const CPPRef<GLUniformBuffer> buffer(new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs));
 
     if(!buffer)
     {
@@ -590,7 +590,7 @@ bool GLBufferBuilder::processArgs(const VertexBufferArgs& args, GLBufferArgs* co
     ERROR_CODE_COND_F(args.elementCount == 0, Error::BufferSizeIsZero);
 
     glArgs->glUsage = GLVertexBuffer::getGLUsageType(args.usage);
-    glArgs->buffer = _glInterface->createBuffer();
+    glArgs->buffer = _glInterface.createBuffer();
 
     return true;
 }
@@ -602,7 +602,7 @@ bool GLBufferBuilder::processArgs(const IndexBufferArgs& args, GLIndexBufferArgs
 
     glArgs->glUsage = GLVertexBuffer::getGLUsageType(args.usage);
     glArgs->glIndexSize = GLIndexBuffer::glIndexSize(args.indexSize);
-    glArgs->buffer = _glInterface->createBuffer();
+    glArgs->buffer = _glInterface.createBuffer();
 
     return true;
 }
@@ -613,7 +613,7 @@ bool GLBufferBuilder::processArgs(const UniformBufferArgs& args, GLBufferArgs* c
     ERROR_CODE_COND_F(args.bufferSize == 0, Error::BufferSizeIsZero);
 
     glArgs->glUsage = GLVertexBuffer::getGLUsageType(args.usage);
-    glArgs->buffer = _glInterface->createBuffer();
+    glArgs->buffer = _glInterface.createBuffer();
 
     return true;
 }

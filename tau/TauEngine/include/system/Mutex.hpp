@@ -4,16 +4,18 @@
 #include <Windows.h>
 #pragma warning(pop)
 
+#include <Objects.hpp>
+
 class CSMutex final
 {
+    DELETE_CM(CSMutex);
 private:
     CRITICAL_SECTION _criticalSection;
 public:
     inline CSMutex() noexcept
-        : _criticalSection()
     {
         InitializeCriticalSectionEx(&_criticalSection, 512,
-                                #if _DEBUG
+                                #ifdef TAU_PRODUCTION
                                     CRITICAL_SECTION_NO_DEBUG_INFO
                                 #else
                                     0
@@ -25,12 +27,6 @@ public:
     {
         DeleteCriticalSection(&_criticalSection);
     }
-
-    CSMutex(const CSMutex& copy) noexcept = delete;
-    CSMutex(CSMutex&& move) noexcept = delete;
-
-    CSMutex& operator =(const CSMutex& copy) noexcept = delete;
-    CSMutex& operator =(CSMutex&& move) noexcept = delete;
 
     inline void lock() noexcept
     {
@@ -50,22 +46,14 @@ public:
 
 class SRWMutex final
 {
+    DEFAULT_DESTRUCT(SRWMutex);
+    DELETE_CM(SRWMutex);
 private:
     SRWLOCK _srw;
 public:
     inline SRWMutex() noexcept
-        : _srw()
-    {
-        InitializeSRWLock(&_srw);
-    }
-
-    inline ~SRWMutex() noexcept = default;
-
-    SRWMutex(const SRWMutex& copy) noexcept = delete;
-    SRWMutex(SRWMutex&& move) noexcept = delete;
-
-    SRWMutex& operator =(const SRWMutex& copy) noexcept = delete;
-    SRWMutex& operator =(SRWMutex&& move) noexcept = delete;
+        : _srw(SRWLOCK_INIT)
+    { }
 
     inline void lock() noexcept
     {

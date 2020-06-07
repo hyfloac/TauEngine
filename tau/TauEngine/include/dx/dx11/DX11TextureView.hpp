@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <d3d11.h>
+#include "dx/DXUtils.hpp"
 
 class TAU_DLL DX11TextureView : public ITextureView
 {
@@ -11,22 +12,51 @@ class TAU_DLL DX11TextureView : public ITextureView
 private:
     ID3D11ShaderResourceView* _d3dShaderResourceView;
 public:
-    inline DX11TextureView(ID3D11ShaderResourceView* const d3dShaderResourceView) noexcept
-        : ITextureView()
-        , _d3dShaderResourceView(d3dShaderResourceView)
+    DX11TextureView(ID3D11ShaderResourceView* const d3dShaderResourceView) noexcept
+        : _d3dShaderResourceView(d3dShaderResourceView)
     { }
 
-    inline ~DX11TextureView() noexcept
+    ~DX11TextureView() noexcept
+    { RELEASE_DX(_d3dShaderResourceView); }
+
+    DX11TextureView(const DX11TextureView& copy) noexcept
+        : ITextureView(copy)
+        , _d3dShaderResourceView(copy._d3dShaderResourceView)
+    { _d3dShaderResourceView->AddRef(); }
+
+    DX11TextureView(DX11TextureView&& move) noexcept
+        : ITextureView(::std::move(move))
+        , _d3dShaderResourceView(move._d3dShaderResourceView)
+    { move._d3dShaderResourceView = null; }
+
+    DX11TextureView& operator=(const DX11TextureView& copy) noexcept
     {
-        if(_d3dShaderResourceView)
-        {
-            _d3dShaderResourceView->Release();
-            _d3dShaderResourceView = null;
-        }
+        if(this == &copy)
+        { return *this; }
+
+        ITextureView::operator=(copy);
+
+        _d3dShaderResourceView = copy._d3dShaderResourceView;
+        _d3dShaderResourceView->AddRef();
+
+        return *this;
     }
 
-    [[nodiscard]] inline const ID3D11ShaderResourceView* d3dShaderResourceView() const noexcept { return _d3dShaderResourceView; }
-    [[nodiscard]] inline       ID3D11ShaderResourceView* d3dShaderResourceView()       noexcept { return _d3dShaderResourceView; }
+    DX11TextureView& operator=(DX11TextureView&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        ITextureView::operator=(::std::move(move));
+
+        _d3dShaderResourceView = move._d3dShaderResourceView;
+        move._d3dShaderResourceView = null;
+
+        return *this;
+    }
+
+    [[nodiscard]]       ID3D11ShaderResourceView* d3dShaderResourceView()       noexcept { return _d3dShaderResourceView; }
+    [[nodiscard]] const ID3D11ShaderResourceView* d3dShaderResourceView() const noexcept { return _d3dShaderResourceView; }
 
     void generateMipmaps(IRenderingContext& context) noexcept override;
 };
@@ -34,9 +64,9 @@ public:
 class TAU_DLL DX11NoMipmapTextureView final : public DX11TextureView
 {
     DEFAULT_DESTRUCT(DX11NoMipmapTextureView);
-    DELETE_COPY(DX11NoMipmapTextureView);
+    DEFAULT_CM_PU(DX11NoMipmapTextureView);
 public:
-    inline DX11NoMipmapTextureView(ID3D11ShaderResourceView* const d3dShaderResourceView) noexcept
+    DX11NoMipmapTextureView(ID3D11ShaderResourceView* const d3dShaderResourceView) noexcept
         : DX11TextureView(d3dShaderResourceView)
     { }
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdio>
 #include <NumTypes.hpp>
+#include <ConPrinter.hpp>
 
 #include "ShaderBundleVisitor.hpp"
 
@@ -9,7 +9,7 @@ struct PrintSBVArgs final
 {
     DEFAULT_CONSTRUCT_PU(PrintSBVArgs);
     DEFAULT_DESTRUCT(PrintSBVArgs);
-    DEFAULT_COPY(PrintSBVArgs);
+    DEFAULT_CM_PU(PrintSBVArgs);
 public:
     enum TabsOrSpaces
     {
@@ -61,7 +61,7 @@ public:
 class TAU_DLL PrintShaderBundleVisitor final : public IShaderBundleVisitor
 {
     DEFAULT_DESTRUCT(PrintShaderBundleVisitor);
-    DELETE_COPY(PrintShaderBundleVisitor);
+    DEFAULT_CM_PU(PrintShaderBundleVisitor);
 private:
     uSys _indentCount;
     char _indentChar;
@@ -87,7 +87,6 @@ public:
     void visit(const sbp::FileExprAST& expr) noexcept override;
     void visit(const sbp::BlockExprAST& expr) noexcept override;
     void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept override;
-    void visit(const sbp::OuterShaderStageBlockExprAST& expr) noexcept override;
     void visit(const sbp::APIBlockExprAST& expr) noexcept override;
     void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept override;
     void visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept override;

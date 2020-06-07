@@ -10,7 +10,7 @@ class UniformAccessor<float> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
@@ -27,7 +27,7 @@ class UniformAccessor<Vector2f> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
@@ -48,7 +48,7 @@ class UniformAccessor<Vector3f> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
@@ -71,7 +71,7 @@ class UniformAccessor<Vector4f> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 

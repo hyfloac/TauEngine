@@ -7,6 +7,7 @@
 
 class TAU_DLL DX11RenderTarget final : public IRenderTarget
 {
+    DELETE_CM(DX11RenderTarget);
     RENDER_TARGET_IMPL(DX11RenderTarget);
 private:
     ID3D11RenderTargetView* _d3dRenderTargetView;
@@ -30,6 +31,7 @@ public:
 
 class TAU_DLL DX11DepthStencilTarget final : public IRenderTarget
 {
+    DELETE_CM(DX11DepthStencilTarget);
     RENDER_TARGET_IMPL(DX11DepthStencilTarget);
 private:
     ID3D11DepthStencilView* _d3dDepthStencilView;

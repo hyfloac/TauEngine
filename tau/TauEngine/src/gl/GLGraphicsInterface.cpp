@@ -2,6 +2,7 @@
 
 #include "gl/gl4_5/GLBuffer4_5.hpp"
 #include "gl/GLShader.hpp"
+#include "gl/GLShaderProgram.hpp"
 #include "gl/GLInputLayout.hpp"
 #include "gl/GLVertexArray.hpp"
 #include "gl/GLBuffer.hpp"
@@ -24,12 +25,13 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
     , _minorVersion(minorVersion)
     , _compat(compat)
     , _forwardCompatible(forwardCompatible)
-    , _shaderBuilder(new(::std::nothrow) GLShaderBuilder(*this))
+    , _shaderInfoExtractor(mode.currentMode())
+    , _shaderBuilder(new(::std::nothrow) GLShaderBuilder(&_shaderInfoExtractor))
+    , _shaderProgramBuilder(new(::std::nothrow) GLShaderProgramBuilder(&_shaderInfoExtractor))
     , _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder)
     , _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder)
     , _textureBuilder(new(::std::nothrow) GLTextureBuilder)
     , _textureSamplerBuilder(new(::std::nothrow) GLTextureSamplerBuilder)
-    , _singleTextureUploaderBuilder(new(::std::nothrow) GLSingleTextureUploaderBuilder)
     , _textureUploaderBuilder(new(::std::nothrow) GLTextureUploaderBuilder)
     , _frameBufferBuilder(new(::std::nothrow) GLFrameBufferBuilder)
     , _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
@@ -65,6 +67,7 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
 GLGraphicsInterface::~GLGraphicsInterface() noexcept
 {
     delete _shaderBuilder;
+    delete _shaderProgramBuilder;
     delete _inputLayoutBuilder;
     delete _vertexArrayBuilder;
     delete _bufferBuilder;
@@ -73,7 +76,6 @@ GLGraphicsInterface::~GLGraphicsInterface() noexcept
     delete _blendingStateBuilder;
     delete _textureBuilder;
     delete _textureSamplerBuilder;
-    delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
     delete _frameBufferBuilder;
     delete _renderingContextBuilder;
@@ -84,6 +86,9 @@ RefDynArray<NullableRef<IGraphicsAccelerator>> GLGraphicsInterface::graphicsAcce
 
 IShaderBuilder& GLGraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
+
+IShaderProgramBuilder& GLGraphicsInterface::createShaderProgram() noexcept
+{ return *_shaderProgramBuilder; }
 
 IInputLayoutBuilder& GLGraphicsInterface::createInputLayout() noexcept
 { return *_inputLayoutBuilder; }
@@ -108,9 +113,6 @@ ITextureBuilder& GLGraphicsInterface::createTexture() noexcept
 
 ITextureSamplerBuilder& GLGraphicsInterface::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
-
-ISingleTextureUploaderBuilder& GLGraphicsInterface::createSingleTextureUploader() noexcept
-{ return *_singleTextureUploaderBuilder; }
 
 ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
 { return *_textureUploaderBuilder; }

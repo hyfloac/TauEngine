@@ -12,7 +12,7 @@ class UniformAccessor<glm::vec2> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
@@ -33,7 +33,7 @@ class UniformAccessor<glm::vec3> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
@@ -56,7 +56,7 @@ class UniformAccessor<glm::vec4> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 public:
     [[nodiscard]] static inline uSys size() noexcept { return sizeof(float) * 4; }
 
@@ -81,7 +81,7 @@ class UniformAccessor<glm::mat4> final
 {
     DELETE_CONSTRUCT(UniformAccessor);
     DELETE_DESTRUCT(UniformAccessor);
-    DELETE_COPY(UniformAccessor);
+    DELETE_CM(UniformAccessor);
 private:
     static constexpr uSys MATRIX_SIZE = sizeof(float) * 4 * 4;
 public:

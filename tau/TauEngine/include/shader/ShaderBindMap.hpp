@@ -9,7 +9,7 @@ class TAU_DLL ShaderBindMap final
 {
     DEFAULT_CONSTRUCT_PU(ShaderBindMap);
     DEFAULT_DESTRUCT(ShaderBindMap);
-    DEFAULT_COPY(ShaderBindMap);
+    DEFAULT_CM(ShaderBindMap);
 private:
     RefDynArray<i32> _vertexUniMap;
     RefDynArray<i32> _tessCtrlUniMap;

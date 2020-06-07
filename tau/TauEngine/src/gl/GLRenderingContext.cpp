@@ -204,7 +204,7 @@ CPPRef<IRenderingContext> GLRenderingContextBuilder::buildCPPRef(const Rendering
     if(!processSysArgs(args, glArgs, &glSysArgs, error))
     { return null; }
 
-    const CPPRef<GLRenderingContext> context = CPPRef<GLRenderingContext>(new(::std::nothrow) GLRenderingContext(_gi.renderingMode(), glArgs, glSysArgs));
+    const CPPRef<GLRenderingContext> context(new(::std::nothrow) GLRenderingContext(_gi.renderingMode(), glArgs, glSysArgs));
 
     ERROR_CODE_COND_N(!context, Error::SystemMemoryAllocationError);
     ERROR_CODE_V(Error::NoError, context);

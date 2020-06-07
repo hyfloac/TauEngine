@@ -18,8 +18,10 @@
 #include "system/Window.hpp"
 
 DX11GraphicsInterface::DX11GraphicsInterface(const RenderingMode& mode, ID3D11Device* const d3dDevice) noexcept
-    : IGraphicsInterface(mode), _d3d11Device(d3dDevice)
-    , _shaderBuilder(new(::std::nothrow) DX11ShaderBuilder(*this))
+    : IGraphicsInterface(mode)
+    , _d3d11Device(d3dDevice)
+    , _shaderInfoExtractor(mode.currentMode())
+    , _shaderBuilder(new(::std::nothrow) DX11ShaderBuilder(*this, &_shaderInfoExtractor))
     , _inputLayoutBuilder(new(::std::nothrow) DX11InputLayoutBuilder(*this))
     , _vertexArrayBuilder(new(::std::nothrow) DX11VertexArrayBuilder)
     , _bufferBuilder(new(::std::nothrow) DX11BufferBuilder(*this))
@@ -28,8 +30,7 @@ DX11GraphicsInterface::DX11GraphicsInterface(const RenderingMode& mode, ID3D11De
     , _blendingStateBuilder(new(::std::nothrow) DX11BlendingStateBuilder(*this))
     , _textureBuilder(new(::std::nothrow) DX11TextureBuilder(*this))
     , _textureSamplerBuilder(new(::std::nothrow) DX11TextureSamplerBuilder(*this))
-    , _singleTextureUploaderBuilder(new(::std::nothrow) DX11SingleTextureUploaderBuilder(*this))
-    , _textureUploaderBuilder(new(::std::nothrow) DX11TextureUploaderBuilder(*this))
+    , _textureUploaderBuilder(new(::std::nothrow) DX11TextureUploaderBuilder)
     , _frameBufferBuilder(new(::std::nothrow) DX11FrameBufferBuilder(*this))
     , _renderingContextBuilder(new(::std::nothrow) DX11RenderingContextBuilder(*this))
 { }
@@ -48,7 +49,6 @@ DX11GraphicsInterface::~DX11GraphicsInterface() noexcept
     delete _blendingStateBuilder;
     delete _textureBuilder;
     delete _textureSamplerBuilder;
-    delete _singleTextureUploaderBuilder;
     delete _textureUploaderBuilder;
     delete _frameBufferBuilder;
     delete _renderingContextBuilder;
@@ -112,9 +112,6 @@ ITextureBuilder& DX11GraphicsInterface::createTexture() noexcept
 
 ITextureSamplerBuilder& DX11GraphicsInterface::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
-
-ISingleTextureUploaderBuilder& DX11GraphicsInterface::createSingleTextureUploader() noexcept
-{ return *_singleTextureUploaderBuilder; }
 
 ITextureUploaderBuilder& DX11GraphicsInterface::createTextureUploader() noexcept
 { return *_textureUploaderBuilder; }

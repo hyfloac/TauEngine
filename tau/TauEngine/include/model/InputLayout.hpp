@@ -24,7 +24,7 @@ public:
 struct InputLayoutArgs final
 {
     DEFAULT_DESTRUCT(InputLayoutArgs);
-    DEFAULT_COPY(InputLayoutArgs);
+    DEFAULT_CM(InputLayoutArgs);
 public:
     /**
      * Used to validate the layout.

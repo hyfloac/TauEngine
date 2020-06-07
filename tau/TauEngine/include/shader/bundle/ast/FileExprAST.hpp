@@ -9,7 +9,7 @@ namespace sbp {
 class TAU_DLL FileExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT(FileExprAST);
-    DELETE_COPY(FileExprAST);
+    DEFAULT_CM_PU(FileExprAST);
 private:
     DynString _filePath;
 public:
