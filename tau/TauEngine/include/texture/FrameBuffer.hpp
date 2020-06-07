@@ -16,10 +16,10 @@
 
 class IRenderingContext;
 
-class TAU_NOVTABLE IFrameBuffer
+class TAU_DLL TAU_NOVTABLE IFrameBuffer
 {
     DEFAULT_DESTRUCT_VI(IFrameBuffer);
-    DELETE_COPY(IFrameBuffer);
+    DEFAULT_CM_PO(IFrameBuffer);
 public:
     enum AccessMode
     {
@@ -47,8 +47,8 @@ public:
 
 struct FrameBufferArgs final
 {
-    DEFAULT_COPY(FrameBufferArgs);
     DEFAULT_DESTRUCT(FrameBufferArgs);
+    DEFAULT_CM_PU(FrameBufferArgs);
 public:
     RefDynArray<CPPRef<ITexture>> colorAttachments;
     CPPRef<ITextureDepthStencil> depthStencilAttachment;
@@ -63,7 +63,7 @@ class TAU_NOVTABLE IFrameBufferBuilder
 {
     DEFAULT_CONSTRUCT_PO(IFrameBufferBuilder);
     DEFAULT_DESTRUCT_VI(IFrameBufferBuilder);
-    DELETE_COPY(IFrameBufferBuilder);
+    DEFAULT_CM_PO(IFrameBufferBuilder);
 public:
     enum Error
     {

@@ -16,15 +16,6 @@
       auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
 #endif
 
-NullableRef<DX10VertexShader> DX10ShaderProgram::dxVertexShader() const noexcept
-{ return _vertexShader; }
-
-NullableRef<DX10GeometryShader> DX10ShaderProgram::dxGeometryShader() const noexcept
-{ return _geometryShader; }
-
-NullableRef<DX10PixelShader> DX10ShaderProgram::dxPixelShader() const noexcept
-{ return _pixelShader; }
-
 void DX10ShaderProgram::bind(IRenderingContext& context) noexcept
 {
     CTX();

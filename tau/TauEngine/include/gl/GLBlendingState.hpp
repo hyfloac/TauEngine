@@ -9,6 +9,7 @@
 class TAU_DLL GLBlendingState : public IBlendingState
 {
     DEFAULT_DESTRUCT(GLBlendingState);
+    DEFAULT_COPY_PO(GLBlendingState);
     BS_IMPL(GLBlendingState);
 protected:
     GLBlendingState(const BlendingArgs& args) noexcept
@@ -22,7 +23,7 @@ struct GL2_0BlendingArgs final
 {
     DEFAULT_CONSTRUCT_PU(GL2_0BlendingArgs);
     DEFAULT_DESTRUCT(GL2_0BlendingArgs);
-    DEFAULT_COPY(GL2_0BlendingArgs);
+    DEFAULT_CM_PU(GL2_0BlendingArgs);
 public:
     void (*GLAPIENTRY blendingControl)(GLenum);
     GLenum colorSrcFactor;
@@ -46,7 +47,7 @@ public:
 class TAU_DLL GL2_0BlendingState final : public GLBlendingState
 {
     DEFAULT_DESTRUCT(GL2_0BlendingState);
-DELETE_COPY(GL2_0BlendingState);
+    DEFAULT_CM_PU(GL2_0BlendingState);
 private:
     GL2_0BlendingArgs _glArgs;
 public:
@@ -62,7 +63,7 @@ class TAU_DLL GLBlendingStateBuilder : public IBlendingStateBuilder
 {
     DEFAULT_CONSTRUCT_PU(GLBlendingStateBuilder);
     DEFAULT_DESTRUCT(GLBlendingStateBuilder);
-    DELETE_COPY(GLBlendingStateBuilder);
+    DEFAULT_CM_PU(GLBlendingStateBuilder);
 public:
     [[nodiscard]] static GLenum glBlendFactor(BlendingArgs::BlendFactor blendFactor) noexcept;
     [[nodiscard]] static GLenum glBlendOp(BlendingArgs::BlendOp blendOp) noexcept;

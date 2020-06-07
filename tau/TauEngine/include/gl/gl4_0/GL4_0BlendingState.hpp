@@ -6,7 +6,7 @@ struct GL4_0FrameBufferBlendingArgs final
 {
     DEFAULT_CONSTRUCT_PU(GL4_0FrameBufferBlendingArgs);
     DEFAULT_DESTRUCT(GL4_0FrameBufferBlendingArgs);
-    DEFAULT_COPY(GL4_0FrameBufferBlendingArgs);
+    DEFAULT_CM_PU(GL4_0FrameBufferBlendingArgs);
 public:
     void (*GLAPIENTRY blendingControl)(GLenum, GLuint);
     GLenum colorSrcFactor;
@@ -35,6 +35,7 @@ struct GL4_0BlendingArgs final
 class TAU_DLL GL4_0BlendingState final : public GLBlendingState
 {
     DEFAULT_DESTRUCT(GL4_0BlendingState);
+    DEFAULT_CM_PU(GL4_0BlendingState);
     BS_IMPL(GL4_0BlendingState);
 private:
     GL4_0FrameBufferBlendingArgs _glArgs[8];
@@ -51,7 +52,7 @@ class TAU_DLL GL4_0BlendingStateBuilder final : public GLBlendingStateBuilder
 {
     DEFAULT_CONSTRUCT_PU(GL4_0BlendingStateBuilder);
     DEFAULT_DESTRUCT(GL4_0BlendingStateBuilder);
-    DELETE_COPY(GL4_0BlendingStateBuilder);
+    DEFAULT_CM_PU(GL4_0BlendingStateBuilder);
 public:
     [[nodiscard]] GLBlendingState* build(const BlendingArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] GLBlendingState* build(const BlendingArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;

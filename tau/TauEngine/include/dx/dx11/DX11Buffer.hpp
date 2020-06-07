@@ -46,6 +46,8 @@ public:
         if(this == &copy)
         { return *this; }
 
+        RELEASE_DX(_d3dBuffer);
+
         IVertexBuffer::operator=(copy);
 
         _d3dBuffer = copy._d3dBuffer;
@@ -60,6 +62,8 @@ public:
     {
         if(this == &move)
         { return *this; }
+
+        RELEASE_DX(_d3dBuffer);
 
         IVertexBuffer::operator=(::std::move(move));
 
@@ -120,6 +124,8 @@ public:
         if(this == &copy)
         { return *this; }
 
+        RELEASE_DX(_d3dBuffer);
+
         IIndexBuffer::operator=(copy);
 
         _dxIndexSize = copy._dxIndexSize;
@@ -135,6 +141,8 @@ public:
     {
         if(this == &move)
         { return *this; }
+
+        RELEASE_DX(_d3dBuffer);
 
         IIndexBuffer::operator=(::std::move(move));
 
@@ -192,6 +200,8 @@ public:
         if(this == &copy)
         { return *this; }
 
+        RELEASE_DX(_d3dBuffer);
+
         IUniformBuffer::operator=(copy);
 
         _d3dBuffer = copy._d3dBuffer;
@@ -206,6 +216,8 @@ public:
     {
         if(this == &move)
         { return *this; }
+
+        RELEASE_DX(_d3dBuffer);
 
         IUniformBuffer::operator=(::std::move(move));
 
@@ -234,7 +246,7 @@ public:
 class TAU_DLL DX11BufferBuilder final : public IBufferBuilder
 {
     DEFAULT_DESTRUCT(DX11BufferBuilder);
-    DELETE_COPY(DX11BufferBuilder);
+    DEFAULT_CM_PU(DX11BufferBuilder);
 public:
     struct DXIndexBufferArgs final
     {

@@ -10,13 +10,13 @@ struct GLDepthStencilArgs final
 {
     DEFAULT_CONSTRUCT_PU(GLDepthStencilArgs);
     DEFAULT_DESTRUCT(GLDepthStencilArgs);
-    DEFAULT_COPY(GLDepthStencilArgs);
+    DEFAULT_CM_PU(GLDepthStencilArgs);
 public:
     struct GLStencilOpArgs final
     {
         DEFAULT_CONSTRUCT_PU(GLStencilOpArgs);
         DEFAULT_DESTRUCT(GLStencilOpArgs);
-        DEFAULT_COPY(GLStencilOpArgs);
+        DEFAULT_CM_PU(GLStencilOpArgs);
     public:
         GLenum failOp;
         GLenum stencilPassDepthFailOp;
@@ -56,6 +56,7 @@ public:
 class GLDepthStencilState final : public IDepthStencilState
 {
     DEFAULT_DESTRUCT(GLDepthStencilState);
+    DEFAULT_CM_PU(GLDepthStencilState);
     DSS_IMPL(GLDepthStencilState);
 private:
     GLDepthStencilArgs _glArgs;
@@ -72,7 +73,7 @@ class GLDepthStencilStateBuilder final : public IDepthStencilStateBuilder
 {
     DEFAULT_CONSTRUCT_PU(GLDepthStencilStateBuilder);
     DEFAULT_DESTRUCT(GLDepthStencilStateBuilder);
-    DELETE_COPY(GLDepthStencilStateBuilder);
+    DEFAULT_CM_PU(GLDepthStencilStateBuilder);
 public:
     [[nodiscard]] static GLenum glStencilOperation(DepthStencilArgs::StencilOp stencilOp) noexcept;
 public:

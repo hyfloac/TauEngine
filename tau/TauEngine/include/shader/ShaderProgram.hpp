@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DLL.hpp"
 #include <Objects.hpp>
 #include <Safeties.hpp>
 #include <IFile.hpp>
+#include "DLL.hpp"
 
 class IGraphicsInterface;
 class IRenderingContext;

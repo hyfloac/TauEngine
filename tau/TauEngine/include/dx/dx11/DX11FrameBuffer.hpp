@@ -9,7 +9,7 @@ class DX11GraphicsInterface;
 
 class TAU_DLL DX11FrameBuffer final : public IFrameBuffer
 {
-    DELETE_COPY(DX11FrameBuffer);
+    DELETE_CM(DX11FrameBuffer);
 private:
     ID3D11RenderTargetView** _d3dColorAttachments;
 public:
@@ -25,7 +25,6 @@ public:
         }
 
         delete[] _d3dColorAttachments;
-        _d3dColorAttachments = null;
     }
 
     void bind(IRenderingContext& context, AccessMode mode) noexcept override;
@@ -37,19 +36,18 @@ public:
 class TAU_DLL DX11FrameBufferBuilder final : public IFrameBufferBuilder
 {
     DEFAULT_DESTRUCT(DX11FrameBufferBuilder);
-    DELETE_COPY(DX11FrameBufferBuilder);
+    DEFAULT_CM_PU(DX11FrameBufferBuilder);
 public:
     struct DX11FrameBufferArgs final
     {
         DEFAULT_CONSTRUCT_PU(DX11FrameBufferArgs);
-        DEFAULT_COPY(DX11FrameBufferArgs);
+        DELETE_CM(DX11FrameBufferArgs);
     public:
         ID3D11RenderTargetView** d3dColorAttachments;
 
         ~DX11FrameBufferArgs()
         {
             delete[] d3dColorAttachments;
-            d3dColorAttachments = null;
         }
     };
 private:

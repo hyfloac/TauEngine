@@ -12,8 +12,8 @@
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
 
-#define RC_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                            RTT_IMPL(_TYPE, IRenderingContext)
+#define RC_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IRenderingContext)
 
 #define RC_IMPL(_TYPE) RC_IMPL_BASE(_TYPE)
 
@@ -29,7 +29,7 @@ struct BlendingArgs;
 class TAU_DLL TAU_NOVTABLE IRenderingContext
 {
     DEFAULT_DESTRUCT_VI(IRenderingContext);
-    DELETE_COPY(IRenderingContext);
+    DEFAULT_CM_PO(IRenderingContext);
 protected:
     RenderingMode _mode;
 protected:
@@ -121,7 +121,7 @@ class TAU_DLL NOVTABLE IRenderingContextBuilder
 {
     DEFAULT_CONSTRUCT_PO(IRenderingContextBuilder);
     DEFAULT_DESTRUCT_VI(IRenderingContextBuilder);
-    DELETE_COPY(IRenderingContextBuilder);
+    DEFAULT_CM_PO(IRenderingContextBuilder);
 public:
     enum class Error
     {

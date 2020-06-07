@@ -11,7 +11,7 @@ struct GLBufferArgs final
 {
     DEFAULT_CONSTRUCT_PU(GLBufferArgs);
     DEFAULT_DESTRUCT(GLBufferArgs);
-    DEFAULT_COPY(GLBufferArgs);
+    DEFAULT_CM_PU(GLBufferArgs);
 
     GLenum glUsage;
     GLuint buffer;
@@ -21,7 +21,7 @@ struct GLIndexBufferArgs final
 {
     DEFAULT_CONSTRUCT_PU(GLIndexBufferArgs);
     DEFAULT_DESTRUCT(GLIndexBufferArgs);
-    DEFAULT_COPY(GLIndexBufferArgs);
+    DEFAULT_CM_PU(GLIndexBufferArgs);
 
     GLenum glUsage;
     GLenum glIndexSize;
@@ -30,6 +30,7 @@ struct GLIndexBufferArgs final
 
 class TAU_DLL GLVertexBuffer final : public IVertexBuffer
 {
+    DELETE_CM(GLVertexBuffer);
     VERTEX_BUFFER_IMPL(GLVertexBuffer);
 public:
     static GLenum getGLUsageType(EBuffer::UsageType usage) noexcept;
@@ -60,6 +61,7 @@ public:
 
 class TAU_DLL GLIndexBuffer final : public IIndexBuffer
 {
+    DELETE_CM(GLIndexBuffer);
     INDEX_BUFFER_IMPL(GLIndexBuffer);
 public:
     static GLenum glIndexSize(EBuffer::IndexSize indexSize) noexcept;
@@ -94,6 +96,7 @@ private:
 
 class TAU_DLL GLUniformBuffer final : public IUniformBuffer
 {
+    DELETE_CM(GLUniformBuffer);
     UNIFORM_BUFFER_IMPL(GLUniformBuffer);
 private:
     GLenum _glUsage;
@@ -132,7 +135,7 @@ class TAU_DLL GLBufInterface
 {
     DEFAULT_CONSTRUCT_PU(GLBufInterface);
     DEFAULT_DESTRUCT_VI(GLBufInterface);
-    DELETE_COPY(GLBufInterface);
+    DEFAULT_CM_PU(GLBufInterface);
 public:
     [[nodiscard]] virtual GLuint createBuffer() const noexcept;
 };
@@ -140,7 +143,7 @@ public:
 class TAU_DLL GLBufferBuilder final : public IBufferBuilder
 {
     DEFAULT_DESTRUCT(GLBufferBuilder);
-    DELETE_COPY(GLBufferBuilder);
+    DEFAULT_CM_PU(GLBufferBuilder);
 private:
     GLBufInterface& _glInterface;
 public:

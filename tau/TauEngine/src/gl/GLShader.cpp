@@ -12,15 +12,6 @@
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 #include <VariableLengthArray.hpp>
 
-GLShader::~GLShader() noexcept
-{
-    if(_shaderID)
-    {
-        glDeleteProgram(_shaderID);
-        _shaderID = 0;
-    }
-}
-
 static void clearWhiteSpace(uSys& index, const uSys length, const u8* const arr) noexcept
 {
     for(; index < length && isspace(arr[index]); ++index);

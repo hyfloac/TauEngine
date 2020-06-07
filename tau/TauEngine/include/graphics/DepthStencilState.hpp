@@ -10,7 +10,7 @@ struct DepthStencilArgs final
 {
     DEFAULT_CONSTRUCT_PU(DepthStencilArgs);
     DEFAULT_DESTRUCT(DepthStencilArgs);
-    DEFAULT_COPY(DepthStencilArgs);
+    DEFAULT_CM_PU(DepthStencilArgs);
 public:
     enum class DepthWriteMask : u8
     {
@@ -36,7 +36,7 @@ public:
     {
         DEFAULT_CONSTRUCT_PU(StencilOpArgs);
         DEFAULT_DESTRUCT(StencilOpArgs);
-        DEFAULT_COPY(StencilOpArgs);
+        DEFAULT_CM_PU(StencilOpArgs);
     public:
         StencilOp failOp;
         StencilOp stencilPassDepthFailOp;
@@ -89,15 +89,15 @@ public:
     explicit DepthStencilArgs(tau::TIPDefault) noexcept { }
 };
 
-#define DSS_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                             RTT_IMPL(_TYPE, IDepthStencilState)
+#define DSS_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IDepthStencilState)
 
 #define DSS_IMPL(_TYPE) DSS_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE IDepthStencilState
 {
     DEFAULT_DESTRUCT_VI(IDepthStencilState);
-    DELETE_COPY(IDepthStencilState);
+    DEFAULT_CM_PO(IDepthStencilState);
 protected:
     DepthStencilArgs _args;
 protected:
@@ -116,7 +116,7 @@ class TAU_DLL TAU_NOVTABLE IDepthStencilStateBuilder
 {
     DEFAULT_CONSTRUCT_PO(IDepthStencilStateBuilder);
     DEFAULT_DESTRUCT_VI(IDepthStencilStateBuilder);
-    DELETE_COPY(IDepthStencilStateBuilder);
+    DEFAULT_CM_PO(IDepthStencilStateBuilder);
 public:
     enum class Error
     {

@@ -15,7 +15,7 @@ class TAU_DLL TAU_NOVTABLE IInputLayout
 {
     DEFAULT_CONSTRUCT_PU(IInputLayout);
     DEFAULT_DESTRUCT_VI(IInputLayout);
-    DELETE_COPY(IInputLayout);
+    DEFAULT_CM_PO(IInputLayout);
 public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
     virtual void unbind(IRenderingContext& context) noexcept = 0;
@@ -24,7 +24,7 @@ public:
 struct InputLayoutArgs final
 {
     DEFAULT_DESTRUCT(InputLayoutArgs);
-    DEFAULT_CM(InputLayoutArgs);
+    DEFAULT_CM_PU(InputLayoutArgs);
 public:
     /**
      * Used to validate the layout.
@@ -44,7 +44,7 @@ class TAU_DLL NOVTABLE IInputLayoutBuilder
 {
     DEFAULT_CONSTRUCT_PO(IInputLayoutBuilder);
     DEFAULT_DESTRUCT_VI(IInputLayoutBuilder);
-    DELETE_COPY(IInputLayoutBuilder);
+    DEFAULT_CM_PO(IInputLayoutBuilder);
 public:
     enum class Error
     {

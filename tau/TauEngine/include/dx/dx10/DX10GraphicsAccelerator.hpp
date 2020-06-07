@@ -7,7 +7,7 @@
 
 class TAU_DLL DX10GraphicsAccelerator final : public IGraphicsAccelerator
 {
-    DELETE_COPY(DX10GraphicsAccelerator);
+    DELETE_CM(DX10GraphicsAccelerator);
 private:
     IDXGIAdapter* _dxgiAdapter;
 public:
@@ -34,7 +34,7 @@ class TAU_DLL DX10GraphicsAcceleratorBuilder final
 {
     DEFAULT_CONSTRUCT_PU(DX10GraphicsAcceleratorBuilder);
     DEFAULT_DESTRUCT(DX10GraphicsAcceleratorBuilder);
-    DEFAULT_COPY(DX10GraphicsAcceleratorBuilder);
+    DEFAULT_CM_PU(DX10GraphicsAcceleratorBuilder);
 private:
     IDXGIAdapter* _dxgiAdapter;
 public:

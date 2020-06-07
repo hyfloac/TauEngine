@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <d3d10.h>
+#include "dx/DXUtils.hpp"
 
 class DX10GraphicsInterface;
 class DX10RenderingContext;
@@ -20,13 +21,50 @@ public:
     { }
 
     ~DX10RasterizerState() noexcept
+    { RELEASE_DX(_d3dRasterizerState); }
+
+    DX10RasterizerState(const DX10RasterizerState& copy) noexcept
+        : IRasterizerState(copy)
+        , _d3dRasterizerState(copy._d3dRasterizerState)
+    { _d3dRasterizerState->AddRef(); }
+
+    DX10RasterizerState(DX10RasterizerState&& move) noexcept
+        : IRasterizerState(::std::move(move))
+        , _d3dRasterizerState(move._d3dRasterizerState)
+    { move._d3dRasterizerState = null; }
+
+    DX10RasterizerState& operator=(const DX10RasterizerState& copy) noexcept
     {
-        _d3dRasterizerState->Release();
-        _d3dRasterizerState = null;
+        if(this == &copy)
+        { return *this; }
+
+        RELEASE_DX(_d3dRasterizerState);
+
+        IRasterizerState::operator=(copy);
+
+        _d3dRasterizerState = copy._d3dRasterizerState;
+        _d3dRasterizerState->AddRef();
+
+        return *this;
     }
 
+    DX10RasterizerState& operator=(DX10RasterizerState&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        RELEASE_DX(_d3dRasterizerState);
+
+        IRasterizerState::operator=(::std::move(move));
+
+        _d3dRasterizerState = move._d3dRasterizerState;
+        move._d3dRasterizerState = null;
+
+        return *this;
+    }
+
+    [[nodiscard]]       ID3D10RasterizerState* d3dRasterizerState()       noexcept { return _d3dRasterizerState; }
     [[nodiscard]] const ID3D10RasterizerState* d3dRasterizerState() const noexcept { return _d3dRasterizerState; }
-    [[nodiscard]] ID3D10RasterizerState* d3dRasterizerState() noexcept { return _d3dRasterizerState; }
 
     void apply(DX10RenderingContext& ctx) const noexcept;
 };
@@ -34,7 +72,7 @@ public:
 class TAU_DLL DX10RasterizerStateBuilder final : public IRasterizerStateBuilder
 {
     DEFAULT_DESTRUCT(DX10RasterizerStateBuilder);
-    DELETE_COPY(DX10RasterizerStateBuilder);
+    DEFAULT_CM_PU(DX10RasterizerStateBuilder);
 public:
     static D3D10_CULL_MODE dxCullMode(RasterizerArgs::CullMode cullMode) noexcept;
     static D3D10_FILL_MODE dxFillMode(RasterizerArgs::FillMode fillMode) noexcept;

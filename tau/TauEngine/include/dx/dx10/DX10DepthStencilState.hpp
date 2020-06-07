@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <d3d10.h>
+#include "dx/DXUtils.hpp"
 
 class DX10GraphicsInterface;
 class DX10RenderingContext;
@@ -20,9 +21,46 @@ public:
     { }
 
     ~DX10DepthStencilState() noexcept
+    { RELEASE_DX(_d3dDepthStencilState); }
+
+    DX10DepthStencilState(const DX10DepthStencilState& copy) noexcept
+        : IDepthStencilState(copy)
+        , _d3dDepthStencilState(copy._d3dDepthStencilState)
+    { _d3dDepthStencilState->AddRef(); }
+
+    DX10DepthStencilState(DX10DepthStencilState&& move) noexcept
+        : IDepthStencilState(::std::move(move))
+        , _d3dDepthStencilState(move._d3dDepthStencilState)
+    { move._d3dDepthStencilState = null; }
+
+    DX10DepthStencilState& operator=(const DX10DepthStencilState& copy) noexcept
     {
-        _d3dDepthStencilState->Release();
-        _d3dDepthStencilState = null;
+        if(this == &copy)
+        { return *this; }
+
+        RELEASE_DX(_d3dDepthStencilState);
+
+        IDepthStencilState::operator=(copy);
+
+        _d3dDepthStencilState = copy._d3dDepthStencilState;
+        _d3dDepthStencilState->AddRef();
+
+        return *this;
+    }
+
+    DX10DepthStencilState& operator=(DX10DepthStencilState&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        RELEASE_DX(_d3dDepthStencilState);
+
+        IDepthStencilState::operator=(std::move(move));
+
+        _d3dDepthStencilState = move._d3dDepthStencilState;
+        move._d3dDepthStencilState = null;
+
+        return *this;
     }
 
     [[nodiscard]] const ID3D10DepthStencilState* d3dDepthStencilState() const noexcept { return _d3dDepthStencilState; }

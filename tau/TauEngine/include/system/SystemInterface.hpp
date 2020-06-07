@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Objects.hpp>
+#include <Safeties.hpp>
 #include "DLL.hpp"
 #include "_SysContainer.hpp"
 

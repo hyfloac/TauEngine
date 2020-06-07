@@ -1,5 +1,6 @@
 #include "vr/VRUtils.hpp"
 #include "texture/Texture.hpp"
+#include "texture/TextureRawInterface.hpp"
 
 vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
 {
@@ -25,5 +26,5 @@ vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
 
 VRTextureHandle_t tauGetVRTextureHandle(ITexture* texture) noexcept
 {
-    return reinterpret_cast<VRTextureHandle_t>(static_cast<uintptr_t>(texture->_getHandle()));
+    return texture->_getRawHandle().rawHandle();
 }

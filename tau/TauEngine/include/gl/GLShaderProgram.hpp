@@ -10,13 +10,13 @@ class TAU_DLL GLShaderProgram final : public IShaderProgram
 {
     DELETE_CM(GLShaderProgram);
 private:
-    GLuint _pipelineHandle;
+    GLuint _programHandle;
 public:
     GLShaderProgram() noexcept;
 
     ~GLShaderProgram() noexcept override;
 
-    [[nodiscard]] GLuint programID() const noexcept { return _pipelineHandle; }
+    [[nodiscard]] GLuint programHandle() const noexcept { return _programHandle; }
 
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;

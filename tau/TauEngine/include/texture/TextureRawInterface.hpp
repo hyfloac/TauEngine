@@ -6,8 +6,8 @@
 #pragma warning(push, 0)
 #include <GL/glew.h>
 #ifdef _WIN32
-  #include <d3d10.h>
   #include <d3d11.h>
+  #include <d3d10.h>
 #endif
 #pragma warning(pop)
 
@@ -17,6 +17,8 @@ class TAU_DLL TAU_NOVTABLE ITextureRawInterface
     DEFAULT_DESTRUCT_VI(ITextureRawInterface);
     DEFAULT_CM_PO(ITextureRawInterface);
 public:
+    [[nodiscard]] virtual void* rawHandle() const noexcept = 0;
+
     [[nodiscard]] virtual GLuint glTexture() const noexcept { return 0; }
 
 #ifdef _WIN32

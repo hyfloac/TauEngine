@@ -15,21 +15,46 @@ class GLGraphicsInterface;
  */
 class TAU_DLL GLShader final : public IShader
 {
+    DELETE_COPY(GLShader);
     SHADER_IMPL(GLShader);
 private:
-    GLuint _shaderID;
+    GLuint _shaderHandle;
     EShader::Stage _shaderType;
 public:
-    GLShader(const GLuint shaderID, const EShader::Stage shaderType) noexcept
-        : _shaderID(shaderID)
+    GLShader(const GLuint shaderHandle, const EShader::Stage shaderType) noexcept
+        : _shaderHandle(shaderHandle)
         , _shaderType(shaderType)
     { }
 	
-    ~GLShader() noexcept override;
+    ~GLShader() noexcept override
+    {
+        if(_shaderHandle)
+        {
+            glDeleteProgram(_shaderHandle);
+        }
+    }
+
+    GLShader(GLShader&& move) noexcept
+        : _shaderHandle(move._shaderHandle)
+        , _shaderType(move._shaderType)
+    { move._shaderHandle = 0; }
+
+    GLShader& operator=(GLShader&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        _shaderHandle = move._shaderHandle;
+        _shaderType = move._shaderType;
+
+        move._shaderHandle = 0;
+
+        return *this;
+    }
 
     [[nodiscard]] EShader::Stage shaderStage() const noexcept override { return _shaderType; }
 
-    [[nodiscard]] GLuint shaderId() const noexcept { return _shaderID; }
+    [[nodiscard]] GLuint shaderHandle() const noexcept { return _shaderHandle; }
 private:
     friend class GLShaderBuilder;
 };
@@ -39,7 +64,7 @@ class ShaderInfoExtractorVisitor;
 class TAU_DLL GLShaderBuilder final : public IShaderBuilder
 {
     DEFAULT_DESTRUCT(GLShaderBuilder);
-    DELETE_COPY(GLShaderBuilder);
+    DEFAULT_CM_PU(GLShaderBuilder);
 private:
 	struct GLShaderArgs final
 	{

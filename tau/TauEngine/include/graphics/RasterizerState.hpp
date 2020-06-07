@@ -10,7 +10,7 @@ struct RasterizerArgs final
 {
     DEFAULT_CONSTRUCT_PU(RasterizerArgs);
     DEFAULT_DESTRUCT(RasterizerArgs);
-    DEFAULT_COPY(RasterizerArgs);
+    DEFAULT_CM_PU(RasterizerArgs);
 public:
     enum class CullMode : u8
     {
@@ -47,15 +47,15 @@ public:
     explicit RasterizerArgs(tau::TIPDefault) noexcept { }
 };
 
-#define RS_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                            RTT_IMPL(_TYPE, IRasterizerState)
+#define RS_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IRasterizerState)
 
 #define RS_IMPL(_TYPE) RS_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE IRasterizerState
 {
     DEFAULT_DESTRUCT_VI(IRasterizerState);
-    DELETE_COPY(IRasterizerState);
+    DEFAULT_CM_PO(IRasterizerState);
 protected:
     RasterizerArgs _args;
 protected:
@@ -74,7 +74,7 @@ class TAU_DLL TAU_NOVTABLE IRasterizerStateBuilder
 {
     DEFAULT_CONSTRUCT_PO(IRasterizerStateBuilder);
     DEFAULT_DESTRUCT_VI(IRasterizerStateBuilder);
-    DELETE_COPY(IRasterizerStateBuilder);
+    DEFAULT_CM_PO(IRasterizerStateBuilder);
 public:
     enum class Error
     {

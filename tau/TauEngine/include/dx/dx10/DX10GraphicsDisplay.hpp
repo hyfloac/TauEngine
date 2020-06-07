@@ -8,7 +8,7 @@
 
 class TAU_DLL DX10GraphicsDisplay final : public IGraphicsDisplay
 {
-    DELETE_COPY(DX10GraphicsDisplay);
+    DELETE_CM(DX10GraphicsDisplay);
 private:
     IDXGIOutput* _dxgiAdapterOutput;
     RefDynArray<GraphicsDisplayMode> _displayModes;
@@ -27,7 +27,7 @@ class TAU_DLL DX10GraphicsDisplayBuilder
 {
     DEFAULT_CONSTRUCT_PU(DX10GraphicsDisplayBuilder);
     DEFAULT_DESTRUCT(DX10GraphicsDisplayBuilder);
-    DEFAULT_COPY(DX10GraphicsDisplayBuilder);
+    DEFAULT_CM_PU(DX10GraphicsDisplayBuilder);
 private:
     IDXGIOutput* _dxgiAdapterOutput;
 public:

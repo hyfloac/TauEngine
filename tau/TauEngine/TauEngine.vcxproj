@@ -154,6 +154,7 @@
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Texture.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10TextureRawInterface.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureSampler.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureUploader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureView.hpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="include\gl\GLRenderTarget.hpp" />
     <ClInclude Include="include\gl\GLShaderBundleVisitor.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
+    <ClInclude Include="include\gl\GLTextureRawInterface.hpp" />
     <ClInclude Include="include\gl\GLTextureSampler.hpp" />
     <ClInclude Include="include\gl\GLTextureUploader.hpp" />
     <ClInclude Include="include\gl\GLTextureView.hpp" />

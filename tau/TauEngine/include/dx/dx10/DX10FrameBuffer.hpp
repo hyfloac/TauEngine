@@ -9,7 +9,7 @@ class DX10GraphicsInterface;
 
 class TAU_DLL DX10FrameBuffer final : public IFrameBuffer
 {
-    DELETE_COPY(DX10FrameBuffer);
+    DELETE_CM(DX10FrameBuffer);
 private:
     ID3D10RenderTargetView** _d3dColorAttachments;
 public:
@@ -25,7 +25,6 @@ public:
         }
 
         delete[] _d3dColorAttachments;
-        _d3dColorAttachments = null;
     }
 
     void bind(IRenderingContext& context, AccessMode mode) noexcept override;
@@ -37,19 +36,18 @@ public:
 class TAU_DLL DX10FrameBufferBuilder final : public IFrameBufferBuilder
 {
     DEFAULT_DESTRUCT(DX10FrameBufferBuilder);
-    DELETE_COPY(DX10FrameBufferBuilder);
+    DEFAULT_CM_PU(DX10FrameBufferBuilder);
 public:
     struct DX10FrameBufferArgs final
     {
         DEFAULT_CONSTRUCT_PU(DX10FrameBufferArgs);
-        DEFAULT_COPY(DX10FrameBufferArgs);
+        DELETE_CM(DX10FrameBufferArgs);
     public:
         ID3D10RenderTargetView** d3dColorAttachments;
 
         ~DX10FrameBufferArgs()
         {
             delete[] d3dColorAttachments;
-            d3dColorAttachments = null;
         }
     };
 private:

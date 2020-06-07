@@ -10,7 +10,7 @@ struct BlendingArgs final
 {
     DEFAULT_CONSTRUCT_PU(BlendingArgs);
     DEFAULT_DESTRUCT(BlendingArgs);
-    DEFAULT_COPY(BlendingArgs);
+    DEFAULT_CM_PU(BlendingArgs);
 public:
     /**
      * Specifies what factor to use for blending.
@@ -106,7 +106,7 @@ public:
     {
         DEFAULT_CONSTRUCT_PU(FrameBufferBlendingArgs);
         DEFAULT_DESTRUCT(FrameBufferBlendingArgs);
-        DEFAULT_COPY(FrameBufferBlendingArgs);
+        DEFAULT_CM_PU(FrameBufferBlendingArgs);
     public:
         bool enableBlending;
         BlendFactor colorSrcFactor;
@@ -169,15 +169,15 @@ public:
     explicit BlendingArgs(tau::TIPDefault) noexcept { }
 };
 
-#define BS_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                            RTT_IMPL(_TYPE, IBlendingState)
+#define BS_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IBlendingState)
 
 #define BS_IMPL(_TYPE) BS_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE IBlendingState
 {
     DEFAULT_DESTRUCT_VI(IBlendingState);
-    DELETE_COPY(IBlendingState);
+    DEFAULT_CM_PO(IBlendingState);
 protected:
     BlendingArgs _args;
 protected:
@@ -196,7 +196,7 @@ class TAU_DLL TAU_NOVTABLE IBlendingStateBuilder
 {
     DEFAULT_CONSTRUCT_PO(IBlendingStateBuilder);
     DEFAULT_DESTRUCT_VI(IBlendingStateBuilder);
-    DELETE_COPY(IBlendingStateBuilder);
+    DEFAULT_CM_PO(IBlendingStateBuilder);
 public:
     enum class Error
     {

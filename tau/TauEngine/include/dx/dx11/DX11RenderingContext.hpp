@@ -22,6 +22,8 @@ struct DX11RenderingContextArgs final
 
 class TAU_DLL DX11RenderingContext final : public IRenderingContext
 {
+    DELETE_CM(DX11RenderingContext);
+    RC_IMPL(DX11RenderingContext);
 private:
     DX11GraphicsInterface& _gi;
 
@@ -93,14 +95,12 @@ public:
     void swapFrame() noexcept override;
 
     void resizeSwapChain(uSys width, uSys height) noexcept override;
-protected:
-    RC_IMPL(DX11RenderingContext);
 };
 
 class TAU_DLL DX11RenderingContextBuilder final : public IRenderingContextBuilder
 {
     DEFAULT_DESTRUCT(DX11RenderingContextBuilder);
-    DELETE_COPY(DX11RenderingContextBuilder);
+    DEFAULT_CM_PU(DX11RenderingContextBuilder);
 private:
     DX11GraphicsInterface& _gi;
 public:

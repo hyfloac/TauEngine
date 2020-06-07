@@ -45,6 +45,8 @@ public:
         return *this;
     }
 
+    [[nodiscard]] void* rawHandle() const noexcept override { return _tex1D; }
+
     [[nodiscard]] ID3D11Texture1D* dx11Texture1D() const noexcept override { return _tex1D; }
     [[nodiscard]] ID3D11Texture2D* dx11Texture2D() const noexcept override { return _tex2D; }
     [[nodiscard]] ID3D11Texture3D* dx11Texture3D() const noexcept override { return _tex3D; }

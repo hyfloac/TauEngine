@@ -881,6 +881,12 @@
     <ClInclude Include="include\dx\dx11\DX11TextureRawInterface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10TextureRawInterface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gl\GLTextureRawInterface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Window.natvis" />

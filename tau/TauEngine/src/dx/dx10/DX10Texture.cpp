@@ -6,30 +6,6 @@
 #include "TauEngine.hpp"
 #include <EnumBitFields.hpp>
 
-DX10Texture2D::~DX10Texture2D() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
-DX10Texture3D::~DX10Texture3D() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
-DX10TextureCube::~DX10TextureCube() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
-DX10TextureDepthStencil::~DX10TextureDepthStencil() noexcept
-{
-    _d3dTexture->Release();
-    _d3dTexture = null;
-}
-
 void DX10Texture2D::set(IRenderingContext& context, const u32 level, const void* const data) noexcept
 {
     if(!RTT_CHECK(context, DX10RenderingContext))

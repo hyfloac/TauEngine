@@ -3,9 +3,11 @@
 #include "texture/Texture.hpp"
 #include "GLRenderTarget.hpp"
 #include "GLTextureView.hpp"
+#include "GLTextureRawInterface.hpp"
 
 class TAU_DLL GLTexture2D final : public ITexture2D
 {
+    DELETE_CM(GLTexture2D);
     TEXTURE_IMPL(GLTexture2D);
 public:
     static GLint glInternalFormat(ETexture::Format format) noexcept;
@@ -18,12 +20,14 @@ private:
     GLuint _texture;
     GLRenderTarget _renderTarget;
     GLTextureView _textureView;
+    GLTextureRawInterface _rawInterface;
 public:
     inline GLTexture2D(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
         : ITexture2D(width, height, dataFormat)
         , _texture(texture)
         , _renderTarget(texture, GL_TEXTURE_2D)
         , _textureView(texture, GL_TEXTURE_2D)
+        , _rawInterface(texture)
     { }
 
     ~GLTexture2D() noexcept;
@@ -35,7 +39,7 @@ public:
     [[nodiscard]] const GLTextureView*   textureView() const noexcept override { return &_textureView;  }
     [[nodiscard]]       GLTextureView*   textureView()       noexcept override { return &_textureView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(u32 mipLevel, const void* data) const noexcept;
     void set(IRenderingContext&, u32 mipLevel, const void* data) noexcept override
@@ -44,17 +48,20 @@ public:
 
 class TAU_DLL GLTexture3D final : public ITexture3D
 {
+    DELETE_CM(GLTexture3D);
     TEXTURE_IMPL(GLTexture3D);
 private:
     GLuint _texture;
     GLRenderTarget _renderTarget;
     GLTextureView _textureView;
+    GLTextureRawInterface _rawInterface;
 public:
     inline GLTexture3D(const u32 width, const u32 height, const u32 depth, const ETexture::Format dataFormat, const GLuint texture) noexcept
         : ITexture3D(width, height, depth, dataFormat)
         , _texture(texture)
         , _renderTarget(texture, GL_TEXTURE_3D)
         , _textureView(texture, GL_TEXTURE_3D)
+        , _rawInterface(texture)
     { }
 
     ~GLTexture3D() noexcept;
@@ -66,7 +73,7 @@ public:
     [[nodiscard]] const GLTextureView*   textureView() const noexcept override { return &_textureView;  }
     [[nodiscard]]       GLTextureView*   textureView()       noexcept override { return &_textureView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(u32 depthLevel, u32 mipLevel, const void* data) const noexcept;
     void set(IRenderingContext&, u32 depthLevel, u32 mipLevel, const void* data) noexcept override
@@ -75,6 +82,7 @@ public:
 
 class TAU_DLL GLTextureCube final : public ITextureCube
 {
+    DELETE_CM(GLTextureCube);
     TEXTURE_IMPL(GLTextureCube);
 public:
     static GLenum glCubeMapFace(ETexture::CubeSide cubeSide) noexcept;
@@ -82,12 +90,14 @@ private:
     GLuint _texture;
     GLRenderTarget _renderTarget;
     GLTextureView _textureView;
+    GLTextureRawInterface _rawInterface;
 public:
     GLTextureCube(const u32 width, const u32 height, const ETexture::Format dataFormat, const GLuint texture) noexcept
         : ITextureCube(width, height, dataFormat)
         , _texture(texture)
         , _renderTarget(texture, GL_TEXTURE_CUBE_MAP)
         , _textureView(texture, GL_TEXTURE_CUBE_MAP)
+        , _rawInterface(texture)
     { }
 
     ~GLTextureCube() noexcept override;
@@ -99,7 +109,7 @@ public:
     [[nodiscard]] const GLTextureView*   textureView() const noexcept override { return &_textureView;  }
     [[nodiscard]]       GLTextureView*   textureView()       noexcept override { return &_textureView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(u32 mipLevel, ETexture::CubeSide side, const void* data) const noexcept;
     void set(IRenderingContext&, u32 mipLevel, ETexture::CubeSide side, const void* data) noexcept override
@@ -108,12 +118,14 @@ public:
 
 class TAU_DLL GLTextureDepthStencil final : public ITextureDepthStencil
 {
+    DELETE_CM(GLTextureDepthStencil);
     TEXTURE_IMPL(GLTextureDepthStencil);
 private:
     GLuint _texture;
     GLRenderTarget _renderTarget;
     GLNoMipmapTextureView _depthView;
     GLNoMipmapTextureView _stencilView;
+    GLTextureRawInterface _rawInterface;
 public:
     GLTextureDepthStencil(const u32 width, const u32 height, const GLuint texture) noexcept
         : ITextureDepthStencil(width, height)
@@ -121,6 +133,7 @@ public:
         , _renderTarget(texture, GL_TEXTURE_2D)
         , _depthView(texture, GL_TEXTURE_2D)
         , _stencilView(texture, GL_TEXTURE_2D)
+        , _rawInterface(texture)
     { }
 
     ~GLTextureDepthStencil() noexcept;
@@ -134,7 +147,7 @@ public:
     [[nodiscard]] const GLNoMipmapTextureView* stencilView() const noexcept override { return &_stencilView;  }
     [[nodiscard]]       GLNoMipmapTextureView* stencilView()       noexcept override { return &_stencilView;  }
 
-    [[nodiscard]] u64 _getHandle() const noexcept override { return _texture; }
+    [[nodiscard]] const ITextureRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 
     void set(const void* data) const noexcept;
     void set(IRenderingContext&, const void* data) noexcept override
@@ -145,7 +158,7 @@ class TAU_DLL GLTextureBuilder final : public ITextureBuilder
 {
     DEFAULT_CONSTRUCT_PU(GLTextureBuilder);
     DEFAULT_DESTRUCT(GLTextureBuilder);
-    DELETE_COPY(GLTextureBuilder);
+    DEFAULT_CM_PU(GLTextureBuilder);
 public:
     struct GLTexture2DArgs final
     {

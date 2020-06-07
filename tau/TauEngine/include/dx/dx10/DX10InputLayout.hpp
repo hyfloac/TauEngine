@@ -3,15 +3,16 @@
 #include "model/InputLayout.hpp"
 
 #ifdef _WIN32
-#include "model/BufferDescriptor.hpp"
 #include <d3d10.h>
+#include "dx/DXUtils.hpp"
+#include "model/BufferDescriptor.hpp"
 
 class DX10GraphicsInterface;
 class DX10RenderingContext;
 
 struct DXInputLayoutArgs final
 {
-    DELETE_COPY(DXInputLayoutArgs);
+    DELETE_CM(DXInputLayoutArgs);
 public:
     UINT* iaStrides;
     UINT* iaOffsets;
@@ -27,14 +28,13 @@ public:
     {
         delete[] iaStrides;
         delete[] iaOffsets;
-        if(inputLayout)
-        { inputLayout->Release(); }
+        RELEASE_DX(inputLayout);
     }
 };
 
 class TAU_DLL DX10InputLayout final : public IInputLayout
 {
-    DELETE_COPY(DX10InputLayout);
+    DELETE_CM(DX10InputLayout);
 private:
     ID3D10InputLayout* _inputLayout;
     UINT* _iaStrides;
@@ -48,9 +48,9 @@ public:
 
     ~DX10InputLayout() noexcept
     {
+        RELEASE_DX(_inputLayout);
         delete[] _iaStrides;
         delete[] _iaOffsets;
-        _inputLayout->Release();
     }
 
     [[nodiscard]]       ID3D10InputLayout* inputLayout()       noexcept { return _inputLayout; }
@@ -66,7 +66,7 @@ public:
 class TAU_DLL DX10InputLayoutBuilder final : public IInputLayoutBuilder
 {
     DEFAULT_DESTRUCT(DX10InputLayoutBuilder);
-    DELETE_COPY(DX10InputLayoutBuilder);
+    DEFAULT_CM_PU(DX10InputLayoutBuilder);
 public:
     /**
      *   DirectX doesn't natively allow you to pass doubles or
