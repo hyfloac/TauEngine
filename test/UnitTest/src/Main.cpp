@@ -120,6 +120,13 @@ int main(int argCount, char* args[]) noexcept
     Matrix4x4fTests::addTest();
     Matrix4x4fTests::subTest();
     Matrix4x4fTests::mulTest();
+
+    Matrix4x4fTests::addScalarTest();
+    Matrix4x4fTests::subScalarTest();
+    Matrix4x4fTests::mulScalarTest();
+    Matrix4x4fTests::divScalarTest();
+
+    Matrix4x4fTests::mulVecTest();
     printf("Matrix4x4f Tests Finished\n");
         
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());

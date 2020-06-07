@@ -34,8 +34,14 @@ public:
     static Matrix4x4f sub(const Matrix4x4f& a, const Matrix4x4f& b) noexcept;
     static Matrix4x4f mul(const Matrix4x4f& a, const Matrix4x4f& b) noexcept;
 
-    // static Vector4f mul(const Matrix4x4f& a, const Vector4f& b) noexcept;
-    // static Vector4f mul(const Vector4f& b, const Matrix4x4f& a) noexcept;
+    static Matrix4x4f add(const Matrix4x4f& a, float b) noexcept;
+    static Matrix4x4f sub(const Matrix4x4f& a, float b) noexcept;
+    static Matrix4x4f mul(const Matrix4x4f& a, float b) noexcept;
+    static Matrix4x4f div(const Matrix4x4f& a, float b) noexcept;
+    static Matrix4x4f divFast(const Matrix4x4f& a, float b) noexcept;
+
+    static Vector4f mul(const Matrix4x4f& a, Vector4f b) noexcept;
+    static Vector4f mul(Vector4f b, const Matrix4x4f& a) noexcept;
 public:
     inline Matrix4x4f() noexcept
     {
