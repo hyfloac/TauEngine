@@ -185,7 +185,7 @@ define void @vector2f_normalizeExact(<2 x float>* nocapture readonly %pA, <2 x f
     ret void
 }
 
-define float @vector2f_dot(<2 x float>* nocapture readonly %pA, <2 x float>* nocapture readonly %pB)
+define float @vector2f_dot(<2 x float>* nocapture readonly %pA, <2 x float>* nocapture readonly %pB) #0
 {
     %a = load <2 x float>, <2 x float>* %pA
     %b = load <2 x float>, <2 x float>* %pB
@@ -201,4 +201,4 @@ define float @vector2f_dot(<2 x float>* nocapture readonly %pA, <2 x float>* noc
 declare <4 x float> @llvm.x86.sse.rsqrt.ss(<4 x float>)
 declare float @llvm.sqrt.f32(float)
 
-attributes #0 = { inlinehint nofree norecurse willreturn nosync nounwind optsize readnone }
+attributes #0 = { inlinehint nofree norecurse willreturn nosync nounwind optsize }
