@@ -26,7 +26,7 @@ define <4 x float> @vector4f_div(<4 x float> %a, <4 x float> %b) local_unnamed_a
     ret <4 x float> %val
 }
 
-define <4 x float> @vector4f_addF(<4 x float> %a, float %b) local_unnamed_addr #0
+define <4 x float> @vector4f_addScalar(<4 x float> %a, float %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %b, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %b, i32 1
@@ -37,7 +37,7 @@ define <4 x float> @vector4f_addF(<4 x float> %a, float %b) local_unnamed_addr #
     ret <4 x float> %val
 }
 
-define <4 x float> @vector4f_subF(<4 x float> %a, float %b) local_unnamed_addr #0
+define <4 x float> @vector4f_subScalar(<4 x float> %a, float %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %b, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %b, i32 1
@@ -48,7 +48,7 @@ define <4 x float> @vector4f_subF(<4 x float> %a, float %b) local_unnamed_addr #
     ret <4 x float> %val
 }
 
-define <4 x float> @vector4f_mulF(<4 x float> %a, float %b) local_unnamed_addr #0
+define <4 x float> @vector4f_mulScalar(<4 x float> %a, float %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %b, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %b, i32 1
@@ -59,7 +59,7 @@ define <4 x float> @vector4f_mulF(<4 x float> %a, float %b) local_unnamed_addr #
     ret <4 x float> %val
 }
 
-define <4 x float> @vector4f_divF(<4 x float> %a, float %b) local_unnamed_addr #0
+define <4 x float> @vector4f_divScalar(<4 x float> %a, float %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %b, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %b, i32 1
@@ -70,7 +70,7 @@ define <4 x float> @vector4f_divF(<4 x float> %a, float %b) local_unnamed_addr #
     ret <4 x float> %val
 }
 
-define <4 x float> @vector4f_divFInv(float %a, <4 x float> %b) local_unnamed_addr #0
+define <4 x float> @vector4f_divScalarInv(float %a, <4 x float> %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %a, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %a, i32 1

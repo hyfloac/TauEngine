@@ -2,8 +2,9 @@
 #include "StringTest.hpp"
 #include "RefUnitTest.hpp"
 #include "FixedBlockAllocatorTest.hpp"
-#include "Vector4fTest.hpp"
+#include "Vector2fTest.hpp"
 #include "Vector3fTest.hpp"
+#include "Vector4fTest.hpp"
 #include "Matrix4x4fTest.hpp"
 #include "UnitTest.hpp"
 #include <cstdio>
@@ -85,6 +86,37 @@ int main(int argCount, char* args[]) noexcept
 
     PAUSE("Continue");
 
+    printf("\nVector2f Tests:\n\n");
+    Vector2fTests::addTest();
+    Vector2fTests::subTest();
+    Vector2fTests::mulTest();
+    Vector2fTests::divTest();
+
+    Vector2fTests::negTest();
+
+    Vector2fTests::magnitudeTest();
+    Vector2fTests::normalizeTest();
+    Vector2fTests::dotTest();
+    printf("Vector2f Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nVector3f Tests:\n\n");
+    Vector3fTests::addTest();
+    Vector3fTests::subTest();
+    Vector3fTests::mulTest();
+    Vector3fTests::divTest();
+
+    Vector3fTests::negTest();
+
+    Vector3fTests::magnitudeTest();
+    Vector3fTests::normalizeTest();
+    Vector3fTests::dotTest();
+    Vector3fTests::crossTest();
+    printf("Vector3f Tests Finished\n");
+
+    PAUSE("Continue");
+
     printf("\nVector4f Tests:\n\n");
     Vector4fTests::addTest();
     Vector4fTests::subTest();
@@ -97,22 +129,6 @@ int main(int argCount, char* args[]) noexcept
     Vector4fTests::normalizeTest();
     Vector4fTests::dotTest();
     printf("Vector4f Tests Finished\n");
-
-    PAUSE("Continue");
-
-    printf("\nVector3f Tests:\n\n");
-    Vector3fTests::addTest();
-    Vector3fTests::subTest();
-    Vector3fTests::mulTest();
-    Vector3fTests::divTest();
-          
-    Vector3fTests::negTest();
-          
-    Vector3fTests::magnitudeTest();
-    Vector3fTests::normalizeTest();
-    Vector3fTests::dotTest();
-    Vector3fTests::crossTest();
-    printf("Vector3f Tests Finished\n");
 
     PAUSE("Continue");
 

@@ -88,3 +88,15 @@ public:
         return *this;
     }
 };
+
+[[nodiscard]] static inline Vector4f operator+(const Vector4f a, const Vector4f b) noexcept
+{ return Vector4f::add(a, b); }
+
+[[nodiscard]] static inline Vector4f operator-(const Vector4f a, const Vector4f b) noexcept
+{ return Vector4f::sub(a, b); }
+
+[[nodiscard]] static inline Vector4f operator*(const Vector4f a, const Vector4f b) noexcept
+{ return Vector4f::mul(a, b); }
+
+[[nodiscard]] static inline Vector4f operator/(const Vector4f a, const Vector4f b) noexcept
+{ return Vector4f::div(a, b); }

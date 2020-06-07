@@ -14,19 +14,19 @@ Vector3f Vector3f::div(const Vector3f a, const Vector3f b) noexcept
 { return vector3f_div(a.vec, b.vec); }
 
 Vector3f Vector3f::add(const Vector3f a, const float b) noexcept
-{ return vector3f_addF(a.vec, b); }
+{ return vector3f_addScalar(a.vec, b); }
 
 Vector3f Vector3f::sub(const Vector3f a, const float b) noexcept
-{ return vector3f_subF(a.vec, b); }
+{ return vector3f_subScalar(a.vec, b); }
 
 Vector3f Vector3f::mul(const Vector3f a, const float b) noexcept
-{ return vector3f_mulF(a.vec, b); }
+{ return vector3f_mulScalar(a.vec, b); }
 
 Vector3f Vector3f::div(const Vector3f a, const float b) noexcept
-{ return vector3f_divF(a.vec, b); }
+{ return vector3f_divScalar(a.vec, b); }
 
 Vector3f Vector3f::div(const float a, const Vector3f b) noexcept
-{ return vector3f_divFInv(a, b.vec); }
+{ return vector3f_divScalarInv(a, b.vec); }
 
 Vector3f Vector3f::negate(const Vector3f a) noexcept
 { return vector3f_neg(a.vec); }

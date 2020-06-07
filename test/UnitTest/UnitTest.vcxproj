@@ -18,6 +18,7 @@
     <ClCompile Include="src\RefPtrTest.cpp" />
     <ClCompile Include="src\StringTest.cpp" />
     <ClCompile Include="src\UnitTest.cpp" />
+    <ClCompile Include="src\Vector2fTest.cpp" />
     <ClCompile Include="src\Vector3fTest.cpp" />
     <ClCompile Include="src\Vector4fTest.cpp" />
   </ItemGroup>
@@ -28,6 +29,7 @@
     <ClInclude Include="include\RefUnitTest.hpp" />
     <ClInclude Include="include\StringTest.hpp" />
     <ClInclude Include="include\UnitTest.hpp" />
+    <ClInclude Include="include\Vector2fTest.hpp" />
     <ClInclude Include="include\Vector4fTest.hpp" />
     <ClInclude Include="include\Vector3fTest.hpp" />
   </ItemGroup>
@@ -43,14 +45,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>ClangCL</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>ClangCL</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -95,6 +97,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +136,9 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

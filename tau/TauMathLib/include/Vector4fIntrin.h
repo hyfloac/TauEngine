@@ -12,12 +12,12 @@ EXTERN __m128 vector4f_sub(__m128 a, __m128 b) NOEXCEPT;
 EXTERN __m128 vector4f_mul(__m128 a, __m128 b) NOEXCEPT;
 EXTERN __m128 vector4f_div(__m128 a, __m128 b) NOEXCEPT;
 
-EXTERN __m128 vector4f_addF(__m128 a, float b) NOEXCEPT;
-EXTERN __m128 vector4f_subF(__m128 a, float b) NOEXCEPT;
-EXTERN __m128 vector4f_mulF(__m128 a, float b) NOEXCEPT;
-EXTERN __m128 vector4f_divF(__m128 a, float b) NOEXCEPT;
+EXTERN __m128 vector4f_addScalar(__m128 a, float b) NOEXCEPT;
+EXTERN __m128 vector4f_subScalar(__m128 a, float b) NOEXCEPT;
+EXTERN __m128 vector4f_mulScalar(__m128 a, float b) NOEXCEPT;
+EXTERN __m128 vector4f_divScalar(__m128 a, float b) NOEXCEPT;
 
-EXTERN __m128 vector4f_divFInv(float a, __m128 b) NOEXCEPT;
+EXTERN __m128 vector4f_divScalarInv(float a, __m128 b) NOEXCEPT;
 
 EXTERN __m128 vector4f_neg(__m128 a) NOEXCEPT;
 

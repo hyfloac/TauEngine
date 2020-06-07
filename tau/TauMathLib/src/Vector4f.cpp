@@ -14,19 +14,19 @@ Vector4f Vector4f::div(const Vector4f a, const Vector4f b) noexcept
 { return vector4f_div(a.vec, b.vec); }
 
 Vector4f Vector4f::add(const Vector4f a, const float b) noexcept
-{ return vector4f_addF(a.vec, b); }
+{ return vector4f_addScalar(a.vec, b); }
 
 Vector4f Vector4f::sub(const Vector4f a, const float b) noexcept
-{ return vector4f_subF(a.vec, b); }
+{ return vector4f_subScalar(a.vec, b); }
 
 Vector4f Vector4f::mul(const Vector4f a, const float b) noexcept
-{ return vector4f_mulF(a.vec, b); }
+{ return vector4f_mulScalar(a.vec, b); }
 
 Vector4f Vector4f::div(const Vector4f a, const float b) noexcept
-{ return vector4f_divF(a.vec, b); }
+{ return vector4f_divScalar(a.vec, b); }
 
 Vector4f Vector4f::div(const float a, const Vector4f b) noexcept
-{ return vector4f_divFInv(a, b.vec); }
+{ return vector4f_divScalarInv(a, b.vec); }
 
 Vector4f Vector4f::negate(const Vector4f a) noexcept
 { return vector4f_neg(a.vec); }

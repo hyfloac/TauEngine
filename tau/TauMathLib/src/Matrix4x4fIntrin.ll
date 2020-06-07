@@ -2,6 +2,65 @@ source_filename = "src\5CMatrix4x4fIntrin.ll"
 target datalayout = "e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-windows-msvc19.25.28614"
 
+define float @matrix4x4f_util_sumVector(<4 x float> %a) local_unnamed_addr #1
+{
+    %x = extractelement <4 x float> %a, i32 0
+    %y = extractelement <4 x float> %a, i32 1
+    %z = extractelement <4 x float> %a, i32 2
+    %w = extractelement <4 x float> %a, i32 3
+
+    %xy = fadd float %x, %y
+    %zw = fadd float %z, %w
+    %sum = fadd float %xy, %zw
+
+    ret float %sum
+}
+
+define <4 x float> @matrix4x4f_util_buildVector(float %x, float %y, float %z, float %w) local_unnamed_addr #1
+{
+    %v0 = insertelement <4 x float> undef, float %x, i32 0
+    %v1 = insertelement <4 x float>   %v0, float %y, i32 1
+    %v2 = insertelement <4 x float>   %v1, float %z, i32 2
+    %v  = insertelement <4 x float>   %v2, float %w, i32 3
+
+    ret <4 x float> %v
+}
+
+define <4 x float> @matrix4x4f_util_buildVector4(float %filler) local_unnamed_addr #1
+{
+    %v0 = insertelement <4 x float> undef, float %filler, i32 0
+    %v1 = insertelement <4 x float>   %v0, float %filler, i32 1
+    %v2 = insertelement <4 x float>   %v1, float %filler, i32 2
+    %v  = insertelement <4 x float>   %v2, float %filler, i32 3
+
+    ret <4 x float> %v
+}
+
+define <16 x float> @matrix4x4f_util_buildVector16(float %filler) local_unnamed_addr #1
+{
+    %v0 = insertelement <16 x float> undef, float %filler, i32 0
+    %v1 = insertelement <16 x float>   %v0, float %filler, i32 1
+    %v2 = insertelement <16 x float>   %v1, float %filler, i32 2
+    %v3 = insertelement <16 x float>   %v2, float %filler, i32 3
+
+    %v4 = insertelement <16 x float>   %v3, float %filler, i32 4
+    %v5 = insertelement <16 x float>   %v4, float %filler, i32 5
+    %v6 = insertelement <16 x float>   %v5, float %filler, i32 6
+    %v7 = insertelement <16 x float>   %v6, float %filler, i32 7
+
+    %v8 = insertelement <16 x float>   %v7, float %filler, i32 8
+    %v9 = insertelement <16 x float>   %v8, float %filler, i32 9
+    %va = insertelement <16 x float>   %v9, float %filler, i32 10
+    %vb = insertelement <16 x float>   %va, float %filler, i32 11
+
+    %vc = insertelement <16 x float>   %vb, float %filler, i32 12
+    %vd = insertelement <16 x float>   %vc, float %filler, i32 13
+    %ve = insertelement <16 x float>   %vd, float %filler, i32 14
+    %v  = insertelement <16 x float>   %ve, float %filler, i32 15
+
+    ret <16 x float> %v
+}
+
 define void @matrix4x4f_transpose(<16 x float>* nocapture readonly %pA, <16 x float>* nocapture writeonly %pStore) local_unnamed_addr #0
 {
     ; Dereference pointer
@@ -66,65 +125,6 @@ define void @matrix4x4f_sub(<16 x float>* nocapture readonly %pA, <16 x float>* 
     %val = fsub <16 x float> %a, %b
     store <16 x float> %val, <16 x float>* %pStore
     ret void
-}
-
-define float @matrix4x4f_util_sumVector(<4 x float> %a) local_unnamed_addr #1
-{
-    %x = extractelement <4 x float> %a, i32 0
-    %y = extractelement <4 x float> %a, i32 1
-    %z = extractelement <4 x float> %a, i32 2
-    %w = extractelement <4 x float> %a, i32 3
-
-    %xy = fadd float %x, %y
-    %zw = fadd float %z, %w
-    %sum = fadd float %xy, %zw
-
-    ret float %sum
-}
-
-define <4 x float> @matrix4x4f_util_buildVector(float %x, float %y, float %z, float %w) local_unnamed_addr #1
-{
-    %v0 = insertelement <4 x float> undef, float %x, i32 0
-    %v1 = insertelement <4 x float>   %v0, float %y, i32 1
-    %v2 = insertelement <4 x float>   %v1, float %z, i32 2
-    %v  = insertelement <4 x float>   %v2, float %w, i32 3
-
-    ret <4 x float> %v
-}
-
-define <4 x float> @matrix4x4f_util_buildVector4(float %filler) local_unnamed_addr #1
-{
-    %v0 = insertelement <4 x float> undef, float %filler, i32 0
-    %v1 = insertelement <4 x float>   %v0, float %filler, i32 1
-    %v2 = insertelement <4 x float>   %v1, float %filler, i32 2
-    %v  = insertelement <4 x float>   %v2, float %filler, i32 3
-
-    ret <4 x float> %v
-}
-
-define <16 x float> @matrix4x4f_util_buildVector16(float %filler) local_unnamed_addr #1
-{
-    %v0 = insertelement <16 x float> undef, float %filler, i32 0
-    %v1 = insertelement <16 x float>   %v0, float %filler, i32 1
-    %v2 = insertelement <16 x float>   %v1, float %filler, i32 2
-    %v3 = insertelement <16 x float>   %v2, float %filler, i32 3
-
-    %v4 = insertelement <16 x float>   %v3, float %filler, i32 4
-    %v5 = insertelement <16 x float>   %v4, float %filler, i32 5
-    %v6 = insertelement <16 x float>   %v5, float %filler, i32 6
-    %v7 = insertelement <16 x float>   %v6, float %filler, i32 7
-
-    %v8 = insertelement <16 x float>   %v7, float %filler, i32 8
-    %v9 = insertelement <16 x float>   %v8, float %filler, i32 9
-    %va = insertelement <16 x float>   %v9, float %filler, i32 10
-    %vb = insertelement <16 x float>   %va, float %filler, i32 11
-
-    %vc = insertelement <16 x float>   %vb, float %filler, i32 12
-    %vd = insertelement <16 x float>   %vc, float %filler, i32 13
-    %ve = insertelement <16 x float>   %vd, float %filler, i32 14
-    %v  = insertelement <16 x float>   %ve, float %filler, i32 15
-
-    ret <16 x float> %v
 }
 
 define void @matrix4x4f_mul(<16 x float>* nocapture readonly %pA, <16 x float>* nocapture readonly %pB, <16 x float>* nocapture writeonly %pStore) local_unnamed_addr #0
@@ -340,4 +340,4 @@ define <4 x float> @matrix4x4f_mulVector(<16 x float>* nocapture readonly %pA, <
 }
 
 attributes #0 = { inlinehint nofree norecurse willreturn nosync nounwind optsize }
-attributes #1 = { inlinehint nofree norecurse willreturn nosync nounwind optsize readnone alwaysinline }
+attributes #1 = { inlinehint nofree norecurse willreturn nosync nounwind optsize readnone }

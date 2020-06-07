@@ -39,6 +39,15 @@
     <ClInclude Include="include\Matrix4x4fIntrin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Vector2fIntrin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Vector2fBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Vector2f.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Vector4f.cpp">
@@ -50,10 +59,14 @@
     <ClCompile Include="src\Matrix4x4f.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Vector2f.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <BuildLlvmIR Include="src\Vector4fIntrin.ll" />
     <BuildLlvmIR Include="src\Vector3fIntrin.ll" />
     <BuildLlvmIR Include="src\Matrix4x4fIntrin.ll" />
+    <BuildLlvmIR Include="src\Vector2fIntrin.ll" />
   </ItemGroup>
 </Project>
