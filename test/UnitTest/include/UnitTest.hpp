@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdio>
 #include <Objects.hpp>
 #include <NumTypes.hpp>
@@ -92,7 +93,6 @@ public:
     }
 };
 
-
 #define UNIT_TEST() UnitTest _ut_##__LINE__(__FUNCSIG__)
 
 #define _x_STR0(_X) #_X
@@ -108,3 +108,10 @@ public:
         fprintf(stdout, "Assert Passed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::pass(); \
         Console::Instance().resetOutColor(); \
     }
+
+template<typename _T>
+static inline bool epsilonEquals(const _T x, const _T y, const _T epsilon = 1E-5)
+{
+    const _T epsilonTrue = max(fabs(x), fabs(y)) * epsilon;
+    return fabs(x - y) <= epsilonTrue;
+}

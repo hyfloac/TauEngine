@@ -2,8 +2,12 @@
 #include "StringTest.hpp"
 #include "RefUnitTest.hpp"
 #include "FixedBlockAllocatorTest.hpp"
+#include "Vector4fTest.hpp"
+#include "Vector3fTest.hpp"
 #include "UnitTest.hpp"
 #include <cstdio>
+
+#include "allocator/PageAllocator.hpp"
 
 #define SHOULD_PAUSE 0
 
@@ -16,6 +20,8 @@
 
 int main(int argCount, char* args[]) noexcept
 {
+    PageAllocator::init();
+
     PAUSE("Start");
 
     printf("\nArrayList Tests:\n\n");
@@ -75,6 +81,37 @@ int main(int argCount, char* args[]) noexcept
     FixedBlockAllocatorUnitTest::countTest();
     FixedBlockAllocatorUnitTest::multipleDeleteTest();
     printf("Fixed Block Allocator Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nVector4f Tests:\n\n");
+    Vector4fTests::addTest();
+    Vector4fTests::subTest();
+    Vector4fTests::mulTest();
+    Vector4fTests::divTest();
+
+    Vector4fTests::negTest();
+
+    Vector4fTests::magnitudeTest();
+    Vector4fTests::normalizeTest();
+    Vector4fTests::dotTest();
+    printf("nVector4f Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nVector3f Tests:\n\n");
+    Vector3fTests::addTest();
+    Vector3fTests::subTest();
+    Vector3fTests::mulTest();
+    Vector3fTests::divTest();
+          
+    Vector3fTests::negTest();
+          
+    Vector3fTests::magnitudeTest();
+    Vector3fTests::normalizeTest();
+    Vector3fTests::dotTest();
+    Vector3fTests::crossTest();
+    printf("nVector3f Tests Finished\n");
 
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());
     printf("Tests Passed: %d\n", UnitTests::testsPassed());

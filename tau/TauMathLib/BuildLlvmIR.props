@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup
+    Condition="'$(BuildLlvmIRBeforeTargets)' == '' and '$(BuildLlvmIRAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <BuildLlvmIRBeforeTargets>Build</BuildLlvmIRBeforeTargets>
+    <BuildLlvmIRAfterTargets>CustomBuild</BuildLlvmIRAfterTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <BuildLlvmIR>
+      <ObjectFileName>$(IntDir)%(FileName).obj</ObjectFileName>
+      <CommandLineTemplate>llvm-as.exe -o=[ObjectFileName] [Inputs]</CommandLineTemplate>
+      <ExecutionDescription>Building LLVM IR %(Identity)...</ExecutionDescription>
+    </BuildLlvmIR>
+  </ItemDefinitionGroup>
+</Project>
