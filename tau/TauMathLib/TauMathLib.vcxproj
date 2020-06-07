@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Matrix4x4f.hpp" />
+    <ClInclude Include="include\Matrix4x4fIntrin.h" />
     <ClInclude Include="include\TauMathLibInternal.h" />
     <ClInclude Include="include\Vector3f.hpp" />
     <ClInclude Include="include\Vector3fIntrin.h" />
@@ -18,6 +20,7 @@
     <ClInclude Include="include\Vector4f.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <BuildLlvmIR Include="src\Matrix4x4fIntrin.ll" />
     <BuildLlvmIR Include="src\Vector3fIntrin.ll" />
     <BuildLlvmIR Include="src\Vector4fIntrin.ll">
       <FileType>Document</FileType>
@@ -25,6 +28,7 @@
     </BuildLlvmIR>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Matrix4x4f.cpp" />
     <ClCompile Include="src\Vector3f.cpp" />
     <ClCompile Include="src\Vector4f.cpp" />
   </ItemGroup>

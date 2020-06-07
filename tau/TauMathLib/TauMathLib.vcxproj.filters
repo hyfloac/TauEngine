@@ -33,6 +33,12 @@
     <ClInclude Include="include\Vector3f.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrix4x4f.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrix4x4fIntrin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Vector4f.cpp">
@@ -41,9 +47,13 @@
     <ClCompile Include="src\Vector3f.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Matrix4x4f.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <BuildLlvmIR Include="src\Vector4fIntrin.ll" />
     <BuildLlvmIR Include="src\Vector3fIntrin.ll" />
+    <BuildLlvmIR Include="src\Matrix4x4fIntrin.ll" />
   </ItemGroup>
 </Project>

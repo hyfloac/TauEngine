@@ -3,7 +3,7 @@
 #include <xmmintrin.h>
 #include "TauMathLibInternal.h"
 
-class TAU_DLL Vector3f
+class TAU_DLL Vector3f final
 {
 public:
     union ALIGN_MSVC(16)
