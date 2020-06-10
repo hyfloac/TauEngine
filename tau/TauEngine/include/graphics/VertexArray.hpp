@@ -3,9 +3,10 @@
 #include <Objects.hpp>
 #include <DynArray.hpp>
 #include <Safeties.hpp>
+
 #include "DLL.hpp"
 
-enum class DrawType : u8
+enum class DrawType
 {
     SeparatedTriangles = 1,
     ConnectedTriangles,
@@ -19,7 +20,7 @@ class IRenderingContext;
 class TAU_DLL TAU_NOVTABLE IVertexArray
 {
     DEFAULT_DESTRUCT_VI(IVertexArray);
-    DELETE_COPY(IVertexArray);
+    DEFAULT_CM_PO(IVertexArray);
 protected:
     uSys _drawCount;
     /**
@@ -29,7 +30,8 @@ protected:
     DynArray<NullableRef<IVertexBuffer>> _buffers;
 protected:
     inline IVertexArray(const uSys drawCount, const DynArray<NullableRef<IVertexBuffer>>& buffers) noexcept
-        : _drawCount(drawCount), _buffers(buffers)
+        : _drawCount(drawCount)
+        , _buffers(buffers)
     { }
 public:
     virtual void bind(IRenderingContext& context) noexcept = 0;
@@ -46,7 +48,7 @@ class IShaderProgram;
 struct VertexArrayArgs final
 {
     DEFAULT_DESTRUCT(VertexArrayArgs);
-    DEFAULT_COPY(VertexArrayArgs);
+    DEFAULT_CM_PU(VertexArrayArgs);
 public:
     DynArray<NullableRef<IVertexBuffer>> buffers;
     NullableRef<IIndexBuffer> indexBuffer;
@@ -65,7 +67,7 @@ class TAU_DLL NOVTABLE IVertexArrayBuilder
 {
     DEFAULT_CONSTRUCT_PO(IVertexArrayBuilder);
     DEFAULT_DESTRUCT_VI(IVertexArrayBuilder);
-    DELETE_COPY(IVertexArrayBuilder);
+    DEFAULT_CM_PO(IVertexArrayBuilder);
 public:
     enum class Error
     {

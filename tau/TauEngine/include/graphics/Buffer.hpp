@@ -8,8 +8,8 @@
 #include "DLL.hpp"
 #include "shader/EShader.hpp"
 #include "events/Exception.hpp"
-#include "model/BufferEnums.hpp"
-#include "model/BufferDescriptor.hpp"
+#include "BufferEnums.hpp"
+#include "BufferDescriptor.hpp"
 #include "TauEngine.hpp"
 #include "TauConfig.hpp"
 

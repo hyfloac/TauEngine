@@ -339,6 +339,9 @@
     <ClCompile Include="src\shader\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10Resource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DLL.hpp">
@@ -455,9 +458,6 @@
     <ClInclude Include="include\PhysicsObject.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\BufferDescriptor.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\maths\Maths.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -551,9 +551,6 @@
     <ClInclude Include="include\ui\UIPanel.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\BufferEnums.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\shader\PointLight.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -606,12 +603,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\VertexArray.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\Buffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\Uniform.hpp">
@@ -842,12 +833,6 @@
     <ClInclude Include="include\entity\Entity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\OcclusionQuery.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\InputLayout.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\dx\dx10\DX10InputLayout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -885,6 +870,36 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\GLTextureRawInterface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\Buffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\BufferDescriptor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\InputLayout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\BufferEnums.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\OcclusionQuery.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\VertexArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\BufferView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\Resource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\ResourceEnums.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10Resource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

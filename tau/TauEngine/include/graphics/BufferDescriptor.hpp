@@ -1,9 +1,10 @@
 #pragma once
 
-#include <DLL.hpp>
 #include <NumTypes.hpp>
 #include <Objects.hpp>
 #include <DynArray.hpp>
+
+#include "DLL.hpp"
 
 class IRenderingContext;
 class IVertexBuffer;

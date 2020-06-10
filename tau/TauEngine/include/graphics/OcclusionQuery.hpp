@@ -12,7 +12,7 @@ class TAU_DLL IOcclusionQuery
 {
     DEFAULT_CONSTRUCT_PO(IOcclusionQuery);
     DEFAULT_DESTRUCT_VI(IOcclusionQuery);
-    DELETE_COPY(IOcclusionQuery);
+    DEFAULT_CM_PO(IOcclusionQuery);
 protected:
     CPPRef<IVertexBuffer> _vertexBuffer;
     CPPRef<IIndexBuffer> _indexBuffer;

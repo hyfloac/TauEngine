@@ -4,7 +4,7 @@
 #include <Safeties.hpp>
 #include <DynArray.hpp>
 
-#include "model/BufferDescriptor.hpp"
+#include "BufferDescriptor.hpp"
 #include "DLL.hpp"
 
 class IShader;

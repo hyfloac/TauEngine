@@ -1,5 +1,4 @@
 #pragma once
-// ReSharper disable CppNotAllPathsReturnValue
 
 #include <NumTypes.hpp>
 
@@ -24,14 +23,6 @@ enum class IndexSize
     Uint16
 };
 
-enum class MemoryStorage
-{
-    Default = 1,
-    GPU,
-    Shared,
-    Managed
-};
-
 enum class ContentHandling
 {
     /**
@@ -47,6 +38,7 @@ static inline uSys indexSize(const IndexSize size) noexcept
     {
         case IndexSize::Uint32: return 4;
         case IndexSize::Uint16: return 2;
+        default: return 0;
     }
 }
 

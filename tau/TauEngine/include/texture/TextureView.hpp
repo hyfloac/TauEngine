@@ -1,7 +1,8 @@
 #pragma once
 
-#include "graphics/ResourceView.hpp"
 #include <Safeties.hpp>
+
+#include "graphics/ResourceView.hpp"
 
 class IRenderingContext;
 
@@ -76,5 +77,4 @@ public:
     [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const TextureViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const TextureViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const TextureViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
 };
