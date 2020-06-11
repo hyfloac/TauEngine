@@ -736,7 +736,7 @@ D3D10_USAGE DX10VertexBuffer::getDXUsage(const EBuffer::UsageType usage) noexcep
 
 D3D10_CPU_ACCESS_FLAG DX10VertexBuffer::getDXAccess(const EBuffer::UsageType usage) noexcept
 {
-    switch (usage)
+    switch(usage)
     {
         case EBuffer::UsageType::StreamDraw:
         case EBuffer::UsageType::StreamCopy:

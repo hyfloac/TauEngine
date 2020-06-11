@@ -10,4 +10,20 @@ enum class Type
     Texture3D
 };
 
+enum class MapType
+{
+    Default = 1,
+    Discard,
+    NoOverwrite,
+    NoWrite
+};
+
+enum class UsageType
+{
+    Default = 1,
+    Immutable,
+    Dynamic,
+    Readable
+};
+
 }

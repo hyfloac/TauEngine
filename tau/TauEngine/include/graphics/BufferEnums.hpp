@@ -32,6 +32,15 @@ enum class ContentHandling
     NoOverwrite
 };
 
+enum class Type
+{
+    Vertex = 1,
+    Index,
+    Uniform,
+    MIN = Vertex,
+    MAX = Uniform
+};
+
 static inline uSys indexSize(const IndexSize size) noexcept
 {
     switch(size)

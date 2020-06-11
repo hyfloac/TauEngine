@@ -45,15 +45,11 @@ template<typename _T>
 
 #define RTT_BASE_IMPL(_TYPE) \
     public: \
-        [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType() const noexcept = 0; \
-        [[nodiscard]] virtual       void* _rttCastTo()       noexcept = 0; \
-        [[nodiscard]] virtual const void* _rttCastTo() const noexcept = 0;
+        [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType() const noexcept = 0;
 
 #define RTTD_BASE_IMPL(_TYPE) \
     public: \
-        [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType_##_TYPE() const noexcept = 0; \
-        [[nodiscard]] virtual       void* _rttCastTo_##_TYPE()       noexcept = 0; \
-        [[nodiscard]] virtual const void* _rttCastTo_##_TYPE() const noexcept = 0;
+        [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType_##_TYPE() const noexcept = 0;
 
 #define RTT_IMPL(_TYPE, _BASE_TYPE) \
     public: \
@@ -61,11 +57,7 @@ template<typename _T>
         { static RunTimeType<_BASE_TYPE> type = RunTimeType<_BASE_TYPE>::define(); \
           return type; } \
         [[nodiscard]] virtual RunTimeType<_BASE_TYPE> _getRTType() const noexcept override \
-        { return _TYPE::_getStaticRTType(); } \
-        [[nodiscard]] virtual void* _rttCastTo() noexcept \
-        { return this; } \
-        [[nodiscard]] virtual const void* _rttCastTo() const noexcept \
-        { return this; }
+        { return _TYPE::_getStaticRTType(); }
 
 #define RTTD_IMPL(_TYPE, _BASE_TYPE) \
     public: \
@@ -73,11 +65,7 @@ template<typename _T>
         { static RunTimeType<_BASE_TYPE> type = RunTimeType<_BASE_TYPE>::define(); \
           return type; } \
         [[nodiscard]] virtual RunTimeType<_BASE_TYPE> _getRTType_##_BASE_TYPE() const noexcept override \
-        { return _TYPE::_getStaticRTType_##_BASE_TYPE(); }\
-        [[nodiscard]] virtual void* _rttCastTo_##_BASE_TYPE() noexcept \
-        { return this; } \
-        [[nodiscard]] virtual const void* _rttCastTo_##_BASE_TYPE() const noexcept \
-        { return this; }
+        { return _TYPE::_getStaticRTType_##_BASE_TYPE(); }
 
 #define RTT_BASE_CHECK(_TYPE) \
     public: \
@@ -107,10 +95,10 @@ template<typename _T>
     public: \
         template<typename _T> \
         [[nodiscard]] _T* _castRTType() noexcept \
-        { return _isRTType<_T>() ? reinterpret_cast<_T*>(this->_rttCastTo()) : nullptr; } \
+        { return _isRTType<_T>() ? static_cast<_T*>(this) : nullptr; } \
         template<typename _T> \
         [[nodiscard]] const _T* _castRTType() const noexcept \
-        { return _isRTType<_T>() ? reinterpret_cast<const _T*>(this->_rttCastTo()) : nullptr; } \
+        { return _isRTType<_T>() ? static_cast<const _T*>(this) : nullptr; } \
         template<typename _T> \
         [[nodiscard]] static _T* _castRTType(_TYPE& obj) noexcept \
         { return obj._castRTType<_T>(); } \
@@ -128,10 +116,10 @@ template<typename _T>
     public: \
         template<typename _T> \
         [[nodiscard]] _T* _castRTType_##_TYPE() noexcept \
-        { return _isRTType_##_TYPE<_T>() ? reinterpret_cast<_T*>(this->_rttCastTo_##_TYPE()) : nullptr; } \
+        { return _isRTType_##_TYPE<_T>() ? static_cast<_T*>(this) : nullptr; } \
         template<typename _T> \
         [[nodiscard]] const _T* _castRTType_##_TYPE() const noexcept \
-        { return _isRTType_##_TYPE<_T>() ? reinterpret_cast<const _T*>(this->_rttCastTo_##_TYPE()) : nullptr; } \
+        { return _isRTType_##_TYPE<_T>() ? static_cast<const _T*>(this) : nullptr; } \
         template<typename _T> \
         [[nodiscard]] static _T* _castRTType_##_TYPE(_TYPE& obj) noexcept \
         { return obj._castRTType_##_TYPE<_T>(); } \

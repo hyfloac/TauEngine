@@ -145,6 +145,7 @@ public:
     {
         NoError = 0,
         BufferIsNull,
+        ResourceIsNotBuffer,
         /**
          * Failed to allocate system memory.
          *
@@ -162,15 +163,16 @@ public:
          * error, given that it likely won't matter in a couple of seconds
          * at most.
          */
-         SystemMemoryAllocationFailure,
-         /**
-          * The driver failed to allocate system memory.
-          *
-          *   This occurs when the driver failed to allocate memory on
-          * the system. This is likely caused by the same reasons as
-          * Error::SystemMemoryAllocationFailure.
-          */
-          DriverMemoryAllocationFailure
+        SystemMemoryAllocationFailure,
+        /**
+         * The driver failed to allocate system memory.
+         *
+         *   This occurs when the driver failed to allocate memory on
+         * the system. This is likely caused by the same reasons as
+         * Error::SystemMemoryAllocationFailure.
+         */
+        DriverMemoryAllocationFailure,
+        InternalError
     };
 public:
     [[nodiscard]] virtual IVertexBufferView* build(const VertexBufferViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
