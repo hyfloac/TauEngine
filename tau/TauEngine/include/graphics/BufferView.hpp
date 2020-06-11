@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #pragma once
 
 #include <Objects.hpp>
@@ -22,6 +25,12 @@ class IResource;
 #define INDEX_BUFFER_VIEW_IMPL(_TYPE) INDEX_BUFFER_VIEW_IMPL_BASE(_TYPE)
 #define UNIFORM_BUFFER_VIEW_IMPL(_TYPE) UNIFORM_BUFFER_VIEW_IMPL_BASE(_TYPE)
 
+/**
+ * A view into a vertex buffer resource.
+ *
+ *   This contains the buffers descriptor. This is used by the
+ * input assembler to decode the data for shaders.
+ */
 class TAU_DLL TAU_NOVTABLE IVertexBufferView : public IResourceView
 {
     DEFAULT_DESTRUCT_VI(IVertexBufferView);
@@ -41,6 +50,12 @@ public:
     RTTD_BASE_CAST(IVertexBufferView);
 };
 
+/**
+ * A view into a vertex buffer resource.
+ *
+ *   This contains information about the indice size. This is
+ * used for decoding the indice stream.
+ */
 class TAU_DLL TAU_NOVTABLE IIndexBufferView : public IResourceView
 {
     DEFAULT_DESTRUCT_VI(IIndexBufferView);
@@ -60,6 +75,12 @@ public:
     RTTD_BASE_CAST(IIndexBufferView);
 };
 
+/**
+ * A view into a uniform buffer resource.
+ *
+ *   This is used for binding uniform buffers to the shader
+ * pipeline.
+ */
 class TAU_DLL TAU_NOVTABLE IUniformBufferView : public IResourceView
 {
     DEFAULT_CONSTRUCT_PO(IUniformBufferView);

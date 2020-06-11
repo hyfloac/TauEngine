@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #pragma once
 
 #include <Objects.hpp>
@@ -8,9 +11,16 @@
 #include "DLL.hpp"
 #include "ResourceEnums.hpp"
 #include "BufferEnums.hpp"
+#include "texture/TextureEnums.hpp"
 
 class IRenderingContext;
 
+/**
+ * Describes a range of a resource to access.
+ *
+ *   This allows for protection and potential optimizations for
+ * certain memory operations.
+ */
 struct ResourceMapRange final
 {
     DEFAULT_DESTRUCT(ResourceMapRange);
@@ -39,6 +49,15 @@ public:
 
 #define RESOURCE_IMPL(_TYPE) RESOURCE_IMPL_BASE(_TYPE)
 
+/**
+ * Describes a general graphics resource.
+ *
+ *   This is the general base for buffers and textures. Do
+ * note that these types currently do not have any high level
+ * specializations from IResource. Lower level API's are free
+ * to implement the various potential structures in their own
+ * classes.
+ */
 class TAU_DLL TAU_NOVTABLE IResource
 {
     DEFAULT_DESTRUCT_VI(IResource);
@@ -50,6 +69,9 @@ protected:
         : _size(size)
     { }
 public:
+    /**
+     * The size in bytes of the resource allocation.
+     */
     [[nodiscard]] uSys size() const noexcept { return _size; }
 
     [[nodiscard]] virtual EResource::Type resourceType() const noexcept = 0;
@@ -70,6 +92,25 @@ struct ResourceBufferArgs final
 public:
     uSys size;
     EBuffer::Type bufferType;
+    /**
+     * A hint on how the resource will be accessed.
+     */
+    EResource::UsageType usageType;
+    const void* initialBuffer;
+};
+
+struct ResourceTextureArgs final
+{
+    DEFAULT_CONSTRUCT_PU(ResourceTextureArgs);
+    DEFAULT_DESTRUCT_VI(ResourceTextureArgs);
+    DEFAULT_CM_PU(ResourceTextureArgs);
+public:
+    uSys size;
+    ETexture::Type type;
+    ETexture::Format dataFormat;
+    /**
+     * A hint on how the resource will be accessed.
+     */
     EResource::UsageType usageType;
     const void* initialBuffer;
 };
@@ -86,6 +127,8 @@ public:
         InvalidSize,
         InvalidUsageType,
         InvalidBufferType,
+        InvalidTextureType,
+        InvalidTextureFormat,
         /**
          * Failed to allocate system memory.
          *
@@ -120,5 +163,11 @@ public:
     [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+
+    [[nodiscard]] virtual IResource* build(const ResourceTextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IResource* build(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 
 };

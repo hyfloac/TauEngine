@@ -1,6 +1,8 @@
 #include "dx/dx10/DX10BufferView.hpp"
 
 #ifdef _WIN32
+#include "dx/dx10/DX10ResourceBuffer.hpp"
+
 DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& args, Error* error) const noexcept
 {
     DXBufferViewArgs dxArgs;
@@ -186,7 +188,7 @@ bool DX10BufferViewBuilder::processArgs(const VertexBufferViewArgs& args, DXBuff
     ERROR_CODE_COND_F(!args.buffer, Error::BufferIsNull);
     ERROR_CODE_COND_F(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.buffer, DX10Resource, IResource);
+    DX10Resource* dxResource = RTTD_CAST(args.buffer, DX10Resource, IResource);
     ERROR_CODE_COND_F(!dxArgs->buffer, Error::InternalError);
 
     dxArgs->buffer = static_cast<DX10ResourceBuffer*>(dxResource);
@@ -199,7 +201,7 @@ bool DX10BufferViewBuilder::processArgs(const IndexBufferViewArgs& args, DXBuffe
     ERROR_CODE_COND_F(!args.buffer, Error::BufferIsNull);
     ERROR_CODE_COND_F(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.buffer, DX10Resource, IResource);
+    DX10Resource* dxResource = RTTD_CAST(args.buffer, DX10Resource, IResource);
     ERROR_CODE_COND_F(!dxArgs->buffer, Error::InternalError);
 
     dxArgs->buffer = static_cast<DX10ResourceBuffer*>(dxResource);
@@ -212,7 +214,7 @@ bool DX10BufferViewBuilder::processArgs(const UniformBufferViewArgs& args, DXBuf
     ERROR_CODE_COND_F(!args.buffer, Error::BufferIsNull);
     ERROR_CODE_COND_F(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.buffer, DX10Resource, IResource);
+    DX10Resource* dxResource = RTTD_CAST(args.buffer, DX10Resource, IResource);
     ERROR_CODE_COND_F(!dxArgs->buffer, Error::InternalError);
 
     dxArgs->buffer = static_cast<DX10ResourceBuffer*>(dxResource);

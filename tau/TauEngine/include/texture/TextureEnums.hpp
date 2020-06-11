@@ -6,10 +6,13 @@ namespace ETexture {
 
 enum class Type
 {
-    T2D = 1,
-    T3D,
-    Cube,
-    DepthStencil
+    Texture1D = 1,
+    Texture1DArray,
+    Texture2D,
+    Texture2DArray,
+    Texture3D,
+    TextureCube,
+    TextureCubeArray
 };
 
 enum class Filter
@@ -62,7 +65,22 @@ enum class Format
     RedGreenBlue32Float,
     RedGreenBlueAlpha16Float,
     RedGreenBlueAlpha32Float,
-    Depth24Stencil8
+    Red8Typeless,
+    Red16Typeless,
+    Red32Typeless,
+    RedGreen8Typeless,
+    RedGreen16Typeless,
+    RedGreen32Typeless,
+    RedGreenBlue8Typeless,
+    RedGreenBlue16Typeless,
+    RedGreenBlue32Typeless,
+    RedGreenBlueAlpha8Typeless,
+    RedGreenBlueAlpha16Typeless,
+    RedGreenBlueAlpha32Typeless,
+    Depth24Stencil8,
+    Depth24Typeless8,
+    Typeless24Stencil8,
+    Typeless24Typeless8
 };
 
 enum class CubeSide

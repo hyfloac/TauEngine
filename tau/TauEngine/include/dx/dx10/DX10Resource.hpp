@@ -4,7 +4,6 @@
 
 #ifdef _WIN32
 #include <d3d10.h>
-#include "dx/DXUtils.hpp"
 
 class DX10GraphicsInterface;
 
