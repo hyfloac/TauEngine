@@ -21,6 +21,8 @@
     <ClInclude Include="include\Vector3fIntrin.h" />
     <ClInclude Include="include\Vector4fIntrin.h" />
     <ClInclude Include="include\Vector4f.hpp" />
+    <ClInclude Include="include\Vector4i.hpp" />
+    <ClInclude Include="include\Vector4iIntrin.h" />
   </ItemGroup>
   <ItemGroup>
     <BuildLlvmIR Include="src\Matrix4x4fIntrin.ll" />
@@ -30,6 +32,7 @@
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </BuildLlvmIR>
+    <BuildLlvmIR Include="src\Vector4iIntrin.ll" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Matrix4x4f.cpp" />

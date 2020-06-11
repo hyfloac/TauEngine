@@ -48,6 +48,12 @@
     <ClInclude Include="include\Vector2f.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Vector4i.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Vector4iIntrin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Vector4f.cpp">
@@ -68,5 +74,6 @@
     <BuildLlvmIR Include="src\Vector3fIntrin.ll" />
     <BuildLlvmIR Include="src\Matrix4x4fIntrin.ll" />
     <BuildLlvmIR Include="src\Vector2fIntrin.ll" />
+    <BuildLlvmIR Include="src\Vector4iIntrin.ll" />
   </ItemGroup>
 </Project>

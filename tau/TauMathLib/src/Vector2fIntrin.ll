@@ -97,7 +97,7 @@ define void @vector2f_divScalarInv(float %a, <2 x float>* nocapture readonly %pB
     %scalingVector0 = insertelement <2 x float>           undef, float %a, i32 0
     %scalingVector  = insertelement <2 x float> %scalingVector0, float %a, i32 1
 
-    %val = fadd <2 x float> %scalingVector, %b
+    %val = fdiv <2 x float> %scalingVector, %b
     store <2 x float> %val, <2 x float>* %pStore
     ret void
 }
@@ -176,11 +176,10 @@ define void @vector2f_normalizeExact(<2 x float>* nocapture readonly %pA, <2 x f
     %a = load <2 x float>, <2 x float>* %pA
 
     %mag = call float @vector2f_internal_magnitude(<2 x float> %a)
-    %invMag = fdiv float 1.0, %mag
-    %invMagVector0 = insertelement <2 x float>          undef, float %invMag, i32 0
-    %invMagVector  = insertelement <2 x float> %invMagVector0, float %invMag, i32 1
+    %magVector0 = insertelement <2 x float>          undef, float %mag, i32 0
+    %magVector  = insertelement <2 x float> %magVector0, float %mag, i32 1
 
-    %normalized = fmul <2 x float> %a, %invMagVector
+    %normalized = fdiv <2 x float> %a, %magVector
     store <2 x float> %normalized, <2 x float>* %pStore
     ret void
 }

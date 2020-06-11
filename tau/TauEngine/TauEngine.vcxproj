@@ -39,6 +39,7 @@
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Resource.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ResourceBuffer.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10ResourceTexture.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Texture.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="include\dx\dx10\DX10RenderTarget.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Resource.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ResourceBuffer.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10ResourceTexture.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Texture.hpp" />

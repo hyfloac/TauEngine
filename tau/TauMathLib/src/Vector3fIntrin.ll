@@ -72,7 +72,7 @@ define <3 x float> @vector3f_divScalarInv(float %a, <3 x float> %b) local_unname
     %scalingVector1 = insertelement <3 x float> %scalingVector0, float %a, i32 1
     %scalingVector  = insertelement <3 x float> %scalingVector1, float %a, i32 2
 
-    %val = fadd <3 x float> %scalingVector, %b
+    %val = fdiv <3 x float> %scalingVector, %b
     ret <3 x float> %val
 }
 
@@ -124,12 +124,11 @@ define <3 x float> @vector3f_normalizeFast(<3 x float> %a) local_unnamed_addr #0
 define <3 x float> @vector3f_normalizeExact(<3 x float> %a) local_unnamed_addr #0
 {
     %mag = call float @vector3f_magnitude(<3 x float> %a)
-    %invMag = fdiv float 1.0, %mag
-    %invMagVector0 = insertelement <3 x float>          undef, float %invMag, i32 0
-    %invMagVector1 = insertelement <3 x float> %invMagVector0, float %invMag, i32 1
-    %invMagVector  = insertelement <3 x float> %invMagVector1, float %invMag, i32 2
+    %magVector0 = insertelement <3 x float>          undef, float %mag, i32 0
+    %magVector1 = insertelement <3 x float> %magVector0, float %mag, i32 1
+    %magVector  = insertelement <3 x float> %magVector1, float %mag, i32 2
 
-    %normalized = fmul <3 x float> %a, %invMagVector
+    %normalized = fdiv <3 x float> %a, %magVector
     ret <3 x float> %normalized
 }
 

@@ -1,7 +1,8 @@
-#include "dx/dx10/DX10ResourceBuffer.hpp"
+#include "dx/dx10/DX10ResourceTexture.hpp"
 
 #ifdef _WIN32
-void* DX10ResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType, uSys, const ResourceMapRange* mapReadRange) noexcept
+
+void* DX10ResourceTexture1D::map(IRenderingContext&, EResource::MapType mapType, uSys subResource, const ResourceMapRange* mapReadRange) noexcept
 {
     if(_currentMapping)
     { return _currentMapping; }
@@ -10,11 +11,11 @@ void* DX10ResourceBuffer::map(IRenderingContext&, const EResource::MapType mapTy
     {
         if(mapType == EResource::MapType::NoWrite)
         {
-            _d3dBuffer->Map(D3D10_MAP_READ, 0, &_currentMapping);
+            _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &_currentMapping);
         }
         else if(mapType == EResource::MapType::Default)
         {
-            _d3dBuffer->Map(D3D10_MAP_READ_WRITE, 0, &_currentMapping);
+            _d3dTexture->Map(subResource, D3D10_MAP_READ_WRITE, 0, &_currentMapping);
         }
     }
     else
@@ -28,17 +29,17 @@ void* DX10ResourceBuffer::map(IRenderingContext&, const EResource::MapType mapTy
             case EResource::MapType::NoWrite:
             default: return null;
         }
-        _d3dBuffer->Map(mapping, 0, &_currentMapping);
+        _d3dTexture->Map(subResource, mapping, 0, &_currentMapping);
     }
 
     return _currentMapping;
 }
 
-void DX10ResourceBuffer::unmap(IRenderingContext&, uSys) noexcept
+void DX10ResourceTexture1D::unmap(IRenderingContext&, uSys subResource) noexcept
 {
     if(_currentMapping)
     {
-        _d3dBuffer->Unmap();
+        _d3dTexture->Unmap(subResource);
     }
 }
 #endif

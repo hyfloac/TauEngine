@@ -65,6 +65,9 @@ enum class Format
     RedGreenBlue32Float,
     RedGreenBlueAlpha16Float,
     RedGreenBlueAlpha32Float,
+    Depth24Stencil8,
+    Depth24Typeless8,
+    Typeless24Stencil8,
     Red8Typeless,
     Red16Typeless,
     Red32Typeless,
@@ -77,10 +80,15 @@ enum class Format
     RedGreenBlueAlpha8Typeless,
     RedGreenBlueAlpha16Typeless,
     RedGreenBlueAlpha32Typeless,
-    Depth24Stencil8,
-    Depth24Typeless8,
-    Typeless24Stencil8,
-    Typeless24Typeless8
+    Typeless24Typeless8,
+    MIN = Red8UnsignedInt,
+    MAX = Typeless24Typeless8,
+    MIN_TYPELESS = Red8Typeless,
+    MAX_TYPELESS = Typeless24Typeless8,
+    MIN_UINT = Red8UnsignedInt,
+    MAX_UINT = RedGreenBlueAlpha32UnsignedInt,
+    MIN_FLOAT = Red16Float,
+    MAX_FLOAT = RedGreenBlueAlpha32Float
 };
 
 enum class CubeSide
@@ -145,33 +153,131 @@ enum class DepthStencilBindFlags
     StencilShaderAccess = 1 << 2
 };
 
-static inline uSys bytesPerPixel(const Format format) noexcept
+static constexpr inline uSys bytesPerComponent(const Format format) noexcept
 {
     switch(format)
     {
-        case Format::Red8UnsignedInt:                return 1 * 1;
-        case Format::Red16UnsignedInt:               return 2 * 1;
-        case Format::Red32UnsignedInt:               return 4 * 1;
-        case Format::RedGreen8UnsignedInt:           return 1 * 2;
-        case Format::RedGreen16UnsignedInt:          return 2 * 2;
-        case Format::RedGreen32UnsignedInt:          return 4 * 2;
-        case Format::RedGreenBlue8UnsignedInt:       return 1 * 3;
-        case Format::RedGreenBlue16UnsignedInt:      return 2 * 3;
-        case Format::RedGreenBlue32UnsignedInt:      return 4 * 3;
-        case Format::RedGreenBlueAlpha8UnsignedInt:  return 1 * 4;
-        case Format::RedGreenBlueAlpha16UnsignedInt: return 2 * 4;
-        case Format::RedGreenBlueAlpha32UnsignedInt: return 4 * 4;
-        case Format::Red16Float:                     return 2 * 1;
-        case Format::Red32Float:                     return 4 * 1;
-        case Format::RedGreen16Float:                return 2 * 2;
-        case Format::RedGreen32Float:                return 4 * 2;
-        case Format::RedGreenBlue16Float:            return 2 * 3;
-        case Format::RedGreenBlue32Float:            return 4 * 3;
-        case Format::RedGreenBlueAlpha16Float:       return 2 * 4;
-        case Format::RedGreenBlueAlpha32Float:       return 4 * 4;
-        case Format::Depth24Stencil8:                return 4;
-        default: return 0;
+        case Format::Red8UnsignedInt:                return 1;
+        case Format::Red16UnsignedInt:               return 2;
+        case Format::Red32UnsignedInt:               return 4;
+        case Format::RedGreen8UnsignedInt:           return 1;
+        case Format::RedGreen16UnsignedInt:          return 2;
+        case Format::RedGreen32UnsignedInt:          return 4;
+        case Format::RedGreenBlue8UnsignedInt:       return 1;
+        case Format::RedGreenBlue16UnsignedInt:      return 2;
+        case Format::RedGreenBlue32UnsignedInt:      return 4;
+        case Format::RedGreenBlueAlpha8UnsignedInt:  return 1;
+        case Format::RedGreenBlueAlpha16UnsignedInt: return 2;
+        case Format::RedGreenBlueAlpha32UnsignedInt: return 4;
+        case Format::Red16Float:                     return 2;
+        case Format::Red32Float:                     return 4;
+        case Format::RedGreen16Float:                return 2;
+        case Format::RedGreen32Float:                return 4;
+        case Format::RedGreenBlue16Float:            return 2;
+        case Format::RedGreenBlue32Float:            return 4;
+        case Format::RedGreenBlueAlpha16Float:       return 2;
+        case Format::RedGreenBlueAlpha32Float:       return 4;
+        case Format::Red8Typeless:                   return 1;
+        case Format::Red16Typeless:                  return 2;
+        case Format::Red32Typeless:                  return 4;
+        case Format::RedGreen8Typeless:              return 1;
+        case Format::RedGreen16Typeless:             return 2;
+        case Format::RedGreen32Typeless:             return 4;
+        case Format::RedGreenBlue8Typeless:          return 1;
+        case Format::RedGreenBlue16Typeless:         return 2;
+        case Format::RedGreenBlue32Typeless:         return 4;
+        case Format::RedGreenBlueAlpha8Typeless:     return 1;
+        case Format::RedGreenBlueAlpha16Typeless:    return 2;
+        case Format::RedGreenBlueAlpha32Typeless:    return 4;
+        default:                                     return 0;
+    } 
+}
+
+static constexpr inline uSys numComponents(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Red8UnsignedInt:                return 1;
+        case Format::Red16UnsignedInt:               return 1;
+        case Format::Red32UnsignedInt:               return 1;
+        case Format::RedGreen8UnsignedInt:           return 2;
+        case Format::RedGreen16UnsignedInt:          return 2;
+        case Format::RedGreen32UnsignedInt:          return 2;
+        case Format::RedGreenBlue8UnsignedInt:       return 3;
+        case Format::RedGreenBlue16UnsignedInt:      return 3;
+        case Format::RedGreenBlue32UnsignedInt:      return 3;
+        case Format::RedGreenBlueAlpha8UnsignedInt:  return 4;
+        case Format::RedGreenBlueAlpha16UnsignedInt: return 4;
+        case Format::RedGreenBlueAlpha32UnsignedInt: return 4;
+        case Format::Red16Float:                     return 1;
+        case Format::Red32Float:                     return 1;
+        case Format::RedGreen16Float:                return 2;
+        case Format::RedGreen32Float:                return 2;
+        case Format::RedGreenBlue16Float:            return 3;
+        case Format::RedGreenBlue32Float:            return 3;
+        case Format::RedGreenBlueAlpha16Float:       return 4;
+        case Format::RedGreenBlueAlpha32Float:       return 4;
+        case Format::Red8Typeless:                   return 1;
+        case Format::Red16Typeless:                  return 1;
+        case Format::Red32Typeless:                  return 1;
+        case Format::RedGreen8Typeless:              return 2;
+        case Format::RedGreen16Typeless:             return 2;
+        case Format::RedGreen32Typeless:             return 2;
+        case Format::RedGreenBlue8Typeless:          return 3;
+        case Format::RedGreenBlue16Typeless:         return 3;
+        case Format::RedGreenBlue32Typeless:         return 3;
+        case Format::RedGreenBlueAlpha8Typeless:     return 4;
+        case Format::RedGreenBlueAlpha16Typeless:    return 4;
+        case Format::RedGreenBlueAlpha32Typeless:    return 4;
+        default:                                     return 0;
     }
 }
+
+static constexpr inline uSys bytesPerPixel(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Depth24Stencil8:    
+        case Format::Depth24Typeless8:   
+        case Format::Typeless24Stencil8: 
+        case Format::Typeless24Typeless8: return 4;
+        default: break;
+    }
+
+    return bytesPerComponent(format) * numComponents(format);
+}
+
+static constexpr bool isCompatible(const Format formatA, const Format formatB)
+{
+    if(formatA == formatB)
+    { return true; }
+
+    switch(formatA)
+    {
+        case Format::Depth24Stencil8:    
+        case Format::Depth24Typeless8:   
+        case Format::Typeless24Stencil8: 
+        case Format::Typeless24Typeless8:
+        {
+            switch(formatB)
+            {
+                case Format::Depth24Stencil8:
+                case Format::Depth24Typeless8:
+                case Format::Typeless24Stencil8:
+                case Format::Typeless24Typeless8: return true;
+                default:                          return false;
+            }
+        }
+        default: break;
+    }
+
+    return bytesPerComponent(formatA) == bytesPerComponent(formatB) && numComponents(formatA) == numComponents(formatB);
+}
+
+static inline uSys computeSize(const u32 width, const u32 height, const u32 depth, const u32 mipmapLevels, const u32 arrayCount) noexcept
+{ return width * height * depth * mipmapLevels * arrayCount; }
+
+static inline uSys computeSubResource(const u32 mipTarget, const u32 arrayIndex, const u32 mipmapLevels)
+{ return mipTarget + (arrayIndex * mipmapLevels); }
 
 }

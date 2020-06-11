@@ -15,6 +15,9 @@
 
 class IRenderingContext;
 
+struct ResourceBufferArgs;
+struct ResourceTextureArgs;
+
 /**
  * Describes a range of a resource to access.
  *
@@ -76,12 +79,17 @@ public:
 
     [[nodiscard]] virtual EResource::Type resourceType() const noexcept = 0;
 
-    [[nodiscard]] virtual void* map(IRenderingContext& context, EResource::MapType mapType = EResource::MapType::Default, const ResourceMapRange* mapReadRange = ResourceMapRange::none()) noexcept = 0;
-    virtual void unmap(IRenderingContext& context) noexcept = 0;
+    [[nodiscard]] virtual void* map(IRenderingContext& context, EResource::MapType mapType = EResource::MapType::Default, uSys subResource = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none()) noexcept = 0;
+    virtual void unmap(IRenderingContext& context, uSys subResource = 0) noexcept = 0;
+
+    template<typename _Args>
+    [[nodiscard]] const _Args* getArgs() const noexcept { return null; }
 
     RTTD_BASE_IMPL(IResource);
     RTTD_BASE_CHECK(IResource);
     RTTD_BASE_CAST(IResource);
+protected:
+    [[nodiscard]] virtual const void* _getArgs() const noexcept = 0;
 };
 
 struct ResourceBufferArgs final
@@ -108,6 +116,7 @@ public:
     uSys size;
     ETexture::Type type;
     ETexture::Format dataFormat;
+    ETexture::BindFlags flags;
     /**
      * A hint on how the resource will be accessed.
      */
@@ -169,5 +178,30 @@ public:
     [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
 };
+
+template<>
+inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const noexcept
+{
+    switch(resourceType())
+    {
+        case EResource::Type::Buffer: return reinterpret_cast<const ResourceBufferArgs*>(_getArgs());
+        case EResource::Type::Texture1D:
+        case EResource::Type::Texture2D:
+        case EResource::Type::Texture3D: return null;
+        default: return null;
+    }
+}
+
+template<>
+inline const ResourceTextureArgs* IResource::getArgs<ResourceTextureArgs>() const noexcept
+{
+    switch(resourceType())
+    {
+        case EResource::Type::Buffer: return null;
+        case EResource::Type::Texture1D:
+        case EResource::Type::Texture2D:
+        case EResource::Type::Texture3D: return reinterpret_cast<const ResourceTextureArgs*>(_getArgs());
+        default: return null;
+    }
+}

@@ -1,8 +1,68 @@
 #include "dx/dx10/DX10Resource.hpp"
 
 #ifdef _WIN32
-#include "dx/dx10/DX10ResourceBuffer.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
+#include "dx/dx10/DX10ResourceBuffer.hpp"
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceBufferArgs& args, Error* error) const noexcept
+{
+    DXResourceBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10ResourceBuffer* const buffer = new(::std::nothrow) DX10ResourceBuffer(args, dxArgs.d3dBuffer);
+    ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10ResourceBuffer* const buffer = allocator.allocateT<DX10ResourceBuffer>(args, dxArgs.d3dBuffer);
+    ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+CPPRef<IResource> DX10ResourceBuilder::buildCPPRef(const ResourceBufferArgs& args, Error* error) const noexcept
+{
+    DXResourceBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10ResourceBuffer> buffer(new(::std::nothrow) DX10ResourceBuffer(args, dxArgs.d3dBuffer));
+    ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10ResourceBuffer> buffer(allocator, args, dxArgs.d3dBuffer);
+    ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, buffer);
+}
+
+NullableStrongRef<IResource> DX10ResourceBuilder::buildTauSRef(const ResourceBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceBufferArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10ResourceBuffer> buffer(allocator, args, dxArgs.d3dBuffer);
+    ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, buffer);
+}
 
 bool DX10ResourceBuilder::processArgs(const ResourceBufferArgs& args, DXResourceBufferArgs* dxArgs, Error* error) const noexcept
 {

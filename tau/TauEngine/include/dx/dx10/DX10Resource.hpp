@@ -19,6 +19,9 @@ protected:
 };
 
 class DX10ResourceBuffer;
+class DX10ResourceTexture1D;
+class DX10ResourceTexture2D;
+class DX10ResourceTexture3D;
 
 class TAU_DLL DX10ResourceBuilder final : public IResourceBuilder
 {

@@ -10,7 +10,7 @@
   #define CTX() \
       if(!RTT_CHECK(context, DX10RenderingContext)) \
       { TAU_THROW(IncorrectContextException); } \
-      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context);
+      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
 #else
   #define CTX() \
       auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
