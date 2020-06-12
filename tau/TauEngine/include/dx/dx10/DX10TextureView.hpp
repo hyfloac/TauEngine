@@ -15,7 +15,7 @@ struct DXTextureViewArgs final
     u32 width;
     u32 height;
     u32 depth;
-    u32 mipCount;
+    u32 mipLevels;
     u32 arrayCount;
 };
 
@@ -29,7 +29,7 @@ protected:
 protected:
     DX10TextureView(const DXTextureViewArgs& args) noexcept
         : _dataFormat(args.dataFormat)
-        , _mipCount(args.mipCount)
+        , _mipCount(args.mipLevels)
         , _d3dSRV(args.d3dSRV)
     { }
 public:

@@ -46,8 +46,6 @@ struct Texture1DViewArgs final
     DEFAULT_CM_PU(Texture1DViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 mipCount;
     ETexture::Format dataFormat;
 };
 
@@ -58,9 +56,6 @@ struct Texture1DArrayViewArgs final
     DEFAULT_CM_PU(Texture1DArrayViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 mipCount;
-    u32 arrayCount;
     ETexture::Format dataFormat;
 };
 
@@ -71,9 +66,6 @@ struct Texture2DViewArgs final
     DEFAULT_CM_PU(Texture2DViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 height;
-    u32 mipCount;
     ETexture::Format dataFormat;
 };
 
@@ -84,10 +76,6 @@ struct Texture2DArrayViewArgs final
     DEFAULT_CM_PU(Texture2DArrayViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 height;
-    u32 mipCount;
-    u32 arrayCount;
     ETexture::Format dataFormat;
 };
 
@@ -98,10 +86,6 @@ struct Texture3DViewArgs final
     DEFAULT_CM_PU(Texture3DViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 height;
-    u32 depth;
-    u32 mipCount;
     ETexture::Format dataFormat;
 };
 
@@ -112,9 +96,6 @@ struct TextureCubeViewArgs final
     DEFAULT_CM_PU(TextureCubeViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 height;
-    u32 mipCount;
     ETexture::Format dataFormat;
 };
 
@@ -125,10 +106,6 @@ struct TextureCubeArrayViewArgs final
     DEFAULT_CM_PU(TextureCubeArrayViewArgs);
 public:
     IResource* texture;
-    u32 width;
-    u32 height;
-    u32 mipCount;
-    u32 arrayCount;
     ETexture::Format dataFormat;
 };
 
@@ -144,11 +121,14 @@ public:
         TextureIsNull,
         InvalidTexture,
         TextureDoesNotSupportView,
-        WidthIsZero,
-        HeightIsZero,
-        DepthIsZero,
-        ArrayCountIsZero,
         InvalidDataFormat,
+        TextureIsNotArray,
+        /**
+         * Indicates that a specific view type is not supported.
+         *
+         * This will most likely be cube map arrays on DX10.
+         */
+        UnsupportedType,
         /**
          * Failed to allocate system memory.
          *

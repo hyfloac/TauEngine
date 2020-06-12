@@ -7,28 +7,47 @@
 
 class TAU_DLL DX10ResourceBuffer final : public DX10Resource
 {
-    DELETE_COPY(DX10ResourceBuffer);
 private:
     ResourceBufferArgs _args;
     ID3D10Buffer* _d3dBuffer;
-    void* _currentMapping;
 public:
     DX10ResourceBuffer(const ResourceBufferArgs& args, ID3D10Buffer* const d3dBuffer) noexcept
         : DX10Resource(args.size)
         , _args(args)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
     { }
 
     ~DX10ResourceBuffer() noexcept
     { RELEASE_DX(_d3dBuffer); }
 
+    DX10ResourceBuffer(const DX10ResourceBuffer& copy) noexcept
+        : DX10Resource(copy)
+        , _args(copy._args)
+        , _d3dBuffer(copy._d3dBuffer)
+    { _d3dBuffer->AddRef(); }
+
     DX10ResourceBuffer(DX10ResourceBuffer&& move) noexcept
         : DX10Resource(::std::move(move))
         , _args(::std::move(move._args))
         , _d3dBuffer(move._d3dBuffer)
-        , _currentMapping(move._currentMapping)
     { move._d3dBuffer = null; }
+
+    DX10ResourceBuffer& operator=(const DX10ResourceBuffer& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        RELEASE_DX(_d3dBuffer);
+
+        DX10Resource::operator=(copy);
+
+        _args = copy._args;
+        _d3dBuffer = copy._d3dBuffer;
+
+        _d3dBuffer->AddRef();
+
+        return *this;
+    }
 
     DX10ResourceBuffer& operator=(DX10ResourceBuffer&& move) noexcept
     {
@@ -37,9 +56,10 @@ public:
 
         RELEASE_DX(_d3dBuffer);
 
+        DX10Resource::operator=(::std::move(move));
+
         _args = move._args;
         _d3dBuffer = move._d3dBuffer;
-        _currentMapping = move._currentMapping;
 
         move._d3dBuffer = null;
 

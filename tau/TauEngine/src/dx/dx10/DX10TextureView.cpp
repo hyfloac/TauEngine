@@ -26,18 +26,17 @@ void DX10TextureView::generateMipmaps(IRenderingContext& context) noexcept
     ctx.d3dDevice()->GenerateMips(_d3dSRV);
 }
 
-
 bool DX10TextureViewBuilder::processArgs(const Texture1DViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
     ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture1D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.width == 0, Error::WidthIsZero);
     ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
     ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
 
-    const ResourceTextureArgs* texArgs = args.texture->getArgs<ResourceTextureArgs>();
+    const ResourceTexture1DArgs* texArgs = args.texture->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
     DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture1D* const dxTexture = static_cast<DX10ResourceTexture1D* const>(dxResource);
@@ -46,14 +45,14 @@ bool DX10TextureViewBuilder::processArgs(const Texture1DViewArgs& args, DXTextur
     srvDesc.Format = dxTextureFormat(args.dataFormat);
     srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE1D;
     srvDesc.Texture1D.MostDetailedMip = 0;
-    srvDesc.Texture1D.MipLevels = args.mipCount;
+    srvDesc.Texture1D.MipLevels = texArgs->mipLevels;
 
     const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
     dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = args.width;
-    dxArgs->mipCount = args.mipCount;
+    dxArgs->width = texArgs->width;
+    dxArgs->mipLevels = texArgs->mipLevels;
 
     return true;
 }
@@ -62,14 +61,14 @@ bool DX10TextureViewBuilder::processArgs(const Texture1DArrayViewArgs& args, DXT
 {
     ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
     ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture1D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.width == 0, Error::WidthIsZero);
-    ERROR_CODE_COND_F(args.arrayCount == 0, Error::ArrayCountIsZero);
     ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
     ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
 
-    const ResourceTextureArgs* texArgs = args.texture->getArgs<ResourceTextureArgs>();
+    const ResourceTexture1DArgs* texArgs = args.texture->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
+    ERROR_CODE_COND_F(texArgs->arrayCount == 1, Error::TextureIsNotArray);
 
     DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture1D* const dxTexture = static_cast<DX10ResourceTexture1D* const>(dxResource);
@@ -78,17 +77,17 @@ bool DX10TextureViewBuilder::processArgs(const Texture1DArrayViewArgs& args, DXT
     srvDesc.Format = dxTextureFormat(args.dataFormat);
     srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE1DARRAY;
     srvDesc.Texture1DArray.MostDetailedMip = 0;
-    srvDesc.Texture1DArray.MipLevels = args.mipCount;
+    srvDesc.Texture1DArray.MipLevels = texArgs->mipLevels;
     srvDesc.Texture1DArray.FirstArraySlice = 0;
-    srvDesc.Texture1DArray.ArraySize = args.arrayCount;
+    srvDesc.Texture1DArray.ArraySize = texArgs->arrayCount;
 
     const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
     dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = args.width;
-    dxArgs->mipCount = args.mipCount;
-    dxArgs->arrayCount = args.arrayCount;
+    dxArgs->width = texArgs->width;
+    dxArgs->mipLevels = texArgs->mipLevels;
+    dxArgs->arrayCount = texArgs->arrayCount;
 
     return true;
 }
@@ -97,12 +96,10 @@ bool DX10TextureViewBuilder::processArgs(const Texture2DViewArgs& args, DXTextur
 {
     ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
     ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.width == 0, Error::WidthIsZero);
-    ERROR_CODE_COND_F(args.height == 0, Error::HeightIsZero);
     ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
     ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
 
-    const ResourceTextureArgs* texArgs = args.texture->getArgs<ResourceTextureArgs>();
+    const ResourceTexture2DArgs* texArgs = args.texture->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
@@ -114,33 +111,124 @@ bool DX10TextureViewBuilder::processArgs(const Texture2DViewArgs& args, DXTextur
     srvDesc.Format = dxTextureFormat(args.dataFormat);
     srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MostDetailedMip = 0;
-    srvDesc.Texture2D.MipLevels = args.mipCount;
+    srvDesc.Texture2D.MipLevels = texArgs->mipLevels;
     
     const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
     dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = args.width;
-    dxArgs->height = args.height;
-    dxArgs->mipCount = args.mipCount;
+    dxArgs->width = texArgs->width;
+    dxArgs->height = texArgs->height;
+    dxArgs->mipLevels = texArgs->mipLevels;
 
     return true;
 }
 
 bool DX10TextureViewBuilder::processArgs(const Texture2DArrayViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
+    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
+    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
+    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
+
+    const ResourceTexture2DArgs* texArgs = args.texture->getArgs<ResourceTexture2DArgs>();
+    ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
+    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
+    ERROR_CODE_COND_F(texArgs->arrayCount == 1, Error::TextureIsNotArray);
+
+    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
+    DX10ResourceTexture2D* const dxTexture = static_cast<DX10ResourceTexture2D* const>(dxResource);
+
+    D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    srvDesc.Format = dxTextureFormat(args.dataFormat);
+    srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2DARRAY;
+    srvDesc.Texture2DArray.MostDetailedMip = 0;
+    srvDesc.Texture2DArray.MipLevels = texArgs->mipLevels;
+    srvDesc.Texture1DArray.FirstArraySlice = 0;
+    srvDesc.Texture1DArray.ArraySize = texArgs->arrayCount;
+
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+
+    dxArgs->dataFormat = args.dataFormat;
+    dxArgs->width = texArgs->width;
+    dxArgs->height = texArgs->height;
+    dxArgs->mipLevels = texArgs->mipLevels;
+    dxArgs->arrayCount = texArgs->arrayCount;
+
+    return true;
 }
 
 bool DX10TextureViewBuilder::processArgs(const Texture3DViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
+    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture3D, Error::InvalidTexture);
+    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
+    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
+
+    const ResourceTexture3DArgs* texArgs = args.texture->getArgs<ResourceTexture3DArgs>();
+    ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
+    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
+
+    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
+    DX10ResourceTexture3D* const dxTexture = static_cast<DX10ResourceTexture3D* const>(dxResource);
+
+    D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    srvDesc.Format = dxTextureFormat(args.dataFormat);
+    srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE3D;
+    srvDesc.Texture3D.MostDetailedMip = 0;
+    srvDesc.Texture3D.MipLevels = texArgs->mipLevels;
+
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+
+    dxArgs->dataFormat = args.dataFormat;
+    dxArgs->width = texArgs->width;
+    dxArgs->height = texArgs->height;
+    dxArgs->depth = texArgs->depth;
+    dxArgs->mipLevels = texArgs->mipLevels;
+
+    return true;
 }
 
 bool DX10TextureViewBuilder::processArgs(const TextureCubeViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
+    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
+    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
+    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
+
+    const ResourceTexture2DArgs* texArgs = args.texture->getArgs<ResourceTexture2DArgs>();
+    ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
+    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
+    ERROR_CODE_COND_F(texArgs->arrayCount != 6, Error::TextureIsNotArray);
+
+    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
+    DX10ResourceTexture2D* const dxTexture = static_cast<DX10ResourceTexture2D* const>(dxResource);
+
+    D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    srvDesc.Format = dxTextureFormat(args.dataFormat);
+    srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURECUBE;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = texArgs->mipLevels;
+
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+
+    dxArgs->dataFormat = args.dataFormat;
+    dxArgs->width = texArgs->width;
+    dxArgs->height = texArgs->height;
+    dxArgs->mipLevels = texArgs->mipLevels;
+
+    return true;
 }
 
 bool DX10TextureViewBuilder::processArgs(const TextureCubeArrayViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
+    ERROR_CODE_F(Error::UnsupportedType);
 }
 
 DXGI_FORMAT DX10TextureViewBuilder::dxTextureFormat(const ETexture::Format format) noexcept

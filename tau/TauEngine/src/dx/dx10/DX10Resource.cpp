@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10ResourceBuffer.hpp"
+#include "dx/dx10/DX10TextureView.hpp"
 
 DX10Resource* DX10ResourceBuilder::build(const ResourceBufferArgs& args, Error* error) const noexcept
 {
@@ -71,9 +72,9 @@ bool DX10ResourceBuilder::processArgs(const ResourceBufferArgs& args, DXResource
 
     D3D10_BUFFER_DESC bufferDesc;
     bufferDesc.ByteWidth = args.size;
-    bufferDesc.Usage = getDXUsage(args.usageType);
-    bufferDesc.BindFlags = getDXBind(args.bufferType);
-    bufferDesc.CPUAccessFlags = getDXAccess(args.usageType);
+    bufferDesc.Usage = dxUsage(args.usageType);
+    bufferDesc.BindFlags = dxBind(args.bufferType);
+    bufferDesc.CPUAccessFlags = dxAccess(args.usageType);
     bufferDesc.MiscFlags = 0;
 
     if(args.initialBuffer)
@@ -95,7 +96,115 @@ bool DX10ResourceBuilder::processArgs(const ResourceBufferArgs& args, DXResource
     return true;
 }
 
-D3D10_USAGE DX10ResourceBuilder::getDXUsage(const EResource::UsageType usage) noexcept
+bool DX10ResourceBuilder::processArgs(const ResourceTexture1DArgs& args, DXResourceTexture1DArgs* dxArgs, Error* error) const noexcept
+{
+    ERROR_CODE_COND_F(args.width == 0, Error::InvalidWidth);
+    ERROR_CODE_COND_F(args.arrayCount == 0, Error::InvalidArrayCount);
+
+    D3D10_TEXTURE1D_DESC textureDesc;
+    textureDesc.Width = args.width;
+    textureDesc.MipLevels = args.mipLevels;
+    textureDesc.ArraySize = args.arrayCount;
+    textureDesc.Format = DX10TextureViewBuilder::dxTextureFormat(args.dataFormat);
+    textureDesc.Usage = dxUsage(args.usageType);
+    textureDesc.BindFlags = DX10TextureViewBuilder::dxBindFlags(args.flags);
+    textureDesc.CPUAccessFlags = 0;
+    textureDesc.MiscFlags = DX10TextureViewBuilder::dxMiscFlags(args.flags);
+
+    if(args.initialBuffer)
+    {
+        D3D10_SUBRESOURCE_DATA initialDesc;
+        initialDesc.pSysMem = args.initialBuffer;
+        initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
+        initialDesc.SysMemSlicePitch = 0;
+
+        const HRESULT res = _gi.d3d10Device()->CreateTexture1D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
+        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+    }
+    else
+    {
+        const HRESULT res = _gi.d3d10Device()->CreateTexture1D(&textureDesc, NULL, &dxArgs->d3dTexture);
+        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+    }
+
+    return true;
+}
+
+bool DX10ResourceBuilder::processArgs(const ResourceTexture2DArgs& args, DXResourceTexture2DArgs* dxArgs, Error* error) const noexcept
+{
+    ERROR_CODE_COND_F(args.width == 0, Error::InvalidWidth);
+    ERROR_CODE_COND_F(args.height == 0, Error::InvalidHeight);
+    ERROR_CODE_COND_F(args.arrayCount == 0, Error::InvalidArrayCount);
+
+    D3D10_TEXTURE2D_DESC textureDesc;
+    textureDesc.Width = args.width;
+    textureDesc.Height = args.height;
+    textureDesc.MipLevels = args.mipLevels;
+    textureDesc.ArraySize = args.arrayCount;
+    textureDesc.Format = DX10TextureViewBuilder::dxTextureFormat(args.dataFormat);
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.SampleDesc.Quality = 0;
+    textureDesc.Usage = dxUsage(args.usageType);
+    textureDesc.BindFlags = DX10TextureViewBuilder::dxBindFlags(args.flags);
+    textureDesc.CPUAccessFlags = 0;
+    textureDesc.MiscFlags = DX10TextureViewBuilder::dxMiscFlags(args.flags);
+
+    if(args.initialBuffer)
+    {
+        D3D10_SUBRESOURCE_DATA initialDesc;
+        initialDesc.pSysMem = args.initialBuffer;
+        initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
+        initialDesc.SysMemSlicePitch = 0;
+
+        const HRESULT res = _gi.d3d10Device()->CreateTexture2D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
+        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+    }
+    else
+    {
+        const HRESULT res = _gi.d3d10Device()->CreateTexture2D(&textureDesc, NULL, &dxArgs->d3dTexture);
+        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+    }
+
+    return true;
+}
+
+bool DX10ResourceBuilder::processArgs(const ResourceTexture3DArgs& args, DXResourceTexture3DArgs* dxArgs, Error* error) const noexcept
+{
+    ERROR_CODE_COND_F(args.width == 0, Error::InvalidWidth);
+    ERROR_CODE_COND_F(args.height == 0, Error::InvalidHeight);
+    ERROR_CODE_COND_F(args.depth == 0, Error::InvalidDepth);
+
+    D3D10_TEXTURE3D_DESC textureDesc;
+    textureDesc.Width = args.width;
+    textureDesc.Height = args.height;
+    textureDesc.Depth = args.depth;
+    textureDesc.MipLevels = args.mipLevels;
+    textureDesc.Format = DX10TextureViewBuilder::dxTextureFormat(args.dataFormat);
+    textureDesc.Usage = dxUsage(args.usageType);
+    textureDesc.BindFlags = DX10TextureViewBuilder::dxBindFlags(args.flags);
+    textureDesc.CPUAccessFlags = 0;
+    textureDesc.MiscFlags = DX10TextureViewBuilder::dxMiscFlags(args.flags);
+
+    if(args.initialBuffer)
+    {
+        D3D10_SUBRESOURCE_DATA initialDesc;
+        initialDesc.pSysMem = args.initialBuffer;
+        initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
+        initialDesc.SysMemSlicePitch = 0;
+
+        const HRESULT res = _gi.d3d10Device()->CreateTexture3D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
+        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+    }
+    else
+    {
+        const HRESULT res = _gi.d3d10Device()->CreateTexture3D(&textureDesc, NULL, &dxArgs->d3dTexture);
+        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+    }
+
+    return true;
+}
+
+D3D10_USAGE DX10ResourceBuilder::dxUsage(const EResource::UsageType usage) noexcept
 {
     switch(usage)
     {
@@ -107,7 +216,7 @@ D3D10_USAGE DX10ResourceBuilder::getDXUsage(const EResource::UsageType usage) no
     }
 }
 
-D3D10_CPU_ACCESS_FLAG DX10ResourceBuilder::getDXAccess(const EResource::UsageType usage) noexcept
+D3D10_CPU_ACCESS_FLAG DX10ResourceBuilder::dxAccess(const EResource::UsageType usage) noexcept
 {
     switch(usage)
     {
@@ -119,7 +228,7 @@ D3D10_CPU_ACCESS_FLAG DX10ResourceBuilder::getDXAccess(const EResource::UsageTyp
     }
 }
 
-D3D10_BIND_FLAG DX10ResourceBuilder::getDXBind(const EBuffer::Type type) noexcept
+D3D10_BIND_FLAG DX10ResourceBuilder::dxBind(const EBuffer::Type type) noexcept
 {
     switch(type)
     {

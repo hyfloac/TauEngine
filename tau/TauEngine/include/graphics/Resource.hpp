@@ -14,10 +14,6 @@
 #include "texture/TextureEnums.hpp"
 
 class IRenderingContext;
-
-struct ResourceBufferArgs;
-struct ResourceTextureArgs;
-
 /**
  * Describes a range of a resource to access.
  *
@@ -63,20 +59,10 @@ public:
  */
 class TAU_DLL TAU_NOVTABLE IResource
 {
+    DEFAULT_CONSTRUCT_PO(IResource);
     DEFAULT_DESTRUCT_VI(IResource);
     DEFAULT_CM_PO(IResource);
-protected:
-    uSys _size;
-protected:
-    IResource(const uSys size) noexcept
-        : _size(size)
-    { }
 public:
-    /**
-     * The size in bytes of the resource allocation.
-     */
-    [[nodiscard]] uSys size() const noexcept { return _size; }
-
     [[nodiscard]] virtual EResource::Type resourceType() const noexcept = 0;
 
     [[nodiscard]] virtual void* map(IRenderingContext& context, EResource::MapType mapType = EResource::MapType::Default, uSys subResource = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none()) noexcept = 0;
@@ -107,14 +93,15 @@ public:
     const void* initialBuffer;
 };
 
-struct ResourceTextureArgs final
+struct ResourceTexture1DArgs final
 {
-    DEFAULT_CONSTRUCT_PU(ResourceTextureArgs);
-    DEFAULT_DESTRUCT_VI(ResourceTextureArgs);
-    DEFAULT_CM_PU(ResourceTextureArgs);
+    DEFAULT_CONSTRUCT_PU(ResourceTexture1DArgs);
+    DEFAULT_DESTRUCT_VI(ResourceTexture1DArgs);
+    DEFAULT_CM_PU(ResourceTexture1DArgs);
 public:
-    uSys size;
-    ETexture::Type type;
+    uSys width;
+    u16 arrayCount;
+    u16 mipLevels;
     ETexture::Format dataFormat;
     ETexture::BindFlags flags;
     /**
@@ -123,6 +110,45 @@ public:
     EResource::UsageType usageType;
     const void* initialBuffer;
 };
+
+struct ResourceTexture2DArgs final
+{
+    DEFAULT_CONSTRUCT_PU(ResourceTexture2DArgs);
+    DEFAULT_DESTRUCT_VI(ResourceTexture2DArgs);
+    DEFAULT_CM_PU(ResourceTexture2DArgs);
+public:
+    uSys width;
+    u32 height;
+    u16 arrayCount;
+    u16 mipLevels;
+    ETexture::Format dataFormat;
+    ETexture::BindFlags flags;
+    /**
+     * A hint on how the resource will be accessed.
+     */
+    EResource::UsageType usageType;
+    const void* initialBuffer;
+};
+
+struct ResourceTexture3DArgs final
+{
+    DEFAULT_CONSTRUCT_PU(ResourceTexture3DArgs);
+    DEFAULT_DESTRUCT_VI(ResourceTexture3DArgs);
+    DEFAULT_CM_PU(ResourceTexture3DArgs);
+public:
+    uSys width;
+    u32 height;
+    u16 depth;
+    u16 mipLevels;
+    ETexture::Format dataFormat;
+    ETexture::BindFlags flags;
+    /**
+     * A hint on how the resource will be accessed.
+     */
+    EResource::UsageType usageType;
+    const void* initialBuffer;
+};
+
 
 class TAU_DLL TAU_NOVTABLE IResourceBuilder
 {
@@ -134,6 +160,11 @@ public:
     {
         NoError = 0,
         InvalidSize,
+        InvalidWidth,
+        InvalidHeight,
+        InvalidDepth,
+        InvalidArrayCount,
+        InvalidMipCount,
         InvalidUsageType,
         InvalidBufferType,
         InvalidTextureType,
@@ -173,35 +204,54 @@ public:
     [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 
-    [[nodiscard]] virtual IResource* build(const ResourceTextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IResource* build(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTextureArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTextureArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual IResource* build(const ResourceTexture1DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IResource* build(const ResourceTexture1DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTexture1DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTexture1DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+
+    [[nodiscard]] virtual IResource* build(const ResourceTexture2DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IResource* build(const ResourceTexture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTexture2DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTexture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+
+    [[nodiscard]] virtual IResource* build(const ResourceTexture3DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IResource* build(const ResourceTexture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTexture3DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTexture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 template<>
 inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const noexcept
 {
-    switch(resourceType())
-    {
-        case EResource::Type::Buffer: return reinterpret_cast<const ResourceBufferArgs*>(_getArgs());
-        case EResource::Type::Texture1D:
-        case EResource::Type::Texture2D:
-        case EResource::Type::Texture3D: return null;
-        default: return null;
-    }
+    if(resourceType() == EResource::Type::Buffer)
+    { return reinterpret_cast<const ResourceBufferArgs*>(_getArgs()); }
+    return null;
 }
 
 template<>
-inline const ResourceTextureArgs* IResource::getArgs<ResourceTextureArgs>() const noexcept
+inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() const noexcept
 {
-    switch(resourceType())
-    {
-        case EResource::Type::Buffer: return null;
-        case EResource::Type::Texture1D:
-        case EResource::Type::Texture2D:
-        case EResource::Type::Texture3D: return reinterpret_cast<const ResourceTextureArgs*>(_getArgs());
-        default: return null;
-    }
+    if(resourceType() == EResource::Type::Texture1D)
+    { return reinterpret_cast<const ResourceTexture1DArgs*>(_getArgs()); }
+    return null;
 }
+
+template<>
+inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() const noexcept
+{
+    if(resourceType() == EResource::Type::Texture2D)
+    { return reinterpret_cast<const ResourceTexture2DArgs*>(_getArgs()); }
+    return null;
+}
+
+template<>
+inline const ResourceTexture3DArgs* IResource::getArgs<ResourceTexture3DArgs>() const noexcept
+{
+    if(resourceType() == EResource::Type::Texture3D)
+    { return reinterpret_cast<const ResourceTexture3DArgs*>(_getArgs()); }
+    return null;
+}
+
