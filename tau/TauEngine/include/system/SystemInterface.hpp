@@ -12,7 +12,7 @@ class TAU_DLL SystemInterface final
 {
     DELETE_CONSTRUCT(SystemInterface);
     DELETE_DESTRUCT(SystemInterface);
-    DELETE_COPY(SystemInterface);
+    DELETE_CM(SystemInterface);
 private:
     static _SysContainer _sysContainer;
 public:

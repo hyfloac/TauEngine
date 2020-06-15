@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10ResourceBuffer.hpp"
+#include "dx/dx10/DX10ResourceTexture.hpp"
 #include "dx/dx10/DX10TextureView.hpp"
 
 DX10Resource* DX10ResourceBuilder::build(const ResourceBufferArgs& args, Error* error) const noexcept
@@ -63,6 +64,186 @@ NullableStrongRef<IResource> DX10ResourceBuilder::buildTauSRef(const ResourceBuf
     ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, buffer);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceTexture1DArgs& args, Error* error) const noexcept
+{
+    DXResourceTexture1DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Resource* const texture = new(::std::nothrow) DX10ResourceTexture1D(args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceTexture1DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture1DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Resource* const texture = allocator.allocateT<DX10ResourceTexture1D>(args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+CPPRef<IResource> DX10ResourceBuilder::buildCPPRef(const ResourceTexture1DArgs& args, Error* error) const noexcept
+{
+    DXResourceTexture1DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Resource> texture(new(::std::nothrow) DX10ResourceTexture1D(args, dxArgs.d3dTexture));
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture1DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture1DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableStrongRef<IResource> DX10ResourceBuilder::buildTauSRef(const ResourceTexture1DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture1DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceTexture2DArgs& args, Error* error) const noexcept
+{
+    DXResourceTexture2DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Resource* const texture = new(::std::nothrow) DX10ResourceTexture2D(args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceTexture2DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture2DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Resource* const texture = allocator.allocateT<DX10ResourceTexture2D>(args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+CPPRef<IResource> DX10ResourceBuilder::buildCPPRef(const ResourceTexture2DArgs& args, Error* error) const noexcept
+{
+    DXResourceTexture2DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Resource> texture(new(::std::nothrow) DX10ResourceTexture2D(args, dxArgs.d3dTexture));
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture2DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture2DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableStrongRef<IResource> DX10ResourceBuilder::buildTauSRef(const ResourceTexture2DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture2DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceTexture3DArgs& args, Error* error) const noexcept
+{
+    DXResourceTexture3DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Resource* const texture = new(::std::nothrow) DX10ResourceTexture3D(args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+DX10Resource* DX10ResourceBuilder::build(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture3DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Resource* const texture = allocator.allocateT<DX10ResourceTexture3D>(args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+CPPRef<IResource> DX10ResourceBuilder::buildCPPRef(const ResourceTexture3DArgs& args, Error* error) const noexcept
+{
+    DXResourceTexture3DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Resource> texture(new(::std::nothrow) DX10ResourceTexture3D(args, dxArgs.d3dTexture));
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture3DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
+}
+
+NullableStrongRef<IResource> DX10ResourceBuilder::buildTauSRef(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXResourceTexture3DArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, texture);
 }
 
 bool DX10ResourceBuilder::processArgs(const ResourceBufferArgs& args, DXResourceBufferArgs* dxArgs, Error* error) const noexcept

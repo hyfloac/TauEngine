@@ -26,6 +26,426 @@ void DX10TextureView::generateMipmaps(IRenderingContext& context) noexcept
     ctx.d3dDevice()->GenerateMips(_d3dSRV);
 }
 
+DX10Texture1DView* DX10TextureViewBuilder::build(const Texture1DViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture1DView* const textureView = new(::std::nothrow) DX10Texture1DView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture1DView* DX10TextureViewBuilder::build(const Texture1DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture1DView* const textureView = allocator.allocateT<DX10Texture1DView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture1DViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Texture1DView> textureView(new(::std::nothrow) DX10Texture1DView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture1DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Texture1DView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture1DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Texture1DView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture1DArrayView* DX10TextureViewBuilder::build(const Texture1DArrayViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture1DArrayView* const textureView = new(::std::nothrow) DX10Texture1DArrayView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture1DArrayView* DX10TextureViewBuilder::build(const Texture1DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture1DArrayView* const textureView = allocator.allocateT<DX10Texture1DArrayView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture1DArrayViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Texture1DArrayView> textureView(new(::std::nothrow) DX10Texture1DArrayView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture1DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Texture1DArrayView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture1DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Texture1DArrayView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture2DView* DX10TextureViewBuilder::build(const Texture2DViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture2DView* const textureView = new(::std::nothrow) DX10Texture2DView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture2DView* DX10TextureViewBuilder::build(const Texture2DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture2DView* const textureView = allocator.allocateT<DX10Texture2DView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture2DViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Texture2DView> textureView(new(::std::nothrow) DX10Texture2DView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture2DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Texture2DView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture2DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Texture2DView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture2DArrayView* DX10TextureViewBuilder::build(const Texture2DArrayViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture2DArrayView* const textureView = new(::std::nothrow) DX10Texture2DArrayView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture2DArrayView* DX10TextureViewBuilder::build(const Texture2DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture2DArrayView* const textureView = allocator.allocateT<DX10Texture2DArrayView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture2DArrayViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Texture2DArrayView> textureView(new(::std::nothrow) DX10Texture2DArrayView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture2DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Texture2DArrayView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture2DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Texture2DArrayView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture3DView* DX10TextureViewBuilder::build(const Texture3DViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture3DView* const textureView = new(::std::nothrow) DX10Texture3DView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10Texture3DView* DX10TextureViewBuilder::build(const Texture3DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10Texture3DView* const textureView = allocator.allocateT<DX10Texture3DView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture3DViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10Texture3DView> textureView(new(::std::nothrow) DX10Texture3DView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture3DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10Texture3DView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture3DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10Texture3DView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10TextureCubeView* DX10TextureViewBuilder::build(const TextureCubeViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10TextureCubeView* const textureView = new(::std::nothrow) DX10TextureCubeView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10TextureCubeView* DX10TextureViewBuilder::build(const TextureCubeViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10TextureCubeView* const textureView = allocator.allocateT<DX10TextureCubeView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const TextureCubeViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10TextureCubeView> textureView(new(::std::nothrow) DX10TextureCubeView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const TextureCubeViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10TextureCubeView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const TextureCubeViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10TextureCubeView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10TextureCubeArrayView* DX10TextureViewBuilder::build(const TextureCubeArrayViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10TextureCubeArrayView* const textureView = new(::std::nothrow) DX10TextureCubeArrayView(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+DX10TextureCubeArrayView* DX10TextureViewBuilder::build(const TextureCubeArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    DX10TextureCubeArrayView* const textureView = allocator.allocateT<DX10TextureCubeArrayView>(dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const TextureCubeArrayViewArgs& args, Error* error) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const CPPRef<DX10TextureCubeArrayView> textureView(new(::std::nothrow) DX10TextureCubeArrayView(dxArgs));
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const TextureCubeArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableRef<DX10TextureCubeArrayView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
+NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const TextureCubeArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+{
+    DXTextureViewArgs dxArgs;
+    if(!processArgs(args, &dxArgs, error))
+    { return null; }
+
+    const NullableStrongRef<DX10TextureCubeArrayView> textureView(allocator, dxArgs);
+    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
+
+    ERROR_CODE_V(Error::NoError, textureView);
+}
+
 bool DX10TextureViewBuilder::processArgs(const Texture1DViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
@@ -275,7 +695,7 @@ D3D10_BIND_FLAG DX10TextureViewBuilder::dxBindFlags(const ETexture::BindFlags fl
     D3D10_BIND_FLAG ret = static_cast<D3D10_BIND_FLAG>(0);
 
     if(hasFlag(flags, ETexture::BindFlags::RenderTarget) ||
-        hasFlag(flags, ETexture::BindFlags::GenerateMipmaps))
+       hasFlag(flags, ETexture::BindFlags::GenerateMipmaps))
     {
         ret |= D3D10_BIND_RENDER_TARGET;
     }
@@ -290,7 +710,7 @@ D3D10_BIND_FLAG DX10TextureViewBuilder::dxBindFlags(const ETexture::BindFlags fl
 D3D10_RESOURCE_MISC_FLAG DX10TextureViewBuilder::dxMiscFlags(const ETexture::BindFlags flags) noexcept
 {
     if(hasFlag(flags, ETexture::BindFlags::GenerateMipmaps) &&
-        hasFlag(flags, ETexture::BindFlags::ShaderAccess))
+       hasFlag(flags, ETexture::BindFlags::ShaderAccess))
     {
         return D3D10_RESOURCE_MISC_GENERATE_MIPS;
     }

@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include "model/Buffer.hpp"
+#include "graphics/Buffer.hpp"
 #include "Safeties.hpp"
 
 struct GLBufferArgs final
