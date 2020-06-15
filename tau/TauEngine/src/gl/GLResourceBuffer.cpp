@@ -1,7 +1,7 @@
 #include "gl/GLResourceBuffer.hpp"
 #include <AtomicIntrinsics.hpp>
 
-void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType, uSys, const ResourceMapRange* const mapReadRange) noexcept
+void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* const mapReadRange) noexcept
 {
     const iSys currAtomicLockCount = atomicIncrement(_atomicMapCount);
 
@@ -19,11 +19,11 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
 
                 if(mapReadRange)
                 {
-                    _currentMapping = glMapBufferRange(_bufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
                 }
                 else
                 {
-                    _currentMapping = glMapBufferRange(_bufferType, 0, _args.size, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, 0, _size, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
                 }
             }
             else if(mapType == EResource::MapType::Discard)
@@ -35,7 +35,7 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
                  * They also require read access for some reason.
                  */
 
-                _currentMapping = new(::std::align_val_t{ 64 }, ::std::nothrow) u8[_args.size];
+                _currentMapping = new(::std::align_val_t{ 64 }, ::std::nothrow) u8[_size];
             }
             else if(mapType == EResource::MapType::NoOverwrite)
             {
@@ -48,11 +48,11 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
 
                 if(mapReadRange)
                 {
-                    _currentMapping = glMapBufferRange(_bufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
                 }
                 else
                 {
-                    _currentMapping = glMapBufferRange(_bufferType, 0, _args.size, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, 0, _size, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
                 }
             }
             else if(mapType == EResource::MapType::NoWrite)
@@ -61,26 +61,12 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
 
                 if(mapReadRange)
                 {
-                    _currentMapping = glMapBufferRange(_bufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT);
                 }
                 else
                 {
-                    _currentMapping = glMapBufferRange(_bufferType, 0, _args.size, GL_MAP_READ_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, 0, _size, GL_MAP_READ_BIT);
                 }
-            }
-            else
-            {
-                /*
-                 * The user has requested an unsupported mode.
-                 *
-                 * Decrement the map count to prevent any mishaps.
-                 *
-                 *   This will still signal any other threads that are waiting
-                 * for the mapping to complete. They are expected to check for
-                 * null just like this thread.
-                 */
-
-                atomicDecrement(_atomicMapCount);
             }
         }
         else
@@ -91,30 +77,34 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
             {
                 case EResource::MapType::Default:
                     // The user wants to only modify portions of the existing buffer.
-                    _currentMapping = glMapBufferRange(_bufferType, 0, _args.size, GL_MAP_WRITE_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, 0, _size, GL_MAP_WRITE_BIT);
                     break;
                 case EResource::MapType::Discard:
                     // The user doesn't need to retain any of the previous data.
-                    _currentMapping = new(::std::align_val_t{ 64 }, ::std::nothrow) u8[_args.size];
+                    _currentMapping = new(::std::align_val_t{ 64 }, ::std::nothrow) u8[_size];
                     break;
                 case EResource::MapType::NoOverwrite:
                     // The user promised not to overwrite any data that is currently in flight.
-                    _currentMapping = glMapBufferRange(_bufferType, 0, _args.size, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, 0, _size, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
                     break;
-                default:
-                    /**
-                     * The user has requested an invalid mode.
-                     *
-                     *   Decrement the map count to prevent any mishaps.
-                     *   
-                     *   This will still signal any other threads that are waiting
-                     * for the mapping to complete. They are expected to check for
-                     * null just like this thread.
-                     */
-
-                    atomicDecrement(_atomicMapCount);
-                    break;
+                default: break; // The user has requested an invalid mode.
             }
+        }
+
+        if(_currentMapping)
+        {
+            _currentMapType = mapType;
+        }
+        else
+        {
+            /*
+             * The user has requested an unsupported mode.
+             *
+             *   Something failed and thus there is not an allocation.
+             * Decrement the map count and signal the other threads to
+             * continue.
+             */
+            atomicDecrement(_atomicMapCount);
         }
 
         /*
@@ -125,7 +115,6 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
          * have halted until this signal is set.
          */
 
-         _currentMapType = mapType;
         _mappingEvent.signal();
     }
     else
@@ -139,16 +128,23 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
          */
         (void) _mappingEvent.waitUntilSignaled();
 
-        if(_currentMapType != mapType)
+        if(_currentMapType != mapType || !_currentMapping)
         {
-            // This thread is mapped differently from the original mapping.
+            /*
+             *   This thread is mapped differently from the original
+             * mapping or the original mapping has failed.
+             *
+             * Decrement the map count and return null.
+             */
+
+            atomicDecrement(_atomicMapCount);
             return null;
         }
     }
     return _currentMapping;
 }
 
-void GLResourceBuffer::unmap(IRenderingContext&, uSys) noexcept
+void GLResourceBuffer::unmap(IRenderingContext&, uSys, uSys) noexcept
 {
     const iSys currAtomicLockCount = atomicDecrement(_atomicMapCount);
 
@@ -159,17 +155,18 @@ void GLResourceBuffer::unmap(IRenderingContext&, uSys) noexcept
         switch(_currentMapType)
         {
             case EResource::MapType::Default:
-                glUnmapBuffer(_bufferType);
+                glUnmapBuffer(_glBufferType);
                 break;
             case EResource::MapType::Discard:
-                glBufferData(_bufferType, _args.size, _currentMapping, _glUsage);
+                glBindBuffer(_glBufferType, _buffer);
+                glBufferData(_glBufferType, _size, _currentMapping, _glUsage);
                 operator delete[](_currentMapping, ::std::align_val_t{ 64 }, ::std::nothrow);
                 break;
             case EResource::MapType::NoOverwrite:
-                glUnmapBuffer(_bufferType);
+                glUnmapBuffer(_glBufferType);
                 break;
             case EResource::MapType::NoWrite:
-                glUnmapBuffer(_bufferType);
+                glUnmapBuffer(_glBufferType);
                 break;
             default: break;
         }

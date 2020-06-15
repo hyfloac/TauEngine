@@ -1,7 +1,7 @@
 #include "dx/dx10/DX10ResourceBuffer.hpp"
 
 #ifdef _WIN32
-void* DX10ResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType, uSys, const ResourceMapRange* mapReadRange) noexcept
+void* DX10ResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* mapReadRange) noexcept
 {
     void* mapping;
 
@@ -37,7 +37,7 @@ void* DX10ResourceBuffer::map(IRenderingContext&, const EResource::MapType mapTy
     return mapping;
 }
 
-void DX10ResourceBuffer::unmap(IRenderingContext&, uSys) noexcept
+void DX10ResourceBuffer::unmap(IRenderingContext&, uSys, uSys) noexcept
 {
     _d3dBuffer->Unmap();
 }

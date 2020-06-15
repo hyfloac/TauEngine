@@ -9,10 +9,13 @@ class DX10GraphicsInterface;
 
 class TAU_DLL TAU_NOVTABLE DX10Resource : public IResource
 {
-    DEFAULT_CONSTRUCT_PO(DX10Resource);
     DEFAULT_DESTRUCT_VI(DX10Resource);
     DEFAULT_CM_PO(DX10Resource);
     RESOURCE_IMPL(DX10Resource);
+protected:
+    DX10Resource(const uSys size) noexcept
+        : IResource(size)
+    { }
 };
 
 class DX10ResourceBuffer;

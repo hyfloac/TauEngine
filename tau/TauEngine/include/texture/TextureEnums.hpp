@@ -1,6 +1,7 @@
 #pragma once
 
 #include <NumTypes.hpp>
+#include <TUMaths.hpp>
 
 namespace ETexture {
 
@@ -274,10 +275,172 @@ static constexpr bool isCompatible(const Format formatA, const Format formatB)
     return bytesPerComponent(formatA) == bytesPerComponent(formatB) && numComponents(formatA) == numComponents(formatB);
 }
 
-static inline uSys computeSize(const u32 width, const u32 height, const u32 depth, const u32 mipmapLevels, const u32 arrayCount) noexcept
-{ return width * height * depth * mipmapLevels * arrayCount; }
+static inline uSys computeMipSide(const u32 width) noexcept
+{ return maxT(width / 2, 1u); }
 
-static inline uSys computeSubResource(const u32 mipTarget, const u32 arrayIndex, const u32 mipmapLevels)
+static inline uSys computeMipSide(const u32 width, const u32 mipLevel) noexcept
+{
+    const u32 divisor = 1 << mipLevel;
+    return maxT(width / divisor, 1u);
+}
+
+static inline uSys computeMipLevels(const u32 width) noexcept
+{ return 1 + log2i(width); }
+
+static inline uSys computeMipLevels(const u32 width, const u32 height) noexcept
+{ return 1 + log2i(maxT(width, height)); }
+
+static inline uSys computeMipLevels(const u32 width, const u32 height, const u32 depth) noexcept
+{ return 1 + log2i(maxT(width, height, depth)); }
+
+static inline uSys computeSubResource(const u32 mipTarget, const u32 arrayIndex, const u32 mipmapLevels) noexcept
 { return mipTarget + (arrayIndex * mipmapLevels); }
+
+static inline uSys computeSubResourceSize(const Format format, const u32 width) noexcept
+{ return width * bytesPerPixel(format); }
+
+static inline uSys computeSubResourceSize(const Format format, const u32 width, const u32 height) noexcept
+{ return width * height * bytesPerPixel(format); }
+
+static inline uSys computeSubResourceSize(const Format format, const u32 width, const u32 height, const u32 depth) noexcept
+{ return width * height * depth * bytesPerPixel(format); }
+
+static inline uSys computeSubResourceSizeMip(const Format format, const u32 width, const u32 mipLevel) noexcept
+{
+    const u32 divisor = 1 << mipLevel;
+    return (width / divisor) * bytesPerPixel(format);
+}
+
+static inline uSys computeSubResourceSizeMip(const Format format, const u32 width, const u32 height, const u32 mipLevel) noexcept
+{
+    const u32 divisor = 1 << mipLevel;
+    return (width / divisor) * (height / divisor) * bytesPerPixel(format);
+}
+
+static inline uSys computeSubResourceSizeMip(const Format format, const u32 width, const u32 height, const u32 depth, const u32 mipLevel) noexcept
+{
+    const u32 divisor = 1 << mipLevel;
+    return (width / divisor) * (height / divisor) * (depth / divisor) * bytesPerPixel(format);
+}
+
+static inline uSys computeSize(const Format format, const u32 width) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width; w > 1; w = computeMipSide(w))
+    {
+        size += w;
+    }
+
+    return size * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeArr(const Format format, const u32 width, const u32 arrayCount) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width; w > 1; w = computeMipSide(w))
+    {
+        size += w;
+    }
+
+    return size * arrayCount * bytesPerPixel(format);
+}
+
+static inline uSys computeSize(const Format format, const u32 width, const u32 height) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, h = height; w > 1 && h > 1; w = computeMipSide(w), h = computeMipSide(h))
+    {
+        size += w * h;
+    }
+
+    return size * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeArr(const Format format, const u32 width, const u32 height, const u32 arrayCount) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, h = height; w > 1 && h > 1; w = computeMipSide(w), h = computeMipSide(h))
+    {
+        size += w * h;
+    }
+
+    return size * arrayCount * bytesPerPixel(format);
+}
+
+static inline uSys computeSize(const Format format, const u32 width, const u32 height, const u32 depth) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, h = height, d = depth; w > 1 && h > 1 && d > 1; w = computeMipSide(w), h = computeMipSide(h), d = computeMipSide(d))
+    {
+        size += w * h * d;
+    }
+
+    return size * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeMip(const Format format, const u32 width, const u32 mipmapLevels) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, m = mipmapLevels; w > 1 && m > 0; w = computeMipSide(w), --m)
+    {
+        size += w;
+    }
+
+    return size * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeMipArr(const Format format, const u32 width, const u32 mipmapLevels, const u32 arrayCount) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, m = mipmapLevels; w > 1 && m > 0; w = computeMipSide(w), --m)
+    {
+        size += w;
+    }
+
+    return size * arrayCount * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeMip(const Format format, const u32 width, const u32 height, const u32 mipmapLevels) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, h = height, m = mipmapLevels; w > 1 && h > 1 && m > 0; w = computeMipSide(w), h = computeMipSide(h), --m)
+    {
+        size += w * h;
+    }
+
+    return size * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeMipArr(const Format format, const u32 width, const u32 height, const u32 mipmapLevels, const u32 arrayCount) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, h = height, m = mipmapLevels; w > 1 && h > 1 && m > 0; w = computeMipSide(w), h = computeMipSide(h), --m)
+    {
+        size += w * h;
+    }
+
+    return size * arrayCount * bytesPerPixel(format);
+}
+
+static inline uSys computeSizeMip(const Format format, const u32 width, const u32 height, const u32 depth, const u32 mipmapLevels) noexcept
+{
+    uSys size = 0;
+
+    for(u32 w = width, h = height, d = depth, m = mipmapLevels; w > 1 && h > 1 && d > 1 && m > 0; w = computeMipSide(w), h = computeMipSide(h), d = computeMipSide(d), --m)
+    {
+        size += w * h * d;
+    }
+
+    return size * bytesPerPixel(format);
+}
 
 }

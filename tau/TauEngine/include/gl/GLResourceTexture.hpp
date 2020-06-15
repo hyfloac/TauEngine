@@ -8,40 +8,33 @@
 #include "GLResource.hpp"
 #include "system/Win32Event.hpp"
 
-class TAU_DLL GLResourceBuffer final : public GLResource
+class TAU_DLL GLResourceTexture1D final : public GLResource
 {
-    DELETE_CM(GLResourceBuffer);
+    DELETE_CM(GLResourceTexture1D);
 private:
-    ResourceBufferArgs _args;
-    GLenum _glBufferType;
-    GLenum _glUsage;
-    GLuint _buffer;
+    ResourceTexture1DArgs _args;
+    GLuint _texture;
 
     volatile iSys* _atomicMapCount;
     void* volatile _currentMapping;
     Win32ManualEvent _mappingEvent;
-    volatile EResource::MapType _currentMapType;
 public:
-    GLResourceBuffer(const ResourceBufferArgs& args, const GLenum glBufferType, const GLenum glUsage, const GLuint buffer) noexcept
-        : GLResource(args.size)
+    GLResourceTexture1D(const ResourceTexture1DArgs& args, const GLuint texture) noexcept
+        : GLResource(ETexture::computeSizeArr(args.dataFormat, args.width, args.mipLevels, args.arrayCount))
         , _args(args)
-        , _glBufferType(glBufferType)
-        , _glUsage(glUsage)
-        , _buffer(buffer)
+        , _texture(texture)
         , _atomicMapCount(new(::std::align_val_t{ 64 }, ::std::nothrow) iSys(0))
         , _currentMapping(null)
-        , _currentMapType(static_cast<EResource::MapType>(0))
     { }
 
-    ~GLResourceBuffer() noexcept
+    ~GLResourceTexture1D() noexcept
     {
         operator delete(const_cast<iSys*>(_atomicMapCount), ::std::align_val_t{ 64 }, ::std::nothrow);
     }
 
-    [[nodiscard]] GLenum glUsage() const noexcept { return _glUsage; }
-    [[nodiscard]] GLuint buffer() const noexcept { return _buffer; }
+    [[nodiscard]] GLuint texture() const noexcept { return _texture; }
 
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Buffer; }
+    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture1D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
     void unmap(IRenderingContext& context, uSys mipLevel, uSys arrayIndex) noexcept override;

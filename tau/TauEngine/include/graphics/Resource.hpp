@@ -63,14 +63,21 @@ public:
  */
 class TAU_DLL TAU_NOVTABLE IResource
 {
-    DEFAULT_CONSTRUCT_PO(IResource);
     DEFAULT_DESTRUCT_VI(IResource);
     DEFAULT_CM_PO(IResource);
+protected:
+    uSys _size;
+protected:
+    IResource(const uSys size) noexcept
+        : _size(size)
+    { }
 public:
+    [[nodiscard]] uSys size() const noexcept { return _size; }
+
     [[nodiscard]] virtual EResource::Type resourceType() const noexcept = 0;
 
-    [[nodiscard]] virtual void* map(IRenderingContext& context, EResource::MapType mapType = EResource::MapType::Default, uSys subResource = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none()) noexcept = 0;
-    virtual void unmap(IRenderingContext& context, uSys subResource = 0) noexcept = 0;
+    [[nodiscard]] virtual void* map(IRenderingContext& context, EResource::MapType mapType = EResource::MapType::Default, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none()) noexcept = 0;
+    virtual void unmap(IRenderingContext& context, uSys mipLevel = 0, uSys arrayIndex = 0) noexcept = 0;
 
     template<typename _Args>
     [[nodiscard]] const _Args* getArgs() const noexcept { return null; }

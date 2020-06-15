@@ -12,7 +12,8 @@ private:
     ID3D10Buffer* _d3dBuffer;
 public:
     DX10ResourceBuffer(const ResourceBufferArgs& args, ID3D10Buffer* const d3dBuffer) noexcept
-        : _args(args)
+        : DX10Resource(args.size)
+        , _args(args)
         , _d3dBuffer(d3dBuffer)
     { }
 
@@ -70,8 +71,8 @@ public:
 
     [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Buffer; }
 
-    [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys subResource, const ResourceMapRange* mapReadRange) noexcept override;
-    void unmap(IRenderingContext& context, uSys subResource) noexcept override;
+    [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
+    void unmap(IRenderingContext& context, uSys mipLevel, uSys arrayIndex) noexcept override;
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };
