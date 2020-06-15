@@ -6,7 +6,6 @@
 #include "Timings.hpp"
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
-#include "system/SystemInterface.hpp"
 
 bool tauInit() noexcept
 {
@@ -15,7 +14,6 @@ bool tauInit() noexcept
     if(!_initializationComplete)
     {
         _initializationComplete = true;
-        SystemInterface::create();
         PageAllocator::init();
     }
 
@@ -33,7 +31,6 @@ void tauMain() noexcept
 
 void tauFinalize() noexcept
 {
-    SystemInterface::finalize();
 }
 
 static ExceptionData exData = { null, 0, "", "" };

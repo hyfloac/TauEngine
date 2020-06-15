@@ -12,8 +12,7 @@ private:
     ID3D10Buffer* _d3dBuffer;
 public:
     DX10ResourceBuffer(const ResourceBufferArgs& args, ID3D10Buffer* const d3dBuffer) noexcept
-        : DX10Resource(args.size)
-        , _args(args)
+        : _args(args)
         , _d3dBuffer(d3dBuffer)
     { }
 

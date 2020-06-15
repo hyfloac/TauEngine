@@ -34,13 +34,17 @@ public:
         return &_none;
     }
 public:
+    // Inclusive
     uSys begin;
+    // Exclusive
     uSys end;
 public:
     ResourceMapRange(const uSys _begin, const uSys _end) noexcept
         : begin(_begin)
         , end(_end)
     { }
+
+    [[nodiscard]] uSys length() const noexcept { return end - begin; }
 };
 
 #define RESOURCE_IMPL_BASE(_TYPE) \

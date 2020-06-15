@@ -1,17 +1,17 @@
 #pragma once
 
-#include "model/VertexArray.hpp"
+#include "graphics/VertexArray.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>
-#include "model/BufferDescriptor.hpp"
+#include "graphics/BufferDescriptor.hpp"
 
 class DX10RenderingContext;
 class DX10IndexBuffer;
 
 struct DXVertexArrayArgs final
 {
-    DELETE_COPY(DXVertexArrayArgs);
+    DELETE_CM(DXVertexArrayArgs);
 public:
     NullableRef<DX10IndexBuffer> indexBuffer;
     ID3D10Buffer** iaBuffers;
@@ -29,7 +29,7 @@ public:
 
 class TAU_DLL DX10VertexArray final : public IVertexArray
 {
-    DELETE_COPY(DX10VertexArray);
+    DELETE_CM(DX10VertexArray);
 public:
     static D3D10_PRIMITIVE_TOPOLOGY getDXDrawType(DrawType drawType) noexcept;
 private:
@@ -62,7 +62,7 @@ class TAU_DLL DX10VertexArrayBuilder final : public IVertexArrayBuilder
 {
     DEFAULT_CONSTRUCT_PU(DX10VertexArrayBuilder);
     DEFAULT_DESTRUCT(DX10VertexArrayBuilder);
-    DELETE_COPY(DX10VertexArrayBuilder);
+    DEFAULT_CM_PU(DX10VertexArrayBuilder);
 public:
     [[nodiscard]] DX10VertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept override;
     [[nodiscard]] DX10VertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
