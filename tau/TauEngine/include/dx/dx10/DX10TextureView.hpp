@@ -242,7 +242,7 @@ public:
     [[nodiscard]] u32 arrayCount() const noexcept override { return _arrayCount; }
 };
 
-#define DX_NO_MIPMAP_TEXTURE_VIEW(_BASE, _TYPE) \
+#define DX10_NO_MIPMAP_TEXTURE_VIEW(_BASE, _TYPE) \
     class TAU_DLL _TYPE final : public _BASE { \
         DEFAULT_DESTRUCT(_TYPE); \
         DEFAULT_CM_PU(_TYPE); \
@@ -251,13 +251,13 @@ public:
         void generateMipmaps(IRenderingContext&) noexcept override { } \
     }
 
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10Texture1DView, DX10NoMipmapTexture1DView);
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10Texture1DArrayView, DX10NoMipmapTexture1DArrayView);
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10Texture2DView, DX10NoMipmapTexture2DView);
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10Texture2DArrayView, DX10NoMipmapTexture2DArrayView);
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10Texture3DView, DX10NoMipmapTexture3DView);
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10TextureCubeView, DX10NoMipmapTextureCubeDView);
-DX_NO_MIPMAP_TEXTURE_VIEW(DX10TextureCubeArrayView, DX10NoMipmapTextureCubeArrayView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10Texture1DView, DX10NoMipmapTexture1DView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10Texture1DArrayView, DX10NoMipmapTexture1DArrayView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10Texture2DView, DX10NoMipmapTexture2DView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10Texture2DArrayView, DX10NoMipmapTexture2DArrayView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10Texture3DView, DX10NoMipmapTexture3DView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10TextureCubeView, DX10NoMipmapTextureCubeDView);
+DX10_NO_MIPMAP_TEXTURE_VIEW(DX10TextureCubeArrayView, DX10NoMipmapTextureCubeArrayView);
 
 class TAU_DLL DX10TextureViewBuilder final : public ITextureViewBuilder
 {

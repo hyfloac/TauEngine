@@ -81,6 +81,7 @@
     <ClCompile Include="src\gl\GLShaderBundleVisitor.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
+    <ClCompile Include="src\gl\GLTextureView.cpp" />
     <ClCompile Include="src\imgui\ImGuiTauImpl.cpp" />
     <ClCompile Include="src\model\Material.cpp" />
     <ClCompile Include="src\model\MeshGenerator.cpp" />
