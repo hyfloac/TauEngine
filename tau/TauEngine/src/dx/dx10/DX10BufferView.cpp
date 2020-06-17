@@ -3,7 +3,7 @@
 #ifdef _WIN32
 #include "dx/dx10/DX10ResourceBuffer.hpp"
 
-DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& args, Error* error) const noexcept
+DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& args, Error* const error) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -15,7 +15,7 @@ DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& a
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -27,7 +27,7 @@ DX10VertexBufferView* DX10BufferViewBuilder::build(const VertexBufferViewArgs& a
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-CPPRef<IVertexBufferView> DX10BufferViewBuilder::buildCPPRef(const VertexBufferViewArgs& args, Error* error) const noexcept
+CPPRef<IVertexBufferView> DX10BufferViewBuilder::buildCPPRef(const VertexBufferViewArgs& args, Error* const error) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -39,7 +39,7 @@ CPPRef<IVertexBufferView> DX10BufferViewBuilder::buildCPPRef(const VertexBufferV
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-NullableRef<IVertexBufferView> DX10BufferViewBuilder::buildTauRef(const VertexBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IVertexBufferView> DX10BufferViewBuilder::buildTauRef(const VertexBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -51,7 +51,7 @@ NullableRef<IVertexBufferView> DX10BufferViewBuilder::buildTauRef(const VertexBu
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-NullableStrongRef<IVertexBufferView> DX10BufferViewBuilder::buildTauSRef(const VertexBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IVertexBufferView> DX10BufferViewBuilder::buildTauSRef(const VertexBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -63,7 +63,7 @@ NullableStrongRef<IVertexBufferView> DX10BufferViewBuilder::buildTauSRef(const V
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-DX10IndexBufferView* DX10BufferViewBuilder::build(const IndexBufferViewArgs& args, Error* error) const noexcept
+DX10IndexBufferView* DX10BufferViewBuilder::build(const IndexBufferViewArgs& args, Error* const error) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -75,7 +75,7 @@ DX10IndexBufferView* DX10BufferViewBuilder::build(const IndexBufferViewArgs& arg
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-DX10IndexBufferView* DX10BufferViewBuilder::build(const IndexBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10IndexBufferView* DX10BufferViewBuilder::build(const IndexBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -87,7 +87,7 @@ DX10IndexBufferView* DX10BufferViewBuilder::build(const IndexBufferViewArgs& arg
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-CPPRef<IIndexBufferView> DX10BufferViewBuilder::buildCPPRef(const IndexBufferViewArgs& args, Error* error) const noexcept
+CPPRef<IIndexBufferView> DX10BufferViewBuilder::buildCPPRef(const IndexBufferViewArgs& args, Error* const error) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -99,7 +99,7 @@ CPPRef<IIndexBufferView> DX10BufferViewBuilder::buildCPPRef(const IndexBufferVie
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-NullableRef<IIndexBufferView> DX10BufferViewBuilder::buildTauRef(const IndexBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IIndexBufferView> DX10BufferViewBuilder::buildTauRef(const IndexBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -111,7 +111,7 @@ NullableRef<IIndexBufferView> DX10BufferViewBuilder::buildTauRef(const IndexBuff
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-NullableStrongRef<IIndexBufferView> DX10BufferViewBuilder::buildTauSRef(const IndexBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IIndexBufferView> DX10BufferViewBuilder::buildTauSRef(const IndexBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -123,7 +123,7 @@ NullableStrongRef<IIndexBufferView> DX10BufferViewBuilder::buildTauSRef(const In
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-DX10UniformBufferView* DX10BufferViewBuilder::build(const UniformBufferViewArgs& args, Error* error) const noexcept
+DX10UniformBufferView* DX10BufferViewBuilder::build(const UniformBufferViewArgs& args, Error* const error) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -135,7 +135,7 @@ DX10UniformBufferView* DX10BufferViewBuilder::build(const UniformBufferViewArgs&
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-DX10UniformBufferView* DX10BufferViewBuilder::build(const UniformBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+DX10UniformBufferView* DX10BufferViewBuilder::build(const UniformBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -147,7 +147,7 @@ DX10UniformBufferView* DX10BufferViewBuilder::build(const UniformBufferViewArgs&
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-CPPRef<IUniformBufferView> DX10BufferViewBuilder::buildCPPRef(const UniformBufferViewArgs& args, Error* error) const noexcept
+CPPRef<IUniformBufferView> DX10BufferViewBuilder::buildCPPRef(const UniformBufferViewArgs& args, Error* const error) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -159,7 +159,7 @@ CPPRef<IUniformBufferView> DX10BufferViewBuilder::buildCPPRef(const UniformBuffe
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-NullableRef<IUniformBufferView> DX10BufferViewBuilder::buildTauRef(const UniformBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableRef<IUniformBufferView> DX10BufferViewBuilder::buildTauRef(const UniformBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -171,7 +171,7 @@ NullableRef<IUniformBufferView> DX10BufferViewBuilder::buildTauRef(const Uniform
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-NullableStrongRef<IUniformBufferView> DX10BufferViewBuilder::buildTauSRef(const UniformBufferViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
+NullableStrongRef<IUniformBufferView> DX10BufferViewBuilder::buildTauSRef(const UniformBufferViewArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     DXBufferViewArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
@@ -183,7 +183,7 @@ NullableStrongRef<IUniformBufferView> DX10BufferViewBuilder::buildTauSRef(const 
     ERROR_CODE_V(Error::NoError, bufferView);
 }
 
-bool DX10BufferViewBuilder::processArgs(const VertexBufferViewArgs& args, DXBufferViewArgs* dxArgs, Error* error) noexcept
+bool DX10BufferViewBuilder::processArgs(const VertexBufferViewArgs& args, DXBufferViewArgs* const dxArgs, Error* const error) noexcept
 {
     ERROR_CODE_COND_F(!args.buffer, Error::BufferIsNull);
     ERROR_CODE_COND_F(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);
@@ -196,7 +196,7 @@ bool DX10BufferViewBuilder::processArgs(const VertexBufferViewArgs& args, DXBuff
     return true;
 }
 
-bool DX10BufferViewBuilder::processArgs(const IndexBufferViewArgs& args, DXBufferViewArgs* dxArgs, Error* error) noexcept
+bool DX10BufferViewBuilder::processArgs(const IndexBufferViewArgs& args, DXBufferViewArgs* const dxArgs, Error* const error) noexcept
 {
     ERROR_CODE_COND_F(!args.buffer, Error::BufferIsNull);
     ERROR_CODE_COND_F(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);
@@ -209,7 +209,7 @@ bool DX10BufferViewBuilder::processArgs(const IndexBufferViewArgs& args, DXBuffe
     return true;
 }
 
-bool DX10BufferViewBuilder::processArgs(const UniformBufferViewArgs& args, DXBufferViewArgs* dxArgs, Error* error) noexcept
+bool DX10BufferViewBuilder::processArgs(const UniformBufferViewArgs& args, DXBufferViewArgs* const dxArgs, Error* const error) noexcept
 {
     ERROR_CODE_COND_F(!args.buffer, Error::BufferIsNull);
     ERROR_CODE_COND_F(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);

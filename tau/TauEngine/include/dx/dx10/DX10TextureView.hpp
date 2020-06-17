@@ -88,7 +88,7 @@ public:
 
     [[nodiscard]] ETexture::Format dataFormat() const noexcept override { return _dataFormat; }
 
-    [[nodiscard]] u32 mipCount() const noexcept override { return _mipCount; }
+    [[nodiscard]] u32 mipLevels() const noexcept override { return _mipCount; }
 
     [[nodiscard]]       ID3D10ShaderResourceView* d3dSRV()       noexcept { return _d3dSRV; }
     [[nodiscard]] const ID3D10ShaderResourceView* d3dSRV() const noexcept { return _d3dSRV; }

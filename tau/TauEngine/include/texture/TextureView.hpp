@@ -4,6 +4,7 @@
 
 #include "graphics/ResourceView.hpp"
 #include "texture/TextureEnums.hpp"
+#include "graphics/DescriptorHeap.hpp"
 
 class IRenderingContext;
 class IResource;
@@ -29,8 +30,8 @@ public:
     [[nodiscard]] virtual u32      width() const noexcept { return 0; }
     [[nodiscard]] virtual u32     height() const noexcept { return 0; }
     [[nodiscard]] virtual u32      depth() const noexcept { return 0; }
-    [[nodiscard]] virtual u32   mipCount() const noexcept { return 0; }
     [[nodiscard]] virtual u32 arrayCount() const noexcept { return 0; }
+    [[nodiscard]] virtual u32  mipLevels() const noexcept { return 0; }
 
     virtual void generateMipmaps(IRenderingContext& context) noexcept = 0;
 
@@ -39,74 +40,15 @@ public:
     RTTD_BASE_CAST(ITextureView);
 };
 
-struct Texture1DViewArgs final
+struct TextureViewArgs final
 {
-    DEFAULT_CONSTRUCT_PU(Texture1DViewArgs);
-    DEFAULT_DESTRUCT(Texture1DViewArgs);
-    DEFAULT_CM_PU(Texture1DViewArgs);
+    DEFAULT_CONSTRUCT_PU(TextureViewArgs);
+    DEFAULT_DESTRUCT(TextureViewArgs);
+    DEFAULT_CM_PU(TextureViewArgs);
 public:
     IResource* texture;
     ETexture::Format dataFormat;
-};
-
-struct Texture1DArrayViewArgs final
-{
-    DEFAULT_CONSTRUCT_PU(Texture1DArrayViewArgs);
-    DEFAULT_DESTRUCT(Texture1DArrayViewArgs);
-    DEFAULT_CM_PU(Texture1DArrayViewArgs);
-public:
-    IResource* texture;
-    ETexture::Format dataFormat;
-};
-
-struct Texture2DViewArgs final
-{
-    DEFAULT_CONSTRUCT_PU(Texture2DViewArgs);
-    DEFAULT_DESTRUCT(Texture2DViewArgs);
-    DEFAULT_CM_PU(Texture2DViewArgs);
-public:
-    IResource* texture;
-    ETexture::Format dataFormat;
-};
-
-struct Texture2DArrayViewArgs final
-{
-    DEFAULT_CONSTRUCT_PU(Texture2DArrayViewArgs);
-    DEFAULT_DESTRUCT(Texture2DArrayViewArgs);
-    DEFAULT_CM_PU(Texture2DArrayViewArgs);
-public:
-    IResource* texture;
-    ETexture::Format dataFormat;
-};
-
-struct Texture3DViewArgs final
-{
-    DEFAULT_CONSTRUCT_PU(Texture3DViewArgs);
-    DEFAULT_DESTRUCT(Texture3DViewArgs);
-    DEFAULT_CM_PU(Texture3DViewArgs);
-public:
-    IResource* texture;
-    ETexture::Format dataFormat;
-};
-
-struct TextureCubeViewArgs final
-{
-    DEFAULT_CONSTRUCT_PU(TextureCubeViewArgs);
-    DEFAULT_DESTRUCT(TextureCubeViewArgs);
-    DEFAULT_CM_PU(TextureCubeViewArgs);
-public:
-    IResource* texture;
-    ETexture::Format dataFormat;
-};
-
-struct TextureCubeArrayViewArgs final
-{
-    DEFAULT_CONSTRUCT_PU(TextureCubeArrayViewArgs);
-    DEFAULT_DESTRUCT(TextureCubeArrayViewArgs);
-    DEFAULT_CM_PU(TextureCubeArrayViewArgs);
-public:
-    IResource* texture;
-    ETexture::Format dataFormat;
+    ETexture::Type type;
 };
 
 class TAU_DLL TAU_NOVTABLE ITextureViewBuilder
@@ -123,6 +65,7 @@ public:
         TextureDoesNotSupportView,
         InvalidDataFormat,
         TextureIsNotArray,
+        DescriptorTableIsNull,
         /**
          * Indicates that a specific view type is not supported.
          *
@@ -158,45 +101,5 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual ITextureView* build(const Texture1DViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const Texture1DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const Texture1DViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const Texture1DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const Texture1DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual ITextureView* build(const Texture1DArrayViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const Texture1DArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const Texture1DArrayViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const Texture1DArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const Texture1DArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual ITextureView* build(const Texture2DViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const Texture2DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const Texture2DViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const Texture2DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const Texture2DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual ITextureView* build(const Texture2DArrayViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const Texture2DArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const Texture2DArrayViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const Texture2DArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const Texture2DArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual ITextureView* build(const Texture3DViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const Texture3DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const Texture3DViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const Texture3DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const Texture3DViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual ITextureView* build(const TextureCubeViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const TextureCubeViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const TextureCubeViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const TextureCubeViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const TextureCubeViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual ITextureView* build(const TextureCubeArrayViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual ITextureView* build(const TextureCubeArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureView> buildCPPRef(const TextureCubeArrayViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureView> buildTauRef(const TextureCubeArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureView> buildTauSRef(const TextureCubeArrayViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual ITextureView* build(const TextureViewArgs& args, [[tau::out]] Error* error, DescriptorTable table, uSys tableIndex) const noexcept = 0;
 };

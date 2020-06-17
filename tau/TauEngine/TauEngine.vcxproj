@@ -70,7 +70,9 @@
     <ClCompile Include="src\gl\GL4_0BlendingState.cpp" />
     <ClCompile Include="src\gl\GL4_3VertexArray.cpp" />
     <ClCompile Include="src\gl\GLBlendingState.cpp" />
+    <ClCompile Include="src\gl\GLBufferView.cpp" />
     <ClCompile Include="src\gl\GLDepthStencilState.cpp" />
+    <ClCompile Include="src\gl\GLDescriptorHeap.cpp" />
     <ClCompile Include="src\gl\GLGraphicsAccelerator.cpp" />
     <ClCompile Include="src\gl\GLGraphicsInterface.cpp" />
     <ClCompile Include="src\gl\GL4_3InputLayout.cpp" />
@@ -202,7 +204,9 @@
     <ClInclude Include="include\gl\gl4_5\GLBuffer4_5.hpp" />
     <ClInclude Include="include\gl\GLBlendingState.hpp" />
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
+    <ClInclude Include="include\gl\GLBufferView.hpp" />
     <ClInclude Include="include\gl\GLDepthStencilState.hpp" />
+    <ClInclude Include="include\gl\GLDescriptorHeap.hpp" />
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLGraphicsAccelerator.hpp" />
     <ClInclude Include="include\gl\GLGraphicsInterface.hpp" />
@@ -225,6 +229,7 @@
     <ClInclude Include="include\graphics\BlendingState.hpp" />
     <ClInclude Include="include\graphics\BufferView.hpp" />
     <ClInclude Include="include\graphics\DepthStencilState.hpp" />
+    <ClInclude Include="include\graphics\DescriptorHeap.hpp" />
     <ClInclude Include="include\graphics\RasterizerState.hpp" />
     <ClInclude Include="include\graphics\Resource.hpp" />
     <ClInclude Include="include\graphics\ResourceEnums.hpp" />

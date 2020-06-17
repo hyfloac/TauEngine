@@ -9,6 +9,7 @@
 #include "BufferDescriptor.hpp"
 #include "ResourceView.hpp"
 #include "BufferEnums.hpp"
+#include "DescriptorHeap.hpp"
 
 class IResource;
 
@@ -167,6 +168,7 @@ public:
         NoError = 0,
         BufferIsNull,
         ResourceIsNotBuffer,
+        DescriptorTableIsNull,
         /**
          * Failed to allocate system memory.
          *
@@ -208,9 +210,5 @@ public:
     [[nodiscard]] virtual NullableRef<IIndexBufferView> buildTauRef(const IndexBufferViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongRef<IIndexBufferView> buildTauSRef(const IndexBufferViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 
-    [[nodiscard]] virtual IUniformBufferView* build(const UniformBufferViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IUniformBufferView* build(const UniformBufferViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IUniformBufferView> buildCPPRef(const UniformBufferViewArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IUniformBufferView> buildTauRef(const UniformBufferViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IUniformBufferView> buildTauSRef(const UniformBufferViewArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual IUniformBufferView* build(const UniformBufferViewArgs& args, [[tau::out]] Error* error, DescriptorTable table, uSys tableIndex) const noexcept = 0;
 };
