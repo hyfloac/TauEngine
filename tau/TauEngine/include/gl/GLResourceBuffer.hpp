@@ -28,14 +28,14 @@ public:
         , _glBufferType(glBufferType)
         , _glUsage(glUsage)
         , _buffer(buffer)
-        , _atomicMapCount(new(::std::align_val_t{ 64 }, ::std::nothrow) iSys(0))
+        , _atomicMapCount(new(::std::nothrow) iSys(0))
         , _currentMapping(null)
         , _currentMapType(static_cast<EResource::MapType>(0))
     { }
 
     ~GLResourceBuffer() noexcept
     {
-        operator delete(const_cast<iSys*>(_atomicMapCount), ::std::align_val_t{ 64 }, ::std::nothrow);
+        delete _atomicMapCount;
     }
 
     [[nodiscard]] GLenum glUsage() const noexcept { return _glUsage; }

@@ -21,12 +21,12 @@ protected:
     GLResourceTexture(const uSys size, const GLuint texture) noexcept
         : GLResource(size)
         , _texture(texture)
-        , _atomicMapCount(new(::std::align_val_t{ 64 }, ::std::nothrow) iSys(0))
+        , _atomicMapCount(new(::std::nothrow) iSys(0))
         , _currentMapping(null)
     { }
 public:
     virtual ~GLResourceTexture() noexcept
-    { operator delete(const_cast<iSys*>(_atomicMapCount), ::std::align_val_t{ 64 }, ::std::nothrow); }
+    { delete _atomicMapCount; }
 
     [[nodiscard]] GLuint texture() const noexcept { return _texture; }
 
