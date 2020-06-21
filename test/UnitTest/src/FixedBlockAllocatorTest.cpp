@@ -4,7 +4,7 @@
 
 class AllocTestObj final
 {
-    DEFAULT_COPY(AllocTestObj);
+    DEFAULT_CM_PU(AllocTestObj);
 private:
     uSys _x;
     float _y;
@@ -84,9 +84,9 @@ template<typename _Allocator>
 void arenaMaxPageExceed() noexcept
 {
     UNIT_TEST();
-    _Allocator allocator(sizeof(AllocTestObj), 1);
+    _Allocator allocator(sizeof(AllocTestObj), PageCountVal{ 1 }, 1);
     const uSys allocations = PageAllocator::pageSize() / allocator.blockSize() - 1;
-    for(int i = 0; i < allocations; ++i)
+    for(uSys i = 0; i < allocations; ++i)
     {
         (void) allocator.template allocateT<AllocTestObj>(i, 1.0f / static_cast<float>(i), false);
     }

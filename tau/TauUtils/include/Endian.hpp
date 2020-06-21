@@ -49,6 +49,6 @@
 static inline bool isLittleEndian()
 {
     static const unsigned short number = 0x0001;
-    static const unsigned char* numPtr = (const unsigned char*) &number;
+    static const unsigned char* numPtr = reinterpret_cast<const unsigned char*>(&number);
     return numPtr[0] == 1;
 }

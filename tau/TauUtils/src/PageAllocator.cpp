@@ -30,6 +30,11 @@ void* PageAllocator::commitPage(void* const page) noexcept
     return VirtualAlloc(page, _pageSize, MEM_COMMIT, PAGE_READWRITE);
 }
 
+void* PageAllocator::commitPages(void* const page, const uSys pageCount) noexcept
+{
+    return VirtualAlloc(page, pageCount * _pageSize, MEM_COMMIT, PAGE_READWRITE);
+}
+
 void PageAllocator::decommitPage(void* const page) noexcept
 {
     VirtualFree(page, 1, MEM_DECOMMIT);

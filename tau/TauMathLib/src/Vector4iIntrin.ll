@@ -22,7 +22,7 @@ define <4 x i32> @vector4i_mul(<4 x i32> %a, <4 x i32> %b) local_unnamed_addr #0
 
 define <4 x i32> @vector4i_div(<4 x i32> %a, <4 x i32> %b) local_unnamed_addr #0
 {
-    %val = div <4 x i32> %a, %b
+    %val = sdiv <4 x i32> %a, %b
     ret <4 x i32> %val
 }
 
@@ -89,7 +89,7 @@ define <4 x i32> @vector4i_divScalarInv(i32 %a, <4 x i32> %b) local_unnamed_addr
     ret <4 x i32> %val
 }
 
-define <4 x i32> @vector4i_divScalar(<4 x i32> %a, float %b) local_unnamed_addr #0
+define <4 x float> @vector4i_divScalarF(<4 x i32> %a, float %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %b, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %b, i32 1
@@ -98,11 +98,11 @@ define <4 x i32> @vector4i_divScalar(<4 x i32> %a, float %b) local_unnamed_addr 
 
     %fa = sitofp <4 x i32> %a to <4 x float>
 
-    %val = fdiv <4 x i32> %fa, %scalingVector
-    ret <4 x i32> %val
+    %val = fdiv <4 x float> %fa, %scalingVector
+    ret <4 x float> %val
 }
 
-define <4 x i32> @vector4i_divScalarInv(float %a, <4 x i32> %b) local_unnamed_addr #0
+define <4 x float> @vector4i_divScalarInvF(float %a, <4 x i32> %b) local_unnamed_addr #0
 {
     %scalingVector0 = insertelement <4 x float>           undef, float %a, i32 0
     %scalingVector1 = insertelement <4 x float> %scalingVector0, float %a, i32 1
@@ -111,19 +111,19 @@ define <4 x i32> @vector4i_divScalarInv(float %a, <4 x i32> %b) local_unnamed_ad
 
     %fb = sitofp <4 x i32> %b to <4 x float>
 
-    %val = fdiv <4 x i32> %scalingVector, %fb
-    ret <4 x i32> %val
+    %val = fdiv <4 x float> %scalingVector, %fb
+    ret <4 x float> %val
 }
 
 define <4 x i32> @vector4i_neg(<4 x i32> %a) local_unnamed_addr #0
 {
-    %val = sub <4 x i32> <i32 0, i32 0, i32 0, i32 0> <4 x i32> %a
+    %val = sub <4 x i32> <i32 0, i32 0, i32 0, i32 0>, %a
     ret <4 x i32> %val
 }
 
 define i32 @vector4i_magnitudeSquared(<4 x i32> %a) local_unnamed_addr #0
 {
-    %squared = fmul <4 x i32> %a, %a
+    %squared = mul <4 x i32> %a, %a
     %x = extractelement <4 x i32> %squared, i32 0
     %y = extractelement <4 x i32> %squared, i32 1
     %z = extractelement <4 x i32> %squared, i32 2
@@ -145,7 +145,7 @@ define float @vector4i_magnitude(<4 x i32> %a) local_unnamed_addr #0
 
 define float @vector4i_inverseMagnitude(<4 x i32> %a) local_unnamed_addr #0
 {
-    %magSquared = call float @vector4i_magnitudeSquared(<4 x i32> %a)
+    %magSquared = call i32 @vector4i_magnitudeSquared(<4 x i32> %a)
     %magSquaredF = sitofp i32 %magSquared to float
     %inputVec = insertelement <4 x float> undef, float %magSquaredF, i32 0
     %rsqrtVec = call <4 x float> @llvm.x86.sse.rsqrt.ss(<4 x float> %inputVec)
@@ -183,15 +183,15 @@ define <4 x float> @vector4i_normalizeExact(<4 x i32> %a) local_unnamed_addr #0
 
 define i32 @vector4i_dot(<4 x i32> %a, <4 x i32> %b)
 {
-    %mul = fmul <4 x i32> %a, %b
+    %mul = mul <4 x i32> %a, %b
     %x = extractelement <4 x i32> %mul, i32 0
     %y = extractelement <4 x i32> %mul, i32 1
     %z = extractelement <4 x i32> %mul, i32 2
     %w = extractelement <4 x i32> %mul, i32 3
 
-    %xy = fadd i32 %x, %y
-    %zw = fadd i32 %z, %w
-    %dot = fadd i32 %xy, %zw
+    %xy = add i32 %x, %y
+    %zw = add i32 %z, %w
+    %dot = add i32 %xy, %zw
     ret i32 %dot
 }
 

@@ -4,8 +4,8 @@
 #define NUM_TYPES_HPP
 
 #pragma warning(push, 0)
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #pragma warning(pop)
 
 typedef ::std::int8_t   i8;
@@ -40,12 +40,12 @@ typedef double f64;
     typedef u32 uSys;
   #endif
 #else
-  typedef i64 iSys;
-  typedef ::std::size_t uSys;
+  typedef ::std::ptrdiff_t iSys;
+  typedef ::std::size_t    uSys;
 #endif
 
-typedef ::std::uintptr_t uPtr;
 typedef ::std::intptr_t  iPtr;
+typedef ::std::uintptr_t uPtr;
 
 template<typename _T>
 struct IntMaxMin final

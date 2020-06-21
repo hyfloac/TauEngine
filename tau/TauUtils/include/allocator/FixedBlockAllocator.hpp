@@ -34,7 +34,8 @@ class FixedBlockAllocator final : public TauAllocator
     DEFAULT_DESTRUCT(FixedBlockAllocator);
     DELETE_CM(FixedBlockAllocator);
 public:
-    FixedBlockAllocator(uSys blockSize, uSys numReservePages) noexcept = delete;
+    FixedBlockAllocator(uSys blockSize, PageCountVal numReservePages, uSys allocPages) noexcept = delete;
+    FixedBlockAllocator(uSys blockSize, uSys maxElements, uSys allocPages) noexcept = delete;
 
     [[nodiscard]] inline uSys blockSize() const noexcept { return 0; }
     [[nodiscard]] inline iSys allocationDifference() const noexcept { return 0; }
@@ -55,20 +56,33 @@ class FixedBlockAllocator<AllocationTracking::None> final : public TauAllocator
 {
     DELETE_CM(FixedBlockAllocator);
 private:
+    uSys _allocPages;
+    uSys _numReservedPages;
     void* _pages;
     uSys _committedPages;
     uSys _blockSize;
     uSys _allocIndex;
-    uSys _numReservedPages;
     void** _firstFree;
     void** _lastFree;
 public:
-    inline FixedBlockAllocator(const uSys blockSize, const uSys numReservedPages = 1024) noexcept
-        : _pages(PageAllocator::reserve(numReservedPages))
+    inline FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
         , _allocIndex(0)
-        , _numReservedPages(numReservedPages)
+        , _firstFree(nullptr)
+        , _lastFree(nullptr)
+    { }
+
+    inline FixedBlockAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
+        , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
+        , _allocIndex(0)
         , _firstFree(nullptr)
         , _lastFree(nullptr)
     { }
@@ -135,8 +149,8 @@ private:
         {
             if(_committedPages == _numReservedPages)
             { return false; }
-            (void)PageAllocator::commitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            ++_committedPages;
+            (void) PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages += _allocPages;
         }
 
         return true;
@@ -144,12 +158,12 @@ private:
 
     void attemptRelease() noexcept
     {
-        // If there are two empty pages, release the last page.
-        const uSys pageBytes = (_committedPages - 1) * PageAllocator::pageSize();
-        if(pageBytes - _blockSize <= PageAllocator::pageSize())
+        // If there are `_allocPages` empty pages, release the block of pages.
+        const uSys pageBytes = (_committedPages - _allocPages) * PageAllocator::pageSize();
+        if(pageBytes - _blockSize <= (PageAllocator::pageSize() * _allocPages))
         {
-            (void)PageAllocator::decommitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            --_committedPages;
+            (void) PageAllocator::decommitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages -= _allocPages;
         }
     }
 };
@@ -165,21 +179,35 @@ class FixedBlockAllocator<AllocationTracking::Count> final : public TauAllocator
 {
     DELETE_CM(FixedBlockAllocator);
 private:
+    uSys _allocPages;
+    uSys _numReservedPages;
     void* _pages;
     uSys _committedPages;
     uSys _blockSize;
     uSys _allocIndex;
-    uSys _numReservedPages;
     void** _firstFree;
     void** _lastFree;
     iSys _allocationDifference;
 public:
-    inline FixedBlockAllocator(const uSys blockSize, const uSys numReservedPages = 1024) noexcept
-        : _pages(PageAllocator::reserve(numReservedPages))
+    inline FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
         , _allocIndex(0)
-        , _numReservedPages(numReservedPages)
+        , _firstFree(nullptr)
+        , _lastFree(nullptr)
+        , _allocationDifference(0)
+    { }
+
+    inline FixedBlockAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
+        , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
+        , _allocIndex(0)
         , _firstFree(nullptr)
         , _lastFree(nullptr)
         , _allocationDifference(0)
@@ -259,8 +287,8 @@ private:
         {
             if(_committedPages == _numReservedPages)
             { return false; }
-            (void)PageAllocator::commitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            ++_committedPages;
+            (void) PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages += _allocPages;
         }
 
         return true;
@@ -268,12 +296,12 @@ private:
 
     void attemptRelease() noexcept
     {
-        // If there are two empty pages, release the last page.
-        const uSys pageBytes = (_committedPages - 1) * PageAllocator::pageSize();
-        if(pageBytes - _blockSize <= PageAllocator::pageSize())
+        // If there are `_allocPages` empty pages, release the block of pages.
+        const uSys pageBytes = (_committedPages - _allocPages) * PageAllocator::pageSize();
+        if(pageBytes - _blockSize <= (PageAllocator::pageSize() * _allocPages))
         {
-            (void)PageAllocator::decommitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            --_committedPages;
+            (void) PageAllocator::decommitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages -= _allocPages;
         }
     }
 };
@@ -292,23 +320,39 @@ class FixedBlockAllocator<AllocationTracking::DoubleDeleteCount> final : public 
 {
     DELETE_CM(FixedBlockAllocator);
 private:
+    uSys _allocPages;
+    uSys _numReservedPages;
     void* _pages;
     uSys _committedPages;
     uSys _blockSize;
     uSys _allocIndex;
-    uSys _numReservedPages;
     void** _firstFree;
     void** _lastFree;
     iSys _allocationDifference;
     uSys _doubleDeleteCount;
     uSys _multipleDeleteCount;
 public:
-    inline FixedBlockAllocator(const uSys blockSize, const uSys numReservedPages = 1024) noexcept
-        : _pages(PageAllocator::reserve(numReservedPages))
+    inline FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) + sizeof(uSys) : blockSize + sizeof(uSys))
         , _allocIndex(0)
-        , _numReservedPages(numReservedPages)
+        , _firstFree(nullptr)
+        , _lastFree(nullptr)
+        , _allocationDifference(0)
+        , _doubleDeleteCount(0)
+        , _multipleDeleteCount(0)
+    { }
+
+    inline FixedBlockAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
+        , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) + sizeof(uSys) : blockSize + sizeof(uSys))
+        , _allocIndex(0)
         , _firstFree(nullptr)
         , _lastFree(nullptr)
         , _allocationDifference(0)
@@ -420,8 +464,8 @@ private:
         {
             if(_committedPages == _numReservedPages)
             { return false; }
-            (void)PageAllocator::commitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            ++_committedPages;
+            (void) PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages += _allocPages;
         }
 
         return true;
@@ -429,12 +473,12 @@ private:
 
     void attemptRelease() noexcept
     {
-        // If there are two empty pages, release the last page.
-        const uSys pageBytes = (_committedPages - 1) * PageAllocator::pageSize();
-        if(pageBytes - _blockSize <= PageAllocator::pageSize())
+        // If there are `_allocPages` empty pages, release the block of pages.
+        const uSys pageBytes = (_committedPages - _allocPages) * PageAllocator::pageSize();
+        if(pageBytes - _blockSize <= (PageAllocator::pageSize() * _allocPages))
         {
-            (void)PageAllocator::decommitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            --_committedPages;
+            (void) PageAllocator::decommitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages -= _allocPages;
         }
     }
 };
@@ -465,7 +509,8 @@ class FixedBlockArenaAllocator final : public TauAllocator
     DEFAULT_DESTRUCT(FixedBlockArenaAllocator);
     DELETE_CM(FixedBlockArenaAllocator);
 public:
-    FixedBlockArenaAllocator(uSys blockSize, uSys numReservePages = 1024) noexcept = delete;
+    FixedBlockArenaAllocator(uSys blockSize, PageCountVal numReservePages, uSys allocPages) noexcept = delete;
+    FixedBlockArenaAllocator(uSys blockSize, uSys maxElements, uSys allocPages) noexcept = delete;
 
     [[nodiscard]] inline uSys blockSize() const noexcept { return 0; }
     [[nodiscard]] inline iSys allocationDifference() const noexcept { return 0; }
@@ -486,18 +531,29 @@ class FixedBlockArenaAllocator<AllocationTracking::None> final : public TauAlloc
 {
     DELETE_CM(FixedBlockArenaAllocator);
 private:
+    uSys _allocPages;
+    uSys _numReservedPages;
     void* _pages;
-    uSys _allocatedPages;
+    uSys _committedPages;
     uSys _blockSize;
     uSys _allocIndex;
-    uSys _numReservedPages;
 public:
-    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys numReservedPages = 1024) noexcept
-        : _pages(PageAllocator::reserve(numReservedPages))
-        , _allocatedPages(0)
+    inline FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
         , _blockSize(blockSize)
         , _allocIndex(0)
-        , _numReservedPages(numReservedPages)
+    { }
+
+    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
+        , _blockSize(blockSize)
+        , _allocIndex(0)
     { }
 
     inline ~FixedBlockArenaAllocator() noexcept
@@ -520,13 +576,13 @@ public:
 private:
     [[nodiscard]] bool assertSize() noexcept
     {
-        const uSys pageBytes = _allocatedPages * PageAllocator::pageSize();
+        const uSys pageBytes = _committedPages * PageAllocator::pageSize();
         if(_allocIndex + _blockSize > pageBytes)
         {
-            if(_allocatedPages == _numReservedPages)
+            if(_committedPages == _numReservedPages)
             { return false; }
-            (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            ++_allocatedPages;
+            (void)PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages += _allocPages;
         }
 
         return true;
@@ -544,19 +600,31 @@ class FixedBlockArenaAllocator<AllocationTracking::Count> final : public TauAllo
 {
     DELETE_CM(FixedBlockArenaAllocator);
 private:
+    uSys _allocPages;
+    uSys _numReservedPages;
     void* _pages;
-    uSys _allocatedPages;
+    uSys _committedPages;
     uSys _blockSize;
     uSys _allocIndex;
-    uSys _numReservedPages;
     iSys _allocationDifference;
 public:
-    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys numReservedPages = 1024) noexcept
-        : _pages(PageAllocator::reserve(numReservedPages))
-        , _allocatedPages(0)
+    inline FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
         , _blockSize(blockSize)
         , _allocIndex(0)
-        , _numReservedPages(numReservedPages)
+        , _allocationDifference(0)
+    { }
+
+    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
+        , _blockSize(blockSize)
+        , _allocIndex(0)
         , _allocationDifference(0)
     { }
 
@@ -592,13 +660,13 @@ public:
 private:
     [[nodiscard]] bool assertSize() noexcept
     {
-        const uSys pageBytes = _allocatedPages * PageAllocator::pageSize();
+        const uSys pageBytes = _committedPages * PageAllocator::pageSize();
         if(_allocIndex + _blockSize > pageBytes)
         {
-            if(_allocatedPages == _numReservedPages)
+            if(_committedPages == _numReservedPages)
             { return false; }
-            (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            ++_allocatedPages;
+            (void) PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages += _allocPages;
         }
 
         return true;
@@ -619,21 +687,35 @@ class FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount> final : pu
 {
     DELETE_CM(FixedBlockArenaAllocator);
 private:
+    uSys _allocPages;
+    uSys _numReservedPages;
     void* _pages;
-    uSys _allocatedPages;
+    uSys _committedPages;
     uSys _blockSize;
     uSys _allocIndex;
-    uSys _numReservedPages;
     iSys _allocationDifference;
     uSys _doubleDeleteCount;
     uSys _multipleDeleteCount;
 public:
-    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys numReservedPages = 1024) noexcept
-        : _pages(PageAllocator::reserve(numReservedPages))
-        , _allocatedPages(0)
+    inline FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
         , _blockSize(blockSize + sizeof(uSys))
         , _allocIndex(0)
-        , _numReservedPages(numReservedPages)
+        , _allocationDifference(0)
+        , _doubleDeleteCount(0)
+        , _multipleDeleteCount(0)
+    { }
+
+    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _pages(PageAllocator::reserve(_numReservedPages))
+        , _committedPages(0)
+        , _blockSize(blockSize + sizeof(uSys))
+        , _allocIndex(0)
         , _allocationDifference(0)
         , _doubleDeleteCount(0)
         , _multipleDeleteCount(0)
@@ -697,13 +779,13 @@ public:
 private:
     [[nodiscard]] bool assertSize() noexcept
     {
-        const uSys pageBytes = _allocatedPages * PageAllocator::pageSize();
+        const uSys pageBytes = _committedPages * PageAllocator::pageSize();
         if(_allocIndex + _blockSize > pageBytes)
         {
-            if(_allocatedPages == _numReservedPages)
+            if(_committedPages == _numReservedPages)
             { return false; }
-            (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_pages) + pageBytes);
-            ++_allocatedPages;
+            (void) PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            _committedPages += _allocPages;
         }
 
         return true;
