@@ -292,15 +292,39 @@ bool DX10ResourceBuilder::processArgs(const ResourceTexture1DArgs& args, DXResou
     textureDesc.CPUAccessFlags = 0;
     textureDesc.MiscFlags = DX10TextureViewBuilder::dxMiscFlags(args.flags);
 
-    if(args.initialBuffer)
+    if(args.initialBuffers)
     {
-        D3D10_SUBRESOURCE_DATA initialDesc;
-        initialDesc.pSysMem = args.initialBuffer;
-        initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
-        initialDesc.SysMemSlicePitch = 0;
+        if((args.mipLevels == 0 || args.mipLevels == 1) && args.arrayCount == 1)
+        {
+            D3D10_SUBRESOURCE_DATA initialDesc;
+            initialDesc.pSysMem = args.initialBuffers[0];
+            initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
+            initialDesc.SysMemSlicePitch = 0;
 
-        const HRESULT res = _gi.d3d10Device()->CreateTexture1D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
-        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+            const HRESULT res = _gi.d3d10Device()->CreateTexture1D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
+            ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+        }
+        else
+        {
+            const uSys mipLevels = args.mipLevels == 0 ? 1 : args.mipLevels;
+
+            const uSys subResourceCount = mipLevels * args.arrayCount;
+            D3D10_SUBRESOURCE_DATA* initialDescriptors = new(::std::nothrow) D3D10_SUBRESOURCE_DATA[subResourceCount];
+
+            const uSys bpp = ETexture::bytesPerPixel(args.dataFormat);
+            uSys width = args.width;
+            for(uSys i = 0; i < subResourceCount; ++i)
+            {
+                initialDescriptors[i].pSysMem = args.initialBuffers[i];
+                initialDescriptors[i].SysMemPitch = width * bpp;
+                initialDescriptors[i].SysMemSlicePitch = 0;
+
+                width = ETexture::computeMipSide(width);
+            }
+
+            const HRESULT res = _gi.d3d10Device()->CreateTexture1D(&textureDesc, initialDescriptors, &dxArgs->d3dTexture);
+            ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+        }
     }
     else
     {
@@ -330,15 +354,35 @@ bool DX10ResourceBuilder::processArgs(const ResourceTexture2DArgs& args, DXResou
     textureDesc.CPUAccessFlags = 0;
     textureDesc.MiscFlags = DX10TextureViewBuilder::dxMiscFlags(args.flags);
 
-    if(args.initialBuffer)
+    if(args.initialBuffers)
     {
-        D3D10_SUBRESOURCE_DATA initialDesc;
-        initialDesc.pSysMem = args.initialBuffer;
-        initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
-        initialDesc.SysMemSlicePitch = 0;
+        if((args.mipLevels == 0 || args.mipLevels == 1) && args.arrayCount == 1)
+        {
+            D3D10_SUBRESOURCE_DATA initialDesc;
+            initialDesc.pSysMem = args.initialBuffers[0];
+            initialDesc.SysMemPitch = 0;
+            initialDesc.SysMemSlicePitch = 0;
 
-        const HRESULT res = _gi.d3d10Device()->CreateTexture2D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
-        ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+            const HRESULT res = _gi.d3d10Device()->CreateTexture2D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
+            ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+        }
+        else
+        {
+            const uSys mipLevels = args.mipLevels == 0 ? 1 : args.mipLevels;
+
+            const uSys subResourceCount = mipLevels * args.arrayCount;
+            D3D10_SUBRESOURCE_DATA* initialDescriptors = new(::std::nothrow) D3D10_SUBRESOURCE_DATA[subResourceCount];
+
+            for(uSys i = 0; i < subResourceCount; ++i)
+            {
+                initialDescriptors[i].pSysMem = args.initialBuffers[i];
+                initialDescriptors[i].SysMemPitch = 0;
+                initialDescriptors[i].SysMemSlicePitch = 0;
+            }
+
+            const HRESULT res = _gi.d3d10Device()->CreateTexture2D(&textureDesc, initialDescriptors, &dxArgs->d3dTexture);
+            ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+        }
     }
     else
     {
@@ -366,10 +410,43 @@ bool DX10ResourceBuilder::processArgs(const ResourceTexture3DArgs& args, DXResou
     textureDesc.CPUAccessFlags = 0;
     textureDesc.MiscFlags = DX10TextureViewBuilder::dxMiscFlags(args.flags);
 
-    if(args.initialBuffer)
+    if(args.initialBuffers)
     {
+        if((args.mipLevels == 0 || args.mipLevels == 1) && args.depth == 1)
+        {
+            D3D10_SUBRESOURCE_DATA initialDesc;
+            initialDesc.pSysMem = args.initialBuffers[0];
+            initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
+            initialDesc.SysMemSlicePitch = 0;
+
+            const HRESULT res = _gi.d3d10Device()->CreateTexture3D(&textureDesc, &initialDesc, &dxArgs->d3dTexture);
+            ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+        }
+        else
+        {
+            const uSys mipLevels = args.mipLevels == 0 ? 1 : args.mipLevels;
+
+            const uSys subResourceCount = mipLevels * args.depth;
+            D3D10_SUBRESOURCE_DATA* initialDescriptors = new(::std::nothrow) D3D10_SUBRESOURCE_DATA[subResourceCount];
+
+            const uSys bpp = ETexture::bytesPerPixel(args.dataFormat);
+            uSys width = args.width;
+            uSys height = args.height;
+            for(uSys i = 0; i < subResourceCount; ++i)
+            {
+                initialDescriptors[i].pSysMem = args.initialBuffers[i];
+                initialDescriptors[i].SysMemPitch = width * bpp;
+                initialDescriptors[i].SysMemSlicePitch = width * height * bpp;
+
+                width = ETexture::computeMipSide(width);
+                height = ETexture::computeMipSide(height);
+            }
+
+            const HRESULT res = _gi.d3d10Device()->CreateTexture3D(&textureDesc, initialDescriptors, &dxArgs->d3dTexture);
+            ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
+        }
         D3D10_SUBRESOURCE_DATA initialDesc;
-        initialDesc.pSysMem = args.initialBuffer;
+        initialDesc.pSysMem = args.initialBuffers;
         initialDesc.SysMemPitch = args.width * ETexture::bytesPerPixel(args.dataFormat);
         initialDesc.SysMemSlicePitch = 0;
 

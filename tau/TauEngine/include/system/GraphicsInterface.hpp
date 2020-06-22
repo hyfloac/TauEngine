@@ -9,13 +9,12 @@
 
 class IShaderBuilder;
 class IShaderProgramBuilder;
+class IResourceBuilder;
 class IInputLayoutBuilder;
 class IVertexArrayBuilder;
-class IBufferBuilder;
 class IDepthStencilStateBuilder;
 class IRasterizerStateBuilder;
 class IBlendingStateBuilder;
-class ITextureBuilder;
 class ITextureSamplerBuilder;
 class ITextureUploaderBuilder;
 class IFrameBufferBuilder;
@@ -38,13 +37,12 @@ public:
 
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
     [[nodiscard]] virtual IShaderProgramBuilder& createShaderProgram() noexcept = 0;
+    [[nodiscard]] virtual IResourceBuilder& createResource() noexcept = 0;
     [[nodiscard]] virtual IInputLayoutBuilder& createInputLayout() noexcept = 0;
     [[nodiscard]] virtual IVertexArrayBuilder& createVertexArray() noexcept = 0;
-    [[nodiscard]] virtual IBufferBuilder& createBuffer() noexcept = 0;
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
     [[nodiscard]] virtual IBlendingStateBuilder& createBlendingState() noexcept = 0;
-    [[nodiscard]] virtual ITextureBuilder& createTexture() noexcept = 0;
     [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
     [[nodiscard]] virtual ITextureUploaderBuilder& createTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IFrameBufferBuilder& createFrameBuffer() noexcept = 0;

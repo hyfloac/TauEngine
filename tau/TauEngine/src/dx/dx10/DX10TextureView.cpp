@@ -6,15 +6,15 @@
 #include "dx/dx10/DX10DescriptorHeap.hpp"
 #include <EnumBitFields.hpp>
 
-TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, Error* const error, const DescriptorTable table, const uSys tableIndex) const noexcept
+TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, Error* const error, DescriptorTable table, const uSys tableIndex) const noexcept
 {
-    DX10DescriptorTable* const dxTable = reinterpret_cast<DX10DescriptorTable*>(table.raw);
+    DX10DescriptorTable* const dxTable = table.get<DX10DescriptorTable>();
 
     DXTextureViewArgs dxArgs{ &dxTable->srvViews()[tableIndex] };
     if(!processArgs(args, &dxArgs, error))
     { return { null }; }
 
-    ERROR_CODE_V(Error::NoError, { dxArgs.d3dSRV });
+    ERROR_CODE_V(Error::NoError, dxArgs.d3dSRV);
 }
 
 bool DX10TextureViewBuilder::processArgs(const TextureViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
@@ -48,6 +48,8 @@ bool DX10TextureViewBuilder::processArgs(const TextureViewArgs& args, DXTextureV
 
 bool DX10TextureViewBuilder::processArgs1D(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture1D, Error::InvalidTexture);
+
     const ResourceTexture1DArgs* texArgs = dxResource->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
@@ -69,6 +71,8 @@ bool DX10TextureViewBuilder::processArgs1D(const TextureViewArgs& args, DXTextur
 
 bool DX10TextureViewBuilder::processArgs1DArray(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture1D, Error::InvalidTexture);
+
     const ResourceTexture1DArgs* texArgs = dxResource->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
@@ -93,6 +97,8 @@ bool DX10TextureViewBuilder::processArgs1DArray(const TextureViewArgs& args, DXT
 
 bool DX10TextureViewBuilder::processArgs2D(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
+
     const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
@@ -114,6 +120,8 @@ bool DX10TextureViewBuilder::processArgs2D(const TextureViewArgs& args, DXTextur
 
 bool DX10TextureViewBuilder::processArgs2DArray(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
+
     const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
@@ -138,6 +146,8 @@ bool DX10TextureViewBuilder::processArgs2DArray(const TextureViewArgs& args, DXT
 
 bool DX10TextureViewBuilder::processArgs3D(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture3D, Error::InvalidTexture);
+
     const ResourceTexture3DArgs* texArgs = dxResource->getArgs<ResourceTexture3DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
@@ -159,6 +169,8 @@ bool DX10TextureViewBuilder::processArgs3D(const TextureViewArgs& args, DXTextur
 
 bool DX10TextureViewBuilder::processArgsCube(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
+    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
+
     const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);

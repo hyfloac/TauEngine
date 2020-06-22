@@ -34,14 +34,6 @@ static void writeCache(const VFS::Container& con, const ParseData& parseData, uS
 // ReSharper disable once CppDeclaratorNeverUsed
 static void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept;
 
-template<typename _T>
-[[nodiscard]] _T max(const _T x, const _T y) noexcept
-{ return x > y ? x : y; }
-
-template<typename _T>
-[[nodiscard]] _T min(const _T x, const _T y) noexcept
-{ return x < y ? x : y; }
-
 static bool _fileExists(const VFS::Container& con) noexcept
 { return con.fileLoader->fileExists(con.path); }
 
@@ -79,16 +71,16 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
 
     if(binaryFileExists)
     {
-        lastModifyBinary = max(_modifyTime(binaryFile), _creationTime(binaryFile));
+        lastModifyBinary = maxT(_modifyTime(binaryFile), _creationTime(binaryFile));
     }
 
     if(textFileExists)
     {
-        lastModifyText = max(_modifyTime(textFile), _creationTime(textFile));
+        lastModifyText = maxT(_modifyTime(textFile), _creationTime(textFile));
     }
 
     bool parseText = lastModifyText > lastModifyBinary;
-    const u64 lastModify = max(lastModifyBinary, lastModifyText);
+    const u64 lastModify = maxT(lastModifyBinary, lastModifyText);
 
     ParseData resourceData = nullParse();
 
@@ -113,7 +105,7 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
 
     for(uSys i = 0; i < resourceData.resources.size(); ++i)
     {
-        maxIndex = max(maxIndex, resourceData.resources[i].index);
+        maxIndex = maxT(maxIndex, resourceData.resources[i].index);
     }
 
     RefDynArray<SelectedResource> ret(maxIndex + 1);

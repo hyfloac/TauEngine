@@ -11,6 +11,7 @@
 #include "DLL.hpp"
 #include "events/Exception.hpp"
 #include "RenderingMode.hpp"
+#include "texture/TextureView.hpp"
 
 #define RC_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, IRenderingContext)
@@ -105,6 +106,8 @@ public:
     virtual void swapFrame() noexcept = 0;
 
     virtual void resizeSwapChain(uSys width, uSys height) noexcept = 0;
+
+    virtual void genMipmaps(TextureView texView) noexcept = 0;
 
     RTT_BASE_IMPL(IRenderingContext);
     RTT_BASE_CHECK(IRenderingContext);

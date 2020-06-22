@@ -4,19 +4,16 @@
 #pragma once
 
 #include <Objects.hpp>
+#include <Safeties.hpp>
 #include <NumTypes.hpp>
-#include <allocator/TauAllocator.hpp>
 #include <RunTimeType.hpp>
+#include <allocator/TauAllocator.hpp>
 
 #include "DLL.hpp"
-#include "Safeties.hpp"
 
 class IResourceView;
 
-struct DescriptorTable final
-{
-    void* raw;
-};
+DECL_OPAQUE_TYPE(DescriptorTable);
 
 enum class DescriptorType
 {

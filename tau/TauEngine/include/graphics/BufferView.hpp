@@ -11,22 +11,18 @@
 
 class IResource;
 
-#define UNIFORM_BUFFER_VIEW_IMPL_BASE(_TYPE) \
-    RTTD_IMPL(_TYPE, IUniformBufferView)
-
-#define UNIFORM_BUFFER_VIEW_IMPL(_TYPE) UNIFORM_BUFFER_VIEW_IMPL_BASE(_TYPE)
-
 /**
  * A view into a vertex buffer resource.
  *
  *   This contains the buffers descriptor. This is used by the
  * input assembler to decode the data for shaders.
  */
-class TAU_DLL VertexBufferView final
+struct VertexBufferView final
 {
+    DEFAULT_CONSTRUCT_PU(VertexBufferView);
     DEFAULT_DESTRUCT(VertexBufferView);
     DEFAULT_CM_PU(VertexBufferView);
-protected:
+public:
     IResource* _buffer;
     BufferDescriptor _descriptor;
 public:
@@ -34,11 +30,6 @@ public:
         : _buffer(buffer)
         , _descriptor(descriptor)
     { }
-
-    [[nodiscard]]       IResource* buffer()       noexcept { return _buffer; }
-    [[nodiscard]] const IResource* buffer() const noexcept { return _buffer; }
-
-    [[nodiscard]] const BufferDescriptor& descriptor() const noexcept { return _descriptor; }
 };
 
 /**
@@ -47,11 +38,12 @@ public:
  *   This contains information about the indice size. This is
  * used for decoding the indice stream.
  */
-class TAU_DLL IndexBufferView final
+struct IndexBufferView final
 {
+    DEFAULT_CONSTRUCT_PU(IndexBufferView);
     DEFAULT_DESTRUCT(IndexBufferView);
     DEFAULT_CM_PU(IndexBufferView);
-protected:
+public:
     IResource* _buffer;
     EBuffer::IndexSize _indexSize;
 public:
@@ -59,11 +51,6 @@ public:
         : _buffer(buffer)
         , _indexSize(indexSize)
     { }
-
-    [[nodiscard]]       IResource* buffer()       noexcept { return _buffer; }
-    [[nodiscard]] const IResource* buffer() const noexcept { return _buffer; }
-
-    [[nodiscard]] EBuffer::IndexSize indexSize() const noexcept { return _indexSize; }
 };
 
 /**
@@ -72,10 +59,7 @@ public:
  *   This is used for binding uniform buffers to the shader
  * pipeline.
  */
-struct UniformBufferView
-{
-    void* raw;
-};
+DECL_OPAQUE_TYPE(UniformBufferView);
 
 struct UniformBufferViewArgs final
 {

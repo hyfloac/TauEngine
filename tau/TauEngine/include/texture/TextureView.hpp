@@ -1,8 +1,5 @@
 #pragma once
 
-#include <Safeties.hpp>
-
-#include "graphics/ResourceView.hpp"
 #include "texture/TextureEnums.hpp"
 #include "graphics/DescriptorHeap.hpp"
 
@@ -16,10 +13,7 @@ class IResource;
  *
  * The exact implementation details are up to the driver.
  */
-struct TextureView
-{
-    void* raw;
-};
+DECL_OPAQUE_TYPE(TextureView);
 
 struct TextureViewArgs final
 {

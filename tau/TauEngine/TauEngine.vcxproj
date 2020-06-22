@@ -168,7 +168,6 @@
     <ClInclude Include="include\dx\dx10\DX10ResourceTexture.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
-    <ClInclude Include="include\dx\dx10\DX10Texture.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureRawInterface.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureSampler.hpp" />
     <ClInclude Include="include\dx\dx10\DX10TextureUploader.hpp" />
@@ -235,7 +234,6 @@
     <ClInclude Include="include\graphics\RasterizerState.hpp" />
     <ClInclude Include="include\graphics\Resource.hpp" />
     <ClInclude Include="include\graphics\ResourceEnums.hpp" />
-    <ClInclude Include="include\graphics\ResourceView.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
@@ -315,13 +313,11 @@
     <ClInclude Include="include\terrain\TerrainTile.hpp" />
     <ClInclude Include="include\TextHandler.hpp" />
     <ClInclude Include="include\texture\FITextureLoader.hpp" />
-    <ClInclude Include="include\gl\GLTexture.hpp" />
     <ClInclude Include="include\texture\FrameBuffer.hpp" />
     <ClInclude Include="include\texture\NullTexture.hpp" />
     <ClInclude Include="include\texture\TextureRawInterface.hpp" />
     <ClInclude Include="include\texture\TextureView.hpp" />
     <ClInclude Include="include\texture\RenderTarget.hpp" />
-    <ClInclude Include="include\texture\Texture.hpp" />
     <ClInclude Include="include\texture\TextureEnums.hpp" />
     <ClInclude Include="include\texture\TextureSampler.hpp" />
     <ClInclude Include="include\Timings.hpp" />

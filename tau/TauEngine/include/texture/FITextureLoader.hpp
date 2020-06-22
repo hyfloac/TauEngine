@@ -8,16 +8,17 @@
 #include <Safeties.hpp>
 #pragma warning(pop)
 
-#include "texture/Texture.hpp"
+#include "graphics/Resource.hpp"
 #include "Color.hpp"
 
+class IRenderingContext;
 class IGraphicsInterface;
 
 class TAU_DLL TextureLoader final
 {
-    DEFAULT_CONSTRUCT_PI(TextureLoader);
-    DEFAULT_DESTRUCT(TextureLoader);
-    DELETE_COPY(TextureLoader);
+    DELETE_CONSTRUCT(TextureLoader);
+    DELETE_DESTRUCT(TextureLoader);
+    DELETE_CM(TextureLoader);
 public:
     enum class TextureLoadError : u8
     {
@@ -32,33 +33,33 @@ public:
         BITS_PER_PIXEL_TOO_LARGE,
         TEXTURE_SIZES_DONT_MATCH
     };
+private:
+    static NullableRef<IResource> _missingTexture;
 public:
-    static void setMissingTexture(const CPPRef<ITexture2D>& missingTexture) noexcept;
-    static CPPRef<ITexture2D> getMissingTexture() noexcept;
+    static void setMissingTexture(const NullableRef<IResource>& missingTexture) noexcept
+    { _missingTexture = missingTexture; }
+    static NullableRef<IResource> getMissingTexture() noexcept
+    { return _missingTexture; }
 
-    static CPPRef<ITexture2D> generateMissingTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept;
+    static NullableRef<IResource> generateMissingTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept;
 
-    static CPPRef<ITexture2D> generateDebugTexture8(IGraphicsInterface& gi, IRenderingContext& context, uSys power) noexcept;
-    static CPPRef<ITexture2D> generateDebugTexture16(IGraphicsInterface& gi, IRenderingContext& context, uSys power) noexcept;
-    static CPPRef<ITexture2D> generateDebugTexture(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
+    static NullableRef<IResource> generateDebugTexture8(IGraphicsInterface& gi, IRenderingContext& context, uSys power) noexcept;
+    static NullableRef<IResource> generateDebugTexture16(IGraphicsInterface& gi, IRenderingContext& context, uSys power) noexcept;
+    static NullableRef<IResource> generateDebugTexture(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
     { return generateDebugTexture8(gi, context, power); }
 	
-    static CPPRef<ITexture2D> generateColorTexture(IGraphicsInterface& gi, IRenderingContext& context, RGBColor color) noexcept;
+    static NullableRef<IResource> generateColorTexture(IGraphicsInterface& gi, IRenderingContext& context, RGBColor color) noexcept;
 
-    static CPPRef<ITexture2D> generateWhiteTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
+    static NullableRef<IResource> generateWhiteTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
     { return generateColorTexture(gi, context, { 255, 255, 255 }); }
 
-    static CPPRef<ITexture2D> generateBlackTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
+    static NullableRef<IResource> generateBlackTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
     { return generateColorTexture(gi, context, { 0, 0, 0 }); }
 
-    static CPPRef<ITexture2D> generateNormalTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
+    static NullableRef<IResource> generateNormalTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
     { return generateColorTexture(gi, context, { 127, 127, 255 }); }
 
-    static CPPRef<ITexture2D> loadTextureEx(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
-    static CPPRef<ITexture2D> loadTexture(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = null) noexcept
-    { return loadTextureEx(gi, context, fileName, -1, error); }
+    static NullableRef<IResource> loadTexture(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = null) noexcept;
 
-    static CPPRef<ITextureCube> loadTextureCubeEx(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, i32 mipmapLevel, TextureLoadError* RESTRICT error = null) noexcept;
-    static CPPRef<ITextureCube> loadTextureCube(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = null) noexcept
-    { return loadTextureCubeEx(gi, context, folderPath, fileExtension, -1, error); }
+    static NullableRef<IResource> loadTextureCube(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = null) noexcept;
 };

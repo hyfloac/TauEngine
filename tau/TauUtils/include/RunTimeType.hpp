@@ -107,10 +107,10 @@ template<typename _T>
         { return obj._castRTType<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static _T* _castRTType(_TYPE* const obj) noexcept \
-        { return obj._castRTType<_T>(); } \
+        { return obj->_castRTType<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static const _T* _castRTType(const _TYPE* const obj) noexcept \
-        { return obj._castRTType<_T>(); }
+        { return obj->_castRTType<_T>(); }
 
 #define RTTD_BASE_CAST(_TYPE) \
     public: \
@@ -125,13 +125,13 @@ template<typename _T>
         { return obj._castRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static const _T* _castRTType_##_TYPE(const _TYPE& obj) noexcept \
-        { return obj._castRTType_##_TYPE<_T>(); } \
+        { return obj-._castRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static _T* _castRTType_##_TYPE(_TYPE* const obj) noexcept \
-        { return obj._castRTType_##_TYPE<_T>(); } \
+        { return obj->_castRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static const _T* _castRTType_##_TYPE(const _TYPE* const obj) noexcept \
-        { return obj._castRTType_##_TYPE<_T>(); }
+        { return obj->_castRTType_##_TYPE<_T>(); }
 
 namespace _RTT_Utils
 {

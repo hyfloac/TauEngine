@@ -1,5 +1,4 @@
 #include "gl/GLDepthStencilState.hpp"
-#include "gl/GLTexture.hpp"
 
 void GLDepthStencilState::apply() const noexcept
 {

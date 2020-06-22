@@ -36,14 +36,17 @@ DX10DescriptorHeap::DX10DescriptorHeap(const uSys maxTables) noexcept
 
 DescriptorTable DX10DescriptorHeap::allocateTable(const uSys descriptors, const DescriptorType type, TauAllocator* const allocator) noexcept
 {
-    u8* placement;
+    void* placement;
 
     if(allocator)
     {
         switch(type)
         {
             case DescriptorType::TextureView:
-                placement = allocator->allocateT<u8>(descriptors * sizeof(ID3D10ShaderResourceView*));
+                placement = allocator->allocateT<ID3D10ShaderResourceView*>(descriptors);
+                break;
+            case DescriptorType::UniformBufferView:
+                placement = allocator->allocateT<ID3D10Buffer*>(descriptors);
                 break;
             default: return { null };
         }
@@ -53,7 +56,10 @@ DescriptorTable DX10DescriptorHeap::allocateTable(const uSys descriptors, const 
         switch(type)
         {
             case DescriptorType::TextureView:
-                placement = new(::std::nothrow) u8[descriptors * sizeof(ID3D10ShaderResourceView*)];
+                placement = new(::std::nothrow) ID3D10ShaderResourceView* [descriptors];
+                break;
+            case DescriptorType::UniformBufferView:
+                placement = new(::std::nothrow) ID3D10Buffer* [descriptors];
                 break;
             default: return { null };
         }
@@ -62,13 +68,13 @@ DescriptorTable DX10DescriptorHeap::allocateTable(const uSys descriptors, const 
     if(!placement)
     { return { null }; }
 
-    DX10DescriptorTable* ret = _allocator.allocateT<DX10DescriptorTable>(allocator, type, descriptors, placement);
+    DX10DescriptorTable* const ret = _allocator.allocateT<DX10DescriptorTable>(allocator, type, descriptors, reinterpret_cast<u8*>(placement));
     return { ret };
 }
 
 void DX10DescriptorHeap::destroyTable(const DescriptorTable table) noexcept
 {
-    DX10DescriptorTable* dxTable = reinterpret_cast<DX10DescriptorTable*>(table.raw);
+    DX10DescriptorTable* const dxTable = reinterpret_cast<DX10DescriptorTable*>(table.raw);
     _allocator.deallocateT<DX10DescriptorTable>(dxTable);
 }
 

@@ -2,32 +2,21 @@
 #include <FreeImage.h>
 #pragma warning(pop)
 
-#include <texture/FITextureLoader.hpp>
-#include <maths/Maths.hpp>
-#include <texture/Texture.hpp>
-#include <RenderingMode.hpp>
+#include "texture/FITextureLoader.hpp"
+#include "maths/Maths.hpp"
+#include "RenderingMode.hpp"
 #include "VFS.hpp"
 #include "Timings.hpp"
 #include "system/GraphicsInterface.hpp"
 #include "system/RenderingContext.hpp"
 #include <EnumBitFields.hpp>
 
-static CPPRef<ITexture2D> _missingTexture = null;
+NullableRef<IResource> TextureLoader::_missingTexture = null;
 
-void TextureLoader::setMissingTexture(const CPPRef<ITexture2D>& missingTexture) noexcept
-{
-    _missingTexture = missingTexture;
-}
-
-CPPRef<ITexture2D> TextureLoader::getMissingTexture() noexcept
-{
-    return _missingTexture;
-}
-
-CPPRef<ITexture2D> TextureLoader::generateMissingTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
+NullableRef<IResource> TextureLoader::generateMissingTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
 {
     PERF();
-    u8* const textureData = new u8[2 * 2 * 4];
+    u8 textureData[2 * 2 * 4 + 1 * 1 * 4];
 
     textureData[0 * 4 + 0] = 0xFF;
     textureData[0 * 4 + 1] = 0x00;
@@ -49,134 +38,169 @@ CPPRef<ITexture2D> TextureLoader::generateMissingTexture(IGraphicsInterface& gi,
     textureData[3 * 4 + 2] = 0xFF;
     textureData[3 * 4 + 3] = 0xFF;
 
-    Texture2DArgs args;
+    // MipLevel 1
+    textureData[16 + 0] = 0xFF;
+    textureData[16 + 1] = 0x00;
+    textureData[16 + 2] = 0xFF;
+    textureData[16 + 3] = 0xFF;
+
+    ResourceTexture2DArgs args;
     args.width = 2;
     args.height = 2;
-    args.mipmapLevels = 1;
+    args.arrayCount = 1;
+    args.mipLevels = 2;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
-    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
-    args.initialBuffer = textureData;
+    args.flags = ETexture::BindFlags::ShaderAccess;
+    args.usageType = EResource::UsageType::Immutable;
 
-    const CPPRef<ITexture2D> ret = gi.createTexture().buildCPPRef(args, null);
+    const void* initialBuffers[2] = { textureData, &textureData[16] };
 
-    ret->textureView()->generateMipmaps(context);
+    args.initialBuffers = initialBuffers;
 
-    delete[] textureData;
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
 
     return ret;
 }
 
-CPPRef<ITexture2D> TextureLoader::generateDebugTexture8(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
+NullableRef<IResource> TextureLoader::generateDebugTexture8(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
 {
     if(power > 12)
     { return _missingTexture; }
 
     const uSys side = 1 << power;
-    const uSys size = side * side;
 
-    u8* const textureData = new u8[size * 4];
+    void** initialBuffers = new(::std::nothrow) void* [power + 1];
 
-    for(uSys i = 0; i < size; ++i)
+    const uSys fullSize = ETexture::computeSize(ETexture::Format::RedGreenBlueAlpha8UnsignedInt, side, side);
+    u8* const textureData = new u8[fullSize];
+
+    uSys currSide = side;
+    uSys base = 0;
+    for(uSys i = 0; i < power; ++i)
     {
-        const uSys x = i / side;
-        const uSys y = i % side;
-        const u16 r = static_cast<u8>((0xFF * x) / side);
-        const u16 g = static_cast<u8>((0xFF * y) / side);
-        const u16 b = static_cast<u8>((0xFF * i) / size);
+        const uSys size = ETexture::computeSubResourceSize(ETexture::Format::RedGreenBlueAlpha8UnsignedInt, side, side);
 
-        textureData[i * 4 + 0] = 0xFF - b;
-        textureData[i * 4 + 1] = g;
-        textureData[i * 4 + 2] = r;
-        textureData[i * 4 + 3] = 0xFF;
+        for(uSys j = 0; j < size; ++j)
+        {
+            const uSys x = j / currSide;
+            const uSys y = j % currSide;
+            const u8 r = static_cast<u8>((0xFF * x) / currSide);
+            const u8 g = static_cast<u8>((0xFF * y) / currSide);
+            const u8 b = static_cast<u8>((0xFF * j) / size);
+
+            textureData[base + j * 4 + 0] = 0xFF - b;
+            textureData[base + j * 4 + 1] = g;
+            textureData[base + j * 4 + 2] = r;
+            textureData[base + j * 4 + 3] = 0xFF;
+        }
+
+        initialBuffers[i] = &textureData[base];
+
+        currSide = ETexture::computeMipSide(currSide);
+        base += size;
     }
 
-    Texture2DArgs args;
+    ResourceTexture2DArgs args;
     args.width = side;
     args.height = side;
-    args.mipmapLevels = 1;
+    args.arrayCount = 1;
+    args.mipLevels = power + 1;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
-    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
-    args.initialBuffer = textureData;
+    args.flags = ETexture::BindFlags::ShaderAccess;
+    args.usageType = EResource::UsageType::Immutable;
+    args.initialBuffers = initialBuffers;
 
-    const CPPRef<ITexture2D> ret = gi.createTexture().buildCPPRef(args, null);
-
-    ret->textureView()->generateMipmaps(context);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
 
     delete[] textureData;
+    delete[] initialBuffers;
 
     return ret;
 }
 
-CPPRef<ITexture2D> TextureLoader::generateDebugTexture16(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
+NullableRef<IResource> TextureLoader::generateDebugTexture16(IGraphicsInterface& gi, IRenderingContext& context, const uSys power) noexcept
 {
     if(power > 12)
-    {
-        return  _missingTexture;
-    }
+    { return  _missingTexture; }
 
     const uSys side = 1 << power;
-    const uSys size = side * side;
 
-    u16* const textureData = new u16[size * 4];
+    void** initialBuffers = new(::std::nothrow) void* [power + 1];
 
-    for(uSys i = 0; i < size; ++i)
+    const uSys fullSize = ETexture::computeSize(ETexture::Format::RedGreenBlueAlpha16UnsignedInt, side, side);
+    u8* const textureDataU8 = new u8[fullSize];
+    u16* const textureData = reinterpret_cast<u16*>(textureDataU8);
+
+    uSys currSide = side;
+    uSys base = 0;
+    for(uSys i = 0; i < power; ++i)
     {
-        const uSys x = i / side;
-        const uSys y = i % side;
-        const u16 r = static_cast<u16>((0xFFFF * x) / side);
-        const u16 g = static_cast<u16>((0xFFFF * y) / side);
-        const u16 b = static_cast<u16>((0xFFFF * i) / size);
+        const uSys size = ETexture::computeSubResourceSize(ETexture::Format::RedGreenBlueAlpha8UnsignedInt, side, side);
 
-        textureData[i * 4 + 0] = 0xFFFF - b;
-        textureData[i * 4 + 1] = g;
-        textureData[i * 4 + 2] = r;
-        textureData[i * 4 + 3] = 0xFFFF;
+        for(uSys j = 0; j < size; ++j)
+        {
+            const uSys x = j / currSide;
+            const uSys y = j % currSide;
+            const u16 r = static_cast<u8>((0xFFFF * x) / currSide);
+            const u16 g = static_cast<u8>((0xFFFF * y) / currSide);
+            const u16 b = static_cast<u8>((0xFFFF * j) / size);
+
+            textureData[base + j * 4 + 0] = 0xFFFF - b;
+            textureData[base + j * 4 + 1] = g;
+            textureData[base + j * 4 + 2] = r;
+            textureData[base + j * 4 + 3] = 0xFFFF;
+        }
+
+        initialBuffers[i] = &textureData[base];
+
+        currSide = ETexture::computeMipSide(currSide);
+        base += size;
     }
 
-    Texture2DArgs args;
+    ResourceTexture2DArgs args;
     args.width = side;
     args.height = side;
-    args.mipmapLevels = 1;
+    args.arrayCount = 1;
+    args.mipLevels = power + 1;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha16UnsignedInt;
-    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
-    args.initialBuffer = textureData;
+    args.flags = ETexture::BindFlags::ShaderAccess;
+    args.usageType = EResource::UsageType::Immutable;
+    args.initialBuffers = initialBuffers;
 
-    const CPPRef<ITexture2D> ret = gi.createTexture().buildCPPRef(args, null);
-
-    ret->textureView()->generateMipmaps(context);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
 
     delete[] textureData;
+    delete[] initialBuffers;
 
     return ret;
 }
 
-CPPRef<ITexture2D> TextureLoader::generateColorTexture(IGraphicsInterface& gi, IRenderingContext& context, RGBColor color) noexcept
+NullableRef<IResource> TextureLoader::generateColorTexture(IGraphicsInterface& gi, IRenderingContext& context, RGBColor color) noexcept
 {
-    u8* const textureData = new u8[1 * 1 * 4];
+    u8 textureData[1 * 1 * 4];
 
     textureData[0] = color.r;
     textureData[1] = color.g;
     textureData[2] = color.b;
     textureData[3] = 0xFF;
 
-    Texture2DArgs args;
+    ResourceTexture2DArgs args;
     args.width = 1;
     args.height = 1;
+    args.arrayCount = 1;
+    args.mipLevels = 1;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
-    args.mipmapLevels = 1;
     args.flags = ETexture::BindFlags::ShaderAccess;
-    args.initialBuffer = textureData;
 
-    const CPPRef<ITexture2D> ret = gi.createTexture().buildCPPRef(args, null);
+    const void* initialBuffers[1] = { textureData };
+    args.initialBuffers = initialBuffers;
 
-    // ret->textureView()->generateMipmaps(context);
-
-    delete[] textureData;
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
 
     return ret;
 }
 
-CPPRef<ITexture2D> TextureLoader::loadTextureEx(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
+NullableRef<IResource> TextureLoader::loadTexture(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -220,20 +244,18 @@ CPPRef<ITexture2D> TextureLoader::loadTextureEx(IGraphicsInterface& gi, IRenderi
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_SMALL, bitsPerPixel < 8);
     ERR_EXIT(TextureLoadError::BITS_PER_PIXEL_TOO_LARGE, bitsPerPixel > 32);
 
-    Texture2DArgs args;
+    ResourceTexture2DArgs args;
     args.width = width;
     args.height = height;
-    args.mipmapLevels = 1;
+    args.arrayCount = 1;
+    args.mipLevels = 0;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
-    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
-    args.initialBuffer = textureData;
+    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::RenderTarget | ETexture::BindFlags::GenerateMipmaps;
 
-    const CPPRef<ITexture2D> ret = gi.createTexture().buildCPPRef(args, null);
+    const void* initialBuffers[1] = { textureData };
+    args.initialBuffers = initialBuffers;
 
-    if(mipmapLevel < 0)
-    {
-        ret->textureView()->generateMipmaps(context);
-    }
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
 
     FreeImage_Unload(texture);
 
@@ -252,7 +274,7 @@ static const char* fileNames[6] = {
     "top",
 };
 
-CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, const i32 mipmapLevel, TextureLoadError* RESTRICT const error) noexcept
+NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT const folderPath, const char* RESTRICT const fileExtension, TextureLoadError* RESTRICT const error) noexcept
 {
     PERF();
 #define ERR_EXIT(__ERR, __CHECK) \
@@ -261,10 +283,14 @@ CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IGraphicsInterface& gi, IR
         if(texture) { FreeImage_Unload(texture); } \
         return null; }
 
-    TextureCubeArgs args;
-    args.mipmapLevels = 1;
+    ResourceTexture2DArgs args;
+    args.arrayCount = 6;
+    args.mipLevels = 0;
     args.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
-    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
+    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::RenderTarget | ETexture::BindFlags::GenerateMipmaps;
+
+    const void* initialBuffers[6];
+    args.initialBuffers = initialBuffers;
 
     u32 width = 0;
     u32 height = 0;
@@ -330,19 +356,14 @@ CPPRef<ITextureCube> TextureLoader::loadTextureCubeEx(IGraphicsInterface& gi, IR
             args.height = height;
         }
 
-        args.initialBuffers[i] = textureData;
+        initialBuffers[i] = textureData;
     }
 
-    CPPRef<ITextureCube> ret = gi.createTexture().buildCPPRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
 
     for(uSys i = 0; i < 6; ++i)
     {
         FreeImage_Unload(textures[i]);
-    }
-
-    if(mipmapLevel < 0)
-    {
-        ret->textureView()->generateMipmaps(context);
     }
 
     if(error) { *error = TextureLoadError::NONE; }

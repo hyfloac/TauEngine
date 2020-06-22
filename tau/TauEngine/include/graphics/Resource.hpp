@@ -119,7 +119,7 @@ public:
      * A hint on how the resource will be accessed.
      */
     EResource::UsageType usageType;
-    const void* initialBuffer;
+    const void* const * initialBuffers;
 };
 
 struct ResourceTexture2DArgs final
@@ -138,7 +138,7 @@ public:
      * A hint on how the resource will be accessed.
      */
     EResource::UsageType usageType;
-    const void* initialBuffer;
+    const void* const * initialBuffers;
 };
 
 struct ResourceTexture3DArgs final
@@ -157,7 +157,7 @@ public:
      * A hint on how the resource will be accessed.
      */
     EResource::UsageType usageType;
-    const void* initialBuffer;
+    const void* const * initialBuffers;
 };
 
 
