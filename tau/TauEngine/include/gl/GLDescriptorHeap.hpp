@@ -1,3 +1,6 @@
+/**
+ * @file
+ */
 #pragma once
 
 #include "graphics/DescriptorHeap.hpp"
@@ -45,6 +48,7 @@ class TAU_DLL GLDescriptorHeap final : public IDescriptorHeap
     DEFAULT_CONSTRUCT_PU(GLDescriptorHeap);
     DEFAULT_DESTRUCT(GLDescriptorHeap);
     DEFAULT_CM_PU(GLDescriptorHeap);
+    DESCRIPTOR_HEAP_IMPL(GLDescriptorHeap);
 public:
     [[nodiscard]] DescriptorTable allocateTable(uSys descriptors, DescriptorType type, TauAllocator* allocator) noexcept override;
     [[nodiscard]] void destroyTable(DescriptorTable table) noexcept override;

@@ -1,464 +1,58 @@
 #include "dx/dx10/DX10TextureView.hpp"
 
-
 #ifdef _WIN32
-#include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10ResourceTexture.hpp"
-#include "graphics/Resource.hpp"
-#include "TauConfig.hpp"
+#include "dx/dx10/DX10DescriptorHeap.hpp"
 #include <EnumBitFields.hpp>
 
-#if TAU_RTTI_CHECK
-  #include "TauEngine.hpp"
-  #define CTX() \
-      if(!RTT_CHECK(context, DX10RenderingContext)) \
-      { TAU_THROW(IncorrectContextException); } \
-      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
-#else
-  #define CTX() \
-      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
-#endif
-
-void DX10TextureView::generateMipmaps(IRenderingContext& context) noexcept
+TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, Error* const error, const DescriptorTable table, const uSys tableIndex) const noexcept
 {
-    CTX();
-    ctx.d3dDevice()->GenerateMips(_d3dSRV);
-}
+    DX10DescriptorTable* const dxTable = reinterpret_cast<DX10DescriptorTable*>(table.raw);
 
-DX10Texture1DView* DX10TextureViewBuilder::build(const Texture1DViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
+    DXTextureViewArgs dxArgs{ &dxTable->srvViews()[tableIndex] };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return { null }; }
 
-    DX10Texture1DView* const textureView = new(::std::nothrow) DX10Texture1DView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
+    ERROR_CODE_V(Error::NoError, { dxArgs.d3dSRV });
 }
 
-DX10Texture1DView* DX10TextureViewBuilder::build(const Texture1DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture1DView* const textureView = allocator.allocateT<DX10Texture1DView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture1DViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10Texture1DView> textureView(new(::std::nothrow) DX10Texture1DView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture1DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10Texture1DView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture1DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10Texture1DView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture1DArrayView* DX10TextureViewBuilder::build(const Texture1DArrayViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture1DArrayView* const textureView = new(::std::nothrow) DX10Texture1DArrayView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture1DArrayView* DX10TextureViewBuilder::build(const Texture1DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture1DArrayView* const textureView = allocator.allocateT<DX10Texture1DArrayView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture1DArrayViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10Texture1DArrayView> textureView(new(::std::nothrow) DX10Texture1DArrayView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture1DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10Texture1DArrayView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture1DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10Texture1DArrayView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture2DView* DX10TextureViewBuilder::build(const Texture2DViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture2DView* const textureView = new(::std::nothrow) DX10Texture2DView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture2DView* DX10TextureViewBuilder::build(const Texture2DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture2DView* const textureView = allocator.allocateT<DX10Texture2DView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture2DViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10Texture2DView> textureView(new(::std::nothrow) DX10Texture2DView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture2DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10Texture2DView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture2DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10Texture2DView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture2DArrayView* DX10TextureViewBuilder::build(const Texture2DArrayViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture2DArrayView* const textureView = new(::std::nothrow) DX10Texture2DArrayView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture2DArrayView* DX10TextureViewBuilder::build(const Texture2DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture2DArrayView* const textureView = allocator.allocateT<DX10Texture2DArrayView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture2DArrayViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10Texture2DArrayView> textureView(new(::std::nothrow) DX10Texture2DArrayView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture2DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10Texture2DArrayView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture2DArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10Texture2DArrayView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture3DView* DX10TextureViewBuilder::build(const Texture3DViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture3DView* const textureView = new(::std::nothrow) DX10Texture3DView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10Texture3DView* DX10TextureViewBuilder::build(const Texture3DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10Texture3DView* const textureView = allocator.allocateT<DX10Texture3DView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const Texture3DViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10Texture3DView> textureView(new(::std::nothrow) DX10Texture3DView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const Texture3DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10Texture3DView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const Texture3DViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10Texture3DView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10TextureCubeView* DX10TextureViewBuilder::build(const TextureCubeViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10TextureCubeView* const textureView = new(::std::nothrow) DX10TextureCubeView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10TextureCubeView* DX10TextureViewBuilder::build(const TextureCubeViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10TextureCubeView* const textureView = allocator.allocateT<DX10TextureCubeView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const TextureCubeViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10TextureCubeView> textureView(new(::std::nothrow) DX10TextureCubeView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const TextureCubeViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10TextureCubeView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const TextureCubeViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10TextureCubeView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10TextureCubeArrayView* DX10TextureViewBuilder::build(const TextureCubeArrayViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10TextureCubeArrayView* const textureView = new(::std::nothrow) DX10TextureCubeArrayView(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-DX10TextureCubeArrayView* DX10TextureViewBuilder::build(const TextureCubeArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10TextureCubeArrayView* const textureView = allocator.allocateT<DX10TextureCubeArrayView>(dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-CPPRef<ITextureView> DX10TextureViewBuilder::buildCPPRef(const TextureCubeArrayViewArgs& args, Error* error) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10TextureCubeArrayView> textureView(new(::std::nothrow) DX10TextureCubeArrayView(dxArgs));
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableRef<ITextureView> DX10TextureViewBuilder::buildTauRef(const TextureCubeArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX10TextureCubeArrayView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-NullableStrongRef<ITextureView> DX10TextureViewBuilder::buildTauSRef(const TextureCubeArrayViewArgs& args, Error* error, TauAllocator& allocator) const noexcept
-{
-    DXTextureViewArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10TextureCubeArrayView> textureView(allocator, dxArgs);
-    ERROR_CODE_COND_N(!textureView, Error::SystemMemoryAllocationFailure);
-
-    ERROR_CODE_V(Error::NoError, textureView);
-}
-
-bool DX10TextureViewBuilder::processArgs(const Texture1DViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgs(const TextureViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
 {
     ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
-    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture1D, Error::InvalidTexture);
     ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
     ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
 
-    const ResourceTexture1DArgs* texArgs = args.texture->getArgs<ResourceTexture1DArgs>();
+    switch(args.texture->resourceType())
+    {
+        case EResource::Type::Texture1D:
+        case EResource::Type::Texture2D:
+        case EResource::Type::Texture3D: break;
+        default:                         ERROR_CODE_F(Error::InvalidTexture);
+    }
+
+    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
+
+    switch(args.type)
+    {
+        case ETexture::Type::Texture1D:        return        processArgs1D(args, dxArgs, dxResource, error);
+        case ETexture::Type::Texture1DArray:   return   processArgs1DArray(args, dxArgs, dxResource, error);
+        case ETexture::Type::Texture2D:        return        processArgs2D(args, dxArgs, dxResource, error);
+        case ETexture::Type::Texture2DArray:   return   processArgs2DArray(args, dxArgs, dxResource, error);
+        case ETexture::Type::Texture3D:        return        processArgs3D(args, dxArgs, dxResource, error);
+        case ETexture::Type::TextureCube:      return      processArgsCube(args, dxArgs, dxResource, error);
+        case ETexture::Type::TextureCubeArray: return processArgsCubeArray(args, dxArgs, dxResource, error);
+        default:                               ERROR_CODE_F(Error::UnsupportedType);
+    }
+}
+
+bool DX10TextureViewBuilder::processArgs1D(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
+{
+    const ResourceTexture1DArgs* texArgs = dxResource->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture1D* const dxTexture = static_cast<DX10ResourceTexture1D* const>(dxResource);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -467,30 +61,20 @@ bool DX10TextureViewBuilder::processArgs(const Texture1DViewArgs& args, DXTextur
     srvDesc.Texture1D.MostDetailedMip = 0;
     srvDesc.Texture1D.MipLevels = texArgs->mipLevels;
 
-    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
-
-    dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = texArgs->width;
-    dxArgs->mipLevels = texArgs->mipLevels;
 
     return true;
 }
 
-bool DX10TextureViewBuilder::processArgs(const Texture1DArrayViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgs1DArray(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
-    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture1D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
-    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
-
-    const ResourceTexture1DArgs* texArgs = args.texture->getArgs<ResourceTexture1DArgs>();
+    const ResourceTexture1DArgs* texArgs = dxResource->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount == 1, Error::TextureIsNotArray);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture1D* const dxTexture = static_cast<DX10ResourceTexture1D* const>(dxResource);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -501,30 +85,19 @@ bool DX10TextureViewBuilder::processArgs(const Texture1DArrayViewArgs& args, DXT
     srvDesc.Texture1DArray.FirstArraySlice = 0;
     srvDesc.Texture1DArray.ArraySize = texArgs->arrayCount;
 
-    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
-
-    dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = texArgs->width;
-    dxArgs->mipLevels = texArgs->mipLevels;
-    dxArgs->arrayCount = texArgs->arrayCount;
 
     return true;
 }
 
-bool DX10TextureViewBuilder::processArgs(const Texture2DViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgs2D(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
-    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
-    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
-
-    const ResourceTexture2DArgs* texArgs = args.texture->getArgs<ResourceTexture2DArgs>();
+    const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture2D* const dxTexture = static_cast<DX10ResourceTexture2D* const>(dxResource);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -533,31 +106,20 @@ bool DX10TextureViewBuilder::processArgs(const Texture2DViewArgs& args, DXTextur
     srvDesc.Texture2D.MostDetailedMip = 0;
     srvDesc.Texture2D.MipLevels = texArgs->mipLevels;
     
-    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
-
-    dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = texArgs->width;
-    dxArgs->height = texArgs->height;
-    dxArgs->mipLevels = texArgs->mipLevels;
 
     return true;
 }
 
-bool DX10TextureViewBuilder::processArgs(const Texture2DArrayViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgs2DArray(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
-    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
-    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
-
-    const ResourceTexture2DArgs* texArgs = args.texture->getArgs<ResourceTexture2DArgs>();
+    const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount == 1, Error::TextureIsNotArray);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture2D* const dxTexture = static_cast<DX10ResourceTexture2D* const>(dxResource);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -565,34 +127,22 @@ bool DX10TextureViewBuilder::processArgs(const Texture2DArrayViewArgs& args, DXT
     srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2DARRAY;
     srvDesc.Texture2DArray.MostDetailedMip = 0;
     srvDesc.Texture2DArray.MipLevels = texArgs->mipLevels;
-    srvDesc.Texture1DArray.FirstArraySlice = 0;
-    srvDesc.Texture1DArray.ArraySize = texArgs->arrayCount;
+    srvDesc.Texture2DArray.FirstArraySlice = 0;
+    srvDesc.Texture2DArray.ArraySize = texArgs->arrayCount;
 
-    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
-
-    dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = texArgs->width;
-    dxArgs->height = texArgs->height;
-    dxArgs->mipLevels = texArgs->mipLevels;
-    dxArgs->arrayCount = texArgs->arrayCount;
 
     return true;
 }
 
-bool DX10TextureViewBuilder::processArgs(const Texture3DViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgs3D(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
-    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture3D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
-    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
-
-    const ResourceTexture3DArgs* texArgs = args.texture->getArgs<ResourceTexture3DArgs>();
+    const ResourceTexture3DArgs* texArgs = dxResource->getArgs<ResourceTexture3DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture3D* const dxTexture = static_cast<DX10ResourceTexture3D* const>(dxResource);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -601,32 +151,20 @@ bool DX10TextureViewBuilder::processArgs(const Texture3DViewArgs& args, DXTextur
     srvDesc.Texture3D.MostDetailedMip = 0;
     srvDesc.Texture3D.MipLevels = texArgs->mipLevels;
 
-    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
-
-    dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = texArgs->width;
-    dxArgs->height = texArgs->height;
-    dxArgs->depth = texArgs->depth;
-    dxArgs->mipLevels = texArgs->mipLevels;
 
     return true;
 }
 
-bool DX10TextureViewBuilder::processArgs(const TextureCubeViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgsCube(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_F(!args.texture, Error::TextureIsNull);
-    ERROR_CODE_COND_F(args.texture->resourceType() != EResource::Type::Texture2D, Error::InvalidTexture);
-    ERROR_CODE_COND_F(args.dataFormat < ETexture::Format::MIN || args.dataFormat > ETexture::Format::MAX, Error::InvalidDataFormat);
-    ERROR_CODE_COND_F(args.dataFormat >= ETexture::Format::MIN_TYPELESS && args.dataFormat <= ETexture::Format::MAX_TYPELESS, Error::InvalidDataFormat);
-
-    const ResourceTexture2DArgs* texArgs = args.texture->getArgs<ResourceTexture2DArgs>();
+    const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount != 6, Error::TextureIsNotArray);
 
-    DX10Resource* const dxResource = RTTD_CAST(args.texture, DX10Resource, IResource);
     DX10ResourceTexture2D* const dxTexture = static_cast<DX10ResourceTexture2D* const>(dxResource);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc;
@@ -635,18 +173,13 @@ bool DX10TextureViewBuilder::processArgs(const TextureCubeViewArgs& args, DXText
     srvDesc.Texture2D.MostDetailedMip = 0;
     srvDesc.Texture2D.MipLevels = texArgs->mipLevels;
 
-    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, &dxArgs->d3dSRV);
+    const HRESULT res = _gi.d3d10Device()->CreateShaderResourceView(dxTexture->d3dTexture(), &srvDesc, dxArgs->d3dSRV);
     ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
-
-    dxArgs->dataFormat = args.dataFormat;
-    dxArgs->width = texArgs->width;
-    dxArgs->height = texArgs->height;
-    dxArgs->mipLevels = texArgs->mipLevels;
 
     return true;
 }
 
-bool DX10TextureViewBuilder::processArgs(const TextureCubeArrayViewArgs& args, DXTextureViewArgs* dxArgs, Error* error) const noexcept
+bool DX10TextureViewBuilder::processArgsCubeArray(const TextureViewArgs& args, DXTextureViewArgs* const dxArgs, DX10Resource* const dxResource, Error* const error) const noexcept
 {
     ERROR_CODE_F(Error::UnsupportedType);
 }

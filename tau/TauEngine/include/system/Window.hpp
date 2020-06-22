@@ -116,8 +116,6 @@ public:
     [[nodiscard]] inline u32 xPos()   const noexcept { return _xPos; }
     [[nodiscard]] inline u32 yPos()   const noexcept { return _yPos; }
     [[nodiscard]] inline const char* title() const noexcept { return _title; }
-    // [[nodiscard]] IRenderingContext* renderingContext() const noexcept { return _context; }
-    // [[nodiscard]] IRenderingContext* renderingContext() const noexcept { return null; }
     [[nodiscard]] inline const _SysWindowContainer& sysWindowContainer() const noexcept { return _windowContainer; }
     [[nodiscard]] inline const void* userContainer() const noexcept { return _userContainer; }
     [[nodiscard]] inline const Window* parent() const noexcept { return _parent; }
@@ -132,7 +130,7 @@ public:
      * @param[in] height
      *      The new height of the window.
      */
-    void resize(const u32 width, const u32 height) noexcept;
+    void resize(u32 width, u32 height) noexcept;
 
     /**
      * Moves the window.
@@ -142,7 +140,7 @@ public:
      * @param[in] yPos
      *      The new y position of the window.
      */
-    void move(const u32 xPos, const u32 yPos) noexcept;
+    void move(u32 xPos, u32 yPos) noexcept;
 
     /**
      * Moves and resizes the window.
@@ -156,7 +154,7 @@ public:
      * @param[in] height
      *      The new height of the window.
      */
-    void moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept;
+    void moveAndResize(u32 xPos, u32 yPos, u32 width, u32 height) noexcept;
 
     void setTitle(const DynString& title) noexcept;
 

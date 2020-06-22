@@ -1,10 +1,23 @@
+/**
+ * @file
+ */
 #pragma once
 
 #include <NumTypes.hpp>
 #include <TUMaths.hpp>
 
+/**
+ *   Various enumerations and utility functions for use with
+ * textures.
+ */
 namespace ETexture {
 
+/**
+ * The type of the texture.
+ *
+ *   This is used by texture views to interpret the raw binary
+ * stream.
+ */
 enum class Type
 {
     Texture1D = 1,
@@ -16,22 +29,65 @@ enum class Type
     TextureCubeArray
 };
 
+/**
+ * How a texture sampler should filter a texture.
+ */
 enum class Filter
 {
+    /**
+     * Uses the nearest pixel.
+     *
+     * This will produce a very pixelated view during magnification.
+     */
     Nearest = 1,
     Point = Nearest,
+    /**
+     * Uses linear interpolation between pixels.
+     *
+     * This will produce a rather blurry view during magnification.
+     */
     Linear
 };
 
+/**
+ *   How a texture sampler should wrap a texture when
+ * coordinates extend beyond the edge of a texture.
+ */
 enum class WrapMode
 {
+    /**
+     *   Takes the last pixel and repeats until it reaches the end
+     * of raster.
+     */
     ClampToEdge = 1,
+    /**
+     *   Produces a colored border when outside the range of the
+     * texture.
+     */
     ClampToBorder,
+    /**
+     *   Tiles the texture, but every every tile is a mirror of all
+     * other axis.
+     */
     MirroredRepeat,
+    /**
+     * Tiles the texture many times.
+     */
     Repeat,
+    /**
+     * Mirrors the texture once, then clamps to edge.
+     *
+     *   Never seen anyone use this, can't even find any examples
+     * online.
+     */
     MirrorClampToEdge
 };
 
+/**
+ * The possible comparison operations.
+ *
+ * Mostly used by depth-stencil textures.
+ */
 enum class CompareFunc
 {
     LessThanOrEqual = 1,
@@ -44,6 +100,12 @@ enum class CompareFunc
     Never
 };
 
+/**
+ * The layout of the texture upon upload.
+ *
+ *   The API may convert the texture in the backend to a more
+ * optimal format for sampling.
+ */
 enum class Format
 {
     Red8UnsignedInt = 1,
@@ -92,6 +154,9 @@ enum class Format
     MAX_FLOAT = RedGreenBlueAlpha32Float
 };
 
+/**
+ * Represents all of the sides of a cubemap.
+ */
 enum class CubeSide
 {
     Front = 1,
@@ -102,8 +167,14 @@ enum class CubeSide
     Bottom
 };
 
+/**
+ * Controls how a texture resource should be able to be bound.
+ */
 enum class BindFlags
 {
+    /**
+     * No special bind flags.
+     */
     None            = 0,
     /**
      * Allows for the texture to be bound as render target.
@@ -127,8 +198,15 @@ enum class BindFlags
     GenerateMipmaps = 1 << 2
 };
 
+/**
+ *   Controls how a depth-stencil texture resource should be
+ * able to be bound.
+ */
 enum class DepthStencilBindFlags
 {
+    /**
+     * No special bind flags.
+     */
     None                = 0,
     /**
      * Allows for the texture to be bound as render target.
@@ -154,6 +232,17 @@ enum class DepthStencilBindFlags
     StencilShaderAccess = 1 << 2
 };
 
+/**
+ * Gets the number of bytes per component color of a pixel.
+ *
+ *   This is different from @link ETexture::bytesPerPixel() @endlink 
+ * in that it only returns the number of bytes for one of the
+ * color aspects, instead of the number of bytes for the
+ * entire pixel.
+ *
+ * @param[in] format
+ *      The format in question.
+ */
 static constexpr inline uSys bytesPerComponent(const Format format) noexcept
 {
     switch(format)
@@ -194,6 +283,12 @@ static constexpr inline uSys bytesPerComponent(const Format format) noexcept
     } 
 }
 
+/**
+ * Get the number of component aspects (r, g, b, a) in a pixel.
+ *
+ * @param[in] format
+ *      The format in question.
+ */
 static constexpr inline uSys numComponents(const Format format) noexcept
 {
     switch(format)
@@ -234,6 +329,12 @@ static constexpr inline uSys numComponents(const Format format) noexcept
     }
 }
 
+/**
+ * Gets the number of bytes an pixel individual requires.
+ *
+ * @param[in] format
+ *      The format in question.
+ */
 static constexpr inline uSys bytesPerPixel(const Format format) noexcept
 {
     switch(format)
@@ -248,6 +349,114 @@ static constexpr inline uSys bytesPerPixel(const Format format) noexcept
     return bytesPerComponent(format) * numComponents(format);
 }
 
+/**
+ * Whether or not the format is typeless (neither float nor int).
+ *
+ * @param[in] format
+ *      The format in question.
+ */
+static constexpr inline bool isTypeless(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Red8Typeless:                   
+        case Format::Red16Typeless:                  
+        case Format::Red32Typeless:                  
+        case Format::RedGreen8Typeless:              
+        case Format::RedGreen16Typeless:             
+        case Format::RedGreen32Typeless:             
+        case Format::RedGreenBlue8Typeless:          
+        case Format::RedGreenBlue16Typeless:         
+        case Format::RedGreenBlue32Typeless:         
+        case Format::RedGreenBlueAlpha8Typeless:     
+        case Format::RedGreenBlueAlpha16Typeless:    
+        case Format::RedGreenBlueAlpha32Typeless:    
+        case Format::Typeless24Typeless8:         return true;
+        default:                                  return false;
+    }
+}
+
+/**
+ * Whether or not the format uses an unsigned integer layout.
+ *
+ * @param[in] format
+ *      The format in question.
+ */
+static constexpr inline bool isUInt(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Red8UnsignedInt:                
+        case Format::Red16UnsignedInt:               
+        case Format::Red32UnsignedInt:               
+        case Format::RedGreen8UnsignedInt:           
+        case Format::RedGreen16UnsignedInt:          
+        case Format::RedGreen32UnsignedInt:          
+        case Format::RedGreenBlue8UnsignedInt:       
+        case Format::RedGreenBlue16UnsignedInt:      
+        case Format::RedGreenBlue32UnsignedInt:      
+        case Format::RedGreenBlueAlpha8UnsignedInt:  
+        case Format::RedGreenBlueAlpha16UnsignedInt: 
+        case Format::RedGreenBlueAlpha32UnsignedInt: return true;
+        default:                                     return false;
+    }
+}
+
+/**
+ * Whether or not the format uses a floating point layout.
+ *
+ * @param[in] format
+ *      The format in question.
+ */
+static constexpr inline bool isFloat(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Red16Float:                     
+        case Format::Red32Float:                     
+        case Format::RedGreen16Float:                
+        case Format::RedGreen32Float:                
+        case Format::RedGreenBlue16Float:            
+        case Format::RedGreenBlue32Float:            
+        case Format::RedGreenBlueAlpha16Float:       
+        case Format::RedGreenBlueAlpha32Float: return true;
+        default:                               return false;
+    }
+}
+
+/**
+ *   Whether or not the format for use with depth-stencil
+ * textures.
+ *
+ * @param[in] format
+ *      The format in question.
+ */
+static constexpr inline bool isDepthStencil(const Format format) noexcept
+{
+    switch(format)
+    {
+        case Format::Depth24Stencil8:
+        case Format::Depth24Typeless8:
+        case Format::Typeless24Stencil8:
+        case Format::Typeless24Typeless8: return true;
+        default:                          return false;
+    }
+}
+
+/**
+ * Determines if two formats are compatible with each other.
+ *
+ *   This is used for texture view data format aliasing. For a
+ * type to be compatible, exactly one of them must be typeless,
+ * or they must be the exact same type, unless both types are
+ * typeless.
+ *
+ * Both types cannot be typeless.
+ *   Both types must be in the same family (same number of
+ * components, and same number of bytes per component).
+ * Both types can be identical (unless they are typeless).
+ * Otherwise One type must be typeless.
+ */
 static constexpr bool isCompatible(const Format formatA, const Format formatB)
 {
     if(formatA == formatB)
@@ -257,72 +466,270 @@ static constexpr bool isCompatible(const Format formatA, const Format formatB)
     {
         case Format::Depth24Stencil8:    
         case Format::Depth24Typeless8:   
-        case Format::Typeless24Stencil8: 
+        case Format::Typeless24Stencil8:
+        {
+            return formatB == Format::Typeless24Typeless8;
+        }
         case Format::Typeless24Typeless8:
         {
             switch(formatB)
             {
                 case Format::Depth24Stencil8:
                 case Format::Depth24Typeless8:
-                case Format::Typeless24Stencil8:
-                case Format::Typeless24Typeless8: return true;
+                case Format::Typeless24Stencil8:  return true;
                 default:                          return false;
             }
         }
         default: break;
     }
 
-    return bytesPerComponent(formatA) == bytesPerComponent(formatB) && numComponents(formatA) == numComponents(formatB);
+    /*
+     * Is A typeless?
+     *   Is B typeless?
+     *     return false.
+     *   Else
+     *     Continue.
+     * Else
+     *   Is B typeless?
+     *     Continue.
+     *   Else
+     *     return false.
+     *
+     * Does A have the same number of bytes per component as B?
+     *   Continue.
+     * Else
+     *   return false.
+     *
+     * Does A have the same number of components as B?
+     *   return true.
+     * Else
+     *   return false.
+     */
+    return (isTypeless(formatA) ^ isTypeless(formatB)) && bytesPerComponent(formatA) == bytesPerComponent(formatB) && numComponents(formatA) == numComponents(formatB);
 }
 
+/**
+ * Computes the next mipmap side length.
+ *
+ * This divides the side length by 2, and clamps it to 1.
+ */
 static inline uSys computeMipSide(const u32 width) noexcept
 { return maxT(width / 2, 1u); }
 
+/**
+ * Computes the side length at a specific mip level.
+ */
 static inline uSys computeMipSide(const u32 width, const u32 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return maxT(width / divisor, 1u);
 }
 
+/**
+ *   Computes the maximum number of mipmap levels this texture
+ * can have.
+ *
+ * @param[in] width
+ *      The width of the texture.
+ */
 static inline uSys computeMipLevels(const u32 width) noexcept
 { return 1 + log2i(width); }
 
+/**
+ *   Computes the maximum number of mipmap levels this texture
+ * can have. This is the max for all dimensions.
+ *
+ * @param[in] width
+ *      The width of the texture.
+ * @param[in] height
+ *      The height of the texture.
+ */
 static inline uSys computeMipLevels(const u32 width, const u32 height) noexcept
 { return 1 + log2i(maxT(width, height)); }
 
+/**
+ *   Computes the maximum number of mipmap levels this texture
+ * can have. This is the max for all dimensions.
+ *
+ * @param[in] width
+ *      The width of the texture.
+ * @param[in] height
+ *      The height of the texture.
+ * @param[in] depth
+ *      The depth of the texture.
+ */
 static inline uSys computeMipLevels(const u32 width, const u32 height, const u32 depth) noexcept
 { return 1 + log2i(maxT(width, height, depth)); }
 
+/**
+ * Computes the sub resource index.
+ *
+ *   This does not require the number of elements within the
+ * array. This is because each index of the array stores the
+ * entire texture and its mipmaps, thus the number of elements
+ * is irrelevant in the equation.
+ *
+ * Not currently used.
+ *
+ * @param[in] mipTarget
+ *      The mipmap level to target.
+ * @param[in] arrayIndex
+ *      The index into the array to target.
+ * @param[in] mipmapLevels
+ *      The number of mipmap levels each texture has.
+ */
 static inline uSys computeSubResource(const u32 mipTarget, const u32 arrayIndex, const u32 mipmapLevels) noexcept
 { return mipTarget + (arrayIndex * mipmapLevels); }
 
+/**
+ * Computes the data size of a given sub resource.
+ *
+ *   This differs from @link ETexture::computeSize() @endlink
+ * in that it does not compute the size for the entire mip
+ * chain.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The width of the sub resource mipmap level.
+ */
 static inline uSys computeSubResourceSize(const Format format, const u32 width) noexcept
 { return width * bytesPerPixel(format); }
 
+/**
+ * Computes the data size of a given sub resource.
+ *
+ *   This differs from @link ETexture::computeSize() @endlink
+ * in that it does not compute the size for the entire mip
+ * chain.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The width of the sub resource mipmap level.
+ * @param[in] height
+ *      The height of the sub resource mipmap level.
+ */
 static inline uSys computeSubResourceSize(const Format format, const u32 width, const u32 height) noexcept
 { return width * height * bytesPerPixel(format); }
 
+/**
+ * Computes the data size of a given sub resource.
+ *
+ *   This differs from @link ETexture::computeSize() @endlink
+ * in that it does not compute the size for the entire mip
+ * chain.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The width of the sub resource mipmap level.
+ * @param[in] height
+ *      The height of the sub resource mipmap level.
+ * @param[in] depth
+ *      The depth of the sub resource mipmap level.
+ */
 static inline uSys computeSubResourceSize(const Format format, const u32 width, const u32 height, const u32 depth) noexcept
 { return width * height * depth * bytesPerPixel(format); }
 
+/**
+ * Computes the data size of a given sub resource.
+ *
+ *   This differs from @link ETexture::computeSize() @endlink
+ * in that it does not compute the size for the entire mip
+ * chain.
+ *
+ *   This differs from @link ETexture::computeSubResourceSize() @endlink
+ * in that it will compute the size of the mipmap level from
+ * the base size.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The width of the sub resource mipmap level.
+ * @param[in] mipLevel
+ *        The mipmap level in question; this automatically
+ *      dissolves the base size into the target mipmap size.
+ */
 static inline uSys computeSubResourceSizeMip(const Format format, const u32 width, const u32 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return (width / divisor) * bytesPerPixel(format);
 }
 
+/**
+ * Computes the data size of a given sub resource.
+ *
+ *   This differs from @link ETexture::computeSize() @endlink
+ * in that it does not compute the size for the entire mip
+ * chain.
+ *
+ *   This differs from @link ETexture::computeSubResourceSize() @endlink
+ * in that it will compute the size of the mipmap level from
+ * the base size.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The width of the sub resource mipmap level.
+ * @param[in] height
+ *      The height of the sub resource mipmap level.
+ * @param[in] mipLevel
+ *        The mipmap level in question; this automatically
+ *      dissolves the base size into the target mipmap size.
+ */
 static inline uSys computeSubResourceSizeMip(const Format format, const u32 width, const u32 height, const u32 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return (width / divisor) * (height / divisor) * bytesPerPixel(format);
 }
 
+/**
+ * Computes the data size of a given sub resource.
+ *
+ *   This differs from @link ETexture::computeSize() @endlink
+ * in that it does not compute the size for the entire mip
+ * chain.
+ *
+ *   This differs from @link ETexture::computeSubResourceSize() @endlink
+ * in that it will compute the size of the mipmap level from
+ * the base size.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The width of the sub resource mipmap level.
+ * @param[in] height
+ *      The height of the sub resource mipmap level.
+ * @param[in] depth
+ *      The depth of the sub resource mipmap level.
+ * @param[in] mipLevel
+ *        The mipmap level in question; this automatically
+ *      dissolves the base size into the target mipmap size.
+ */
 static inline uSys computeSubResourceSizeMip(const Format format, const u32 width, const u32 height, const u32 depth, const u32 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return (width / divisor) * (height / divisor) * (depth / divisor) * bytesPerPixel(format);
 }
 
+/**
+ * Computes the data size of a given texture and its mip chain.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ */
 static inline uSys computeSize(const Format format, const u32 width) noexcept
 {
     uSys size = 0;
@@ -335,6 +742,26 @@ static inline uSys computeSize(const Format format, const u32 width) noexcept
     return size * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given array of textures and
+ * their mip chain.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] arrayCount
+ *      The number of textures in the array.
+ */
 static inline uSys computeSizeArr(const Format format, const u32 width, const u32 arrayCount) noexcept
 {
     uSys size = 0;
@@ -347,6 +774,25 @@ static inline uSys computeSizeArr(const Format format, const u32 width, const u3
     return size * arrayCount * bytesPerPixel(format);
 }
 
+/**
+ * Computes the data size of a given texture and its mip chain.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] height
+ *      The base height of the texture.
+ */
 static inline uSys computeSize(const Format format, const u32 width, const u32 height) noexcept
 {
     uSys size = 0;
@@ -359,6 +805,28 @@ static inline uSys computeSize(const Format format, const u32 width, const u32 h
     return size * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given array of textures and
+ * their mip chain.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] height
+ *      The base height of the texture.
+ * @param[in] arrayCount
+ *      The number of textures in the array.
+ */
 static inline uSys computeSizeArr(const Format format, const u32 width, const u32 height, const u32 arrayCount) noexcept
 {
     uSys size = 0;
@@ -371,6 +839,27 @@ static inline uSys computeSizeArr(const Format format, const u32 width, const u3
     return size * arrayCount * bytesPerPixel(format);
 }
 
+/**
+ * Computes the data size of a given texture and its mip chain.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] height
+ *      The base height of the texture.
+ * @param[in] depth
+ *      The base depth of the texture.
+ */
 static inline uSys computeSize(const Format format, const u32 width, const u32 height, const u32 depth) noexcept
 {
     uSys size = 0;
@@ -383,6 +872,31 @@ static inline uSys computeSize(const Format format, const u32 width, const u32 h
     return size * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given texture and its mip
+ * chain with a maximum number of mipmap levels.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] mipmapLevels
+ *        The maximum number of mipmap levels this texture will
+ *      have. The return value may be incorrect if mipmapLevels
+ *      exceeds the maximum number of mipmap levels the texture
+ *      can actually have. i.e. a texture with base size 8 only
+ *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
+ *      cannot be 5.
+ */
 static inline uSys computeSizeMip(const Format format, const u32 width, const u32 mipmapLevels) noexcept
 {
     uSys size = 0;
@@ -395,6 +909,33 @@ static inline uSys computeSizeMip(const Format format, const u32 width, const u3
     return size * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given array of textures and
+ * their mip chain with a maximum number of mipmap levels.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] mipmapLevels
+ *        The maximum number of mipmap levels this texture will
+ *      have. The return value may be incorrect if mipmapLevels
+ *      exceeds the maximum number of mipmap levels the texture
+ *      can actually have. i.e. a texture with base size 8 only
+ *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
+ *      cannot be 5.
+ * @param[in] arrayCount
+ *      The number of textures in the array.
+ */
 static inline uSys computeSizeMipArr(const Format format, const u32 width, const u32 mipmapLevels, const u32 arrayCount) noexcept
 {
     uSys size = 0;
@@ -407,6 +948,33 @@ static inline uSys computeSizeMipArr(const Format format, const u32 width, const
     return size * arrayCount * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given texture and its mip
+ * chain with a maximum number of mipmap levels.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] height
+ *      The base height of the texture.
+ * @param[in] mipmapLevels
+ *        The maximum number of mipmap levels this texture will
+ *      have. The return value may be incorrect if mipmapLevels
+ *      exceeds the maximum number of mipmap levels the texture
+ *      can actually have. i.e. a texture with base size 8 only
+ *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
+ *      cannot be 5.
+ */
 static inline uSys computeSizeMip(const Format format, const u32 width, const u32 height, const u32 mipmapLevels) noexcept
 {
     uSys size = 0;
@@ -419,6 +987,35 @@ static inline uSys computeSizeMip(const Format format, const u32 width, const u3
     return size * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given array of textures and
+ * their mip chain with a maximum number of mipmap levels.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] height
+ *      The base height of the texture.
+ * @param[in] mipmapLevels
+ *        The maximum number of mipmap levels this texture will
+ *      have. The return value may be incorrect if mipmapLevels
+ *      exceeds the maximum number of mipmap levels the texture
+ *      can actually have. i.e. a texture with base size 8 only
+ *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
+ *      cannot be 5.
+ * @param[in] arrayCount
+ *      The number of textures in the array.
+ */
 static inline uSys computeSizeMipArr(const Format format, const u32 width, const u32 height, const u32 mipmapLevels, const u32 arrayCount) noexcept
 {
     uSys size = 0;
@@ -431,6 +1028,35 @@ static inline uSys computeSizeMipArr(const Format format, const u32 width, const
     return size * arrayCount * bytesPerPixel(format);
 }
 
+/**
+ *   Computes the data size of a given texture and its mip
+ * chain with a maximum number of mipmap levels.
+ *
+ *   I have been unable to find an `O(1)` formula that can
+ * compute the entire mip chain size of any given start size,
+ * specifically including non-square start sizes. WolframAlpha
+ * was unable to deterministically find a formula given the use
+ * of floor functions (we're dealing with integers, not reals).
+ * Its only recommendations were `2x` and `2x-1`, which
+ * appeared to only be accurate when using square sizes, or
+ * when using reals as `x` approaches infinity.
+ *
+ * @param[in] format
+ *      The format of the texture.
+ * @param[in] width
+ *      The base width of the texture.
+ * @param[in] height
+ *      The base height of the texture.
+ * @param[in] depth
+ *      The base depth of the texture.
+ * @param[in] mipmapLevels
+ *        The maximum number of mipmap levels this texture will
+ *      have. The return value may be incorrect if mipmapLevels
+ *      exceeds the maximum number of mipmap levels the texture
+ *      can actually have. i.e. a texture with base size 8 only
+ *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
+ *      cannot be 5.
+ */
 static inline uSys computeSizeMip(const Format format, const u32 width, const u32 height, const u32 depth, const u32 mipmapLevels) noexcept
 {
     uSys size = 0;

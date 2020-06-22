@@ -33,17 +33,17 @@ GLDescriptorTable::~GLDescriptorTable() noexcept
 
 DescriptorTable GLDescriptorHeap::allocateTable(const uSys descriptors, const DescriptorType type, TauAllocator* allocator) noexcept
 {
-    void* placement;
+    u8* placement;
 
     if(allocator)
     {
         switch(type)
         {
             case DescriptorType::TextureView:
-                placement = allocator->allocate(descriptors * sizeof(GLTextureView));
+                placement = allocator->allocateT<u8>(descriptors * sizeof(GLTextureView));
                 break;
             case DescriptorType::UniformBufferView:
-                placement = allocator->allocate(descriptors * sizeof(GLUniformBufferView));
+                placement = allocator->allocateT<u8>(descriptors * sizeof(GLUniformBufferView));
                 break;
             default: return { null };
         }
@@ -65,7 +65,7 @@ DescriptorTable GLDescriptorHeap::allocateTable(const uSys descriptors, const De
     if(!placement)
     { return { null }; }
 
-    GLDescriptorTable* ret = new(::std::nothrow) GLDescriptorTable(null, type, descriptors, reinterpret_cast<u8*>(placement));
+    GLDescriptorTable* ret = new(::std::nothrow) GLDescriptorTable(allocator, type, descriptors, placement);
     return { ret };
 }
 

@@ -9,35 +9,16 @@
 class IRenderingContext;
 class IResource;
 
-#define TEXTURE_VIEW_IMPL_BASE(_TYPE) \
-    RTTD_IMPL(_TYPE, ITextureView)
-
-#define TEXTURE_VIEW_IMPL(_TYPE) TEXTURE_VIEW_IMPL_BASE(_TYPE)
-
 /**
  * A view into a texture.
+ *
+ * This is used for binding textures to the shader pipeline.
+ *
+ * The exact implementation details are up to the driver.
  */
-class TAU_DLL TAU_NOVTABLE ITextureView : public IResourceView
+struct TextureView
 {
-    DEFAULT_CONSTRUCT_PO(ITextureView);
-    DEFAULT_DESTRUCT_VI(ITextureView);
-    DEFAULT_CM_PO(ITextureView);
-    RESOURCE_VIEW_IMPL(ITextureView);
-public:
-    [[nodiscard]] virtual ETexture::Format dataFormat() const noexcept = 0;
-    [[nodiscard]] virtual ETexture::Type  textureType() const noexcept = 0;
-
-    [[nodiscard]] virtual u32      width() const noexcept { return 0; }
-    [[nodiscard]] virtual u32     height() const noexcept { return 0; }
-    [[nodiscard]] virtual u32      depth() const noexcept { return 0; }
-    [[nodiscard]] virtual u32 arrayCount() const noexcept { return 0; }
-    [[nodiscard]] virtual u32  mipLevels() const noexcept { return 0; }
-
-    virtual void generateMipmaps(IRenderingContext& context) noexcept = 0;
-
-    RTTD_BASE_IMPL(ITextureView);
-    RTTD_BASE_CHECK(ITextureView);
-    RTTD_BASE_CAST(ITextureView);
+    void* raw;
 };
 
 struct TextureViewArgs final
@@ -101,5 +82,5 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual ITextureView* build(const TextureViewArgs& args, [[tau::out]] Error* error, DescriptorTable table, uSys tableIndex) const noexcept = 0;
+    [[nodiscard]] virtual TextureView build(const TextureViewArgs& args, [[tau::out]] Error* error, DescriptorTable table, uSys tableIndex) const noexcept = 0;
 };

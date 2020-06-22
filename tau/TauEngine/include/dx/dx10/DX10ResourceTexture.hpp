@@ -27,7 +27,7 @@ public:
     [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture1D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
-    void unmap(IRenderingContext& context, uSys subResource) noexcept override;
+    void unmap(IRenderingContext& context, uSys subResource, uSys arrayIndex) noexcept override;
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };
@@ -54,7 +54,7 @@ public:
     [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture2D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
-    void unmap(IRenderingContext& context, uSys subResource) noexcept override;
+    void unmap(IRenderingContext& context, uSys subResource, uSys arrayIndex) noexcept override;
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };
@@ -81,7 +81,7 @@ public:
     [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture3D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
-    void unmap(IRenderingContext& context, uSys subResource) noexcept override;
+    void unmap(IRenderingContext& context, uSys subResource, uSys arrayIndex) noexcept override;
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };
