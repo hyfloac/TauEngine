@@ -141,6 +141,9 @@
       <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
     </ClCompile>
     <Link>
       <PerUserRedirection>true</PerUserRedirection>
@@ -220,6 +223,9 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Sa
       <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
     </ClCompile>
     <Link>
       <PerUserRedirection>true</PerUserRedirection>
@@ -356,7 +362,7 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Sa
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <ExceptionHandling>false</ExceptionHandling>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
       <ControlFlowGuard>false</ControlFlowGuard>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -368,6 +374,9 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Sa
       <OmitFramePointers>true</OmitFramePointers>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <WarningLevel>Level4</WarningLevel>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
     </ClCompile>
     <Link>
       <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;openvr_api.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>

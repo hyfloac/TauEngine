@@ -10,7 +10,8 @@ namespace sbp {
 class ExprAST;
 class RootExprAST;
 class FileExprAST;
-class BlockExprAST;
+class UniformBlockExprAST;
+class TextureParamsBlockExprAST;
 class ShaderStageBlockExprAST;
 class APIBlockExprAST;
 class ShaderIOPointExprAST;
@@ -41,7 +42,8 @@ public:
     virtual void visit(const sbp::RootExprAST& expr) noexcept;
 
     virtual void visit(const sbp::FileExprAST& expr) noexcept = 0;
-    virtual void visit(const sbp::BlockExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::UniformBlockExprAST& expr) noexcept = 0;
+    virtual void visit(const sbp::TextureParamsBlockExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::APIBlockExprAST& expr) noexcept = 0;
     virtual void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept = 0;

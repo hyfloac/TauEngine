@@ -68,6 +68,8 @@ SBPToken ShaderBundleLexer::getNextToken() noexcept
             TOKEN_BLOCK_STR_CASE(Uniforms)
             TOKEN_BLOCK_STR_CASE(Textures)
             TOKEN_STR_CASE("File", File)
+            TOKEN_STR_CASE("Location", Location)
+            TOKEN_STR_CASE("Sampler", Sampler)
             RM_STR_CASE(DirectX10)
             RM_STR_CASE(DirectX11)
             RM_STR_CASE(DirectX12)
@@ -286,7 +288,7 @@ bool ShaderBundleLexer::readChar() noexcept
     return c >= '0' && c <= '9';
 }
 
-[[nodiscard]] static char getEscape(char c) noexcept
+[[nodiscard]] static char getEscape(const char c) noexcept
 {
     switch(c)
     {
@@ -301,7 +303,7 @@ bool ShaderBundleLexer::readChar() noexcept
     }
 }
 
-[[nodiscard]] static bool isValidIdentifier(char c) noexcept
+[[nodiscard]] static bool isValidIdentifier(const char c) noexcept
 {
     if(c >= 'A' && c <= 'Z')
     { return true; }

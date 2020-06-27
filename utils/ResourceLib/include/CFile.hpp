@@ -51,6 +51,8 @@ public:
     i64 readBytes(u8* buffer, uSys len) noexcept override;
 
     i64 writeBytes(const u8* buffer, uSys len) noexcept override;
+
+    int readChar() noexcept override;
 };
 
 /**

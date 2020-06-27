@@ -5,6 +5,10 @@
 
 #include "ShaderBundleVisitor.hpp"
 
+namespace sbp {
+    struct BindingUnion;
+}
+
 struct PrintSBVArgs final
 {
     DEFAULT_CONSTRUCT_PU(PrintSBVArgs);
@@ -85,7 +89,8 @@ public:
     { IShaderBundleVisitor::visit(expr); }
 
     void visit(const sbp::FileExprAST& expr) noexcept override;
-    void visit(const sbp::BlockExprAST& expr) noexcept override;
+    void visit(const sbp::UniformBlockExprAST& expr) noexcept override;
+    void visit(const sbp::TextureParamsBlockExprAST& expr) noexcept override;
     void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept override;
     void visit(const sbp::APIBlockExprAST& expr) noexcept override;
     void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept override;
@@ -94,6 +99,8 @@ private:
     void printIndent() const noexcept;
 
     void printComma(bool shouldPrint = true) const noexcept;
+
+    void printBindingUnion(const sbp::BindingUnion& bindingUnion) const noexcept;
 
     void printBrace() const noexcept;
 };

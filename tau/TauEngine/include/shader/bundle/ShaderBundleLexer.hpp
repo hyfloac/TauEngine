@@ -18,6 +18,8 @@ enum class SBPToken
     PixelBlock,
     UniformsBlock,
     TexturesBlock,
+    Location,
+    Sampler,
     File,
     RenderingMode,
     CRMLiteral,

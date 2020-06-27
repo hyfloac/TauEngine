@@ -32,27 +32,27 @@
 #define DEG_2_RAD(__F) DEG_2_RAD_F(__F)
 
 template<typename _T>
-constexpr _T minT(const _T a, const _T b)
+constexpr _T minT(const _T a, const _T b) noexcept
 { return a < b ? a : b; }
 
 template<typename _T>
-constexpr _T minT(const _T a, const _T b, const _T c)
+constexpr _T minT(const _T a, const _T b, const _T c) noexcept
 { return minT(minT(a, b), c); }
 
 template<typename _T>
-constexpr _T minT(const _T a, const _T b, const _T c, const _T d)
+constexpr _T minT(const _T a, const _T b, const _T c, const _T d) noexcept
 { return minT(minT(a, b), minT(c, d)); }
 
 template<typename _T>
-constexpr _T maxT(const _T a, const _T b)
+constexpr _T maxT(const _T a, const _T b) noexcept
 { return a > b ? a : b; }
 
 template<typename _T>
-constexpr _T maxT(const _T a, const _T b, const _T c)
+constexpr _T maxT(const _T a, const _T b, const _T c) noexcept
 { return maxT(maxT(a, b), c); }
 
 template<typename _T>
-constexpr _T maxT(const _T a, const _T b, const _T c, const _T d)
+constexpr _T maxT(const _T a, const _T b, const _T c, const _T d) noexcept
 { return maxT(maxT(a, b), maxT(c, d)); }
 
 const u32 tab64[64] = {

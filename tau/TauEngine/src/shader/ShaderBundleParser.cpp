@@ -205,11 +205,11 @@ void ShaderBundleParser::parseShaderContents(NullableStrongRef<sbp::ShaderStageB
                 break;
             case SBPToken::UniformsBlock:
                 PARSE_COND_ERROR(block->uniforms(), Error::DuplicateDeclaration, "Duplicate `Uniforms` block found within inner shader stage block.");
-                block->uniforms() = parseBlock();
+                block->uniforms() = parseUniformBlock();
                 break;
             case SBPToken::TexturesBlock:
                 PARSE_COND_ERROR(block->textures(), Error::DuplicateDeclaration, "Duplicate `Textures` block found within inner shader stage block.");
-                block->textures() = parseBlock();
+                block->textures() = parseTexturesBlock();
                 break;
             default: break;
         }
@@ -223,32 +223,17 @@ void ShaderBundleParser::parseShaderContents(NullableStrongRef<sbp::ShaderStageB
     }
 }
 
-NullableStrongRef<sbp::BlockExprAST> ShaderBundleParser::parseBlock() noexcept
+NullableStrongRef<sbp::UniformBlockExprAST> ShaderBundleParser::parseUniformBlock() noexcept
 {
-    sbp::BlockType blockType;
-
-    switch(_lexer.currentToken())
-    {
-        case SBPToken::UniformsBlock:
-            blockType = sbp::BlockType::Uniforms;
-            break;
-        case SBPToken::TexturesBlock:
-            blockType = sbp::BlockType::Textures;
-            break;
-        default: return null;
-    }
-
-    _currentBlock = blockType;
-
-    const NullableStrongRef<sbp::BlockExprAST> block(DefaultTauAllocator::Instance(), blockType, null);
-    parseBlockContents(block);
+    const NullableStrongRef<sbp::UniformBlockExprAST> block(DefaultTauAllocator::Instance(), null);
+    parseUniformBlockContents(block);
     return block;
 }
 
-void ShaderBundleParser::parseBlockContents(NullableStrongRef<sbp::BlockExprAST> block) noexcept
+void ShaderBundleParser::parseUniformBlockContents(NullableStrongRef<sbp::UniformBlockExprAST> block) noexcept
 {
-    static constexpr const char* ErrorInvalidToken = "Invalid token encountered while parsing block.";
-    static constexpr const char* ErrorInvalidChar = "Invalid character encountered while parsing block.";
+    static constexpr const char* ErrorInvalidToken = "Invalid token encountered while parsing uniform block.";
+    static constexpr const char* ErrorInvalidChar = "Invalid character encountered while parsing uniform block.";
 
     PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
     PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
@@ -271,9 +256,116 @@ void ShaderBundleParser::parseBlockContents(NullableStrongRef<sbp::BlockExprAST>
 
         if(_lexer.cValue() == '}')
         { break; }
-        
+
         PARSE_COND_ERROR(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
     }
+}
+
+NullableStrongRef<sbp::TextureParamsBlockExprAST> ShaderBundleParser::parseTexturesBlock() noexcept
+{
+    static constexpr const char* ErrorInvalidCRM = "Invalid Common Rendering Model token encountered while parsing texture params block.";
+    static constexpr const char* ErrorInvalidToken = "Invalid token encountered while parsing texture params block.";
+    static constexpr const char* ErrorInvalidChar = "Invalid character encountered while parsing texture params block.";
+    static constexpr const char* ErrorDuplicateLocation = "Duplicate Location encountered while parsing texture params block.";
+    static constexpr const char* ErrorDuplicateSampler = "Duplicate Sampler encountered while parsing texture params block.";
+    static constexpr const char* ErrorUnexpectedEndOfBlock = "Unexpected end of block encountered while parsing texture params block.";
+
+    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+    PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+    PARSE_COND_ERROR(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
+
+    NullableStrongRef<sbp::TextureParamsBlockExprAST> base(null);
+    NullableStrongRef<sbp::TextureParamsBlockExprAST>* curr = null;
+
+    // For all textures
+    while(true)
+    {
+        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR(!isTextureCRM(_lexer.crmToken()), Error::InvalidCRM, ErrorInvalidCRM);
+
+        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
+
+        sbp::BindingUnion binding;
+        u32 sampler = 0;
+
+        // Used to determine if all texture params are set.
+        uSys flags = 0;
+
+        // For each texture attribute
+        while(true)
+        {
+            if(_lexer.getNextToken() == SBPToken::Location)
+            {
+                PARSE_COND_ERROR(flags & 0x01, Error::DuplicateDeclaration, ErrorDuplicateLocation);
+
+                PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+                PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+
+                if(_lexer.getNextToken() == SBPToken::UnsignedIntegerLiteral)
+                {
+                    binding = sampler;
+                }
+                else if(_lexer.currentToken() == SBPToken::StringLiteral)
+                {
+                    binding = _lexer.strValue();
+                }
+                else
+                {
+                    PARSE_ERROR(Error::InvalidToken, ErrorInvalidToken);
+                }
+                flags |= 0x01;
+            }
+            else if(_lexer.currentToken() == SBPToken::Sampler)
+            {
+                PARSE_COND_ERROR(flags & 0x02, Error::DuplicateDeclaration, ErrorDuplicateSampler);
+
+                PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+                PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+                PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::UnsignedIntegerLiteral, Error::InvalidToken, ErrorInvalidToken);
+                sampler = _lexer.uintValue();
+                flags |= 0x02;
+            }
+            else
+            {
+                PARSE_ERROR(Error::InvalidToken, ErrorInvalidToken);
+            }
+
+            PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+            if(_lexer.cValue() == '}')
+            {
+                PARSE_COND_ERROR(flags != 0x03, Error::UnexpectedEndOfBlock, ErrorUnexpectedEndOfBlock);
+
+                if(!base)
+                {
+                    base = NullableStrongRef<sbp::TextureParamsBlockExprAST>(DefaultTauAllocator::Instance(), null, ::std::move(binding), sampler);
+                    curr = &base;
+                }
+                else
+                {
+                    curr->get()->next() = NullableStrongRef<sbp::TextureParamsBlockExprAST>(DefaultTauAllocator::Instance(), null, ::std::move(binding), sampler);
+                    curr = &curr->get()->next();
+                }
+                break;
+            }
+            else if(_lexer.cValue() != ',')
+            {
+                PARSE_ERROR(Error::InvalidCharacter, ErrorInvalidChar);
+            }
+        }
+
+        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        if(_lexer.cValue() == '}')
+        {
+            break;
+        }
+        PARSE_COND_ERROR(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
+    }
+
+    return base;
 }
 
 NullableStrongRef<sbp::FileExprAST> ShaderBundleParser::parseFile() noexcept
@@ -296,7 +388,7 @@ NullableStrongRef<sbp::ShaderIOPointExprAST> ShaderBundleParser::parseIOPoint() 
 
     CommonRenderingModelToken crmTarget = _lexer.crmToken();
 
-    PARSE_COND_ERROR_N(getAssociatedBlock(crmTarget) != _currentBlock, Error::InvalidCRM, ErrorInvalidCRM);
+    PARSE_COND_ERROR_N(!isUniformCRM(crmTarget), Error::InvalidCRM, ErrorInvalidCRM);
     PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
     PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
 
@@ -313,20 +405,27 @@ NullableStrongRef<sbp::ShaderIOPointExprAST> ShaderBundleParser::parseIOPoint() 
     PARSE_ERROR_N(Error::InvalidToken, ErrorInvalidToken);
 }
 
-sbp::BlockType ShaderBundleParser::getAssociatedBlock(const CommonRenderingModelToken token) noexcept
+bool ShaderBundleParser::isTextureCRM(const CommonRenderingModelToken token) noexcept
 {
     switch(token)
     {
-        case CommonRenderingModelToken::UniformBindingCameraDynamic:
-        case CommonRenderingModelToken::UniformBindingCameraStatic: return sbp::BlockType::Uniforms;
-
         case CommonRenderingModelToken::TextureNormal:      
         case CommonRenderingModelToken::TextureDiffuse:     
         case CommonRenderingModelToken::TexturePBRCompound: 
         case CommonRenderingModelToken::TextureEmissivity:  
         case CommonRenderingModelToken::TexturePosition:    
         case CommonRenderingModelToken::TextureDepth:       
-        case CommonRenderingModelToken::TextureStencil: return sbp::BlockType::Textures;
-        default: return static_cast<sbp::BlockType>(0);
+        case CommonRenderingModelToken::TextureStencil: return true;
+        default: return false;
+    }
+}
+
+bool ShaderBundleParser::isUniformCRM(const CommonRenderingModelToken token) noexcept
+{
+    switch(token)
+    {
+        case CommonRenderingModelToken::UniformBindingCameraDynamic:
+        case CommonRenderingModelToken::UniformBindingCameraStatic: return true;
+        default: return false;
     }
 }

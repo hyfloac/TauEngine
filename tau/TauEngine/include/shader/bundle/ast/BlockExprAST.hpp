@@ -5,32 +5,21 @@
 #include "ShaderIOBindingExprAST.hpp"
 #include "FileExprAST.hpp"
 #include "RenderingMode.hpp"
+#include "shader/EShader.hpp"
 
 #include <bitset>
 
-#include "shader/EShader.hpp"
-
 namespace sbp {
-enum class BlockType
+class TAU_DLL UniformBlockExprAST final : public ExprAST
 {
-    Uniforms = 1,
-    Textures
-};
-
-class TAU_DLL BlockExprAST final : public ExprAST
-{
-    DEFAULT_DESTRUCT(BlockExprAST);
-    DEFAULT_CM_PU(BlockExprAST);
+    DEFAULT_DESTRUCT(UniformBlockExprAST);
+    DEFAULT_CM_PU(UniformBlockExprAST);
 private:
-    BlockType _type;
     NullableStrongRef<ShaderIOPointExprAST> _container;
 public:
-    inline BlockExprAST(const BlockType type, const NullableStrongRef<ShaderIOPointExprAST>& container) noexcept
-        : _type(type)
-        , _container(container)
+    inline UniformBlockExprAST(const NullableStrongRef<ShaderIOPointExprAST>& container) noexcept
+        : _container(container)
     { }
-
-    [[nodiscard]] BlockType type() const noexcept { return _type; }
 
     [[nodiscard]]       NullableStrongRef<ShaderIOPointExprAST>& container()       noexcept { return _container; }
     [[nodiscard]] const NullableStrongRef<ShaderIOPointExprAST>& container() const noexcept { return _container; }
@@ -39,15 +28,51 @@ public:
     { visitor.visit(*this); }
 };
 
+class TAU_DLL TextureParamsBlockExprAST final : public ExprAST
+{
+    DEFAULT_DESTRUCT(TextureParamsBlockExprAST);
+    DELETE_COPY(TextureParamsBlockExprAST);
+    DEFAULT_MOVE_PU(TextureParamsBlockExprAST);
+private:
+    NullableStrongRef<TextureParamsBlockExprAST> _next;
+    CommonRenderingModelToken _crmTarget;
+    BindingUnion _bindPoint;
+    u32 _sampler;
+public:
+    inline TextureParamsBlockExprAST(const NullableStrongRef<TextureParamsBlockExprAST>& next, const CommonRenderingModelToken crmTarget, const BindingUnion& bindPoint, const u32 sampler) noexcept
+        : _next(next)
+        , _crmTarget(crmTarget)
+        , _bindPoint(bindPoint)
+        , _sampler(sampler)
+    { }
+
+    inline TextureParamsBlockExprAST(const NullableStrongRef<TextureParamsBlockExprAST>& next, const CommonRenderingModelToken crmTarget, BindingUnion&& bindPoint, const u32 sampler) noexcept
+        : _next(next)
+        , _crmTarget(crmTarget)
+        , _bindPoint(::std::move(bindPoint))
+        , _sampler(sampler)
+    { }
+    
+    [[nodiscard]]       NullableStrongRef<TextureParamsBlockExprAST>& next()       noexcept { return _next; }
+    [[nodiscard]] const NullableStrongRef<TextureParamsBlockExprAST>& next() const noexcept { return _next; }
+
+    [[nodiscard]] CommonRenderingModelToken crmTarget() const noexcept { return _crmTarget; }
+    [[nodiscard]] const BindingUnion& bindPoint() const noexcept { return _bindPoint; }
+    [[nodiscard]] u32 sampler() const noexcept { return _sampler; }
+
+    void visit(IShaderBundleVisitor& visitor) const noexcept override
+    { visitor.visit(*this); }
+};
+
 class TAU_DLL ShaderStageBlockExprAST final : public ExprAST
 {
     DEFAULT_DESTRUCT_VI(ShaderStageBlockExprAST);
-DEFAULT_CM_PU(ShaderStageBlockExprAST);
+    DEFAULT_CM_PU(ShaderStageBlockExprAST);
 private:
     EShader::Stage _stage;
     NullableStrongRef<FileExprAST> _file;
-    NullableStrongRef<BlockExprAST> _uniforms;
-    NullableStrongRef<BlockExprAST> _textures;
+    NullableStrongRef<UniformBlockExprAST> _uniforms;
+    NullableStrongRef<TextureParamsBlockExprAST> _textures;
 public:
     inline ShaderStageBlockExprAST(const EShader::Stage stage) noexcept
         : _stage(stage)
@@ -58,13 +83,13 @@ public:
 
     [[nodiscard]] EShader::Stage stage() const noexcept { return _stage; }
 
-    [[nodiscard]] NullableStrongRef<FileExprAST>&      file() noexcept { return _file;     }
-    [[nodiscard]] NullableStrongRef<BlockExprAST>& uniforms() noexcept { return _uniforms; }
-    [[nodiscard]] NullableStrongRef<BlockExprAST>& textures() noexcept { return _textures; }
+    [[nodiscard]] NullableStrongRef<FileExprAST>&                   file() noexcept { return _file;     }
+    [[nodiscard]] NullableStrongRef<UniformBlockExprAST>&       uniforms() noexcept { return _uniforms; }
+    [[nodiscard]] NullableStrongRef<TextureParamsBlockExprAST>& textures() noexcept { return _textures; }
 
-    [[nodiscard]] const NullableStrongRef<FileExprAST>&      file() const noexcept { return _file;     }
-    [[nodiscard]] const NullableStrongRef<BlockExprAST>& uniforms() const noexcept { return _uniforms; }
-    [[nodiscard]] const NullableStrongRef<BlockExprAST>& textures() const noexcept { return _textures; }
+    [[nodiscard]] const NullableStrongRef<FileExprAST>&                   file() const noexcept { return _file;     }
+    [[nodiscard]] const NullableStrongRef<UniformBlockExprAST>&       uniforms() const noexcept { return _uniforms; }
+    [[nodiscard]] const NullableStrongRef<TextureParamsBlockExprAST>& textures() const noexcept { return _textures; }
 
     void visit(IShaderBundleVisitor& visitor) const noexcept override
     { visitor.visit(*this); }

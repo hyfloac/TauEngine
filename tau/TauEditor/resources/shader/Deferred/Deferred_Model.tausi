@@ -28,9 +28,18 @@ OpenGL4_5, OpenGL4_6: {
             0: 0
         },
         Textures: {
-            CRMTextureDiffuse: 0,
-            CRMTexturePBRCompound: 1,
-            CRMTextureNormal: 2
+            CRMTextureDiffuse: {
+                Location: 0,
+                Sampler: 0
+            },
+            CRMTexturePBRCompound: { 
+                Location: 1,
+                Sampler: 0
+            },
+            CRMTextureNormal: {
+                Location: 2,
+                Sampler: 0
+            }
         }
     }
 }

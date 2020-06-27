@@ -35,6 +35,14 @@ i64 CFile::writeBytes(const u8* const buffer, const uSys len) noexcept
     return fwrite(buffer, sizeof(u8), len, _file);
 }
 
+
+int CFile::readChar() noexcept
+{
+    if(_props == FileProps::Read)
+    { return -1; }
+    return fgetc(_file);
+}
+
 CPPRef<CFileLoader>& CFileLoader::Instance() noexcept
 {
     static CPPRef<CFileLoader> instance = CPPRef<CFileLoader>(new CFileLoader);
