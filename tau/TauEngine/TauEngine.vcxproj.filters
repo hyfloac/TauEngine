@@ -662,19 +662,7 @@
     <ClInclude Include="include\shader\bundle\ShaderBundleParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\shader\bundle\ast\ExprAST.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shader\bundle\ast\BlockExprAST.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shader\bundle\ast\ShaderIOBindingExprAST.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\shader\bundle\ShaderBundleLexer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\shader\bundle\ast\FileExprAST.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shader\bundle\ShaderBundleVisitor.hpp">
@@ -945,6 +933,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx10\DX10DescriptorHeap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\bundle\ast\AST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\bundle\ast\BlockAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shader\bundle\ast\FileAST.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,37 +1,25 @@
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
-#include "shader/bundle/ast/FileExprAST.hpp"
-#include "shader/bundle/ast/BlockExprAST.hpp"
-#include "shader/bundle/ast/ShaderIOBindingExprAST.hpp"
+#include "shader/bundle/ast/FileAST.hpp"
+#include "shader/bundle/ast/BlockAST.hpp"
 
-void ShaderInfoExtractorVisitor::visit(const sbp::FileExprAST& expr) noexcept
+void ShaderInfoExtractorVisitor::visit(const sbp::FileAST& expr) noexcept
 {
-    switch(_currentStage)
-    {
-        case EShader::Stage::Vertex:
-            _vertexInfo.fileName = expr.filePath();
-            break;
-        case EShader::Stage::TessellationControl:
-            _tessCtrlInfo.fileName = expr.filePath();
-            break;
-        case EShader::Stage::TessellationEvaluation:
-            _tessEvalInfo.fileName = expr.filePath();
-            break;
-        case EShader::Stage::Geometry:
-            _geometryInfo.fileName = expr.filePath();
-            break;
-        case EShader::Stage::Pixel:
-            _pixelInfo.fileName = expr.filePath();
-            break;
-        default: break;
-    }
+    get(_currentStage).fileName = expr.filePath();
 }
 
-void ShaderInfoExtractorVisitor::visit(const sbp::BlockExprAST& expr) noexcept
+void ShaderInfoExtractorVisitor::visit(const sbp::UniformBindingAST& expr) noexcept
 {
-    visit(expr.container().get());
+    get(_currentStage).uniformPoints.emplace(expr.crmTarget(), expr.bindPoint());
+    visit(expr.next().get());
 }
 
-void ShaderInfoExtractorVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) noexcept
+void ShaderInfoExtractorVisitor::visit(const sbp::TextureParamsBlockAST& expr) noexcept
+{
+    get(_currentStage).texturePoints.emplace(expr.crmTarget(), expr.bindPoint(), expr.sampler());
+    visit(expr.next().get());
+}
+
+void ShaderInfoExtractorVisitor::visit(const sbp::ShaderStageBlockAST& expr) noexcept
 {
     _currentStage = expr.stage();
 
@@ -40,9 +28,9 @@ void ShaderInfoExtractorVisitor::visit(const sbp::ShaderStageBlockExprAST& expr)
     visit(expr.textures().get());
 }
 
-void ShaderInfoExtractorVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
+void ShaderInfoExtractorVisitor::visit(const sbp::APIBlockAST& expr) noexcept
 {
-    const sbp::APIBlockExprAST* curr = &expr;
+    const sbp::APIBlockAST* curr = &expr;
     while(curr && !curr->hasAPI(_targetMode))
     { curr = curr->next().get(); }
 
@@ -53,144 +41,4 @@ void ShaderInfoExtractorVisitor::visit(const sbp::APIBlockExprAST& expr) noexcep
     visit(expr.tessEval().get());
     visit(expr.geometry().get());
     visit(expr.pixel().get());
-}
-
-void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept
-{
-    switch(_currentStage)
-    {
-        case EShader::Stage::Vertex:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _vertexInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                case sbp::BlockType::Textures:
-                    _vertexInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::TessellationControl:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _tessCtrlInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                case sbp::BlockType::Textures:
-                    _tessCtrlInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::TessellationEvaluation:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _tessEvalInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                case sbp::BlockType::Textures:
-                    _tessEvalInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::Geometry:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _geometryInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                case sbp::BlockType::Textures:
-                    _geometryInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::Pixel:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _pixelInfo.uniformPoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                case sbp::BlockType::Textures:
-                    _pixelInfo.texturePoints.emplace(expr.crmTarget(), expr.shaderBind());
-                    break;
-                default: break;
-            }
-            break;
-        default: break;
-    }
-
-    visit(expr.next().get());
-}
-
-void ShaderInfoExtractorVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept
-{
-    switch(_currentStage)
-    {
-        case EShader::Stage::Vertex:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _vertexInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                case sbp::BlockType::Textures:
-                    _vertexInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::TessellationControl:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _tessCtrlInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                case sbp::BlockType::Textures:
-                    _tessCtrlInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::TessellationEvaluation:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _tessEvalInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                case sbp::BlockType::Textures:
-                    _tessEvalInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::Geometry:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _geometryInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                case sbp::BlockType::Textures:
-                    _geometryInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                default: break;
-            }
-            break;
-        case EShader::Stage::Pixel:
-            switch(_currentBlock)
-            {
-                case sbp::BlockType::Uniforms:
-                    _pixelInfo.uniformPoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                case sbp::BlockType::Textures:
-                    _pixelInfo.texturePoints.emplace(expr.crmTarget(), expr.uniformName());
-                    break;
-                default: break;
-            }
-            break;
-        default: break;
-    }
-
-    visit(expr.next().get());
 }

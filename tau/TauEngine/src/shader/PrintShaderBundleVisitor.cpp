@@ -1,7 +1,6 @@
 #include "shader/bundle/PrintShaderBundleVisitor.hpp"
-#include "shader/bundle/ast/FileExprAST.hpp"
-#include "shader/bundle/ast/BlockExprAST.hpp"
-#include "shader/bundle/ast/ShaderIOBindingExprAST.hpp"
+#include "shader/bundle/ast/FileAST.hpp"
+#include "shader/bundle/ast/BlockAST.hpp"
 
 static const char* renderingModeName(RenderingMode::Mode mode) noexcept;
 static const char* crmTargetName(CommonRenderingModelToken crmTarget) noexcept;
@@ -33,32 +32,34 @@ PrintShaderBundleVisitor::PrintShaderBundleVisitor(const PrintSBVArgs* args) noe
     }
 }
 
-void PrintShaderBundleVisitor::visit(const sbp::FileExprAST& expr) noexcept
+void PrintShaderBundleVisitor::visit(const sbp::FileAST& expr) noexcept
 {
     printIndent();
     ConPrinter::print(_file, "File: \"%\"", expr.filePath());
 }
 
-void PrintShaderBundleVisitor::visit(const sbp::UniformBlockExprAST& expr) noexcept
+void PrintShaderBundleVisitor::visit(const sbp::UniformBindingAST& expr) noexcept
 {
     printIndent();
-    ConPrinter::print(_file, "Uniforms: ");
-    printBrace();
-    ++_currIndent;
+    ConPrinter::print(_file, "%: ", crmTargetName(expr.crmTarget()));
 
-    visit(expr.container().get());
+    if(expr.bindPoint().type == sbp::BindingUnion::Number)
+    {
+        ConPrinter::print(_file, expr.bindPoint().number);
+    }
+    else
+    {
+        ConPrinter::print(_file, "\"%\"", expr.bindPoint().str);
+    }
 
-    --_currIndent;
-    ConPrinter::print(_file, _newLine);
-    printIndent();
-    ConPrinter::print(_file, '}');
+    printComma(expr.next());
+    visit(expr.next().get());
 }
 
-void PrintShaderBundleVisitor::visit(const sbp::TextureParamsBlockExprAST& expr) noexcept
+void PrintShaderBundleVisitor::visit(const sbp::TextureParamsBlockAST& expr) noexcept
 {
     printIndent();
-    ConPrinter::print(_file, crmTargetName(expr.crmTarget()));
-    ConPrinter::print(_file, ": ");
+    ConPrinter::print(_file, "%: ", crmTargetName(expr.crmTarget()));
     printBrace();
     ++_currIndent;
 
@@ -74,14 +75,11 @@ void PrintShaderBundleVisitor::visit(const sbp::TextureParamsBlockExprAST& expr)
     printIndent();
     ConPrinter::print(_file, '}');
 
-    if(expr.next())
-    {
-        printComma();
-        visit(*expr.next());
-    }
+    printComma(expr.next());
+    visit(expr.next().get());
 }
 
-void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) noexcept
+void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockAST& expr) noexcept
 {
     printIndent();
     switch(expr.stage())
@@ -105,7 +103,18 @@ void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) n
 
     if(expr.uniforms())
     {
+        printIndent();
+        ConPrinter::print(_file, "Uniforms: ");
+        printBrace();
+        ++_currIndent;
+
         visit(*expr.uniforms().get());
+
+        --_currIndent;
+        ConPrinter::print(_file, _newLine);
+        printIndent();
+        ConPrinter::print(_file, '}');
+
         printComma(expr.textures());
     }
 
@@ -130,11 +139,11 @@ void PrintShaderBundleVisitor::visit(const sbp::ShaderStageBlockExprAST& expr) n
     ConPrinter::print(_file, '}');
 }
 
-void PrintShaderBundleVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
+void PrintShaderBundleVisitor::visit(const sbp::APIBlockAST& expr) noexcept
 {
     printIndent();
 
-    const sbp::APIBlockExprAST::APISet& apiSet = expr.apis();
+    const sbp::APIBlockAST::APISet& apiSet = expr.apis();
 
     bool shouldPrintComma = false;
 
@@ -205,22 +214,6 @@ void PrintShaderBundleVisitor::visit(const sbp::APIBlockExprAST& expr) noexcept
         printComma();
         visit(*expr.next().get());
     }
-}
-
-void PrintShaderBundleVisitor::visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept
-{
-    printIndent();
-    ConPrinter::print(_file, "%: %", crmTargetName(expr.crmTarget()), expr.shaderBind());
-    printComma(expr.next());
-    visit(expr.next().get());
-}
-
-void PrintShaderBundleVisitor::visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept
-{
-    printIndent();
-    ConPrinter::print(_file, "%: \"%\"", crmTargetName(expr.crmTarget()), expr.uniformName());
-    printComma(expr.next());
-    visit(expr.next().get());
 }
 
 void PrintShaderBundleVisitor::printIndent() const noexcept

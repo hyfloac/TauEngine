@@ -1,106 +1,102 @@
 #pragma once
 
+#include <String.hpp>
+#include <ArrayList.hpp>
+
 #include "shader/bundle/ShaderBundleVisitor.hpp"
 #include "RenderingMode.hpp"
 #include "shader/EShader.hpp"
 
-#include <String.hpp>
-#include <ArrayList.hpp>
-
 #include "ShaderBundleLexer.hpp"
+#include "ast/AST.hpp"
 
 class ShaderInfoExtractorVisitor;
 
 namespace sbp {
-struct BindPointUnion
+struct UniformBindPoint final
 {
-    DELETE_COPY(BindPointUnion);
+    DEFAULT_DESTRUCT(UniformBindPoint);
+    DEFAULT_CM_PU(UniformBindPoint);
 public:
-    enum Type
-    {
-        Number = 1,
-        Str
-    };
-public:
-    Type type;
     CommonRenderingModelToken crmTarget;
-    union
-    {
-        i32 mapPoint;
-        char* bindName;
-    };
+    BindingUnion binding;
 public:
-    BindPointUnion() noexcept
-        : type(static_cast<Type>(0))
-        , crmTarget(static_cast<CommonRenderingModelToken>(-1))
-        , bindName(null)
+    UniformBindPoint() noexcept
+        : crmTarget(static_cast<CommonRenderingModelToken>(-1))
     { }
 
-    BindPointUnion(const CommonRenderingModelToken _crmTarget, const u32 _mapPoint) noexcept
-        : type(Number)
-        , crmTarget(_crmTarget)
-        , mapPoint(_mapPoint)
+    UniformBindPoint(const CommonRenderingModelToken _crmTarget, const u32 _mapPoint) noexcept
+        : crmTarget(_crmTarget)
+        , binding(_mapPoint)
     { }
 
-    BindPointUnion(const CommonRenderingModelToken _crmTarget, const DynString& _bindName) noexcept
-        : type(Str)
-        , crmTarget(_crmTarget)
-        , bindName(new(::std::nothrow) char[_bindName.length() + 1])
-    { ::std::memcpy(bindName, _bindName.c_str(), _bindName.length() + 1); }
+    UniformBindPoint(const CommonRenderingModelToken _crmTarget, const DynString& _bindName) noexcept
+        : crmTarget(_crmTarget)
+        , binding(_bindName)
+    { }
 
-    ~BindPointUnion() noexcept
-    {
-        if(type == Str)
-        { delete[] bindName; }
-    }
+    UniformBindPoint(const CommonRenderingModelToken _crmTarget, const BindingUnion& _bindingUnion) noexcept
+        : crmTarget(_crmTarget)
+        , binding(_bindingUnion)
+    { }
 
-    BindPointUnion(BindPointUnion&& move) noexcept
-        : type(move.type)
-        , crmTarget(move.crmTarget)
-    {
-        if(type == Str)
-        {
-            bindName = move.bindName;
-            move.bindName = null;
-        }
-        else if(type == Number)
-        { mapPoint = move.mapPoint; }
-    }
+    UniformBindPoint(const CommonRenderingModelToken _crmTarget, BindingUnion&& _bindingUnion) noexcept
+        : crmTarget(_crmTarget)
+        , binding(::std::move(_bindingUnion))
+    { }
+};
 
-    BindPointUnion& operator=(BindPointUnion&& move) noexcept
-    {
-        if(this == &move)
-        { return *this; }
+struct TextureBindPoint final
+{
+    DEFAULT_DESTRUCT(TextureBindPoint);
+    DEFAULT_CM_PU(TextureBindPoint);
+public:
+    CommonRenderingModelToken crmTarget;
+    BindingUnion binding;
+    u32 sampler;
+public:
+    TextureBindPoint() noexcept
+        : crmTarget(static_cast<CommonRenderingModelToken>(-1))
+        , sampler(0)
+    { }
 
-        type = move.type;
-        crmTarget = move.crmTarget;
+    TextureBindPoint(const CommonRenderingModelToken _crmTarget, const u32 _mapPoint, const u32 _sampler) noexcept
+        : crmTarget(_crmTarget)
+        , binding(_mapPoint)
+        , sampler(_sampler)
+    { }
 
-        if(type == Str)
-        {
-            bindName = move.bindName;
-            move.bindName = null;
-        }
-        else if(type == Number)
-        { mapPoint = move.mapPoint; }
+    TextureBindPoint(const CommonRenderingModelToken _crmTarget, const DynString& _bindName, const u32 _sampler) noexcept
+        : crmTarget(_crmTarget)
+        , binding(_bindName)
+        , sampler(_sampler)
+    { }
 
-        return *this;
-    }
+    TextureBindPoint(const CommonRenderingModelToken _crmTarget, const BindingUnion& _bindingUnion, const u32 _sampler) noexcept
+        : crmTarget(_crmTarget)
+        , binding(_bindingUnion)
+        , sampler(_sampler)
+    { }
+
+    TextureBindPoint(const CommonRenderingModelToken _crmTarget, BindingUnion&& _bindingUnion, const u32 _sampler) noexcept
+        : crmTarget(_crmTarget)
+        , binding(::std::move(_bindingUnion))
+        , sampler(_sampler)
+    { }
 };
 
 struct ShaderInfo final
 {
     DynString fileName;
-    ArrayList<BindPointUnion> uniformPoints;
-    ArrayList<BindPointUnion> texturePoints;
+    ArrayList<UniformBindPoint> uniformPoints;
+    ArrayList<TextureBindPoint> texturePoints;
 
-    inline ShaderInfo() noexcept
+    ShaderInfo() noexcept
         : fileName("")
-        , uniformPoints(4)
-        , texturePoints(4)
+        , uniformPoints(256)
+        , texturePoints(256)
     { }
 };
-
-enum class BlockType;
 
 class ShaderInfoIterator final
 {
@@ -111,7 +107,7 @@ private:
     const ShaderInfo* _shaderInfo;
     EShader::Stage _stage;
 public:
-    inline ShaderInfoIterator(const ShaderInfoExtractorVisitor* const visitor, const ShaderInfo* const shaderInfo, const EShader::Stage stage) noexcept
+    ShaderInfoIterator(const ShaderInfoExtractorVisitor* const visitor, const ShaderInfo* const shaderInfo, const EShader::Stage stage) noexcept
         : _visitor(visitor)
         , _shaderInfo(shaderInfo)
         , _stage(stage)
@@ -140,7 +136,6 @@ class TAU_DLL ShaderInfoExtractorVisitor final : public IShaderBundleVisitor
 private:
     RenderingMode::Mode _targetMode;
     EShader::Stage _currentStage;
-    sbp::BlockType _currentBlock;
 
     sbp::ShaderInfo _vertexInfo;
     sbp::ShaderInfo _tessCtrlInfo;
@@ -151,7 +146,6 @@ public:
     inline ShaderInfoExtractorVisitor(const RenderingMode::Mode targetMode) noexcept
         : _targetMode(targetMode)
         , _currentStage(static_cast<EShader::Stage>(0))
-        , _currentBlock(static_cast<sbp::BlockType>(0))
     { }
 
     [[nodiscard]] const sbp::ShaderInfo&   vertexInfo() const noexcept { return _vertexInfo;   }
@@ -164,12 +158,12 @@ public:
     {
         switch(stage)
         {
-            case EShader::Stage::Vertex: return _vertexInfo;
-            case EShader::Stage::TessellationControl: return _tessCtrlInfo;
+            case EShader::Stage::Vertex:                 return _vertexInfo;
+            case EShader::Stage::TessellationControl:    return _tessCtrlInfo;
             case EShader::Stage::TessellationEvaluation: return _tessEvalInfo;
-            case EShader::Stage::Geometry: return _geometryInfo;
-            case EShader::Stage::Pixel: return _pixelInfo;
-            default: return _vertexInfo;
+            case EShader::Stage::Geometry:               return _geometryInfo;
+            case EShader::Stage::Pixel:                  return _pixelInfo;
+            default:                                     return _vertexInfo;
         }
     }
 
@@ -185,21 +179,33 @@ public:
     [[nodiscard]] sbp::ShaderInfoIterator begin() const noexcept { return sbp::ShaderInfoIterator(this, &_vertexInfo, EShader::Stage::Vertex); }
     [[nodiscard]] sbp::ShaderInfoIterator   end() const noexcept { return sbp::ShaderInfoIterator(this, &_pixelInfo, EShader::Stage::Pixel); }
 
-    void visit(const sbp::ExprAST* expr) noexcept override
+    void visit(const sbp::AST* expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }
 
-    void visit(const sbp::ExprAST& expr) noexcept override
+    void visit(const sbp::AST& expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }
 
-    void visit(const sbp::RootExprAST& expr) noexcept override
+    void visit(const sbp::RootAST& expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }
 
-    void visit(const sbp::FileExprAST& expr) noexcept override;
-    void visit(const sbp::BlockExprAST& expr) noexcept override;
-    void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept override;
-    void visit(const sbp::APIBlockExprAST& expr) noexcept override;
-    void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept override;
-    void visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept override;
+    void visit(const sbp::FileAST& expr) noexcept override;
+    void visit(const sbp::UniformBindingAST& expr) noexcept override;
+    void visit(const sbp::TextureParamsBlockAST& expr) noexcept override;
+    void visit(const sbp::ShaderStageBlockAST& expr) noexcept override;
+    void visit(const sbp::APIBlockAST& expr) noexcept override;
+private:
+    [[nodiscard]] sbp::ShaderInfo& get(const EShader::Stage stage) noexcept
+    {
+        switch(stage)
+        {
+            case EShader::Stage::Vertex:                 return _vertexInfo;
+            case EShader::Stage::TessellationControl:    return _tessCtrlInfo;
+            case EShader::Stage::TessellationEvaluation: return _tessEvalInfo;
+            case EShader::Stage::Geometry:               return _geometryInfo;
+            case EShader::Stage::Pixel:                  return _pixelInfo;
+            default:                                     return _vertexInfo;
+        }
+    }
 };
 
 inline sbp::ShaderInfoIterator& sbp::ShaderInfoIterator::operator++() noexcept

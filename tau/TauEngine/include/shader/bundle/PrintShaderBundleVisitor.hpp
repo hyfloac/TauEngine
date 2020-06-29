@@ -6,7 +6,7 @@
 #include "ShaderBundleVisitor.hpp"
 
 namespace sbp {
-    struct BindingUnion;
+struct BindingUnion;
 }
 
 struct PrintSBVArgs final
@@ -79,22 +79,20 @@ private:
 public:
     PrintShaderBundleVisitor(const PrintSBVArgs* args = null) noexcept;
 
-    void visit(const sbp::ExprAST* expr) noexcept override
+    void visit(const sbp::AST* expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }
 
-    void visit(const sbp::ExprAST& expr) noexcept override
+    void visit(const sbp::AST& expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }
 
-    void visit(const sbp::RootExprAST& expr) noexcept override
+    void visit(const sbp::RootAST& expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }
 
-    void visit(const sbp::FileExprAST& expr) noexcept override;
-    void visit(const sbp::UniformBlockExprAST& expr) noexcept override;
-    void visit(const sbp::TextureParamsBlockExprAST& expr) noexcept override;
-    void visit(const sbp::ShaderStageBlockExprAST& expr) noexcept override;
-    void visit(const sbp::APIBlockExprAST& expr) noexcept override;
-    void visit(const sbp::ShaderIOMapPointExprAST& expr) noexcept override;
-    void visit(const sbp::ShaderIOBindPointExprAST& expr) noexcept override;
+    void visit(const sbp::FileAST& expr) noexcept override;
+    void visit(const sbp::UniformBindingAST& expr) noexcept override;
+    void visit(const sbp::TextureParamsBlockAST& expr) noexcept override;
+    void visit(const sbp::ShaderStageBlockAST& expr) noexcept override;
+    void visit(const sbp::APIBlockAST& expr) noexcept override;
 private:
     void printIndent() const noexcept;
 

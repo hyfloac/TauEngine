@@ -277,11 +277,10 @@
     <ClInclude Include="include\renderer\Renderer.hpp" />
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\ResourceLoader.hpp" />
-    <ClInclude Include="include\shader\bundle\ast\BlockExprAST.hpp" />
-    <ClInclude Include="include\shader\bundle\ast\ExprAST.hpp" />
-    <ClInclude Include="include\shader\bundle\ast\FileExprAST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\BlockAST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\AST.hpp" />
+    <ClInclude Include="include\shader\bundle\ast\FileAST.hpp" />
     <ClInclude Include="include\shader\bundle\ast\RootExprAST.hpp" />
-    <ClInclude Include="include\shader\bundle\ast\ShaderIOBindingExprAST.hpp" />
     <ClInclude Include="include\shader\bundle\PrintShaderBundleVisitor.hpp" />
     <ClInclude Include="include\shader\bundle\ShaderBundleLexer.hpp" />
     <ClInclude Include="include\shader\bundle\ShaderBundleVisitor.hpp" />

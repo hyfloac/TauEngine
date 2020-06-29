@@ -1,17 +1,15 @@
 #pragma once
 
 #include "ShaderBundleLexer.hpp"
-#include "ast/ExprAST.hpp"
+#include "ast/AST.hpp"
 
 namespace sbp {
-class ExprAST;
+class AST;
+class FileAST;
 class UniformBlockExprAST;
-class TextureParamsBlockExprAST;
-class FileExprAST;
-class ShaderIOPointExprAST;
-class ShaderStageBlockExprAST;
-class OuterShaderStageBlockExprAST;
-class APIBlockExprAST;
+class TextureParamsBlockAST;
+class ShaderStageBlockAST;
+class APIBlockAST;
 };
 
 class TAU_DLL ShaderBundleParser
@@ -33,7 +31,7 @@ public:
     };
 private:
     ShaderBundleLexer _lexer;
-    NullableStrongRef<sbp::ExprAST> _ast;
+    NullableStrongRef<sbp::AST> _ast;
 
     Error _error;
     const char* _errorMsg;
@@ -53,9 +51,9 @@ public:
         , _codeLine(0)
     { }
 
-    NullableStrongRef<sbp::ExprAST> parse([[tau::out]] Error* error = null) noexcept;
+    NullableStrongRef<sbp::AST> parse([[tau::out]] Error* error = null) noexcept;
 
-    [[nodiscard]] const NullableStrongRef<sbp::ExprAST>& ast() const noexcept { return _ast; }
+    [[nodiscard]] const NullableStrongRef<sbp::AST>& ast() const noexcept { return _ast; }
 
     [[nodiscard]] Error error() const noexcept { return _error; }
     [[nodiscard]] const char* errorMsg() const noexcept { return _errorMsg; }
@@ -64,20 +62,17 @@ public:
     [[nodiscard]] uSys errorLineIndex() const noexcept { return _errorLineIndex; }
     [[nodiscard]] uSys codeLine() const noexcept { return _codeLine; }
 private:
-    NullableStrongRef<sbp::APIBlockExprAST> parseAPIBlock() noexcept;
-    void parseAPIBlockContents(NullableStrongRef<sbp::APIBlockExprAST> block) noexcept;
+    NullableStrongRef<sbp::APIBlockAST> parseAPIBlock() noexcept;
+    void parseAPIBlockContents(NullableStrongRef<sbp::APIBlockAST> block) noexcept;
 
-    NullableStrongRef<sbp::ShaderStageBlockExprAST> parseShaderBlock() noexcept;
-    void parseShaderContents(NullableStrongRef<sbp::ShaderStageBlockExprAST> block) noexcept;
+    NullableStrongRef<sbp::ShaderStageBlockAST> parseShaderBlock() noexcept;
+    void parseShaderContents(NullableStrongRef<sbp::ShaderStageBlockAST> block) noexcept;
 
-    NullableStrongRef<sbp::UniformBlockExprAST> parseUniformBlock() noexcept;
-    void parseUniformBlockContents(NullableStrongRef<sbp::UniformBlockExprAST> block) noexcept;
+    NullableStrongRef<sbp::UniformBlockExprAST> parseUniformsBlock() noexcept;
 
-    NullableStrongRef<sbp::TextureParamsBlockExprAST> parseTexturesBlock() noexcept;
+    NullableStrongRef<sbp::TextureParamsBlockAST> parseTexturesBlock() noexcept;
 
-    NullableStrongRef<sbp::FileExprAST> parseFile() noexcept;
-
-    NullableStrongRef<sbp::ShaderIOPointExprAST> parseIOPoint() noexcept;
+    NullableStrongRef<sbp::FileAST> parseFile() noexcept;
 
     [[nodiscard]] static bool isTextureCRM(CommonRenderingModelToken token) noexcept;
     [[nodiscard]] static bool isUniformCRM(CommonRenderingModelToken token) noexcept;

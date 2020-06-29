@@ -9,11 +9,11 @@
 class IShaderBundleVisitor;
 
 namespace sbp {
-class TAU_DLL TAU_NOVTABLE ExprAST
+class TAU_DLL TAU_NOVTABLE AST
 {
-    DEFAULT_CONSTRUCT_PU(ExprAST);
-    DEFAULT_DESTRUCT_VI(ExprAST);
-    DEFAULT_CM_PO(ExprAST);
+    DEFAULT_CONSTRUCT_PU(AST);
+    DEFAULT_DESTRUCT_VI(AST);
+    DEFAULT_CM_PO(AST);
 public:
     virtual void visit(IShaderBundleVisitor& visitor) const noexcept = 0;
 };

@@ -2,18 +2,18 @@
 
 #include <String.hpp>
 
-#include "ExprAST.hpp"
+#include "AST.hpp"
 #include "shader/bundle/ShaderBundleVisitor.hpp"
 
 namespace sbp {
-class TAU_DLL FileExprAST final : public ExprAST
+class TAU_DLL FileAST final : public AST
 {
-    DEFAULT_DESTRUCT(FileExprAST);
-    DEFAULT_CM_PU(FileExprAST);
+    DEFAULT_DESTRUCT(FileAST);
+    DEFAULT_CM_PU(FileAST);
 private:
     DynString _filePath;
 public:
-    FileExprAST(const DynString& filePath) noexcept
+    FileAST(const DynString& filePath) noexcept
         : _filePath(filePath)
     { }
 

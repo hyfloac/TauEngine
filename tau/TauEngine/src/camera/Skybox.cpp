@@ -1,8 +1,8 @@
 #include "camera/Skybox.hpp"
 #include "camera/Camera3D.hpp"
 #include "system/RenderingContext.hpp"
-#include "model/VertexArray.hpp"
-#include "shader/IShader.hpp"
+#include "graphics/VertexArray.hpp"
+#include "shader/Shader.hpp"
 #include "texture/FITextureLoader.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
