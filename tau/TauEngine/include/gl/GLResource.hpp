@@ -15,7 +15,5 @@ protected:
 
 class GLResourceBuffer;
 class GLResourceTexture1D;
-class GLResourceTexture1DArray;
 class GLResourceTexture2D;
-class GLResourceTexture2DArray;
 class GLResourceTexture3D;

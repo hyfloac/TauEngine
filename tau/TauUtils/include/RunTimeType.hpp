@@ -125,7 +125,7 @@ template<typename _T>
         { return obj._castRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static const _T* _castRTType_##_TYPE(const _TYPE& obj) noexcept \
-        { return obj-._castRTType_##_TYPE<_T>(); } \
+        { return obj._castRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static _T* _castRTType_##_TYPE(_TYPE* const obj) noexcept \
         { return obj->_castRTType_##_TYPE<_T>(); } \

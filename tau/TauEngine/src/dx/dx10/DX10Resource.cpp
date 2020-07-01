@@ -462,6 +462,26 @@ bool DX10ResourceBuilder::processArgs(const ResourceTexture3DArgs& args, DXResou
     return true;
 }
 
+uSys DX10ResourceBuilder::_allocSize(const uSys type) const noexcept
+{
+    switch(type)
+    {
+        case  1: return sizeof(DX10ResourceBuffer);
+        case  2: return NullableRef<DX10ResourceBuffer>::allocSize();
+        case  3: return NullableStrongRef<DX10ResourceBuffer>::allocSize();
+        case  4: return sizeof(DX10ResourceTexture1D);
+        case  5: return NullableRef<DX10ResourceTexture1D>::allocSize();
+        case  6: return NullableStrongRef<DX10ResourceTexture1D>::allocSize();
+        case  7: return sizeof(DX10ResourceTexture2D);
+        case  8: return NullableRef<DX10ResourceTexture2D>::allocSize();
+        case  9: return NullableStrongRef<DX10ResourceTexture2D>::allocSize();
+        case 10: return sizeof(DX10ResourceTexture3D);
+        case 11: return NullableRef<DX10ResourceTexture3D>::allocSize();
+        case 12: return NullableStrongRef<DX10ResourceTexture3D>::allocSize();
+        default: return 0;
+    }
+}
+
 D3D10_USAGE DX10ResourceBuilder::dxUsage(const EResource::UsageType usage) noexcept
 {
     switch(usage)

@@ -1,34 +1,18 @@
 #pragma once
 
 #include <Objects.hpp>
-#include <RunTimeType.hpp>
-#include <ReferenceCountingPointer.hpp>
-#include <Safeties.hpp>
 
 #include "DLL.hpp"
 #include "TextureEnums.hpp"
 #include "Color.hpp"
+#include "graphics/DescriptorHeap.hpp"
 
-#define TEXTURE_SAMPLER_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                                         RTT_IMPL(_TYPE, ITextureSampler)
-
-#define TEXTURE_SAMPLER_IMPL(_TYPE) TEXTURE_SAMPLER_IMPL_BASE(_TYPE)
-
-class TAU_DLL TAU_NOVTABLE ITextureSampler
-{
-    DEFAULT_CONSTRUCT_PO(ITextureSampler);
-    DEFAULT_DESTRUCT_VI(ITextureSampler);
-    DELETE_COPY(ITextureSampler);
-public:
-    RTT_BASE_IMPL(ITextureSampler);
-    RTT_BASE_CHECK(ITextureSampler);
-    RTT_BASE_CAST(ITextureSampler);
-};
+DECL_OPAQUE_TYPE(TextureSampler);
 
 struct TextureSamplerArgs final
 {
     DEFAULT_DESTRUCT(TextureSamplerArgs);
-    DEFAULT_COPY(TextureSamplerArgs);
+    DEFAULT_CM_PU(TextureSamplerArgs);
 public:
     ETexture::Filter magnificationFilter;
     ETexture::Filter minificationFilter;
@@ -40,14 +24,14 @@ public:
     RGBAColor borderColor;
 public:
     TextureSamplerArgs() noexcept
-        : magnificationFilter(static_cast<ETexture::Filter>(0)),
-          minificationFilter(static_cast<ETexture::Filter>(0)),
-          mipmapMinificationFilter(static_cast<ETexture::Filter>(0)),
-          wrapU(static_cast<ETexture::WrapMode>(0)),
-          wrapV(static_cast<ETexture::WrapMode>(0)),
-          wrapW(static_cast<ETexture::WrapMode>(0)),
-          depthCompareFunc(static_cast<ETexture::CompareFunc>(0)),
-          borderColor{ 0, 0, 0, 0 }
+        : magnificationFilter(static_cast<ETexture::Filter>(0))
+        , minificationFilter(static_cast<ETexture::Filter>(0))
+        , mipmapMinificationFilter(static_cast<ETexture::Filter>(0))
+        , wrapU(static_cast<ETexture::WrapMode>(0))
+        , wrapV(static_cast<ETexture::WrapMode>(0))
+        , wrapW(static_cast<ETexture::WrapMode>(0))
+        , depthCompareFunc(static_cast<ETexture::CompareFunc>(0))
+        , borderColor { 0, 0, 0, 0 }
     { }
 
     [[nodiscard]] const ETexture::Filter&    magFilter() const noexcept { return magnificationFilter;      }
@@ -65,7 +49,7 @@ class TAU_DLL TAU_NOVTABLE ITextureSamplerBuilder
 {
     DEFAULT_CONSTRUCT_PO(ITextureSamplerBuilder);
     DEFAULT_DESTRUCT_VI(ITextureSamplerBuilder);
-    DELETE_COPY(ITextureSamplerBuilder);
+    DEFAULT_CM_PO(ITextureSamplerBuilder);
 public:
     enum class Error
     {
@@ -98,12 +82,9 @@ public:
         DriverMemoryAllocationFailure,
         FilterIsUnset,
         WrapModeIsUnset,
-        DepthComparisonIsUnset
+        DepthComparisonIsUnset,
+        DescriptorTableIsNull
     };
 public:
-    [[nodiscard]] virtual ITextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error = null) const noexcept = 0;
-    [[nodiscard]] virtual ITextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, [[tau::out]] Error* error = null) const noexcept = 0;
 };

@@ -76,5 +76,5 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual TextureView build(const TextureViewArgs& args, [[tau::out]] Error* error, DescriptorTable table, uSys tableIndex) const noexcept = 0;
+    [[nodiscard]] virtual TextureView build(const TextureViewArgs& args, DescriptorTable table, uSys tableIndex, [[tau::out]] Error* error) const noexcept = 0;
 };

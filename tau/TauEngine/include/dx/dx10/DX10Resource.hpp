@@ -81,6 +81,8 @@ public:
     [[nodiscard]] CPPRef<IResource> buildCPPRef(const ResourceTexture3DArgs& args, Error* error) const noexcept override;
     [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] NullableStrongRef<IResource> buildTauSRef(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+protected:
+    [[nodiscard]] uSys _allocSize(uSys type) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const ResourceBufferArgs& args, [[tau::out]] DXResourceBufferArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs(const ResourceTexture1DArgs& args, [[tau::out]] DXResourceTexture1DArgs* dxArgs, [[tau::out]] Error* error) const noexcept;

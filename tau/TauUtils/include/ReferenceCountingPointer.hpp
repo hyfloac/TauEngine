@@ -18,7 +18,7 @@ namespace _ReferenceCountingPointerUtils {
 template<typename _T>
 struct _ReferenceCountDataObject final
 {
-    DELETE_COPY(_ReferenceCountDataObject);
+    DELETE_CM(_ReferenceCountDataObject);
 public:
     uSys _refCount;
     TauAllocator& _allocator;
@@ -47,7 +47,7 @@ template<typename _T>
 struct _SWReferenceCount final
 {
     DEFAULT_DESTRUCT(_SWReferenceCount);
-    DELETE_COPY(_SWReferenceCount);
+    DELETE_CM(_SWReferenceCount);
 public:
     uSys _strongRefCount;
     uSys _weakRefCount;
@@ -103,6 +103,9 @@ class ReferenceCountingPointer final
 public:
     template<typename _TT>
     using RCDO = _ReferenceCountingPointerUtils::_ReferenceCountDataObject<_TT>;
+
+    [[nodiscard]] static uSys allocSize() noexcept
+    { return sizeof(RCDO<_T>); }
 private:
     RCDO<_T>* _ptr;
 public:
@@ -237,6 +240,9 @@ class NullableReferenceCountingPointer final
 public:
     template<typename _TT>
     using RCDO = _ReferenceCountingPointerUtils::_ReferenceCountDataObject<_TT>;
+
+    [[nodiscard]] static uSys allocSize() noexcept
+    { return sizeof(RCDO<_T>); }
 private:
     RCDO<_T>* _ptr;
 public:
@@ -493,6 +499,9 @@ class StrongReferenceCountingPointer final
 public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
+
+    [[nodiscard]] static uSys allocSize() noexcept
+    { return sizeof(SWRC<_T>); }
 private:
     SWRC<_T>* _ptr;
 public:
@@ -670,6 +679,9 @@ class WeakReferenceCountingPointer final
 public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
+
+    [[nodiscard]] static uSys allocSize() noexcept
+    { return sizeof(SWRC<_T>); }
 private:
     SWRC<_T>* _ptr;
 public:
@@ -827,6 +839,9 @@ class NullableStrongReferenceCountingPointer final
 public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
+
+    [[nodiscard]] static uSys allocSize() noexcept
+    { return sizeof(SWRC<_T>); }
 private:
     SWRC<_T>* _ptr;
 public:
@@ -1136,6 +1151,9 @@ class NullableWeakReferenceCountingPointer final
 public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
+
+    [[nodiscard]] static uSys allocSize() noexcept
+    { return sizeof(SWRC<_T>); }
 private:
     SWRC<_T>* _ptr;
 public:

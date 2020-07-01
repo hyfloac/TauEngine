@@ -16,7 +16,7 @@ public:
         GLResourceTexture* texture;
     };
 public:
-    [[nodiscard]] TextureView build(const TextureViewArgs& args, Error* error, DescriptorTable table, uSys tableIndex) const noexcept override;
+    [[nodiscard]] TextureView build(const TextureViewArgs& args, DescriptorTable table, uSys tableIndex, Error* error = null) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const TextureViewArgs& args, [[tau::out]] GLTextureViewArgs* glArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs1D(const TextureViewArgs& args, [[tau::out]] GLTextureViewArgs* glArgs, [[tau::out]] Error* error) const noexcept;
