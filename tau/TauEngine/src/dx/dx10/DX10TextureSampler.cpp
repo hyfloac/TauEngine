@@ -1,104 +1,20 @@
 #include "dx/dx10/DX10TextureSampler.hpp"
 
 #ifdef _WIN32
-#include <cfloat>
-#include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
+#include "dx/dx10/DX10DescriptorHeap.hpp"
 
-void DX10TextureSampler::bind(DX10RenderingContext& context, const UINT slot) const noexcept
+TextureSampler DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, Error* error) const noexcept
 {
-    context.d3dDevice()->PSSetSamplers(slot, 1, &_samplerState);
-}
+    ERROR_CODE_COND_N(!table.raw, Error::DescriptorTableIsNull);
+    DX10DescriptorSamplerTable* const dxTable = table.get<DX10DescriptorSamplerTable>();
 
-void DX10TextureSampler::unbind(DX10RenderingContext& context, const UINT slot) const noexcept
-{
-    ID3D10SamplerState* nullSS = null;
-    context.d3dDevice()->PSSetSamplers(slot, 1, &nullSS);
-}
-
-DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error) const noexcept
-{
     ID3D10SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
     { return null; }
 
-    DX10TextureSampler* const sampler = new(::std::nothrow) DX10TextureSampler(d3dSampler);
-
-    if(!sampler)
-    {
-        d3dSampler->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, sampler);
-}
-
-DX10TextureSampler* DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    ID3D10SamplerState* d3dSampler;
-    if(!processArgs(args, &d3dSampler, error))
-    { return null; }
-
-    DX10TextureSampler* const sampler = allocator.allocateT<DX10TextureSampler>(d3dSampler);
-
-    if(!sampler)
-    {
-        d3dSampler->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, sampler);
-}
-
-CPPRef<ITextureSampler> DX10TextureSamplerBuilder::buildCPPRef(const TextureSamplerArgs& args, Error* const error) const noexcept
-{
-    ID3D10SamplerState* d3dSampler;
-    if(!processArgs(args, &d3dSampler, error))
-    { return null; }
-
-    const CPPRef<DX10TextureSampler> sampler = CPPRef<DX10TextureSampler>(new(::std::nothrow) DX10TextureSampler(d3dSampler));
-
-    if(!sampler)
-    {
-        d3dSampler->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, sampler);
-}
-
-NullableRef<ITextureSampler> DX10TextureSamplerBuilder::buildTauRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    ID3D10SamplerState* d3dSampler;
-    if(!processArgs(args, &d3dSampler, error))
-    { return null; }
-
-    const NullableRef<DX10TextureSampler> sampler(allocator, d3dSampler);
-
-    if(!sampler)
-    {
-        d3dSampler->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, sampler);
-}
-
-NullableStrongRef<ITextureSampler> DX10TextureSamplerBuilder::buildTauSRef(const TextureSamplerArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    ID3D10SamplerState* d3dSampler;
-    if(!processArgs(args, &d3dSampler, error))
-    { return null; }
-
-    const NullableStrongRef<DX10TextureSampler> sampler(allocator, d3dSampler);
-
-    if(!sampler)
-    {
-        d3dSampler->Release();
-        ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
-    }
-
-    ERROR_CODE_V(Error::NoError, sampler);
+    dxTable->samplers()[tableIndex] = d3dSampler;
+    ERROR_CODE_V(Error::NoError, &dxTable->samplers()[tableIndex]);
 }
 
 bool DX10TextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, ID3D10SamplerState** dxArgs, Error* const error) const noexcept

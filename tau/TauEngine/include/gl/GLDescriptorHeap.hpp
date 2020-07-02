@@ -58,7 +58,7 @@ private:
     union
     {
         u8* _placement;
-        GLTextureSampler* _samplers;
+        GLuint* _samplers;
     };
 public:
     GLDescriptorSamplerTable(TauAllocator* const allocator, const uSys count, u8* const placement) noexcept
@@ -73,8 +73,8 @@ public:
 
     [[nodiscard]] u8* placement() noexcept { return _placement; }
 
-    [[nodiscard]]       GLTextureSampler* samplers()       noexcept { return _samplers; }
-    [[nodiscard]] const GLTextureSampler* samplers() const noexcept { return _samplers; }
+    [[nodiscard]]       GLuint* samplers()       noexcept { return _samplers; }
+    [[nodiscard]] const GLuint* samplers() const noexcept { return _samplers; }
 };
 
 class TAU_DLL GLDescriptorHeap final : public IDescriptorHeap

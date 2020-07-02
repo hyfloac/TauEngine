@@ -16,10 +16,7 @@ GLDescriptorTable::~GLDescriptorTable() noexcept
 
 GLDescriptorSamplerTable::~GLDescriptorSamplerTable() noexcept
 {
-    for(uSys i = 0; i < _count; ++i)
-    {
-        _samplers[i].~GLTextureSampler();
-    }
+    glDeleteSamplers(_count, _samplers);
 
     if(_allocator)
     {
@@ -89,11 +86,11 @@ DescriptorSamplerTable GLDescriptorSamplerHeap::allocateTable(const uSys descrip
 
     if(allocator)
     {
-        placement = allocator->allocate(sizeof(GLTextureSampler) * descriptors);
+        placement = allocator->allocate(sizeof(GLuint) * descriptors);
     }
     else
     {
-        placement = new(::std::nothrow) u8*[sizeof(GLTextureSampler) * descriptors];
+        placement = new(::std::nothrow) u8*[sizeof(GLuint) * descriptors];
     }
 
     if(!placement)

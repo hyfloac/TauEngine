@@ -5,31 +5,12 @@
 #ifdef _WIN32
 #include <d3d10.h>
 
-class DX10RenderingContext;
 class DX10GraphicsInterface;
-
-class TAU_DLL DX10TextureSampler final : public ITextureSampler
-{
-    DEFAULT_DESTRUCT(DX10TextureSampler);
-    TEXTURE_SAMPLER_IMPL(DX10TextureSampler);
-private:
-    ID3D10SamplerState* _samplerState;
-public:
-    inline DX10TextureSampler(ID3D10SamplerState* const samplerState) noexcept
-        : _samplerState(samplerState)
-    { }
-
-    [[nodiscard]] const ID3D10SamplerState* d3dSampler() const noexcept { return _samplerState; }
-    [[nodiscard]] ID3D10SamplerState* d3dSampler() noexcept { return _samplerState; }
-
-    void bind(DX10RenderingContext& context, UINT slot) const noexcept;
-    void unbind(DX10RenderingContext& context, UINT slot) const noexcept;
-};
 
 class TAU_DLL DX10TextureSamplerBuilder final : public ITextureSamplerBuilder
 {
     DEFAULT_DESTRUCT(DX10TextureSamplerBuilder);
-    DELETE_COPY(DX10TextureSamplerBuilder);
+    DEFAULT_CM_PU(DX10TextureSamplerBuilder);
 public:
     [[nodiscard]] static D3D10_FILTER dxFilter(ETexture::Filter magnificationFilter, ETexture::Filter minificationFilter, ETexture::Filter mipmapMinificationFilter) noexcept;
     [[nodiscard]] static D3D10_TEXTURE_ADDRESS_MODE  dxWrapMode(ETexture::WrapMode wrapMode) noexcept;
@@ -41,11 +22,7 @@ public:
         : _gi(gi)
     { }
 
-    [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] DX10TextureSampler* build(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<ITextureSampler> buildCPPRef(const TextureSamplerArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<ITextureSampler> buildTauRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<ITextureSampler> buildTauSRef(const TextureSamplerArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, Error* error = null) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const TextureSamplerArgs& args, [[tau::out]] ID3D10SamplerState** dxArgs, [[tau::out]] Error* error) const noexcept;
 };

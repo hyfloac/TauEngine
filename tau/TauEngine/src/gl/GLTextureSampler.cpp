@@ -10,9 +10,8 @@ TextureSampler GLTextureSamplerBuilder::build(const TextureSamplerArgs& args, De
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    GLTextureSampler* sampler = new(glTable->placement() + tableIndex * sizeof(GLTextureSampler)) GLTextureSampler(glArgs.sampler);
-
-    ERROR_CODE_V(Error::NoError, sampler);
+    glTable->samplers()[tableIndex] = glArgs.sampler;
+    ERROR_CODE_V(Error::NoError, &glTable->samplers()[tableIndex]);
 }
 
 bool GLTextureSamplerBuilder::processArgs(const TextureSamplerArgs& args, GLTextureSamplerArgs* const glArgs, Error* const error) noexcept

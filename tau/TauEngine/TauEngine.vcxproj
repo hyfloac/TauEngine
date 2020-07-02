@@ -231,6 +231,7 @@
     <ClInclude Include="include\graphics\BufferView.hpp" />
     <ClInclude Include="include\graphics\DepthStencilState.hpp" />
     <ClInclude Include="include\graphics\DescriptorHeap.hpp" />
+    <ClInclude Include="include\graphics\DescriptorLayout.hpp" />
     <ClInclude Include="include\graphics\RasterizerState.hpp" />
     <ClInclude Include="include\graphics\Resource.hpp" />
     <ClInclude Include="include\graphics\ResourceEnums.hpp" />
