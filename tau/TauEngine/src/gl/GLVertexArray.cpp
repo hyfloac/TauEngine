@@ -9,7 +9,7 @@ void GLVertexArray::bind(IRenderingContext& context) noexcept
     glBindVertexArray(_vao);
     if(_indexBuffer)
     {
-        _indexBuffer->bind(context);
+        _indexBuffer->bind();
     }
 }
 
@@ -17,7 +17,7 @@ void GLVertexArray::unbind(IRenderingContext& context) noexcept
 {
     if(_indexBuffer)
     {
-        _indexBuffer->unbind(context);
+        _indexBuffer->unbind();
     }
     glBindVertexArray(0);
 }

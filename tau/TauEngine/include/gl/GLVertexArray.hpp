@@ -4,8 +4,8 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include "model/VertexArray.hpp"
-#include "model/BufferDescriptor.hpp"
+#include "graphics/VertexArray.hpp"
+#include "graphics/BufferDescriptor.hpp"
 
 class GLIndexBuffer;
 
@@ -28,6 +28,10 @@ public:
 
     ~GLVertexArray() noexcept override
     { glDeleteVertexArrays(1, &_vao); }
+
+    [[nodiscard]] GLuint vao() const noexcept { return _vao; }
+    [[nodiscard]] GLenum glDrawType() const noexcept { return _glDrawType; }
+    [[nodiscard]] const NullableRef<GLIndexBuffer>& indexBuffer() const noexcept { return _indexBuffer; }
 
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
