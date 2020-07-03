@@ -73,6 +73,7 @@
     <ClCompile Include="src\gl\GLBlendingState.cpp" />
     <ClCompile Include="src\gl\GLBufferView.cpp" />
     <ClCompile Include="src\gl\GLCommandList.cpp" />
+    <ClCompile Include="src\gl\GLCommandQueue.cpp" />
     <ClCompile Include="src\gl\GLDepthStencilState.cpp" />
     <ClCompile Include="src\gl\GLDescriptorHeap.cpp" />
     <ClCompile Include="src\gl\GLGraphicsAccelerator.cpp" />
@@ -83,6 +84,7 @@
     <ClCompile Include="src\gl\GLResourceBuffer.cpp" />
     <ClCompile Include="src\gl\GLResourceTexture.cpp" />
     <ClCompile Include="src\gl\GLShaderBundleVisitor.cpp" />
+    <ClCompile Include="src\gl\GLStateHelper.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
     <ClCompile Include="src\gl\GLTextureView.cpp" />
@@ -208,8 +210,10 @@
     <ClInclude Include="include\gl\GLBufferDescriptor.hpp" />
     <ClInclude Include="include\gl\GLBufferView.hpp" />
     <ClInclude Include="include\gl\GLCommandList.hpp" />
+    <ClInclude Include="include\gl\GLCommandQueue.hpp" />
     <ClInclude Include="include\gl\GLDepthStencilState.hpp" />
     <ClInclude Include="include\gl\GLDescriptorHeap.hpp" />
+    <ClInclude Include="include\gl\GLDescriptorLayout.hpp" />
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLGraphicsAccelerator.hpp" />
     <ClInclude Include="include\gl\GLGraphicsInterface.hpp" />
@@ -222,6 +226,7 @@
     <ClInclude Include="include\gl\GLResourceTexture.hpp" />
     <ClInclude Include="include\gl\GLShaderBundleVisitor.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
+    <ClInclude Include="include\gl\GLStateHelper.hpp" />
     <ClInclude Include="include\gl\GLTextureRawInterface.hpp" />
     <ClInclude Include="include\gl\GLTextureSampler.hpp" />
     <ClInclude Include="include\gl\GLTextureUploader.hpp" />

@@ -2,7 +2,6 @@
 
 #include <Objects.hpp>
 #include <NumTypes.hpp>
-#include <allocator/TauAllocator.hpp>
 
 #include "DLL.hpp"
 #include "DescriptorHeap.hpp"
@@ -20,12 +19,10 @@ struct DescriptorLayoutEntry final
 public:
     enum class Type
     {
-        Constant = 1,
-        DescriptorTable,
-        DescriptorSamplerTable,
-        UniformBufferView,
+        UniformBufferView = 1,
         UnorderedAccessView,
-        TextureView
+        TextureView,
+        TextureSampler
     };
 public:
     Type type;
@@ -59,4 +56,5 @@ public:
     };
 public:
     [[nodiscard]] virtual DescriptorLayout build(uSys entryCount, DescriptorLayoutEntry* entries, Error* error = null) const noexcept = 0;
+    virtual void destroyLayout(DescriptorLayout layout) const noexcept = 0;
 };

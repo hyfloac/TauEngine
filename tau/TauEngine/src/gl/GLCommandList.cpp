@@ -54,14 +54,6 @@ void GLCommandList::setGraphicsDescriptorLayout(const DescriptorLayout& layout) 
 {
 }
 
-void GLCommandList::setGraphicsConstant(const uSys index, const uSys offset, const u32 value) noexcept
-{
-}
-
-void GLCommandList::setGraphicsConstants(const uSys index, const uSys offset, const uSys count, const u32* const values) noexcept
-{
-}
-
 void GLCommandList::setGraphicsDescriptorTable(const uSys index, const DescriptorTable& table) noexcept
 {
 }

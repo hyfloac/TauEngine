@@ -13,9 +13,9 @@ TextureView GLTextureViewBuilder::build(const TextureViewArgs& args, DescriptorT
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    glTable->texViews()[tableIndex] = glArgs.texture;
+    GLTextureView* view = new(glTable->texViews() + tableIndex) GLTextureView(glArgs.target, glArgs.texture);
 
-    ERROR_CODE_V(Error::NoError, glArgs.texture);
+    ERROR_CODE_V(Error::NoError, view);
 }
 
 bool GLTextureViewBuilder::processArgs(const TextureViewArgs& args, GLTextureViewArgs* glArgs, Error* error) const noexcept
@@ -50,6 +50,8 @@ bool GLTextureViewBuilder::processArgs1D(const TextureViewArgs& args, GLTextureV
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
+    glArgs->target = GL_TEXTURE_1D;
+
     return true;
 }
 
@@ -61,6 +63,8 @@ bool GLTextureViewBuilder::processArgs1DArray(const TextureViewArgs& args, GLTex
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
+
+    glArgs->target = GL_TEXTURE_1D_ARRAY;
 
     return true;
 }
@@ -74,6 +78,8 @@ bool GLTextureViewBuilder::processArgs2D(const TextureViewArgs& args, GLTextureV
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
+    glArgs->target = GL_TEXTURE_2D;
+
     return true;
 }
 
@@ -86,6 +92,8 @@ bool GLTextureViewBuilder::processArgs2DArray(const TextureViewArgs& args, GLTex
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
+    glArgs->target = GL_TEXTURE_2D_ARRAY;
+
     return true;
 }
 
@@ -97,6 +105,8 @@ bool GLTextureViewBuilder::processArgs3D(const TextureViewArgs& args, GLTextureV
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
+
+    glArgs->target = GL_TEXTURE_3D;
 
     return true;
 }
@@ -111,6 +121,8 @@ bool GLTextureViewBuilder::processArgsCube(const TextureViewArgs& args, GLTextur
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount != 6, Error::TextureIsNotArray);
 
+    glArgs->target = GL_TEXTURE_CUBE_MAP;
+
     return true;
 }
 
@@ -123,6 +135,8 @@ bool GLTextureViewBuilder::processArgsCubeArray(const TextureViewArgs& args, GLT
     ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount % 6 != 0, Error::TextureIsNotArray);
+
+    glArgs->target = GL_TEXTURE_CUBE_MAP_ARRAY;
 
     return true;
 }

@@ -41,7 +41,7 @@ DescriptorTable GLDescriptorHeap::allocateTable(const uSys descriptors, const De
         switch(type)
         {
             case DescriptorType::TextureView:
-                placement = allocator->allocate(sizeof(GLResourceTexture*) * descriptors);
+                placement = allocator->allocate(sizeof(GLTextureView*) * descriptors);
                 break;
             case DescriptorType::UniformBufferView:
                 placement = allocator->allocate(sizeof(GLuint) * descriptors);
@@ -54,7 +54,7 @@ DescriptorTable GLDescriptorHeap::allocateTable(const uSys descriptors, const De
         switch(type)
         {
             case DescriptorType::TextureView:
-                placement = new(::std::nothrow) GLResourceTexture* [descriptors];
+                placement = new(::std::nothrow) GLTextureView* [descriptors];
                 break;
             case DescriptorType::UniformBufferView:
                 placement = new(::std::nothrow) GLuint[descriptors];

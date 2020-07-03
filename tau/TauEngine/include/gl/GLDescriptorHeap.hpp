@@ -10,7 +10,7 @@
 #include "graphics/DescriptorHeap.hpp"
 #include "allocator/FixedBlockAllocator.hpp"
 
-class GLResourceTexture;
+class GLTextureView;
 class GLUniformBufferView;
 class GLTextureSampler;
 
@@ -24,7 +24,7 @@ private:
     union
     {
         u8* _placement;
-        GLResourceTexture** _texViews;
+        GLTextureView** _texViews;
         GLuint* _uniViews;
     };
 public:
@@ -42,8 +42,8 @@ public:
 
     [[nodiscard]] u8* placement() noexcept { return _placement; }
 
-    [[nodiscard]] GLResourceTexture*       * texViews()       noexcept { return _texViews; }
-    [[nodiscard]] GLResourceTexture* const * texViews() const noexcept { return _texViews; }
+    [[nodiscard]] GLTextureView*       * texViews()       noexcept { return _texViews; }
+    [[nodiscard]] GLTextureView* const * texViews() const noexcept { return _texViews; }
 
     [[nodiscard]]       GLuint* uniViews()       noexcept { return _uniViews; }
     [[nodiscard]] const GLuint* uniViews() const noexcept { return _uniViews; }

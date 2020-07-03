@@ -3,6 +3,7 @@
 #include <Objects.hpp>
 #include <NumTypes.hpp>
 #include <Safeties.hpp>
+#include <RunTimeType.hpp>
 
 #include "DLL.hpp"
 
@@ -11,6 +12,11 @@ class IVertexArray;
 struct DescriptorLayout;
 struct DescriptorTable;
 struct DescriptorSamplerTable;
+
+#define COMMAND_LIST_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, ICommandList)
+
+#define COMMAND_LIST_IMPL(_TYPE) COMMAND_LIST_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE ICommandList
 {
@@ -97,32 +103,6 @@ public:
     virtual void setGraphicsDescriptorLayout(const DescriptorLayout& layout) noexcept = 0;
 
     /**
-     * Sets a constant to use within the shader pipeline.
-     *
-     * @param[in] index
-     *      The descriptor layout index.
-     * @param[in] offset
-     *      The offset within group of constants.
-     * @param[in] value
-     *      The value to set.
-     */
-    virtual void setGraphicsConstant(uSys index, uSys offset, u32 value) noexcept = 0;
-
-    /**
-     * Sets a a series constants to use within the shader pipeline.
-     *
-     * @param[in] index
-     *      The descriptor layout index.
-     * @param[in] offset
-     *      The offset within group of constants.
-     * @param[in] count
-     *      The number of values in the buffer.
-     * @param[in] values
-     *      The buffer of values to set.
-     */
-    virtual void setGraphicsConstants(uSys index, uSys offset, uSys count, const u32* values) noexcept = 0;
-
-    /**
      * Sets a descriptor table to use within the shader pipeline.
      *
      * @param[in] index
@@ -142,6 +122,10 @@ public:
      *      The sampler table to set.
      */
     virtual void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable& table) noexcept = 0;
+
+    RTT_BASE_IMPL(ICommandList);
+    RTT_BASE_CHECK(ICommandList);
+    RTT_BASE_CAST(ICommandList);
 };
 
 struct CommandListArgs final

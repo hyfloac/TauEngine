@@ -16,6 +16,14 @@
   #endif
 #endif
 
+#ifndef TAU_NULL_CHECK
+  #if defined(TAU_PRODUCTION)
+    #define TAU_NULL_CHECK 0
+  #else
+    #define TAU_NULL_CHECK 1
+  #endif
+#endif
+
 #ifdef TAU_USER_CONFIG
   #include TAU_USER_CONFIG
 #endif

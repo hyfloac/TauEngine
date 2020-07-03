@@ -24,8 +24,6 @@ enum class CommandType
     SetVertexArray,
     SetIndexBuffer,
     SetGDescriptorLayout,
-    SetGConstant,
-    SetGConstants,
     SetGDescriptorTable,
     SetGDescriptorSamplerTable
 };
@@ -99,22 +97,22 @@ struct CommandDrawIndexedInstanced final
     DEFAULT_CM_PU(CommandDrawIndexedInstanced);
 public:
     GLenum mode;
-    GLsizei vertexCount;
+    GLsizei indexCount;
     GLenum indexSize;
     const void* indexOffset;
     GLsizei instanceCount;
 public:
-    CommandDrawIndexedInstanced(const GLenum _mode, const GLsizei _vertexCount, const GLenum _indexSize, const void* const _indexOffset, const GLsizei _instanceCount) noexcept
+    CommandDrawIndexedInstanced(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const void* const _indexOffset, const GLsizei _instanceCount) noexcept
         : mode(_mode)
-        , vertexCount(_vertexCount)
+        , indexCount(_indexCount)
         , indexSize(_indexSize)
         , indexOffset(_indexOffset)
         , instanceCount(_instanceCount)
     { }
 
-    CommandDrawIndexedInstanced(const GLenum _mode, const GLsizei _vertexCount, const GLenum _indexSize, const uSys _indexOffset, const GLsizei _instanceCount) noexcept
+    CommandDrawIndexedInstanced(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const uSys _indexOffset, const GLsizei _instanceCount) noexcept
         : mode(_mode)
-        , vertexCount(_vertexCount)
+        , indexCount(_indexCount)
         , indexSize(_indexSize)
         , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
         , instanceCount(_instanceCount)
@@ -150,21 +148,6 @@ struct CommandSetGDescriptorLayout final
     DescriptorLayout layout;
 };
 
-struct CommandSetGConstant final
-{
-    uSys index;
-    uSys offset;
-    u32 value;
-};
-
-struct CommandSetGConstants final
-{
-    uSys index;
-    uSys offset;
-    uSys count;
-    const u32* values;
-};
-
 struct CommandSetGDescriptorTable final
 {
     uSys index;
@@ -193,8 +176,6 @@ public:
         CommandSetVertexArray setVertexArray;
         CommandSetIndexBuffer setIndexBuffer;
         CommandSetGDescriptorLayout setGDescriptorLayout;
-        CommandSetGConstant setGConstant;
-        CommandSetGConstants setGConstants;
         CommandSetGDescriptorTable setGDescriptorTable;
         CommandSetGDescriptorSamplerTable setGDescriptorSamplerTable;
     };
@@ -234,13 +215,13 @@ public:
         , setIndexBuffer(_setIndexBuffer)
     { }
 };
-
 }
 
 class TAU_DLL GLCommandList final : public ICommandList
 {
     DEFAULT_DESTRUCT(GLCommandList);
     DELETE_CM(GLCommandList);
+    COMMAND_LIST_IMPL(GLCommandList);
 private:
     uSys _maxCommands;
     ArrayList<GLCL::Command> _commands;
@@ -252,6 +233,8 @@ public:
         , _currentVA(null)
     { }
 
+    [[nodiscard]] const ArrayList<GLCL::Command>& commands() const noexcept { return _commands; }
+
     void reset() noexcept override;
     void finish() noexcept override;
     void draw(uSys exCount, uSys startIndex, uSys startVertex) noexcept override;
@@ -259,8 +242,6 @@ public:
     void setVertexArray(const IVertexArray& va) noexcept override;
     void setInputLayout(const IInputLayout& layout) noexcept override { }
     void setGraphicsDescriptorLayout(const DescriptorLayout& layout) noexcept override;
-    void setGraphicsConstant(uSys index, uSys offset, u32 value) noexcept override;
-    void setGraphicsConstants(uSys index, uSys offset, uSys count, const u32* values) noexcept override;
     void setGraphicsDescriptorTable(uSys index, const DescriptorTable& table) noexcept override;
     void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable& table) noexcept override;
 };
