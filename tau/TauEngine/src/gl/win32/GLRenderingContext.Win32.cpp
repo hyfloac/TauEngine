@@ -1,4 +1,9 @@
 #ifdef _WIN32
+#pragma warning(push, 0)
+#include <GL/glew.h>
+#include <GL/wglew.h>
+#pragma warning(pop)
+
 #include "gl/GLRenderingContext.hpp"
 #include "gl/GLGraphicsInterface.hpp"
 

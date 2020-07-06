@@ -1,14 +1,14 @@
 #include "gl/gl3_0/GL3_0BlendingState.hpp"
+#include "gl/GLStateHelper.hpp"
 
-void GL3_0BlendingState::apply() const noexcept
+void GL3_0BlendingState::apply(GLStateHelper& glStateHelper) const noexcept
 {
     for(uSys i = 0; i < 8; ++i)
     {
-        _glArgs.blendingControl[i](GL_BLEND, i);
+        glStateHelper.setBlending(i, _glArgs.frameBuffers[i].enableBlending);
+        glStateHelper.blendFunc(_glArgs.frameBuffers[i].colorSrcFactor, _glArgs.frameBuffers[i].colorDstFactor, _glArgs.frameBuffers[i].alphaSrcFactor, _glArgs.frameBuffers[i].alphaDstFactor);
+        glStateHelper.blendEquation(_glArgs.frameBuffers[i].colorBlendOp, _glArgs.frameBuffers[i].alphaBlendOp);
     }
-
-    glBlendFuncSeparate(_glArgs.colorSrcFactor, _glArgs.colorDstFactor, _glArgs.alphaSrcFactor, _glArgs.alphaDstFactor);
-    glBlendEquationSeparate(_glArgs.colorBlendOp, _glArgs.alphaBlendOp);
 }
 
 GLBlendingState* GL3_0BlendingStateBuilder::build(const BlendingArgs& args, Error* const error) const noexcept
@@ -90,22 +90,21 @@ bool GL3_0BlendingStateBuilder::processArgs3_0(const BlendingArgs& args, GL3_0Bl
 {
     for(uSys i = 0; i < 8; ++i)
     {
-        glArgs->blendingControl[i] = args.frameBuffers[i].enableBlending ? glEnablei : glDisablei;
+        glArgs->frameBuffers[i].enableBlending = args.frameBuffers[i].enableBlending;
+        glArgs->frameBuffers[i].colorSrcFactor = glBlendFactor(args.frameBuffers[i].colorSrcFactor);
+        glArgs->frameBuffers[i].colorDstFactor = glBlendFactor(args.frameBuffers[i].colorDstFactor);
+        glArgs->frameBuffers[i].alphaSrcFactor = glBlendFactor(args.frameBuffers[i].alphaSrcFactor);
+        glArgs->frameBuffers[i].alphaDstFactor = glBlendFactor(args.frameBuffers[i].alphaDstFactor);
+        glArgs->frameBuffers[i].colorBlendOp = glBlendOp(args.frameBuffers[i].colorBlendOp);
+        glArgs->frameBuffers[i].alphaBlendOp = glBlendOp(args.frameBuffers[i].alphaBlendOp);
+
+        ERROR_CODE_COND_F(glArgs->frameBuffers[i].colorSrcFactor == 0, Error::InvalidBlendFactor);
+        ERROR_CODE_COND_F(glArgs->frameBuffers[i].colorDstFactor == 0, Error::InvalidBlendFactor);
+        ERROR_CODE_COND_F(glArgs->frameBuffers[i].alphaSrcFactor == 0, Error::InvalidBlendFactor);
+        ERROR_CODE_COND_F(glArgs->frameBuffers[i].alphaDstFactor == 0, Error::InvalidBlendFactor);
+        ERROR_CODE_COND_F(glArgs->frameBuffers[i].colorBlendOp == 0, Error::InvalidBlendOp);
+        ERROR_CODE_COND_F(glArgs->frameBuffers[i].alphaBlendOp == 0, Error::InvalidBlendOp);
     }
-
-    glArgs->colorSrcFactor = glBlendFactor(args.frameBuffers[0].colorSrcFactor);
-    glArgs->colorDstFactor = glBlendFactor(args.frameBuffers[0].colorDstFactor);
-    glArgs->alphaSrcFactor = glBlendFactor(args.frameBuffers[0].alphaSrcFactor);
-    glArgs->alphaDstFactor = glBlendFactor(args.frameBuffers[0].alphaDstFactor);
-    glArgs->colorBlendOp = glBlendOp(args.frameBuffers[0].colorBlendOp);
-    glArgs->alphaBlendOp = glBlendOp(args.frameBuffers[0].alphaBlendOp);
-
-    ERROR_CODE_COND_F(glArgs->colorSrcFactor == 0, Error::InvalidBlendFactor);
-    ERROR_CODE_COND_F(glArgs->colorDstFactor == 0, Error::InvalidBlendFactor);
-    ERROR_CODE_COND_F(glArgs->alphaSrcFactor == 0, Error::InvalidBlendFactor);
-    ERROR_CODE_COND_F(glArgs->alphaDstFactor == 0, Error::InvalidBlendFactor);
-    ERROR_CODE_COND_F(glArgs->colorBlendOp == 0, Error::InvalidBlendOp);
-    ERROR_CODE_COND_F(glArgs->alphaBlendOp == 0, Error::InvalidBlendOp);
 
     return true;
 }

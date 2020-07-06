@@ -5,14 +5,7 @@
 
 #include "DLL.hpp"
 #include "DescriptorHeap.hpp"
-
-/**
- * An opaque descriptor layout.
- *
- *   This is used during resource binding to know where each
- * descriptor should be bound to within the pipeline.
- */
-DECL_OPAQUE_TYPE(DescriptorLayout);
+#include "_GraphicsOpaqueObjects.hpp"
 
 struct DescriptorLayoutEntry final
 {

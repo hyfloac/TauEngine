@@ -1,19 +1,11 @@
 #pragma once
 
 #include "texture/TextureEnums.hpp"
-#include "graphics/DescriptorHeap.hpp"
+#include "graphics/_GraphicsOpaqueObjects.hpp"
+#include "DLL.hpp"
 
 class IRenderingContext;
 class IResource;
-
-/**
- * A view into a texture.
- *
- * This is used for binding textures to the shader pipeline.
- *
- * The exact implementation details are up to the driver.
- */
-DECL_OPAQUE_TYPE(TextureView);
 
 struct TextureViewArgs final
 {

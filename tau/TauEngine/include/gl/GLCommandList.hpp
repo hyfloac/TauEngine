@@ -21,6 +21,7 @@ enum class CommandType
     DrawIndexed,
     DrawInstanced,
     DrawIndexedInstanced,
+    SetPipelineState,
     SetVertexArray,
     SetIndexBuffer,
     SetGDescriptorLayout,
@@ -119,11 +120,25 @@ public:
     { }
 };
 
+struct CommandSetPipelineState final
+{
+    DEFAULT_CONSTRUCT_PU(CommandSetPipelineState);
+    DEFAULT_DESTRUCT(CommandSetPipelineState);
+    DEFAULT_CM_PU(CommandSetPipelineState);
+public:
+    const PipelineState& pipelineState;
+public:
+    CommandSetPipelineState(const PipelineState& _pipelineState) noexcept
+        : pipelineState(_pipelineState)
+    { }
+};
+
 struct CommandSetVertexArray final
 {
     DEFAULT_CONSTRUCT_PU(CommandSetVertexArray);
     DEFAULT_DESTRUCT(CommandSetVertexArray);
     DEFAULT_CM_PU(CommandSetVertexArray);
+public:
     GLuint vao;
 public:
     CommandSetVertexArray(const GLuint _vao) noexcept
@@ -136,6 +151,7 @@ struct CommandSetIndexBuffer final
     DEFAULT_CONSTRUCT_PU(CommandSetIndexBuffer);
     DEFAULT_DESTRUCT(CommandSetIndexBuffer);
     DEFAULT_CM_PU(CommandSetIndexBuffer);
+public:
     GLuint ibo;
 public:
     CommandSetIndexBuffer(const GLuint _ibo) noexcept
@@ -145,19 +161,45 @@ public:
 
 struct CommandSetGDescriptorLayout final
 {
+    DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorLayout);
+    DEFAULT_DESTRUCT(CommandSetGDescriptorLayout);
+    DEFAULT_CM_PU(CommandSetGDescriptorLayout);
+public:
     DescriptorLayout layout;
+public:
+    CommandSetGDescriptorLayout(const DescriptorLayout _layout) noexcept
+        : layout(_layout)
+    { }
 };
 
 struct CommandSetGDescriptorTable final
 {
+    DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorTable);
+    DEFAULT_DESTRUCT(CommandSetGDescriptorTable);
+    DEFAULT_CM_PU(CommandSetGDescriptorTable);
+public:
     uSys index;
-    const DescriptorTable table;
+    DescriptorTable table;
+public:
+    CommandSetGDescriptorTable(const uSys _index, const DescriptorTable _table) noexcept
+        : index(_index)
+        , table(_table)
+    { }
 };
 
 struct CommandSetGDescriptorSamplerTable final
 {
+    DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorSamplerTable);
+    DEFAULT_DESTRUCT(CommandSetGDescriptorSamplerTable);
+    DEFAULT_CM_PU(CommandSetGDescriptorSamplerTable);
+public:
     uSys index;
-    const DescriptorSamplerTable table;
+    DescriptorSamplerTable table;
+public:
+    CommandSetGDescriptorSamplerTable(const uSys _index, const DescriptorSamplerTable _table) noexcept
+        : index(_index)
+        , table(_table)
+    { }
 };
 
 struct Command final
@@ -173,6 +215,7 @@ public:
         CommandDrawIndexed drawIndexed;
         CommandDrawInstanced drawInstanced;
         CommandDrawIndexedInstanced drawIndexedInstanced;
+        CommandSetPipelineState setPipelineState;
         CommandSetVertexArray setVertexArray;
         CommandSetIndexBuffer setIndexBuffer;
         CommandSetGDescriptorLayout setGDescriptorLayout;
@@ -203,6 +246,11 @@ public:
     Command(const CommandDrawIndexedInstanced& _drawIndexedInstanced) noexcept
         : type(CommandType::DrawIndexedInstanced)
         , drawIndexedInstanced(_drawIndexedInstanced)
+    { }
+
+    Command(const CommandSetPipelineState& _setPipelineState) noexcept
+        : type(CommandType::SetPipelineState)
+        , setPipelineState(_setPipelineState)
     { }
 
     Command(const CommandSetVertexArray& _setVertexArray) noexcept
@@ -240,8 +288,8 @@ public:
     void draw(uSys exCount, uSys startIndex, uSys startVertex) noexcept override;
     void drawInstanced(uSys exCount, uSys startIndex, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setVertexArray(const IVertexArray& va) noexcept override;
-    void setInputLayout(const IInputLayout& layout) noexcept override { }
-    void setGraphicsDescriptorLayout(const DescriptorLayout& layout) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, const DescriptorTable& table) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable& table) noexcept override;
+    void setPipelineState(const PipelineState& pipelineState) noexcept override;
+    void setGraphicsDescriptorLayout(const DescriptorLayout layout) noexcept override;
+    void setGraphicsDescriptorTable(uSys index, const DescriptorTable table) noexcept override;
+    void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable table) noexcept override;
 };

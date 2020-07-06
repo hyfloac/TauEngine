@@ -1,10 +1,10 @@
 #pragma once
 
-#include "system/RenderingContext.hpp"
-#ifdef _WIN32
+#pragma warning(push, 0)
 #include <GL/glew.h>
-#include <GL/wglew.h>
-#endif
+#pragma warning(pop)
+
+#include "system/RenderingContext.hpp"
 
 class GLGraphicsInterface;
 
@@ -50,7 +50,7 @@ public:
     GLRenderingContext(const RenderingMode& mode, const GLRenderingContextArgs& glArgs, const GLSystemRenderingContextArgs& glSysArgs) noexcept;
     ~GLRenderingContext() noexcept override final;
 
-    HDC getHDC() const noexcept { return _device; }
+    [[nodiscard]] HDC getHDC() const noexcept { return _device; }
 
     void setBufferData(GLintptr* const offsets, GLsizei* const strides) noexcept
     {
@@ -104,7 +104,7 @@ private:
 class TAU_DLL GLRenderingContextBuilder final : public IRenderingContextBuilder
 {
     DEFAULT_DESTRUCT(GLRenderingContextBuilder);
-    DELETE_COPY(GLRenderingContextBuilder);
+    DEFAULT_CM_PU(GLRenderingContextBuilder);
 private:
     GLGraphicsInterface& _gi;
 public:

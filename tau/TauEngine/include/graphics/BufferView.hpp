@@ -5,9 +5,9 @@
 
 #include <Objects.hpp>
 
-#include "BufferDescriptor.hpp"
 #include "BufferEnums.hpp"
-#include "DescriptorHeap.hpp"
+#include "BufferDescriptor.hpp"
+#include "_GraphicsOpaqueObjects.hpp"
 
 class IResource;
 
@@ -52,14 +52,6 @@ public:
         , _indexSize(indexSize)
     { }
 };
-
-/**
- * A view into a uniform buffer resource.
- *
- *   This is used for binding uniform buffers to the shader
- * pipeline.
- */
-DECL_OPAQUE_TYPE(UniformBufferView);
 
 struct UniformBufferViewArgs final
 {

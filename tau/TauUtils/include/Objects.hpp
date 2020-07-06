@@ -48,23 +48,23 @@
 #define DEFAULT_CONSTRUCT_PI(_TYPE) private: DEFAULT_CONSTRUCT(_TYPE)
 #define DEFAULT_CONSTRUCT_PO(_TYPE) protected: DEFAULT_CONSTRUCT(_TYPE)
 
-#define DECL_OPAQUE_TYPE(_TYPE)                \
-    struct _TYPE final {                       \
-        DEFAULT_CONSTRUCT_PU(_TYPE);           \
-        DEFAULT_DESTRUCT(_TYPE);               \
-        DEFAULT_CM_PU(_TYPE);                  \
-    public:                                    \
-        void* raw;                             \
-    public:                                    \
-        _TYPE(void* const _raw) noexcept       \
-            : raw(_raw)                        \
-        { }                                    \
-        template<typename _T>                  \
-        _T* get() noexcept                     \
-        { return reinterpret_cast<_T*>(raw); } \
-        template<typename _T>                  \
-        const _T* get() const noexcept         \
-        { return reinterpret_cast<_T*>(raw); } \
+#define DECL_OPAQUE_TYPE(_TYPE)                      \
+    struct _TYPE final {                             \
+        DEFAULT_CONSTRUCT_PU(_TYPE);                 \
+        DEFAULT_DESTRUCT(_TYPE);                     \
+        DEFAULT_CM_PU(_TYPE);                        \
+    public:                                          \
+        void* raw;                                   \
+    public:                                          \
+        _TYPE(void* const _raw) noexcept             \
+            : raw(_raw)                              \
+        { }                                          \
+        template<typename _T>                        \
+        [[nodiscard]] _T* get() noexcept             \
+        { return reinterpret_cast<_T*>(raw); }       \
+        template<typename _T>                        \
+        [[nodiscard]] const _T* get() const noexcept \
+        { return reinterpret_cast<_T*>(raw); }       \
     }
 
 namespace tau {

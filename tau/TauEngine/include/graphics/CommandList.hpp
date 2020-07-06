@@ -6,12 +6,11 @@
 #include <RunTimeType.hpp>
 
 #include "DLL.hpp"
+#include "_GraphicsOpaqueObjects.hpp"
 
+struct PipelineState;
 class IInputLayout;
 class IVertexArray;
-struct DescriptorLayout;
-struct DescriptorTable;
-struct DescriptorSamplerTable;
 
 #define COMMAND_LIST_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, ICommandList)
@@ -79,12 +78,18 @@ public:
     virtual void drawInstanced(uSys exCount, uSys startIndex, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
 
     /**
-     * Sets the input layout to use for decoding the vertex array.
+     * Sets the pipeline state.
      *
-     * @param[in] layout
-     *      The input layout to use.
+     *   This contains all of the general purpose information
+     * needed by the rendering pipeline. This is a homogenous
+     * object of what used to be many individual state objects.
+     * This also includes things like the input layout, and the
+     * shader objects.
+     *
+     * @param[in] pipelineState
+     *      The homogenous pipeline state to use.
      */
-    virtual void setInputLayout(const IInputLayout& layout) noexcept = 0;
+    virtual void setPipelineState(const PipelineState& pipelineState) noexcept = 0;
 
     /**
      * Sets the vertex array to render from.
@@ -100,7 +105,7 @@ public:
      * @param[in] layout
      *      The layout of descriptors.
      */
-    virtual void setGraphicsDescriptorLayout(const DescriptorLayout& layout) noexcept = 0;
+    virtual void setGraphicsDescriptorLayout(const DescriptorLayout layout) noexcept = 0;
 
     /**
      * Sets a descriptor table to use within the shader pipeline.
@@ -110,7 +115,7 @@ public:
      * @param[in] table
      *      The table to set.
      */
-    virtual void setGraphicsDescriptorTable(uSys index, const DescriptorTable& table) noexcept = 0;
+    virtual void setGraphicsDescriptorTable(uSys index, const DescriptorTable table) noexcept = 0;
 
     /**
      *   Sets a descriptor table of samplers to use within the
@@ -121,7 +126,7 @@ public:
      * @param[in] table
      *      The sampler table to set.
      */
-    virtual void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable& table) noexcept = 0;
+    virtual void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable table) noexcept = 0;
 
     RTT_BASE_IMPL(ICommandList);
     RTT_BASE_CHECK(ICommandList);

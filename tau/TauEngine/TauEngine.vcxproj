@@ -241,9 +241,11 @@
     <ClInclude Include="include\graphics\DepthStencilState.hpp" />
     <ClInclude Include="include\graphics\DescriptorHeap.hpp" />
     <ClInclude Include="include\graphics\DescriptorLayout.hpp" />
+    <ClInclude Include="include\graphics\PipelineState.hpp" />
     <ClInclude Include="include\graphics\RasterizerState.hpp" />
     <ClInclude Include="include\graphics\Resource.hpp" />
     <ClInclude Include="include\graphics\ResourceEnums.hpp" />
+    <ClInclude Include="include\graphics\_GraphicsOpaqueObjects.hpp" />
     <ClInclude Include="include\I18n.hpp" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />

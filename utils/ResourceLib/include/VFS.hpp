@@ -40,7 +40,7 @@ public:
     struct Container final
     {
         DEFAULT_DESTRUCT(Container);
-        DEFAULT_COPY(Container);
+        DEFAULT_CM_PU(Container);
     public:
         DynString path;
         CPPRef<IFileLoader> fileLoader;

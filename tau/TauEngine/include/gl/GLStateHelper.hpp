@@ -22,16 +22,22 @@ struct TextureBinding final
     GLenum target;
     GLuint texture;
 };
+
+struct BlendingControl final
+{
+    bool active;
+    GLenum srcColor;
+    GLenum srcAlpha;
+    GLenum destColor;
+    GLenum destAlpha;
+    GLenum equationColor;
+    GLenum equationAlpha;
+};
 }
 
 class TAU_DLL GLStateHelper final
 {
     DELETE_CM(GLStateHelper);
-private:
-    static GLStateHelper _globalInstance;
-public:
-    static GLStateHelper& Instance() noexcept
-    { return _globalInstance; }
 private:
     GLuint _vao;
 
@@ -49,6 +55,10 @@ private:
 
     GLState::TextureBinding* _textureBindings;
     uSys _activeTextureUnit;
+
+    GLuint _activeProgram;
+
+    GLState::BlendingControl _blendingControls[8];
 public:
     GLStateHelper() noexcept;
 
@@ -80,4 +90,36 @@ public:
 
     void bindTexture(GLenum target, GLuint texture) noexcept;
     void bindTexture(GLenum target, GLuint texture, uSys unit) noexcept;
+
+    void bindShaderProgram(GLuint program) noexcept;
+
+    void setBlending(bool state) noexcept;
+    void setBlending(uSys index, bool state) noexcept;
+
+    void enableBlending() noexcept;
+    void enableBlending(uSys index) noexcept;
+
+    void disableBlending() noexcept;
+    void disableBlending(uSys index) noexcept;
+
+    void set(GLenum capability, bool state) noexcept;
+    void set(GLenum capability, uSys index, bool state) noexcept;
+
+    void enable(GLenum capability) noexcept;
+    void enable(GLenum capability, uSys index) noexcept;
+
+    void disable(GLenum capability) noexcept;
+    void disable(GLenum capability, uSys index) noexcept;
+
+    void blendFunc(GLenum src, GLenum dest) noexcept;
+    void blendFunc(GLenum srcColor, GLenum srcAlpha, GLenum destColor, GLenum destAlpha) noexcept;
+
+    void blendFunc(uSys index, GLenum src, GLenum dest) noexcept;
+    void blendFunc(uSys index, GLenum srcColor, GLenum srcAlpha, GLenum destColor, GLenum destAlpha) noexcept;
+
+    void blendEquation(GLenum equation) noexcept;
+    void blendEquation(GLenum equationColor, GLenum equationAlpha) noexcept;
+
+    void blendEquation(uSys index, GLenum equation) noexcept;
+    void blendEquation(uSys index, GLenum equationColor, GLenum equationAlpha) noexcept;
 };

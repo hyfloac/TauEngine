@@ -6,17 +6,19 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
+class GLStateHelper;
+
 class TAU_DLL GLBlendingState : public IBlendingState
 {
     DEFAULT_DESTRUCT(GLBlendingState);
-    DEFAULT_COPY_PO(GLBlendingState);
+    DEFAULT_CM_PO(GLBlendingState);
     BS_IMPL(GLBlendingState);
 protected:
     GLBlendingState(const BlendingArgs& args) noexcept
         : IBlendingState(args)
     { }
 public:
-    virtual void apply() const noexcept = 0;
+    virtual void apply(GLStateHelper& glStateHelper) const noexcept = 0;
 };
 
 struct GL2_0BlendingArgs final
@@ -25,7 +27,7 @@ struct GL2_0BlendingArgs final
     DEFAULT_DESTRUCT(GL2_0BlendingArgs);
     DEFAULT_CM_PU(GL2_0BlendingArgs);
 public:
-    void (*GLAPIENTRY blendingControl)(GLenum);
+    bool enableBlending;
     GLenum colorSrcFactor;
     GLenum colorDstFactor;
     GLenum alphaSrcFactor;
@@ -33,8 +35,8 @@ public:
     GLenum colorBlendOp;
     GLenum alphaBlendOp;
 public:
-    GL2_0BlendingArgs(void(* const blendingControl)(GLenum), const GLenum colorSrcFactor, const GLenum colorDstFactor, const GLenum alphaSrcFactor, const GLenum alphaDstFactor, const GLenum colorBlendOp, const GLenum alphaBlendOp) noexcept
-        : blendingControl{ blendingControl }
+    GL2_0BlendingArgs(bool enableBlending, const GLenum colorSrcFactor, const GLenum colorDstFactor, const GLenum alphaSrcFactor, const GLenum alphaDstFactor, const GLenum colorBlendOp, const GLenum alphaBlendOp) noexcept
+        : enableBlending(enableBlending)
         , colorSrcFactor(colorSrcFactor)
         , colorDstFactor(colorDstFactor)
         , alphaSrcFactor(alphaSrcFactor)
@@ -56,7 +58,7 @@ public:
         , _glArgs(glArgs)
     { }
 
-    void apply() const noexcept override;
+    void apply(GLStateHelper& glStateHelper) const noexcept override;
 };
 
 class TAU_DLL GLBlendingStateBuilder : public IBlendingStateBuilder

@@ -1,10 +1,11 @@
 #include "gl/GLBlendingState.hpp"
+#include "gl/GLStateHelper.hpp"
 
-void GL2_0BlendingState::apply() const noexcept
+void GL2_0BlendingState::apply(GLStateHelper& glStateHelper) const noexcept
 {
-    _glArgs.blendingControl(GL_BLEND);
-    glBlendFuncSeparate(_glArgs.colorSrcFactor, _glArgs.colorDstFactor, _glArgs.alphaSrcFactor, _glArgs.alphaDstFactor);
-    glBlendEquationSeparate(_glArgs.colorBlendOp, _glArgs.alphaBlendOp);
+    glStateHelper.setBlending(_glArgs.enableBlending);
+    glStateHelper.blendFunc(_glArgs.colorSrcFactor, _glArgs.colorDstFactor, _glArgs.alphaSrcFactor, _glArgs.alphaDstFactor);
+    glStateHelper.blendEquation(_glArgs.colorBlendOp, _glArgs.alphaBlendOp);
 }
 
 GLBlendingState* GLBlendingStateBuilder::build(const BlendingArgs& args, Error* const error) const noexcept
@@ -71,7 +72,7 @@ bool GLBlendingStateBuilder::processArgs(const BlendingArgs& args, GL2_0Blending
 {
     ERROR_CODE_COND_F(args.independentBlending, Error::DriverDoesNotSupportIndependentBlending);
 
-    glArgs->blendingControl = args.frameBuffers[0].enableBlending ? glEnable : glDisable;
+    glArgs->enableBlending = args.frameBuffers[0].enableBlending;
     glArgs->colorSrcFactor = glBlendFactor(args.frameBuffers[0].colorSrcFactor);
     glArgs->colorDstFactor = glBlendFactor(args.frameBuffers[0].colorDstFactor);
     glArgs->alphaSrcFactor = glBlendFactor(args.frameBuffers[0].alphaSrcFactor);

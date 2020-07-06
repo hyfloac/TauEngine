@@ -10,11 +10,9 @@
 #include <allocator/TauAllocator.hpp>
 
 #include "DLL.hpp"
+#include "_GraphicsOpaqueObjects.hpp"
 
 class IResourceView;
-
-DECL_OPAQUE_TYPE(DescriptorTable);
-DECL_OPAQUE_TYPE(DescriptorSamplerTable);
 
 enum class DescriptorType
 {

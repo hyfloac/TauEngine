@@ -1,6 +1,7 @@
 #pragma warning(push, 0)
 #include <GL/glew.h>
 #pragma warning(pop)
+
 #include <Utils.hpp>
 
 #include "gl/GLRenderingContext.hpp"
@@ -13,7 +14,7 @@
 #include "gl/GLBlendingState.hpp"
 #include "gl/GLGraphicsInterface.hpp"
 
-#include "gl/GLVertexBuffer.hpp"
+#include "gl/GLBuffer.hpp"
 
 #include "Timings.hpp"
 

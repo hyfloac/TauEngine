@@ -3,6 +3,8 @@
 #include "gl/GLDescriptorHeap.hpp"
 #include "gl/GLResourceTexture.hpp"
 #include "gl/GLTextureView.hpp"
+#include "graphics/PipelineState.hpp"
+#include "gl/GLBlendingState.hpp"
 #include "TauConfig.hpp"
 
 void GLCommandQueue::executeCommandLists(uSys count, const ICommandList** lists) noexcept
@@ -15,10 +17,14 @@ void GLCommandQueue::executeCommandLists(uSys count, const ICommandList** lists)
     {
         if(!lists[i])
         { return; }
-  #if TAU_RTTI_CHECK
+    }
+#endif
+
+#if TAU_RTTI_CHECK
+    for(uSys i = 0; i < count; ++i)
+    {
         if(!RTT_CHECK(lists[i], GLCommandList))
         { return; }
-  #endif
     }
 #endif
 
@@ -70,14 +76,22 @@ void GLCommandQueue::_drawIndexedInstanced(const GLCL::CommandDrawIndexedInstanc
     glDrawElementsInstanced(cmd.mode, cmd.indexCount, cmd.indexSize, cmd.indexOffset, cmd.instanceCount);
 }
 
+void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd) noexcept
+{
+    _currentPipelineState = &cmd.pipelineState;
+
+    const GLBlendingState* const blendingState = RTT_CAST(_currentPipelineState->args().blendingState.get(), GLBlendingState);
+    blendingState->apply(_glStateHelper);
+}
+
 void GLCommandQueue::_setVertexArray(const GLCL::CommandSetVertexArray& cmd) noexcept
 {
-    GLStateHelper::Instance().bindVertexArray(cmd.vao);
+    _glStateHelper.bindVertexArray(cmd.vao);
 }
 
 void GLCommandQueue::_setIndexBuffer(const GLCL::CommandSetIndexBuffer& cmd) noexcept
 {
-    GLStateHelper::Instance().bindElementArrayBuffer(cmd.ibo);
+    _glStateHelper.bindElementArrayBuffer(cmd.ibo);
 }
 
 void GLCommandQueue::_setGDescriptorLayout(const GLCL::CommandSetGDescriptorLayout& cmd) noexcept
@@ -89,35 +103,41 @@ void GLCommandQueue::_setGDescriptorTable(const GLCL::CommandSetGDescriptorTable
 {
     const GLDescriptorTable* table = cmd.table.get<GLDescriptorTable>();
 
+#if TAU_GENERAL_SAFETY_CHECK
     // Counts don't match
     if(table->count() != _currentLayout->entries()[cmd.index].count)
     { return; }
+#endif
 
     if(table->type() == DescriptorType::TextureView)
     {
+#if TAU_GENERAL_SAFETY_CHECK
         // Types don't match
         if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::TextureView)
         { return; }
+#endif
 
         const uSys begin = _currentLayout->entries()[cmd.index].begin;
 
         for(uSys i = 0; i < table->count(); ++i)
         {
             GLTextureView* const texView = table->texViews()[i];
-            GLStateHelper::Instance().bindTexture(texView->target(), texView->texture()->texture(), i + begin);
+            _glStateHelper.bindTexture(texView->target(), texView->texture()->texture(), i + begin);
         }
     }
     else if(table->type() == DescriptorType::UniformBufferView)
     {
+#if TAU_GENERAL_SAFETY_CHECK
         // Types don't match
         if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::UniformBufferView)
         { return; }
+#endif
 
         const uSys begin = _currentLayout->entries()[cmd.index].begin;
 
         for(uSys i = 0; i < table->count(); ++i)
         {
-            GLStateHelper::Instance().bindUniformBufferBase(begin + i, table->uniViews()[i]);
+            _glStateHelper.bindUniformBufferBase(begin + i, table->uniViews()[i]);
         }
     }
 }
