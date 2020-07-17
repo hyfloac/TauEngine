@@ -6,16 +6,16 @@ void GLDepthStencilState::apply(GLStateManager& glStateManager) const noexcept
     glStateManager.setDepthTest(_glArgs.enableDepthTest);
     glStateManager.setStencilTest(_glArgs.enableStencilTest);
 
-    glDepthMask(_glArgs.depthWriteMask);
-    glDepthFunc(_glArgs.depthCompareFunc);
+    glStateManager.depthMask(_glArgs.depthWriteMask);
+    glStateManager.depthFunc(_glArgs.depthCompareFunc);
 
-    glStencilMask(_glArgs.stencilWriteMask);
+    glStateManager.stencilMask(_glArgs.stencilWriteMask);
 
-    glStencilOpSeparate(GL_FRONT, _glArgs.frontFace.failOp, _glArgs.frontFace.stencilPassDepthFailOp, _glArgs.frontFace.passOp);
-    glStencilFuncSeparate(GL_FRONT, _glArgs.frontFace.compareFunc, 1, _glArgs.stencilReadMask);
+    glStateManager.stencilOpFront(_glArgs.frontFace.failOp, _glArgs.frontFace.stencilPassDepthFailOp, _glArgs.frontFace.passOp);
+    glStateManager.stencilFuncFront(_glArgs.frontFace.compareFunc, _glArgs.stencilReadMask);
 
-    glStencilOpSeparate(GL_BACK, _glArgs.backFace.failOp, _glArgs.backFace.stencilPassDepthFailOp, _glArgs.backFace.passOp);
-    glStencilFuncSeparate(GL_BACK, _glArgs.backFace.compareFunc, 1, _glArgs.stencilReadMask);
+    glStateManager.stencilOpBack(_glArgs.backFace.failOp, _glArgs.backFace.stencilPassDepthFailOp, _glArgs.backFace.passOp);
+    glStateManager.stencilFuncBack(_glArgs.backFace.compareFunc, _glArgs.stencilReadMask);
 }
 
 GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& args, Error* error) const noexcept

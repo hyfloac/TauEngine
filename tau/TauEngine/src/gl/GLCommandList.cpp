@@ -44,6 +44,12 @@ void GLCommandList::setPipelineState(const PipelineState& pipelineState) noexcep
     _commands.emplace(setPipelineState);
 }
 
+void GLCommandList::setStencilRef(const uSys stencilRef) noexcept
+{
+    const GLCL::CommandSetStencilRef setStencilRef(stencilRef);
+    _commands.emplace(setStencilRef);
+}
+
 void GLCommandList::setVertexArray(const IVertexArray& va) noexcept
 {
     _currentVA = static_cast<const GLVertexArray*>(&va);

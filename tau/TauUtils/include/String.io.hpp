@@ -7,83 +7,83 @@
 #pragma warning(pop)
 
 namespace fmtStr {
-static inline ::std::ostream& writeFormattedLen(::std::ostream& os, const char* str, ::std::streamsize len) noexcept;
-static inline ::std::wostream& writeFormattedLen(::std::wostream& os, const wchar_t* str, ::std::streamsize len) noexcept;
+inline ::std::ostream& writeFormattedLen(::std::ostream& os, const char* str, ::std::streamsize len) noexcept;
+inline ::std::wostream& writeFormattedLen(::std::wostream& os, const wchar_t* str, ::std::streamsize len) noexcept;
 }
 
-static inline ::std::ostream& operator <<(::std::ostream& os, const ConstExprString& string) noexcept
+inline ::std::ostream& operator <<(::std::ostream& os, const ConstExprString& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::ostream& operator <<(::std::ostream& os, const String& string) noexcept
+inline ::std::ostream& operator <<(::std::ostream& os, const String& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::ostream& operator <<(::std::ostream& os, const StringView& string) noexcept
+inline ::std::ostream& operator <<(::std::ostream& os, const StringView& string) noexcept
 {
     fmtStr::writeFormattedLen(os, string.c_str(), string.length());
     return os;
 }
 
-static inline ::std::ostream& operator <<(::std::ostream& os, const DynString& string) noexcept
+inline ::std::ostream& operator <<(::std::ostream& os, const DynString& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::ostream& operator <<(::std::ostream& os, const DynStringView& string) noexcept
+inline ::std::ostream& operator <<(::std::ostream& os, const DynStringView& string) noexcept
 {
     fmtStr::writeFormattedLen(os, string.c_str(), string.length());
     return os;
 }
 
-static inline ::std::ostream& operator <<(::std::ostream& os, const StringBuilder& string) noexcept
+inline ::std::ostream& operator <<(::std::ostream& os, const StringBuilder& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::wostream& operator <<(::std::wostream& os, const WConstExprString& string) noexcept
+inline ::std::wostream& operator <<(::std::wostream& os, const WConstExprString& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::wostream& operator <<(::std::wostream& os, const WString& string) noexcept
+inline ::std::wostream& operator <<(::std::wostream& os, const WString& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::wostream& operator <<(::std::wostream& os, const WStringView& string) noexcept
+inline ::std::wostream& operator <<(::std::wostream& os, const WStringView& string) noexcept
 {
     fmtStr::writeFormattedLen(os, string.c_str(), string.length());
     return os;
 }
 
-static inline ::std::wostream& operator <<(::std::wostream& os, const WDynString& string) noexcept
+inline ::std::wostream& operator <<(::std::wostream& os, const WDynString& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::wostream& operator <<(::std::wostream& os, const WDynStringView& string) noexcept
+inline ::std::wostream& operator <<(::std::wostream& os, const WDynStringView& string) noexcept
 {
     fmtStr::writeFormattedLen(os, string.c_str(), string.length());
     return os;
 }
 
-static inline ::std::wostream& operator <<(::std::wostream& os, const WStringBuilder& string) noexcept
+inline ::std::wostream& operator <<(::std::wostream& os, const WStringBuilder& string) noexcept
 {
     os << string.c_str();
     return os;
 }
 
-static inline ::std::ostream& fmtStr::writeFormattedLen(::std::ostream& os, const char* const str, const ::std::streamsize len) noexcept
+inline ::std::ostream& fmtStr::writeFormattedLen(::std::ostream& os, const char* const str, const ::std::streamsize len) noexcept
 {
     using _Traits = ::std::char_traits<char>;
 
@@ -133,7 +133,7 @@ static inline ::std::ostream& fmtStr::writeFormattedLen(::std::ostream& os, cons
     return os;
 }
 
-static inline ::std::wostream& fmtStr::writeFormattedLen(::std::wostream& os, const wchar_t* const str, const ::std::streamsize len) noexcept
+inline ::std::wostream& fmtStr::writeFormattedLen(::std::wostream& os, const wchar_t* const str, const ::std::streamsize len) noexcept
 {
     using _Traits = ::std::char_traits<char>;
 

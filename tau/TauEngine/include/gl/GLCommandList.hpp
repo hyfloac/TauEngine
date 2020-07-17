@@ -21,6 +21,7 @@ enum class CommandType
     DrawInstanced,
     DrawIndexedInstanced,
     SetPipelineState,
+    SetStencilRef,
     SetVertexArray,
     SetIndexBuffer,
     SetGDescriptorLayout,
@@ -132,6 +133,19 @@ public:
     { }
 };
 
+struct CommandSetStencilRef final
+{
+    DEFAULT_CONSTRUCT_PU(CommandSetStencilRef);
+    DEFAULT_DESTRUCT(CommandSetStencilRef);
+    DEFAULT_CM_PU(CommandSetStencilRef);
+public:
+    uSys stencilRef;
+public:
+    CommandSetStencilRef(const uSys _stencilRef) noexcept
+        : stencilRef(_stencilRef)
+    { }
+};
+
 struct CommandSetVertexArray final
 {
     DEFAULT_CONSTRUCT_PU(CommandSetVertexArray);
@@ -215,6 +229,7 @@ public:
         CommandDrawInstanced drawInstanced;
         CommandDrawIndexedInstanced drawIndexedInstanced;
         CommandSetPipelineState setPipelineState;
+        CommandSetStencilRef setStencilRef;
         CommandSetVertexArray setVertexArray;
         CommandSetIndexBuffer setIndexBuffer;
         CommandSetGDescriptorLayout setGDescriptorLayout;
@@ -250,6 +265,11 @@ public:
     Command(const CommandSetPipelineState& _setPipelineState) noexcept
         : type(CommandType::SetPipelineState)
         , setPipelineState(_setPipelineState)
+    { }
+
+    Command(const CommandSetStencilRef& _setStencilRef) noexcept
+        : type(CommandType::SetStencilRef)
+        , setStencilRef(_setStencilRef)
     { }
 
     Command(const CommandSetVertexArray& _setVertexArray) noexcept
@@ -288,6 +308,7 @@ public:
     void drawInstanced(uSys exCount, uSys startIndex, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setVertexArray(const IVertexArray& va) noexcept override;
     void setPipelineState(const PipelineState& pipelineState) noexcept override;
+    void setStencilRef(uSys stencilRef) noexcept override;
     void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
     void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept override;
     void setGraphicsDescriptorTable(uSys index, DescriptorSamplerTable table) noexcept override;

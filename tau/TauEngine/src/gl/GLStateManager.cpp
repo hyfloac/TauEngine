@@ -14,8 +14,10 @@ GLStateManager::GLStateManager() noexcept
     , _textureBindings(null)
     , _activeTextureUnit(0)
     , _activeProgram(0)
-    , _depthTestEnabled(false)
+    , _depthControl({ false, true, GL_LESS })
     , _stencilTestEnabled(false)
+    , _frontStencil({ 0xFFFFFFFF, 0xFFFFFFFF, 0, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS })
+    , _backStencil({ 0xFFFFFFFF, 0xFFFFFFFF, 0, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS })
 {
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxUniformBufferBindings));
     glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxShaderStorageBufferBindings));
@@ -372,9 +374,9 @@ void GLStateManager::disableBlending(const uSys index) noexcept
 
 void GLStateManager::setDepthTest(const bool state) noexcept
 {
-    if(_depthTestEnabled != state)
+    if(_depthControl.active != state)
     {
-        _depthTestEnabled = state;
+        _depthControl.active = state;
         if(state)
         {
             glEnable(GL_DEPTH_TEST);
@@ -388,27 +390,27 @@ void GLStateManager::setDepthTest(const bool state) noexcept
 
 void GLStateManager::enableDepthTest() noexcept
 {
-    if(_depthTestEnabled != true)
+    if(_depthControl.active != true)
     {
-        _depthTestEnabled = true;
+        _depthControl.active = true;
         glEnable(GL_DEPTH_TEST);
     }
 }
 
 void GLStateManager::disableDepthTest() noexcept
 {
-    if(_depthTestEnabled != false)
+    if(_depthControl.active != false)
     {
-        _depthTestEnabled = false;
+        _depthControl.active = false;
         glDisable(GL_DEPTH_TEST);
     }
 }
 
 void GLStateManager::setStencilTest(const bool state) noexcept
 {
-    if(_depthTestEnabled != state)
+    if(_stencilTestEnabled != state)
     {
-        _depthTestEnabled = state;
+        _stencilTestEnabled = state;
         if(state)
         {
             glEnable(GL_STENCIL_TEST);
@@ -422,18 +424,18 @@ void GLStateManager::setStencilTest(const bool state) noexcept
 
 void GLStateManager::enableStencilTest() noexcept
 {
-    if(_depthTestEnabled != true)
+    if(_stencilTestEnabled != true)
     {
-        _depthTestEnabled = true;
+        _stencilTestEnabled = true;
         glEnable(GL_STENCIL_TEST);
     }
 }
 
 void GLStateManager::disableStencilTest() noexcept
 {
-    if(_depthTestEnabled != false)
+    if(_stencilTestEnabled != false)
     {
-        _depthTestEnabled = false;
+        _stencilTestEnabled = false;
         glDisable(GL_STENCIL_TEST);
     }
 }
@@ -647,5 +649,380 @@ void GLStateManager::blendEquation(const uSys index, const GLenum equationColor,
         _blendingControls[index].equationColor = equationColor;
         _blendingControls[index].equationAlpha = equationAlpha;
         glBlendEquationSeparatei(index, equationColor, equationAlpha);
+    }
+}
+
+void GLStateManager::depthMask(const GLboolean depthMask) noexcept
+{
+    if(_depthControl.depthMask != depthMask)
+    {
+        _depthControl.depthMask = depthMask;
+        glDepthMask(depthMask);
+    }
+}
+
+void GLStateManager::depthFunc(const GLenum depthCompareFunc) noexcept
+{
+    if(_depthControl.depthCompareFunc != depthCompareFunc)
+    {
+        _depthControl.depthCompareFunc = depthCompareFunc;
+        glDepthFunc(depthCompareFunc);
+    }
+}
+
+void GLStateManager::stencilMaskFront(const GLuint writeMask) noexcept
+{
+    if(_frontStencil.writeMask != writeMask)
+    {
+        _frontStencil.writeMask = writeMask;
+        glStencilMaskSeparate(GL_FRONT, writeMask);
+    }
+}
+
+void GLStateManager::stencilMaskBack(const GLuint writeMask) noexcept
+{
+    if(_backStencil.writeMask != writeMask)
+    {
+        _backStencil.writeMask = writeMask;
+        glStencilMaskSeparate(GL_BACK, writeMask);
+    }
+}
+
+void GLStateManager::stencilMaskFrontBack(const GLuint writeMask) noexcept
+{
+    int update = 0;
+    if(_frontStencil.writeMask != writeMask)
+    {
+        _frontStencil.writeMask = writeMask;
+        update |= 0x01;
+    }
+
+    if(_backStencil.writeMask != writeMask)
+    {
+        _backStencil.writeMask = writeMask;
+        update |= 0x02;
+    }
+
+    if(update == 0x01)
+    {
+        glStencilMaskSeparate(GL_FRONT, writeMask);
+    }
+    else if(update == 0x02)
+    {
+        glStencilMaskSeparate(GL_BACK, writeMask);
+    }
+    else if(update == 0x03)
+    {
+        glStencilMaskSeparate(GL_FRONT_AND_BACK, writeMask);
+    }
+}
+
+void GLStateManager::stencilMask(const GLuint writeMask) noexcept
+{
+    stencilMaskFrontBack(writeMask);
+}
+
+void GLStateManager::stencilMask(const GLenum face, const GLuint writeMask) noexcept
+{
+    switch(face)
+    {
+        case GL_FRONT:          stencilMaskFront(writeMask); break;
+        case GL_BACK:           stencilMaskBack(writeMask); break;
+        case GL_FRONT_AND_BACK: stencilMaskFrontBack(writeMask); break;
+        default:                glStencilMaskSeparate(face, writeMask); break;
+    }
+}
+
+void GLStateManager::stencilOpFront(const GLenum stencilFail, const GLenum depthFail, const GLenum pass) noexcept
+{
+    if(_frontStencil.stencilFailOp != stencilFail ||
+       _frontStencil.stencilDepthFailOp != depthFail ||
+       _frontStencil.stencilPassOp != pass)
+    {
+        _frontStencil.stencilFailOp = stencilFail;
+        _frontStencil.stencilDepthFailOp = depthFail;
+        _frontStencil.stencilPassOp = pass;
+        glStencilOpSeparate(GL_FRONT, stencilFail, depthFail, pass);
+    }
+}
+
+void GLStateManager::stencilOpBack(const GLenum stencilFail, const GLenum depthFail, const GLenum pass) noexcept
+{
+    if(_backStencil.stencilFailOp != stencilFail ||
+       _backStencil.stencilDepthFailOp != depthFail ||
+       _backStencil.stencilPassOp != pass)
+    {
+        _backStencil.stencilFailOp = stencilFail;
+        _backStencil.stencilDepthFailOp = depthFail;
+        _backStencil.stencilPassOp = pass;
+        glStencilOpSeparate(GL_BACK, stencilFail, depthFail, pass);
+    }
+}
+
+void GLStateManager::stencilOpFrontBack(const GLenum stencilFail, const GLenum depthFail, const GLenum pass) noexcept
+{
+    int update = 0;
+    if(_frontStencil.stencilFailOp != stencilFail ||
+       _frontStencil.stencilDepthFailOp != depthFail ||
+       _frontStencil.stencilPassOp != pass)
+    {
+        _frontStencil.stencilFailOp = stencilFail;
+        _frontStencil.stencilDepthFailOp = depthFail;
+        _frontStencil.stencilPassOp = pass;
+        update |= 0x01;
+    }
+
+    if(_backStencil.stencilFailOp != stencilFail ||
+       _backStencil.stencilDepthFailOp != depthFail ||
+       _backStencil.stencilPassOp != pass)
+    {
+        _backStencil.stencilFailOp = stencilFail;
+        _backStencil.stencilDepthFailOp = depthFail;
+        _backStencil.stencilPassOp = pass;
+        update |= 0x02;
+    }
+
+    if(update == 0x01)
+    {
+        glStencilOpSeparate(GL_FRONT, stencilFail, depthFail, pass);
+    }
+    else if(update == 0x02)
+    {
+        glStencilOpSeparate(GL_BACK, stencilFail, depthFail, pass);
+    }
+    else if(update == 0x03)
+    {
+        glStencilOpSeparate(GL_FRONT_AND_BACK, stencilFail, depthFail, pass);
+    }
+}
+
+void GLStateManager::stencilOp(const GLenum stencilFail, const GLenum depthFail, const GLenum pass) noexcept
+{
+    stencilOpFrontBack(stencilFail, depthFail, pass);
+}
+
+void GLStateManager::stencilOp(const GLenum face, const GLenum stencilFail, const GLenum depthFail, const GLenum pass) noexcept
+{
+    switch(face)
+    {
+        case GL_FRONT:          stencilOpFront(stencilFail, depthFail, pass); break;
+        case GL_BACK:           stencilOpBack(stencilFail, depthFail, pass); break;
+        case GL_FRONT_AND_BACK: stencilOpFrontBack(stencilFail, depthFail, pass); break;
+        default:                glStencilOpSeparate(face, stencilFail, depthFail, pass); break;
+    }
+}
+
+void GLStateManager::stencilFuncFront(const GLenum func, const GLint reference, const GLuint readMask) noexcept
+{
+    if(_frontStencil.compareFunc != func ||
+       _frontStencil.reference != reference ||
+       _frontStencil.readMask != readMask)
+    {
+        _frontStencil.compareFunc = func;
+        _frontStencil.reference = reference;
+        _frontStencil.readMask = readMask;
+        glStencilFuncSeparate(GL_FRONT, func, reference, readMask);
+    }
+}
+
+void GLStateManager::stencilFuncBack(const GLenum func, const GLint reference, const GLuint readMask) noexcept
+{
+    if(_backStencil.compareFunc != func ||
+       _backStencil.reference != reference ||
+       _backStencil.readMask != readMask)
+    {
+        _backStencil.compareFunc = func;
+        _backStencil.reference = reference;
+        _backStencil.readMask = readMask;
+        glStencilFuncSeparate(GL_BACK, func, reference, readMask);
+    }
+}
+
+void GLStateManager::stencilFuncFrontBack(const GLenum func, const GLint reference, const GLuint readMask) noexcept
+{
+    int update = 0;
+    if(_frontStencil.compareFunc != func ||
+       _frontStencil.reference != reference ||
+       _frontStencil.readMask != readMask)
+    {
+        _frontStencil.compareFunc = func;
+        _frontStencil.reference = reference;
+        _frontStencil.readMask = readMask;
+        update |= 0x01;
+    }
+
+    if(_backStencil.compareFunc != func ||
+       _backStencil.reference != reference ||
+       _backStencil.readMask != readMask)
+    {
+        _backStencil.compareFunc = func;
+        _backStencil.reference = reference;
+        _backStencil.readMask = readMask;
+        update |= 0x02;
+    }
+
+    if(update == 0x01)
+    {
+        glStencilFuncSeparate(GL_FRONT, func, reference, readMask);
+    }
+    else if(update == 0x02)
+    {
+        glStencilFuncSeparate(GL_BACK, func, reference, readMask);
+    }
+    else if(update == 0x03)
+    {
+        glStencilFuncSeparate(GL_FRONT_AND_BACK, func, reference, readMask);
+    }
+}
+
+void GLStateManager::stencilFunc(const GLenum func, const GLint reference, const GLuint readMask) noexcept
+{
+    stencilFuncFrontBack(func, reference, readMask);
+}
+
+void GLStateManager::stencilFunc(const GLenum face, const GLenum func, const GLint reference, const GLuint readMask) noexcept
+{
+    switch(face)
+    {
+        case GL_FRONT:          stencilFuncFront(func, reference, readMask); break;
+        case GL_BACK:           stencilFuncBack(func, reference, readMask); break;
+        case GL_FRONT_AND_BACK: stencilFuncFrontBack(func, reference, readMask); break;
+        default:                glStencilFuncSeparate(face, func, reference, readMask); break;
+    }
+}
+
+void GLStateManager::stencilFuncFront(const GLenum func, const GLuint readMask) noexcept
+{
+    if(_frontStencil.compareFunc != func ||
+        _frontStencil.readMask != readMask)
+    {
+        _frontStencil.compareFunc = func;
+        _frontStencil.readMask = readMask;
+        glStencilFuncSeparate(GL_FRONT, func, _frontStencil.reference, readMask);
+    }
+}
+
+void GLStateManager::stencilFuncBack(const GLenum func, const GLuint readMask) noexcept
+{
+    if(_backStencil.compareFunc != func ||
+        _backStencil.readMask != readMask)
+    {
+        _backStencil.compareFunc = func;
+        _backStencil.readMask = readMask;
+        glStencilFuncSeparate(GL_BACK, func, _backStencil.reference, readMask);
+    }
+}
+
+void GLStateManager::stencilFuncFrontBack(const GLenum func, const GLuint readMask) noexcept
+{
+    int update = 0;
+    if(_frontStencil.compareFunc != func ||
+        _frontStencil.readMask != readMask)
+    {
+        _frontStencil.compareFunc = func;
+        _frontStencil.readMask = readMask;
+        update |= 0x01;
+    }
+
+    if(_backStencil.compareFunc != func ||
+        _backStencil.readMask != readMask)
+    {
+        _backStencil.compareFunc = func;
+        _backStencil.readMask = readMask;
+        update |= 0x02;
+    }
+
+    if(update == 0x01)
+    {
+        glStencilFuncSeparate(GL_FRONT, func, _frontStencil.reference, readMask);
+    }
+    else if(update == 0x02)
+    {
+        glStencilFuncSeparate(GL_BACK, func, _backStencil.reference, readMask);
+    }
+    else if(update == 0x03)
+    {
+        glStencilFuncSeparate(GL_FRONT, func, _frontStencil.reference, readMask);
+        glStencilFuncSeparate(GL_BACK, func, _backStencil.reference, readMask);
+    }
+}
+
+void GLStateManager::stencilFunc(const GLenum func, const GLuint readMask) noexcept
+{
+    stencilFuncFrontBack(func, readMask);
+}
+
+void GLStateManager::stencilFunc(const GLenum face, const GLenum func, const GLuint readMask) noexcept
+{
+    switch(face)
+    {
+        case GL_FRONT:          stencilFuncFront(func, readMask); break;
+        case GL_BACK:           stencilFuncBack(func, readMask); break;
+        case GL_FRONT_AND_BACK: stencilFuncFrontBack(func, readMask); break;
+        default: break;
+    }
+}
+
+void GLStateManager::stencilRefFront(const GLint reference) noexcept
+{
+    if(_frontStencil.reference != reference)
+    {
+        _frontStencil.reference = reference;
+        glStencilFuncSeparate(GL_FRONT, _frontStencil.compareFunc, reference, _frontStencil.readMask);
+    }
+}
+
+void GLStateManager::stencilRefBack(const GLint reference) noexcept
+{
+    if(_backStencil.reference != reference)
+    {
+        _backStencil.reference = reference;
+        glStencilFuncSeparate(GL_BACK, _backStencil.compareFunc, reference, _backStencil.readMask);
+    }
+}
+
+void GLStateManager::stencilRefFrontBack(const GLint reference) noexcept
+{
+    int update = 0;
+    if(_frontStencil.reference != reference)
+    {
+        _frontStencil.reference = reference;
+        update |= 0x01;
+    }
+
+    if(_backStencil.reference != reference)
+    {
+        _backStencil.reference = reference;
+        update |= 0x02;
+    }
+
+    if(update == 0x01)
+    {
+        glStencilFuncSeparate(GL_FRONT, _frontStencil.compareFunc, reference, _frontStencil.readMask);
+    }
+    else if(update == 0x02)
+    {
+        glStencilFuncSeparate(GL_BACK, _backStencil.compareFunc, reference, _backStencil.readMask);
+    }
+    else if(update == 0x03)
+    {
+        glStencilFuncSeparate(GL_FRONT, _frontStencil.compareFunc, reference, _frontStencil.readMask);
+        glStencilFuncSeparate(GL_BACK, _backStencil.compareFunc, reference, _backStencil.readMask);
+    }
+}
+
+void GLStateManager::stencilRef(const GLint reference) noexcept
+{
+    stencilRefFrontBack(reference);
+}
+
+void GLStateManager::stencilRef(const GLenum face, const GLint reference) noexcept
+{
+    switch(face)
+    {
+        case GL_FRONT:          stencilRefFront(reference); break;
+        case GL_BACK:           stencilRefBack(reference); break;
+        case GL_FRONT_AND_BACK: stencilRefFrontBack(reference); break;
+        default: break;
     }
 }

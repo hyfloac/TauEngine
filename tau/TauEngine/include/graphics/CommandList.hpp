@@ -92,6 +92,27 @@ public:
     virtual void setPipelineState(const PipelineState& pipelineState) noexcept = 0;
 
     /**
+     * Sets the stencil reference target.
+     *
+     *   The stencil reference is used during the rendering to
+     * determine how to respond to a specific stencil value. This
+     * is used in combination with the values in the
+     * DepthStencilState.
+     *
+     *   The classic example would be to stencil out a shape with
+     * value `1` and leave everything else as `0`. Then you can
+     * setup the stencil state to render only where the stencil
+     * value is equal to the stencil ref. Then you can set the
+     * stencil ref separately and do one render pass for stencil
+     * values `1` and a separate render pass for stencil values `0`
+     * without having to build multiple stencil states.
+     *
+     * @param[in] stencilRef
+     *      The stencil reference value.
+     */
+    virtual void setStencilRef(uSys stencilRef) noexcept = 0;
+
+    /**
      * Sets the vertex array to render from.
      *
      * @param[in] va

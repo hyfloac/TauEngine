@@ -92,6 +92,11 @@ void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd)
     _glStateManager.bindShaderProgram(shaderProgram->programHandle());
 }
 
+void GLCommandQueue::_setStencilRef(const GLCL::CommandSetStencilRef& cmd) noexcept
+{
+    _glStateManager.stencilRef(cmd.stencilRef);
+}
+
 void GLCommandQueue::_setVertexArray(const GLCL::CommandSetVertexArray& cmd) noexcept
 {
     _glStateManager.bindVertexArray(cmd.vao);

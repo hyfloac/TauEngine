@@ -43,10 +43,13 @@ struct DepthControl final
 
 struct StencilControl final
 {
-    GLuint mask;
+    GLuint writeMask;
+    GLuint readMask;
+    GLint reference;
     GLenum stencilFailOp;
     GLenum stencilDepthFailOp;
-    GLenum stencilDepthPassOp;
+    GLenum stencilPassOp;
+    GLenum compareFunc;
 };
 }
 
@@ -75,8 +78,11 @@ private:
 
     GLState::BlendingControl _blendingControls[8];
 
-    bool _depthTestEnabled;
+    GLState::DepthControl _depthControl;
     bool _stencilTestEnabled;
+
+    GLState::StencilControl _frontStencil;
+    GLState::StencilControl _backStencil;
 public:
     GLStateManager() noexcept;
 
@@ -148,4 +154,42 @@ public:
 
     void blendEquation(uSys index, GLenum equation) noexcept;
     void blendEquation(uSys index, GLenum equationColor, GLenum equationAlpha) noexcept;
+
+    void depthMask(GLboolean depthMask) noexcept;
+    void depthFunc(GLenum depthCompareFunc) noexcept;
+
+    void stencilMaskFront(GLuint writeMask) noexcept;
+    void stencilMaskBack(GLuint writeMask) noexcept;
+    void stencilMaskFrontBack(GLuint writeMask) noexcept;
+
+    void stencilMask(GLuint writeMask) noexcept;
+    void stencilMask(GLenum face, GLuint writeMask) noexcept;
+
+    void stencilOpFront(GLenum stencilFail, GLenum depthFail, GLenum pass) noexcept;
+    void stencilOpBack(GLenum stencilFail, GLenum depthFail, GLenum pass) noexcept;
+    void stencilOpFrontBack(GLenum stencilFail, GLenum depthFail, GLenum pass) noexcept;
+
+    void stencilOp(GLenum stencilFail, GLenum depthFail, GLenum pass) noexcept;
+    void stencilOp(GLenum face, GLenum stencilFail, GLenum depthFail, GLenum pass) noexcept;
+
+    void stencilFuncFront(GLenum func, GLint reference, GLuint readMask) noexcept;
+    void stencilFuncBack(GLenum func, GLint reference, GLuint readMask) noexcept;
+    void stencilFuncFrontBack(GLenum func, GLint reference, GLuint readMask) noexcept;
+
+    void stencilFunc(GLenum func, GLint reference, GLuint readMask) noexcept;
+    void stencilFunc(GLenum face, GLenum func, GLint reference, GLuint readMask) noexcept;
+
+    void stencilFuncFront(GLenum func, GLuint readMask) noexcept;
+    void stencilFuncBack(GLenum func, GLuint readMask) noexcept;
+    void stencilFuncFrontBack(GLenum func, GLuint readMask) noexcept;
+
+    void stencilFunc(GLenum func, GLuint readMask) noexcept;
+    void stencilFunc(GLenum face, GLenum func, GLuint readMask) noexcept;
+
+    void stencilRefFront(GLint reference) noexcept;
+    void stencilRefBack(GLint reference) noexcept;
+    void stencilRefFrontBack(GLint reference) noexcept;
+
+    void stencilRef(GLint reference) noexcept;
+    void stencilRef(GLenum face, GLint reference) noexcept;
 };
