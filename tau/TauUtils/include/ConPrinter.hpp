@@ -19,11 +19,13 @@ class ConPrinter final
 public:
     static i32 print(const char* str) noexcept { return fputs(str, stdout); }
     static i32 print(const char c) noexcept { return fputc(c, stdout); }
-    static i32 print(const c8 c) noexcept { return fputc(c, stdout); }
+    static i32 print(const wchar_t* str) noexcept { return fputws(str, stdout); }
+    static i32 print(const wchar_t c) noexcept { return fputwc(c, stdout); }
 
     static i32 print(FILE* const file, const char* str) noexcept { return fputs(str, file); }
     static i32 print(FILE* const file, const char c) noexcept { return fputc(c, file); }
-    static i32 print(FILE* const file, const c8 c) noexcept { return fputc(c, file); }
+    static i32 print(FILE* const file, const wchar_t* str) noexcept { return fputws(str, file); }
+    static i32 print(FILE* const file, const wchar_t c) noexcept { return fputwc(c, file); }
 
     static i32 print(const i8  d) noexcept { return fprintf(stdout, "%d", d); }
     static i32 print(const i16 d) noexcept { return fprintf(stdout, "%d", d); }
@@ -62,11 +64,23 @@ public:
     static i32 print(const DynString& str) noexcept { return fputs(str.c_str(), stdout); }
     static i32 print(const DynStringView& str) noexcept { return fprintf(stdout, "%.*s", static_cast<int>(str.length()), str.c_str()); }
 
+    static i32 print(const WConstExprString& str) noexcept { return fputws(str.c_str(), stdout); }
+    static i32 print(const WString& str) noexcept { return fputws(str.c_str(), stdout); }
+    static i32 print(const WStringView& str) noexcept { return fwprintf(stdout, L"%.*s", static_cast<int>(str.length()), str.c_str()); }
+    static i32 print(const WDynString& str) noexcept { return fputws(str.c_str(), stdout); }
+    static i32 print(const WDynStringView& str) noexcept { return fwprintf(stdout, L"%.*s", static_cast<int>(str.length()), str.c_str()); }
+
     static i32 print(FILE* const file, const ConstExprString& str) noexcept { return fputs(str.c_str(), file); }
     static i32 print(FILE* const file, const String& str) noexcept { return fputs(str.c_str(), file); }
     static i32 print(FILE* const file, const StringView& str) noexcept { return fprintf(file, "%.*s", static_cast<int>(str.length()), str.c_str()); }
     static i32 print(FILE* const file, const DynString& str) noexcept { return fputs(str.c_str(), file); }
     static i32 print(FILE* const file, const DynStringView& str) noexcept { return fprintf(file, "%.*s", static_cast<int>(str.length()), str.c_str()); }
+
+    static i32 print(FILE* const file, const WConstExprString& str) noexcept { return fputws(str.c_str(), file); }
+    static i32 print(FILE* const file, const WString& str) noexcept { return fputws(str.c_str(), file); }
+    static i32 print(FILE* const file, const WStringView& str) noexcept { return fwprintf(file, L"%.*s", static_cast<int>(str.length()), str.c_str()); }
+    static i32 print(FILE* const file, const WDynString& str) noexcept { return fputws(str.c_str(), file); }
+    static i32 print(FILE* const file, const WDynStringView& str) noexcept { return fwprintf(file, L"%.*s", static_cast<int>(str.length()), str.c_str()); }
 
     template<typename _T>
     static i32 print(const _T& t) noexcept { return TPrinter<_T>::print(t); }

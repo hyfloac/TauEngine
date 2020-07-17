@@ -98,7 +98,7 @@ public:
 #define _x_STR0(_X) #_X
 #define _x_STR(_X) _x_STR0(_X)
 
-#define Assert(_EXPR) \
+#define UTAssert(_EXPR) \
     if(!(_EXPR)) { \
         Console::Instance().setErrColor(Console::BrightRed, Console::Black); \
         fprintf(stderr, "Assert Failed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::fail(); \
@@ -108,6 +108,8 @@ public:
         fprintf(stdout, "Assert Passed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::pass(); \
         Console::Instance().resetOutColor(); \
     }
+
+#define Assert(_EXPR) UTAssert(_EXPR)
 
 template<typename _T>
 static inline bool epsilonEquals(const _T x, const _T y, const _T epsilon = 1E-5)

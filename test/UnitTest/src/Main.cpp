@@ -37,6 +37,7 @@ int main(int argCount, char* args[]) noexcept
     printf("\nString Tests:\n\n");
     StringTest::stringWrapTest();
     StringTest::stringViewTest();
+    StringTest::dynStringViewTest();
     StringTest::dynStringTest();
     printf("String Tests Finished\n");
 

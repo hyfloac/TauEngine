@@ -74,11 +74,11 @@ const _ReferenceCountDataObject<_ToT>& RCDOCast(const _ReferenceCountDataObject<
 
 template<typename _ToT, typename _FromT>
 _ReferenceCountDataObject<_ToT>& RCDOCast(_ReferenceCountDataObject<_FromT>& obj) noexcept
-{ return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&>(obj); }
+{ return reinterpret_cast<_ReferenceCountDataObject<_ToT>&>(obj); }
 
 template<typename _ToT, typename _FromT>
 _ReferenceCountDataObject<_ToT>&& RCDOCast(_ReferenceCountDataObject<_FromT>&& obj) noexcept
-{ return reinterpret_cast<const _ReferenceCountDataObject<_ToT>&&>(obj); }
+{ return reinterpret_cast<_ReferenceCountDataObject<_ToT>&&>(obj); }
 
 template<typename _ToT, typename _FromT>
 const _SWReferenceCount<_ToT>& SWRCCast(const _SWReferenceCount<_FromT>& obj) noexcept
@@ -86,11 +86,11 @@ const _SWReferenceCount<_ToT>& SWRCCast(const _SWReferenceCount<_FromT>& obj) no
 
 template<typename _ToT, typename _FromT>
 _SWReferenceCount<_ToT>& SWRCCast(_SWReferenceCount<_FromT>& obj) noexcept
-{ return reinterpret_cast<const _SWReferenceCount<_ToT>&>(obj); }
+{ return reinterpret_cast<_SWReferenceCount<_ToT>&>(obj); }
 
 template<typename _ToT, typename _FromT>
 _SWReferenceCount<_ToT>&& SWRCCast(_SWReferenceCount<_FromT>&& obj) noexcept
-{ return reinterpret_cast<const _SWReferenceCount<_ToT>&&>(obj); }
+{ return reinterpret_cast<_SWReferenceCount<_ToT>&&>(obj); }
 
 }
 
