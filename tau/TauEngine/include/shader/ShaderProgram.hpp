@@ -2,22 +2,10 @@
 
 #include <Objects.hpp>
 #include <Safeties.hpp>
-#include <IFile.hpp>
 #include "DLL.hpp"
+#include "graphics/_GraphicsOpaqueObjects.hpp"
 
-class IGraphicsInterface;
-class IRenderingContext;
-class IShader;
-
-class TAU_DLL TAU_NOVTABLE IShaderProgram
-{
-    DEFAULT_CONSTRUCT_PO(IShaderProgram);
-    DEFAULT_DESTRUCT_VI(IShaderProgram);
-    DEFAULT_CM_PO(IShaderProgram);
-public:
-    virtual void bind(IRenderingContext& context) noexcept = 0;
-    virtual void unbind(IRenderingContext& context) noexcept = 0;
-};
+class IFile;
 
 struct ShaderProgramArgs final
 {
@@ -33,16 +21,15 @@ public:
     enum class Error
     {
         NoError = 0,
+        InvalidShaderStage,
         CompileError,
         InvalidFile,
         InvalidInclude,
         SystemMemoryAllocationFailure,
-        DriverMemoryAllocationFailure
+        DriverMemoryAllocationFailure,
+        InternalError
     };
 public:
-    [[nodiscard]] virtual IShaderProgram* build(const ShaderProgramArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IShaderProgram* build(const ShaderProgramArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IShaderProgram> buildCPPRef(const ShaderProgramArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IShaderProgram> buildTauRef(const ShaderProgramArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IShaderProgram> buildTauSRef(const ShaderProgramArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual ShaderProgram build(const ShaderProgramArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    virtual void destroy(ShaderProgram program) noexcept = 0;
 };

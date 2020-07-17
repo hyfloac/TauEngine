@@ -4,12 +4,14 @@ LayerStack::~LayerStack() noexcept
 {
     for(ILayer* layer : _layers)
     {
+        layer->onDetach();
         delete layer;
     }
 
-    for(ILayer* layer : _overlayLayers)
+    for(ILayer* overlay : _overlayLayers)
     {
-        delete layer;
+        overlay->onDetach();
+        delete overlay;
     }
 }
 

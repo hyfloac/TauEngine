@@ -35,7 +35,7 @@ class Event;
 class TAU_DLL TAU_NOVTABLE ILayer
 {
     DEFAULT_DESTRUCT_VI(ILayer);
-    DELETE_COPY(ILayer);
+    DEFAULT_CM_PO(ILayer);
 protected:
     bool _visible;
 protected:

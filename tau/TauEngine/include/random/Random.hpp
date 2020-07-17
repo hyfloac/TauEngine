@@ -7,16 +7,18 @@ template<typename _RNG>
 class Random final
 {
     DEFAULT_DESTRUCT(Random);
-    DEFAULT_COPY(Random);
+    DEFAULT_CM(Random);
 private:
     _RNG& _rng;
 public:
-    inline Random(_RNG& rng) noexcept
+    Random(_RNG& rng) noexcept
         : _rng(rng)
     { }
 
     [[nodiscard]] u64 seed() const noexcept { return _rng.seed(); }
+
     void seed(const u64 seed) const noexcept { _rng.seed(seed); }
+
     [[nodiscard]] u64 rand() noexcept { return _rng.rand(); }
 
     [[nodiscard]] u8  randomU8 () noexcept { return static_cast<u8> (_rng.rand()); }

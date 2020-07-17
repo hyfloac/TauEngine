@@ -33,11 +33,26 @@ struct BlendingControl final
     GLenum equationColor;
     GLenum equationAlpha;
 };
+
+struct DepthControl final
+{
+    bool active;
+    GLboolean depthMask;
+    GLenum depthCompareFunc;
+};
+
+struct StencilControl final
+{
+    GLuint mask;
+    GLenum stencilFailOp;
+    GLenum stencilDepthFailOp;
+    GLenum stencilDepthPassOp;
+};
 }
 
-class TAU_DLL GLStateHelper final
+class TAU_DLL GLStateManager final
 {
-    DELETE_CM(GLStateHelper);
+    DELETE_CM(GLStateManager);
 private:
     GLuint _vao;
 
@@ -59,10 +74,13 @@ private:
     GLuint _activeProgram;
 
     GLState::BlendingControl _blendingControls[8];
-public:
-    GLStateHelper() noexcept;
 
-    ~GLStateHelper() noexcept;
+    bool _depthTestEnabled;
+    bool _stencilTestEnabled;
+public:
+    GLStateManager() noexcept;
+
+    ~GLStateManager() noexcept;
 
     [[nodiscard]] GLuint maxUniformBufferBindings() const noexcept { return _maxUniformBufferBindings; }
     [[nodiscard]] GLuint maxShaderStorageBufferBindings() const noexcept { return _maxShaderStorageBufferBindings; }
@@ -101,6 +119,14 @@ public:
 
     void disableBlending() noexcept;
     void disableBlending(uSys index) noexcept;
+
+    void setDepthTest(bool state) noexcept;
+    void enableDepthTest() noexcept;
+    void disableDepthTest() noexcept;
+
+    void setStencilTest(bool state) noexcept;
+    void enableStencilTest() noexcept;
+    void disableStencilTest() noexcept;
 
     void set(GLenum capability, bool state) noexcept;
     void set(GLenum capability, uSys index, bool state) noexcept;

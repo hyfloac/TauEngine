@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
+class GLStateManager;
+
 struct GLDepthStencilArgs final
 {
     DEFAULT_CONSTRUCT_PU(GLDepthStencilArgs);
@@ -29,8 +31,8 @@ public:
         { }
     };
 public:
-    void (* GLAPIENTRY depthTestControl)(GLenum);
-    void (* GLAPIENTRY stencilTestControl)(GLenum);
+    bool enableDepthTest;
+    bool enableStencilTest;
 
     GLboolean depthWriteMask;
     GLenum depthCompareFunc;
@@ -41,15 +43,15 @@ public:
     GLStencilOpArgs frontFace;
     GLStencilOpArgs backFace;
 public:
-    GLDepthStencilArgs(void(* const GLAPIENTRY depthTestControl)(GLenum), void(* const GLAPIENTRY stencilTestControl)(GLenum), const GLboolean depthWriteMask, const GLenum depthCompareFunc, const GLuint stencilReadMask, const GLuint stencilWriteMask, const GLStencilOpArgs& frontFace, const GLStencilOpArgs& backFace) noexcept
-        : depthTestControl{ depthTestControl }
-        , stencilTestControl{ stencilTestControl }
-        , depthWriteMask(depthWriteMask)
-        , depthCompareFunc(depthCompareFunc)
-        , stencilReadMask(stencilReadMask)
-        , stencilWriteMask(stencilWriteMask)
-        , frontFace(frontFace)
-        , backFace(backFace)
+    GLDepthStencilArgs(const bool _enableDepthTest, const bool _enableStencilTest, const GLboolean _depthWriteMask, const GLenum _depthCompareFunc, const GLuint _stencilReadMask, const GLuint _stencilWriteMask, const GLStencilOpArgs& _frontFace, const GLStencilOpArgs& _backFace) noexcept
+        : enableDepthTest(_enableDepthTest)
+        , enableStencilTest(_enableStencilTest)
+        , depthWriteMask(_depthWriteMask)
+        , depthCompareFunc(_depthCompareFunc)
+        , stencilReadMask(_stencilReadMask)
+        , stencilWriteMask(_stencilWriteMask)
+        , frontFace(_frontFace)
+        , backFace(_backFace)
     { }
 };
 
@@ -66,7 +68,7 @@ public:
         , _glArgs(glArgs)
     { }
 
-    void apply() const noexcept;
+    void apply(GLStateManager& glStateHelper) const noexcept;
 };
 
 class GLDepthStencilStateBuilder final : public IDepthStencilStateBuilder

@@ -16,7 +16,7 @@ UniformBufferView DX10BufferViewBuilder::build(const UniformBufferViewArgs& args
     DX10ResourceBuffer* const buffer = static_cast<DX10ResourceBuffer*>(resource);
 
     DX10DescriptorTable* const dxTable = table.get<DX10DescriptorTable>();
-    ID3D10Buffer** const dxBuffer = new(dxTable->placement() + sizeof(ID3D10Buffer*) * tableIndex) ID3D10Buffer* (buffer->d3dBuffer());
+    ID3D10Buffer** const dxBuffer = new(dxTable->bufferViews() + tableIndex) ID3D10Buffer* (buffer->d3dBuffer());
     buffer->d3dBuffer()->AddRef();
 
     ERROR_CODE_V(Error::NoError, dxBuffer);

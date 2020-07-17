@@ -5,6 +5,8 @@
 #include "gl/GLTextureView.hpp"
 #include "graphics/PipelineState.hpp"
 #include "gl/GLBlendingState.hpp"
+#include "gl/GLDepthStencilState.hpp"
+#include "gl/GLShaderProgram.hpp"
 #include "TauConfig.hpp"
 
 void GLCommandQueue::executeCommandLists(uSys count, const ICommandList** lists) noexcept
@@ -81,17 +83,23 @@ void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd)
     _currentPipelineState = &cmd.pipelineState;
 
     const GLBlendingState* const blendingState = RTT_CAST(_currentPipelineState->args().blendingState.get(), GLBlendingState);
-    blendingState->apply(_glStateHelper);
+    blendingState->apply(_glStateManager);
+
+    const GLDepthStencilState* const depthStencilState = RTT_CAST(_currentPipelineState->args().depthStencilState.get(), GLDepthStencilState);
+    depthStencilState->apply(_glStateManager);
+
+    const GLShaderProgram* shaderProgram = _currentPipelineState->args().shaderProgram.get<GLShaderProgram>();
+    _glStateManager.bindShaderProgram(shaderProgram->programHandle());
 }
 
 void GLCommandQueue::_setVertexArray(const GLCL::CommandSetVertexArray& cmd) noexcept
 {
-    _glStateHelper.bindVertexArray(cmd.vao);
+    _glStateManager.bindVertexArray(cmd.vao);
 }
 
 void GLCommandQueue::_setIndexBuffer(const GLCL::CommandSetIndexBuffer& cmd) noexcept
 {
-    _glStateHelper.bindElementArrayBuffer(cmd.ibo);
+    _glStateManager.bindElementArrayBuffer(cmd.ibo);
 }
 
 void GLCommandQueue::_setGDescriptorLayout(const GLCL::CommandSetGDescriptorLayout& cmd) noexcept
@@ -122,7 +130,7 @@ void GLCommandQueue::_setGDescriptorTable(const GLCL::CommandSetGDescriptorTable
         for(uSys i = 0; i < table->count(); ++i)
         {
             GLTextureView* const texView = table->texViews()[i];
-            _glStateHelper.bindTexture(texView->target(), texView->texture()->texture(), i + begin);
+            _glStateManager.bindTexture(texView->target(), texView->texture()->texture(), i + begin);
         }
     }
     else if(table->type() == DescriptorType::UniformBufferView)
@@ -137,7 +145,7 @@ void GLCommandQueue::_setGDescriptorTable(const GLCL::CommandSetGDescriptorTable
 
         for(uSys i = 0; i < table->count(); ++i)
         {
-            _glStateHelper.bindUniformBufferBase(begin + i, table->uniViews()[i]);
+            _glStateManager.bindUniformBufferBase(begin + i, table->uniViews()[i]);
         }
     }
 }

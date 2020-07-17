@@ -1,6 +1,6 @@
-#include "gl/GLStateHelper.hpp"
+#include "gl/GLStateManager.hpp"
 
-GLStateHelper::GLStateHelper() noexcept
+GLStateManager::GLStateManager() noexcept
     : _vao(0)
     , _arrayBuffer(0)
     , _elementArrayBuffer(0)
@@ -14,7 +14,8 @@ GLStateHelper::GLStateHelper() noexcept
     , _textureBindings(null)
     , _activeTextureUnit(0)
     , _activeProgram(0)
-    , _blendingActive { false, false, false, false, false, false, false, false }
+    , _depthTestEnabled(false)
+    , _stencilTestEnabled(false)
 {
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxUniformBufferBindings));
     glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxShaderStorageBufferBindings));
@@ -23,16 +24,27 @@ GLStateHelper::GLStateHelper() noexcept
     _uniformBufferBaseBindings = new GLState::BufferBaseBinding[_maxUniformBufferBindings];
     _shaderStorageBufferBaseBindings = new GLState::BufferBaseBinding[_maxShaderStorageBufferBindings];
     _textureBindings = new GLState::TextureBinding[_maxTextureBindings];
+
+    for(uSys i = 0; i < 8; ++i)
+    {
+        _blendingControls[0].active = false;
+        _blendingControls[0].srcColor = GL_ONE;
+        _blendingControls[0].srcAlpha = GL_ZERO;
+        _blendingControls[0].destColor = GL_ONE;
+        _blendingControls[0].destAlpha = GL_ZERO;
+        _blendingControls[0].equationColor = GL_FUNC_ADD;
+        _blendingControls[0].equationAlpha = GL_FUNC_ADD;
+    }
 }
 
-GLStateHelper::~GLStateHelper() noexcept
+GLStateManager::~GLStateManager() noexcept
 {
     delete[] _uniformBufferBaseBindings;
     delete[] _shaderStorageBufferBaseBindings;
     delete[] _textureBindings;
 }
 
-void GLStateHelper::bindVertexArray(const GLuint vao) noexcept
+void GLStateManager::bindVertexArray(const GLuint vao) noexcept
 {
     if(vao != _vao)
     {
@@ -41,7 +53,7 @@ void GLStateHelper::bindVertexArray(const GLuint vao) noexcept
     }
 }
 
-void GLStateHelper::bindArrayBuffer(const GLuint buffer) noexcept
+void GLStateManager::bindArrayBuffer(const GLuint buffer) noexcept
 {
     if(buffer != _arrayBuffer)
     {
@@ -50,7 +62,7 @@ void GLStateHelper::bindArrayBuffer(const GLuint buffer) noexcept
     }
 }
 
-void GLStateHelper::bindElementArrayBuffer(const GLuint buffer) noexcept
+void GLStateManager::bindElementArrayBuffer(const GLuint buffer) noexcept
 {
     if(buffer != _elementArrayBuffer)
     {
@@ -59,7 +71,7 @@ void GLStateHelper::bindElementArrayBuffer(const GLuint buffer) noexcept
     }
 }
 
-void GLStateHelper::bindUniformBuffer(const GLuint buffer) noexcept
+void GLStateManager::bindUniformBuffer(const GLuint buffer) noexcept
 {
     if(buffer != _uniformBuffer)
     {
@@ -68,7 +80,7 @@ void GLStateHelper::bindUniformBuffer(const GLuint buffer) noexcept
     }
 }
 
-void GLStateHelper::bindShaderStorageBuffer(const GLuint buffer) noexcept
+void GLStateManager::bindShaderStorageBuffer(const GLuint buffer) noexcept
 {
     if(buffer != _shaderStorageBuffer)
     {
@@ -77,7 +89,7 @@ void GLStateHelper::bindShaderStorageBuffer(const GLuint buffer) noexcept
     }
 }
 
-void GLStateHelper::bindBuffer(const GLenum target, const GLuint buffer) noexcept
+void GLStateManager::bindBuffer(const GLenum target, const GLuint buffer) noexcept
 {
     switch(target)
     {
@@ -89,7 +101,7 @@ void GLStateHelper::bindBuffer(const GLenum target, const GLuint buffer) noexcep
     }
 }
 
-void GLStateHelper::bindUniformBufferBase(const GLuint index, const GLuint buffer) noexcept
+void GLStateManager::bindUniformBufferBase(const GLuint index, const GLuint buffer) noexcept
 {
     if(index > _maxUniformBufferBindings)
     { return; }
@@ -114,7 +126,7 @@ void GLStateHelper::bindUniformBufferBase(const GLuint index, const GLuint buffe
     }
 }
 
-void GLStateHelper::bindShaderStorageBufferBase(const GLuint index, const GLuint buffer) noexcept
+void GLStateManager::bindShaderStorageBufferBase(const GLuint index, const GLuint buffer) noexcept
 {
     if(index > _maxShaderStorageBufferBindings)
     { return; }
@@ -139,7 +151,7 @@ void GLStateHelper::bindShaderStorageBufferBase(const GLuint index, const GLuint
     }
 }
 
-void GLStateHelper::bindUniformBufferRange(const GLuint index, const GLuint buffer, const GLintptr offset, const GLsizeiptr size) noexcept
+void GLStateManager::bindUniformBufferRange(const GLuint index, const GLuint buffer, const GLintptr offset, const GLsizeiptr size) noexcept
 {
     if(index > _maxUniformBufferBindings)
     { return; }
@@ -164,7 +176,7 @@ void GLStateHelper::bindUniformBufferRange(const GLuint index, const GLuint buff
     }
 }
 
-void GLStateHelper::bindShaderStorageBufferRange(const GLuint index, const GLuint buffer, const GLintptr offset, const GLsizeiptr size) noexcept
+void GLStateManager::bindShaderStorageBufferRange(const GLuint index, const GLuint buffer, const GLintptr offset, const GLsizeiptr size) noexcept
 {
     if(index > _maxShaderStorageBufferBindings)
     { return; }
@@ -189,7 +201,7 @@ void GLStateHelper::bindShaderStorageBufferRange(const GLuint index, const GLuin
     }
 }
 
-void GLStateHelper::bindBufferBase(const GLenum target, const GLuint index, const GLuint buffer) noexcept
+void GLStateManager::bindBufferBase(const GLenum target, const GLuint index, const GLuint buffer) noexcept
 {
     switch(target)
     {
@@ -199,7 +211,7 @@ void GLStateHelper::bindBufferBase(const GLenum target, const GLuint index, cons
     }
 }
 
-void GLStateHelper::bindBufferRange(const GLenum target, const GLuint index, const GLuint buffer, const GLintptr offset, const GLsizeiptr size) noexcept
+void GLStateManager::bindBufferRange(const GLenum target, const GLuint index, const GLuint buffer, const GLintptr offset, const GLsizeiptr size) noexcept
 {
     switch(target)
     {
@@ -209,7 +221,7 @@ void GLStateHelper::bindBufferRange(const GLenum target, const GLuint index, con
     }
 }
 
-void GLStateHelper::activeTexture(const uSys unit) noexcept
+void GLStateManager::activeTexture(const uSys unit) noexcept
 {
     if(unit > _maxTextureBindings)
     { return; }
@@ -221,7 +233,7 @@ void GLStateHelper::activeTexture(const uSys unit) noexcept
     }
 }
 
-void GLStateHelper::bindTexture(const GLenum target, const GLuint texture) noexcept
+void GLStateManager::bindTexture(const GLenum target, const GLuint texture) noexcept
 {
     GLState::TextureBinding& binding = _textureBindings[_activeTextureUnit];
 
@@ -233,7 +245,7 @@ void GLStateHelper::bindTexture(const GLenum target, const GLuint texture) noexc
     }
 }
 
-void GLStateHelper::bindTexture(const GLenum target, const GLuint texture, const uSys unit) noexcept
+void GLStateManager::bindTexture(const GLenum target, const GLuint texture, const uSys unit) noexcept
 {
     if(unit > _maxTextureBindings)
     { return; }
@@ -254,7 +266,7 @@ void GLStateHelper::bindTexture(const GLenum target, const GLuint texture, const
     }
 }
 
-void GLStateHelper::bindShaderProgram(const GLuint program) noexcept
+void GLStateManager::bindShaderProgram(const GLuint program) noexcept
 {
     if(program != _activeProgram)
     {
@@ -263,7 +275,7 @@ void GLStateHelper::bindShaderProgram(const GLuint program) noexcept
     }
 }
 
-void GLStateHelper::setBlending(const bool state) noexcept
+void GLStateManager::setBlending(const bool state) noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -288,7 +300,7 @@ void GLStateHelper::setBlending(const bool state) noexcept
     }
 }
 
-void GLStateHelper::setBlending(const uSys index, const bool state) noexcept
+void GLStateManager::setBlending(const uSys index, const bool state) noexcept
 {
     if(_blendingControls[index].active != state)
     {
@@ -304,7 +316,7 @@ void GLStateHelper::setBlending(const uSys index, const bool state) noexcept
     }
 }
 
-void GLStateHelper::enableBlending() noexcept
+void GLStateManager::enableBlending() noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -322,7 +334,7 @@ void GLStateHelper::enableBlending() noexcept
     }
 }
 
-void GLStateHelper::enableBlending(const uSys index) noexcept
+void GLStateManager::enableBlending(const uSys index) noexcept
 {
     if(_blendingControls[index].active != true)
     {
@@ -331,7 +343,7 @@ void GLStateHelper::enableBlending(const uSys index) noexcept
     }
 }
 
-void GLStateHelper::disableBlending() noexcept
+void GLStateManager::disableBlending() noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -349,7 +361,7 @@ void GLStateHelper::disableBlending() noexcept
     }
 }
 
-void GLStateHelper::disableBlending(const uSys index) noexcept
+void GLStateManager::disableBlending(const uSys index) noexcept
 {
     if(_blendingControls[index].active != false)
     {
@@ -358,11 +370,81 @@ void GLStateHelper::disableBlending(const uSys index) noexcept
     }
 }
 
-void GLStateHelper::set(const GLenum capability, const bool state) noexcept
+void GLStateManager::setDepthTest(const bool state) noexcept
+{
+    if(_depthTestEnabled != state)
+    {
+        _depthTestEnabled = state;
+        if(state)
+        {
+            glEnable(GL_DEPTH_TEST);
+        }
+        else
+        {
+            glDisable(GL_DEPTH_TEST);
+        }
+    }
+}
+
+void GLStateManager::enableDepthTest() noexcept
+{
+    if(_depthTestEnabled != true)
+    {
+        _depthTestEnabled = true;
+        glEnable(GL_DEPTH_TEST);
+    }
+}
+
+void GLStateManager::disableDepthTest() noexcept
+{
+    if(_depthTestEnabled != false)
+    {
+        _depthTestEnabled = false;
+        glDisable(GL_DEPTH_TEST);
+    }
+}
+
+void GLStateManager::setStencilTest(const bool state) noexcept
+{
+    if(_depthTestEnabled != state)
+    {
+        _depthTestEnabled = state;
+        if(state)
+        {
+            glEnable(GL_STENCIL_TEST);
+        }
+        else
+        {
+            glDisable(GL_STENCIL_TEST);
+        }
+    }
+}
+
+void GLStateManager::enableStencilTest() noexcept
+{
+    if(_depthTestEnabled != true)
+    {
+        _depthTestEnabled = true;
+        glEnable(GL_STENCIL_TEST);
+    }
+}
+
+void GLStateManager::disableStencilTest() noexcept
+{
+    if(_depthTestEnabled != false)
+    {
+        _depthTestEnabled = false;
+        glDisable(GL_STENCIL_TEST);
+    }
+}
+
+void GLStateManager::set(const GLenum capability, const bool state) noexcept
 {
     switch(capability)
     {
         case GL_BLEND: setBlending(state); break;
+        case GL_DEPTH_TEST: setDepthTest(state); break;
+        case GL_STENCIL_TEST: setStencilTest(state); break;
         default:
             if(state)
             {
@@ -376,11 +458,13 @@ void GLStateHelper::set(const GLenum capability, const bool state) noexcept
     }
 }
 
-void GLStateHelper::set(const GLenum capability, const uSys index, const bool state) noexcept
+void GLStateManager::set(const GLenum capability, const uSys index, const bool state) noexcept
 {
     switch(capability)
     {
         case GL_BLEND: setBlending(index, state); break;
+        case GL_DEPTH_TEST: setDepthTest(state); break;
+        case GL_STENCIL_TEST: setStencilTest(state); break;
         default:
             if(state)
             {
@@ -394,43 +478,51 @@ void GLStateHelper::set(const GLenum capability, const uSys index, const bool st
     }
 }
 
-void GLStateHelper::enable(const GLenum capability) noexcept
+void GLStateManager::enable(const GLenum capability) noexcept
 {
     switch(capability)
     {
         case GL_BLEND: enableBlending(); break;
+        case GL_DEPTH_TEST: enableDepthTest(); break;
+        case GL_STENCIL_TEST: enableStencilTest(); break;
         default: glEnable(capability); break;
     }
 }
 
-void GLStateHelper::enable(const GLenum capability, const uSys index) noexcept
+void GLStateManager::enable(const GLenum capability, const uSys index) noexcept
 {
     switch(capability)
     {
         case GL_BLEND: enableBlending(index); break;
+        case GL_DEPTH_TEST: enableDepthTest(); break;
+        case GL_STENCIL_TEST: enableStencilTest(); break;
         default: glEnablei(capability, index); break;
     }
 }
 
-void GLStateHelper::disable(const GLenum capability) noexcept
+void GLStateManager::disable(const GLenum capability) noexcept
 {
     switch(capability)
     {
         case GL_BLEND: disableBlending(); break;
+        case GL_DEPTH_TEST: disableDepthTest(); break;
+        case GL_STENCIL_TEST: disableStencilTest(); break;
         default: glDisable(capability); break;
     }
 }
 
-void GLStateHelper::disable(const GLenum capability, const uSys index) noexcept
+void GLStateManager::disable(const GLenum capability, const uSys index) noexcept
 {
     switch(capability)
     {
         case GL_BLEND: disableBlending(index); break;
+        case GL_DEPTH_TEST: disableDepthTest(); break;
+        case GL_STENCIL_TEST: disableStencilTest(); break;
         default: glDisablei(capability, index); break;
     }
 }
 
-void GLStateHelper::blendFunc(const GLenum src, const GLenum dest) noexcept
+void GLStateManager::blendFunc(const GLenum src, const GLenum dest) noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -452,7 +544,7 @@ void GLStateHelper::blendFunc(const GLenum src, const GLenum dest) noexcept
     }
 }
 
-void GLStateHelper::blendFunc(const GLenum srcColor, const GLenum srcAlpha, const GLenum destColor, const GLenum destAlpha) noexcept
+void GLStateManager::blendFunc(const GLenum srcColor, const GLenum srcAlpha, const GLenum destColor, const GLenum destAlpha) noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -474,7 +566,7 @@ void GLStateHelper::blendFunc(const GLenum srcColor, const GLenum srcAlpha, cons
     }
 }
 
-void GLStateHelper::blendFunc(const uSys index, const GLenum src, const GLenum dest) noexcept
+void GLStateManager::blendFunc(const uSys index, const GLenum src, const GLenum dest) noexcept
 {
     if(_blendingControls[index].srcColor  != src  || _blendingControls[index].srcAlpha  != src ||
        _blendingControls[index].destColor != dest || _blendingControls[index].destAlpha != dest)
@@ -487,7 +579,7 @@ void GLStateHelper::blendFunc(const uSys index, const GLenum src, const GLenum d
     }
 }
 
-void GLStateHelper::blendFunc(const uSys index, const GLenum srcColor, const GLenum srcAlpha, const GLenum destColor, const GLenum destAlpha) noexcept
+void GLStateManager::blendFunc(const uSys index, const GLenum srcColor, const GLenum srcAlpha, const GLenum destColor, const GLenum destAlpha) noexcept
 {
     if(_blendingControls[index].srcColor  != srcColor  || _blendingControls[index].srcAlpha  != srcAlpha ||
        _blendingControls[index].destColor != destColor || _blendingControls[index].destAlpha != destAlpha)
@@ -500,7 +592,7 @@ void GLStateHelper::blendFunc(const uSys index, const GLenum srcColor, const GLe
     }
 }
 
-void GLStateHelper::blendEquation(const GLenum equation) noexcept
+void GLStateManager::blendEquation(const GLenum equation) noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -519,7 +611,7 @@ void GLStateHelper::blendEquation(const GLenum equation) noexcept
     }
 }
 
-void GLStateHelper::blendEquation(const GLenum equationColor, const GLenum equationAlpha) noexcept
+void GLStateManager::blendEquation(const GLenum equationColor, const GLenum equationAlpha) noexcept
 {
     bool stateChangeRequired = false;
     for(uSys i = 0; i < 8; ++i)
@@ -538,7 +630,7 @@ void GLStateHelper::blendEquation(const GLenum equationColor, const GLenum equat
     }
 }
 
-void GLStateHelper::blendEquation(const uSys index, const GLenum equation) noexcept
+void GLStateManager::blendEquation(const uSys index, const GLenum equation) noexcept
 {
     if(_blendingControls[index].equationColor != equation || _blendingControls[index].equationAlpha != equation)
     {
@@ -548,7 +640,7 @@ void GLStateHelper::blendEquation(const uSys index, const GLenum equation) noexc
     }
 }
 
-void GLStateHelper::blendEquation(const uSys index, const GLenum equationColor, const GLenum equationAlpha) noexcept
+void GLStateManager::blendEquation(const uSys index, const GLenum equationColor, const GLenum equationAlpha) noexcept
 {
     if(_blendingControls[index].equationColor != equationColor || _blendingControls[index].equationAlpha != equationAlpha)
     {

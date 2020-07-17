@@ -4,7 +4,6 @@
 #include <Safeties.hpp>
 #include <NumTypes.hpp>
 
-#include "DLL.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 
 class IBlendingState;
@@ -25,7 +24,7 @@ public:
     NullableRef<IDepthStencilState> depthStencilState;
     NullableRef<IRasterizerState> rasterizerState;
 
-    NullableRef<IShaderProgram> shaderProgram;
+    ShaderProgram shaderProgram;
     NullableRef<IInputLayout> inputLayout;
 
     uSys numRenderTargets;

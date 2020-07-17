@@ -167,6 +167,19 @@ public:
         }
     }
 
+    [[nodiscard]] sbp::ShaderInfo& get(const EShader::Stage stage) noexcept
+    {
+        switch(stage)
+        {
+            case EShader::Stage::Vertex:                 return _vertexInfo;
+            case EShader::Stage::TessellationControl:    return _tessCtrlInfo;
+            case EShader::Stage::TessellationEvaluation: return _tessEvalInfo;
+            case EShader::Stage::Geometry:               return _geometryInfo;
+            case EShader::Stage::Pixel:                  return _pixelInfo;
+            default:                                     return _vertexInfo;
+        }
+    }
+
     void reset() noexcept
     {
         _vertexInfo   = { };
@@ -193,19 +206,6 @@ public:
     void visit(const sbp::TextureParamsBlockAST& expr) noexcept override;
     void visit(const sbp::ShaderStageBlockAST& expr) noexcept override;
     void visit(const sbp::APIBlockAST& expr) noexcept override;
-private:
-    [[nodiscard]] sbp::ShaderInfo& get(const EShader::Stage stage) noexcept
-    {
-        switch(stage)
-        {
-            case EShader::Stage::Vertex:                 return _vertexInfo;
-            case EShader::Stage::TessellationControl:    return _tessCtrlInfo;
-            case EShader::Stage::TessellationEvaluation: return _tessEvalInfo;
-            case EShader::Stage::Geometry:               return _geometryInfo;
-            case EShader::Stage::Pixel:                  return _pixelInfo;
-            default:                                     return _vertexInfo;
-        }
-    }
 };
 
 inline sbp::ShaderInfoIterator& sbp::ShaderInfoIterator::operator++() noexcept

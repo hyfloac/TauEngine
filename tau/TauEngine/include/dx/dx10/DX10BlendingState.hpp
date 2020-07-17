@@ -90,5 +90,4 @@ public:
 private:
     [[nodiscard]] bool processArgs(const BlendingArgs& args, [[tau::out]] ID3D10BlendState** d3dBlendState, [[tau::out]] Error* error) const noexcept;
 };
-
 #endif

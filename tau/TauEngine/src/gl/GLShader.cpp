@@ -3,18 +3,86 @@
 #include <cstring>
 #include <cstdio>
 #pragma warning(pop)
-#include <gl/GLShader.hpp>
+
 #include <Utils.hpp>
 #include <VFS.hpp>
+#include <VariableLengthArray.hpp>
+#include <ConPrinter.hpp>
+
 #include "Timings.hpp"
-#include "gl/GLRenderingContext.hpp"
+#include "gl/GLShader.hpp"
 #include "shader/bundle/ShaderBundleParser.hpp"
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
-#include <VariableLengthArray.hpp>
+
+static bool validateFail(GLuint shaderHandle, const char* type) noexcept;
+
+GLShaderData* GLShaderManager::acquire(const DynString& path) noexcept
+{
+    if(_shaderMap.contains(path))
+    {
+        GLShaderData* const shader = _shaderMap.at(path);
+
+        ++shader->_refCount;
+
+        return shader;
+    }
+
+    return null;
+}
+
+void GLShaderManager::release(GLShaderData* const shader) noexcept
+{
+    if(!shader)
+    { return; }
+
+    if(--shader->_refCount > 0)
+    { return; }
+
+    if(_shaderMap.contains(shader->path()))
+    { _shaderMap.erase(shader->path()); }
+
+    _allocator.deallocateT(shader);
+}
+
+GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, const DynString& path) noexcept
+{
+    if(_shaderMap.contains(path))
+    { return null; }
+
+    GLShaderData* const shader = _allocator.allocateT<GLShaderData>(handle, stage, path);
+
+    _shaderMap.emplace(path, shader);
+
+    return shader;
+}
+
+GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, DynString&& path) noexcept
+{
+    if(_shaderMap.contains(path))
+    { return null; }
+
+    GLShaderData* const shader = _allocator.allocateT<GLShaderData>(handle, stage, ::std::move(path));
+
+    _shaderMap.emplace(path, shader);
+
+    return shader;
+}
+
+static bool isWhitespace(const char c) noexcept
+{
+    switch(c)
+    {
+        case ' ':
+        case '\t':
+        case '\r':
+        case '\n': return true;
+        default: return false;
+    }
+}
 
 static void clearWhiteSpace(uSys& index, const uSys length, const u8* const arr) noexcept
 {
-    for(; index < length && isspace(arr[index]); ++index);
+    for(; index < length && isWhitespace(arr[index]); ++index);
 }
 
 static void clearLine(uSys& index, const uSys length, const u8* const arr) noexcept
@@ -189,87 +257,9 @@ bool GLShaderBuilder::processBundle(const ShaderArgs& args, GLShaderArgs* const 
     const sbp::ShaderInfo& info = _visitor->get(args.stage);
 
     const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
-    if(!processShader(file, glArgs, shaderStage, error))
-    { return false; }
 
-    for(auto& uniPoint : info.uniformPoints)
-    {
-        GLuint index;
-
-        if(uniPoint.type == sbp::BindPointUnion::Str)
-        {
-            index = glGetUniformBlockIndex(glArgs->shaderHandle, uniPoint.bindName);
-            
-        }
-        else if(uniPoint.type == sbp::BindPointUnion::Number)
-        {
-            index = uniPoint.mapPoint;
-        }
-        else
-        {
-            continue;
-        }
-
-        switch(uniPoint.crmTarget)
-        {
-            case CommonRenderingModelToken::UniformBindingCameraDynamic:
-                glUniformBlockBinding(glArgs->shaderHandle, index, 0);
-                break;
-            case CommonRenderingModelToken::UniformBindingCameraStatic:
-                glUniformBlockBinding(glArgs->shaderHandle, index, 1);
-                break;
-            default: break;
-        }
-    }
-
-    for(auto& texPoint : info.texturePoints)
-    {
-        GLuint location;
-
-        if(texPoint.type == sbp::BindPointUnion::Str)
-        {
-            location = glGetUniformLocation(glArgs->shaderHandle, texPoint.bindName);
-        }
-        else if(texPoint.type == sbp::BindPointUnion::Number)
-        {
-            location = texPoint.mapPoint;
-        }
-        else
-        {
-            continue;
-        }
-
-        switch(texPoint.crmTarget)
-        {
-            case CommonRenderingModelToken::TextureNormal:
-                glProgramUniform1i(glArgs->shaderHandle, location, 0);
-                break;
-            case CommonRenderingModelToken::TextureDiffuse:
-                glProgramUniform1i(glArgs->shaderHandle, location, 1);
-                break;
-            case CommonRenderingModelToken::TexturePBRCompound:
-                glProgramUniform1i(glArgs->shaderHandle, location, 2);
-                break;
-            case CommonRenderingModelToken::TextureEmissivity:
-                glProgramUniform1i(glArgs->shaderHandle, location, 3);
-                break;
-            case CommonRenderingModelToken::TexturePosition:
-                glProgramUniform1i(glArgs->shaderHandle, location, 4);
-                break;
-            case CommonRenderingModelToken::TextureDepth:
-                glProgramUniform1i(glArgs->shaderHandle, location, 5);
-                break;
-            case CommonRenderingModelToken::TextureStencil:
-                glProgramUniform1i(glArgs->shaderHandle, location, 6);
-                break;
-            default: break;
-        }
-    }
-
-    return true;
+    return processShader(file, glArgs, shaderStage, error);
 }
-
-static bool validateFail(GLuint& programId, const char* type) noexcept;
 
 bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* const glArgs, const GLenum shaderStage, Error* const error) const noexcept
 {
@@ -278,89 +268,66 @@ bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* con
 
     const GLchar* const shaderSrc = reinterpret_cast<GLchar*>(data.arr());
 
-    glArgs->shaderHandle = glCreateShaderProgramv(shaderStage, 1, &shaderSrc);
+    glArgs->shaderHandle = glCreateShader(shaderStage);
 
     if(glArgs->shaderHandle == GL_FALSE)
     {
 #if !defined(TAU_PRODUCTION)
-        GLint result;
-        glGetShaderiv(GL_FALSE, GL_INFO_LOG_LENGTH, &result);
-        if(result <= 0)
-        {
-            fprintf(stderr, "OpenGL failed to create a shader, but no error message was generated.\n");
-        }
-        else
-        {
-            GLchar* errorMsg = new GLchar[result];
-            glGetShaderInfoLog(glArgs->shaderHandle, result, &result, errorMsg);
-            fprintf(stderr, "OpenGL failed to create a shader.\n  Error Message: %s\n", errorMsg);
-            delete[] errorMsg;
-        }
+        (void) validateFail(glArgs->shaderHandle, "create");
+#else
+        glDeleteShader(glArgs->shaderHandle);
 #endif
         ERROR_CODE_F(Error::DriverMemoryAllocationFailure);
     }
+
+    const GLint shaderLength = data.length();
+    glShaderSource(glArgs->shaderHandle, 1, &shaderSrc, &shaderLength);
+
+    glCompileShader(glArgs->shaderHandle);
 
     GLint result;
     glGetShaderiv(glArgs->shaderHandle, GL_COMPILE_STATUS, &result);
     if(result == GL_FALSE)
     {
 #if !defined(TAU_PRODUCTION)
-        glGetShaderiv(glArgs->shaderHandle, GL_INFO_LOG_LENGTH, &result);
-        if(result <= 0)
-        {
-            fprintf(stderr, "OpenGL failed to compile a shader, but no error message was generated.\n");
-        }
-        else
-        {
-            GLchar* errorMsg = new GLchar[result];
-            glGetShaderInfoLog(glArgs->shaderHandle, result, &result, errorMsg);
-            fprintf(stderr, "OpenGL failed to compile a shader.\n  Error Message: %s\n", errorMsg);
-            delete[] errorMsg;
-            fprintf(stderr, "File Path: %s\n", file->name());
-            fprintf(stderr, "File Data: \n%s\n", shaderSrc);
-        }
-#endif
-
+        (void) validateFail(glArgs->shaderHandle, "compile");
+        ConPrinter::print(stderr, "File Path: %\n", file->name());
+        ConPrinter::print(stderr, "File Data: \n%\n", shaderSrc);
+#else
         glDeleteProgram(glArgs->shaderHandle);
+#endif
         ERROR_CODE_F(Error::CompileError);
-    }
-
-    glGetProgramiv(glArgs->shaderHandle, GL_LINK_STATUS, &result);
-    if(result == GL_FALSE)
-    {
-        return validateFail(glArgs->shaderHandle, "link");
     }
 
     return true;
 }
 
-static bool validateFail(GLuint& programId, const char* const type) noexcept
+static bool validateFail(const GLuint shaderHandle, const char* const type) noexcept
 {
     PERF();
     GLint length;
 
-    glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &length);
+    glGetProgramiv(shaderHandle, GL_INFO_LOG_LENGTH, &length);
 
     if(!length)
     {
-        fprintf(stderr, "OpenGL failed to %s program, but no error message was generated.\n", type);
+        ConPrinter::print(stderr, "OpenGL failed to % shader, but no error message was generated.\n", type);
     }
     else if(length >= VLA_MAX_LEN)
     {
         GLchar* errorMsg = new GLchar[length];
-        glGetShaderInfoLog(programId, length, &length, errorMsg);
-        fprintf(stderr, "OpenGL failed to %s program.\n  Error Message: %s\n", type, errorMsg);
+        glGetShaderInfoLog(shaderHandle, length, &length, errorMsg);
+        ConPrinter::print(stderr, "OpenGL failed to % shader.\n  Error Message: %\n", type, errorMsg);
         delete[] errorMsg;
     }
     else
     {
         VLA(GLchar, errorMsg, length);
-        glGetShaderInfoLog(programId, length, &length, errorMsg);
-        fprintf(stderr, "OpenGL failed to %s program.\n  Error Message: %s\n", type, errorMsg);
+        glGetShaderInfoLog(shaderHandle, length, &length, errorMsg);
+        ConPrinter::print(stderr, "OpenGL failed to % shader.\n  Error Message: %\n", type, errorMsg);
     }
 
-    glDeleteProgram(programId);
-    programId = 0;
+    glDeleteShader(shaderHandle);
 
     return false;
 }

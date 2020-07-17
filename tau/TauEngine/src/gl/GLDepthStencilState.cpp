@@ -1,9 +1,10 @@
 #include "gl/GLDepthStencilState.hpp"
+#include "gl/GLStateManager.hpp"
 
-void GLDepthStencilState::apply() const noexcept
+void GLDepthStencilState::apply(GLStateManager& glStateManager) const noexcept
 {
-    _glArgs.depthTestControl(GL_DEPTH_TEST);
-    _glArgs.stencilTestControl(GL_STENCIL_TEST);
+    glStateManager.setDepthTest(_glArgs.enableDepthTest);
+    glStateManager.setStencilTest(_glArgs.enableStencilTest);
 
     glDepthMask(_glArgs.depthWriteMask);
     glDepthFunc(_glArgs.depthCompareFunc);
@@ -84,8 +85,8 @@ NullableStrongRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauSRef(c
 
 bool GLDepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, GLDepthStencilArgs* glArgs, Error* error) noexcept
 {
-    glArgs->depthTestControl = args.enableDepthTest ? glEnable : glDisable;
-    glArgs->stencilTestControl = args.enableStencilTest ? glEnable : glDisable;
+    glArgs->enableDepthTest = args.enableDepthTest;
+    glArgs->enableStencilTest = args.enableStencilTest;
 
     glArgs->depthWriteMask = args.depthWriteMask == DepthStencilArgs::DepthWriteMask::Zero ? GL_FALSE : GL_TRUE;
     glArgs->depthCompareFunc = GLTexture2D::glDepthCompareFunc(args.depthCompareFunc);

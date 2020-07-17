@@ -3,7 +3,7 @@
 #include "graphics/CommandQueue.hpp"
 #include "GLCommandList.hpp"
 #include "gl/GLDescriptorLayout.hpp"
-#include "GLStateHelper.hpp"
+#include "GLStateManager.hpp"
 
 struct PipelineState;
 
@@ -15,7 +15,7 @@ class TAU_DLL GLCommandQueue final : public ICommandQueue
 private:
     const PipelineState* _currentPipelineState;
     const GLDescriptorLayout* _currentLayout;
-    GLStateHelper _glStateHelper;
+    GLStateManager _glStateManager;
 public:
     void executeCommandLists(uSys count, const ICommandList** lists) noexcept override;
 

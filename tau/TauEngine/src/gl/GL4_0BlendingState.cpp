@@ -1,12 +1,13 @@
 #include "gl/gl4_0/GL4_0BlendingState.hpp"
+#include "gl/GLStateManager.hpp"
 
-void GL4_0BlendingState::apply() const noexcept
+void GL4_0BlendingState::apply(GLStateManager& glStateManager) const noexcept
 {
     for(uSys i = 0; i < 8; ++i)
     {
-        _glArgs[i].blendingControl(GL_BLEND, i);
-        glBlendFuncSeparatei(i, _glArgs[i].colorSrcFactor, _glArgs[i].colorDstFactor, _glArgs[i].alphaSrcFactor, _glArgs[i].alphaDstFactor);
-        glBlendEquationSeparatei(i, _glArgs[i].colorBlendOp, _glArgs[i].alphaBlendOp);
+        glStateManager.setBlending(i, _glArgs.frameBuffers[i].enableBlending);
+        glStateManager.blendFunc(i, _glArgs.frameBuffers[i].colorSrcFactor, _glArgs.frameBuffers[i].colorDstFactor, _glArgs.frameBuffers[i].alphaSrcFactor, _glArgs.frameBuffers[i].alphaDstFactor);
+        glStateManager.blendEquation(i, _glArgs.frameBuffers[i].colorBlendOp, _glArgs.frameBuffers[i].alphaBlendOp);
     }
 }
 
@@ -19,7 +20,7 @@ GLBlendingState* GL4_0BlendingStateBuilder::build(const BlendingArgs& args, Erro
     if(!processArgs4_0(args, &glArgs, error))
     { return null; }
 
-    GL4_0BlendingState* const blendingState = new(::std::nothrow) GL4_0BlendingState(args, glArgs.frameBuffers);
+    GL4_0BlendingState* const blendingState = new(::std::nothrow) GL4_0BlendingState(args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, blendingState);
@@ -34,7 +35,7 @@ GLBlendingState* GL4_0BlendingStateBuilder::build(const BlendingArgs& args, Erro
     if(!processArgs4_0(args, &glArgs, error))
     { return null; }
 
-    GL4_0BlendingState* const blendingState = allocator.allocateT<GL4_0BlendingState>(args, glArgs.frameBuffers);
+    GL4_0BlendingState* const blendingState = allocator.allocateT<GL4_0BlendingState>(args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, blendingState);
@@ -49,7 +50,7 @@ CPPRef<IBlendingState> GL4_0BlendingStateBuilder::buildCPPRef(const BlendingArgs
     if(!processArgs4_0(args, &glArgs, error))
     { return null; }
 
-    const CPPRef<GL4_0BlendingState> blendingState = CPPRef<GL4_0BlendingState>(new(::std::nothrow) GL4_0BlendingState(args, glArgs.frameBuffers));
+    const CPPRef<GL4_0BlendingState> blendingState = CPPRef<GL4_0BlendingState>(new(::std::nothrow) GL4_0BlendingState(args, glArgs));
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, blendingState);
@@ -64,7 +65,7 @@ NullableRef<IBlendingState> GL4_0BlendingStateBuilder::buildTauRef(const Blendin
     if(!processArgs4_0(args, &glArgs, error))
     { return null; }
 
-    const NullableRef<GL4_0BlendingState> blendingState(allocator, args, glArgs.frameBuffers);
+    const NullableRef<GL4_0BlendingState> blendingState(allocator, args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, blendingState);
@@ -79,7 +80,7 @@ NullableStrongRef<IBlendingState> GL4_0BlendingStateBuilder::buildTauSRef(const 
     if(!processArgs4_0(args, &glArgs, error))
     { return null; }
 
-    const NullableStrongRef<GL4_0BlendingState> blendingState(allocator, args, glArgs.frameBuffers);
+    const NullableStrongRef<GL4_0BlendingState> blendingState(allocator, args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, blendingState);
@@ -89,7 +90,7 @@ bool GL4_0BlendingStateBuilder::processArgs4_0(const BlendingArgs& args, GL4_0Bl
 {
     for(uSys i = 0; i < 8; ++i)
     {
-        glArgs->frameBuffers[i].blendingControl = args.frameBuffers[i].enableBlending ? glEnablei : glDisablei;
+        glArgs->frameBuffers[i].enableBlending = args.frameBuffers[i].enableBlending;
         glArgs->frameBuffers[i].colorSrcFactor = glBlendFactor(args.frameBuffers[i].colorSrcFactor);
         glArgs->frameBuffers[i].colorDstFactor = glBlendFactor(args.frameBuffers[i].colorDstFactor);
         glArgs->frameBuffers[i].alphaSrcFactor = glBlendFactor(args.frameBuffers[i].alphaSrcFactor);

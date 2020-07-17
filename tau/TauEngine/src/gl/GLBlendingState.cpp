@@ -1,11 +1,11 @@
 #include "gl/GLBlendingState.hpp"
-#include "gl/GLStateHelper.hpp"
+#include "gl/GLStateManager.hpp"
 
-void GL2_0BlendingState::apply(GLStateHelper& glStateHelper) const noexcept
+void GL2_0BlendingState::apply(GLStateManager& glStateManager) const noexcept
 {
-    glStateHelper.setBlending(_glArgs.enableBlending);
-    glStateHelper.blendFunc(_glArgs.colorSrcFactor, _glArgs.colorDstFactor, _glArgs.alphaSrcFactor, _glArgs.alphaDstFactor);
-    glStateHelper.blendEquation(_glArgs.colorBlendOp, _glArgs.alphaBlendOp);
+    glStateManager.setBlending(_glArgs.enableBlending);
+    glStateManager.blendFunc(_glArgs.colorSrcFactor, _glArgs.colorDstFactor, _glArgs.alphaSrcFactor, _glArgs.alphaDstFactor);
+    glStateManager.blendEquation(_glArgs.colorBlendOp, _glArgs.alphaBlendOp);
 }
 
 GLBlendingState* GLBlendingStateBuilder::build(const BlendingArgs& args, Error* const error) const noexcept

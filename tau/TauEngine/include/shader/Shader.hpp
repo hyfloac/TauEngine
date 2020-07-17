@@ -62,7 +62,8 @@ public:
         InvalidFile,
         InvalidInclude,
         SystemMemoryAllocationFailure,
-        DriverMemoryAllocationFailure
+        DriverMemoryAllocationFailure,
+        InternalError
     };
 public:
     [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;

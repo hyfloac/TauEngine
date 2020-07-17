@@ -2,13 +2,80 @@
 
 #pragma warning(push, 0)
 #include <GL/glew.h>
+#include <unordered_map>
 #pragma warning(pop)
 
 #include "shader/Shader.hpp"
 #include <Safeties.hpp>
+#include <allocator/FixedBlockAllocator.hpp>
 
 class GLRenderingContext;
 class GLGraphicsInterface;
+
+class TAU_DLL GLShaderData final
+{
+    DELETE_CM(GLShaderData);
+private:
+    GLuint _handle;
+    EShader::Stage _stage;
+    DynString _path;
+    mutable uSys _refCount;
+private:
+    GLShaderData(const GLuint handle, const EShader::Stage stage, const DynString& path) noexcept
+        : _handle(handle)
+        , _stage(stage)
+        , _path(path)
+        , _refCount(1)
+    { }
+
+    GLShaderData(const GLuint handle, const EShader::Stage stage, DynString&& path) noexcept
+        : _handle(handle)
+        , _stage(stage)
+        , _path(::std::move(path))
+        , _refCount(1)
+    { }
+public:
+    ~GLShaderData() noexcept
+    {
+        if(_handle)
+        { glDeleteShader(_handle); }
+    }
+
+    [[nodiscard]] GLuint handle() const noexcept { return _handle; }
+    [[nodiscard]] EShader::Stage stage() const noexcept { return _stage; }
+    [[nodiscard]] const DynString& path() const noexcept { return _path; }
+private:
+    friend class GLShaderManager;
+};
+
+class TAU_DLL GLShaderManager final
+{
+    DEFAULT_DESTRUCT(GLShaderManager);
+    DELETE_CM(GLShaderManager);
+private:
+#if defined(TAU_PRODUCTION)
+    using FBAllocator = FixedBlockAllocator<AllocationTracking::None>;
+#else
+    using FBAllocator = FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>;
+#endif
+private:
+    FBAllocator _allocator;
+    ::std::unordered_map<DynString, GLShaderData*> _shaderMap;
+public:
+    GLShaderManager(const uSys maxShaders) noexcept
+        : _allocator(sizeof(GLShaderData), maxShaders)
+    { }
+
+    [[nodiscard]] bool contains(const DynString& path) noexcept
+    { return _shaderMap.contains(path); }
+
+    [[nodiscard]] GLShaderData* acquire(const DynString& path) noexcept;
+
+    void release(GLShaderData* shader) noexcept;
+
+    [[nodiscard]] GLShaderData* create(GLuint handle, EShader::Stage stage, const DynString& path) noexcept;
+    [[nodiscard]] GLShaderData* create(GLuint handle, EShader::Stage stage, DynString&& path) noexcept;
+};
 
 /**
  * Represents an OpenGL shader.
@@ -87,4 +154,6 @@ private:
 
     [[nodiscard]] bool processBundle(const ShaderArgs& args, [[tau::out]] GLShaderArgs* glArgs, GLenum shaderStage, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processShader(const CPPRef<IFile>& file, [[tau::out]] GLShaderArgs* glArgs, GLenum shaderStage, [[tau::out]] Error* error) const noexcept;
+private:
+    friend class GLShaderProgramBuilder;
 };

@@ -84,7 +84,7 @@
     <ClCompile Include="src\gl\GLResourceBuffer.cpp" />
     <ClCompile Include="src\gl\GLResourceTexture.cpp" />
     <ClCompile Include="src\gl\GLShaderBundleVisitor.cpp" />
-    <ClCompile Include="src\gl\GLStateHelper.cpp" />
+    <ClCompile Include="src\gl\GLStateManager.cpp" />
     <ClCompile Include="src\gl\GLTextureSampler.cpp" />
     <ClCompile Include="src\gl\GLTextureUploader.cpp" />
     <ClCompile Include="src\gl\GLTextureView.cpp" />
@@ -226,7 +226,7 @@
     <ClInclude Include="include\gl\GLResourceTexture.hpp" />
     <ClInclude Include="include\gl\GLShaderBundleVisitor.hpp" />
     <ClInclude Include="include\gl\GLShaderProgram.hpp" />
-    <ClInclude Include="include\gl\GLStateHelper.hpp" />
+    <ClInclude Include="include\gl\GLStateManager.hpp" />
     <ClInclude Include="include\gl\GLTextureRawInterface.hpp" />
     <ClInclude Include="include\gl\GLTextureSampler.hpp" />
     <ClInclude Include="include\gl\GLTextureUploader.hpp" />

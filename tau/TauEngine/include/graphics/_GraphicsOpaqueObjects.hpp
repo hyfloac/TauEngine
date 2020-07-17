@@ -44,3 +44,5 @@ DECL_OPAQUE_TYPE(DescriptorTable);
  * their own table.
  */
 DECL_OPAQUE_TYPE(DescriptorSamplerTable);
+
+DECL_OPAQUE_TYPE(ShaderProgram);

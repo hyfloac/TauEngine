@@ -105,7 +105,7 @@ public:
      * @param[in] layout
      *      The layout of descriptors.
      */
-    virtual void setGraphicsDescriptorLayout(const DescriptorLayout layout) noexcept = 0;
+    virtual void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept = 0;
 
     /**
      * Sets a descriptor table to use within the shader pipeline.
@@ -115,7 +115,7 @@ public:
      * @param[in] table
      *      The table to set.
      */
-    virtual void setGraphicsDescriptorTable(uSys index, const DescriptorTable table) noexcept = 0;
+    virtual void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept = 0;
 
     /**
      *   Sets a descriptor table of samplers to use within the
@@ -126,7 +126,7 @@ public:
      * @param[in] table
      *      The sampler table to set.
      */
-    virtual void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable table) noexcept = 0;
+    virtual void setGraphicsDescriptorTable(uSys index, DescriptorSamplerTable table) noexcept = 0;
 
     RTT_BASE_IMPL(ICommandList);
     RTT_BASE_CHECK(ICommandList);

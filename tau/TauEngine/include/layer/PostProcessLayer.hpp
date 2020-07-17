@@ -36,7 +36,7 @@ class Event;
 class TAU_DLL TAU_NOVTABLE IPostProcessLayer
 {
     DEFAULT_DESTRUCT_VI(IPostProcessLayer);
-    DELETE_COPY(IPostProcessLayer);
+    DELETE_CM(IPostProcessLayer);
 protected:
     bool _active;
 protected:

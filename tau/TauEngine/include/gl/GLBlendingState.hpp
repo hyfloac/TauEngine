@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-class GLStateHelper;
+class GLStateManager;
 
 class TAU_DLL GLBlendingState : public IBlendingState
 {
@@ -18,7 +18,7 @@ protected:
         : IBlendingState(args)
     { }
 public:
-    virtual void apply(GLStateHelper& glStateHelper) const noexcept = 0;
+    virtual void apply(GLStateManager& glStateManager) const noexcept = 0;
 };
 
 struct GL2_0BlendingArgs final
@@ -58,7 +58,7 @@ public:
         , _glArgs(glArgs)
     { }
 
-    void apply(GLStateHelper& glStateHelper) const noexcept override;
+    void apply(GLStateManager& glStateManager) const noexcept override;
 };
 
 class TAU_DLL GLBlendingStateBuilder : public IBlendingStateBuilder

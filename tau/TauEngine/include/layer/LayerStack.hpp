@@ -6,16 +6,15 @@
 
 #include "DLL.hpp"
 #include "Layer.hpp"
-#include "PostProcessLayer.hpp"
 
 class TAU_DLL LayerStack final
 {
+    DEFAULT_CONSTRUCT_PU(LayerStack);
+    DELETE_CM(LayerStack);
 public:
     template<typename _Iter>
     struct IteratorContainer
     {
-        using iter = std::vector<ILayer*>::iterator;
-
         _Iter _begin;
         _Iter _end;
 
@@ -26,15 +25,25 @@ private:
     std::vector<ILayer*> _layers;
     std::vector<ILayer*> _overlayLayers;
 public:
-    inline LayerStack() noexcept = default;
-
     ~LayerStack() noexcept;
 
-    LayerStack(const LayerStack& copy) noexcept = delete;
-    LayerStack(LayerStack&& move) noexcept = delete;
+    template<typename _T, typename... _Args>
+    _T* emplaceLayer(_Args&&... args) noexcept
+    {
+        _T* const layer = new(::std::nothrow) _T(::std::forward<_Args>(args)...);
+        _layers.emplace_back(layer);
+        layer->onAttach();
+        return layer;
+    }
 
-    LayerStack& operator=(const LayerStack& copy) noexcept = delete;
-    LayerStack& operator=(LayerStack&& move) noexcept = delete;
+    template<typename _T, typename... _Args>
+    _T* emplaceOverlay(_Args&&... args) noexcept
+    {
+        _T* const overlay = new(::std::nothrow) _T(::std::forward<_Args>(args)...);
+        _overlayLayers.emplace_back(overlay);
+        overlay->onAttach();
+        return overlay;
+    }
 
     void   pushLayer(ILayer* layer) noexcept;
     void removeLayer(ILayer* layer) noexcept;

@@ -375,7 +375,7 @@
     <ClCompile Include="src\gl\GLCommandQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gl\GLStateHelper.cpp">
+    <ClCompile Include="src\gl\GLStateManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -968,9 +968,6 @@
     <ClInclude Include="include\gl\GLCommandQueue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\gl\GLStateHelper.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\gl\GLDescriptorLayout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -978,6 +975,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\graphics\_GraphicsOpaqueObjects.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gl\GLStateManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,8 +7,7 @@
 #include <ArrayList.hpp>
 
 #include "graphics/CommandList.hpp"
-#include "graphics/DescriptorHeap.hpp"
-#include "graphics/DescriptorLayout.hpp"
+#include "graphics/_GraphicsOpaqueObjects.hpp"
 
 class GLVertexArray;
 
@@ -289,7 +288,7 @@ public:
     void drawInstanced(uSys exCount, uSys startIndex, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setVertexArray(const IVertexArray& va) noexcept override;
     void setPipelineState(const PipelineState& pipelineState) noexcept override;
-    void setGraphicsDescriptorLayout(const DescriptorLayout layout) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, const DescriptorTable table) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, const DescriptorSamplerTable table) noexcept override;
+    void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
+    void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept override;
+    void setGraphicsDescriptorTable(uSys index, DescriptorSamplerTable table) noexcept override;
 };

@@ -4,38 +4,26 @@
 
 struct GL3_0BlendingArgs final
 {
+    DEFAULT_CONSTRUCT_PU(GL3_0BlendingArgs);
     DEFAULT_DESTRUCT(GL3_0BlendingArgs);
     DEFAULT_CM_PU(GL3_0BlendingArgs);
 public:
-    struct GLFrameBufferBlendingArgs final
-    {
-        DEFAULT_CONSTRUCT_PU(GLFrameBufferBlendingArgs);
-        DEFAULT_DESTRUCT(GLFrameBufferBlendingArgs);
-        DEFAULT_CM_PU(GLFrameBufferBlendingArgs);
-    public:
-        bool enableBlending;
-        GLenum colorSrcFactor;
-        GLenum colorDstFactor;
-        GLenum alphaSrcFactor;
-        GLenum alphaDstFactor;
-        GLenum colorBlendOp;
-        GLenum alphaBlendOp;
-    public:
-        GLFrameBufferBlendingArgs(bool _enableBlending, const GLenum colorSrcFactor, const GLenum colorDstFactor, const GLenum alphaSrcFactor, const GLenum alphaDstFactor, const GLenum colorBlendOp, const GLenum alphaBlendOp) noexcept
-            : enableBlending(_enableBlending)
-            , colorSrcFactor(colorSrcFactor)
-            , colorDstFactor(colorDstFactor)
-            , alphaSrcFactor(alphaSrcFactor)
-            , alphaDstFactor(alphaDstFactor)
-            , colorBlendOp(colorBlendOp)
-            , alphaBlendOp(alphaBlendOp)
-        { }
-    };
+    bool enableBlending[8];
+    GLenum colorSrcFactor;
+    GLenum colorDstFactor;
+    GLenum alphaSrcFactor;
+    GLenum alphaDstFactor;
+    GLenum colorBlendOp;
+    GLenum alphaBlendOp;
 public:
-    GLFrameBufferBlendingArgs frameBuffers[8];
-public:
-    GL3_0BlendingArgs() noexcept
-        : frameBuffers { }
+    GL3_0BlendingArgs(bool _enableBlending[8], const GLenum _colorSrcFactor, const GLenum _colorDstFactor, const GLenum _alphaSrcFactor, const GLenum _alphaDstFactor, const GLenum _colorBlendOp, const GLenum _alphaBlendOp) noexcept
+        : enableBlending { _enableBlending[0], _enableBlending[1], _enableBlending[2], _enableBlending[3], _enableBlending[4], _enableBlending[5], _enableBlending[6], _enableBlending[7] }
+        , colorSrcFactor(_colorSrcFactor)
+        , colorDstFactor(_colorDstFactor)
+        , alphaSrcFactor(_alphaSrcFactor)
+        , alphaDstFactor(_alphaDstFactor)
+        , colorBlendOp(_colorBlendOp)
+        , alphaBlendOp(_alphaBlendOp)
     { }
 };
 
@@ -51,7 +39,7 @@ public:
         , _glArgs(glArgs)
     { }
 
-    void apply(GLStateHelper& glStateHelper) const noexcept override;
+    void apply(GLStateManager& glStateManager) const noexcept override;
 };
 
 class TAU_DLL GL3_0BlendingStateBuilder final : public GLBlendingStateBuilder
