@@ -5,7 +5,6 @@
  */
 #pragma once
 
-// #include "pch.h"
 #include "IFile.hpp"
 #include <cstdio>
 #include <Utils.hpp>
@@ -22,7 +21,7 @@ class Win32FileLoader;
  */
 class CFile final : public IFile
 {
-    DELETE_COPY(CFile);
+    DELETE_CM(CFile);
 private:
     FILE* _file;
     const char* _name;
@@ -66,7 +65,7 @@ class CFileLoader final : public IFileLoader
 {
     DEFAULT_CONSTRUCT_PU(CFileLoader);
     DEFAULT_DESTRUCT(CFileLoader);
-    DELETE_COPY(CFileLoader);
+    DEFAULT_CM_PO(CFileLoader);
 public:
     static CPPRef<CFileLoader>& Instance() noexcept;
 public:

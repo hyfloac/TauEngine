@@ -29,7 +29,7 @@ enum class FileProps : u8
  */
 class IFile
 {
-    DELETE_COPY(IFile);
+    DEFAULT_CM_PO(IFile);
 public:
     IFile() noexcept = default;
 
@@ -102,25 +102,30 @@ public:
  */
 class IFileLoader
 {
-    DELETE_COPY(IFileLoader);
+    DEFAULT_CM_PO(IFileLoader);
 public:
     IFileLoader() noexcept = default;
 
     virtual ~IFileLoader() noexcept = default;
 
+    [[nodiscard]] virtual bool fileExists(const wchar_t* basePath, const wchar_t* subPath) const noexcept = 0;
+    [[nodiscard]] virtual bool fileExists(const char* basePath, const char* subPath) const noexcept = 0;
+
+    [[nodiscard]] virtual bool fileExists(const wchar_t* path) const noexcept = 0;
     [[nodiscard]] virtual bool fileExists(const char* path) const noexcept = 0;
 
+    [[nodiscard]] virtual CPPRef<IFile> load(const wchar_t* path, FileProps props) const noexcept = 0;
     [[nodiscard]] virtual CPPRef<IFile> load(const char* path, FileProps props) const noexcept = 0;
 
-    [[nodiscard]] virtual bool createFolder(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IFile> load(const wchar_t* basePath, const wchar_t* subPath, FileProps props) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IFile> load(const char* basePath, const char* subPath, FileProps props) const noexcept = 0;
 
+    [[nodiscard]] virtual bool createFolder(const char* path) const noexcept = 0;
     [[nodiscard]] virtual bool createFolders(const char* path) const noexcept = 0;
 
     [[nodiscard]] virtual bool deleteFolder(const char* path) const noexcept = 0;
-
     [[nodiscard]] virtual bool deleteFile(const char* path) const noexcept = 0;
 
     [[nodiscard]] virtual u64 creationTime(const char* path) const noexcept = 0;
-
     [[nodiscard]] virtual u64 modifyTime(const char* path) const noexcept = 0;
 };

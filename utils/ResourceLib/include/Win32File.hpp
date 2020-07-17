@@ -7,7 +7,6 @@
 
 #ifdef _WIN32
 
-// #include "pch.h"
 #include "IFile.hpp"
 #include <Windows.h>
 #include <NumTypes.hpp>
@@ -28,13 +27,13 @@ class CFileLoader;
  */
 class Win32File final : public IFile
 {
-    DELETE_COPY(Win32File);
+    DELETE_CM(Win32File);
 private:
     HANDLE _file;
     const char* _name;
     FileProps _props;
 public:
-    Win32File(const HANDLE file, const char* const name, const FileProps props) noexcept
+    Win32File(HANDLE file, const char* const name, const FileProps props) noexcept
         : _file(file)
         , _name(name)
         , _props(props)
@@ -71,7 +70,7 @@ class Win32FileLoader final : public IFileLoader
 {
     DEFAULT_CONSTRUCT_PU(Win32FileLoader);
     DEFAULT_DESTRUCT(Win32FileLoader);
-    DELETE_COPY(Win32FileLoader);
+    DEFAULT_CM_PU(Win32FileLoader);
 public:
     static CPPRef<Win32FileLoader>& Instance() noexcept;
 public:

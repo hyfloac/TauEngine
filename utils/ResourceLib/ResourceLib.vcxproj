@@ -276,6 +276,7 @@
   <ItemGroup>
     <ClInclude Include="include\CFile.hpp" />
     <ClInclude Include="include\IFile.hpp" />
+    <ClInclude Include="include\PathSanitizer.hpp" />
     <ClInclude Include="include\ResourceSelector.hpp" />
     <ClInclude Include="include\TauModelPart.hpp" />
     <ClInclude Include="include\VFS.hpp" />
@@ -290,6 +291,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\CFile.cpp" />
+    <ClCompile Include="src\PathSanitizer.cpp" />
     <ClCompile Include="src\ResourceSelector.cpp" />
     <ClCompile Include="src\TauModelPart.cpp" />
     <ClCompile Include="src\VFS.cpp" />
