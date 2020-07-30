@@ -1,11 +1,11 @@
 #include "gl/GLCommandQueue.hpp"
-#include "gl/GLStateHelper.hpp"
 #include "gl/GLDescriptorHeap.hpp"
 #include "gl/GLResourceTexture.hpp"
 #include "gl/GLTextureView.hpp"
 #include "graphics/PipelineState.hpp"
 #include "gl/GLBlendingState.hpp"
 #include "gl/GLDepthStencilState.hpp"
+#include "gl/GLRasterizerState.hpp"
 #include "gl/GLShaderProgram.hpp"
 #include "TauConfig.hpp"
 
@@ -45,14 +45,16 @@ void GLCommandQueue::executeCommandList(const ICommandList* const list) noexcept
     {
         switch(cmd.type)
         {
-            case GLCL::CommandType::Draw:                 _draw(cmd.draw); break;
-            case GLCL::CommandType::DrawIndexed:          _drawIndexed(cmd.drawIndexed); break;
-            case GLCL::CommandType::DrawInstanced:        _drawInstanced(cmd.drawInstanced); break;
+            case GLCL::CommandType::Draw:                 _draw(cmd.draw);                                 break;
+            case GLCL::CommandType::DrawIndexed:          _drawIndexed(cmd.drawIndexed);                   break;
+            case GLCL::CommandType::DrawInstanced:        _drawInstanced(cmd.drawInstanced);               break;
             case GLCL::CommandType::DrawIndexedInstanced: _drawIndexedInstanced(cmd.drawIndexedInstanced); break;
-            case GLCL::CommandType::SetVertexArray:       _setVertexArray(cmd.setVertexArray); break;
-            case GLCL::CommandType::SetIndexBuffer:       _setIndexBuffer(cmd.setIndexBuffer); break;
+            case GLCL::CommandType::SetPipelineState:     _setPipelineState(cmd.setPipelineState);         break;
+            case GLCL::CommandType::SetStencilRef:        _setStencilRef(cmd.setStencilRef);               break;
+            case GLCL::CommandType::SetVertexArray:       _setVertexArray(cmd.setVertexArray);             break;
+            case GLCL::CommandType::SetIndexBuffer:       _setIndexBuffer(cmd.setIndexBuffer);             break;
             case GLCL::CommandType::SetGDescriptorLayout: _setGDescriptorLayout(cmd.setGDescriptorLayout); break;
-            case GLCL::CommandType::SetGDescriptorTable:  _setGDescriptorTable(cmd.setGDescriptorTable); break;
+            case GLCL::CommandType::SetGDescriptorTable:  _setGDescriptorTable(cmd.setGDescriptorTable);   break;
             default: break;
         }
     }
@@ -80,13 +82,16 @@ void GLCommandQueue::_drawIndexedInstanced(const GLCL::CommandDrawIndexedInstanc
 
 void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd) noexcept
 {
-    _currentPipelineState = &cmd.pipelineState;
+    _currentPipelineState = cmd.pipelineState;
 
     const GLBlendingState* const blendingState = RTT_CAST(_currentPipelineState->args().blendingState.get(), GLBlendingState);
     blendingState->apply(_glStateManager);
 
     const GLDepthStencilState* const depthStencilState = RTT_CAST(_currentPipelineState->args().depthStencilState.get(), GLDepthStencilState);
     depthStencilState->apply(_glStateManager);
+
+    const GLRasterizerState* const rasterizerState = RTT_CAST(_currentPipelineState->args().rasterizerState.get(), GLRasterizerState);
+    rasterizerState->apply(_glStateManager);
 
     const GLShaderProgram* shaderProgram = _currentPipelineState->args().shaderProgram.get<GLShaderProgram>();
     _glStateManager.bindShaderProgram(shaderProgram->programHandle());

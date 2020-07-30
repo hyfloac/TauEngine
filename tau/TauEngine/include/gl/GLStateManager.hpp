@@ -51,6 +51,22 @@ struct StencilControl final
     GLenum stencilPassOp;
     GLenum compareFunc;
 };
+
+struct PolygonOffset final
+{
+    union
+    {
+        GLfloat factor;
+        GLfloat slopeScaledDepthBias;
+    };
+    union
+    {
+        GLfloat units;
+        GLfloat depthBias;
+    };
+    GLfloat depthClamp;
+    PFNGLPOLYGONOFFSETCLAMPPROC extFunc;
+};
 }
 
 class TAU_DLL GLStateManager final
@@ -80,9 +96,17 @@ private:
 
     GLState::DepthControl _depthControl;
     bool _stencilTestEnabled;
+    bool _scissorTestEnabled;
+    bool _faceCullingEnabled;
 
     GLState::StencilControl _frontStencil;
     GLState::StencilControl _backStencil;
+
+    GLState::PolygonOffset _polygonOffset;
+
+    GLenum _frontFace;
+    GLenum _faceCullingMode;
+    GLenum _polygonFillMode;
 public:
     GLStateManager() noexcept;
 
@@ -133,6 +157,14 @@ public:
     void setStencilTest(bool state) noexcept;
     void enableStencilTest() noexcept;
     void disableStencilTest() noexcept;
+
+    void setScissorTest(bool state) noexcept;
+    void enableScissorTest() noexcept;
+    void disableScissorTest() noexcept;
+
+    void setFaceCulling(bool state) noexcept;
+    void enableFaceCulling() noexcept;
+    void disableFaceCulling() noexcept;
 
     void set(GLenum capability, bool state) noexcept;
     void set(GLenum capability, uSys index, bool state) noexcept;
@@ -192,4 +224,30 @@ public:
 
     void stencilRef(GLint reference) noexcept;
     void stencilRef(GLenum face, GLint reference) noexcept;
+
+    void polygonOffset(GLfloat factor, GLfloat units) noexcept;
+    void polygonOffset(GLfloat factor, GLfloat units, GLfloat clamp) noexcept;
+
+    void frontFaceCW() noexcept;
+    void frontFaceCCW() noexcept;
+
+    void frontFace(GLenum mode) noexcept;
+    void frontFaceB(bool counterClockWise) noexcept;
+
+    void cullFront() noexcept;
+    void cullBack() noexcept;
+    void cullFrontBack() noexcept;
+
+    void cullMode(GLenum mode) noexcept;
+
+    void polygonModeFill() noexcept;
+    void polygonModeLines() noexcept;
+    void polygonModePoints() noexcept;
+
+    void polygonModeVertices() noexcept
+    { polygonModePoints(); }
+               
+    void polygonMode(GLenum mode) noexcept;
+private:
+    static void _glPolygonOffsetFallback(GLfloat factor, GLfloat units, GLfloat clamp) noexcept;
 };

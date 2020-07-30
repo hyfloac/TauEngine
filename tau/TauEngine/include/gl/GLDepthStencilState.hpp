@@ -26,8 +26,10 @@ public:
         GLenum compareFunc;
     public:
         GLStencilOpArgs(const GLenum failOp, const GLenum stencilPassDepthFailOp, const GLenum passOp, const GLenum compareFunc) noexcept
-            : failOp(failOp), stencilPassDepthFailOp(stencilPassDepthFailOp),
-              passOp(passOp), compareFunc(compareFunc)
+            : failOp(failOp)
+            , stencilPassDepthFailOp(stencilPassDepthFailOp)
+            , passOp(passOp)
+            , compareFunc(compareFunc)
         { }
     };
 public:

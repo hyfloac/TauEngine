@@ -4,6 +4,7 @@
 #pragma once
 
 #include <Objects.hpp>
+#include <Safeties.hpp>
 
 #include "BufferEnums.hpp"
 #include "BufferDescriptor.hpp"
@@ -23,12 +24,12 @@ struct VertexBufferView final
     DEFAULT_DESTRUCT(VertexBufferView);
     DEFAULT_CM_PU(VertexBufferView);
 public:
-    IResource* _buffer;
-    BufferDescriptor _descriptor;
+    NullableRef<IResource> buffer;
+    BufferDescriptor descriptor;
 public:
-    VertexBufferView(IResource* const buffer, const BufferDescriptor& descriptor) noexcept
-        : _buffer(buffer)
-        , _descriptor(descriptor)
+    VertexBufferView(const NullableRef<IResource>& _buffer, const BufferDescriptor& _descriptor) noexcept
+        : buffer(_buffer)
+        , descriptor(_descriptor)
     { }
 };
 
@@ -44,12 +45,12 @@ struct IndexBufferView final
     DEFAULT_DESTRUCT(IndexBufferView);
     DEFAULT_CM_PU(IndexBufferView);
 public:
-    IResource* _buffer;
-    EBuffer::IndexSize _indexSize;
+    NullableRef<IResource> buffer;
+    EBuffer::IndexSize indexSize;
 public:
-    IndexBufferView(IResource* const buffer, const EBuffer::IndexSize indexSize) noexcept
-        : _buffer(buffer)
-        , _indexSize(indexSize)
+    IndexBufferView(const NullableRef<IResource>& _buffer, const EBuffer::IndexSize _indexSize) noexcept
+        : buffer(_buffer)
+        , indexSize(_indexSize)
     { }
 };
 
@@ -59,9 +60,9 @@ struct UniformBufferViewArgs final
     DEFAULT_DESTRUCT(UniformBufferViewArgs);
     DEFAULT_CM_PU(UniformBufferViewArgs);
 public:
-    IResource* buffer;
+    NullableRef<IResource> buffer;
 public:
-    UniformBufferViewArgs(IResource* const _buffer) noexcept
+    UniformBufferViewArgs(const NullableRef<IResource>& _buffer) noexcept
         : buffer(_buffer)
     { }
 };

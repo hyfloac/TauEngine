@@ -37,13 +37,13 @@ public:
     FixedBlockAllocator(uSys blockSize, PageCountVal numReservePages, uSys allocPages) noexcept = delete;
     FixedBlockAllocator(uSys blockSize, uSys maxElements, uSys allocPages) noexcept = delete;
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return 0; }
-    [[nodiscard]] inline iSys allocationDifference() const noexcept { return 0; }
-    [[nodiscard]] inline uSys multipleDeleteCount() const noexcept { return 0; }
+    [[nodiscard]] uSys blockSize() const noexcept { return 0; }
+    [[nodiscard]] iSys allocationDifference() const noexcept { return 0; }
+    [[nodiscard]] uSys multipleDeleteCount() const noexcept { return 0; }
 
-    [[nodiscard]] inline void* allocate() noexcept { return nullptr; }
-    [[nodiscard]] inline void* allocate(uSys size) noexcept override { return nullptr; }
-    inline void deallocate(void* obj) noexcept override { }
+    [[nodiscard]] void* allocate() noexcept { return nullptr; }
+    [[nodiscard]] void* allocate(uSys size) noexcept override { return nullptr; }
+    void deallocate(void* obj) noexcept override { }
 };
 
 /**
@@ -65,7 +65,7 @@ private:
     void** _firstFree;
     void** _lastFree;
 public:
-    inline FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+    FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -76,7 +76,7 @@ public:
         , _lastFree(nullptr)
     { }
 
-    inline FixedBlockAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+    FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -87,12 +87,12 @@ public:
         , _lastFree(nullptr)
     { }
 
-    inline ~FixedBlockAllocator() noexcept
+    ~FixedBlockAllocator() noexcept
     { PageAllocator::free(_pages); }
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return _blockSize; }
+    [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
-    [[nodiscard]] inline void* allocate() noexcept
+    [[nodiscard]] void* allocate() noexcept
     {
         if(_firstFree)
         {
@@ -117,9 +117,9 @@ public:
         return ret;
     }
 
-    [[nodiscard]] inline void* allocate(uSys) noexcept override { return allocate(); }
+    [[nodiscard]] void* allocate(uSys) noexcept override { return allocate(); }
 
-    inline void deallocate(void* obj) noexcept override
+    void deallocate(void* obj) noexcept override
     {
         if(!obj)
         { return; }
@@ -189,7 +189,7 @@ private:
     void** _lastFree;
     iSys _allocationDifference;
 public:
-    inline FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+    FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -201,7 +201,7 @@ public:
         , _allocationDifference(0)
     { }
 
-    inline FixedBlockAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+    FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -213,18 +213,18 @@ public:
         , _allocationDifference(0)
     { }
 
-    inline ~FixedBlockAllocator() noexcept
+    ~FixedBlockAllocator() noexcept
     { PageAllocator::free(_pages); }
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return _blockSize; }
+    [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
      *   Returns the difference in the number of allocations vs
      * the number of deallocations.
      */
-    [[nodiscard]] inline iSys allocationDifference() const noexcept { return _allocationDifference; }
+    [[nodiscard]] iSys allocationDifference() const noexcept { return _allocationDifference; }
 
-    [[nodiscard]] inline void* allocate() noexcept
+    [[nodiscard]] void* allocate() noexcept
     {
         if(_firstFree)
         {
@@ -253,9 +253,9 @@ public:
         return ret;
     }
 
-    [[nodiscard]] inline void* allocate(uSys) noexcept override { return allocate(); }
+    [[nodiscard]] void* allocate(uSys) noexcept override { return allocate(); }
 
-    inline void deallocate(void* obj) noexcept override
+    void deallocate(void* obj) noexcept override
     {
         if(!obj)
         { return; }
@@ -332,7 +332,7 @@ private:
     uSys _doubleDeleteCount;
     uSys _multipleDeleteCount;
 public:
-    inline FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+    FixedBlockAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -346,7 +346,7 @@ public:
         , _multipleDeleteCount(0)
     { }
 
-    inline FixedBlockAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+    FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -360,16 +360,16 @@ public:
         , _multipleDeleteCount(0)
     { }
 
-    inline ~FixedBlockAllocator() noexcept
+    ~FixedBlockAllocator() noexcept
     { PageAllocator::free(_pages); }
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return _blockSize; }
+    [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
      *   Returns the difference in the number of allocations vs
      * the number of deallocations.
      */
-    [[nodiscard]] inline iSys allocationDifference() const noexcept { return _allocationDifference; }
+    [[nodiscard]] iSys allocationDifference() const noexcept { return _allocationDifference; }
 
     /**
      * Returns the number of times objects were deleted twice.
@@ -378,7 +378,7 @@ public:
      * (ie triple deleting an object only counts increments
      * this value once).
      */
-    [[nodiscard]] inline uSys doubleDeleteCount() const noexcept { return _doubleDeleteCount; }
+    [[nodiscard]] uSys doubleDeleteCount() const noexcept { return _doubleDeleteCount; }
 
     /**
      * Returns the number of times objects were more than once.
@@ -386,9 +386,9 @@ public:
      *   This value tracks any deallocations more than 1. (ie
      * a triple delete will increment this twice).
      */
-    [[nodiscard]] inline uSys multipleDeleteCount() const noexcept { return _multipleDeleteCount; }
+    [[nodiscard]] uSys multipleDeleteCount() const noexcept { return _multipleDeleteCount; }
 
-    [[nodiscard]] inline void* allocate() noexcept
+    [[nodiscard]] void* allocate() noexcept
     {
         if(_firstFree)
         {
@@ -421,9 +421,9 @@ public:
         return ret;
     }
 
-    [[nodiscard]] inline void* allocate(uSys) noexcept override { return allocate(); }
+    [[nodiscard]] void* allocate(uSys) noexcept override { return allocate(); }
 
-    inline void deallocate(void* obj) noexcept override
+    void deallocate(void* obj) noexcept override
     {
         if(!obj)
         { return; }
@@ -512,13 +512,13 @@ public:
     FixedBlockArenaAllocator(uSys blockSize, PageCountVal numReservePages, uSys allocPages) noexcept = delete;
     FixedBlockArenaAllocator(uSys blockSize, uSys maxElements, uSys allocPages) noexcept = delete;
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return 0; }
-    [[nodiscard]] inline iSys allocationDifference() const noexcept { return 0; }
-    [[nodiscard]] inline uSys multipleDeleteCount() const noexcept { return 0; }
+    [[nodiscard]] uSys blockSize() const noexcept { return 0; }
+    [[nodiscard]] iSys allocationDifference() const noexcept { return 0; }
+    [[nodiscard]] uSys multipleDeleteCount() const noexcept { return 0; }
 
-    [[nodiscard]] inline void* allocate() noexcept { return nullptr; }
-    [[nodiscard]] inline void* allocate(uSys size) noexcept override { return nullptr; }
-    inline void deallocate(void* obj) noexcept override { }
+    [[nodiscard]] void* allocate() noexcept { return nullptr; }
+    [[nodiscard]] void* allocate(uSys size) noexcept override { return nullptr; }
+    void deallocate(void* obj) noexcept override { }
 };
 
 /**
@@ -538,7 +538,7 @@ private:
     uSys _blockSize;
     uSys _allocIndex;
 public:
-    inline FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+    FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -547,7 +547,7 @@ public:
         , _allocIndex(0)
     { }
 
-    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+    FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -556,12 +556,12 @@ public:
         , _allocIndex(0)
     { }
 
-    inline ~FixedBlockArenaAllocator() noexcept
+    ~FixedBlockArenaAllocator() noexcept
     { PageAllocator::free(_pages); }
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return _blockSize; }
+    [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
-    [[nodiscard]] inline void* allocate() noexcept
+    [[nodiscard]] void* allocate() noexcept
     {
         if(!assertSize())
         { return nullptr; }
@@ -570,9 +570,19 @@ public:
         return ret;
     }
 
-    [[nodiscard]] inline void* allocate(uSys) noexcept override { return allocate(); }
+    [[nodiscard]] void* allocate(uSys) noexcept override { return allocate(); }
 
-    inline void deallocate(void*) noexcept override { }
+    void deallocate(void*) noexcept override { }
+
+    void reset(const bool releasePages = false) noexcept
+    {
+        _allocIndex = 0;
+        if(releasePages)
+        {
+            PageAllocator::decommitPages(reinterpret_cast<u8*>(_pages) + _allocPages * PageAllocator::pageSize(), _committedPages - _allocPages);
+            _committedPages = _allocPages;
+        }
+    }
 private:
     [[nodiscard]] bool assertSize() noexcept
     {
@@ -581,7 +591,7 @@ private:
         {
             if(_committedPages == _numReservedPages)
             { return false; }
-            (void)PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
+            (void) PageAllocator::commitPages(reinterpret_cast<u8*>(_pages) + pageBytes, _allocPages);
             _committedPages += _allocPages;
         }
 
@@ -608,7 +618,7 @@ private:
     uSys _allocIndex;
     iSys _allocationDifference;
 public:
-    inline FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+    FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -618,7 +628,7 @@ public:
         , _allocationDifference(0)
     { }
 
-    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+    FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -628,18 +638,18 @@ public:
         , _allocationDifference(0)
     { }
 
-    inline ~FixedBlockArenaAllocator() noexcept
+    ~FixedBlockArenaAllocator() noexcept
     { PageAllocator::free(_pages); }
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return _blockSize; }
+    [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
      *   Returns the difference in the number of allocations vs
      * the number of deallocations.
      */
-    [[nodiscard]] inline iSys allocationDifference() const noexcept { return _allocationDifference; }
+    [[nodiscard]] iSys allocationDifference() const noexcept { return _allocationDifference; }
 
-    [[nodiscard]] inline void* allocate() noexcept
+    [[nodiscard]] void* allocate() noexcept
     {
         if(!assertSize())
         { return nullptr; }
@@ -649,13 +659,24 @@ public:
         return ret;
     }
 
-    [[nodiscard]] inline void* allocate(uSys) noexcept override { return allocate(); }
+    [[nodiscard]] void* allocate(uSys) noexcept override { return allocate(); }
 
-    inline void deallocate(void* const obj) noexcept override
+    void deallocate(void* const obj) noexcept override
     {
         if(!obj)
         { return; }
         --_allocationDifference;
+    }
+
+    void reset(const bool releasePages = false) noexcept
+    {
+        _allocIndex = 0;
+        _allocationDifference = 0;
+        if(releasePages)
+        {
+            PageAllocator::decommitPages(reinterpret_cast<u8*>(_pages) + _allocPages * PageAllocator::pageSize(), _committedPages - _allocPages);
+            _committedPages = _allocPages;
+        }
     }
 private:
     [[nodiscard]] bool assertSize() noexcept
@@ -697,7 +718,7 @@ private:
     uSys _doubleDeleteCount;
     uSys _multipleDeleteCount;
 public:
-    inline FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, uSys allocPages = 4) noexcept
+    FixedBlockArenaAllocator(const uSys blockSize, const PageCountVal numReservedPages = PageCountVal{ 1024 }, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -709,7 +730,7 @@ public:
         , _multipleDeleteCount(0)
     { }
 
-    inline FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, uSys allocPages = 4) noexcept
+    FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
         , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
@@ -721,16 +742,16 @@ public:
         , _multipleDeleteCount(0)
     { }
 
-    inline ~FixedBlockArenaAllocator() noexcept
+    ~FixedBlockArenaAllocator() noexcept
     { PageAllocator::free(_pages); }
 
-    [[nodiscard]] inline uSys blockSize() const noexcept { return _blockSize; }
+    [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
      *   Returns the difference in the number of allocations vs
      * the number of deallocations.
      */
-    [[nodiscard]] inline iSys allocationDifference() const noexcept { return _allocationDifference; }
+    [[nodiscard]] iSys allocationDifference() const noexcept { return _allocationDifference; }
 
     /**
      * Returns the number of times objects were deleted twice.
@@ -739,7 +760,7 @@ public:
      * (ie triple deleting an object only counts increments
      * this value once).
      */
-    [[nodiscard]] inline uSys doubleDeleteCount() const noexcept { return _doubleDeleteCount; }
+    [[nodiscard]] uSys doubleDeleteCount() const noexcept { return _doubleDeleteCount; }
 
     /**
      * Returns the number of times objects were more than once.
@@ -747,9 +768,9 @@ public:
      *   This value tracks any deallocations more than 1. (ie
      * a triple delete will increment this twice).
      */
-    [[nodiscard]] inline uSys multipleDeleteCount() const noexcept { return _multipleDeleteCount; }
+    [[nodiscard]] uSys multipleDeleteCount() const noexcept { return _multipleDeleteCount; }
 
-    [[nodiscard]] inline void* allocate() noexcept
+    [[nodiscard]] void* allocate() noexcept
     {
         if(!assertSize())
         { return nullptr; }
@@ -759,9 +780,9 @@ public:
         return ret;
     }
 
-    [[nodiscard]] inline void* allocate(uSys) noexcept override { return allocate(); }
+    [[nodiscard]] void* allocate(uSys) noexcept override { return allocate(); }
 
-    inline void deallocate(void* const obj) noexcept override
+    void deallocate(void* const obj) noexcept override
     {
         if(!obj)
         { return; }
@@ -774,6 +795,19 @@ public:
             ++_multipleDeleteCount;
             if(*deallocationCount == 2)
             { ++_doubleDeleteCount; }
+        }
+    }
+
+    void reset(const bool releasePages = false) noexcept
+    {
+        _allocIndex = 0;
+        _allocationDifference = 0;
+        _multipleDeleteCount = 0;
+        _doubleDeleteCount = 0;
+        if(releasePages)
+        {
+            PageAllocator::decommitPages(reinterpret_cast<u8*>(_pages) + _allocPages * PageAllocator::pageSize(), _committedPages - _allocPages);
+            _committedPages = _allocPages;
         }
     }
 private:

@@ -87,6 +87,9 @@
     <ClInclude Include="include\AtomicIntrinsics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\allocator\FreeListAllocator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PageAllocator.cpp">
@@ -98,6 +101,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="include\String.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\ReferenceCountingPointer.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

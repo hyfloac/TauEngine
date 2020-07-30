@@ -72,9 +72,6 @@
     <ClCompile Include="src\TextHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\astdio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Color.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -376,6 +373,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gl\GLStateManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\astdio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10CommandList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx10\DX10CommandQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -978,6 +984,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gl\GLStateManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10CommandList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10CommandQueue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

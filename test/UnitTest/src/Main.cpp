@@ -2,6 +2,7 @@
 #include "StringTest.hpp"
 #include "RefUnitTest.hpp"
 #include "FixedBlockAllocatorTest.hpp"
+#include "FreeListAllocatorTest.hpp"
 #include "Vector2fTest.hpp"
 #include "Vector3fTest.hpp"
 #include "Vector4fTest.hpp"
@@ -64,9 +65,6 @@ int main(int argCount, char* args[]) noexcept
     RefPtrTest::nullableRefResetTest();
     RefPtrTest::strongRefResetTest();
     RefPtrTest::nullableStrongRefResetTest();
-
-    RefPtrTest::refCrossAssignmentTest();
-    RefPtrTest::strongRefCrossAssignmentTest();
     printf("Reference Counting Pointer Tests Finished\n");
 
     PAUSE("Continue");
@@ -84,6 +82,22 @@ int main(int argCount, char* args[]) noexcept
     FixedBlockAllocatorUnitTest::countTest();
     FixedBlockAllocatorUnitTest::multipleDeleteTest();
     printf("Fixed Block Allocator Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nFree List Allocator Tests:\n\n");
+    FreeListAllocatorTest::resetTest();
+    FreeListAllocatorTest::destructTest();
+
+    FreeListAllocatorTest::difTypeResetTest();
+    FreeListAllocatorTest::difTypeDestructTest();
+
+    FreeListAllocatorTest::difPtrResetTest();
+    FreeListAllocatorTest::difPtrDestructTest();
+
+    FreeListAllocatorTest::difPtrTypeResetTest();
+    FreeListAllocatorTest::difPtrTypeDestructTest();
+    printf("Free List Allocator Tests Finished\n");
 
     PAUSE("Continue");
 

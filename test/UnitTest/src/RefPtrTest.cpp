@@ -5,7 +5,7 @@ static int _dataIndex = 0;
 
 class PtrData final
 {
-    DELETE_COPY(PtrData);
+    DELETE_CM(PtrData);
 private:
     int _x, _y, _index;
 public:
@@ -128,32 +128,6 @@ void _resetTest() noexcept
     Assert(p0->x() == 16 && p0->y() == 13);
 }
 
-template<typename _NonNullablePtrType, typename _NullablePtrType>
-void _crossAssignmentTest() noexcept
-{
-    _NonNullablePtrType p0(DefaultTauAllocator::Instance(), 2, 5);
-    _NullablePtrType p1(p0);
-
-    Assert(p1->x() == p0->x() && p1->y() == p0->y());
-
-    p1->x() = 7;
-    Assert(p0->x() == p1->x() && p0->x() == 7);
-    Assert(p0->y() == p1->y() && p0->y() == 5);
-
-    p1 = _NullablePtrType(DefaultTauAllocator::Instance(), 19, 32);
-    Assert(p0->x() != p1->x() && p0->y() != p1->y());
-    Assert(p0->x() == 7);
-
-    p1 = nullptr;
-    p0 = p1;
-    Assert(p0->x() == 7 && p0->y() == 5);
-
-    p1.reset(DefaultTauAllocator::Instance(), 3, 4);
-    Assert(p1->x() == 3 && p1->y() == 4);
-    Assert(p0->x() != p1->x() && p0->y() != p1->y());
-    Assert(p0.get() != p1.get());
-}
-
 void refCountTest() noexcept
 {
     UNIT_TEST();
@@ -175,25 +149,25 @@ void refTmpTest() noexcept
 void nullableRefCountTest() noexcept
 {
     UNIT_TEST();
-    _refCountTest<NullableReferenceCountingPointer<PtrData>>();
+    _refCountTest<ReferenceCountingPointer<PtrData>>();
 }
 
 void nullableRefRewriteTest() noexcept
 {
     UNIT_TEST();
-    _refRewriteTest<NullableReferenceCountingPointer<PtrData>>();
+    _refRewriteTest<ReferenceCountingPointer<PtrData>>();
 }
 
 void nullableRefTmpTest() noexcept
 {
     UNIT_TEST();
-    _refTmpTest<NullableReferenceCountingPointer<PtrData>>();
+    _refTmpTest<ReferenceCountingPointer<PtrData>>();
 }
 
 void nullableRefNullSetTest() noexcept
 {
     UNIT_TEST();
-    _nullableRefNullSetTest<NullableReferenceCountingPointer<PtrData>>();
+    _nullableRefNullSetTest<ReferenceCountingPointer<PtrData>>();
 }
 
 void strongRefCountTest() noexcept
@@ -217,25 +191,25 @@ void strongRefTmpTest() noexcept
 void nullableStrongRefCountTest() noexcept
 {
     UNIT_TEST();
-    _refCountTest<NullableStrongReferenceCountingPointer<PtrData>>();
+    _refCountTest<StrongReferenceCountingPointer<PtrData>>();
 }
 
 void nullableStrongRefRewriteTest() noexcept
 {
     UNIT_TEST();
-    _refRewriteTest<NullableStrongReferenceCountingPointer<PtrData>>();
+    _refRewriteTest<StrongReferenceCountingPointer<PtrData>>();
 }
 
 void nullableStrongRefTmpTest() noexcept
 {
     UNIT_TEST();
-    _refTmpTest<NullableStrongReferenceCountingPointer<PtrData>>();
+    _refTmpTest<StrongReferenceCountingPointer<PtrData>>();
 }
 
 void nullableStrongRefNullSetTest() noexcept
 {
     UNIT_TEST();
-    _nullableRefNullSetTest<NullableStrongReferenceCountingPointer<PtrData>>();
+    _nullableRefNullSetTest<StrongReferenceCountingPointer<PtrData>>();
 }
 
 void refResetTest() noexcept
@@ -247,7 +221,7 @@ void refResetTest() noexcept
 void nullableRefResetTest() noexcept
 {
     UNIT_TEST();
-    _resetTest<NullableReferenceCountingPointer<PtrData>>();
+    _resetTest<ReferenceCountingPointer<PtrData>>();
 }
 
 void strongRefResetTest() noexcept
@@ -259,19 +233,7 @@ void strongRefResetTest() noexcept
 void nullableStrongRefResetTest() noexcept
 {
     UNIT_TEST();
-    _resetTest<NullableStrongReferenceCountingPointer<PtrData>>();
-}
-
-void refCrossAssignmentTest() noexcept
-{
-    UNIT_TEST();
-    _crossAssignmentTest<ReferenceCountingPointer<PtrData>, NullableReferenceCountingPointer<PtrData>>();
-}
-
-void strongRefCrossAssignmentTest() noexcept
-{
-    UNIT_TEST();
-    _crossAssignmentTest<StrongReferenceCountingPointer<PtrData>, NullableStrongReferenceCountingPointer<PtrData>>();
+    _resetTest<StrongReferenceCountingPointer<PtrData>>();
 }
 
 }

@@ -45,6 +45,9 @@
     <ClCompile Include="src\Vector2fTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\FreeListAllocatorTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ArrayListUnitTest.hpp">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Vector2fTest.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FreeListAllocatorTest.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,6 +11,9 @@
 struct PipelineState;
 class IInputLayout;
 class IVertexArray;
+struct IndexBufferView;
+
+enum class DrawType;
 
 #define COMMAND_LIST_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, ICommandList)
@@ -37,28 +40,24 @@ public:
     /**
      * Issues a draw command.
      *
-     *   This will automatically choose to draw with indexing
-     * depending on whether or not an index buffer is bound within
-     * the vertex array.
+     *   This will assemble primitives by reading off vertices from
+     * the vertex buffers in sequential order.
      *
      * @param[in] exCount
      *        The number of indices or vertices that need to be
      *      drawn.
-     * @param[in] startIndex
-     *        The offset of the first index to be used by the input
-     *      assembler.
      * @param[in] startVertex
      *        The offset of the first vertex to be used by the
      *      input assembler.
      */
-    virtual void draw(uSys exCount, uSys startIndex, uSys startVertex) noexcept = 0;
+    virtual void draw(uSys exCount, uSys startVertex) noexcept = 0;
 
     /**
-     * Issues a draw command with instanced rendering.
+     * Issues a draw command.
      *
-     *   This will automatically choose to draw with indexing
-     * depending on whether or not an index buffer is bound within
-     * the vertex array.
+     *   This will assemble primitives by reading off indices from
+     * the index buffer and selecting the corresponding vertices
+     * from the vertex buffers.
      *
      * @param[in] exCount
      *        The number of indices or vertices that need to be
@@ -66,6 +65,23 @@ public:
      * @param[in] startIndex
      *        The offset of the first index to be used by the input
      *      assembler.
+     * @param[in] baseVertex
+     *        An offset added to each index.
+     */
+    virtual void drawIndexed(uSys exCount, uSys startIndex, iSys baseVertex) noexcept = 0;
+
+    /**
+     * Issues a draw command with instanced rendering.
+     *
+     *   This will assemble primitives by reading off vertices from
+     * the vertex buffers in sequential order.
+     *
+     *   This also uses and additional buffers for per instance
+     * rendering.
+     *
+     * @param[in] exCount
+     *        The number of indices or vertices that need to be
+     *      drawn.
      * @param[in] startVertex
      *        The offset of the first vertex to be used by the
      *      input assembler.
@@ -75,7 +91,44 @@ public:
      *        The offset of the first instance to be used by the
      *      input assembler.
      */
-    virtual void drawInstanced(uSys exCount, uSys startIndex, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
+    virtual void drawInstanced(uSys exCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
+
+    /**
+     * Issues a draw command with instanced rendering.
+     *
+     *   This will assemble primitives by reading off indices from
+     * the index buffer and selecting the corresponding vertices
+     * from the vertex buffers.
+     *
+     *   This also uses and additional buffers for per instance
+     * rendering.
+     *
+     * @param[in] exCount
+     *        The number of indices or vertices that need to be
+     *      drawn.
+     * @param[in] startIndex
+     *        The offset of the first index to be used by the input
+     *      assembler.
+     * @param[in] baseVertex
+     *        An offset added to each index.
+     * @param[in] instanceCount
+     *      The number of instances to render.
+     * @param[in] startInstance
+     *        The offset of the first instance to be used by the
+     *      input assembler.
+     */
+    virtual void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
+
+    /**
+     * Sets the draw type.
+     *
+     *   This is used to control how the list of vertices and
+     * indices should be interpreted.
+     *
+     * @param[in] drawType
+     *      The method of interpreting the vertices and indices.
+     */
+    virtual void setDrawType(DrawType drawType) noexcept = 0;
 
     /**
      * Sets the pipeline state.
@@ -118,7 +171,19 @@ public:
      * @param[in] va
      *      The vertex array to use.
      */
-    virtual void setVertexArray(const IVertexArray& va) noexcept = 0;
+    virtual void setVertexArray(const NullableRef<IVertexArray>& va) noexcept = 0;
+
+    /**
+     * Sets the index buffer.
+     *
+     *   This is used to decode the buffers inside the vertex array
+     * into triangles.
+     *
+     * @param[in] indexBufferView
+     *        The view into the index buffer. This includes the
+     *      buffer and the size of the indices.
+     */
+    virtual void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept = 0;
 
     /**
      * Sets the descriptor layout to use within the shader pipeline.

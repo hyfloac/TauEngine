@@ -269,6 +269,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Alignment.h" />
+    <ClInclude Include="include\allocator\FreeListAllocator.hpp" />
     <ClInclude Include="include\allocator\TauAllocator.hpp" />
     <ClInclude Include="include\ArrayList.hpp" />
     <ClInclude Include="include\AtomicIntrinsics.hpp" />
@@ -298,6 +299,7 @@
     <ClCompile Include="src\PageAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\ReferenceCountingPointer.inl" />
     <None Include="include\String.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

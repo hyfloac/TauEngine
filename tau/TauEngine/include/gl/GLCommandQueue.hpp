@@ -26,6 +26,7 @@ private:
     void _drawInstanced(const GLCL::CommandDrawInstanced& cmd) noexcept;
     void _drawIndexedInstanced(const GLCL::CommandDrawIndexedInstanced& cmd) noexcept;
     void _setPipelineState(const GLCL::CommandSetPipelineState& cmd) noexcept;
+    void _setStencilRef(const GLCL::CommandSetStencilRef& cmd) noexcept;
     void _setVertexArray(const GLCL::CommandSetVertexArray& cmd) noexcept;
     void _setIndexBuffer(const GLCL::CommandSetIndexBuffer& cmd) noexcept;
 

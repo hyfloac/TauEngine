@@ -12,14 +12,14 @@ struct RasterizerArgs final
     DEFAULT_DESTRUCT(RasterizerArgs);
     DEFAULT_CM_PU(RasterizerArgs);
 public:
-    enum class CullMode : u8
+    enum class CullMode
     {
         None = 1,
         Front,
         Back
     };
 
-    enum class FillMode : u8
+    enum class FillMode
     {
         Vertices = 1,
         Wireframe,
@@ -30,17 +30,28 @@ public:
     bool frontFaceCounterClockwise;
     CullMode cullMode;
     FillMode fillMode;
+    float depthBias;
+    float slopeScaledDepthBias;
+    float depthBiasClamp;
 public:
-    RasterizerArgs(const bool _enableScissorTest, const bool _frontFaceCounterClockwise, const CullMode _cullMode, const FillMode _fillMode) noexcept
-        : enableScissorTest(_enableScissorTest),
-          frontFaceCounterClockwise(_frontFaceCounterClockwise),
-          cullMode(_cullMode), fillMode(_fillMode)
+    RasterizerArgs(const bool _enableScissorTest, const bool _frontFaceCounterClockwise, const CullMode _cullMode, const FillMode _fillMode, const float _depthBias, const float _slopScaledDepthBias, const float _depthBiasClamp) noexcept
+        : enableScissorTest(_enableScissorTest)
+        , frontFaceCounterClockwise(_frontFaceCounterClockwise)
+        , cullMode(_cullMode)
+        , fillMode(_fillMode)
+        , depthBias(_depthBias)
+        , slopeScaledDepthBias(_slopScaledDepthBias)
+        , depthBiasClamp(_depthBiasClamp)
     { }
 
     explicit RasterizerArgs(tau::TIPRecommended) noexcept
-        : enableScissorTest(false),
-          frontFaceCounterClockwise(true),
-          cullMode(CullMode::Back), fillMode(FillMode::Filled)
+        : enableScissorTest(false)
+        , frontFaceCounterClockwise(true)
+        , cullMode(CullMode::Back)
+        , fillMode(FillMode::Filled)
+        , depthBias(0.0f)
+        , slopeScaledDepthBias(0.0f)
+        , depthBiasClamp(0.0f)
     { }
 
     // ReSharper disable once CppPossiblyUninitializedMember

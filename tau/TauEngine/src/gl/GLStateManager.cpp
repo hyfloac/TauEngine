@@ -16,8 +16,14 @@ GLStateManager::GLStateManager() noexcept
     , _activeProgram(0)
     , _depthControl({ false, true, GL_LESS })
     , _stencilTestEnabled(false)
+    , _scissorTestEnabled(false)
+    , _faceCullingEnabled(false)
     , _frontStencil({ 0xFFFFFFFF, 0xFFFFFFFF, 0, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS })
     , _backStencil({ 0xFFFFFFFF, 0xFFFFFFFF, 0, GL_KEEP, GL_KEEP, GL_KEEP, GL_ALWAYS })
+    , _polygonOffset({ { 0.0f }, { 0.0f }, 0.0f, null })
+    , _frontFace(GL_CCW)
+    , _faceCullingMode(GL_BACK)
+    , _polygonFillMode(GL_FILL)
 {
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxUniformBufferBindings));
     glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxShaderStorageBufferBindings));
@@ -36,6 +42,19 @@ GLStateManager::GLStateManager() noexcept
         _blendingControls[0].destAlpha = GL_ZERO;
         _blendingControls[0].equationColor = GL_FUNC_ADD;
         _blendingControls[0].equationAlpha = GL_FUNC_ADD;
+    }
+
+    if(GLEW_ARB_polygon_offset_clamp && glPolygonOffsetClamp)
+    {
+        _polygonOffset.extFunc = glPolygonOffsetClamp;
+    }
+    else if(GLEW_EXT_polygon_offset_clamp && glPolygonOffsetClampEXT)
+    {
+        _polygonOffset.extFunc = glPolygonOffsetClampEXT;
+    }
+    else
+    {
+        _polygonOffset.extFunc = _glPolygonOffsetFallback;
     }
 }
 
@@ -440,6 +459,74 @@ void GLStateManager::disableStencilTest() noexcept
     }
 }
 
+void GLStateManager::setScissorTest(const bool state) noexcept
+{
+    if(_scissorTestEnabled != state)
+    {
+        _scissorTestEnabled = state;
+        if(state)
+        {
+            glEnable(GL_SCISSOR_TEST);
+        }
+        else
+        {
+            glDisable(GL_SCISSOR_TEST);
+        }
+    }
+}
+
+void GLStateManager::enableScissorTest() noexcept
+{
+    if(_scissorTestEnabled != true)
+    {
+        _scissorTestEnabled = true;
+        glEnable(GL_SCISSOR_TEST);
+    }
+}
+
+void GLStateManager::disableScissorTest() noexcept
+{
+    if(_scissorTestEnabled != false)
+    {
+        _scissorTestEnabled = false;
+        glDisable(GL_SCISSOR_TEST);
+    }
+}
+
+void GLStateManager::setFaceCulling(const bool state) noexcept
+{
+    if(_faceCullingEnabled != state)
+    {
+        _faceCullingEnabled = state;
+        if(state)
+        {
+            glEnable(GL_CULL_FACE);
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
+        }
+    }
+}
+
+void GLStateManager::enableFaceCulling() noexcept
+{
+    if(_faceCullingEnabled != true)
+    {
+        _faceCullingEnabled = true;
+        glEnable(GL_CULL_FACE);
+    }
+}
+
+void GLStateManager::disableFaceCulling() noexcept
+{
+    if(_faceCullingEnabled != false)
+    {
+        _faceCullingEnabled = false;
+        glDisable(GL_CULL_FACE);
+    }
+}
+
 void GLStateManager::set(const GLenum capability, const bool state) noexcept
 {
     switch(capability)
@@ -447,6 +534,8 @@ void GLStateManager::set(const GLenum capability, const bool state) noexcept
         case GL_BLEND: setBlending(state); break;
         case GL_DEPTH_TEST: setDepthTest(state); break;
         case GL_STENCIL_TEST: setStencilTest(state); break;
+        case GL_SCISSOR_TEST: setScissorTest(state); break;
+        case GL_CULL_FACE: setFaceCulling(state); break;
         default:
             if(state)
             {
@@ -467,6 +556,8 @@ void GLStateManager::set(const GLenum capability, const uSys index, const bool s
         case GL_BLEND: setBlending(index, state); break;
         case GL_DEPTH_TEST: setDepthTest(state); break;
         case GL_STENCIL_TEST: setStencilTest(state); break;
+        case GL_SCISSOR_TEST: setScissorTest(state); break;
+        case GL_CULL_FACE: setFaceCulling(state); break;
         default:
             if(state)
             {
@@ -487,6 +578,8 @@ void GLStateManager::enable(const GLenum capability) noexcept
         case GL_BLEND: enableBlending(); break;
         case GL_DEPTH_TEST: enableDepthTest(); break;
         case GL_STENCIL_TEST: enableStencilTest(); break;
+        case GL_SCISSOR_TEST: enableScissorTest(); break;
+        case GL_CULL_FACE: enableFaceCulling(); break;
         default: glEnable(capability); break;
     }
 }
@@ -498,6 +591,8 @@ void GLStateManager::enable(const GLenum capability, const uSys index) noexcept
         case GL_BLEND: enableBlending(index); break;
         case GL_DEPTH_TEST: enableDepthTest(); break;
         case GL_STENCIL_TEST: enableStencilTest(); break;
+        case GL_SCISSOR_TEST: enableScissorTest(); break;
+        case GL_CULL_FACE: enableFaceCulling(); break;
         default: glEnablei(capability, index); break;
     }
 }
@@ -509,6 +604,8 @@ void GLStateManager::disable(const GLenum capability) noexcept
         case GL_BLEND: disableBlending(); break;
         case GL_DEPTH_TEST: disableDepthTest(); break;
         case GL_STENCIL_TEST: disableStencilTest(); break;
+        case GL_SCISSOR_TEST: disableScissorTest(); break;
+        case GL_CULL_FACE: disableFaceCulling(); break;
         default: glDisable(capability); break;
     }
 }
@@ -520,6 +617,8 @@ void GLStateManager::disable(const GLenum capability, const uSys index) noexcept
         case GL_BLEND: disableBlending(index); break;
         case GL_DEPTH_TEST: disableDepthTest(); break;
         case GL_STENCIL_TEST: disableStencilTest(); break;
+        case GL_SCISSOR_TEST: disableScissorTest(); break;
+        case GL_CULL_FACE: disableFaceCulling(); break;
         default: glDisablei(capability, index); break;
     }
 }
@@ -1024,5 +1123,135 @@ void GLStateManager::stencilRef(const GLenum face, const GLint reference) noexce
         case GL_BACK:           stencilRefBack(reference); break;
         case GL_FRONT_AND_BACK: stencilRefFrontBack(reference); break;
         default: break;
+    }
+}
+
+void GLStateManager::polygonOffset(const GLfloat factor, const GLfloat units) noexcept
+{
+    if(_polygonOffset.factor != factor || _polygonOffset.units != units)
+    {
+        _polygonOffset.factor = factor;
+        _polygonOffset.units = units;
+        glPolygonOffset(factor, units);
+    }
+}
+
+void GLStateManager::polygonOffset(const GLfloat factor, const GLfloat units, const GLfloat clamp) noexcept
+{
+    if(_polygonOffset.factor != factor || _polygonOffset.units != units || _polygonOffset.depthClamp != clamp)
+    {
+        _polygonOffset.factor = factor;
+        _polygonOffset.units = units;
+        _polygonOffset.depthClamp = clamp;
+        _polygonOffset.extFunc(factor, units, clamp);
+    }
+}
+
+void GLStateManager::_glPolygonOffsetFallback(const GLfloat factor, const GLfloat units, GLfloat) noexcept
+{
+    glPolygonOffset(factor, units);
+}
+
+void GLStateManager::frontFaceCW() noexcept
+{
+    if(_frontFace != GL_CW)
+    {
+        _frontFace = GL_CW;
+        glFrontFace(GL_CW);
+    }
+}
+
+void GLStateManager::frontFaceCCW() noexcept
+{
+    if(_frontFace != GL_CCW)
+    {
+        _frontFace = GL_CCW;
+        glFrontFace(GL_CCW);
+    }
+}
+
+void GLStateManager::frontFace(const GLenum mode) noexcept
+{
+    if(_frontFace != mode)
+    {
+        _frontFace = mode;
+        glFrontFace(mode);
+    }
+}
+
+void GLStateManager::frontFaceB(const bool counterClockWise) noexcept
+{
+    frontFace(counterClockWise ? GL_CCW : GL_CW);
+}
+
+void GLStateManager::cullFront() noexcept
+{
+    if(_faceCullingMode != GL_FRONT)
+    {
+        _faceCullingMode = GL_FRONT;
+        glCullFace(GL_FRONT);
+    }
+}
+
+void GLStateManager::cullBack() noexcept
+{
+    if(_faceCullingMode != GL_BACK)
+    {
+        _faceCullingMode = GL_BACK;
+        glCullFace(GL_BACK);
+    }
+}
+
+void GLStateManager::cullFrontBack() noexcept
+{
+    if(_faceCullingMode != GL_FRONT_AND_BACK)
+    {
+        _faceCullingMode = GL_FRONT_AND_BACK;
+        glCullFace(GL_FRONT_AND_BACK);
+    }
+}
+
+void GLStateManager::cullMode(const GLenum mode) noexcept
+{
+    if(_faceCullingMode != mode)
+    {
+        _faceCullingMode = mode;
+        glCullFace(mode);
+    }
+}
+
+void GLStateManager::polygonModeFill() noexcept
+{
+    if(_polygonFillMode != GL_FILL)
+    {
+        _polygonFillMode = GL_FILL;
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+}
+
+void GLStateManager::polygonModeLines() noexcept
+{
+    if(_polygonFillMode != GL_LINE)
+    {
+        _polygonFillMode = GL_LINE;
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+}
+
+void GLStateManager::polygonModePoints() noexcept
+{
+    if(_polygonFillMode != GL_POINT)
+    {
+        _polygonFillMode = GL_POINT;
+        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    }
+}
+
+void GLStateManager::polygonMode(const GLenum mode) noexcept
+{
+    if(_polygonFillMode != mode)
+    {
+        _polygonFillMode = mode;
+        glPolygonMode(GL_FRONT_AND_BACK, mode);
     }
 }

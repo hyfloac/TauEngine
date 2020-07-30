@@ -62,9 +62,9 @@ public:
 
         return *this;
     }
-
-    [[nodiscard]] const ID3D10DepthStencilState* d3dDepthStencilState() const noexcept { return _d3dDepthStencilState; }
-    [[nodiscard]] ID3D10DepthStencilState* d3dDepthStencilState() noexcept { return _d3dDepthStencilState; }
+    
+    [[nodiscard]] ID3D10DepthStencilState* d3dDepthStencilState() const noexcept { return _d3dDepthStencilState; }
+    // [[nodiscard]] const ID3D10DepthStencilState* d3dDepthStencilState() const noexcept { return _d3dDepthStencilState; }
 
     void apply(DX10RenderingContext& ctx) const noexcept;
 };

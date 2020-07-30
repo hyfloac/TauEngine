@@ -3,6 +3,7 @@
 #include <Objects.hpp>
 #include <DynArray.hpp>
 #include <Safeties.hpp>
+#include <RunTimeType.hpp>
 
 #include "DLL.hpp"
 
@@ -16,6 +17,11 @@ enum class DrawType
 class IVertexBuffer;
 class IIndexBuffer;
 class IRenderingContext;
+
+#define VERTEX_ARRAY_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IVertexArray)
+
+#define VERTEX_ARRAY_IMPL(_TYPE) VERTEX_ARRAY_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE IVertexArray
 {
@@ -34,13 +40,17 @@ protected:
         , _buffers(buffers)
     { }
 public:
+    [[nodiscard]] uSys drawCount() const noexcept { return _drawCount; }
+
     virtual void bind(IRenderingContext& context) noexcept = 0;
     virtual void unbind(IRenderingContext& context) noexcept = 0;
 
     virtual void draw(IRenderingContext& context, uSys drawCount = 0, uSys drawOffset = 0) noexcept = 0;
     virtual void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0, uSys drawOffset = 0) noexcept = 0;
 
-    [[nodiscard]] uSys drawCount() const noexcept { return _drawCount; }
+    RTT_BASE_IMPL(IVertexArray);
+    RTT_BASE_CHECK(IVertexArray);
+    RTT_BASE_CAST(IVertexArray);
 };
 
 class IShaderProgram;

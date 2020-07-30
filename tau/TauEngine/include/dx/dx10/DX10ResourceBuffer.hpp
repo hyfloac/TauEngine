@@ -7,6 +7,8 @@
 
 class TAU_DLL DX10ResourceBuffer final : public DX10Resource
 {
+public:
+    static DXGI_FORMAT dxIndexSize(const EBuffer::IndexSize indexSize) noexcept;
 private:
     ResourceBufferArgs _args;
     ID3D10Buffer* _d3dBuffer;
@@ -76,4 +78,14 @@ public:
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };
+
+inline DXGI_FORMAT DX10ResourceBuffer::dxIndexSize(const EBuffer::IndexSize indexSize) noexcept
+{
+    switch(indexSize)
+    {
+        case EBuffer::IndexSize::Uint32: return DXGI_FORMAT_R32_UINT;
+        case EBuffer::IndexSize::Uint16: return DXGI_FORMAT_R16_UINT;
+        default: return static_cast<DXGI_FORMAT>(0);
+    }
+}
 #endif

@@ -51,6 +51,14 @@ public:
         delete[] _iaBuffers;
     }
 
+    [[nodiscard]] uSys iaBufferCount() const noexcept { return _iaBufferCount; }
+
+    [[nodiscard]] ID3D10Buffer** iaBuffers() const noexcept { return _iaBuffers; }
+
+    [[nodiscard]] const NullableRef<DX10IndexBuffer>& indexBuffer() const noexcept { return _indexBuffer; }
+
+    [[nodiscard]] D3D10_PRIMITIVE_TOPOLOGY drawTypeCache() const noexcept { return _drawTypeCache; }
+
     void bind(IRenderingContext& context) noexcept override;
     void unbind(IRenderingContext& context) noexcept override;
 

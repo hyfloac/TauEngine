@@ -76,9 +76,9 @@ bool DX10RasterizerStateBuilder::processArgs(const RasterizerArgs& args, DXRaste
     dxArgs->desc.CullMode = dxCullMode(args.cullMode);
     dxArgs->desc.FillMode = dxFillMode(args.fillMode);
 
-    dxArgs->desc.DepthBias = 0.0f;
-    dxArgs->desc.DepthBiasClamp = 0.0f;
-    dxArgs->desc.SlopeScaledDepthBias = 0.0f;
+    dxArgs->desc.DepthBias = args.depthBias;
+    dxArgs->desc.DepthBiasClamp = args.depthBiasClamp;
+    dxArgs->desc.SlopeScaledDepthBias = args.slopeScaledDepthBias;
     dxArgs->desc.DepthClipEnable = true;
     dxArgs->desc.MultisampleEnable = false;
     dxArgs->desc.AntialiasedLineEnable = false;

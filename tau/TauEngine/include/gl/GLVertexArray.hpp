@@ -11,7 +11,7 @@ class GLIndexBuffer;
 
 class TAU_DLL GLVertexArray final : public IVertexArray
 {
-    DELETE_COPY(GLVertexArray);
+    DELETE_CM(GLVertexArray);
 public:
     static GLenum getGLType(ShaderDataType::Type type) noexcept;
 private:
@@ -46,7 +46,7 @@ class TAU_DLL GLVertexArrayBuilder : public IVertexArrayBuilder
 {
     DEFAULT_CONSTRUCT_PU(GLVertexArrayBuilder);
     DEFAULT_DESTRUCT(GLVertexArrayBuilder);
-    DELETE_COPY(GLVertexArrayBuilder);
+    DEFAULT_CM_PU(GLVertexArrayBuilder);
 public:
     struct GLVertexArrayArgs final
     {

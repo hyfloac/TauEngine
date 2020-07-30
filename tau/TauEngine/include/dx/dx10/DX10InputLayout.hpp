@@ -1,11 +1,11 @@
 #pragma once
 
-#include "model/InputLayout.hpp"
+#include "graphics/InputLayout.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>
 #include "dx/DXUtils.hpp"
-#include "model/BufferDescriptor.hpp"
+#include "graphics/BufferDescriptor.hpp"
 
 class DX10GraphicsInterface;
 class DX10RenderingContext;

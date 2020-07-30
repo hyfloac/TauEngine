@@ -374,7 +374,7 @@ template<typename _T>
 using Ref = ReferenceCountingPointer<_T>;
 
 template<typename _T>
-using NullableRef = NullableReferenceCountingPointer<_T>;
+using NullableRef = ReferenceCountingPointer<_T>;
 
 template<typename _T>
 using StrongRef = StrongReferenceCountingPointer<_T>;
@@ -383,10 +383,10 @@ template<typename _T>
 using WeakRef = WeakReferenceCountingPointer<_T>;
 
 template<typename _T>
-using NullableStrongRef = NullableStrongReferenceCountingPointer<_T>;
+using NullableStrongRef = StrongReferenceCountingPointer<_T>;
 
 template<typename _T>
-using NullableWeakRef = NullableWeakReferenceCountingPointer<_T>;
+using NullableWeakRef = WeakReferenceCountingPointer<_T>;
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline CPPRef<_Out> RefCast(const CPPRef<_In>& in) noexcept
@@ -397,21 +397,9 @@ template<typename _Out, typename _In>
 { return RCPCast<_Out>(in); }
 
 template<typename _Out, typename _In>
-[[nodiscard]] static inline NullableRef<_Out> RefCast(const NullableRef<_In>& in) noexcept
-{ return RCPCast<_Out>(in); }
-
-template<typename _Out, typename _In>
 [[nodiscard]] static inline StrongRef<_Out> RefCast(const StrongRef<_In>& in) noexcept
 { return RCPCast<_Out>(in); }
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline WeakRef<_Out> RefCast(const WeakRef<_In>& in) noexcept
-{ return RCPCast<_Out>(in); }
-
-template<typename _Out, typename _In>
-[[nodiscard]] static inline NullableStrongRef<_Out> RefCast(const NullableStrongRef<_In>& in) noexcept
-{ return RCPCast<_Out>(in); }
-
-template<typename _Out, typename _In>
-[[nodiscard]] static inline NullableWeakRef<_Out> RefCast(const NullableWeakRef<_In>& in) noexcept
 { return RCPCast<_Out>(in); }
