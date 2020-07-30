@@ -55,11 +55,14 @@ public:
 
     virtual i64 readBytes(u8* buffer, uSys len) noexcept = 0;
 
-    virtual i64 read(void* buffer, uSys len) noexcept
+    virtual i64 read(void* const buffer, const uSys len) noexcept
     { return readBytes(reinterpret_cast<u8*>(buffer), len); }
 
-    virtual i64 readString(char* buffer, uSys len) noexcept
-    { return readBytes(reinterpret_cast<u8*>(buffer), len); }
+    virtual i64 readString(char* const buffer, const uSys len) noexcept
+    { return readBytes(reinterpret_cast<u8*>(buffer), len * sizeof(char)); }
+
+    virtual i64 readString(wchar_t* const buffer, const uSys len) noexcept
+    { return readBytes(reinterpret_cast<u8*>(buffer), len * sizeof(wchar_t)); }
 
     virtual RefDynArray<u8> readFile() noexcept
     {
@@ -73,17 +76,27 @@ public:
     virtual int readChar() noexcept
     {
         char ret;
-        const int cnt = readBytes(reinterpret_cast<u8*>(&ret), 1);
+        const int cnt = readBytes(reinterpret_cast<u8*>(&ret), sizeof(char));
+        return cnt ? ret : -1;
+    }
+
+    virtual int readWChar() noexcept
+    {
+        wchar_t ret;
+        const int cnt = readBytes(reinterpret_cast<u8*>(&ret), sizeof(wchar_t));
         return cnt ? ret : -1;
     }
 
     virtual i64 writeBytes(const u8* buffer, uSys len) noexcept = 0;
 
-    virtual i64 write(const void* buffer, uSys len) noexcept
+    virtual i64 write(const void* const buffer, const uSys len) noexcept
     { return writeBytes(reinterpret_cast<const u8*>(buffer), len); }
 
-    virtual i64 writeString(const char* str) noexcept
-    { return writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str)); }
+    virtual i64 writeString(const char* const str) noexcept
+    { return writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str) * sizeof(char)); }
+
+    virtual i64 writeString(const wchar_t* const str) noexcept
+    { return writeBytes(reinterpret_cast<const u8*>(str), std::wcslen(str) * sizeof(wchar_t)); }
 
     template<typename _T>
     i64 readType(_T* t) noexcept

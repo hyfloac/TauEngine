@@ -17,44 +17,52 @@ struct TranslationHeader
 };
 #pragma pack(pop)
 
-void I18n::loadTranslations(const CPPRef<IFile>& file) noexcept
+bool I18n::loadTranslations(const CPPRef<IFile>& file) noexcept
 {
     LangHeader header;
     file->readType(&header);
 
     if(header.magic == 0x4C614E67)
     {
-        char* languageName = new char[header.languageNameLength + 1];
-        file->readString(languageName, header.languageNameLength);
-        languageName[header.languageNameLength] = '\0';
+        _translations.clear();
 
-        _language = DynString::passControl(languageName);
+        wchar_t* languageName = new wchar_t[header.languageNameLength + 1];
+        languageName[header.languageNameLength] = '\0';
+        if(file->readString(languageName, header.languageNameLength) != header.languageNameLength * sizeof(wchar_t))
+        { return false; }
+
+        _language = WDynString::passControl(languageName);
 
         for(u32 i = 0; i < header.translationCount; ++i)
         {
             TranslationHeader tHeader;
-            file->readType(&tHeader);
+            if(file->readType(&tHeader) != sizeof(tHeader))
+            { return false; }
 
             char* key = new char[tHeader.keyLength + 1];
-            file->readString(key, tHeader.keyLength);
             key[tHeader.keyLength] = '\0';
+            if(file->readString(key, tHeader.keyLength) != tHeader.keyLength * sizeof(char))
+            { return false; }
 
-            char* value = new char[tHeader.keyLength + 1];
-            file->readString(value, tHeader.valueLength);
+            wchar_t* value = new wchar_t[tHeader.valueLength + 1];
             value[tHeader.valueLength] = '\0';
+            if(file->readString(value, tHeader.valueLength) != tHeader.valueLength * sizeof(wchar_t))
+            { return false; }
 
-            _translations.insert({ DynString::passControl(key), DynString::passControl(value) });
+            _translations.emplace(DynString::passControl(key), WDynString::passControl(value));
         }
     }
+
+    return true;
 }
 
-const DynString& I18n::translate(const DynString& key, Error* const error) const noexcept
+const WDynString& I18n::translate(const DynString& key, Error* const error) const noexcept
 {
     if(this->_translations.find(key) != this->_translations.end())
     {
-        const DynString& translation = _translations.at(key);
+        const WDynString& translation = _translations.at(key);
         ERROR_CODE_V(Error::NoError, translation);
     }
 
-    ERROR_CODE_V(Error::UnknownTranslationKey, key);
+    ERROR_CODE_V(Error::UnknownTranslationKey, WDynString());
 }

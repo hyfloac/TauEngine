@@ -2,6 +2,8 @@
  * @file
  */
 #pragma once
+
+#include <Objects.hpp>
 #include <NumTypes.hpp>
 #include <DLL.hpp>
 
@@ -12,6 +14,8 @@
  */
 class TAU_DLL TUID
 {
+    DEFAULT_DESTRUCT(TUID);
+    DEFAULT_CM_PU(TUID);
 private:
     u64 _lowBits;
     u64 _highBits;

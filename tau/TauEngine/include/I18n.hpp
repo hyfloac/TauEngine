@@ -6,20 +6,20 @@
 
 #include <Objects.hpp>
 #include <IFile.hpp>
+#include <String.hpp>
 
-#include "String.hpp"
 #include "DLL.hpp"
 
 class TAU_DLL I18n final
 {
     DEFAULT_CONSTRUCT_PU(I18n);
     DEFAULT_DESTRUCT(I18n);
-    DEFAULT_COPY(I18n);
+    DEFAULT_CM_PU(I18n);
 public:
-    using I18nMap = ::std::unordered_map<DynString, DynString>;
+    using I18nMap = ::std::unordered_map<DynString, WDynString>;
 private:
     I18nMap _translations;
-    DynString _language;
+    WDynString _language;
 public:
     enum class Error
     {
@@ -27,12 +27,12 @@ public:
         UnknownTranslationKey
     };
 public:
-    [[nodiscard]] inline const char* language() const noexcept { return _language; }
+    [[nodiscard]] inline const WDynString& language() const noexcept { return _language; }
     [[nodiscard]] inline const I18nMap& operator()() const noexcept { return _translations; }
 
-    [[nodiscard]] inline const DynString& operator[](const DynString& key) const noexcept { return translate(key); }
+    [[nodiscard]] inline const WDynString& operator[](const DynString& key) const noexcept { return translate(key); }
 
-    void loadTranslations(const CPPRef<IFile>& file) noexcept;
+    bool loadTranslations(const CPPRef<IFile>& file) noexcept;
 
-    [[nodiscard]] const DynString& translate(const DynString& key, [[tau::out]] Error* error = null) const noexcept;
+    [[nodiscard]] const WDynString& translate(const DynString& key, [[tau::out]] Error* error = null) const noexcept;
 };

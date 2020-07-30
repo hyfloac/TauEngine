@@ -289,7 +289,14 @@ public:
     ~ArrayList() noexcept
     {
         if(_ctrlBlock && --_ctrlBlock->refCount == 0)
-        { PageAllocator::free(_ctrlBlock); }
+        {
+            for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+            {
+                _arr[i].~_T();
+            }
+
+            PageAllocator::free(_ctrlBlock);
+        }
     }
 
     ArrayList(const ArrayList<_T, ALMoveMethod::MemCopy>& copy) noexcept
@@ -358,6 +365,8 @@ public:
         if(index + 1 > _ctrlBlock->elementCount)
         { return; }
 
+        _arr[index].~_T();
+
         --_ctrlBlock->elementCount;
         if(index == _ctrlBlock->elementCount)
         { return; }
@@ -373,6 +382,8 @@ public:
         if(index + 1 > _ctrlBlock->elementCount)
         { return; }
 
+        _arr[index].~_T();
+
         --_ctrlBlock->elementCount;
         if(index == _ctrlBlock->elementCount)
         { return; }
@@ -381,6 +392,19 @@ public:
         _ctrlBlock->dataSize -= sizeof(_T);
 
         attemptRelease();
+    }
+
+    void clear(const bool releasePages = true) noexcept
+    {
+        for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+        {
+            _arr[i].~_T();
+        }
+
+        if(releasePages)
+        {
+            PageAllocator::decommitPages(_ctrlBlock + PageAllocator::pageSize(), _ctrlBlock->committedPages - 1);
+        }
     }
 
     [[nodiscard]] _T* at(const uSys index) noexcept
@@ -456,7 +480,14 @@ public:
     ~ArrayList() noexcept
     {
         if(_ctrlBlock && --_ctrlBlock->refCount == 0)
-        { PageAllocator::free(_ctrlBlock); }
+        {
+            for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+            {
+                _arr[i].~_T();
+            }
+
+            PageAllocator::free(_ctrlBlock);
+        }
     }
 
     ArrayList(const ArrayList<_T, ALMoveMethod::MoveConstruct>& copy) noexcept
@@ -525,6 +556,8 @@ public:
         if(index + 1 > _ctrlBlock->elementCount)
         { return; }
 
+        _arr[index].~_T();
+
         --_ctrlBlock->elementCount;
         if(index == _ctrlBlock->elementCount)
         { return; }
@@ -540,6 +573,8 @@ public:
         if(index + 1 > _ctrlBlock->elementCount)
         { return; }
 
+        _arr[index].~_T();
+
         --_ctrlBlock->elementCount;
         if(index == _ctrlBlock->elementCount)
         { return; }
@@ -553,6 +588,19 @@ public:
         _ctrlBlock->dataSize -= sizeof(_T);
 
         attemptRelease();
+    }
+
+    void clear(const bool releasePages = true) noexcept
+    {
+        for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+        {
+            _arr[i].~_T();
+        }
+
+        if(releasePages)
+        {
+            PageAllocator::decommitPages(_ctrlBlock + PageAllocator::pageSize(), _ctrlBlock->committedPages - 1);
+        }
     }
 
     [[nodiscard]] _T* at(const uSys index) noexcept

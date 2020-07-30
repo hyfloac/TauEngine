@@ -662,7 +662,7 @@ inline DynStringT<_C> DynStringT<_C>::passControl(const _C* const str) noexcept
 
 template<typename _C>
 inline DynStringT<_C>::DynStringT(const _C* const string, const uSys length) noexcept
-    : _largeString { string, new(::std::nothrow) uSys(1) }
+    : _largeString { new(::std::nothrow) uSys(1), string }
     , _length(length)
     , _hash(findHashCode(string))
 { }
@@ -700,8 +700,11 @@ inline DynStringT<_C>::DynStringT(const NotNull<const _C>& string) noexcept
 {
     if(_length >= 16)
     {
-        _largeString.refCount = new(::std::nothrow) uSys(1);
-        _C* const str = new(::std::nothrow) _C[_length + 1];
+        void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
+
+        _largeString.refCount = new(placement) uSys(1);
+        _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+
         ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
         _largeString.string = str;
     }
@@ -720,8 +723,11 @@ inline DynStringT<_C>::DynStringT(const _C* const string) noexcept
     Ensure(string != null);
     if(_length >= 16)
     {
-        _largeString.refCount = new(::std::nothrow) uSys(1);
-        _C* const str = new(::std::nothrow) _C[_length + 1];
+        void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
+
+        _largeString.refCount = new(placement) uSys(1);
+        _C* const str = new(reinterpret_cast<u8* const>(placement) + sizeof(uSys)) _C[_length + 1];
+
         ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
         _largeString.string = str;
     }
@@ -744,8 +750,12 @@ inline DynStringT<_C>::~DynStringT() noexcept
 {
     if(_length >= 16 && _largeString.string && --(*_largeString.refCount) == 0)
     {
-        delete[] _largeString.string;
         delete _largeString.refCount;
+        // Was this allocated as a single block.
+        if(reinterpret_cast<uPtr>(_largeString.refCount) != reinterpret_cast<uPtr>(_largeString.string) - static_cast<uPtr>(sizeof(uSys)))
+        {
+            delete[] _largeString.string;
+        }
     }
 }
 
@@ -756,8 +766,8 @@ inline DynStringT<_C>::DynStringT(const DynStringT<_C>& copy) noexcept
 {
     if(_length >= 16)
     {
-        _largeString.string = copy._largeString.string;
         _largeString.refCount = copy._largeString.refCount;
+        _largeString.string = copy._largeString.string;
         ++(*_largeString.refCount);
     }
     else
@@ -773,8 +783,8 @@ inline DynStringT<_C>::DynStringT(DynStringT<_C>&& move) noexcept
 {
     if(_length >= 16)
     {
-        _largeString.string = move._largeString.string;
         _largeString.refCount = move._largeString.refCount;
+        _largeString.string = move._largeString.string;
         move._largeString.string = null;
     }
     else
@@ -793,12 +803,16 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const DynStringT<_C>& copy) noe
     {
         if(_length >= 16 && --(*_largeString.refCount) == 0)
         {
-            delete[] _largeString.string;
             delete _largeString.refCount;
+            // Was this allocated as a single block.
+            if(reinterpret_cast<uPtr>(_largeString.refCount) != reinterpret_cast<uPtr>(_largeString.string) - static_cast<uPtr>(sizeof(uSys)))
+            {
+                delete[] _largeString.string;
+            }
         }
 
-        _largeString.string = copy._largeString.string;
         _largeString.refCount = copy._largeString.refCount;
+        _largeString.string = copy._largeString.string;
         ++(*_largeString.refCount);
     }
     else
@@ -822,12 +836,16 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(DynStringT<_C>&& move) noexcept
     {
         if(_length >= 16 && --(*_largeString.refCount) == 0)
         {
-            delete[] _largeString.string;
             delete _largeString.refCount;
+            // Was this allocated as a single block.
+            if(reinterpret_cast<uPtr>(*_largeString.refCount) != reinterpret_cast<uPtr>(_largeString.string) - static_cast<uPtr>(sizeof(uSys)))
+            {
+                delete[] _largeString.string;
+            }
         }
 
-        _largeString.string = move._largeString.string;
         _largeString.refCount = move._largeString.refCount;
+        _largeString.string = move._largeString.string;
         move._largeString.string = null;
     }
     else
@@ -854,26 +872,50 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const NotNull<const _C>& string
 
     if(_length >= 16 && length >= 16 && *_largeString.refCount == 1)
     {
-        delete[] _largeString.string;
         _length = length;
 
-        _C* const str = new(::std::nothrow) _C[_length + 1];
-        ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-        _largeString.string = str;
+        // Was this allocated as a single block.
+        if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
+        {
+            delete[] _largeString.string;
+
+            _C* const str = new(::std::nothrow) _C[_length + 1];
+            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
+            _largeString.string = str;
+        }
+        else
+        {
+            delete _largeString.refCount;
+
+            void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
+
+            _largeString.refCount = new(placement) uSys(1);
+            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+
+            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
+            _largeString.string = str;
+        }
     }
     else
     {
         if(_length >= 16 && --(*_largeString.refCount) == 0)
         {
-            delete[] _largeString.string;
             delete _largeString.refCount;
+            // Was this allocated as a single block.
+            if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
+            {
+                delete[] _largeString.string;
+            }
         }
 
         _length = length;
         if(_length >= 16)
         {
-            _largeString.refCount = new(::std::nothrow) uSys(1);
-            _C* const str = new(::std::nothrow) _C[_length + 1];
+            void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
+
+            _largeString.refCount = new(placement) uSys(1);
+            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+
             ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
             _largeString.string = str;
         }
@@ -906,26 +948,50 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcep
 
     if(_length >= 16 && length >= 16 && *_largeString.refCount == 1)
     {
-        delete[] _largeString.string;
         _length = length;
 
-        _C* const str = new(::std::nothrow) _C[_length + 1];
-        ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-        _largeString.string = str;
+        // Was this allocated as a single block.
+        if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
+        {
+            delete[] _largeString.string;
+
+            _C* const str = new(::std::nothrow) _C[_length + 1];
+            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
+            _largeString.string = str;
+        }
+        else
+        {
+            delete _largeString.refCount;
+
+            void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
+
+            _largeString.refCount = new(placement) uSys(1);
+            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+
+            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
+            _largeString.string = str;
+        }
     }
     else
     {
         if(_length >= 16 && --(*_largeString.refCount) == 0)
         {
-            delete[] _largeString.string;
             delete _largeString.refCount;
+            // Was this allocated as a single block.
+            if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
+            {
+                delete[] _largeString.string;
+            }
         }
 
         _length = length;
         if(_length >= 16)
         {
-            _largeString.refCount = new(::std::nothrow) uSys(1);
-            _C* const str = new(::std::nothrow) _C[_length + 1];
+            void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
+
+            _largeString.refCount = new(placement) uSys(1);
+            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+
             ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
             _largeString.string = str;
         }
@@ -1203,8 +1269,12 @@ inline DynStringViewT<_C>::~DynStringViewT() noexcept
 {
     if(_refCount && --(*_refCount) == 0)
     {
-        delete[] _string;
         delete _refCount;
+        // Was this allocated as a single block.
+        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - sizeof(uSys))
+        {
+            delete[] _string;
+        }
     }
 }
 
@@ -1235,8 +1305,12 @@ inline DynStringViewT<_C>& DynStringViewT<_C>::operator=(const DynStringViewT<_C
 
     if(_refCount && --(*_refCount) == 0)
     {
-        delete[] _string;
         delete _refCount;
+        // Was this allocated as a single block.
+        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - sizeof(uSys))
+        {
+            delete[] _string;
+        }
     }
 
     _string = copy._string;
@@ -1257,8 +1331,12 @@ inline DynStringViewT<_C>& DynStringViewT<_C>::operator=(DynStringViewT<_C>&& mo
 
     if(_refCount && --(*_refCount) == 0)
     {
-        delete[] _string;
         delete _refCount;
+        // Was this allocated as a single block.
+        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - sizeof(uSys))
+        {
+            delete[] _string;
+        }
     }
 
     _string = move._string;
@@ -1287,8 +1365,12 @@ inline DynStringViewT<_C>& DynStringViewT<_C>::reset(const DynStringT<_C>& str, 
 
     if(_refCount && --(*_refCount) == 0)
     {
-        delete[] _string;
         delete _refCount;
+        // Was this allocated as a single block.
+        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - sizeof(uSys))
+        {
+            delete[] _string;
+        }
     }
 
     _string = str.c_str() + begin;
@@ -1315,8 +1397,12 @@ inline DynStringViewT<_C>& DynStringViewT<_C>::resetLen(const DynStringT<_C>& st
 
     if(_refCount && --(*_refCount) == 0)
     {
-        delete[] _string;
         delete _refCount;
+        // Was this allocated as a single block.
+        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - sizeof(uSys))
+        {
+            delete[] _string;
+        }
     }
 
     _string = str.c_str() + begin;

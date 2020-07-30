@@ -144,7 +144,7 @@ public:
 class TAU_DLL DeltaTime final
 {
     DEFAULT_DESTRUCT(DeltaTime);
-    DEFAULT_COPY(DeltaTime);
+    DEFAULT_CM_PU(DeltaTime);
 private:
     float _us;
     float _ms;

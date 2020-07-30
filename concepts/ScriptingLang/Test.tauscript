@@ -1,0 +1,35 @@
+function x()
+function add(var x : i32, var y)
+{
+    return x + y;
+}
+
+function add(var x : i32, var y : i32) : i32
+{
+    return x + y;
+}
+
+function fib(var n)
+{
+    if(n <= 1)
+    {
+        return n;
+    }
+
+    return fib(n - 1) + fib(n - 2);
+}
+
+function fib2(var n : i32) : i32
+{
+    var sum : i32 = 0;
+    var l0  : i32 = 0;
+    var l1  : i32 = 1;
+
+    for(var i : i32 = 1; i <= n; ++i)
+    {
+        sum = l0 + l1;
+        l0 = l1;
+        l1 = sum;
+    }
+    return sum;
+}

@@ -387,8 +387,8 @@ private:
     {
         struct
         {
-            const _C* string;
             uSys* refCount;
+            const _C* string;
         } _largeString;
         _C _stackString[16];
     };
