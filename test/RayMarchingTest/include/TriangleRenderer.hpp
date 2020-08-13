@@ -13,6 +13,7 @@ private:
     Allocation _positionsBuffer;
     Allocation _colorBuffer;
     Allocation _uploadBuffer;
+    Allocation _texture;
     UINT _dynamicCycle;
     winrt::com_ptr<ID3D12GraphicsCommandList> _dynamicBundles[DynamicCycles];
 public:
@@ -20,10 +21,12 @@ public:
         : _positionsBuffer(nullptr, 0, 0)
         , _colorBuffer(nullptr, 0, 0)
         , _uploadBuffer(nullptr, 0, 0)
+        , _texture(nullptr, 0, 0)
         , _dynamicCycle(0)
     { }
 
     void initBuffers(BufferAllocator& bufferAllocator, BufferAllocator& uploadAllocator, const Window& window, ID3D12GraphicsCommandList* uploadCmdList) noexcept;
+    void initTexture(TextureAllocator& textureAllocator, Allocation& uploadTexture, ID3D12GraphicsCommandList* uploadCmdList) noexcept;
     void initCmdLists(ID3D12Device* device, ID3D12CommandAllocator* bundleAllocator, ID3D12PipelineState* baseState) noexcept;
 
     void updateSize(UINT width, UINT height, ID3D12GraphicsCommandList* uploadCmdList) noexcept;

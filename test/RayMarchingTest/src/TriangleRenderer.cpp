@@ -1,6 +1,8 @@
 #include "TriangleRenderer.hpp"
 #include "d3dx12.h"
 
+#include <FreeImage.h>
+
 void TriangleRenderer::initBuffers(BufferAllocator& bufferAllocator, BufferAllocator& uploadAllocator, const Window& window, ID3D12GraphicsCommandList* const uploadCmdList) noexcept
 {
     _positionsBuffer = bufferAllocator.alloc(sizeof(float) * 3 * 3);
@@ -17,10 +19,16 @@ void TriangleRenderer::initBuffers(BufferAllocator& bufferAllocator, BufferAlloc
     const float w = 1000.0f / window.cWidth();
     const float h = 1000.0f / window.cHeight();
 
+    // const float vertices[] = {
+    //       0.0f * w, (root3_4 - 0.25f) * h, 0.0f,
+    //      0.25f * w, -0.25f * h, 0.0f,
+    //     -0.25f * w, -0.25f * h, 0.0f
+    // };
+    
     const float vertices[] = {
-          0.0f * w, (root3_4 - 0.25f) * h, 0.0f,
-         0.25f * w, -0.25f * h, 0.0f,
-        -0.25f * w, -0.25f * h, 0.0f
+        -1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f
     };
 
     const float colors[] = {
@@ -39,6 +47,54 @@ void TriangleRenderer::initBuffers(BufferAllocator& bufferAllocator, BufferAlloc
     uploadCmdList->CopyBufferRegion(_colorBuffer.resource().get(), 0, _uploadBuffer.resource().get(), sizeof(vertices), sizeof(colors));
 
     _dynamicCycle = 1;
+}
+
+void TriangleRenderer::initTexture(TextureAllocator& textureAllocator, Allocation& uploadTexture, ID3D12GraphicsCommandList* uploadCmdList) noexcept
+{
+    constexpr const char* filePath = R"(D:\TauEngine\test\RayMarchingTest\resources\brickwall.png)";
+
+    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filePath);
+
+    if(format == FIF_UNKNOWN)
+    {
+        format = FreeImage_GetFIFFromFilename(filePath);
+        if(format == FIF_UNKNOWN)
+        {
+            return;
+        }
+    }
+
+    FIBITMAP* texture = nullptr;
+
+    if(FreeImage_FIFSupportsReading(format))
+    {
+        texture = FreeImage_Load(format, filePath);
+    }
+
+    FIBITMAP* tmp = FreeImage_ConvertTo32Bits(texture);
+    FreeImage_Unload(texture);
+    texture = tmp;
+
+    BYTE* textureData = FreeImage_GetBits(texture);
+    const UINT width  = FreeImage_GetWidth(texture);
+    const UINT height = FreeImage_GetHeight(texture);
+
+    const CD3DX12_RESOURCE_DESC texArgs = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R8G8B8A8_UINT, width, height);
+    _texture = textureAllocator.alloc(texArgs);
+
+    void* textureRaw;
+
+    CD3DX12_RANGE readRange(0, 0);
+    uploadTexture.map(&readRange, &textureRaw);
+
+    ::std::memcpy(textureRaw, textureData, width * height * 4);
+
+    FreeImage_Unload(texture);
+
+    CD3DX12_RANGE writeRangePos(0, width * height * 4);
+    uploadTexture.unmap(&writeRangePos);
+
+    uploadCmdList->CopyBufferRegion(_texture.resource().get(), 0, uploadTexture.resource().get(), 0, 0);
 }
 
 void TriangleRenderer::initCmdLists(ID3D12Device* const device, ID3D12CommandAllocator* const bundleAllocator, ID3D12PipelineState* const baseState) noexcept

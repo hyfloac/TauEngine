@@ -56,6 +56,9 @@ public:
 
     void show() noexcept;
     void hide() noexcept;
+
+    void setAsDesktopBackground() noexcept;
+    void removeFromDesktopBackground() noexcept;
 private:
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
 };

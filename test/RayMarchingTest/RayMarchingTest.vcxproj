@@ -49,21 +49,21 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)utils\ResourceLib\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)utils\ResourceLib\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_CLANG_COROUTINE_MESSAGE;_SILENCE_CLANG_CONCEPTS_MESSAGE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_CLANG_COROUTINE_MESSAGE;_SILENCE_CLANG_CONCEPTS_MESSAGE;_WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -106,7 +106,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_CLANG_COROUTINE_MESSAGE;_SILENCE_CLANG_CONCEPTS_MESSAGE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_SILENCE_CLANG_COROUTINE_MESSAGE;_SILENCE_CLANG_CONCEPTS_MESSAGE;_WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -146,6 +146,7 @@
     <ClCompile Include="src\DeltaTime.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Renderer.error.cpp" />
     <ClCompile Include="src\TriangleRenderer.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>

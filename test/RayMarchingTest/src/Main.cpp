@@ -15,6 +15,8 @@ int main(int argCount, char* args[])
 
     Window window(720, 720, &renderer);
     window.create();
+    window.setToTaskView();
+    window.setAsDesktopBackground();
     window.show();
     window.setOnResize(onResize);
 
@@ -59,6 +61,9 @@ int main(int argCount, char* args[])
             return 1;
         }
     }
+
+    window.removeFromTaskView();
+    window.removeFromDesktopBackground();
 
     return 0;
 }

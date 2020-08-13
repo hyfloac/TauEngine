@@ -32,22 +32,24 @@ RetCode Renderer::loadPipeline(const Window& window) noexcept
     _scissorRect.right = window.cWidth();
     _scissorRect.bottom = window.cHeight();
 
+#ifdef _DEBUG
     winrt::com_ptr<ID3D12Debug> debugController;
     if(SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-    {
-        debugController->EnableDebugLayer();
-    }
+    { debugController->EnableDebugLayer(); }
+#endif
 
     winrt::com_ptr<IDXGIFactory4> dxgiFactory;
-    if(FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory))))
-    { return RC_Error; }
+    HRESULT res = CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory));
+    if(FAILED(res))
+    { return dxgiFactorySetupError(res); }
 
     chooseGPU(dxgiFactory.get(), _gpu.put());
     if(!_gpu)
     { return RC_Error; }
 
-    if(FAILED(D3D12CreateDevice(_gpu.get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&_device))))
-    { return RC_Error; }
+    res = D3D12CreateDevice(_gpu.get(), D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&_device));
+    if(FAILED(res))
+    { return deviceSetupError(res); }
 
     RetCode ret = setupCommandQueue();
     if(ret != RC_Success)
@@ -209,8 +211,9 @@ RetCode Renderer::setupCommandQueue() noexcept
         commandQueueArgs.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         commandQueueArgs.NodeMask = 0;
 
-        if(FAILED(_device->CreateCommandQueue(&commandQueueArgs, IID_PPV_ARGS(&_commandQueue))))
-        { return RC_Error; }
+        const HRESULT res = _device->CreateCommandQueue(&commandQueueArgs, IID_PPV_ARGS(&_commandQueue));
+        if(FAILED(res))
+        { return commandQueueSetupError(res); }
     }
 
     {
@@ -220,8 +223,9 @@ RetCode Renderer::setupCommandQueue() noexcept
         uploadQueueArgs.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         uploadQueueArgs.NodeMask = 0;
 
-        if(FAILED(_device->CreateCommandQueue(&uploadQueueArgs, IID_PPV_ARGS(&_uploadQueue))))
-        { return RC_Error; }
+        const HRESULT res = _device->CreateCommandQueue(&uploadQueueArgs, IID_PPV_ARGS(&_uploadQueue));
+        if(FAILED(res))
+        { return uploadQueueSetupError(res); }
     }
 
     return RC_Success;
@@ -245,22 +249,14 @@ RetCode Renderer::setupSwapChain(const winrt::com_ptr<IDXGIFactory4>& dxgiFactor
 
     winrt::com_ptr<IDXGISwapChain1> tmpSwapChain;
     const HRESULT swapChainResult = dxgiFactory->CreateSwapChainForHwnd(_commandQueue.get(), window.hWnd(), &swapChainArgs, NULL, NULL, tmpSwapChain.put());
-    switch(swapChainResult)
-    {
-        case E_OUTOFMEMORY:
-            MessageBoxW(NULL, L"Ran out of memory while trying to create the swap chain.", NULL, MB_OK | MB_ICONERROR);
-            return RC_ErrorReported;
-        case DXGI_ERROR_INVALID_CALL:
-            MessageBoxW(NULL, L"Invalid call to CreateSwapChainForHwnd.", NULL, MB_OK | MB_ICONERROR);
-            return RC_ErrorReported;
-        case S_OK: break;
-        default:
-            MessageBoxW(NULL, L"Unknown error while trying to create the swap chain.", NULL, MB_OK | MB_ICONERROR);
-            return RC_ErrorReported;
-    }
+    if(FAILED(swapChainResult))
+    { return swapChainSetupError(swapChainResult); }
 
     if(!tmpSwapChain.try_as(_swapChain))
-    { return RC_Error; }
+    {
+        MessageBoxW(NULL, L"Unable to retrieve IDXGISwapChain3 from IDXGISwapChain1.", NULL, MB_OK | MB_ICONERROR);
+        return RC_ErrorReported;
+    }
 
     _frameIndex = _swapChain->GetCurrentBackBufferIndex();
 

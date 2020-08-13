@@ -3,7 +3,24 @@
 
 HRESULT Allocation::map(const D3D12_RANGE* readRange, void** const buffer) noexcept
 {
-    return _resource->Map(0, readRange, buffer);
+    HRESULT ret;
+    if(readRange)
+    {
+        CD3DX12_RANGE realRange(readRange->Begin + _offset, readRange->End + _offset);
+        ret = _resource->Map(0, &realRange, buffer);
+    }
+    else
+    {
+        ret = _resource->Map(0, NULL, buffer);
+    }
+
+    if(SUCCEEDED(ret))
+    {
+        unsigned char* offBuf = reinterpret_cast<unsigned char*>(*buffer);
+        offBuf += _offset;
+        *buffer = offBuf;
+    }
+    return ret;
 }
 
 void Allocation::unmap(const D3D12_RANGE* writtenRange) noexcept

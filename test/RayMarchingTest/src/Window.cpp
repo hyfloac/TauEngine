@@ -36,30 +36,32 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             globalWindow->close();
             break;
         }
-        case WM_SIZE:
+        case WM_WINDOWPOSCHANGED:
         {
-            globalWindow->_width = LOWORD(lParam);
-            globalWindow->_height = HIWORD(lParam);
+            WINDOWPOS* wndPos = reinterpret_cast<WINDOWPOS*>(lParam);
+            globalWindow->_x = wndPos->x;
+            globalWindow->_y = wndPos->y;
 
-            RECT clientArea;
-            GetClientRect(hWnd, &clientArea);
-
-            globalWindow->_cWidth = clientArea.right;
-            globalWindow->_cHeight = clientArea.bottom;
-
-            if(globalWindow->_onResize)
+            if(globalWindow->_width != wndPos->cx || globalWindow->_height != wndPos->cy)
             {
-                globalWindow->_onResize(clientArea.right, clientArea.bottom, globalWindow->_userParam);
+                globalWindow->_width = wndPos->cx;
+                globalWindow->_height = wndPos->cy;
+
+                RECT clientArea;
+                GetClientRect(hWnd, &clientArea);
+
+                globalWindow->_cWidth = clientArea.right;
+                globalWindow->_cHeight = clientArea.bottom;
+
+                if(globalWindow->_onResize)
+                {
+                    globalWindow->_onResize(clientArea.right, clientArea.bottom, globalWindow->_userParam);
+                }
             }
+
             break;
         }
-        case WM_MOVE:
-        {
-            globalWindow->_x = LOWORD(lParam);
-            globalWindow->_y = HIWORD(lParam);
-        }
-        default: return DefWindowProcW(hWnd, uMsg, wParam, lParam);
-            
+        default: return DefWindowProcW(hWnd, uMsg, wParam, lParam);       
     }
 
     return 0;
@@ -118,4 +120,42 @@ void Window::show() noexcept
 void Window::hide() noexcept
 {
     ShowWindow(_hWnd, SW_HIDE);
+}
+
+static BOOL CALLBACK enumWindowsProc(HWND hWnd, LPARAM lParam);
+
+static HWND _workerW = NULL;
+
+void Window::setAsDesktopBackground() noexcept
+{
+    HWND progMan = FindWindowW(L"Progman", NULL);
+    DWORD_PTR result;
+    SendMessageTimeoutW(progMan, 0x052C, 0, 0, SMTO_NORMAL, 1000, &result);
+    
+    EnumWindows(&enumWindowsProc, 0);
+    
+    SetParent(_hWnd, _workerW);
+
+    RECT screen;
+    SystemParametersInfoW(SPI_GETWORKAREA, 0, &screen, 0);
+
+    SetWindowLongW(_hWnd, GWL_STYLE, WS_POPUP);
+    SetWindowPos(_hWnd, NULL, 0, 0, screen.right, screen.bottom, SWP_SHOWWINDOW);
+}
+
+void Window::removeFromDesktopBackground() noexcept
+{
+    SetParent(_hWnd, NULL);
+}
+
+static BOOL CALLBACK enumWindowsProc(HWND topHandle, LPARAM lParam)
+{
+    HWND defView = FindWindowExW(topHandle, NULL, L"SHELLDLL_DefView", NULL);
+
+    if(defView)
+    {
+        _workerW = FindWindowExW(NULL, topHandle, L"WorkerW", NULL);
+    }
+
+    return true;
 }

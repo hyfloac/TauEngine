@@ -71,8 +71,8 @@ public:
         , _uploadFenceValue(1)
         , _uploadFenceEvent(NULL)
         , _topColor(ColorCycler::initRotator(255, 0, 0, 1))
-        , _leftColor(ColorCycler::initRotator(0, 0, 255, 1))
-        , _rightColor(ColorCycler::initRotator(0, 255, 0, 1))
+        , _leftColor(ColorCycler::initRotator(0, 255, 0, 1))
+        , _rightColor(ColorCycler::initRotator(0, 0, 255, 1))
         , _bufferAllocator(nullptr)
         , _uploadBufferAllocator(nullptr)
     { }
@@ -104,4 +104,12 @@ private:
 
     RetCode waitForLastFrame() noexcept;
     RetCode waitForUpload() noexcept;
+private:
+    [[nodiscard]] RetCode dxgiFactorySetupError(HRESULT res) const noexcept;
+    [[nodiscard]] RetCode deviceSetupError(HRESULT res) const noexcept;
+
+    [[nodiscard]] RetCode commandQueueSetupError(HRESULT res) const noexcept;
+    [[nodiscard]] RetCode uploadQueueSetupError(HRESULT res) const noexcept;
+
+    [[nodiscard]] RetCode swapChainSetupError(HRESULT res) const noexcept;
 };
