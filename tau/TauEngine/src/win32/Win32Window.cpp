@@ -427,17 +427,19 @@ static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcep
 
     RECT clientArea;
     GetClientRect(window._windowContainer.windowHandle, &clientArea);
-    const u32 width = clientArea.right;
-    const u32 height = clientArea.bottom;
+    const u32 cWidth = clientArea.right;
+    const u32 cHeight = clientArea.bottom;
 
-    // const u32 width  = LOWORD(lParam);
-    // const u32 height = HIWORD(lParam);
-
-    WindowResizeEvent evt(window, window._width, window._height, width, height);
+    WindowResizeEvent evt(window, window._cWidth, window._cHeight, cWidth, cHeight);
     window._eventHandler(window._userContainer, evt);
 
-    window._width  = width;
-    window._height = height;
+    RECT windowArea;
+    GetWindowRect(window._windowContainer.windowHandle, &windowArea);
+    window._width = windowArea.right;
+    window._height = windowArea.bottom;
+
+    window._cWidth  = cWidth;
+    window._cHeight = cHeight;
 }
 
 LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
@@ -553,54 +555,56 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
     return 0;
 }
 
-Window::Window(u32 width, u32 height, DynString title, Nullable void* userContainer, Nullable const Window* parent) noexcept
-    : _width(width), _height(height), _xPos(0), _yPos(0),
-      _title(std::move(title)),
-      _windowContainer({ { }, null, null }),
-      _context(null),
-      _userContainer(userContainer),
-      _parent(parent),
-      _renderingMode(RenderingMode::getGlobalMode()),
-      _windowState(WindowState::NEITHER),
-      _eventHandler(null)
+Window::Window(u32 width, u32 height, const WDynString& title, Nullable void* userContainer, Nullable const Window* parent) noexcept
+    : _width(width)
+    , _height(height)
+    , _cWidth(0)
+    , _cHeight(0)
+    , _xPos(0)
+    , _yPos(0)
+    , _title(title)
+    , _windowContainer({ { }, null, null })
+    , _userContainer(userContainer)
+    , _parent(parent)
+    , _renderingMode(RenderingMode::getGlobalMode())
+    , _windowState(WindowState::NEITHER)
+    , _eventHandler(null)
 { }
 
 Window::~Window() noexcept
-{ this->closeWindow(); }
+{ closeWindow(); }
 
 void Window::resize(const u32 width, const u32 height) noexcept
 {
     PERF();
-    this->_width = width;
-    this->_height = height;
-    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
-    _context->updateViewport(0, 0, width, height);
+    _width = width;
+    _height = height;
+    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
 void Window::move(const u32 xPos, const u32 yPos) noexcept
 {
     PERF();
-    this->_xPos = xPos;
-    this->_yPos = yPos;
-    SetWindowPos(_windowContainer.windowHandle, null, static_cast<int>(xPos), static_cast<int>(yPos), 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+    _xPos = xPos;
+    _yPos = yPos;
+    SetWindowPos(_windowContainer.windowHandle, null, static_cast<int>(xPos), static_cast<int>(yPos), 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
 void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept
 {
     PERF();
-    this->_xPos = xPos;
-    this->_yPos = yPos;
-    this->_width = width;
-    this->_height = height;
-    SetWindowPos(_windowContainer.windowHandle, null, xPos, yPos, width, height, SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
-    _context->updateViewport(0, 0, width, height);
+    _xPos = xPos;
+    _yPos = yPos;
+    _width = width;
+    _height = height;
+    SetWindowPos(_windowContainer.windowHandle, null, xPos, yPos, width, height, SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
-void Window::setTitle(const DynString& title) noexcept
+void Window::setTitle(const WDynString& title) noexcept
 {
     PERF();
-    this->_title = title;
-    SetWindowTextA(_windowContainer.windowHandle, title);
+    _title = title;
+    SetWindowTextW(_windowContainer.windowHandle, title);
 }
 
 bool Window::createWindow() noexcept
@@ -608,42 +612,59 @@ bool Window::createWindow() noexcept
     PERF();
     addWindow(*this);
 
-    WNDCLASSA* windowClass = &this->_windowContainer.windowClass;
+    WNDCLASSEXW* windowClass = &_windowContainer.windowClass;
 
-    windowClass->lpfnWndProc = WindowProc;
-    windowClass->hInstance = GetModuleHandleA(null);
-    windowClass->lpszClassName = "TauEngineWindowClass";
+    windowClass->cbSize = sizeof(WNDCLASSEXW);
     windowClass->style = CS_DBLCLKS;
-
-    RegisterClassA(windowClass);
+    windowClass->lpfnWndProc = WindowProc;
+    windowClass->cbClsExtra = 0;
+    windowClass->cbWndExtra = 0;
+    windowClass->hInstance = GetModuleHandleW(null);
+    windowClass->hIcon = null;
+    windowClass->hCursor = null;
+    windowClass->hbrBackground = null;
+    windowClass->lpszMenuName = null;
+    windowClass->lpszClassName = L"TauWndCls";
+    windowClass->hIconSm = null;
+    
+    RegisterClassExW(windowClass);
 
     HWND parent = null;
 
-    if(this->_parent)
+    if(_parent)
     {
-        parent = this->_parent->_windowContainer.windowHandle;
+        parent = _parent->_windowContainer.windowHandle;
     }
 
-    this->_windowContainer.windowHandle = CreateWindowExA(0, windowClass->lpszClassName, this->_title,
-                                                          WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 
-                                                          static_cast<i32>(this->_width), static_cast<i32>(this->_height),
-                                                          parent, null, windowClass->hInstance, static_cast<LPVOID>(this));
+    _windowContainer.windowHandle = CreateWindowExW(
+        0, 
+        windowClass->lpszClassName, 
+        _title, 
+        WS_OVERLAPPEDWINDOW, 
+        CW_USEDEFAULT, 
+        CW_USEDEFAULT,
+        static_cast<i32>(_width), 
+        static_cast<i32>(_height),
+        parent, 
+        null, 
+        windowClass->hInstance, 
+        this);
 
-    this->_windowContainer.hdc = GetDC(this->_windowContainer.windowHandle);
+    _windowContainer.hdc = GetDC(_windowContainer.windowHandle);
 
     RECT clientArea;
-    GetClientRect(this->_windowContainer.windowHandle, &clientArea);
-    this->_width = clientArea.right;
-    this->_height = clientArea.bottom;
+    GetClientRect(_windowContainer.windowHandle, &clientArea);
+    _cWidth = clientArea.right;
+    _cHeight = clientArea.bottom;
 
-    return this->_windowContainer.windowHandle;
+    return _windowContainer.windowHandle;
 }
 
 void Window::closeWindow() const noexcept
 {
     PERF();
     removeWindow(this);
-    if(this->_windowContainer.windowHandle)
+    if(_windowContainer.windowHandle)
     {
         DestroyWindow(_windowContainer.windowHandle);
     }
@@ -652,15 +673,99 @@ void Window::closeWindow() const noexcept
 void Window::showWindow() const noexcept
 {
     PERF();
-    ShowWindow(this->_windowContainer.windowHandle, SW_SHOWNA);
-    UpdateWindow(this->_windowContainer.windowHandle);
+    ShowWindow(_windowContainer.windowHandle, SW_SHOWNA);
+    UpdateWindow(_windowContainer.windowHandle);
 
-    SetActiveWindow(this->_windowContainer.windowHandle);
+    SetActiveWindow(_windowContainer.windowHandle);
 }
 
 void Window::hideWindow() const noexcept
 {
     PERF();
-    ShowWindow(this->_windowContainer.windowHandle, SW_HIDE);
+    ShowWindow(_windowContainer.windowHandle, SW_HIDE);
+}
+
+void Window::setBorderlessFullscreen() noexcept
+{
+    HMONITOR currentMonitor = MonitorFromWindow(_windowContainer.windowHandle, MONITOR_DEFAULTTONEAREST);
+    
+    MONITORINFO monitorInfo;
+    monitorInfo.cbSize = sizeof(monitorInfo);
+
+    GetMonitorInfoW(currentMonitor, &monitorInfo);
+
+    RECT screen = monitorInfo.rcMonitor;
+
+    SetWindowLongW(_windowContainer.windowHandle, GWL_STYLE, WS_POPUP);
+    SetWindowPos(_windowContainer.windowHandle, NULL, screen.left, screen.top, screen.right, screen.bottom, SWP_SHOWWINDOW);
+
+    _xPos = screen.left;
+    _yPos = screen.top;
+    _width = screen.right;
+    _height = screen.bottom;
+}
+
+void Window::setBorderlessWorkspace() noexcept
+{
+    HMONITOR currentMonitor = MonitorFromWindow(_windowContainer.windowHandle, MONITOR_DEFAULTTONEAREST);
+
+    MONITORINFO monitorInfo;
+    monitorInfo.cbSize = sizeof(monitorInfo);
+
+    GetMonitorInfoW(currentMonitor, &monitorInfo);
+
+    RECT screen = monitorInfo.rcWork;
+
+    SetWindowLongW(_windowContainer.windowHandle, GWL_STYLE, WS_POPUP);
+    SetWindowPos(_windowContainer.windowHandle, NULL, screen.left, screen.top, screen.right, screen.bottom, SWP_SHOWWINDOW);
+
+    _xPos = screen.left;
+    _yPos = screen.top;
+    _width = screen.right;
+    _height = screen.bottom;
+}
+
+void Window::setWindowed(const u32 width, const u32 height) noexcept
+{
+    SetWindowLongW(_windowContainer.windowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+    SetWindowPos(_windowContainer.windowHandle, NULL, CW_USEDEFAULT, CW_USEDEFAULT, width, height, SWP_SHOWWINDOW);
+}
+
+static BOOL CALLBACK enumWindowsProc(HWND hWnd, LPARAM lParam);
+
+void Window::setAsDesktopBackground() noexcept
+{
+    if(_parent)
+    { return; }
+
+    HWND progMan = FindWindowW(L"Progman", NULL);
+    DWORD_PTR result;
+    SendMessageTimeoutW(progMan, 0x052C, 0, 0, SMTO_NORMAL, 1000, &result);
+
+    HWND workerW;
+    EnumWindows(&enumWindowsProc, reinterpret_cast<LPARAM>(&workerW));
+
+    SetParent(_windowContainer.windowHandle, workerW);
+}
+
+void Window::removeFromDesktopBackground() noexcept
+{
+    if(_parent)
+    { return; }
+
+    SetParent(_windowContainer.windowHandle, null);
+}
+
+static BOOL CALLBACK enumWindowsProc(HWND topHandle, LPARAM lParam)
+{
+    HWND defView = FindWindowExW(topHandle, NULL, L"SHELLDLL_DefView", NULL);
+
+    if(defView)
+    {
+        HWND* workerW = reinterpret_cast<HWND*>(lParam);
+        *workerW = FindWindowExW(NULL, topHandle, L"WorkerW", NULL);
+    }
+
+    return true;
 }
 #endif

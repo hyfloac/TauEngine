@@ -2,111 +2,24 @@
 #include "gl/GLTextureView.hpp"
 #include "gl/GLTextureSampler.hpp"
 
-GLDescriptorTable::~GLDescriptorTable() noexcept
-{
-    if(_allocator)
-    {
-        _allocator->deallocate(_placement);
-    }
-    else
-    {
-        delete[] _placement;
-    }
-}
-
-GLDescriptorSamplerTable::~GLDescriptorSamplerTable() noexcept
-{
-    glDeleteSamplers(_count, _samplers);
-
-    if(_allocator)
-    {
-        _allocator->deallocate(_placement);
-    }
-    else
-    {
-        delete[] _placement;
-    }
-}
-
-GLDescriptorHeap::GLDescriptorHeap(const uSys maxTables) noexcept
-    : _allocator(sizeof(GLDescriptorTable), maxTables)
+GLTextureViewDescriptorHeap::GLTextureViewDescriptorHeap(uSys maxDescriptors) noexcept
+    : _placement(::std::malloc(sizeof(GLTextureView) * maxDescriptors))
 { }
 
-DescriptorTable GLDescriptorHeap::allocateTable(const uSys descriptors, const DescriptorType type, TauAllocator* allocator) noexcept
-{
-    void* placement;
+GLTextureViewDescriptorHeap::~GLTextureViewDescriptorHeap()
+{ ::std::free(_placement); }
 
-    if(allocator)
-    {
-        switch(type)
-        {
-            case DescriptorType::TextureView:
-                placement = allocator->allocate(sizeof(GLTextureView*) * descriptors);
-                break;
-            case DescriptorType::UniformBufferView:
-                placement = allocator->allocate(sizeof(GLuint) * descriptors);
-                break;
-            default: return { null };
-        }
-    }
-    else
-    {
-        switch(type)
-        {
-            case DescriptorType::TextureView:
-                placement = new(::std::nothrow) GLTextureView* [descriptors];
-                break;
-            case DescriptorType::UniformBufferView:
-                placement = new(::std::nothrow) GLuint[descriptors];
-                break;
-            default: return { null };
-        }
-    }
+uSys GLTextureViewDescriptorHeap::getOffsetStride() const noexcept
+{ return sizeof(GLTextureView); }
 
-    if(!placement)
-    { return { null }; }
-
-    GLDescriptorTable* const ret = _allocator.allocateT<GLDescriptorTable>(allocator, type, descriptors, reinterpret_cast<u8*>(placement));
-    return { ret };
-}
-
-void GLDescriptorHeap::destroyTable(const DescriptorTable table) noexcept
-{
-    GLDescriptorTable* const glTable = reinterpret_cast<GLDescriptorTable*>(table.raw);
-    _allocator.deallocateT<GLDescriptorTable>(glTable);
-}
-
-GLDescriptorSamplerHeap::GLDescriptorSamplerHeap(const uSys maxTables) noexcept
-    : _allocator(sizeof(GLDescriptorSamplerTable), maxTables)
+GLUniformBufferViewDescriptorHeap::GLUniformBufferViewDescriptorHeap(uSys maxDescriptors) noexcept
+    : _placement(::std::malloc(sizeof(GLuint) * maxDescriptors))
 { }
 
-DescriptorSamplerTable GLDescriptorSamplerHeap::allocateTable(const uSys descriptors, TauAllocator* const allocator) noexcept
-{
-    void* placement;
+GLUniformBufferViewDescriptorHeap::~GLUniformBufferViewDescriptorHeap()
+{ ::std::free(_placement); }
 
-    if(allocator)
-    {
-        placement = allocator->allocate(sizeof(GLuint) * descriptors);
-    }
-    else
-    {
-        placement = new(::std::nothrow) u8*[sizeof(GLuint) * descriptors];
-    }
-
-    if(!placement)
-    { return { null }; }
-
-    GLDescriptorSamplerTable* const ret = _allocator.allocateT<GLDescriptorSamplerTable>(allocator, descriptors, reinterpret_cast<u8*>(placement));
-    return { ret };
-}
-
-void GLDescriptorSamplerHeap::destroyTable(const DescriptorSamplerTable table) noexcept
-{
-    GLDescriptorSamplerTable* const glTable = reinterpret_cast<GLDescriptorSamplerTable*>(table.raw);
-    _allocator.deallocateT<GLDescriptorSamplerTable>(glTable);
-}
-
-GLDescriptorHeap* GLDescriptorHeapBuilder::build(const DescriptorHeapArgs& args, Error* const error) const noexcept
+IDescriptorHeap* GLDescriptorHeapBuilder::build(const DescriptorHeapArgs& args, Error* const error) const noexcept
 {
     GLDescriptorHeap* const heap = new(::std::nothrow) GLDescriptorHeap(args.maxTables);
     ERROR_CODE_COND_N(!heap, Error::SystemMemoryAllocationFailure);
@@ -114,7 +27,7 @@ GLDescriptorHeap* GLDescriptorHeapBuilder::build(const DescriptorHeapArgs& args,
     ERROR_CODE_V(Error::NoError, heap);
 }
 
-GLDescriptorHeap* GLDescriptorHeapBuilder::build(const DescriptorHeapArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+IDescriptorHeap* GLDescriptorHeapBuilder::build(const DescriptorHeapArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     GLDescriptorHeap* const heap = allocator.allocateT<GLDescriptorHeap>(args.maxTables);
     ERROR_CODE_COND_N(!heap, Error::SystemMemoryAllocationFailure);

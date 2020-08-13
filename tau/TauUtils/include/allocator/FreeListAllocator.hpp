@@ -39,16 +39,16 @@ private:
     /*
      * Assert ref pointers of different types are the same size.
      */
-    static_assert(sizeof(ReferenceCountingPointer<void*>) == sizeof(StrongReferenceCountingPointer<void*>));
-    static_assert(sizeof(ReferenceCountingPointer<void*>) == sizeof(WeakReferenceCountingPointer<void*>));
+    static_assert(sizeof(ReferenceCountingPointer<void*>) == sizeof(StrongReferenceCountingPointer<void*>), "Reference Counting Pointer type sizes do not match.");
+    static_assert(sizeof(ReferenceCountingPointer<void*>) == sizeof(WeakReferenceCountingPointer<void*>), "Reference Counting Pointer type sizes do not match.");
 
     /*
      *   Assert ref pointers of different types to different types
      * are the same size.
      */
-    static_assert(sizeof(ReferenceCountingPointer<u64>) == sizeof(ReferenceCountingPointer<u32>));
-    static_assert(sizeof(StrongReferenceCountingPointer<u64>) == sizeof(StrongReferenceCountingPointer<u32>));
-    static_assert(sizeof(WeakReferenceCountingPointer<u64>) == sizeof(WeakReferenceCountingPointer<u32>));
+    static_assert(sizeof(ReferenceCountingPointer<u64>) == sizeof(ReferenceCountingPointer<u32>), "Reference Counting Pointer type sizes do not match.");
+    static_assert(sizeof(StrongReferenceCountingPointer<u64>) == sizeof(StrongReferenceCountingPointer<u32>), "Reference Counting Pointer type sizes do not match.");
+    static_assert(sizeof(WeakReferenceCountingPointer<u64>) == sizeof(WeakReferenceCountingPointer<u32>), "Reference Counting Pointer type sizes do not match.");
 private:
     uSys _allocPages;
     uSys _numReservedPages;

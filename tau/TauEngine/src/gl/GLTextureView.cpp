@@ -3,17 +3,15 @@
 #include "gl/GLDescriptorHeap.hpp"
 #include <EnumBitFields.hpp>
 
-TextureView GLTextureViewBuilder::build(const TextureViewArgs& args, DescriptorTable table, uSys tableIndex, Error* const error) const noexcept
+TextureView GLTextureViewBuilder::build(const TextureViewArgs& args, const CPUDescriptorHandle handle, Error* const error) const noexcept
 {
-    ERROR_CODE_COND_N(!table.raw, Error::DescriptorTableIsNull);
-    GLDescriptorTable* const glTable = table.get<GLDescriptorTable>();
-    ERROR_CODE_COND_N(glTable->type() != DescriptorType::TextureView, Error::InternalError);
-
+    ERROR_CODE_COND_N(!handle, Error::DescriptorTableIsNull);
+    
     GLTextureViewArgs glArgs;
     if(!processArgs(args, &glArgs, error))
     { return null; }
 
-    GLTextureView* view = new(glTable->texViews() + tableIndex) GLTextureView(glArgs.target, glArgs.texture);
+    GLTextureView* view = new(handle) GLTextureView(glArgs.target, glArgs.texture);
 
     ERROR_CODE_V(Error::NoError, view);
 }

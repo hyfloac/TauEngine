@@ -3,12 +3,14 @@
 #ifdef _WIN32
 #include "dx/dx10/DX10VertexArray.hpp"
 #include "dx/dx10/DX10ResourceBuffer.hpp"
+#include "dx/dx10/DX10Enums.hpp"
 #include "graphics/BufferView.hpp"
 #include "TauConfig.hpp"
 
 void DX10CommandList::reset() noexcept
 {
     _commands = ArrayList<DX10CL::Command>(_maxCommands);
+    _refCountList.reset(true);
 }
 
 void DX10CommandList::finish() noexcept
@@ -38,9 +40,9 @@ void DX10CommandList::drawIndexedInstanced(const uSys exCount, const uSys startI
     _commands.emplace(drawIndexedInstanced);
 }
 
-void DX10CommandList::setDrawType(const DrawType drawType) noexcept
+void DX10CommandList::setDrawType(const EGraphics::DrawType drawType) noexcept
 {
-    const DX10CL::CommandSetDrawType setDrawType(DX10VertexArray::getDXDrawType(drawType));
+    const DX10CL::CommandSetDrawType setDrawType(DX10Utils::getDXDrawType(drawType));
     _commands.emplace(setDrawType);
 }
 
@@ -56,46 +58,56 @@ void DX10CommandList::setStencilRef(const uSys stencilRef) noexcept
     _commands.emplace(setStencilRef);
 }
 
-void DX10CommandList::setVertexArray(const IVertexArray& va) noexcept
+void DX10CommandList::setVertexArray(const NullableRef<IVertexArray>& va) noexcept
 {
 #if TAU_RTTI_CHECK
-    const DX10VertexArray* const dxVA = RTT_CAST(va, DX10VertexArray);
-
-    if(!dxVA)
+    if(!RTT_CHECK(va.get(), DX10VertexArray))
     { return; }
-#else
-    const DX10VertexArray* const dxVA = static_cast<DX10VertexArray* const>(&va);
 #endif
 
+    /*
+     * Add the pointer to the free list.
+     */
+    (void) _refCountList.allocateT<NullableRef<IVertexArray>>(va);
+
+    const NullableRef<DX10VertexArray> dxVA = RefCast<DX10VertexArray>(va);
     const DX10CL::CommandSetVertexArray setVertexArray(0, dxVA->iaBufferCount(), dxVA->iaBuffers());
     _commands.emplace(setVertexArray);
 }
 
 void DX10CommandList::setIndexBuffer(const IndexBufferView& indexBufferView) noexcept
 {
-    if(indexBufferView.buffer->resourceType() == EResource::Type::Buffer)
-    {
-        DX10Resource* const resource = RTTD_CAST(indexBufferView.buffer, DX10Resource, IResource);
+    if(!indexBufferView.buffer || 
+        indexBufferView.buffer->resourceType() != EResource::Type::Buffer || 
+       !RTTD_CHECK(indexBufferView.buffer.get(), DX10Resource, IResource))
+    { return; }
 
-        if(resource)
-        {
-            DX10ResourceBuffer* const buffer = static_cast<DX10ResourceBuffer* const>(resource);
+    /*
+     * Add the pointer to the free list.
+     */
+    (void) _refCountList.allocateT<NullableRef<IResource>>(indexBufferView.buffer);
 
-            const DX10CL::CommandSetIndexBuffer setIndexBuffer(buffer->d3dBuffer(), DX10ResourceBuffer::dxIndexSize(indexBufferView.indexSize));
-            _commands.emplace(setIndexBuffer);
-        }
-    }
+
+    NullableRef<DX10ResourceBuffer> buffer = RefCast<DX10ResourceBuffer>(indexBufferView.buffer);
+    const DX10CL::CommandSetIndexBuffer setIndexBuffer(buffer->d3dBuffer(), DX10ResourceBuffer::dxIndexSize(indexBufferView.indexSize));
+    _commands.emplace(setIndexBuffer);
 }
 
 void DX10CommandList::setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept
 {
+    const DX10CL::CommandSetGDescriptorLayout setGDescriptorLayout(layout);
+    _commands.emplace(setGDescriptorLayout);
 }
 
 void DX10CommandList::setGraphicsDescriptorTable(const uSys index, DescriptorTable table) noexcept
 {
+    const DX10CL::CommandSetGDescriptorTable setGDescriptorTable(index, table);
+    _commands.emplace(setGDescriptorTable);
 }
 
 void DX10CommandList::setGraphicsDescriptorTable(const uSys index, DescriptorSamplerTable table) noexcept
 {
+    const DX10CL::CommandSetGDescriptorSamplerTable setGDescriptorSamplerTable(index, table);
+    _commands.emplace(setGDescriptorSamplerTable);
 }
 #endif

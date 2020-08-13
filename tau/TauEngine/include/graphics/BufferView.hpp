@@ -8,6 +8,7 @@
 
 #include "BufferEnums.hpp"
 #include "BufferDescriptor.hpp"
+#include "DescriptorHeap.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 
 class IResource;
@@ -108,5 +109,5 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual UniformBufferView build(const UniformBufferViewArgs& args, [[tau::out]] Error* error, DescriptorTable table, uSys tableIndex) const noexcept = 0;
+    [[nodiscard]] virtual UniformBufferView build(const UniformBufferViewArgs& args, CPUDescriptorHandle handle, [[tau::out]] Error* error) const noexcept = 0;
 };

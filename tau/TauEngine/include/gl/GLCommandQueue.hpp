@@ -2,7 +2,7 @@
 
 #include "graphics/CommandQueue.hpp"
 #include "GLCommandList.hpp"
-#include "gl/GLDescriptorLayout.hpp"
+#include "GLDescriptorLayout.hpp"
 #include "GLStateManager.hpp"
 
 struct PipelineState;
@@ -16,6 +16,8 @@ private:
     const PipelineState* _currentPipelineState;
     const GLDescriptorLayout* _currentLayout;
     GLStateManager _glStateManager;
+    GLenum _currentDrawType;
+    GLenum _currentIndexSize;
 public:
     void executeCommandLists(uSys count, const ICommandList** lists) noexcept override;
 
@@ -23,8 +25,14 @@ public:
 private:
     void _draw(const GLCL::CommandDraw& cmd) noexcept;
     void _drawIndexed(const GLCL::CommandDrawIndexed& cmd) noexcept;
+    void _drawIndexedBaseVertex(const GLCL::CommandDrawIndexedBaseVertex& cmd) noexcept;
     void _drawInstanced(const GLCL::CommandDrawInstanced& cmd) noexcept;
+    void _drawInstancedBaseInstance(const GLCL::CommandDrawInstancedBaseInstance& cmd) noexcept;
     void _drawIndexedInstanced(const GLCL::CommandDrawIndexedInstanced& cmd) noexcept;
+    void _drawIndexedBaseVertexInstanced(const GLCL::CommandDrawIndexedBaseVertexInstanced& cmd) noexcept;
+    void _drawIndexedInstancedBaseInstance(const GLCL::CommandDrawIndexedInstancedBaseInstance& cmd) noexcept;
+    void _drawIndexedBaseVertexInstancedBaseInstance(const GLCL::CommandDrawIndexedBaseVertexInstancedBaseInstance& cmd) noexcept;
+    void _setDrawType(const GLCL::CommandSetDrawType& cmd) noexcept;
     void _setPipelineState(const GLCL::CommandSetPipelineState& cmd) noexcept;
     void _setStencilRef(const GLCL::CommandSetStencilRef& cmd) noexcept;
     void _setVertexArray(const GLCL::CommandSetVertexArray& cmd) noexcept;

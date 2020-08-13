@@ -2,6 +2,7 @@
 
 #include "texture/TextureEnums.hpp"
 #include "graphics/_GraphicsOpaqueObjects.hpp"
+#include "graphics/DescriptorHeap.hpp"
 #include "DLL.hpp"
 
 class IRenderingContext;
@@ -68,5 +69,5 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual TextureView build(const TextureViewArgs& args, DescriptorTable table, uSys tableIndex, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual TextureView build(const TextureViewArgs& args, CPUDescriptorHandle handle, [[tau::out]] Error* error) const noexcept = 0;
 };

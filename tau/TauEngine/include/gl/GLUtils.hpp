@@ -4,8 +4,10 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 #include <NumTypes.hpp>
-#include <DLL.hpp>
 #include <Safeties.hpp>
+
+#include "DLL.hpp"
+#include "graphics/GraphicsEnums.hpp"
 
 enum class GLDebugSource
 {

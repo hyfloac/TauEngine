@@ -4,7 +4,6 @@
 #include <NumTypes.hpp>
 
 #include "DLL.hpp"
-#include "DescriptorHeap.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 
 struct DescriptorLayoutEntry final

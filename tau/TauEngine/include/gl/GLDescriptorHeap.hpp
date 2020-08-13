@@ -11,130 +11,52 @@
 #include "allocator/FixedBlockAllocator.hpp"
 
 class GLTextureView;
-class GLUniformBufferView;
 class GLTextureSampler;
 
-class TAU_DLL GLDescriptorTable final
+class TAU_DLL GLTextureViewDescriptorHeap final : public IDescriptorHeap
 {
-    DELETE_CM(GLDescriptorTable);
+    DELETE_CM(GLTextureViewDescriptorHeap);
+    DESCRIPTOR_HEAP_IMPL(GLTextureViewDescriptorHeap);
 private:
-    TauAllocator* _allocator;
-    DescriptorType _type;
-    uSys _count;
     union
     {
-        u8* _placement;
-        GLTextureView** _texViews;
-        GLuint* _uniViews;
+        void* _placement;
+        GLTextureView* _heap;
     };
 public:
-    GLDescriptorTable(TauAllocator* const allocator, const DescriptorType type, const uSys count, u8* const placement) noexcept
-        : _allocator(allocator)
-        , _type(type)
-        , _count(count)
-        , _placement(placement)
-    { }
+    GLTextureViewDescriptorHeap(uSys maxDescriptors) noexcept;
 
-    ~GLDescriptorTable() noexcept;
+    ~GLTextureViewDescriptorHeap();
 
-    [[nodiscard]] DescriptorType type() const noexcept { return _type; }
-    [[nodiscard]] uSys count() const noexcept { return _count; }
+    [[nodiscard]] EGraphics::DescriptorType type() const noexcept override { return EGraphics::DescriptorType::TextureView; }
 
-    [[nodiscard]] u8* placement() noexcept { return _placement; }
+    [[nodiscard]] CPUDescriptorHandle getBaseCPUHandle() const noexcept override { return CPUDescriptorHandle(static_cast<uSys>(reinterpret_cast<uPtr>(_heap))); }
+    [[nodiscard]] GPUDescriptorHandle getBaseGPUHandle() const noexcept override { return GPUDescriptorHandle(static_cast<u64> (reinterpret_cast<uPtr>(_heap))); }
 
-    [[nodiscard]] GLTextureView*       * texViews()       noexcept { return _texViews; }
-    [[nodiscard]] GLTextureView* const * texViews() const noexcept { return _texViews; }
-
-    [[nodiscard]]       GLuint* uniViews()       noexcept { return _uniViews; }
-    [[nodiscard]] const GLuint* uniViews() const noexcept { return _uniViews; }
+    [[nodiscard]] uSys getOffsetStride() const noexcept override;
 };
 
-class TAU_DLL GLDescriptorSamplerTable final
+class TAU_DLL GLUniformBufferViewDescriptorHeap final : public IDescriptorHeap
 {
-    DELETE_CM(GLDescriptorSamplerTable);
+    DELETE_CM(GLUniformBufferViewDescriptorHeap);
+    DESCRIPTOR_HEAP_IMPL(GLUniformBufferViewDescriptorHeap);
 private:
-    TauAllocator* _allocator;
-    uSys _count;
     union
     {
-        u8* _placement;
-        GLuint* _samplers;
+        void* _placement;
+        GLuint* _heap;
     };
 public:
-    GLDescriptorSamplerTable(TauAllocator* const allocator, const uSys count, u8* const placement) noexcept
-        : _allocator(allocator)
-        , _count(count)
-        , _placement(placement)
-    { }
+    GLUniformBufferViewDescriptorHeap(uSys maxDescriptors) noexcept;
 
-    ~GLDescriptorSamplerTable() noexcept;
+    ~GLUniformBufferViewDescriptorHeap();
 
-    [[nodiscard]] uSys count() const noexcept { return _count; }
+    [[nodiscard]] EGraphics::DescriptorType type() const noexcept override { return EGraphics::DescriptorType::UniformBufferView; }
 
-    [[nodiscard]] u8* placement() noexcept { return _placement; }
+    [[nodiscard]] CPUDescriptorHandle getBaseCPUHandle() const noexcept override { return CPUDescriptorHandle(static_cast<uSys>(reinterpret_cast<uPtr>(_heap))); }
+    [[nodiscard]] GPUDescriptorHandle getBaseGPUHandle() const noexcept override { return GPUDescriptorHandle(static_cast<u64> (reinterpret_cast<uPtr>(_heap))); }
 
-    [[nodiscard]]       GLuint* samplers()       noexcept { return _samplers; }
-    [[nodiscard]] const GLuint* samplers() const noexcept { return _samplers; }
-};
-
-class TAU_DLL GLDescriptorHeap final : public IDescriptorHeap
-{
-    DEFAULT_DESTRUCT(GLDescriptorHeap);
-    DELETE_CM(GLDescriptorHeap);
-    DESCRIPTOR_HEAP_IMPL(GLDescriptorHeap);
-private:
-#if defined(TAU_PRODUCTION)
-    using FBAllocator = FixedBlockAllocator<AllocationTracking::None>;
-#else
-    using FBAllocator = FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>;
-#endif
-private:
-    /**
-     * Used to allocate the actual descriptor table objects.
-     *
-     *   This allocator operates on a fixed size block and is
-     * capable of deallocating blocks. This makes it a very fast
-     * allocator, ensuring minimal overhead.
-     *
-     *   Depending on whether or not we are in production mode this
-     * allocator may track double deletions.
-     */
-    FBAllocator _allocator;
-public:
-    GLDescriptorHeap(uSys maxTables) noexcept;
-
-    [[nodiscard]] DescriptorTable allocateTable(uSys descriptors, DescriptorType type, TauAllocator* allocator) noexcept override;
-    [[nodiscard]] void destroyTable(DescriptorTable table) noexcept override;
-};
-
-class TAU_DLL GLDescriptorSamplerHeap final : public IDescriptorSamplerHeap
-{
-    DEFAULT_DESTRUCT(GLDescriptorSamplerHeap);
-    DELETE_CM(GLDescriptorSamplerHeap);
-    DESCRIPTOR_SAMPLER_HEAP_IMPL(GLDescriptorSamplerHeap);
-private:
-#if defined(TAU_PRODUCTION)
-    using FBAllocator = FixedBlockAllocator<AllocationTracking::None>;
-#else
-    using FBAllocator = FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>;
-#endif
-private:
-    /**
-     * Used to allocate the actual descriptor table objects.
-     *
-     *   This allocator operates on a fixed size block and is
-     * capable of deallocating blocks. This makes it a very fast
-     * allocator, ensuring minimal overhead.
-     *
-     *   Depending on whether or not we are in production mode this
-     * allocator may track double deletions.
-     */
-    FBAllocator _allocator;
-public:
-    GLDescriptorSamplerHeap(uSys maxTables) noexcept;
-
-    [[nodiscard]] DescriptorSamplerTable allocateTable(uSys descriptors, TauAllocator* allocator) noexcept override;
-    [[nodiscard]] void destroyTable(DescriptorSamplerTable table) noexcept override;
+    [[nodiscard]] uSys getOffsetStride() const noexcept override { return sizeof(GLuint); }
 };
 
 class TAU_DLL GLDescriptorHeapBuilder final : public IDescriptorHeapBuilder
@@ -143,17 +65,12 @@ class TAU_DLL GLDescriptorHeapBuilder final : public IDescriptorHeapBuilder
     DEFAULT_DESTRUCT(GLDescriptorHeapBuilder);
     DEFAULT_CM_PU(GLDescriptorHeapBuilder);
 public:
-    [[nodiscard]] GLDescriptorHeap* build(const DescriptorHeapArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] GLDescriptorHeap* build(const DescriptorHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] IDescriptorHeap* build(const DescriptorHeapArgs& args, Error* error) const noexcept override;
+    [[nodiscard]] IDescriptorHeap* build(const DescriptorHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] CPPRef<IDescriptorHeap> buildCPPRef(const DescriptorHeapArgs& args, Error* error) const noexcept override;
     [[nodiscard]] NullableRef<IDescriptorHeap> buildTauRef(const DescriptorHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] NullableStrongRef<IDescriptorHeap> buildTauSRef(const DescriptorHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 
-    [[nodiscard]] IDescriptorSamplerHeap* build(const DescriptorSamplerHeapArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] IDescriptorSamplerHeap* build(const DescriptorSamplerHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IDescriptorSamplerHeap> buildCPPRef(const DescriptorSamplerHeapArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IDescriptorSamplerHeap> buildTauRef(const DescriptorSamplerHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IDescriptorSamplerHeap> buildTauSRef(const DescriptorSamplerHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 protected:
     [[nodiscard]] uSys _allocSize(const uSys type) const noexcept override
     {

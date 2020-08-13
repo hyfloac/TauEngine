@@ -39,45 +39,88 @@ void GLCommandQueue::executeCommandLists(uSys count, const ICommandList** lists)
 void GLCommandQueue::executeCommandList(const ICommandList* const list) noexcept
 {
     const GLCommandList* const glList = static_cast<const GLCommandList*>(list);
-    const ArrayList<GLCL::Command>& commands = glList->commands();
+    /*
+     * Copy the command array so that the list can be reset.
+     * This will perform a reference count copy.
+     */
+    const ArrayList<GLCL::Command> commands = glList->commands();  // NOLINT(performance-unnecessary-copy-initialization)
 
     for(auto cmd : commands)
     {
+#define DISPATCH(__CMD, __FUNC, __ARG) case GLCL::CommandType::__CMD: __FUNC(cmd.__ARG); break
+
         switch(cmd.type)
         {
-            case GLCL::CommandType::Draw:                 _draw(cmd.draw);                                 break;
-            case GLCL::CommandType::DrawIndexed:          _drawIndexed(cmd.drawIndexed);                   break;
-            case GLCL::CommandType::DrawInstanced:        _drawInstanced(cmd.drawInstanced);               break;
-            case GLCL::CommandType::DrawIndexedInstanced: _drawIndexedInstanced(cmd.drawIndexedInstanced); break;
-            case GLCL::CommandType::SetPipelineState:     _setPipelineState(cmd.setPipelineState);         break;
-            case GLCL::CommandType::SetStencilRef:        _setStencilRef(cmd.setStencilRef);               break;
-            case GLCL::CommandType::SetVertexArray:       _setVertexArray(cmd.setVertexArray);             break;
-            case GLCL::CommandType::SetIndexBuffer:       _setIndexBuffer(cmd.setIndexBuffer);             break;
-            case GLCL::CommandType::SetGDescriptorLayout: _setGDescriptorLayout(cmd.setGDescriptorLayout); break;
-            case GLCL::CommandType::SetGDescriptorTable:  _setGDescriptorTable(cmd.setGDescriptorTable);   break;
+            DISPATCH(Draw, _draw, draw);
+            DISPATCH(DrawIndexed, _drawIndexed, drawIndexed);
+            DISPATCH(DrawIndexedBaseVertex, _drawIndexedBaseVertex, drawIndexedBaseVertex);
+            DISPATCH(DrawInstanced, _drawInstanced, drawInstanced);
+            DISPATCH(DrawInstancedBaseInstance, _drawInstancedBaseInstance, drawInstancedBaseInstance);
+            DISPATCH(DrawIndexedInstanced, _drawIndexedInstanced, drawIndexedInstanced);
+            DISPATCH(DrawIndexedBaseVertexInstanced, _drawIndexedBaseVertexInstanced, drawIndexedBaseVertexInstanced);
+            DISPATCH(DrawIndexedInstancedBaseInstance, _drawIndexedInstancedBaseInstance, drawIndexedInstancedBaseInstance);
+            DISPATCH(DrawIndexedBaseVertexInstancedBaseInstance, _drawIndexedBaseVertexInstancedBaseInstance, drawIndexedBaseVertexInstancedBaseInstance);
+            DISPATCH(SetDrawType, _setDrawType, setDrawType);
+            DISPATCH(SetPipelineState, _setPipelineState, setPipelineState);
+            DISPATCH(SetStencilRef, _setStencilRef, setStencilRef);
+            DISPATCH(SetVertexArray, _setVertexArray, setVertexArray);
+            DISPATCH(SetIndexBuffer, _setIndexBuffer, setIndexBuffer);
+            DISPATCH(SetGDescriptorLayout, _setGDescriptorLayout, setGDescriptorLayout);
+            DISPATCH(SetGDescriptorTable, _setGDescriptorTable, setGDescriptorTable);
             default: break;
         }
+#undef DISPATCH
     }
 }
 
 void GLCommandQueue::_draw(const GLCL::CommandDraw& cmd) noexcept
 {
-    glDrawArrays(cmd.mode, cmd.startVertex, cmd.vertexCount);
+    glDrawArrays(_currentDrawType, cmd.startVertex, cmd.vertexCount);
 }
 
 void GLCommandQueue::_drawIndexed(const GLCL::CommandDrawIndexed& cmd) noexcept
 {
-    glDrawElements(cmd.mode, cmd.indexCount, cmd.indexSize, cmd.indexOffset);
+    glDrawElements(_currentDrawType, cmd.indexCount, _currentIndexSize, cmd.indexOffset);
+}
+
+void GLCommandQueue::_drawIndexedBaseVertex(const GLCL::CommandDrawIndexedBaseVertex& cmd) noexcept
+{
+    glDrawElementsBaseVertex(_currentDrawType, cmd.indexCount, _currentIndexSize, cmd.indexOffset, cmd.baseVertex);
 }
 
 void GLCommandQueue::_drawInstanced(const GLCL::CommandDrawInstanced& cmd) noexcept
 {
-    glDrawArraysInstanced(cmd.mode, cmd.startVertex, cmd.vertexCount, cmd.instanceCount);
+    glDrawArraysInstanced(_currentDrawType, cmd.startVertex, cmd.vertexCount, cmd.instanceCount);
+}
+
+void GLCommandQueue::_drawInstancedBaseInstance(const GLCL::CommandDrawInstancedBaseInstance& cmd) noexcept
+{
+    glDrawArraysInstancedBaseInstance(_currentDrawType, cmd.startVertex, cmd.vertexCount, cmd.instanceCount, cmd.baseInstance);
 }
 
 void GLCommandQueue::_drawIndexedInstanced(const GLCL::CommandDrawIndexedInstanced& cmd) noexcept
 {
-    glDrawElementsInstanced(cmd.mode, cmd.indexCount, cmd.indexSize, cmd.indexOffset, cmd.instanceCount);
+    glDrawElementsInstanced(_currentDrawType, cmd.indexCount, _currentIndexSize, cmd.indexOffset, cmd.instanceCount);
+}
+
+void GLCommandQueue::_drawIndexedBaseVertexInstanced(const GLCL::CommandDrawIndexedBaseVertexInstanced& cmd) noexcept
+{
+    glDrawElementsInstancedBaseVertex(_currentDrawType, cmd.indexCount, _currentIndexSize, cmd.indexOffset, cmd.instanceCount, cmd.baseVertex);
+}
+
+void GLCommandQueue::_drawIndexedInstancedBaseInstance(const GLCL::CommandDrawIndexedInstancedBaseInstance& cmd) noexcept
+{
+    glDrawElementsInstancedBaseInstance(_currentDrawType, cmd.indexCount, _currentIndexSize, cmd.indexOffset, cmd.instanceCount, cmd.baseInstance);
+}
+
+void GLCommandQueue::_drawIndexedBaseVertexInstancedBaseInstance(const GLCL::CommandDrawIndexedBaseVertexInstancedBaseInstance& cmd) noexcept
+{
+    glDrawElementsInstancedBaseVertexBaseInstance(_currentDrawType, cmd.indexCount, _currentIndexSize, cmd.indexOffset, cmd.instanceCount, cmd.baseVertex, cmd.baseInstance);
+}
+
+void GLCommandQueue::_setDrawType(const GLCL::CommandSetDrawType& cmd) noexcept
+{
+    _currentDrawType = cmd.glDrawType;
 }
 
 void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd) noexcept
@@ -110,6 +153,7 @@ void GLCommandQueue::_setVertexArray(const GLCL::CommandSetVertexArray& cmd) noe
 void GLCommandQueue::_setIndexBuffer(const GLCL::CommandSetIndexBuffer& cmd) noexcept
 {
     _glStateManager.bindElementArrayBuffer(cmd.ibo);
+    _currentIndexSize = cmd.indexSize;
 }
 
 void GLCommandQueue::_setGDescriptorLayout(const GLCL::CommandSetGDescriptorLayout& cmd) noexcept

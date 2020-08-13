@@ -31,7 +31,7 @@ class TAU_DLL DX10VertexArray final : public IVertexArray
 {
     DELETE_CM(DX10VertexArray);
 public:
-    static D3D10_PRIMITIVE_TOPOLOGY getDXDrawType(DrawType drawType) noexcept;
+    static D3D10_PRIMITIVE_TOPOLOGY getDXDrawType(EGraphics::DrawType drawType) noexcept;
 private:
     uSys _iaBufferCount;
     ID3D10Buffer** _iaBuffers;

@@ -162,6 +162,7 @@
     <ClInclude Include="include\dx\dx10\DX10CommandQueue.hpp" />
     <ClInclude Include="include\dx\dx10\DX10DepthStencilState.hpp" />
     <ClInclude Include="include\dx\dx10\DX10DescriptorHeap.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10Enums.hpp" />
     <ClInclude Include="include\dx\dx10\DX10FrameBuffer.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsAccelerator.hpp" />
     <ClInclude Include="include\dx\dx10\DX10GraphicsDisplay.hpp" />
@@ -218,6 +219,7 @@
     <ClInclude Include="include\gl\GLDepthStencilState.hpp" />
     <ClInclude Include="include\gl\GLDescriptorHeap.hpp" />
     <ClInclude Include="include\gl\GLDescriptorLayout.hpp" />
+    <ClInclude Include="include\gl\GLEnums.hpp" />
     <ClInclude Include="include\gl\GLFrameBuffer.hpp" />
     <ClInclude Include="include\gl\GLGraphicsAccelerator.hpp" />
     <ClInclude Include="include\gl\GLGraphicsInterface.hpp" />
@@ -245,6 +247,7 @@
     <ClInclude Include="include\graphics\DepthStencilState.hpp" />
     <ClInclude Include="include\graphics\DescriptorHeap.hpp" />
     <ClInclude Include="include\graphics\DescriptorLayout.hpp" />
+    <ClInclude Include="include\graphics\GraphicsEnums.hpp" />
     <ClInclude Include="include\graphics\PipelineState.hpp" />
     <ClInclude Include="include\graphics\RasterizerState.hpp" />
     <ClInclude Include="include\graphics\Resource.hpp" />
@@ -354,6 +357,7 @@
     <Natvis Include="natvis\Window.natvis" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\dx\dx10\DX10DescriptorLayout.hpp" />
     <None Include="resources\imgui_fragment.glsl" />
     <None Include="resources\imgui_vertex.glsl" />
   </ItemGroup>
@@ -485,7 +489,7 @@
       <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -572,7 +576,7 @@
       <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -661,7 +665,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -746,7 +750,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>

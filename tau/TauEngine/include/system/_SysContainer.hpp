@@ -7,9 +7,9 @@
 
 struct _SysWindowContainer final
 {
-    WNDCLASSA windowClass;
-    HWND      windowHandle;
-    HDC       hdc;
+    WNDCLASSEXW windowClass;
+    HWND        windowHandle;
+    HDC         hdc;
 };
 
 struct _SysContainer final

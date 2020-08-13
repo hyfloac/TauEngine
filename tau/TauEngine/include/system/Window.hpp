@@ -40,6 +40,7 @@ static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcep
 
 class TAU_DLL Window
 {
+    DELETE_CM(Window);
 public:
     typedef void(*onEvent_f)(void*, WindowEvent&);
 private:
@@ -56,6 +57,18 @@ private:
      */
     u32 _height;
     /**
+     *   The current width of the drawable area of the window.
+     * This can change by either being manually resized, or by
+     * being programatically resized.
+     */
+    u32 _cWidth;
+    /**
+     *   The current height of the drawable area of the window.
+     * This can change by either being manually resized, or by
+     * being programatically resized.
+     */
+    u32 _cHeight;
+    /**
      *   The current X position of the window. This can change
      * by either being manually resized, or by being
      * programatically resized.
@@ -71,15 +84,13 @@ private:
      *   The title of the window. The string can change, the 
      * contents cannot.
      */
-    DynString _title;
+    WDynString _title;
     /**
      * A system dependent container of information.
      * 
      * See {@link _SysWindowContainer @endlink}.
      */
     _SysWindowContainer _windowContainer;
-    IRenderingContext* _context;
-    // SharedRenderingContextsContainer _contexts;
     /**
      *   A pointer to a user dependent structure. This can be
      * anything, it is up to the developer.
@@ -98,24 +109,18 @@ private:
     WindowState _windowState;
     onEvent_f _eventHandler;
 public:
-    Window(u32 width, u32 height, DynString title, Nullable void* userContainer = null, Nullable const Window* parent = null) noexcept;
+    Window(u32 width, u32 height, const WDynString& title, Nullable void* userContainer = null, Nullable const Window* parent = null) noexcept;
 
     ~Window() noexcept;
 
-#pragma region Copy and Move Operations
-    Window(const Window& copy) noexcept = delete;
-    Window(Window&& move) noexcept = delete;
-
-    Window& operator =(const Window& copy) noexcept = delete;
-    Window& operator =(Window&& move) noexcept = delete;
-#pragma endregion
-
 #pragma region Getters
-    [[nodiscard]] inline u32 width()  const noexcept { return _width;  }
-    [[nodiscard]] inline u32 height() const noexcept { return _height; }
-    [[nodiscard]] inline u32 xPos()   const noexcept { return _xPos; }
-    [[nodiscard]] inline u32 yPos()   const noexcept { return _yPos; }
-    [[nodiscard]] inline const char* title() const noexcept { return _title; }
+    [[nodiscard]] inline u32 width()   const noexcept { return _width;   }
+    [[nodiscard]] inline u32 height()  const noexcept { return _height;  }
+    [[nodiscard]] inline u32 cWidth()  const noexcept { return _cWidth;  }
+    [[nodiscard]] inline u32 cHeight() const noexcept { return _cHeight; }
+    [[nodiscard]] inline u32 xPos()    const noexcept { return _xPos;    }
+    [[nodiscard]] inline u32 yPos()    const noexcept { return _yPos;    }
+    [[nodiscard]] inline const WDynString& title() const noexcept { return _title; }
     [[nodiscard]] inline const _SysWindowContainer& sysWindowContainer() const noexcept { return _windowContainer; }
     [[nodiscard]] inline const void* userContainer() const noexcept { return _userContainer; }
     [[nodiscard]] inline const Window* parent() const noexcept { return _parent; }
@@ -156,7 +161,7 @@ public:
      */
     void moveAndResize(u32 xPos, u32 yPos, u32 width, u32 height) noexcept;
 
-    void setTitle(const DynString& title) noexcept;
+    void setTitle(const WDynString& title) noexcept;
 
     inline void setEventHandler(Nullable onEvent_f eventHandler) noexcept { _eventHandler = eventHandler;  }
 
@@ -164,6 +169,15 @@ public:
     void closeWindow() const noexcept;
     void showWindow()  const noexcept;
     void hideWindow()  const noexcept;
+
+    void setBorderlessFullscreen() noexcept;
+    void setBorderlessWorkspace() noexcept;
+    void setWindowed(u32 width, u32 height) noexcept;
+
+#ifdef _WIN32
+    void setAsDesktopBackground() noexcept;
+    void removeFromDesktopBackground() noexcept;
+#endif
 public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;

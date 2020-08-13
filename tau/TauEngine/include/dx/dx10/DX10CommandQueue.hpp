@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <d3d10.h>
 #include "DX10CommandList.hpp"
+#include "DX10DescriptorLayout.hpp"
 
 class DX10InputLayout;
 
@@ -17,12 +18,14 @@ private:
     ID3D10DepthStencilState* _currentDepthStencilState;
     const PipelineState* _currentPipelineState;
     NullableRef<DX10InputLayout> _currentInputLayout;
+    const DX10DescriptorLayout* _currentLayout;
 public:
     DX10CommandQueue(ID3D10Device* const d3d10Device) noexcept
         : _d3d10Device(d3d10Device)
         , _currentDepthStencilState(null)
         , _currentPipelineState(null)
         , _currentInputLayout(null)
+        , _currentLayout(null)
     { }
 
     void executeCommandLists(uSys count, const ICommandList** lists) noexcept override;
@@ -33,6 +36,7 @@ private:
     void _drawIndexed(const DX10CL::CommandDrawIndexed& cmd) noexcept;
     void _drawInstanced(const DX10CL::CommandDrawInstanced& cmd) noexcept;
     void _drawIndexedInstanced(const DX10CL::CommandDrawIndexedInstanced& cmd) noexcept;
+    void _setDrawType(const DX10CL::CommandSetDrawType& cmd) noexcept;
     void _setPipelineState(const DX10CL::CommandSetPipelineState& cmd) noexcept;
     void _setStencilRef(const DX10CL::CommandSetStencilRef& cmd) noexcept;
     void _setVertexArray(const DX10CL::CommandSetVertexArray& cmd) noexcept;

@@ -176,13 +176,13 @@ bool DX10VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexAr
     return true;
 }
 
-D3D10_PRIMITIVE_TOPOLOGY DX10VertexArray::getDXDrawType(const DrawType drawType) noexcept
+D3D10_PRIMITIVE_TOPOLOGY DX10VertexArray::getDXDrawType(const EGraphics::DrawType drawType) noexcept
 {
     switch(drawType)
     {
-        case DrawType::SeparatedTriangles:      return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        case DrawType::ConnectedTriangles:      return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-        case DrawType::PointConnectedTriangles: return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+        case EGraphics::DrawType::SeparatedTriangles:      return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        case EGraphics::DrawType::ConnectedTriangles:      return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+        case EGraphics::DrawType::PointConnectedTriangles: return D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
         default:                                return D3D10_PRIMITIVE_TOPOLOGY_UNDEFINED;
     }
 }

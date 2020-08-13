@@ -7,13 +7,12 @@
 
 #include "DLL.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
+#include "GraphicsEnums.hpp"
 
 struct PipelineState;
 class IInputLayout;
 class IVertexArray;
 struct IndexBufferView;
-
-enum class DrawType;
 
 #define COMMAND_LIST_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, ICommandList)
@@ -43,14 +42,13 @@ public:
      *   This will assemble primitives by reading off vertices from
      * the vertex buffers in sequential order.
      *
-     * @param[in] exCount
-     *        The number of indices or vertices that need to be
-     *      drawn.
+     * @param[in] vertexCount
+     *        The number of vertices that need to be drawn.
      * @param[in] startVertex
      *        The offset of the first vertex to be used by the
      *      input assembler.
      */
-    virtual void draw(uSys exCount, uSys startVertex) noexcept = 0;
+    virtual void draw(uSys vertexCount, uSys startVertex) noexcept = 0;
 
     /**
      * Issues a draw command.
@@ -59,16 +57,15 @@ public:
      * the index buffer and selecting the corresponding vertices
      * from the vertex buffers.
      *
-     * @param[in] exCount
-     *        The number of indices or vertices that need to be
-     *      drawn.
+     * @param[in] indexCount
+     *        The number of indices that need to be drawn.
      * @param[in] startIndex
      *        The offset of the first index to be used by the input
      *      assembler.
      * @param[in] baseVertex
      *        An offset added to each index.
      */
-    virtual void drawIndexed(uSys exCount, uSys startIndex, iSys baseVertex) noexcept = 0;
+    virtual void drawIndexed(uSys indexCount, uSys startIndex, iSys baseVertex) noexcept = 0;
 
     /**
      * Issues a draw command with instanced rendering.
@@ -79,9 +76,8 @@ public:
      *   This also uses and additional buffers for per instance
      * rendering.
      *
-     * @param[in] exCount
-     *        The number of indices or vertices that need to be
-     *      drawn.
+     * @param[in] vertexCount
+     *        The number of vertices that need to be drawn.
      * @param[in] startVertex
      *        The offset of the first vertex to be used by the
      *      input assembler.
@@ -91,7 +87,7 @@ public:
      *        The offset of the first instance to be used by the
      *      input assembler.
      */
-    virtual void drawInstanced(uSys exCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
+    virtual void drawInstanced(uSys vertexCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
 
     /**
      * Issues a draw command with instanced rendering.
@@ -103,9 +99,8 @@ public:
      *   This also uses and additional buffers for per instance
      * rendering.
      *
-     * @param[in] exCount
-     *        The number of indices or vertices that need to be
-     *      drawn.
+     * @param[in] indexCount
+     *        The number of indices that need to be drawn.
      * @param[in] startIndex
      *        The offset of the first index to be used by the input
      *      assembler.
@@ -117,7 +112,7 @@ public:
      *        The offset of the first instance to be used by the
      *      input assembler.
      */
-    virtual void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
+    virtual void drawIndexedInstanced(uSys indexCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
 
     /**
      * Sets the draw type.
@@ -128,7 +123,7 @@ public:
      * @param[in] drawType
      *      The method of interpreting the vertices and indices.
      */
-    virtual void setDrawType(DrawType drawType) noexcept = 0;
+    virtual void setDrawType(EGraphics::DrawType drawType) noexcept = 0;
 
     /**
      * Sets the pipeline state.

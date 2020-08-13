@@ -6,13 +6,7 @@
 #include <RunTimeType.hpp>
 
 #include "DLL.hpp"
-
-enum class DrawType
-{
-    SeparatedTriangles = 1,
-    ConnectedTriangles,
-    PointConnectedTriangles
-};
+#include "GraphicsEnums.hpp"
 
 class IVertexBuffer;
 class IIndexBuffer;
@@ -63,13 +57,13 @@ public:
     DynArray<NullableRef<IVertexBuffer>> buffers;
     NullableRef<IIndexBuffer> indexBuffer;
     u32 drawCount;
-    DrawType drawType;
+    EGraphics::DrawType drawType;
 public:
     inline VertexArrayArgs(const uSys bufferCount) noexcept
         : buffers(bufferCount)
         , indexBuffer(null)
         , drawCount(0)
-        , drawType(static_cast<DrawType>(0))
+        , drawType(static_cast<EGraphics::DrawType>(0))
     { }
 };
 

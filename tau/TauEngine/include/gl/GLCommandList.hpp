@@ -19,8 +19,11 @@ enum class CommandType
     DrawIndexed,
     DrawIndexedBaseVertex,
     DrawInstanced,
+    DrawInstancedBaseInstance,
     DrawIndexedInstanced,
     DrawIndexedBaseVertexInstanced,
+    DrawIndexedInstancedBaseInstance,
+    DrawIndexedBaseVertexInstancedBaseInstance,
     SetDrawType,
     SetPipelineState,
     SetStencilRef,
@@ -37,13 +40,11 @@ struct CommandDraw final
     DEFAULT_DESTRUCT(CommandDraw);
     DEFAULT_CM_PU(CommandDraw);
 public:
-    GLenum mode;
     GLint startVertex;
     GLsizei vertexCount;
 public:
-    CommandDraw(const GLenum _mode, const GLint _startVertex, const GLsizei _vertexCount) noexcept
-        : mode(_mode)
-        , startVertex(_startVertex)
+    CommandDraw(const GLint _startVertex, const GLsizei _vertexCount) noexcept
+        : startVertex(_startVertex)
         , vertexCount(_vertexCount)
     { }
 };
@@ -54,22 +55,16 @@ struct CommandDrawIndexed final
     DEFAULT_DESTRUCT(CommandDrawIndexed);
     DEFAULT_CM_PU(CommandDrawIndexed);
 public:
-    GLenum mode;
     GLsizei indexCount;
-    GLenum indexSize;
     const void* indexOffset;
 public:
-    CommandDrawIndexed(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const void* const _indexOffset) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexed(const GLsizei _indexCount, const void* const _indexOffset) noexcept
+        : indexCount(_indexCount)
         , indexOffset(_indexOffset)
     { }
 
-    CommandDrawIndexed(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const uSys _indexOffset) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexed(const GLsizei _indexCount, const uSys _indexOffset) noexcept
+        : indexCount(_indexCount)
         , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
     { }
 };
@@ -80,25 +75,19 @@ struct CommandDrawIndexedBaseVertex final
     DEFAULT_DESTRUCT(CommandDrawIndexedBaseVertex);
     DEFAULT_CM_PU(CommandDrawIndexedBaseVertex);
 public:
-    GLenum mode;
     GLsizei indexCount;
-    GLenum indexSize;
-    const void* indexOffset;
+    void* indexOffset;
     GLint baseVertex;
 public:
-    CommandDrawIndexedBaseVertex(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const void* const _indexOffset, const GLint _baseVertex) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexedBaseVertex(const GLsizei _indexCount, void* const _indexOffset, const GLint _baseVertex) noexcept
+        : indexCount(_indexCount)
         , indexOffset(_indexOffset)
         , baseVertex(_baseVertex)
     { }
 
-    CommandDrawIndexedBaseVertex(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const uSys _indexOffset, const GLint _baseVertex) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
-        , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
+    CommandDrawIndexedBaseVertex(const GLsizei _indexCount, const uSys _indexOffset, const GLint _baseVertex) noexcept
+        : indexCount(_indexCount)
+        , indexOffset(reinterpret_cast<void*>(static_cast<uPtr>(_indexOffset)))
         , baseVertex(_baseVertex)
     { }
 };
@@ -109,16 +98,33 @@ struct CommandDrawInstanced final
     DEFAULT_DESTRUCT(CommandDrawInstanced);
     DEFAULT_CM_PU(CommandDrawInstanced);
 public:
-    GLenum mode;
     GLint startVertex;
     GLsizei vertexCount;
     GLsizei instanceCount;
 public:
-    CommandDrawInstanced(const GLenum _mode, const GLint _startVertex, const GLsizei _vertexCount, const GLsizei _instanceCount) noexcept
-        : mode(_mode)
-        , startVertex(_startVertex)
+    CommandDrawInstanced(const GLint _startVertex, const GLsizei _vertexCount, const GLsizei _instanceCount) noexcept
+        : startVertex(_startVertex)
         , vertexCount(_vertexCount)
         , instanceCount(_instanceCount)
+    { }
+};
+
+struct CommandDrawInstancedBaseInstance final
+{
+    DEFAULT_CONSTRUCT_PU(CommandDrawInstancedBaseInstance);
+    DEFAULT_DESTRUCT(CommandDrawInstancedBaseInstance);
+    DEFAULT_CM_PU(CommandDrawInstancedBaseInstance);
+public:
+    GLint startVertex;
+    GLsizei vertexCount;
+    GLsizei instanceCount;
+    GLuint baseInstance;
+public:
+    CommandDrawInstancedBaseInstance(const GLint _startVertex, const GLsizei _vertexCount, const GLsizei _instanceCount, const GLuint _baseInstance) noexcept
+        : startVertex(_startVertex)
+        , vertexCount(_vertexCount)
+        , instanceCount(_instanceCount)
+        , baseInstance(_baseInstance)
     { }
 };
 
@@ -128,24 +134,18 @@ struct CommandDrawIndexedInstanced final
     DEFAULT_DESTRUCT(CommandDrawIndexedInstanced);
     DEFAULT_CM_PU(CommandDrawIndexedInstanced);
 public:
-    GLenum mode;
     GLsizei indexCount;
-    GLenum indexSize;
     const void* indexOffset;
     GLsizei instanceCount;
 public:
-    CommandDrawIndexedInstanced(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const void* const _indexOffset, const GLsizei _instanceCount) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexedInstanced(const GLsizei _indexCount, const void* const _indexOffset, const GLsizei _instanceCount) noexcept
+        : indexCount(_indexCount)
         , indexOffset(_indexOffset)
         , instanceCount(_instanceCount)
     { }
 
-    CommandDrawIndexedInstanced(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const uSys _indexOffset, const GLsizei _instanceCount) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexedInstanced(const GLsizei _indexCount, const uSys _indexOffset, const GLsizei _instanceCount) noexcept
+        : indexCount(_indexCount)
         , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
         , instanceCount(_instanceCount)
     { }
@@ -157,29 +157,91 @@ struct CommandDrawIndexedBaseVertexInstanced final
     DEFAULT_DESTRUCT(CommandDrawIndexedBaseVertexInstanced);
     DEFAULT_CM_PU(CommandDrawIndexedBaseVertexInstanced);
 public:
-    GLenum mode;
     GLsizei indexCount;
-    GLenum indexSize;
     const void* indexOffset;
     GLsizei instanceCount;
     GLint baseVertex;
 public:
-    CommandDrawIndexedBaseVertexInstanced(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const void* const _indexOffset, const GLsizei _instanceCount, const GLint _baseVertex) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexedBaseVertexInstanced(const GLsizei _indexCount, const void* const _indexOffset, const GLsizei _instanceCount, const GLint _baseVertex) noexcept
+        : indexCount(_indexCount)
         , indexOffset(_indexOffset)
         , instanceCount(_instanceCount)
         , baseVertex(_baseVertex)
     { }
 
-    CommandDrawIndexedBaseVertexInstanced(const GLenum _mode, const GLsizei _indexCount, const GLenum _indexSize, const uSys _indexOffset, const GLsizei _instanceCount, const GLint _baseVertex) noexcept
-        : mode(_mode)
-        , indexCount(_indexCount)
-        , indexSize(_indexSize)
+    CommandDrawIndexedBaseVertexInstanced(const GLsizei _indexCount, const uSys _indexOffset, const GLsizei _instanceCount, const GLint _baseVertex) noexcept
+        : indexCount(_indexCount)
         , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
         , instanceCount(_instanceCount)
         , baseVertex(_baseVertex)
+    { }
+};
+
+struct CommandDrawIndexedInstancedBaseInstance final
+{
+    DEFAULT_CONSTRUCT_PU(CommandDrawIndexedInstancedBaseInstance);
+    DEFAULT_DESTRUCT(CommandDrawIndexedInstancedBaseInstance);
+    DEFAULT_CM_PU(CommandDrawIndexedInstancedBaseInstance);
+public:
+    GLsizei indexCount;
+    const void* indexOffset;
+    GLsizei instanceCount;
+    GLuint baseInstance;
+public:
+    CommandDrawIndexedInstancedBaseInstance(const GLsizei _indexCount, const void* const _indexOffset, const GLsizei _instanceCount, const GLuint _baseInstance) noexcept
+        : indexCount(_indexCount)
+        , indexOffset(_indexOffset)
+        , instanceCount(_instanceCount)
+        , baseInstance(_baseInstance)
+    { }
+
+    CommandDrawIndexedInstancedBaseInstance(const GLsizei _indexCount, const uSys _indexOffset, const GLsizei _instanceCount, const GLuint _baseInstance) noexcept
+        : indexCount(_indexCount)
+        , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
+        , instanceCount(_instanceCount)
+        , baseInstance(_baseInstance)
+    { }
+};
+
+struct CommandDrawIndexedBaseVertexInstancedBaseInstance final
+{
+    DEFAULT_CONSTRUCT_PU(CommandDrawIndexedBaseVertexInstancedBaseInstance);
+    DEFAULT_DESTRUCT(CommandDrawIndexedBaseVertexInstancedBaseInstance);
+    DEFAULT_CM_PU(CommandDrawIndexedBaseVertexInstancedBaseInstance);
+public:
+    GLsizei indexCount;
+    const void* indexOffset;
+    GLsizei instanceCount;
+    GLint baseVertex;
+    GLuint baseInstance;
+public:
+    CommandDrawIndexedBaseVertexInstancedBaseInstance(const GLsizei _indexCount, const void* const _indexOffset, const GLsizei _instanceCount, const GLint _baseVertex, const GLuint _baseInstance) noexcept
+        : indexCount(_indexCount)
+        , indexOffset(_indexOffset)
+        , instanceCount(_instanceCount)
+        , baseVertex(_baseVertex)
+        , baseInstance(_baseInstance)
+    { }
+
+    CommandDrawIndexedBaseVertexInstancedBaseInstance(const GLsizei _indexCount, const uSys _indexOffset, const GLsizei _instanceCount, const GLint _baseVertex, const GLuint _baseInstance) noexcept
+        : indexCount(_indexCount)
+        , indexOffset(reinterpret_cast<const void*>(static_cast<uPtr>(_indexOffset)))
+        , instanceCount(_instanceCount)
+        , baseVertex(_baseVertex)
+        , baseInstance(_baseInstance)
+    { }
+};
+
+struct CommandSetDrawType final
+{
+    DEFAULT_CONSTRUCT_PU(CommandSetDrawType);
+    DEFAULT_DESTRUCT(CommandSetDrawType);
+    DEFAULT_CM_PU(CommandSetDrawType);
+public:
+    GLenum glDrawType;
+public:
+    CommandSetDrawType(const GLenum _glDrawType) noexcept
+        : glDrawType(_glDrawType)
     { }
 };
 
@@ -229,9 +291,11 @@ struct CommandSetIndexBuffer final
     DEFAULT_CM_PU(CommandSetIndexBuffer);
 public:
     GLuint ibo;
+    GLenum indexSize;
 public:
-    CommandSetIndexBuffer(const GLuint _ibo) noexcept
+    CommandSetIndexBuffer(const GLuint _ibo, const GLenum _indexSize) noexcept
         : ibo(_ibo)
+        , indexSize(_indexSize)
     { }
 };
 
@@ -291,8 +355,12 @@ public:
         CommandDrawIndexed drawIndexed;
         CommandDrawIndexedBaseVertex drawIndexedBaseVertex;
         CommandDrawInstanced drawInstanced;
+        CommandDrawInstancedBaseInstance drawInstancedBaseInstance;
         CommandDrawIndexedInstanced drawIndexedInstanced;
         CommandDrawIndexedBaseVertexInstanced drawIndexedBaseVertexInstanced;
+        CommandDrawIndexedInstancedBaseInstance drawIndexedInstancedBaseInstance;
+        CommandDrawIndexedBaseVertexInstancedBaseInstance drawIndexedBaseVertexInstancedBaseInstance;
+        CommandSetDrawType setDrawType;
         CommandSetPipelineState setPipelineState;
         CommandSetStencilRef setStencilRef;
         CommandSetVertexArray setVertexArray;
@@ -327,14 +395,34 @@ public:
         , drawInstanced(_drawInstanced)
     { }
 
+    Command(const CommandDrawInstancedBaseInstance& _drawInstancedBaseInstance) noexcept
+        : type(CommandType::DrawInstancedBaseInstance)
+        , drawInstancedBaseInstance(_drawInstancedBaseInstance)
+    { }
+
     Command(const CommandDrawIndexedInstanced& _drawIndexedInstanced) noexcept
         : type(CommandType::DrawIndexedInstanced)
         , drawIndexedInstanced(_drawIndexedInstanced)
     { }
 
-    Command(const CommandDrawIndexedBaseVertexInstanced & _drawIndexedBaseVertexInstanced) noexcept
+    Command(const CommandDrawIndexedBaseVertexInstanced& _drawIndexedBaseVertexInstanced) noexcept
         : type(CommandType::DrawIndexedBaseVertexInstanced)
         , drawIndexedBaseVertexInstanced(_drawIndexedBaseVertexInstanced)
+    { }
+
+    Command(const CommandDrawIndexedInstancedBaseInstance& _drawIndexedInstancedBaseInstance) noexcept
+        : type(CommandType::DrawIndexedInstancedBaseInstance)
+        , drawIndexedInstancedBaseInstance(_drawIndexedInstancedBaseInstance)
+    { }
+
+    Command(const CommandDrawIndexedBaseVertexInstancedBaseInstance& _drawIndexedBaseVertexInstancedBaseInstance) noexcept
+        : type(CommandType::DrawIndexedBaseVertexInstancedBaseInstance)
+        , drawIndexedBaseVertexInstancedBaseInstance(_drawIndexedBaseVertexInstancedBaseInstance)
+    { }
+
+    Command(const CommandSetDrawType& _setDrawType) noexcept
+        : type(CommandType::SetDrawType)
+        , setDrawType(_setDrawType)
     { }
 
     Command(const CommandSetPipelineState& _setPipelineState) noexcept
@@ -370,24 +458,22 @@ private:
     uSys _maxCommands;
     ArrayList<GLCL::Command> _commands;
     FreeListAllocator _refCountList;
-    const GLVertexArray* _currentVA;
 public:
     GLCommandList(const uSys maxCommands = 4096) noexcept
         : _maxCommands(maxCommands)
         , _commands(maxCommands)
         , _refCountList(_maxCommands * MaxVertexBuffers)
-        , _currentVA(null)
     { }
 
     [[nodiscard]] const ArrayList<GLCL::Command>& commands() const noexcept { return _commands; }
 
     void reset() noexcept override;
     void finish() noexcept override;
-    void draw(uSys exCount, uSys startVertex) noexcept override;
-    void drawIndexed(uSys exCount, uSys startIndex, iSys baseVertex) noexcept override;
-    void drawInstanced(uSys exCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
-    void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
-    void setDrawType(DrawType drawType) noexcept override;
+    void draw(uSys vertexCount, uSys startVertex) noexcept override;
+    void drawIndexed(uSys indexCount, uSys startIndex, iSys baseVertex) noexcept override;
+    void drawInstanced(uSys vertexCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
+    void drawIndexedInstanced(uSys indexCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
+    void setDrawType(EGraphics::DrawType drawType) noexcept override;
     void setPipelineState(const PipelineState& pipelineState) noexcept override;
     void setStencilRef(uSys stencilRef) noexcept override;
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;

@@ -3,6 +3,7 @@
 #include "gl/GLBuffer.hpp"
 #include "gl/GLResourceBuffer.hpp"
 #include "graphics/BufferView.hpp"
+#include "gl/GLEnums.hpp"
 
 void GLCommandList::reset() noexcept
 {
@@ -13,44 +14,74 @@ void GLCommandList::reset() noexcept
 void GLCommandList::finish() noexcept
 { }
 
-void GLCommandList::draw(const uSys exCount, const uSys startVertex) noexcept
+void GLCommandList::draw(const uSys vertexCount, const uSys startVertex) noexcept
 {
-    const GLCL::CommandDraw draw(_currentVA->glDrawType(), startVertex, exCount);
+    const GLCL::CommandDraw draw(startVertex, vertexCount);
     _commands.emplace(draw);
 }
 
-void GLCommandList::drawIndexed(const uSys exCount, const uSys startIndex, const iSys baseVertex) noexcept
+void GLCommandList::drawIndexed(const uSys indexCount, const uSys startIndex, const iSys baseVertex) noexcept
 {
     if(baseVertex > 0)
     {
-        const GLCL::CommandDrawIndexed drawIndexed(_currentVA->glDrawType(), exCount, _currentVA->indexBuffer()->glIndexSize(), startIndex);
-        _commands.emplace(drawIndexed);
-    }
-    else
-    {
-        const GLCL::CommandDrawIndexedBaseVertex drawIndexedBaseVertex(_currentVA->glDrawType(), exCount, _currentVA->indexBuffer()->glIndexSize(), startIndex, baseVertex);
+        const GLCL::CommandDrawIndexedBaseVertex drawIndexedBaseVertex(indexCount, startIndex, baseVertex);
         _commands.emplace(drawIndexedBaseVertex);
     }
-}
-
-void GLCommandList::drawInstanced(const uSys exCount, const uSys startVertex, const uSys instanceCount, const uSys startInstance) noexcept
-{
-    const GLCL::CommandDrawInstanced drawInstanced(_currentVA->glDrawType(), startVertex, exCount, instanceCount);
-    _commands.emplace(drawInstanced);
-}
-
-void GLCommandList::drawIndexedInstanced(const uSys exCount, const uSys startIndex, const iSys baseVertex, const uSys instanceCount, const uSys startInstance) noexcept
-{
-    if(baseVertex > 0)
+    else
     {
-        const GLCL::CommandDrawIndexedInstanced drawIndexedInstanced(_currentVA->glDrawType(), exCount, _currentVA->indexBuffer()->glIndexSize(), startIndex, instanceCount);
-        _commands.emplace(drawIndexedInstanced);
+        const GLCL::CommandDrawIndexed drawIndexed(indexCount, startIndex);
+        _commands.emplace(drawIndexed);
+    }
+}
+
+void GLCommandList::drawInstanced(const uSys vertexCount, const uSys startVertex, const uSys instanceCount, const uSys startInstance) noexcept
+{
+    if(startInstance > 0)
+    {
+        const GLCL::CommandDrawInstancedBaseInstance drawInstancedBaseInstance(startVertex, vertexCount, instanceCount, startInstance);
+        _commands.emplace(drawInstancedBaseInstance);
     }
     else
     {
-        const GLCL::CommandDrawIndexedBaseVertexInstanced drawIndexedBaseVertexInstanced(_currentVA->glDrawType(), exCount, _currentVA->indexBuffer()->glIndexSize(), startIndex, instanceCount, baseVertex);
-        _commands.emplace(drawIndexedBaseVertexInstanced);
+        const GLCL::CommandDrawInstanced drawInstanced(startVertex, vertexCount, instanceCount);
+        _commands.emplace(drawInstanced);
     }
+}
+
+void GLCommandList::drawIndexedInstanced(const uSys indexCount, const uSys startIndex, const iSys baseVertex, const uSys instanceCount, const uSys startInstance) noexcept
+{
+    if(baseVertex > 0)
+    {
+        if(startInstance > 0)
+        {
+            const GLCL::CommandDrawIndexedBaseVertexInstancedBaseInstance drawIndexedBaseVertexInstancedBaseInstance(indexCount, startIndex, instanceCount, baseVertex, startInstance);
+            _commands.emplace(drawIndexedBaseVertexInstancedBaseInstance);
+        }
+        else
+        {
+            const GLCL::CommandDrawIndexedBaseVertexInstanced drawIndexedBaseVertexInstanced(indexCount, startIndex, instanceCount, baseVertex);
+            _commands.emplace(drawIndexedBaseVertexInstanced);
+        }
+    }
+    else
+    {
+        if(startInstance > 0)
+        {
+            const GLCL::CommandDrawIndexedInstancedBaseInstance drawIndexedInstancedBaseInstance(indexCount, startIndex, instanceCount, startInstance);
+            _commands.emplace(drawIndexedInstancedBaseInstance);
+        }
+        else
+        {
+            const GLCL::CommandDrawIndexedInstanced drawIndexedInstanced(indexCount, startIndex, instanceCount);
+            _commands.emplace(drawIndexedInstanced);
+        }
+    }
+}
+
+void GLCommandList::setDrawType(const EGraphics::DrawType drawType) noexcept
+{
+    const GLCL::CommandSetDrawType setDrawType(GLUtils::glDrawType(drawType));
+    _commands.emplace(setDrawType);
 }
 
 void GLCommandList::setPipelineState(const PipelineState& pipelineState) noexcept
@@ -93,10 +124,9 @@ void GLCommandList::setIndexBuffer(const IndexBufferView& indexBufferView) noexc
     (void) _refCountList.allocateT<NullableRef<IResource>>(indexBufferView.buffer);
 
     NullableRef<GLResourceBuffer> buffer = RefCast<GLResourceBuffer>(indexBufferView.buffer);
-    const GLCL::CommandSetIndexBuffer setIndexBuffer(buffer->buffer());
+    const GLCL::CommandSetIndexBuffer setIndexBuffer(buffer->buffer(), GLUtils::glIndexSize(indexBufferView.indexSize));
     _commands.emplace(setIndexBuffer);
 }
-
 
 void GLCommandList::setGraphicsDescriptorLayout(const DescriptorLayout layout) noexcept
 {

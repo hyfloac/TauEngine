@@ -10,12 +10,14 @@
 
 class TAU_DLL GLDescriptorLayout final
 {
-    DEFAULT_CONSTRUCT_PU(GLDescriptorLayout);
     DEFAULT_DESTRUCT(GLDescriptorLayout);
     DELETE_CM(GLDescriptorLayout);
 private:
     RefDynArray<DescriptorLayoutEntry> _entries;
 public:
+    GLDescriptorLayout(const RefDynArray<DescriptorLayoutEntry>& entries) noexcept
+        : _entries(entries)
+    { }
 
     [[nodiscard]] const RefDynArray<DescriptorLayoutEntry>& entries() const noexcept { return _entries; }
 };

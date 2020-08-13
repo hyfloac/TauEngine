@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <d3d10.h>
 #include <ArrayList.hpp>
+#include <allocator/FreeListAllocator.hpp>
 
 class DX10VertexArray;
 
@@ -292,13 +293,17 @@ class TAU_DLL DX10CommandList final : public ICommandList
     DELETE_CM(DX10CommandList);
     COMMAND_LIST_IMPL(DX10CommandList);
 private:
+    static constexpr uSys MaxVertexBuffers = 64;
+private:
     uSys _maxCommands;
     ArrayList<DX10CL::Command> _commands;
+    FreeListAllocator _refCountList;
     const DX10VertexArray* _currentVA;
 public:
     DX10CommandList(const uSys maxCommands = 4096) noexcept
         : _maxCommands(maxCommands)
         , _commands(maxCommands)
+        , _refCountList(_maxCommands* MaxVertexBuffers)
         , _currentVA(null)
     { }
 
@@ -310,10 +315,10 @@ public:
     void drawIndexed(uSys exCount, uSys startIndex, iSys baseVertex) noexcept override;
     void drawInstanced(uSys exCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
-    void setDrawType(DrawType drawType) noexcept override;
+    void setDrawType(EGraphics::DrawType drawType) noexcept override;
     void setPipelineState(const PipelineState& pipelineState) noexcept override;
     void setStencilRef(uSys stencilRef) noexcept override;
-    void setVertexArray(const IVertexArray& va) noexcept override;
+    void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
     void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
     void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept override;

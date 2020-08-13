@@ -992,6 +992,15 @@
     <ClInclude Include="include\dx\dx10\DX10CommandQueue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\graphics\GraphicsEnums.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gl\GLEnums.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx10\DX10Enums.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="natvis\Window.natvis" />
@@ -1002,5 +1011,6 @@
   <ItemGroup>
     <None Include="resources\imgui_vertex.glsl" />
     <None Include="resources\imgui_fragment.glsl" />
+    <None Include="include\dx\dx10\DX10DescriptorLayout.hpp" />
   </ItemGroup>
 </Project>

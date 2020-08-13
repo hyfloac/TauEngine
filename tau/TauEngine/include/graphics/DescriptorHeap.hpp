@@ -11,15 +11,9 @@
 
 #include "DLL.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
+#include "GraphicsEnums.hpp"
 
 class IResourceView;
-
-enum class DescriptorType
-{
-    TextureView = 1,
-    UniformBufferView,
-    UnorderedAccessView
-};
 
 #define DESCRIPTOR_HEAP_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, IDescriptorHeap)
@@ -29,6 +23,140 @@ enum class DescriptorType
 
 #define DESCRIPTOR_HEAP_IMPL(_TYPE) DESCRIPTOR_HEAP_IMPL_BASE(_TYPE)
 #define DESCRIPTOR_SAMPLER_HEAP_IMPL(_TYPE) DESCRIPTOR_SAMPLER_HEAP_IMPL_BASE(_TYPE)
+
+class CPUDescriptorHandle final
+{
+    DEFAULT_CONSTRUCT_PU(CPUDescriptorHandle);
+    DEFAULT_DESTRUCT(CPUDescriptorHandle);
+    DEFAULT_CM_PU(CPUDescriptorHandle);
+public:
+    uSys ptr;
+public:
+    CPUDescriptorHandle(const uSys _ptr) noexcept
+        : ptr(_ptr)
+    { }
+
+    CPUDescriptorHandle(const uSys _ptr, const uSys offset) noexcept
+        : ptr(_ptr + offset)
+    { }
+
+    CPUDescriptorHandle(const uSys _ptr, const uSys offsetCount, const uSys offsetStride) noexcept
+        : ptr(_ptr + offsetCount * offsetStride)
+    { }
+
+    CPUDescriptorHandle(const CPUDescriptorHandle handle, const uSys offset) noexcept
+        : ptr(handle.ptr + offset)
+    { }
+
+    CPUDescriptorHandle(const CPUDescriptorHandle handle, const uSys offsetCount, const uSys offsetStride) noexcept
+        : ptr(handle.ptr + offsetCount * offsetStride)
+    { }
+
+    CPUDescriptorHandle& offset(const uSys offset) noexcept
+    {
+        ptr += offset;
+        return *this;
+    }
+
+    CPUDescriptorHandle& offset(const uSys offsetCount, const uSys offsetStride) noexcept
+    {
+        ptr += offsetCount * offsetStride;
+        return *this;
+    }
+
+    [[nodiscard]] CPUDescriptorHandle offset(const uSys offset) const noexcept
+    { return CPUDescriptorHandle(ptr, offset); }
+
+    [[nodiscard]] CPUDescriptorHandle offset(const uSys offsetCount, const uSys offsetStride) const noexcept
+    { return CPUDescriptorHandle(ptr, offsetCount, offsetStride); }
+
+    [[nodiscard]] operator uSys() const noexcept { return ptr; }
+    [[nodiscard]] operator bool() const noexcept { return ptr; }
+    [[nodiscard]] operator void*() const noexcept { return reinterpret_cast<void*>(static_cast<uPtr>(ptr)); }
+
+    [[nodiscard]] bool operator ==(const CPUDescriptorHandle& other) const noexcept { return ptr == other.ptr; }
+    [[nodiscard]] bool operator !=(const CPUDescriptorHandle& other) const noexcept { return ptr != other.ptr; }
+
+    [[nodiscard]] bool operator ==(const uSys _ptr) const noexcept { return ptr == _ptr; }
+    [[nodiscard]] bool operator !=(const uSys _ptr) const noexcept { return ptr != _ptr; }
+
+    [[nodiscard]] bool operator > (const CPUDescriptorHandle& other) const noexcept { return ptr >  other.ptr; }
+    [[nodiscard]] bool operator < (const CPUDescriptorHandle& other) const noexcept { return ptr <  other.ptr; }
+    [[nodiscard]] bool operator >=(const CPUDescriptorHandle& other) const noexcept { return ptr >= other.ptr; }
+    [[nodiscard]] bool operator <=(const CPUDescriptorHandle& other) const noexcept { return ptr <= other.ptr; }
+
+    [[nodiscard]] bool operator > (const uSys _ptr) const noexcept { return ptr >  _ptr; }
+    [[nodiscard]] bool operator < (const uSys _ptr) const noexcept { return ptr <  _ptr; }
+    [[nodiscard]] bool operator >=(const uSys _ptr) const noexcept { return ptr >= _ptr; }
+    [[nodiscard]] bool operator <=(const uSys _ptr) const noexcept { return ptr <= _ptr; }
+};
+
+class GPUDescriptorHandle final
+{
+    DEFAULT_CONSTRUCT_PU(GPUDescriptorHandle);
+    DEFAULT_DESTRUCT(GPUDescriptorHandle);
+    DEFAULT_CM_PU(GPUDescriptorHandle);
+public:
+    u64 ptr;
+public:
+    GPUDescriptorHandle(const u64 _ptr) noexcept
+        : ptr(_ptr)
+    { }
+
+    GPUDescriptorHandle(const u64 _ptr, const u64 offset) noexcept
+        : ptr(_ptr + offset)
+    { }
+
+    GPUDescriptorHandle(const u64 _ptr, const u64 offsetCount, const u64 offsetStride) noexcept
+        : ptr(_ptr + offsetCount * offsetStride)
+    { }
+
+    GPUDescriptorHandle(const GPUDescriptorHandle handle, const u64 offset) noexcept
+        : ptr(handle.ptr + offset)
+    { }
+
+    GPUDescriptorHandle(const GPUDescriptorHandle handle, const u64 offsetCount, const u64 offsetStride) noexcept
+        : ptr(handle.ptr + offsetCount * offsetStride)
+    { }
+
+    GPUDescriptorHandle& offset(const u64 offset) noexcept
+    {
+        ptr += offset;
+        return *this;
+    }
+
+    GPUDescriptorHandle& offset(const u64 offsetCount, const u64 offsetStride) noexcept
+    {
+        ptr += offsetCount * offsetStride;
+        return *this;
+    }
+
+    [[nodiscard]] GPUDescriptorHandle offset(const u64 offset) const noexcept
+    { return GPUDescriptorHandle(ptr, offset); }
+
+    [[nodiscard]] GPUDescriptorHandle offset(const u64 offsetCount, const u64 offsetStride) const noexcept
+    { return GPUDescriptorHandle(ptr, offsetCount, offsetStride); }
+
+    [[nodiscard]] operator u64() const noexcept { return ptr; }
+    [[nodiscard]] operator bool() const noexcept { return ptr; }
+    [[nodiscard]] operator void*() const noexcept { return reinterpret_cast<void*>(static_cast<uPtr>(ptr)); }
+
+    [[nodiscard]] bool operator ==(const GPUDescriptorHandle& other) const noexcept { return ptr == other.ptr; }
+    [[nodiscard]] bool operator !=(const GPUDescriptorHandle& other) const noexcept { return ptr != other.ptr; }
+
+    [[nodiscard]] bool operator ==(const u64 _ptr) const noexcept { return ptr == _ptr; }
+    [[nodiscard]] bool operator !=(const u64 _ptr) const noexcept { return ptr != _ptr; }
+
+    [[nodiscard]] bool operator > (const GPUDescriptorHandle& other) const noexcept { return ptr > other.ptr; }
+    [[nodiscard]] bool operator < (const GPUDescriptorHandle& other) const noexcept { return ptr < other.ptr; }
+    [[nodiscard]] bool operator >=(const GPUDescriptorHandle& other) const noexcept { return ptr >= other.ptr; }
+    [[nodiscard]] bool operator <=(const GPUDescriptorHandle& other) const noexcept { return ptr <= other.ptr; }
+
+    [[nodiscard]] bool operator > (const u64 _ptr) const noexcept { return ptr > _ptr; }
+    [[nodiscard]] bool operator < (const u64 _ptr) const noexcept { return ptr < _ptr; }
+    [[nodiscard]] bool operator >=(const u64 _ptr) const noexcept { return ptr >= _ptr; }
+    [[nodiscard]] bool operator <=(const u64 _ptr) const noexcept { return ptr <= _ptr; }
+};
 
 /**
  * A heap of memory intended to hold descriptors.
@@ -48,6 +176,13 @@ class TAU_DLL TAU_NOVTABLE IDescriptorHeap
     DEFAULT_DESTRUCT_VI(IDescriptorHeap);
     DEFAULT_CM_PO(IDescriptorHeap);
 public:
+    [[nodiscard]] virtual EGraphics::DescriptorType type() const noexcept = 0;
+
+    [[nodiscard]] virtual CPUDescriptorHandle getBaseCPUHandle() const noexcept = 0;
+    [[nodiscard]] virtual GPUDescriptorHandle getBaseGPUHandle() const noexcept = 0;
+
+    [[nodiscard]] virtual uSys getOffsetStride() const noexcept = 0;
+
     /**
      * Allocates a descriptor table on the heap.
      *
@@ -59,16 +194,10 @@ public:
      * new to create the actual objects within that predefined
      * space.
      * 
-     * @param[in] descriptors
+     * @param[in] numDescriptors
      *      The number of descriptors the table will contain.
-     * @param[in] type
-     *      The type of the descriptors.
-     * @param[in] allocator
-     *        An optional allocator for the Tau descriptors. This
-     *      allocator cannot be a fixed block allocator, unless all
-     *      tables are the same size.
      */
-    [[nodiscard]] virtual DescriptorTable allocateTable(uSys descriptors, DescriptorType type, [[tau::nullable]] TauAllocator* allocator = null) noexcept = 0;
+    // [[nodiscard]] virtual DescriptorTable allocateTable(uSys numDescriptors) noexcept = 0;
 
     /**
      * Deallocates a descriptor table.
@@ -79,75 +208,18 @@ public:
      * @param[in] table
      *      The descriptor table to destroy.
      */
-    [[nodiscard]] virtual void destroyTable(DescriptorTable table) noexcept = 0;
+    // [[nodiscard]] virtual void destroyTable(DescriptorTable table) noexcept = 0;
 
     RTT_BASE_IMPL(IDescriptorHeap);
     RTT_BASE_CHECK(IDescriptorHeap);
     RTT_BASE_CAST(IDescriptorHeap);
 };
 
-/**
- * A heap of memory intended to hold descriptors.
- *
- *   This is intended to map to DirectX12 descriptor heaps. The
- * exact implementation may vary heavily though, due to the
- * drastic differences between conventional graphics API's, and
- * the more modern low-overhead API's.
- *
- *   Unlike DirectX12 you are expected to destroy tables. This
- * is because the descriptor table is intended to contain
- * allocations for all of the Tau descriptor objects.
- */
-class TAU_DLL TAU_NOVTABLE IDescriptorSamplerHeap
-{
-    DEFAULT_CONSTRUCT_PO(IDescriptorSamplerHeap);
-    DEFAULT_DESTRUCT_VI(IDescriptorSamplerHeap);
-    DEFAULT_CM_PO(IDescriptorSamplerHeap);
-public:
-    /**
-     * Allocates a descriptor table of samplers on the heap.
-     *
-     *   This function takes in an optional allocator. This
-     * allocator cannot be a fixed block allocator unless all
-     * tables are the same size. This is because in the backend the
-     * API is intended to allocate a large placement buffer to fit
-     * all of the Tau descriptor objects, and then use placement
-     * new to create the actual objects within that predefined
-     * space.
-     *
-     * @param[in] descriptors
-     *      The number of descriptors the table will contain.
-     * @param[in] allocator
-     *        An optional allocator for the Tau descriptors. This
-     *      allocator cannot be a fixed block allocator, unless all
-     *      tables are the same size.
-     */
-    [[nodiscard]] virtual DescriptorSamplerTable allocateTable(uSys descriptors, [[tau::nullable]] TauAllocator* allocator = null) noexcept = 0;
-
-    /**
-     * Deallocates a descriptor table.
-     *
-     *   It is important to destroy the descriptor tables manually
-     * as they contain an allocation for all of the Tau descriptors.
-     *
-     * @param[in] table
-     *      The descriptor table to destroy.
-     */
-    [[nodiscard]] virtual void destroyTable(DescriptorSamplerTable table) noexcept = 0;
-
-    RTT_BASE_IMPL(IDescriptorSamplerHeap);
-    RTT_BASE_CHECK(IDescriptorSamplerHeap);
-    RTT_BASE_CAST(IDescriptorSamplerHeap);
-};
-
 struct DescriptorHeapArgs
 {
-    uSys maxTables;
-};
-
-struct DescriptorSamplerHeapArgs
-{
-    uSys maxTables;
+    EGraphics::DescriptorType type;
+    uSys numDescriptors;
+    EGraphics::DescriptorHeapFlags flags;
 };
 
 class TAU_DLL TAU_NOVTABLE IDescriptorHeapBuilder
@@ -208,12 +280,6 @@ public:
     [[nodiscard]] virtual CPPRef<IDescriptorHeap> buildCPPRef(const DescriptorHeapArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IDescriptorHeap> buildTauRef(const DescriptorHeapArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableStrongRef<IDescriptorHeap> buildTauSRef(const DescriptorHeapArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual IDescriptorSamplerHeap* build(const DescriptorSamplerHeapArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IDescriptorSamplerHeap* build(const DescriptorSamplerHeapArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IDescriptorSamplerHeap> buildCPPRef(const DescriptorSamplerHeapArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IDescriptorSamplerHeap> buildTauRef(const DescriptorSamplerHeapArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IDescriptorSamplerHeap> buildTauSRef(const DescriptorSamplerHeapArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 protected:
     [[nodiscard]] virtual uSys _allocSize(uSys type) const noexcept = 0;
 };
@@ -229,15 +295,3 @@ inline uSys IDescriptorHeapBuilder::allocSize<NullableRef<IDescriptorHeap>>() co
 template<>
 inline uSys IDescriptorHeapBuilder::allocSize<NullableStrongRef<IDescriptorHeap>>() const noexcept
 { return _allocSize(3); }
-
-template<>
-inline uSys IDescriptorHeapBuilder::allocSize<IDescriptorSamplerHeap>() const noexcept
-{ return _allocSize(4); }
-
-template<>
-inline uSys IDescriptorHeapBuilder::allocSize<NullableRef<IDescriptorSamplerHeap>>() const noexcept
-{ return _allocSize(5); }
-
-template<>
-inline uSys IDescriptorHeapBuilder::allocSize<NullableStrongRef<IDescriptorSamplerHeap>>() const noexcept
-{ return _allocSize(6); }
