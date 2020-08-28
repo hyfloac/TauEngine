@@ -5,7 +5,7 @@
 
 #include "DLL.hpp"
 #include "shader/ShaderProgram.hpp"
-#include "texture/Texture.hpp"
+#include "graphics/Resource.hpp"
 #include "shader/Uniform.hpp"
 #include "shader/TextureUploader.hpp"
 #include "graphics/DepthStencilState.hpp"
@@ -18,30 +18,28 @@ class IVertexArray;
 
 class TAU_DLL Skybox final
 {
+    DEFAULT_CONSTRUCT_PU(Skybox);
     DEFAULT_DESTRUCT(Skybox);
     DEFAULT_CM(Skybox);
 public:
     struct Uniforms final
     {
         DEFAULT_DESTRUCT(Uniforms);
-        DEFAULT_COPY(Uniforms);
+        DEFAULT_CM_PU(Uniforms);
 
         glm::mat4 projectionMatrix;
         glm::mat4 viewMatrix;
 
-        Uniforms() noexcept
-            : projectionMatrix(1.0f), viewMatrix(1.0f)
-        { }
-
         Uniforms(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) noexcept
-            : projectionMatrix(projectionMatrix), viewMatrix(viewMatrix)
+            : projectionMatrix(projectionMatrix)
+            , viewMatrix(viewMatrix)
         { }
     };
 private:
     CPPRef<IShaderProgram> _shader;
     UniformBlockS<Uniforms> _uniforms;
 
-    CPPRef<ITextureCube> _skybox;
+    NullableRef<IResource> _skybox;
     NullableRef<ISingleTextureUploader> _textureUploader;
     CPPRef<IVertexArray> _cubeVA;
 
@@ -50,8 +48,8 @@ private:
 public:
     Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
 
-    [[nodiscard]] CPPRef<ITextureCube> skybox() const noexcept { return _skybox; }
-    [[nodiscard]] const CPPRef<ITextureCube>& skybox() noexcept { return _skybox; }
+    [[nodiscard]]       NullableRef<IResource>  skybox()       noexcept { return _skybox; }
+    [[nodiscard]] const NullableRef<IResource>& skybox() const noexcept { return _skybox; }
 
     void render(IRenderingContext& context, const Camera3D& camera) noexcept;
 };

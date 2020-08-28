@@ -157,7 +157,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     ShaderBundleLexer lexer(VFS::Instance().openFile("|TERes/shader/Deferred/Deferred_Model.tausi", FileProps::Read));
     ShaderBundleParser parser(lexer);
-    NullableStrongRef<ExprAST> ast = parser.parse();
+    NullableStrongRef<AST> ast = parser.parse();
 
     if(!ast)
     {
