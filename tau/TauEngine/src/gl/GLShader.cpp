@@ -16,9 +16,9 @@
 
 static bool validateFail(GLuint shaderHandle, const char* type) noexcept;
 
-GLShaderData* GLShaderManager::acquire(const DynString& path) noexcept
+GLShaderData* GLShaderManager::acquire(const WDynString& path) noexcept
 {
-    if(_shaderMap.contains(path))
+    if(_shaderMap.count(path) > 0)
     {
         GLShaderData* const shader = _shaderMap.at(path);
 
@@ -38,15 +38,15 @@ void GLShaderManager::release(GLShaderData* const shader) noexcept
     if(--shader->_refCount > 0)
     { return; }
 
-    if(_shaderMap.contains(shader->path()))
+    if(_shaderMap.count(shader->path()) > 0)
     { _shaderMap.erase(shader->path()); }
 
     _allocator.deallocateT(shader);
 }
 
-GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, const DynString& path) noexcept
+GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, const WDynString& path) noexcept
 {
-    if(_shaderMap.contains(path))
+    if(_shaderMap.count(path) > 0)
     { return null; }
 
     GLShaderData* const shader = _allocator.allocateT<GLShaderData>(handle, stage, path);
@@ -56,9 +56,9 @@ GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, const
     return shader;
 }
 
-GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, DynString&& path) noexcept
+GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, WDynString&& path) noexcept
 {
-    if(_shaderMap.contains(path))
+    if(_shaderMap.count(path) > 0)
     { return null; }
 
     GLShaderData* const shader = _allocator.allocateT<GLShaderData>(handle, stage, ::std::move(path));
@@ -106,7 +106,7 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
         clearWhiteSpace(i, ret.count(), ret.arr());
         if(ret.arr()[i] == '#')
         {
-            const u32 includeBegin = i;
+            const uSys includeBegin = i;
             ++i;
             if(i + 7 < ret.count())
             {
@@ -230,12 +230,13 @@ bool GLShaderBuilder::processArgs(const ShaderArgs& args, GLShaderArgs* const gl
 	    case EShader::Stage::Fragment:
 	        glShaderStage = GL_FRAGMENT_SHADER;
 	        break;
+        case EShader::Stage::Compute:
 	    default: ERROR_CODE_F(Error::InvalidShaderStage);
     }
 
-    const DynString path = args.file->name();
+    const WDynString path = args.file->name();
 
-    if(VFS::getFileExt(path, false) == "tausi")
+    if(VFS::getFileExt(path, false) == L"tausi")
     {
         return processBundle(args, glArgs, glShaderStage, error);
     }
@@ -280,7 +281,7 @@ bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* con
         ERROR_CODE_F(Error::DriverMemoryAllocationFailure);
     }
 
-    const GLint shaderLength = data.length();
+    const GLint shaderLength = static_cast<GLint>(data.length());
     glShaderSource(glArgs->shaderHandle, 1, &shaderSrc, &shaderLength);
 
     glCompileShader(glArgs->shaderHandle);

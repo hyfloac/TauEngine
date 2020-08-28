@@ -12,35 +12,27 @@ class GLIndexBuffer;
 class TAU_DLL GLVertexArray final : public IVertexArray
 {
     DELETE_CM(GLVertexArray);
+    VERTEX_ARRAY_IMPL(GLVertexArray);
 public:
     static GLenum getGLType(ShaderDataType::Type type) noexcept;
 private:
     GLuint _vao;
-    GLenum _glDrawType;
-    NullableRef<GLIndexBuffer> _indexBuffer;
 public:
-    GLVertexArray(const u32 drawCount, const DynArray<NullableRef<IVertexBuffer>>& buffers, const GLuint vao, const GLenum drawType, const NullableRef<GLIndexBuffer>& indexBuffer)
-        : IVertexArray(drawCount, buffers)
+    GLVertexArray(const DynArray<NullableRef<IResource>>& buffers, const GLuint vao)
+        : IVertexArray(buffers)
         , _vao(vao)
-        , _glDrawType(drawType)
-        , _indexBuffer(indexBuffer)
+    { }
+    
+    GLVertexArray(DynArray<NullableRef<IResource>>&& buffers, const GLuint vao)
+        : IVertexArray(::std::move(buffers))
+        , _vao(vao)
     { }
 
     ~GLVertexArray() noexcept override
     { glDeleteVertexArrays(1, &_vao); }
 
     [[nodiscard]] GLuint vao() const noexcept { return _vao; }
-    [[nodiscard]] GLenum glDrawType() const noexcept { return _glDrawType; }
-    [[nodiscard]] const NullableRef<GLIndexBuffer>& indexBuffer() const noexcept { return _indexBuffer; }
-
-    void bind(IRenderingContext& context) noexcept override;
-    void unbind(IRenderingContext& context) noexcept override;
-
-    void draw(IRenderingContext& context, uSys drawCount = 0, uSys drawOffset = 0) noexcept override;
-    void drawInstanced(IRenderingContext& context, uSys instanceCount, uSys drawCount = 0, uSys drawOffset = 0) noexcept override;
 };
-
-class GLRenderingContext;
 
 class TAU_DLL GLVertexArrayBuilder : public IVertexArrayBuilder
 {
@@ -52,8 +44,6 @@ public:
     {
         GLuint vao;
         GLuint attribCount;
-        NullableRef<GLIndexBuffer> indexBuffer;
-        GLenum drawType;
     };
 public:
     [[nodiscard]] IVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept override;

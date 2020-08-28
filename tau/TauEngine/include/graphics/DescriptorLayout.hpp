@@ -5,6 +5,7 @@
 
 #include "DLL.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
+#include "GraphicsEnums.hpp"
 
 struct DescriptorLayoutEntry final
 {
@@ -17,6 +18,9 @@ public:
         TextureSampler
     };
 public:
+    /**
+     * The type of descriptors stored in the table.
+     */
     Type type;
     /**
      * The beginning index for binding.
@@ -26,11 +30,10 @@ public:
      * The number of descriptors within the table to bind.
      */
     uSys count;
-    union
-    {
-        DescriptorTable table;
-        DescriptorSamplerTable samplerTable;
-    };
+    /**
+     * Which shader is allowed to access the table.
+     */
+    EGraphics::ShaderAccess shaderAccess;
 };
 
 class TAU_DLL TAU_NOVTABLE IDescriptorLayoutBuilder

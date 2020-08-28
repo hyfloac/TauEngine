@@ -6,11 +6,9 @@
 #include "dx/dx10/DX10DescriptorHeap.hpp"
 #include <EnumBitFields.hpp>
 
-TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, DescriptorTable table, uSys tableIndex, Error* const error) const noexcept
+TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, CPUDescriptorHandle handle, Error* error) const noexcept
 {
-    DX10DescriptorTable* const dxTable = table.get<DX10DescriptorTable>();
-
-    DXTextureViewArgs dxArgs{ &dxTable->srvViews()[tableIndex] };
+    DXTextureViewArgs dxArgs{ handle.as<ID3D10ShaderResourceView*>() };
     if(!processArgs(args, &dxArgs, error))
     { return { null }; }
 

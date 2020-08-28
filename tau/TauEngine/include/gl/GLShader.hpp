@@ -18,17 +18,17 @@ class TAU_DLL GLShaderData final
 private:
     GLuint _handle;
     EShader::Stage _stage;
-    DynString _path;
+    WDynString _path;
     mutable uSys _refCount;
 private:
-    GLShaderData(const GLuint handle, const EShader::Stage stage, const DynString& path) noexcept
+    GLShaderData(const GLuint handle, const EShader::Stage stage, const WDynString& path) noexcept
         : _handle(handle)
         , _stage(stage)
         , _path(path)
         , _refCount(1)
     { }
 
-    GLShaderData(const GLuint handle, const EShader::Stage stage, DynString&& path) noexcept
+    GLShaderData(const GLuint handle, const EShader::Stage stage, WDynString&& path) noexcept
         : _handle(handle)
         , _stage(stage)
         , _path(::std::move(path))
@@ -43,7 +43,7 @@ public:
 
     [[nodiscard]] GLuint handle() const noexcept { return _handle; }
     [[nodiscard]] EShader::Stage stage() const noexcept { return _stage; }
-    [[nodiscard]] const DynString& path() const noexcept { return _path; }
+    [[nodiscard]] const WDynString& path() const noexcept { return _path; }
 private:
     friend class GLShaderManager;
 };
@@ -60,21 +60,21 @@ private:
 #endif
 private:
     FBAllocator _allocator;
-    ::std::unordered_map<DynString, GLShaderData*> _shaderMap;
+    ::std::unordered_map<WDynString, GLShaderData*> _shaderMap;
 public:
     GLShaderManager(const uSys maxShaders) noexcept
         : _allocator(sizeof(GLShaderData), maxShaders)
     { }
 
-    [[nodiscard]] bool contains(const DynString& path) noexcept
-    { return _shaderMap.contains(path); }
+    [[nodiscard]] bool contains(const WDynString& path) noexcept
+    { return _shaderMap.count(path) > 0; }
 
-    [[nodiscard]] GLShaderData* acquire(const DynString& path) noexcept;
+    [[nodiscard]] GLShaderData* acquire(const WDynString& path) noexcept;
 
     void release(GLShaderData* shader) noexcept;
 
-    [[nodiscard]] GLShaderData* create(GLuint handle, EShader::Stage stage, const DynString& path) noexcept;
-    [[nodiscard]] GLShaderData* create(GLuint handle, EShader::Stage stage, DynString&& path) noexcept;
+    [[nodiscard]] GLShaderData* create(GLuint handle, EShader::Stage stage, const WDynString& path) noexcept;
+    [[nodiscard]] GLShaderData* create(GLuint handle, EShader::Stage stage, WDynString&& path) noexcept;
 };
 
 /**

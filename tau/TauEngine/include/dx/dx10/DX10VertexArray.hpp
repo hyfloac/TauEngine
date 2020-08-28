@@ -6,6 +6,10 @@
 #include <d3d10.h>
 #include "graphics/BufferDescriptor.hpp"
 
+namespace EGraphics {
+    enum class DrawType;
+}
+
 class DX10RenderingContext;
 class DX10IndexBuffer;
 

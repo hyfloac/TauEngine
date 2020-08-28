@@ -110,6 +110,6 @@ namespace ImGui
 }
 */
 
-#include "texture/Texture.hpp"
-#define ImTextureID CPPRef<ITexture>
+// #include "texture/Texture.hpp"
+// #define ImTextureID CPPRef<ITexture>
 

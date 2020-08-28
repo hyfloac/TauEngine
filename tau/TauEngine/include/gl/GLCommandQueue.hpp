@@ -19,7 +19,7 @@ private:
     GLenum _currentDrawType;
     GLenum _currentIndexSize;
 public:
-    void executeCommandLists(uSys count, const ICommandList** lists) noexcept override;
+    void executeCommandLists(uSys count, const ICommandList* const * lists) noexcept override;
 
     void executeCommandList(const ICommandList* list) noexcept;
 private:
@@ -40,4 +40,6 @@ private:
 
     void _setGDescriptorLayout(const GLCL::CommandSetGDescriptorLayout& cmd) noexcept;
     void _setGDescriptorTable(const GLCL::CommandSetGDescriptorTable& cmd) noexcept;
+
+    void _executeBundle(const GLCL::CommandExecuteBundle& cmd) noexcept;
 };

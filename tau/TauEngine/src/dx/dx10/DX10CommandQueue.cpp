@@ -7,7 +7,7 @@
 #include "dx/dx10/DX10DescriptorHeap.hpp"
 #include "TauConfig.hpp"
 
-void DX10CommandQueue::executeCommandLists(uSys count, const ICommandList** lists) noexcept
+void DX10CommandQueue::executeCommandLists(uSys count, const ICommandList* const * lists) noexcept
 {
 #if TAU_NULL_CHECK
     if(!lists)
@@ -103,12 +103,12 @@ void DX10CommandQueue::_setPipelineState(const DX10CL::CommandSetPipelineState& 
 
 void DX10CommandQueue::_setStencilRef(const DX10CL::CommandSetStencilRef& cmd) noexcept
 {
-    _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, cmd.stencilRef);
+    _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, static_cast<UINT>(cmd.stencilRef));
 }
 
 void DX10CommandQueue::_setVertexArray(const DX10CL::CommandSetVertexArray& cmd) noexcept
 {
-    _d3d10Device->IASetVertexBuffers(cmd.startSlot, cmd.bufferCount, cmd.buffers, _currentInputLayout->strides(), _currentInputLayout->offsets());
+    _d3d10Device->IASetVertexBuffers(static_cast<UINT>(cmd.startSlot), static_cast<UINT>(cmd.bufferCount), cmd.buffers, _currentInputLayout->strides(), _currentInputLayout->offsets());
 }
 
 void DX10CommandQueue::_setIndexBuffer(const DX10CL::CommandSetIndexBuffer& cmd) noexcept
@@ -123,24 +123,83 @@ void DX10CommandQueue::_setGDescriptorLayout(const DX10CL::CommandSetGDescriptor
 
 void DX10CommandQueue::_setGDescriptorTable(const DX10CL::CommandSetGDescriptorTable& cmd) noexcept
 {
-    const DX10DescriptorTable* table = cmd.table.get<DX10DescriptorTable>();
-
 #if TAU_GENERAL_SAFETY_CHECK
     // Counts don't match
-    if(table->count() != _currentLayout->entries()[cmd.index].count)
+    if(cmd.descriptorCount != _currentLayout->entries()[cmd.index].count)
     { return; }
 #endif
 
-    if(table->type() == EGraphics::DescriptorType::TextureView)
+    if(cmd.type == EGraphics::DescriptorType::TextureView)
     {
 #if TAU_GENERAL_SAFETY_CHECK
         // Types don't match
         if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::TextureView)
         { return; }
+        // Counts don't match
+        if(_currentLayout->entries()[cmd.index].count != cmd.descriptorCount)
+        { return; }
 #endif
 
-        const uSys begin = _currentLayout->entries()[cmd.index].begin;
-        _d3d10Device->VSSetShaderResources(begin, table->count(), table->srvViews());
+        ID3D10ShaderResourceView** const texViews = cmd.handle.as<ID3D10ShaderResourceView*>();
+
+        const UINT begin = static_cast<UINT>(_currentLayout->entries()[cmd.index].begin);
+        const UINT count = static_cast<UINT>(cmd.descriptorCount);
+        switch(_currentLayout->entries()[cmd.index].shaderAccess)
+        {
+            case EGraphics::ShaderAccess::All:
+                _d3d10Device->VSSetShaderResources(begin, count, texViews);
+                _d3d10Device->GSSetShaderResources(begin, count, texViews);
+                _d3d10Device->PSSetShaderResources(begin, count, texViews);
+                break;
+            case EGraphics::ShaderAccess::Vertex:
+                _d3d10Device->VSSetShaderResources(begin, count, texViews);
+                break;
+            case EGraphics::ShaderAccess::TessCtrl:
+            case EGraphics::ShaderAccess::TessEval:
+                break;
+            case EGraphics::ShaderAccess::Geometry:
+                _d3d10Device->GSSetShaderResources(begin, count, texViews);
+                break;
+            case EGraphics::ShaderAccess::Pixel:
+                _d3d10Device->PSSetShaderResources(begin, count, texViews);
+                break;
+        }
+    }
+    else if(cmd.type == EGraphics::DescriptorType::UniformBufferView)
+    {
+#if TAU_GENERAL_SAFETY_CHECK
+        // Types don't match
+        if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::UniformBufferView)
+        { return; }
+        // Counts don't match
+        if(_currentLayout->entries()[cmd.index].count != cmd.descriptorCount)
+        { return; }
+#endif
+
+        ID3D10Buffer** const buffers = cmd.handle.as<ID3D10Buffer*>();
+
+        const UINT begin = static_cast<UINT>(_currentLayout->entries()[cmd.index].begin);
+        const UINT count = static_cast<UINT>(cmd.descriptorCount);
+        switch(_currentLayout->entries()[cmd.index].shaderAccess)
+        {
+            case EGraphics::ShaderAccess::All:
+                _d3d10Device->VSSetConstantBuffers(begin, count, buffers);
+                _d3d10Device->GSSetConstantBuffers(begin, count, buffers);
+                _d3d10Device->PSSetConstantBuffers(begin, count, buffers);
+                break;
+            case EGraphics::ShaderAccess::Vertex:
+                _d3d10Device->VSSetConstantBuffers(begin, count, buffers);
+                break;
+            case EGraphics::ShaderAccess::TessCtrl:
+            case EGraphics::ShaderAccess::TessEval:
+                break;
+            case EGraphics::ShaderAccess::Geometry:
+                _d3d10Device->GSSetConstantBuffers(begin, count, buffers);
+                break;
+            case EGraphics::ShaderAccess::Pixel:
+                _d3d10Device->PSSetConstantBuffers(begin, count, buffers);
+                break;
+        }
     }
 }
 #endif

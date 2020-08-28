@@ -28,7 +28,7 @@ public:
         : _gi(gi)
     { }
 
-    [[nodiscard]] TextureView build(const TextureViewArgs& args, DescriptorTable table, uSys tableIndex, Error* error = null) const noexcept override;
+    [[nodiscard]] TextureView build(const TextureViewArgs& args, CPUDescriptorHandle handle, Error* error) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const TextureViewArgs& args, [[tau::out]] DXTextureViewArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs1D(const TextureViewArgs& args, [[tau::out]] DXTextureViewArgs* dxArgs, DX10Resource* dxResource, [[tau::out]] Error* error) const noexcept;

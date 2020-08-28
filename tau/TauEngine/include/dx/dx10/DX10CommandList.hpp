@@ -22,8 +22,7 @@ enum class CommandType
     SetVertexArray,
     SetIndexBuffer,
     SetGDescriptorLayout,
-    SetGDescriptorTable,
-    SetGDescriptorSamplerTable
+    SetGDescriptorTable
 };
 
 struct CommandDraw final
@@ -189,26 +188,15 @@ struct CommandSetGDescriptorTable final
     DEFAULT_CM_PU(CommandSetGDescriptorTable);
 public:
     uSys index;
-    DescriptorTable table;
+    EGraphics::DescriptorType type;
+    uSys descriptorCount;
+    GPUDescriptorHandle handle;
 public:
-    CommandSetGDescriptorTable(const uSys _index, const DescriptorTable _table) noexcept
+    CommandSetGDescriptorTable(const uSys _index, const EGraphics::DescriptorType _type, const uSys _descriptorCount, const GPUDescriptorHandle _handle) noexcept
         : index(_index)
-        , table(_table)
-    { }
-};
-
-struct CommandSetGDescriptorSamplerTable final
-{
-    DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorSamplerTable);
-    DEFAULT_DESTRUCT(CommandSetGDescriptorSamplerTable);
-    DEFAULT_CM_PU(CommandSetGDescriptorSamplerTable);
-public:
-    uSys index;
-    DescriptorSamplerTable table;
-public:
-    CommandSetGDescriptorSamplerTable(const uSys _index, const DescriptorSamplerTable _table) noexcept
-        : index(_index)
-        , table(_table)
+        , type(_type)
+        , descriptorCount(_descriptorCount)
+        , handle(_handle)
     { }
 };
 
@@ -232,7 +220,6 @@ public:
         CommandSetIndexBuffer setIndexBuffer;
         CommandSetGDescriptorLayout setGDescriptorLayout;
         CommandSetGDescriptorTable setGDescriptorTable;
-        CommandSetGDescriptorSamplerTable setGDescriptorSamplerTable;
     };
 public:
     Command() noexcept
@@ -284,6 +271,16 @@ public:
         : type(CommandType::SetIndexBuffer)
         , setIndexBuffer(_setIndexBuffer)
     { }
+
+    Command(const CommandSetGDescriptorLayout& _setGDescriptorLayout) noexcept
+        : type(CommandType::SetGDescriptorLayout)
+        , setGDescriptorLayout(_setGDescriptorLayout)
+    { }
+
+    Command(const CommandSetGDescriptorTable& _setGDescriptorTable) noexcept
+        : type(CommandType::SetGDescriptorTable)
+        , setGDescriptorTable(_setGDescriptorTable)
+    { }
 };
 }
 
@@ -321,8 +318,7 @@ public:
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
     void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, DescriptorSamplerTable table) noexcept override;
+    void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept override;
 };
 
 #endif

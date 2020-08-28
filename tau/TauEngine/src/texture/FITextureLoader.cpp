@@ -212,10 +212,14 @@ NullableRef<IResource> TextureLoader::loadTexture(IGraphicsInterface& gi, IRende
     const VFS::Container physPath = VFS::Instance().resolvePath(fileName);
 
     FIBITMAP* texture = null;
+    
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.basePath.length() == 0);
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.subPath.length() == 0);
 
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.path.length() == 0);
+    WDynString path = physPath.basePath + physPath.subPath;
+    DynString strPath = StringCast<char>(path);
 
-    fileName = physPath.path.c_str();
+    const char* fileName = strPath.c_str();
 
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName);
 
@@ -304,9 +308,13 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
 
         FIBITMAP* texture = null;
 
-        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.path.length() == 0);
+        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.basePath.length() == 0);
+        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.subPath.length() == 0);
 
-        const char* fileName = physPath.path.c_str();
+        WDynString path = physPath.basePath + physPath.subPath;
+        DynString strPath = StringCast<char>(path);
+
+        const char* fileName = strPath.c_str();
 
         FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName);
 

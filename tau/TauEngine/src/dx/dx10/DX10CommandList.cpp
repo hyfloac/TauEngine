@@ -99,15 +99,9 @@ void DX10CommandList::setGraphicsDescriptorLayout(DescriptorLayout layout) noexc
     _commands.emplace(setGDescriptorLayout);
 }
 
-void DX10CommandList::setGraphicsDescriptorTable(const uSys index, DescriptorTable table) noexcept
+void DX10CommandList::setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept
 {
-    const DX10CL::CommandSetGDescriptorTable setGDescriptorTable(index, table);
+    const DX10CL::CommandSetGDescriptorTable setGDescriptorTable(index, type, descriptorCount, handle);
     _commands.emplace(setGDescriptorTable);
-}
-
-void DX10CommandList::setGraphicsDescriptorTable(const uSys index, DescriptorSamplerTable table) noexcept
-{
-    const DX10CL::CommandSetGDescriptorSamplerTable setGDescriptorSamplerTable(index, table);
-    _commands.emplace(setGDescriptorSamplerTable);
 }
 #endif

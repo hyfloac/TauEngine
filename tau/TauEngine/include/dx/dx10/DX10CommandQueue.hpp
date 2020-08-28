@@ -28,7 +28,7 @@ public:
         , _currentLayout(null)
     { }
 
-    void executeCommandLists(uSys count, const ICommandList** lists) noexcept override;
+    void executeCommandLists(uSys count, const ICommandList* const * lists) noexcept override;
 
     void executeCommandList(const ICommandList* list) noexcept;
 private:

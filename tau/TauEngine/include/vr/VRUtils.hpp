@@ -7,9 +7,9 @@
 typedef void* VRTextureHandle_t;
 
 TAU_DLL vr::ETextureType tauGetTextureType(RenderingMode::Mode mode) noexcept;
-static inline vr::ETextureType tauGetTextureType(const RenderingMode& mode) noexcept
+inline vr::ETextureType tauGetTextureType(const RenderingMode& mode) noexcept
 { return tauGetTextureType(mode.currentMode()); }
 
-class ITexture;
+class IResource;
 
-TAU_DLL VRTextureHandle_t tauGetVRTextureHandle(ITexture* texture) noexcept;
+TAU_DLL VRTextureHandle_t tauGetVRTextureHandle(const IResource* texture) noexcept;

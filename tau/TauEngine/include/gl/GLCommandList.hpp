@@ -7,9 +7,12 @@
 #include <ArrayList.hpp>
 #include <allocator/FreeListAllocator.hpp>
 
+#include "system/Win32Event.hpp"
 #include "graphics/CommandList.hpp"
 
 class GLVertexArray;
+class GLCommandList;
+class GLCommandAllocator;
 
 // OpenGL Command List
 namespace GLCL {
@@ -31,7 +34,7 @@ enum class CommandType
     SetIndexBuffer,
     SetGDescriptorLayout,
     SetGDescriptorTable,
-    SetGDescriptorSamplerTable
+    ExecuteBundle
 };
 
 struct CommandDraw final
@@ -319,26 +322,28 @@ struct CommandSetGDescriptorTable final
     DEFAULT_CM_PU(CommandSetGDescriptorTable);
 public:
     uSys index;
-    DescriptorTable table;
+    EGraphics::DescriptorType type;
+    uSys descriptorCount;
+    GPUDescriptorHandle handle;
 public:
-    CommandSetGDescriptorTable(const uSys _index, const DescriptorTable _table) noexcept
+    CommandSetGDescriptorTable(const uSys _index, const EGraphics::DescriptorType _type, const uSys _descriptorCount, const GPUDescriptorHandle _handle) noexcept
         : index(_index)
-        , table(_table)
+        , type(_type)
+        , descriptorCount(_descriptorCount)
+        , handle(_handle)
     { }
 };
 
-struct CommandSetGDescriptorSamplerTable final
+struct CommandExecuteBundle final
 {
-    DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorSamplerTable);
-    DEFAULT_DESTRUCT(CommandSetGDescriptorSamplerTable);
-    DEFAULT_CM_PU(CommandSetGDescriptorSamplerTable);
+    DEFAULT_CONSTRUCT_PU(CommandExecuteBundle);
+    DEFAULT_DESTRUCT(CommandExecuteBundle);
+    DEFAULT_CM_PU(CommandExecuteBundle);
 public:
-    uSys index;
-    DescriptorSamplerTable table;
+    const GLCommandList* bundle;
 public:
-    CommandSetGDescriptorSamplerTable(const uSys _index, const DescriptorSamplerTable _table) noexcept
-        : index(_index)
-        , table(_table)
+    CommandExecuteBundle(const GLCommandList* const _bundle) noexcept
+        : bundle(_bundle)
     { }
 };
 
@@ -367,7 +372,7 @@ public:
         CommandSetIndexBuffer setIndexBuffer;
         CommandSetGDescriptorLayout setGDescriptorLayout;
         CommandSetGDescriptorTable setGDescriptorTable;
-        CommandSetGDescriptorSamplerTable setGDescriptorSamplerTable;
+        CommandExecuteBundle executeBundle;
     };
 public:
     Command() noexcept
@@ -444,6 +449,21 @@ public:
         : type(CommandType::SetIndexBuffer)
         , setIndexBuffer(_setIndexBuffer)
     { }
+
+    Command(const CommandSetGDescriptorLayout& _setGDescriptorLayout) noexcept
+        : type(CommandType::SetGDescriptorLayout)
+        , setGDescriptorLayout(_setGDescriptorLayout)
+    { }
+
+    Command(const CommandSetGDescriptorTable& _setGDescriptorTable) noexcept
+        : type(CommandType::SetGDescriptorTable)
+        , setGDescriptorTable(_setGDescriptorTable)
+    { }
+
+    Command(const CommandExecuteBundle& _executeBundle) noexcept
+        : type(CommandType::ExecuteBundle)
+        , executeBundle(_executeBundle)
+    { }
 };
 }
 
@@ -453,21 +473,19 @@ class TAU_DLL GLCommandList final : public ICommandList
     DELETE_CM(GLCommandList);
     COMMAND_LIST_IMPL(GLCommandList);
 private:
+    static constexpr uSys MaxRefCounters = 3;
     static constexpr uSys MaxVertexBuffers = 64;
 private:
-    uSys _maxCommands;
-    ArrayList<GLCL::Command> _commands;
-    FreeListAllocator _refCountList;
+    NullableRef<GLCommandAllocator> _commandAllocator;
+    const void* _head;
+    uSys _commandCount;
 public:
-    GLCommandList(const uSys maxCommands = 4096) noexcept
-        : _maxCommands(maxCommands)
-        , _commands(maxCommands)
-        , _refCountList(_maxCommands * MaxVertexBuffers)
-    { }
+    GLCommandList(const NullableRef<GLCommandAllocator>& allocator) noexcept;
 
-    [[nodiscard]] const ArrayList<GLCL::Command>& commands() const noexcept { return _commands; }
+    [[nodiscard]] const void* head() const noexcept { return _head; }
+    [[nodiscard]] uSys commandCount() const noexcept { return _commandCount; }
 
-    void reset() noexcept override;
+    void reset(const NullableRef<ICommandAllocator>& allocator) noexcept override;
     void finish() noexcept override;
     void draw(uSys vertexCount, uSys startVertex) noexcept override;
     void drawIndexed(uSys indexCount, uSys startIndex, iSys baseVertex) noexcept override;
@@ -479,6 +497,8 @@ public:
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
     void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept override;
-    void setGraphicsDescriptorTable(uSys index, DescriptorSamplerTable table) noexcept override;
+    void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept override;
+    void executeBundle(const NullableRef<ICommandList>& bundle) noexcept override;
+private:
+    friend class GLCommandQueue;
 };

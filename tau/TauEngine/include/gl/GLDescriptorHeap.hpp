@@ -26,7 +26,7 @@ private:
 public:
     GLTextureViewDescriptorHeap(uSys maxDescriptors) noexcept;
 
-    ~GLTextureViewDescriptorHeap();
+    ~GLTextureViewDescriptorHeap() noexcept override;
 
     [[nodiscard]] EGraphics::DescriptorType type() const noexcept override { return EGraphics::DescriptorType::TextureView; }
 
@@ -49,7 +49,7 @@ private:
 public:
     GLUniformBufferViewDescriptorHeap(uSys maxDescriptors) noexcept;
 
-    ~GLUniformBufferViewDescriptorHeap();
+    ~GLUniformBufferViewDescriptorHeap() noexcept override;
 
     [[nodiscard]] EGraphics::DescriptorType type() const noexcept override { return EGraphics::DescriptorType::UniformBufferView; }
 
@@ -70,19 +70,30 @@ public:
     [[nodiscard]] CPPRef<IDescriptorHeap> buildCPPRef(const DescriptorHeapArgs& args, Error* error) const noexcept override;
     [[nodiscard]] NullableRef<IDescriptorHeap> buildTauRef(const DescriptorHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
     [[nodiscard]] NullableStrongRef<IDescriptorHeap> buildTauSRef(const DescriptorHeapArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-
 protected:
     [[nodiscard]] uSys _allocSize(const uSys type) const noexcept override
     {
         switch(type)
         {
-            case 1: return sizeof(GLDescriptorHeap);
-            case 2: return NullableRef<GLDescriptorHeap>::allocSize();
-            case 3: return NullableStrongRef<GLDescriptorHeap>::allocSize();
-            case 4: return sizeof(GLDescriptorSamplerHeap);
-            case 5: return NullableRef<GLDescriptorSamplerHeap>::allocSize();
-            case 6: return NullableStrongRef<GLDescriptorSamplerHeap>::allocSize();
-            default: return 0;
+            case _DHB_AS_RAW_TV:  return sizeof(GLTextureViewDescriptorHeap);
+            case _DHB_AS_NR_TV:   return NullableRef<GLTextureViewDescriptorHeap>::allocSize();
+            case _DHB_AS_NSR_TV:  return NullableStrongRef<GLTextureViewDescriptorHeap>::allocSize();
+            case _DHB_AS_RAW_RTV:
+            case _DHB_AS_NR_RTV:
+            case _DHB_AS_NSR_RTV:
+            case _DHB_AS_RAW_DSV:
+            case _DHB_AS_NR_DSV:
+            case _DHB_AS_NSR_DSV: return 0;
+            case _DHB_AS_RAW_UBV: return sizeof(GLUniformBufferViewDescriptorHeap);
+            case _DHB_AS_NR_UBV:  return NullableRef<GLUniformBufferViewDescriptorHeap>::allocSize();
+            case _DHB_AS_NSR_UBV: return NullableStrongRef<GLUniformBufferViewDescriptorHeap>::allocSize();
+            case _DHB_AS_RAW_UAV: 
+            case _DHB_AS_NR_UAV:  
+            case _DHB_AS_NSR_UAV:
+            case _DHB_AS_RAW_S: 
+            case _DHB_AS_NR_S:  
+            case _DHB_AS_NSR_S:   return 0;
+            default:              return 0;
         }
     }
 };

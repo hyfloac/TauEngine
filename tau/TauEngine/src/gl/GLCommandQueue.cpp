@@ -7,9 +7,11 @@
 #include "gl/GLDepthStencilState.hpp"
 #include "gl/GLRasterizerState.hpp"
 #include "gl/GLShaderProgram.hpp"
+#include "gl/GLCommandAllocator.hpp"
 #include "TauConfig.hpp"
+#include <AtomicIntrinsics.hpp>
 
-void GLCommandQueue::executeCommandLists(uSys count, const ICommandList** lists) noexcept
+void GLCommandQueue::executeCommandLists(uSys count, const ICommandList* const * const lists) noexcept
 {
 #if TAU_NULL_CHECK
     if(!lists)
@@ -39,14 +41,15 @@ void GLCommandQueue::executeCommandLists(uSys count, const ICommandList** lists)
 void GLCommandQueue::executeCommandList(const ICommandList* const list) noexcept
 {
     const GLCommandList* const glList = static_cast<const GLCommandList*>(list);
-    /*
-     * Copy the command array so that the list can be reset.
-     * This will perform a reference count copy.
-     */
-    const ArrayList<GLCL::Command> commands = glList->commands();  // NOLINT(performance-unnecessary-copy-initialization)
 
-    for(auto cmd : commands)
+    const u8* head = reinterpret_cast<const u8*>(glList->_head);
+    const uSys commandCount = glList->_commandCount;
+    const uSys blockSize = glList->_commandAllocator->blockSize();
+
+    for(uSys i = 0, offset = 0; i < commandCount; ++i, offset += blockSize)
     {
+        const GLCL::Command& cmd = *reinterpret_cast<const GLCL::Command*>(head + offset);
+
 #define DISPATCH(__CMD, __FUNC, __ARG) case GLCL::CommandType::__CMD: __FUNC(cmd.__ARG); break
 
         switch(cmd.type)
@@ -67,6 +70,7 @@ void GLCommandQueue::executeCommandList(const ICommandList* const list) noexcept
             DISPATCH(SetIndexBuffer, _setIndexBuffer, setIndexBuffer);
             DISPATCH(SetGDescriptorLayout, _setGDescriptorLayout, setGDescriptorLayout);
             DISPATCH(SetGDescriptorTable, _setGDescriptorTable, setGDescriptorTable);
+            DISPATCH(ExecuteBundle, _executeBundle, executeBundle);
             default: break;
         }
 #undef DISPATCH
@@ -127,13 +131,13 @@ void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd)
 {
     _currentPipelineState = cmd.pipelineState;
 
-    const GLBlendingState* const blendingState = RTT_CAST(_currentPipelineState->args().blendingState.get(), GLBlendingState);
+    const GLBlendingState* const blendingState = static_cast<const GLBlendingState*>(_currentPipelineState->args().blendingState.get());
     blendingState->apply(_glStateManager);
 
-    const GLDepthStencilState* const depthStencilState = RTT_CAST(_currentPipelineState->args().depthStencilState.get(), GLDepthStencilState);
+    const GLDepthStencilState* const depthStencilState = static_cast<const GLDepthStencilState*>(_currentPipelineState->args().depthStencilState.get());
     depthStencilState->apply(_glStateManager);
 
-    const GLRasterizerState* const rasterizerState = RTT_CAST(_currentPipelineState->args().rasterizerState.get(), GLRasterizerState);
+    const GLRasterizerState* const rasterizerState = static_cast<const GLRasterizerState*>(_currentPipelineState->args().rasterizerState.get());
     rasterizerState->apply(_glStateManager);
 
     const GLShaderProgram* shaderProgram = _currentPipelineState->args().shaderProgram.get<GLShaderProgram>();
@@ -142,7 +146,7 @@ void GLCommandQueue::_setPipelineState(const GLCL::CommandSetPipelineState& cmd)
 
 void GLCommandQueue::_setStencilRef(const GLCL::CommandSetStencilRef& cmd) noexcept
 {
-    _glStateManager.stencilRef(cmd.stencilRef);
+    _glStateManager.stencilRef(static_cast<GLint>(cmd.stencilRef));
 }
 
 void GLCommandQueue::_setVertexArray(const GLCL::CommandSetVertexArray& cmd) noexcept
@@ -163,31 +167,31 @@ void GLCommandQueue::_setGDescriptorLayout(const GLCL::CommandSetGDescriptorLayo
 
 void GLCommandQueue::_setGDescriptorTable(const GLCL::CommandSetGDescriptorTable& cmd) noexcept
 {
-    const GLDescriptorTable* table = cmd.table.get<GLDescriptorTable>();
-
 #if TAU_GENERAL_SAFETY_CHECK
     // Counts don't match
-    if(table->count() != _currentLayout->entries()[cmd.index].count)
+    if(cmd.descriptorCount != _currentLayout->entries()[cmd.index].count)
     { return; }
 #endif
 
-    if(table->type() == DescriptorType::TextureView)
+    if(cmd.type == EGraphics::DescriptorType::TextureView)
     {
 #if TAU_GENERAL_SAFETY_CHECK
         // Types don't match
         if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::TextureView)
         { return; }
 #endif
+        
+        const GLuint begin = static_cast<GLuint>(_currentLayout->entries()[cmd.index].begin);
 
-        const uSys begin = _currentLayout->entries()[cmd.index].begin;
+        GLTextureView* const texViews = cmd.handle.as<GLTextureView>();
 
-        for(uSys i = 0; i < table->count(); ++i)
+        for(uSys i = 0; i < cmd.descriptorCount; ++i)
         {
-            GLTextureView* const texView = table->texViews()[i];
-            _glStateManager.bindTexture(texView->target(), texView->texture()->texture(), i + begin);
+            GLTextureView& texView = texViews[i];
+            _glStateManager.bindTexture(texView.target(), texView.texture()->texture(), begin + i);
         }
     }
-    else if(table->type() == DescriptorType::UniformBufferView)
+    else if(cmd.type == EGraphics::DescriptorType::UniformBufferView)
     {
 #if TAU_GENERAL_SAFETY_CHECK
         // Types don't match
@@ -195,11 +199,18 @@ void GLCommandQueue::_setGDescriptorTable(const GLCL::CommandSetGDescriptorTable
         { return; }
 #endif
 
-        const uSys begin = _currentLayout->entries()[cmd.index].begin;
+        const GLuint begin = static_cast<GLuint>(_currentLayout->entries()[cmd.index].begin);
 
-        for(uSys i = 0; i < table->count(); ++i)
+        GLuint* uniViews = cmd.handle.as<GLuint>();
+
+        for(uSys i = 0; i < cmd.descriptorCount; ++i)
         {
-            _glStateManager.bindUniformBufferBase(begin + i, table->uniViews()[i]);
+            _glStateManager.bindUniformBufferBase(begin + static_cast<GLuint>(i), uniViews[i]);
         }
     }
+}
+
+void GLCommandQueue::_executeBundle(const GLCL::CommandExecuteBundle& cmd) noexcept
+{
+    executeCommandList(cmd.bundle);
 }

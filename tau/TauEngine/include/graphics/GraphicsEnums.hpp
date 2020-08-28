@@ -22,7 +22,8 @@ enum class DescriptorType
     RenderTargetView,
     DepthStencilView,
     UniformBufferView,
-    UnorderedAccessView
+    UnorderedAccessView,
+    Sampler
 };
 
 enum class DescriptorHeapFlags
@@ -33,5 +34,15 @@ enum class DescriptorHeapFlags
 
 #define DHF_None EGraphics::DescriptorHeapFlags::None
 #define DHF_ShaderAccess EGraphics::DescriptorHeapFlags::ShaderAccess
+
+enum class ShaderAccess
+{
+    All = 0,
+    Vertex,
+    TessCtrl,
+    TessEval,
+    Geometry,
+    Pixel
+};
 
 }

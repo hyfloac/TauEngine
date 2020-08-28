@@ -61,7 +61,7 @@ inline constexpr EBuffer::UsageType glUsageType(const GLenum usage) noexcept
     }
 }
 
-inline constexpr GLenum GLIndexBuffer::glIndexSize(const EBuffer::IndexSize indexSize) noexcept
+inline constexpr GLenum glIndexSize(const EBuffer::IndexSize indexSize) noexcept
 {
     switch(indexSize)
     {

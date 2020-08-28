@@ -1,6 +1,6 @@
 #include "vr/VRUtils.hpp"
-#include "texture/Texture.hpp"
-#include "texture/TextureRawInterface.hpp"
+#include "graphics/Resource.hpp"
+#include "graphics/ResourceRawInterface.hpp"
 
 vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
 {
@@ -14,6 +14,7 @@ vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
             return vr::TextureType_DirectX12;
         case RenderingMode::Vulkan:
             return vr::TextureType_Vulkan;
+        case RenderingMode::OpenGL4_1:
         case RenderingMode::OpenGL4_2:
         case RenderingMode::OpenGL4_3:
         case RenderingMode::OpenGL4_4:
@@ -24,7 +25,7 @@ vr::ETextureType tauGetTextureType(const RenderingMode::Mode mode) noexcept
     }
 }
 
-VRTextureHandle_t tauGetVRTextureHandle(ITexture* texture) noexcept
+VRTextureHandle_t tauGetVRTextureHandle(const IResource* const texture) noexcept
 {
     return texture->_getRawHandle().rawHandle();
 }

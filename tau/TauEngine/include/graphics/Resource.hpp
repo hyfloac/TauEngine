@@ -14,6 +14,8 @@
 #include "texture/TextureEnums.hpp"
 
 class IRenderingContext;
+class IResourceRawInterface;
+
 /**
  * Describes a range of a resource to access.
  *
@@ -81,6 +83,8 @@ public:
 
     template<typename _Args>
     [[nodiscard]] const _Args* getArgs() const noexcept { return null; }
+
+    [[nodiscard]] virtual const IResourceRawInterface& _getRawHandle() const noexcept = 0;
 
     RTTD_BASE_IMPL(IResource);
     RTTD_BASE_CHECK(IResource);
@@ -159,7 +163,6 @@ public:
     EResource::UsageType usageType;
     const void* const * initialBuffers;
 };
-
 
 class TAU_DLL TAU_NOVTABLE IResourceBuilder
 {

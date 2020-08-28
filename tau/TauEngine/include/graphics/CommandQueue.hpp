@@ -13,7 +13,7 @@ class TAU_DLL TAU_NOVTABLE ICommandQueue
     DEFAULT_DESTRUCT_VI(ICommandQueue);
     DEFAULT_CM_PO(ICommandQueue);
 public:
-    virtual void executeCommandLists(uSys count, const ICommandList** lists) noexcept = 0;
+    virtual void executeCommandLists(uSys count, const ICommandList* const * lists) noexcept = 0;
 };
 
 struct CommandQueueArgs final

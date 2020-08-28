@@ -6,7 +6,7 @@ GLTextureViewDescriptorHeap::GLTextureViewDescriptorHeap(uSys maxDescriptors) no
     : _placement(::std::malloc(sizeof(GLTextureView) * maxDescriptors))
 { }
 
-GLTextureViewDescriptorHeap::~GLTextureViewDescriptorHeap()
+GLTextureViewDescriptorHeap::~GLTextureViewDescriptorHeap() noexcept
 { ::std::free(_placement); }
 
 uSys GLTextureViewDescriptorHeap::getOffsetStride() const noexcept

@@ -6,6 +6,7 @@
 #include <RunTimeType.hpp>
 
 #include "DLL.hpp"
+#include "DescriptorHeap.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 #include "GraphicsEnums.hpp"
 
@@ -13,6 +14,7 @@ struct PipelineState;
 class IInputLayout;
 class IVertexArray;
 struct IndexBufferView;
+class ICommandAllocator;
 
 #define COMMAND_LIST_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, ICommandList)
@@ -26,10 +28,10 @@ class TAU_DLL TAU_NOVTABLE ICommandList
     DEFAULT_CM_PO(ICommandList);
 public:
     /**
-     *   Resets the command list to the initial state to be
+     *   Resets the command list to the initial state to begin
      * recording again.
      */
-    virtual void reset() noexcept = 0;
+    virtual void reset(const NullableRef<ICommandAllocator>& allocator) noexcept = 0;
 
     /**
      * Finishes recording the command list.
@@ -193,21 +195,27 @@ public:
      *
      * @param[in] index
      *      The descriptor layout index.
-     * @param[in] table
-     *      The table to set.
+     * @param[in] type
+     *      The type of descriptor stored in the table.
+     * @param[in] descriptorCount
+     *      The number of descriptors in the table.
+     * @param[in] handle
+     *      The address of the table to set.
      */
-    virtual void setGraphicsDescriptorTable(uSys index, DescriptorTable table) noexcept = 0;
+    virtual void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept = 0;
 
     /**
-     *   Sets a descriptor table of samplers to use within the
-     * shader pipeline.
+     * Executes a command list bundle.
      *
-     * @param[in] index
-     *      The descriptor layout index.
-     * @param[in] table
-     *      The sampler table to set.
+     *   This allows you to record a small set of command and reuse
+     * them many times. The benefit of doing this is that you can
+     * do all of the validation processing once, then every time
+     * you execute a bundle you're simply copying the commands in.
+     *
+     * @param[in] bundle
+     *      The command list bundle to execute.
      */
-    virtual void setGraphicsDescriptorTable(uSys index, DescriptorSamplerTable table) noexcept = 0;
+    virtual void executeBundle(const NullableRef<ICommandList>& bundle) noexcept = 0;
 
     RTT_BASE_IMPL(ICommandList);
     RTT_BASE_CHECK(ICommandList);

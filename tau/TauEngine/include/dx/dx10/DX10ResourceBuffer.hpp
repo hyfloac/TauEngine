@@ -8,7 +8,7 @@
 class TAU_DLL DX10ResourceBuffer final : public DX10Resource
 {
 public:
-    static DXGI_FORMAT dxIndexSize(const EBuffer::IndexSize indexSize) noexcept;
+    static DXGI_FORMAT dxIndexSize(EBuffer::IndexSize indexSize) noexcept;
 private:
     ResourceBufferArgs _args;
     ID3D10Buffer* _d3dBuffer;
@@ -68,8 +68,7 @@ public:
         return *this;
     }
     
-    [[nodiscard]]       ID3D10Buffer* d3dBuffer()       noexcept { return _d3dBuffer; }
-    [[nodiscard]] const ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
+    [[nodiscard]] ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
 
     [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Buffer; }
 
