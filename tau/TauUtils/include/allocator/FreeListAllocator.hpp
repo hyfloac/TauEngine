@@ -72,7 +72,7 @@ public:
         , _allocIndex(0)
     { }
 
-    ~FreeListAllocator() noexcept
+    ~FreeListAllocator() noexcept override
     {
         /*
          * Invoke the destructor of each pointer using its vtable.

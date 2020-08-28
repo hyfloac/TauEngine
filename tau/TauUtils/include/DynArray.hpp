@@ -391,7 +391,7 @@ public:
     DynArray<_T>& operator =(const DynArray<_T>& copy)
     {
         if(this == &copy)
-        { return; }
+        { return *this; }
 
         delete[] _arr;
 
@@ -406,7 +406,7 @@ public:
     DynArray<_T>& operator =(DynArray<_T>&& move) noexcept
     {
         if(this == &move)
-        { return; }
+        { return *this; }
 
         delete[] _arr;
 
@@ -471,8 +471,8 @@ public:
         , _size(move._size)
         , _refCount(move._refCount)
     {
-        move._arr = null;
-        move._refCount = null;
+        move._arr = nullptr;
+        move._refCount = nullptr;
     }
 
     inline RefDynArray<_T>& operator =(const RefDynArray<_T>& copy) noexcept

@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyClangDiagnosticUninitialized
 #pragma once
 
 #include "Objects.hpp"
@@ -36,7 +37,11 @@ class FixedBlockAllocator final : public TauAllocator
 public:
     FixedBlockAllocator(uSys blockSize, PageCountVal numReservePages, uSys allocPages) noexcept = delete;
     FixedBlockAllocator(uSys blockSize, uSys maxElements, uSys allocPages) noexcept = delete;
-
+    
+    [[nodiscard]] const void* head() const noexcept { return nullptr; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return 0; }
+    [[nodiscard]] uSys committedPages() const noexcept { return 0; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return 0; }
     [[nodiscard]] uSys blockSize() const noexcept { return 0; }
     [[nodiscard]] iSys allocationDifference() const noexcept { return 0; }
     [[nodiscard]] uSys multipleDeleteCount() const noexcept { return 0; }
@@ -78,7 +83,7 @@ public:
 
     FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
-        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements * blockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
@@ -87,9 +92,13 @@ public:
         , _lastFree(nullptr)
     { }
 
-    ~FixedBlockAllocator() noexcept
+    ~FixedBlockAllocator() noexcept override
     { PageAllocator::free(_pages); }
 
+    [[nodiscard]] const void* head() const noexcept { return _pages; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return _numReservedPages; }
+    [[nodiscard]] uSys committedPages() const noexcept { return _committedPages; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return _allocIndex; }
     [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     [[nodiscard]] void* allocate() noexcept
@@ -213,9 +222,13 @@ public:
         , _allocationDifference(0)
     { }
 
-    ~FixedBlockAllocator() noexcept
+    ~FixedBlockAllocator() noexcept override
     { PageAllocator::free(_pages); }
-
+    
+    [[nodiscard]] const void* head() const noexcept { return _pages; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return _numReservedPages; }
+    [[nodiscard]] uSys committedPages() const noexcept { return _committedPages; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return _allocIndex; }
     [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
@@ -360,9 +373,13 @@ public:
         , _multipleDeleteCount(0)
     { }
 
-    ~FixedBlockAllocator() noexcept
+    ~FixedBlockAllocator() noexcept override
     { PageAllocator::free(_pages); }
-
+    
+    [[nodiscard]] const void* head() const noexcept { return _pages; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return _numReservedPages; }
+    [[nodiscard]] uSys committedPages() const noexcept { return _committedPages; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return _allocIndex; }
     [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
@@ -511,7 +528,11 @@ class FixedBlockArenaAllocator final : public TauAllocator
 public:
     FixedBlockArenaAllocator(uSys blockSize, PageCountVal numReservePages, uSys allocPages) noexcept = delete;
     FixedBlockArenaAllocator(uSys blockSize, uSys maxElements, uSys allocPages) noexcept = delete;
-
+    
+    [[nodiscard]] const void* head() const noexcept { return nullptr; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return 0; }
+    [[nodiscard]] uSys committedPages() const noexcept { return 0; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return 0; }
     [[nodiscard]] uSys blockSize() const noexcept { return 0; }
     [[nodiscard]] iSys allocationDifference() const noexcept { return 0; }
     [[nodiscard]] uSys multipleDeleteCount() const noexcept { return 0; }
@@ -556,9 +577,13 @@ public:
         , _allocIndex(0)
     { }
 
-    ~FixedBlockArenaAllocator() noexcept
+    ~FixedBlockArenaAllocator() noexcept override
     { PageAllocator::free(_pages); }
-
+    
+    [[nodiscard]] const void* head() const noexcept { return _pages; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return _numReservedPages; }
+    [[nodiscard]] uSys committedPages() const noexcept { return _committedPages; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return _allocIndex; }
     [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     [[nodiscard]] void* allocate() noexcept
@@ -638,9 +663,13 @@ public:
         , _allocationDifference(0)
     { }
 
-    ~FixedBlockArenaAllocator() noexcept
+    ~FixedBlockArenaAllocator() noexcept override
     { PageAllocator::free(_pages); }
-
+    
+    [[nodiscard]] const void* head() const noexcept { return _pages; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return _numReservedPages; }
+    [[nodiscard]] uSys committedPages() const noexcept { return _committedPages; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return _allocIndex; }
     [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**
@@ -742,9 +771,13 @@ public:
         , _multipleDeleteCount(0)
     { }
 
-    ~FixedBlockArenaAllocator() noexcept
+    ~FixedBlockArenaAllocator() noexcept override
     { PageAllocator::free(_pages); }
-
+    
+    [[nodiscard]] const void* head() const noexcept { return _pages; }
+    [[nodiscard]] uSys reservedPages() const noexcept { return _numReservedPages; }
+    [[nodiscard]] uSys committedPages() const noexcept { return _committedPages; }
+    [[nodiscard]] uSys allocIndex() const noexcept { return _allocIndex; }
     [[nodiscard]] uSys blockSize() const noexcept { return _blockSize; }
 
     /**

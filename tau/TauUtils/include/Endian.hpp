@@ -46,9 +46,16 @@
  *   A runtime function used to determine what endian the 
  * system is.
  */
-static inline bool isLittleEndian()
+inline bool isLittleEndian() noexcept
 {
     static const unsigned short number = 0x0001;
     static const unsigned char* numPtr = reinterpret_cast<const unsigned char*>(&number);
     return numPtr[0] == 1;
 }
+
+enum Endian
+{
+    EndianUnknown = 0,
+    EndianLittle,
+    EndianBig
+};

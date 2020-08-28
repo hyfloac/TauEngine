@@ -2,6 +2,7 @@
 
 #pragma warning(push, 0)
 #include <cstring>
+#include <utility>
 #pragma warning(pop)
 
 #include "NumTypes.hpp"
@@ -42,17 +43,19 @@ namespace _ArrayListUtils
  *    committed. A committed page is one where the address
  *    space correlates to a real block of RAM.
  */
+struct _CtrlBlockData
+{
+    uSys refCount;
+    uSys elementCount;
+    uSys dataSize;
+    uSys committedPages;
+};
+
 struct ControlBlock final
 {
     union
     {
-        struct
-        {
-            uSys refCount;
-            uSys elementCount;
-            uSys dataSize;
-            uSys committedPages;
-        };
+        _CtrlBlockData data;
         char _alignment[64];
     };
 };
@@ -72,11 +75,11 @@ public:
         : _ctrlBlock(ctrlBlock)
         , _arr(arr)
         , _index(index)
-    { ++_ctrlBlock->refCount; }
+    { ++_ctrlBlock->data.refCount; }
 
     inline ~ArrayListIterator() noexcept
     {
-        if(_ctrlBlock && --_ctrlBlock->refCount == 0)
+        if(_ctrlBlock && --_ctrlBlock->data.refCount == 0)
         { PageAllocator::free(_ctrlBlock); }
     }
 
@@ -84,13 +87,13 @@ public:
         : _ctrlBlock(copy._ctrlBlock)
         , _arr(copy._arr)
         , _index(copy._index)
-    { ++_ctrlBlock->refCount; }
+    { ++_ctrlBlock->data.refCount; }
 
     inline ArrayListIterator(ArrayListIterator<_T>&& move) noexcept
         : _ctrlBlock(move._ctrlBlock)
         , _arr(move._arr)
         , _index(move._index)
-    { move._ctrlBlock = null; }
+    { move._ctrlBlock = nullptr; }
 
     inline ArrayListIterator<_T>& operator =(const ArrayListIterator<_T>& copy) noexcept
     {
@@ -101,7 +104,7 @@ public:
         _arr = copy._arr;
         _index = copy._index;
 
-        ++_ctrlBlock->refCount;
+        ++_ctrlBlock->data.refCount;
 
         return *this;
     }
@@ -115,14 +118,14 @@ public:
         _arr = move._arr;
         _index = move._index;
 
-        move._ctrlBlock = null;
+        move._ctrlBlock = nullptr;
 
         return *this;
     }
 
     inline ArrayListIterator<_T>& operator++() noexcept
     {
-        if(_index < _ctrlBlock->elementCount)
+        if(_index < _ctrlBlock->data.elementCount)
         { ++_index; }
         return *this;
     }
@@ -169,11 +172,11 @@ public:
         : _ctrlBlock(ctrlBlock)
         , _arr(arr)
         , _index(index)
-    { ++_ctrlBlock->refCount; }
+    { ++_ctrlBlock->data.refCount; }
 
     inline ~ConstArrayListIterator() noexcept
     {
-        if(_ctrlBlock && --_ctrlBlock->refCount == 0)
+        if(_ctrlBlock && --_ctrlBlock->data.refCount == 0)
         { PageAllocator::free(_ctrlBlock); }
     }
 
@@ -181,27 +184,27 @@ public:
         : _ctrlBlock(copy._ctrlBlock)
         , _arr(copy._arr)
         , _index(copy._index)
-    { ++_ctrlBlock->refCount; }
+    { ++_ctrlBlock->data.refCount; }
 
     inline ConstArrayListIterator(ConstArrayListIterator<_T>&& move) noexcept
         : _ctrlBlock(move._ctrlBlock)
         , _arr(move._arr)
         , _index(move._index)
-    { move._ctrlBlock = null; }
+    { move._ctrlBlock = nullptr; }
 
     inline ConstArrayListIterator<_T>& operator =(const ConstArrayListIterator<_T>& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
-        if(--_ctrlBlock->refCount == 0)
+        if(--_ctrlBlock->data.refCount == 0)
         { PageAllocator::free(_ctrlBlock); }
 
         _ctrlBlock = copy._ctrlBlock;
         _arr = copy._arr;
         _index = copy._index;
 
-        ++_ctrlBlock->refCount;
+        ++_ctrlBlock->data.refCount;
 
         return *this;
     }
@@ -211,21 +214,21 @@ public:
         if(this == &move)
         { return *this; }
 
-        if(--_ctrlBlock->refCount == 0)
+        if(--_ctrlBlock->data.refCount == 0)
         { PageAllocator::free(_ctrlBlock); }
 
         _ctrlBlock = move._ctrlBlock;
         _arr = move._arr;
         _index = move._index;
 
-        move._ctrlBlock = null;
+        move._ctrlBlock = nullptr;
 
         return *this;
     }
 
     inline ConstArrayListIterator<_T>& operator++() noexcept
     {
-        if(_index < _ctrlBlock->elementCount)
+        if(_index < _ctrlBlock->data.elementCount)
         { ++_index; }
         return *this;
     }
@@ -280,17 +283,17 @@ public:
         , _arr(reinterpret_cast<_T*>(_ctrlBlock + 1))
     {
         (void) PageAllocator::commitPage(_ctrlBlock);
-        _ctrlBlock->refCount = 1;
-        _ctrlBlock->elementCount = 0;
-        _ctrlBlock->dataSize = sizeof(ControlBlock);
-        _ctrlBlock->committedPages = 1;
+        _ctrlBlock->data.refCount = 1;
+        _ctrlBlock->data.elementCount = 0;
+        _ctrlBlock->data.dataSize = sizeof(ControlBlock);
+        _ctrlBlock->data.committedPages = 1;
     }
 
     ~ArrayList() noexcept
     {
-        if(_ctrlBlock && --_ctrlBlock->refCount == 0)
+        if(_ctrlBlock && --_ctrlBlock->data.refCount == 0)
         {
-            for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+            for(uSys i = 0; i < _ctrlBlock->data.elementCount; ++i)
             {
                 _arr[i].~_T();
             }
@@ -302,12 +305,12 @@ public:
     ArrayList(const ArrayList<_T, ALMoveMethod::MemCopy>& copy) noexcept
         : _ctrlBlock(copy._ctrlBlock)
         , _arr(copy._arr)
-    { ++_ctrlBlock->refCount; }
+    { ++_ctrlBlock->data.refCount; }
 
     ArrayList(ArrayList<_T, ALMoveMethod::MemCopy>&& move) noexcept
         : _ctrlBlock(move._ctrlBlock)
         , _arr(move._arr)
-    { move._ctrlBlock = null; }
+    { move._ctrlBlock = nullptr; }
 
     ArrayList<_T, ALMoveMethod::MemCopy>& operator=(const ArrayList<_T, ALMoveMethod::MemCopy>& copy) noexcept
     {
@@ -317,7 +320,7 @@ public:
         _ctrlBlock = copy._ctrlBlock;
         _arr = copy._arr;
 
-        ++_ctrlBlock->refCount;
+        ++_ctrlBlock->data.refCount;
 
         return *this;
     }
@@ -330,95 +333,95 @@ public:
         _ctrlBlock = move._ctrlBlock;
         _arr = move._arr;
 
-        move._ctrlBlock = null;
+        move._ctrlBlock = nullptr;
 
         return *this;
     }
     
     [[nodiscard]]       _T* arr()       noexcept { return _arr; }
     [[nodiscard]] const _T* arr() const noexcept { return _arr; }
-    [[nodiscard]] uSys  count() const noexcept { return _ctrlBlock->elementCount; }
-    [[nodiscard]] uSys   size() const noexcept { return _ctrlBlock->elementCount; }
-    [[nodiscard]] uSys length() const noexcept { return _ctrlBlock->elementCount; }
+    [[nodiscard]] uSys  count() const noexcept { return _ctrlBlock->data.elementCount; }
+    [[nodiscard]] uSys   size() const noexcept { return _ctrlBlock->data.elementCount; }
+    [[nodiscard]] uSys length() const noexcept { return _ctrlBlock->data.elementCount; }
 
     void add(const _T& val) noexcept
     {
         assertSize();
-        _arr[_ctrlBlock->elementCount++] = val;
-        _ctrlBlock->dataSize += sizeof(_T);
+        _arr[_ctrlBlock->data.elementCount++] = val;
+        _ctrlBlock->data.dataSize += sizeof(_T);
     }
 
     template<typename... _Args>
     _T& emplace(_Args&&... args) noexcept
     {
         assertSize();
-        void* const placement = _arr + _ctrlBlock->elementCount;
+        void* const placement = _arr + _ctrlBlock->data.elementCount;
         _T* const ret = new(placement) _T(_TauAllocatorUtils::_forward<_Args>(args)...);
-        ++_ctrlBlock->elementCount;
-        _ctrlBlock->dataSize += sizeof(_T);
+        ++_ctrlBlock->data.elementCount;
+        _ctrlBlock->data.dataSize += sizeof(_T);
 
         return *ret;
     }
 
     void removeFast(const uSys index) noexcept
     {
-        if(index + 1 > _ctrlBlock->elementCount)
+        if(index + 1 > _ctrlBlock->data.elementCount)
         { return; }
 
         _arr[index].~_T();
 
-        --_ctrlBlock->elementCount;
-        if(index == _ctrlBlock->elementCount)
+        --_ctrlBlock->data.elementCount;
+        if(index == _ctrlBlock->data.elementCount)
         { return; }
 
-        (void) std::memcpy(_arr + index, _arr + _ctrlBlock->elementCount - 1, sizeof(_T));
-        _ctrlBlock->dataSize -= sizeof(_T);
+        (void) std::memcpy(_arr + index, _arr + _ctrlBlock->data.elementCount - 1, sizeof(_T));
+        _ctrlBlock->data.dataSize -= sizeof(_T);
 
         attemptRelease();
     }
 
     void remove(const uSys index) noexcept
     {
-        if(index + 1 > _ctrlBlock->elementCount)
+        if(index + 1 > _ctrlBlock->data.elementCount)
         { return; }
 
         _arr[index].~_T();
 
-        --_ctrlBlock->elementCount;
-        if(index == _ctrlBlock->elementCount)
+        --_ctrlBlock->data.elementCount;
+        if(index == _ctrlBlock->data.elementCount)
         { return; }
 
-        (void) std::memcpy(_arr + index, _arr + index + sizeof(_T), (_ctrlBlock->elementCount - index - 1) * sizeof(_T));
-        _ctrlBlock->dataSize -= sizeof(_T);
+        (void) std::memcpy(_arr + index, _arr + index + sizeof(_T), (_ctrlBlock->data.elementCount - index - 1) * sizeof(_T));
+        _ctrlBlock->data.dataSize -= sizeof(_T);
 
         attemptRelease();
     }
 
     void clear(const bool releasePages = true) noexcept
     {
-        for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+        for(uSys i = 0; i < _ctrlBlock->data.elementCount; ++i)
         {
             _arr[i].~_T();
         }
 
         if(releasePages)
         {
-            PageAllocator::decommitPages(_ctrlBlock + PageAllocator::pageSize(), _ctrlBlock->committedPages - 1);
+            PageAllocator::decommitPages(_ctrlBlock + PageAllocator::pageSize(), _ctrlBlock->data.committedPages - 1);
         }
     }
 
     [[nodiscard]] _T* at(const uSys index) noexcept
     {
-        if(index >= _ctrlBlock->elementCount)
-        { return null; }
+        if(index >= _ctrlBlock->data.elementCount)
+        { return nullptr; }
 
         return _arr[index];
     }
 
     [[nodiscard]] const _T* at(const uSys index) const noexcept
     {
-        if(index >= _ctrlBlock->elementCount)
-        { return null; }
+        if(index >= _ctrlBlock->data.elementCount)
+        { return nullptr; }
 
         return &_arr[index];
     }
@@ -430,29 +433,29 @@ public:
     [[nodiscard]] const _T& operator[](const uSys index) const noexcept { return _arr[index]; }
 
     [[nodiscard]] inline ArrayListIterator<_T> begin() noexcept { return ArrayListIterator<_T>(_ctrlBlock, _arr, 0);                        }
-    [[nodiscard]] inline ArrayListIterator<_T>   end() noexcept { return ArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->elementCount); }
+    [[nodiscard]] inline ArrayListIterator<_T>   end() noexcept { return ArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->data.elementCount); }
 
     [[nodiscard]] inline ConstArrayListIterator<_T> begin() const noexcept { return ConstArrayListIterator<_T>(_ctrlBlock, _arr, 0);                        }
-    [[nodiscard]] inline ConstArrayListIterator<_T>   end() const noexcept { return ConstArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->elementCount); }
+    [[nodiscard]] inline ConstArrayListIterator<_T>   end() const noexcept { return ConstArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->data.elementCount); }
 private:
     void assertSize() noexcept
     {
-        const uSys pageBytes = _ctrlBlock->committedPages * PageAllocator::pageSize();
-        if(_ctrlBlock->dataSize + sizeof(_T) >= pageBytes)
+        const uSys pageBytes = _ctrlBlock->data.committedPages * PageAllocator::pageSize();
+        if(_ctrlBlock->data.dataSize + sizeof(_T) >= pageBytes)
         {
             (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_ctrlBlock) + pageBytes);
-            ++_ctrlBlock->committedPages;
+            ++_ctrlBlock->data.committedPages;
         }
     }
 
     void attemptRelease() noexcept
     {
         // If there are two empty pages, release the last page.
-        const uSys pageBytes = (_ctrlBlock->committedPages - 1) * PageAllocator::pageSize();
-        if(pageBytes - _ctrlBlock->dataSize <= PageAllocator::pageSize())
+        const uSys pageBytes = (_ctrlBlock->data.committedPages - 1) * PageAllocator::pageSize();
+        if(pageBytes - _ctrlBlock->data.dataSize <= PageAllocator::pageSize())
         {
             (void) PageAllocator::decommitPage(reinterpret_cast<u8*>(_ctrlBlock) + pageBytes);
-            --_ctrlBlock->committedPages;
+            --_ctrlBlock->data.committedPages;
         }
     }
 };
@@ -471,17 +474,17 @@ public:
         , _arr(reinterpret_cast<_T*>(_ctrlBlock + 1))
     {
         (void)PageAllocator::commitPage(_ctrlBlock);
-        _ctrlBlock->refCount = 1;
-        _ctrlBlock->elementCount = 0;
-        _ctrlBlock->dataSize = sizeof(ControlBlock);
-        _ctrlBlock->committedPages = 1;
+        _ctrlBlock->data.refCount = 1;
+        _ctrlBlock->data.elementCount = 0;
+        _ctrlBlock->data.dataSize = sizeof(ControlBlock);
+        _ctrlBlock->data.committedPages = 1;
     }
 
     ~ArrayList() noexcept
     {
-        if(_ctrlBlock && --_ctrlBlock->refCount == 0)
+        if(_ctrlBlock && --_ctrlBlock->data.refCount == 0)
         {
-            for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+            for(uSys i = 0; i < _ctrlBlock->data.elementCount; ++i)
             {
                 _arr[i].~_T();
             }
@@ -493,12 +496,12 @@ public:
     ArrayList(const ArrayList<_T, ALMoveMethod::MoveConstruct>& copy) noexcept
         : _ctrlBlock(copy._ctrlBlock)
         , _arr(copy._arr)
-    { ++_ctrlBlock->refCount; }
+    { ++_ctrlBlock->data.refCount; }
 
     ArrayList(ArrayList<_T, ALMoveMethod::MoveConstruct>&& move) noexcept
         : _ctrlBlock(move._ctrlBlock)
         , _arr(move._arr)
-    { move._ctrlBlock = null; }
+    { move._ctrlBlock = nullptr; }
 
     ArrayList<_T, ALMoveMethod::MoveConstruct>& operator=(const ArrayList<_T, ALMoveMethod::MoveConstruct>& copy) noexcept
     {
@@ -508,7 +511,7 @@ public:
         _ctrlBlock = copy._ctrlBlock;
         _arr = copy._arr;
 
-        ++_ctrlBlock->refCount;
+        ++_ctrlBlock->data.refCount;
 
         return *this;
     }
@@ -521,100 +524,100 @@ public:
         _ctrlBlock = move._ctrlBlock;
         _arr = move._arr;
 
-        move._ctrlBlock = null;
+        move._ctrlBlock = nullptr;
 
         return *this;
     }
 
     [[nodiscard]]       _T* arr()       noexcept { return _arr; }
     [[nodiscard]] const _T* arr() const noexcept { return _arr; }
-    [[nodiscard]] uSys  count() const noexcept { return _ctrlBlock->elementCount; }
-    [[nodiscard]] uSys   size() const noexcept { return _ctrlBlock->elementCount; }
-    [[nodiscard]] uSys length() const noexcept { return _ctrlBlock->elementCount; }
+    [[nodiscard]] uSys  count() const noexcept { return _ctrlBlock->data.elementCount; }
+    [[nodiscard]] uSys   size() const noexcept { return _ctrlBlock->data.elementCount; }
+    [[nodiscard]] uSys length() const noexcept { return _ctrlBlock->data.elementCount; }
 
     void add(const _T& val) noexcept
     {
         assertSize();
-        _arr[_ctrlBlock->elementCount++] = val;
-        _ctrlBlock->dataSize += sizeof(_T);
+        _arr[_ctrlBlock->data.elementCount++] = val;
+        _ctrlBlock->data.dataSize += sizeof(_T);
     }
 
     template<typename... _Args>
     _T& emplace(_Args&&... args) noexcept
     {
         assertSize();
-        void* const placement = _arr + _ctrlBlock->elementCount;
+        void* const placement = _arr + _ctrlBlock->data.elementCount;
         _T* ret = new(placement) _T(_TauAllocatorUtils::_forward<_Args>(args)...);
-        ++_ctrlBlock->elementCount;
-        _ctrlBlock->dataSize += sizeof(_T);
+        ++_ctrlBlock->data.elementCount;
+        _ctrlBlock->data.dataSize += sizeof(_T);
 
         return *ret;
     }
 
     void removeFast(const uSys index) noexcept
     {
-        if(index + 1 > _ctrlBlock->elementCount)
+        if(index + 1 > _ctrlBlock->data.elementCount)
         { return; }
 
         _arr[index].~_T();
 
-        --_ctrlBlock->elementCount;
-        if(index == _ctrlBlock->elementCount)
+        --_ctrlBlock->data.elementCount;
+        if(index == _ctrlBlock->data.elementCount)
         { return; }
 
-        _arr[index] = ::std::move(_arr[_ctrlBlock->elementCount - 1]);
-        _ctrlBlock->dataSize -= sizeof(_T);
+        _arr[index] = ::std::move(_arr[_ctrlBlock->data.elementCount - 1]);
+        _ctrlBlock->data.dataSize -= sizeof(_T);
 
         attemptRelease();
     }
 
     void remove(const uSys index) noexcept
     {
-        if(index + 1 > _ctrlBlock->elementCount)
+        if(index + 1 > _ctrlBlock->data.elementCount)
         { return; }
 
         _arr[index].~_T();
 
-        --_ctrlBlock->elementCount;
-        if(index == _ctrlBlock->elementCount)
+        --_ctrlBlock->data.elementCount;
+        if(index == _ctrlBlock->data.elementCount)
         { return; }
 
-        const uSys count = _ctrlBlock->elementCount - index - 1;
+        const uSys count = _ctrlBlock->data.elementCount - index - 1;
 
         for(uSys i = 0; i < count; ++i)
         {
             _arr[index + i] = ::std::move(_arr[index + i + 1]);
         }
-        _ctrlBlock->dataSize -= sizeof(_T);
+        _ctrlBlock->data.dataSize -= sizeof(_T);
 
         attemptRelease();
     }
 
     void clear(const bool releasePages = true) noexcept
     {
-        for(uSys i = 0; i < _ctrlBlock->elementCount; ++i)
+        for(uSys i = 0; i < _ctrlBlock->data.elementCount; ++i)
         {
             _arr[i].~_T();
         }
 
         if(releasePages)
         {
-            PageAllocator::decommitPages(_ctrlBlock + PageAllocator::pageSize(), _ctrlBlock->committedPages - 1);
+            PageAllocator::decommitPages(_ctrlBlock + PageAllocator::pageSize(), _ctrlBlock->data.committedPages - 1);
         }
     }
 
     [[nodiscard]] _T* at(const uSys index) noexcept
     {
-        if(index >= _ctrlBlock->elementCount)
-        { return null; }
+        if(index >= _ctrlBlock->data.elementCount)
+        { return nullptr; }
 
         return _arr[index];
     }
 
     [[nodiscard]] const _T* at(const uSys index) const noexcept
     {
-        if(index >= _ctrlBlock->elementCount)
-        { return null; }
+        if(index >= _ctrlBlock->data.elementCount)
+        { return nullptr; }
 
         return &_arr[index];
     }
@@ -626,29 +629,29 @@ public:
     [[nodiscard]] const _T& operator[](const uSys index) const noexcept { return _arr[index]; }
 
     [[nodiscard]] inline ArrayListIterator<_T> begin() noexcept { return ArrayListIterator<_T>(_ctrlBlock, _arr, 0);                        }
-    [[nodiscard]] inline ArrayListIterator<_T>   end() noexcept { return ArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->elementCount); }
+    [[nodiscard]] inline ArrayListIterator<_T>   end() noexcept { return ArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->data.elementCount); }
 
     [[nodiscard]] inline ConstArrayListIterator<_T> begin() const noexcept { return ConstArrayListIterator<_T>(_ctrlBlock, _arr, 0);                        }
-    [[nodiscard]] inline ConstArrayListIterator<_T>   end() const noexcept { return ConstArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->elementCount); }
+    [[nodiscard]] inline ConstArrayListIterator<_T>   end() const noexcept { return ConstArrayListIterator<_T>(_ctrlBlock, _arr, _ctrlBlock->data.elementCount); }
 private:
     void assertSize() noexcept
     {
-        const uSys pageBytes = _ctrlBlock->committedPages * PageAllocator::pageSize();
-        if(_ctrlBlock->dataSize + sizeof(_T) >= pageBytes)
+        const uSys pageBytes = _ctrlBlock->data.committedPages * PageAllocator::pageSize();
+        if(_ctrlBlock->data.dataSize + sizeof(_T) >= pageBytes)
         {
             (void) PageAllocator::commitPage(reinterpret_cast<u8*>(_ctrlBlock) + pageBytes);
-            ++_ctrlBlock->committedPages;
+            ++_ctrlBlock->data.committedPages;
         }
     }
 
     void attemptRelease() noexcept
     {
         // If there are two empty pages, release the last page.
-        const uSys pageBytes = (_ctrlBlock->committedPages - 1) * PageAllocator::pageSize();
-        if(pageBytes - _ctrlBlock->dataSize <= PageAllocator::pageSize())
+        const uSys pageBytes = (_ctrlBlock->data.committedPages - 1) * PageAllocator::pageSize();
+        if(pageBytes - _ctrlBlock->data.dataSize <= PageAllocator::pageSize())
         {
             (void) PageAllocator::decommitPage(reinterpret_cast<u8*>(_ctrlBlock) + pageBytes);
-            --_ctrlBlock->committedPages;
+            --_ctrlBlock->data.committedPages;
         }
     }
 };

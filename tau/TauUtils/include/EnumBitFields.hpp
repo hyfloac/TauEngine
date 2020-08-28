@@ -1,24 +1,44 @@
 #pragma once
 
-#include <NumTypes.hpp>
-
 /*
  *   A series of templates for producing binary arithmetic
  * on enum bit fields.
  */
 
-template<typename T> inline T  operator ~ (T  a)      noexcept { return static_cast<T>(~static_cast<u64>(a)); }
+template<typename _T> inline _T  operator ~(_T a) noexcept;
 
-template<typename T> inline T  operator | (T  a, T b) noexcept { return static_cast<T>(static_cast<u64>(a) | static_cast<u64>(b)); }
-template<typename T> inline T  operator & (T  a, T b) noexcept { return static_cast<T>(static_cast<u64>(a) & static_cast<u64>(b)); }
-template<typename T> inline T  operator ^ (T  a, T b) noexcept { return static_cast<T>(static_cast<u64>(a) ^ static_cast<u64>(b)); }
+template<typename _T> inline _T operator |(_T a, _T b) noexcept;
+template<typename _T> inline _T operator &(_T a, _T b) noexcept;
+template<typename _T> inline _T operator ^(_T a, _T b) noexcept;
 
-template<typename T> inline T& operator |=(T& a, const T& b) noexcept { a = a | b; return a; }
-template<typename T> inline T& operator &=(T& a, const T& b) noexcept { a = a & b; return a; }
-template<typename T> inline T& operator ^=(T& a, const T& b) noexcept { a = a ^ b; return a; }
+template<typename _T> inline _T& operator |=(_T& a, const _T& b) noexcept;
+template<typename _T> inline _T& operator &=(_T& a, const _T& b) noexcept;
+template<typename _T> inline _T& operator ^=(_T& a, const _T& b) noexcept;
 
-template<typename T> inline bool hasFlag(T  in, T flag) noexcept { return (static_cast<u64>(in) & static_cast<u64>(flag)) != 0; }
-template<typename T> inline T    setFlag(T  in, T flag) noexcept { return in |   flag; }
-template<typename T> inline T&   setFlag(T& in, T flag) noexcept { return in |=  flag; }
-template<typename T> inline T  unsetFlag(T  in, T flag) noexcept { return in &  ~flag; }
-template<typename T> inline T& unsetFlag(T& in, T flag) noexcept { return in &= ~flag; }
+template<typename _Int, typename _Enum> inline _Int  operator |(_Int a, _Enum b) noexcept;
+template<typename _Int, typename _Enum> inline _Int  operator &(_Int a, _Enum b) noexcept;
+template<typename _Int, typename _Enum> inline _Int  operator ^(_Int a, _Enum b) noexcept;
+
+template<typename _Int, typename _Enum> inline _Int& operator |=(_Int& a, const _Enum& b) noexcept;
+template<typename _Int, typename _Enum> inline _Int& operator &=(_Int& a, const _Enum& b) noexcept;
+template<typename _Int, typename _Enum> inline _Int& operator ^=(_Int& a, const _Enum& b) noexcept;
+
+template<typename _T> inline bool  hasFlag(      _T  in, _T flag) noexcept;
+template<typename _T> inline _T    setFlag(const _T& in, _T flag) noexcept;
+template<typename _T> inline _T&   setFlag(      _T& in, _T flag) noexcept;
+template<typename _T> inline _T  unsetFlag(const _T& in, _T flag) noexcept;
+template<typename _T> inline _T& unsetFlag(      _T& in, _T flag) noexcept;
+
+template<typename _Int, typename _Enum> inline bool    hasFlag(      _Int  in, _Enum flag) noexcept;
+template<typename _Int, typename _Enum> inline _Int    setFlag(const _Int& in, _Enum flag) noexcept;
+template<typename _Int, typename _Enum> inline _Int&   setFlag(      _Int& in, _Enum flag) noexcept;
+template<typename _Int, typename _Enum> inline _Int  unsetFlag(const _Int& in, _Enum flag) noexcept;
+template<typename _Int, typename _Enum> inline _Int& unsetFlag(      _Int& in, _Enum flag) noexcept;
+
+template<typename _T> inline _T setFlag(const _T& in, _T flag, bool enable) noexcept;
+template<typename _T> inline _T setFlag(      _T& in, _T flag, bool enable) noexcept;
+
+template<typename _Int, typename _Enum> inline _Int setFlag(const _Int& in, _Enum flag, bool enable) noexcept;
+template<typename _Int, typename _Enum> inline _Int setFlag(      _Int& in, _Enum flag, bool enable) noexcept;
+
+#include "EnumBitFields.inl"

@@ -106,5 +106,8 @@
     <None Include="include\ReferenceCountingPointer.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="include\EnumBitFields.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

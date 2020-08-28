@@ -7,7 +7,6 @@
 
 #include "NumTypes.hpp"
 #include "Safeties.hpp"
-#include "Objects.hpp"
 #include "Utils.hpp"
 
 #define STR_SWITCH(_PARAM, _BLOCK, _DEFAULT_BLOCK) \
@@ -231,8 +230,8 @@ public:
     [[nodiscard]] i32 compareTo(const DynStringViewT<_C>& other) const noexcept;
     [[nodiscard]] i32 compareTo(const _C* str) const noexcept;
 
-    [[nodiscard]] inline StringIteratorT<_C> begin() const noexcept { return StringIteratorT(_string, _length, 0); }
-    [[nodiscard]] inline StringIteratorT<_C>   end() const noexcept { return StringIteratorT(_string, _length, _length - 1); }
+    [[nodiscard]] inline StringIteratorT<_C> begin() const noexcept { return StringIteratorT<_C>(_string, _length, 0); }
+    [[nodiscard]] inline StringIteratorT<_C>   end() const noexcept { return StringIteratorT<_C>(_string, _length, _length - 1); }
 
 #if __has_feature(__cpp_impl_three_way_comparison)
     [[nodiscard]] i32 operator <=>(const StringT<_C>& other) const noexcept { return compareTo(other); }
@@ -310,8 +309,8 @@ public:
     [[nodiscard]] uSys length() const noexcept { return _length; }
     [[nodiscard]] uSys hashCode() const noexcept { return _hash; }
 
-    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT(_string, _length, 0); }
-    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT(_string, _length, _length - 1); }
+    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT<_C>(_string, _length, 0); }
+    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT<_C>(_string, _length, _length - 1); }
 
     [[nodiscard]] bool equals(const StringT<_C>& other) const noexcept;
     [[nodiscard]] bool equals(const StringViewT<_C>& other) const noexcept;
@@ -443,8 +442,8 @@ public:
     [[nodiscard]] i32 compareTo(const DynStringViewT<_C>& other) const noexcept;
     [[nodiscard]] i32 compareTo(const _C* const str) const noexcept;
 
-    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT(_length >= 16 ? _largeString.string : _stackString, _length, 0); }
-    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT(_length >= 16 ? _largeString.string : _stackString, _length, _length - 1); }
+    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT<_C>(_length >= 16 ? _largeString.string : _stackString, _length, 0); }
+    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT<_C>(_length >= 16 ? _largeString.string : _stackString, _length, _length - 1); }
 
     [[nodiscard]] DynStringT<_C> concat(const StringT<_C>& other) const noexcept;
     [[nodiscard]] DynStringT<_C> concat(const StringViewT<_C>& other) const noexcept;
@@ -560,8 +559,8 @@ public:
     [[nodiscard]] uSys length() const noexcept { return _length; }
     [[nodiscard]] uSys hashCode() const noexcept { return _hash; }
 
-    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT(_string, _length, 0); }
-    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT(_string, _length, _length - 1); }
+    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT<_C>(_string, _length, 0); }
+    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT<_C>(_string, _length, _length - 1); }
 
     [[nodiscard]] bool equals(const StringT<_C>& other) const noexcept;
     [[nodiscard]] bool equals(const StringViewT<_C>& other) const noexcept;
@@ -669,8 +668,8 @@ public:
 
     [[nodiscard]] i32 compareTo(const StringBuilderT<_C>& other) const noexcept;
 
-    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT(_string, _length, 0); }
-    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT(_string, _length, _length - 1); }
+    [[nodiscard]] StringIteratorT<_C> begin() const noexcept { return StringIteratorT<_C>(_string, _length, 0); }
+    [[nodiscard]] StringIteratorT<_C>   end() const noexcept { return StringIteratorT<_C>(_string, _length, _length - 1); }
 
     inline StringBuilderT<_C>& append(const StringT<_C>& string) noexcept;
     inline StringBuilderT<_C>& append(const StringViewT<_C>& string) noexcept;
@@ -715,7 +714,7 @@ public:
     inline StringBuilderT<_C>& operator +=(const _C* other) noexcept { return append(other); }
     inline StringBuilderT<_C>& operator +=(const NotNull<const _C>& other) noexcept { return append(other); }
 
-    [[nodiscard]] inline DynStringT<_C> toString() const noexcept { return DynStringT(_string); }
+    [[nodiscard]] inline DynStringT<_C> toString() const noexcept { return DynStringT<_C>(_string); }
 
     [[nodiscard]] inline _C operator[](uSys index) const noexcept;
     [[nodiscard]] inline _C at(uSys index) const noexcept;

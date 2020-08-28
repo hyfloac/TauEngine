@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(STRING_IN_DEV) || 1
+#if defined(STRING_IN_DEV)
 #include "String.hpp"
 #endif
 
@@ -951,7 +951,7 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcep
         _length = length;
 
         // Was this allocated as a single block.
-        if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
+        if(reinterpret_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
         {
             delete[] _largeString.string;
 
@@ -966,7 +966,7 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcep
             void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
 
             _largeString.refCount = new(placement) uSys(1);
-            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+            _C* const str = new(reinterpret_cast<u8*>(placement) + sizeof(uSys)) _C[_length + 1];
 
             ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
             _largeString.string = str;
@@ -990,7 +990,7 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcep
             void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
 
             _largeString.refCount = new(placement) uSys(1);
-            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
+            _C* const str = new(reinterpret_cast<u8*>(placement) + sizeof(uSys)) _C[_length + 1];
 
             ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
             _largeString.string = str;
@@ -1539,11 +1539,11 @@ inline DynStringT<_C> DynStringViewT<_C>::_concat(const uSys len, const _C* cons
         newStr[newLen] = '\0';
         ::std::memcpy(newStr, _string, _length * sizeof(_C));
         ::std::memcpy(newStr + _length, str, len * sizeof(_C));
-        return DynStringT(newStr, newLen);
+        return DynStringT<_C>(newStr, newLen);
     }
     else
     {
-        DynStringT tmp(newLen);
+        DynStringT<_C> tmp(newLen);
         tmp._stackString[newLen] = '\0';
         ::std::memcpy(tmp._stackString, _string, _length * sizeof(_C));
         ::std::memcpy(tmp._stackString + _length, str, len * sizeof(_C));
@@ -1556,7 +1556,7 @@ template<typename _C>
 inline DynStringT<_C> DynStringViewT<_C>::subString(const uSys begin, const uSys end) const noexcept
 {
     if(begin >= end || end > _length)
-    { return DynStringT(""); }
+    { return DynStringT<_C>(""); }
 
     const uSys length = end - begin;
 
@@ -1565,34 +1565,34 @@ inline DynStringT<_C> DynStringViewT<_C>::subString(const uSys begin, const uSys
         _C* const sub = new(::std::nothrow) _C[length + 1];
         sub[length] = '\0';
         ::std::memcpy(sub, c_str() + begin, length * sizeof(_C));
-        return DynStringT(sub, length);
+        return DynStringT<_C>(sub, length);
     }
 
-    return DynStringT(length, c_str() + begin);
+    return DynStringT<_C>(length, c_str() + begin);
 }
 
 template<typename _C>
 inline DynString DynStringViewT<_C>::subStringLen(const uSys begin, const uSys length) const noexcept
 {
     if(begin + length > _length)
-    { return DynStringT(""); }
+    { return DynStringT<_C>(""); }
 
     if(length >= 16)
     {
         _C* const sub = new(::std::nothrow) _C[length + 1];
         sub[length] = '\0';
         ::std::memcpy(sub, c_str() + begin, length * sizeof(_C));
-        return DynStringT(sub, length);
+        return DynStringT<_C>(sub, length);
     }
 
-    return DynStringT(length, c_str() + begin);
+    return DynStringT<_C>(length, c_str() + begin);
 }
 
 template<typename _C>
 inline DynString DynStringViewT<_C>::subString(const uSys from) const noexcept
 {
     if(from > _length)
-    { return DynStringT(""); }
+    { return DynStringT<_C>(""); }
 
     const uSys length = _length - from;
 
@@ -1601,10 +1601,10 @@ inline DynString DynStringViewT<_C>::subString(const uSys from) const noexcept
         _C* const sub = new(::std::nothrow) _C[length + 1];
         sub[length] = '\0';
         ::std::memcpy(sub, c_str() + from, length * sizeof(_C));
-        return DynStringT(sub, length);
+        return DynStringT<_C>(sub, length);
     }
 
-    return DynStringT(length, c_str() + from);
+    return DynStringT<_C>(length, c_str() + from);
 }
 
 template<typename _C>
@@ -1927,38 +1927,38 @@ inline DynStringT<char> StringCast<char, wchar_t>(const DynStringT<wchar_t>& str
 
 namespace std
 {
-template<>
-struct hash<ConstExprString>
+template<typename _C>
+struct hash<ConstExprStringT<_C>>
 {
-    inline uSys operator()(const ConstExprString& str) const noexcept
+    inline uSys operator()(const ConstExprStringT<_C>& str) const noexcept
     { return str.hashCode(); }
 };
 
-template<>
-struct hash<String>
+template<typename _C>
+struct hash<StringT<_C>>
 {
-    inline uSys operator()(const String& str) const noexcept
+    inline uSys operator()(const StringT<_C>& str) const noexcept
     { return str.hashCode(); }
 };
 
-template<>
-struct hash<StringView>
+template<typename _C>
+struct hash<StringViewT<_C>>
 {
-    inline uSys operator()(const StringView& str) const noexcept
+    inline uSys operator()(const StringViewT<_C>& str) const noexcept
     { return str.hashCode(); }
 };
 
-template<>
-struct hash<DynString>
+template<typename _C>
+struct hash<DynStringT<_C>>
 {
-    inline uSys operator()(const DynString& str) const noexcept
+    inline uSys operator()(const DynStringT<_C>& str) const noexcept
     { return str.hashCode(); }
 };
 
-template<>
-struct hash<DynStringView>
+template<typename _C>
+struct hash<DynStringViewT<_C>>
 {
-    inline uSys operator()(const DynStringView& str) const noexcept
+    inline uSys operator()(const DynStringViewT<_C>& str) const noexcept
     { return str.hashCode(); }
 };
 }

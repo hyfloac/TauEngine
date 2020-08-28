@@ -53,49 +53,49 @@ template<typename _T, _T _Alignment>
 }
 
 #ifdef _WIN32
-[[nodiscard]] inline u32 _ctz(u32 v)
+[[nodiscard]] inline u32 _ctz(const u32 v) noexcept
 {
     unsigned long trailingZero = 0;
     _BitScanForward(&trailingZero, v);
     return trailingZero;
 }
 
-[[nodiscard]] inline u32 _clz(u32 v)
+[[nodiscard]] inline u32 _clz(const u32 v) noexcept
 {
     unsigned long leadingZero = 0;
     _BitScanReverse(&leadingZero, v);
     return 31 - leadingZero;
 }
 
-[[nodiscard]] inline u64 _ctz(u64 v)
+[[nodiscard]] inline u64 _ctz(const u64 v) noexcept
 {
     unsigned long trailingZero = 0;
     _BitScanForward64(&trailingZero, v);
     return trailingZero;
 }
 
-[[nodiscard]] inline u64 _clz(u64 v)
+[[nodiscard]] inline u64 _clz(const u64 v) noexcept
 {
     unsigned long leadingZero = 0;
     _BitScanReverse64(&leadingZero, v);
     return 63 - leadingZero;
 }
 #else
-[[nodiscard]] inline u32 _ctz(u32 v)
+[[nodiscard]] inline u32 _ctz(const u32 v) noexcept
 { return __builtin_ctz(v); }
 
-[[nodiscard]] inline u32 _clz(u32 v)
+[[nodiscard]] inline u32 _clz(const u32 v) noexcept
 { return __builtin_clz(v); }
 
-[[nodiscard]] inline u64 _ctz(u64 v)
+[[nodiscard]] inline u64 _ctz(const u64 v) noexcept
 { return __builtin_ctzll(v); }
 
-[[nodiscard]] inline u64 _clz(u64 v)
+[[nodiscard]] inline u64 _clz(const u64 v) noexcept
 { return __builtin_clzll(v); }
 #endif
 
 #if defined(TAU_CROSS_PLATFORM)
-[[nodiscard]] constexpr inline u32 _nextPowerOf2(u32 v) noexcept
+[[nodiscard]] constexpr inline u32 _nextPowerOf2(const u32 v) noexcept
 {
     --v;
     v |= v >> 1;
@@ -106,7 +106,7 @@ template<typename _T, _T _Alignment>
     return v + 1;
 }
 
-[[nodiscard]] constexpr inline u64 _nextPowerOf2(u64 v) noexcept
+[[nodiscard]] constexpr inline u64 _nextPowerOf2(const u64 v) noexcept
 {
     --v;
     v |= v >> 1;
@@ -164,9 +164,9 @@ class TauAllocator
     DEFAULT_DESTRUCT_VI(TauAllocator);
     DELETE_CM(TauAllocator);
 public:
-    [[nodiscard]] virtual void* allocate(uSys size) = 0;
+    [[nodiscard]] virtual void* allocate(uSys size) noexcept = 0;
 
-    virtual void deallocate(void* obj) = 0;
+    virtual void deallocate(void* obj) noexcept = 0;
 
     template<typename _T, typename... _Args>
     _T* allocateT(_Args&&... args) noexcept
@@ -194,8 +194,8 @@ public:
     static DefaultTauAllocator& Instance() noexcept;
 public:
     [[nodiscard]] void* allocate(const uSys size) noexcept override
-    { return malloc(size); }
+    { return operator new(size); }
 
     void deallocate(void* const obj) noexcept override
-    { free(obj); }
+    { operator delete(obj); }
 };

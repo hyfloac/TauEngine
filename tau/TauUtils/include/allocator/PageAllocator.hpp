@@ -13,6 +13,11 @@ public:
 
     static void* reserve(uSys numPages) noexcept;
 
+    /**
+     * Reserves and commits the pages.
+     */
+    static void* alloc(uSys numPages) noexcept;
+
     static void* commitPage(void* page) noexcept;
     static void* commitPages(void* page, uSys pageCount) noexcept;
 
@@ -20,6 +25,10 @@ public:
     static void decommitPages(void* page, uSys pageCount) noexcept;
 
     static void free(void* page) noexcept;
+
+    static void setReadWrite(void* page, uSys pageCount = 1) noexcept;
+    static void setReadOnly(void* page, uSys pageCount = 1) noexcept;
+    static void setExecute(void* page, uSys pageCount = 1) noexcept;
 
     static uSys pageSize() noexcept;
 };

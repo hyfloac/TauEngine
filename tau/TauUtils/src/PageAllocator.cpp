@@ -25,6 +25,11 @@ void* PageAllocator::reserve(const uSys numPages) noexcept
     return VirtualAlloc(NULL, numPages * _pageSize, MEM_RESERVE, PAGE_NOACCESS);
 }
 
+void* PageAllocator::alloc(const uSys numPages) noexcept
+{
+    return VirtualAlloc(NULL, numPages * _pageSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+}
+
 void* PageAllocator::commitPage(void* const page) noexcept
 {
     return VirtualAlloc(page, _pageSize, MEM_COMMIT, PAGE_READWRITE);
@@ -48,6 +53,24 @@ void PageAllocator::decommitPages(void* const page, const uSys pageCount) noexce
 void PageAllocator::free(void* const page) noexcept
 {
     VirtualFree(page, 0, MEM_RELEASE);
+}
+
+void PageAllocator::setReadWrite(void* page, uSys pageCount) noexcept
+{
+    DWORD oldProtect;
+    VirtualProtect(page, pageCount * _pageSize, PAGE_READWRITE, &oldProtect);
+}
+
+void PageAllocator::setReadOnly(void* page, uSys pageCount) noexcept
+{
+    DWORD oldProtect;
+    VirtualProtect(page, pageCount * _pageSize, PAGE_READONLY, &oldProtect);
+}
+
+void PageAllocator::setExecute(void* page, uSys pageCount) noexcept
+{
+    DWORD oldProtect;
+    VirtualProtect(page, pageCount * _pageSize, PAGE_EXECUTE_READ, &oldProtect);
 }
 
 uSys PageAllocator::pageSize() noexcept
