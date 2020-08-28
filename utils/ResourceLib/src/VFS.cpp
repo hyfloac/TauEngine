@@ -40,9 +40,9 @@ static PathPair split(const wchar_t* str, const wchar_t separator, const bool ke
     {
         if(*str == separator)
         {
-            const std::size_t len = str - begin + 1;
+            const ::std::size_t len = str - begin + 1;
             wchar_t* const copy = new wchar_t[len];
-            std::memcpy(copy, begin, len - 1);
+            ::std::memcpy(copy, begin, len - 1);
             copy[len - 1] = 0;
             WDynString first = WDynString::passControl(copy);
 
@@ -68,7 +68,7 @@ VFS::Container VFS::resolvePath(const wchar_t* path) const noexcept
     if(!path) 
     { return VFS::Container::Static({ }, { }, null); }
 
-    const std::size_t len = std::wcslen(path);
+    const ::std::size_t len = std::wcslen(path);
     if(!len) 
     { return VFS::Container::Static({ }, { }, null); }
 
@@ -227,6 +227,22 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const ch
     return resolvePath(StringCast<wchar_t>(pathCompound));
 }
 
+WDynString VFS::win32Path(const WDynString& path) noexcept
+{
+    wchar_t* cPath = new(::std::nothrow) wchar_t[path.length() + 1];
+    ::std::memcpy(cPath, path.c_str(), (path.length() + 1) * sizeof(wchar_t));
+
+    for(uSys i = 0; i < path.length(); ++i)
+    {
+        if(cPath[i] == L'/')
+        {
+            cPath[i] = L'\\';
+        }
+    }
+
+    return WDynString::passControl(cPath);
+}
+
 DynString VFS::win32Path(const DynString& path) noexcept
 {
     char* cPath = new(::std::nothrow) char[path.length() + 1];
@@ -241,6 +257,22 @@ DynString VFS::win32Path(const DynString& path) noexcept
     }
 
     return DynString::passControl(cPath);
+}
+
+WDynString VFS::unixPath(const WDynString& path) noexcept
+{
+    wchar_t* cPath = new(::std::nothrow) wchar_t[path.length() + 1];
+    ::std::memcpy(cPath, path.c_str(), (path.length() + 1) * sizeof(wchar_t));
+
+    for(uSys i = 0; i < path.length(); ++i)
+    {
+        if(cPath[i] == L'\\')
+        {
+            cPath[i] = L'/';
+        }
+    }
+
+    return WDynString::passControl(cPath);
 }
 
 DynString VFS::unixPath(const DynString& path) noexcept

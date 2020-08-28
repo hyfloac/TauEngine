@@ -163,7 +163,10 @@ public:
     Container resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept;
     Container resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept;
 
+    static WDynString win32Path(const WDynString& path) noexcept;
     static DynString win32Path(const DynString& path) noexcept;
+
+    static WDynString unixPath(const WDynString& path) noexcept;
     static DynString unixPath(const DynString& path) noexcept;
 
     static WDynString win32PathSanitizer(const WDynString& path) noexcept;

@@ -5,13 +5,11 @@
  */
 #pragma once
 
-// #include "pch.h"
-
 #include <Safeties.hpp>
 #include <NumTypes.hpp>
 #include <DynArray.hpp>
 
-enum class FileProps : u8
+enum class FileProps
 {
     Read = 0,
     WriteNew,
@@ -39,7 +37,7 @@ public:
 
     [[nodiscard]] virtual bool exists() noexcept = 0;
 
-    [[nodiscard]] virtual const char* name() noexcept = 0;
+    [[nodiscard]] virtual const wchar_t* name() noexcept = 0;
 
     /**
      * Sets the current read/write index pointer of the file.
@@ -49,6 +47,8 @@ public:
      * index pointer works.
      */
     virtual void setPos(uSys pos) noexcept = 0;
+
+    virtual void advancePos(iSys phase) noexcept = 0;
 
     virtual void resetPos() noexcept
     { setPos(0); }
@@ -66,7 +66,7 @@ public:
 
     virtual RefDynArray<u8> readFile() noexcept
     {
-        const size_t size_ = size();
+        const ::std::size_t size_ = size();
         RefDynArray<u8> arr(size_ + 1);
         readBytes(arr.arr(), size_);
         arr[size_] = '\0';
@@ -76,14 +76,14 @@ public:
     virtual int readChar() noexcept
     {
         char ret;
-        const int cnt = readBytes(reinterpret_cast<u8*>(&ret), sizeof(char));
+        const i64 cnt = readBytes(reinterpret_cast<u8*>(&ret), sizeof(char));
         return cnt ? ret : -1;
     }
 
     virtual int readWChar() noexcept
     {
         wchar_t ret;
-        const int cnt = readBytes(reinterpret_cast<u8*>(&ret), sizeof(wchar_t));
+        const i64 cnt = readBytes(reinterpret_cast<u8*>(&ret), sizeof(wchar_t));
         return cnt ? ret : -1;
     }
 
@@ -115,30 +115,55 @@ public:
  */
 class IFileLoader
 {
+    DEFAULT_CONSTRUCT_PU(IFileLoader);
+    DEFAULT_DESTRUCT_VI(IFileLoader);
     DEFAULT_CM_PO(IFileLoader);
 public:
-    IFileLoader() noexcept = default;
-
-    virtual ~IFileLoader() noexcept = default;
-
-    [[nodiscard]] virtual bool fileExists(const wchar_t* basePath, const wchar_t* subPath) const noexcept = 0;
-    [[nodiscard]] virtual bool fileExists(const char* basePath, const char* subPath) const noexcept = 0;
-
     [[nodiscard]] virtual bool fileExists(const wchar_t* path) const noexcept = 0;
-    [[nodiscard]] virtual bool fileExists(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool fileExists(const char* path) const noexcept;
+
+    [[nodiscard]] virtual bool fileExists(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual bool fileExists(const char* basePath, const char* subPath) const noexcept;
 
     [[nodiscard]] virtual CPPRef<IFile> load(const wchar_t* path, FileProps props) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IFile> load(const char* path, FileProps props) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IFile> load(const char* path, FileProps props) const noexcept;
 
-    [[nodiscard]] virtual CPPRef<IFile> load(const wchar_t* basePath, const wchar_t* subPath, FileProps props) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IFile> load(const char* basePath, const char* subPath, FileProps props) const noexcept = 0;
+    [[nodiscard]] virtual CPPRef<IFile> load(const wchar_t* basePath, const wchar_t* subPath, FileProps props) const noexcept;
+    [[nodiscard]] virtual CPPRef<IFile> load(const char* basePath, const char* subPath, FileProps props) const noexcept;
+    
+    [[nodiscard]] virtual bool createFolder(const wchar_t* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolder(const char* path) const noexcept;
 
-    [[nodiscard]] virtual bool createFolder(const char* path) const noexcept = 0;
-    [[nodiscard]] virtual bool createFolders(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolder(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual bool createFolder(const char* basePath, const char* subPath) const noexcept;
 
-    [[nodiscard]] virtual bool deleteFolder(const char* path) const noexcept = 0;
-    [[nodiscard]] virtual bool deleteFile(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolders(const wchar_t* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolders(const char* path) const noexcept;
 
-    [[nodiscard]] virtual u64 creationTime(const char* path) const noexcept = 0;
-    [[nodiscard]] virtual u64 modifyTime(const char* path) const noexcept = 0;
+    [[nodiscard]] virtual bool createFolders(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual bool createFolders(const char* basePath, const char* subPath) const noexcept;
+
+    [[nodiscard]] virtual bool deleteFolder(const wchar_t* path) const noexcept = 0;
+    [[nodiscard]] virtual bool deleteFolder(const char* path) const noexcept;
+
+    [[nodiscard]] virtual bool deleteFolder(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual bool deleteFolder(const char* basePath, const char* subPath) const noexcept;
+
+    [[nodiscard]] virtual bool deleteFile(const wchar_t* path) const noexcept = 0;
+    [[nodiscard]] virtual bool deleteFile(const char* path) const noexcept;
+
+    [[nodiscard]] virtual bool deleteFile(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual bool deleteFile(const char* basePath, const char* subPath) const noexcept;
+    
+    [[nodiscard]] virtual u64 creationTime(const wchar_t* path) const noexcept = 0;
+    [[nodiscard]] virtual u64 creationTime(const char* path) const noexcept;
+    
+    [[nodiscard]] virtual u64 creationTime(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual u64 creationTime(const char* basePath, const char* subPath) const noexcept;
+
+    [[nodiscard]] virtual u64 modifyTime(const wchar_t* path) const noexcept = 0;
+    [[nodiscard]] virtual u64 modifyTime(const char* path) const noexcept;
+
+    [[nodiscard]] virtual u64 modifyTime(const wchar_t* basePath, const wchar_t* subPath) const noexcept;
+    [[nodiscard]] virtual u64 modifyTime(const char* basePath, const char* subPath) const noexcept;
 };

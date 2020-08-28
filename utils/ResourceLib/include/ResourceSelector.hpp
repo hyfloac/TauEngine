@@ -7,7 +7,7 @@
 #include <String.hpp>
 #include <unordered_map>
 
-enum class FileProps : u8;
+enum class FileProps;
 class IFile;
 class IFileLoader;
 

@@ -72,6 +72,8 @@ WDynString PathSanitizer::sanitizeSubPath(const WDynString& path) noexcept
     }
 
     wchar_t* const newPath = fixPathSeparator(path.length(), path.c_str());
+
+    return newPath;
 }
 
 static bool isValidCharset(const uSys length, const wchar_t* const path) noexcept

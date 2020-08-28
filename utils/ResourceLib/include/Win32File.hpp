@@ -8,8 +8,10 @@
 #ifdef _WIN32
 
 #include "IFile.hpp"
+
 #include <Windows.h>
 #include <NumTypes.hpp>
+#include <String.hpp>
 
 class CFile;
 class CFileLoader;
@@ -30,12 +32,18 @@ class Win32File final : public IFile
     DELETE_CM(Win32File);
 private:
     HANDLE _file;
-    const char* _name;
+    WDynString _name;
     FileProps _props;
 public:
-    Win32File(HANDLE file, const char* const name, const FileProps props) noexcept
+    Win32File(HANDLE file, const WDynString& name, const FileProps props) noexcept
         : _file(file)
         , _name(name)
+        , _props(props)
+    { }
+
+    Win32File(HANDLE file, WDynString&& name, const FileProps props) noexcept
+        : _file(file)
+        , _name(::std::move(name))
         , _props(props)
     { }
 
@@ -46,9 +54,10 @@ public:
 
     [[nodiscard]] bool exists() noexcept override;
 
-    [[nodiscard]] const char* name() noexcept override { return _name; }
+    [[nodiscard]] const wchar_t* name() noexcept override { return _name; }
 
     void setPos(uSys pos) noexcept override;
+    void advancePos(iSys phase) noexcept override;
 
     i64 readBytes(u8* buffer, uSys len) noexcept override;
 
@@ -72,25 +81,33 @@ class Win32FileLoader final : public IFileLoader
     DEFAULT_DESTRUCT(Win32FileLoader);
     DEFAULT_CM_PU(Win32FileLoader);
 public:
-    static CPPRef<Win32FileLoader>& Instance() noexcept;
+    static const CPPRef<Win32FileLoader>& Instance() noexcept;
 public:
+    [[nodiscard]] bool fileExists(const wchar_t* path) const noexcept override;
     [[nodiscard]] bool fileExists(const char* path) const noexcept override;
 
+    [[nodiscard]] CPPRef<IFile> load(const wchar_t* path, FileProps props) const noexcept override;
     [[nodiscard]] CPPRef<IFile> load(const char* path, FileProps props) const noexcept override;
 
     [[nodiscard]] CPPRef<Win32File> load2(const char* const path, const FileProps props) const noexcept
     { return RefCast<Win32File>(load(path, props)); }
 
+    [[nodiscard]] bool createFolder(const wchar_t* path) const noexcept override;
     [[nodiscard]] bool createFolder(const char* path) const noexcept override;
 
+    [[nodiscard]] bool createFolders(const wchar_t* path) const noexcept override;
     [[nodiscard]] bool createFolders(const char* path) const noexcept override;
 
+    [[nodiscard]] bool deleteFolder(const wchar_t* path) const noexcept override;
     [[nodiscard]] bool deleteFolder(const char* path) const noexcept override;
 
+    [[nodiscard]] bool deleteFile(const wchar_t* path) const noexcept override;
     [[nodiscard]] bool deleteFile(const char* path) const noexcept override;
 
+    [[nodiscard]] u64 creationTime(const wchar_t* path) const noexcept override;
     [[nodiscard]] u64 creationTime(const char* path) const noexcept override;
 
+    [[nodiscard]] u64 modifyTime(const wchar_t* path) const noexcept override;
     [[nodiscard]] u64 modifyTime(const char* path) const noexcept override;
 };
 

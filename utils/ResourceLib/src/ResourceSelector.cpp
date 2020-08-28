@@ -2,6 +2,8 @@
 #include "VFS.hpp"
 #include <ArrayList.hpp>
 
+#include <TUMaths.hpp>
+
 using RST = IResourceSelectorTransformer;
 
 DynString ResourceSelectorLoader::_cacheDir = "";
@@ -35,16 +37,16 @@ static void writeCache(const VFS::Container& con, const ParseData& parseData, uS
 static void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept;
 
 static bool _fileExists(const VFS::Container& con) noexcept
-{ return con.fileLoader->fileExists(con.path); }
+{ return con.fileLoader->fileExists(con.basePath, con.subPath); }
 
 static CPPRef<IFile> _loadFile(const VFS::Container& con, const FileProps props = FileProps::Read) noexcept
-{ return con.fileLoader->load(con.path, props); }
+{ return con.fileLoader->load(con.basePath, con.subPath, props); }
 
 static u64 _creationTime(const VFS::Container& con) noexcept
-{ return con.fileLoader->creationTime(con.path); }
+{ return con.fileLoader->creationTime(con.basePath, con.subPath); }
 
 static u64 _modifyTime(const VFS::Container& con) noexcept
-{ return con.fileLoader->modifyTime(con.path); }
+{ return con.fileLoader->modifyTime(con.basePath, con.subPath); }
 
 CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
 { return _loader->load(_path, props); }
@@ -52,7 +54,7 @@ CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
 RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
 {
     const VFS::Container cacheDir = VFS::Instance().resolvePath(_cacheDir, path);
-    if(!cacheDir.fileLoader->createFolders(cacheDir.path))
+    if(!cacheDir.fileLoader->createFolders(cacheDir.basePath, cacheDir.subPath))
     { return RefDynArray<SelectedResource>(0); }
 
     const VFS::Container binaryCache = VFS::Instance().resolvePath(_cacheDir, path, filename, ".tauibcache");
@@ -117,7 +119,7 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
         const uSys ind = res.index;
         ret[ind]._index = ind;
         ret[ind]._name = res.filePath;
-        ret[ind]._path = vfsRes.path;
+        ret[ind]._path = StringCast<char>(WDynString(vfsRes.basePath).concat(vfsRes.subPath));
         ret[ind]._loader = vfsRes.fileLoader;
     }
 
