@@ -4,9 +4,9 @@
 #include "Objects.hpp"
 #include "NumTypes.hpp"
 #include "allocator/TauAllocator.hpp"
+#include <atomic>
 
 namespace _ReferenceCountingPointerUtils {
-
 /**
  *   This does not store a direct _T because we may want to
  * cast it to a non-concrete interface, in which case the
@@ -148,7 +148,8 @@ public:
 
     [[nodiscard]] static uSys allocSize() noexcept;
 private:
-    RCDO<_T>* _ptr;
+    RCDO<_T>* _rcdo;
+    _T* _tPtr;
 public:
     template<typename... _Args>
     explicit ReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept;
@@ -159,11 +160,11 @@ public:
     template<typename _TT>
     ReferenceCountingPointer(ReferenceCountingPointer<_TT>&& rcp) noexcept;
 
-    ReferenceCountingPointer(nullptr_t) noexcept;
+    constexpr ReferenceCountingPointer(nullptr_t) noexcept;
 
-    ReferenceCountingPointer() noexcept;
+    constexpr ReferenceCountingPointer() noexcept;
 
-    ~ReferenceCountingPointer() noexcept;
+    ~ReferenceCountingPointer() noexcept override;
 
     ReferenceCountingPointer(const ReferenceCountingPointer<_T>& copy) noexcept;
     ReferenceCountingPointer(ReferenceCountingPointer<_T>&& move) noexcept;
@@ -182,29 +183,29 @@ public:
     template<typename... _Args>
     void reset(TauAllocator& allocator, _Args&&... args) noexcept;
 
-    [[nodiscard]]       _T& operator  *()                override { return _ptr->obj(); }
-    [[nodiscard]] const _T& operator  *() const          override { return _ptr->obj(); }
-    [[nodiscard]]       _T* operator ->()       noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] const _T* operator ->() const noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]]       _T& operator  *()                override { return *_tPtr; }
+    [[nodiscard]] const _T& operator  *() const          override { return *_tPtr; }
+    [[nodiscard]]       _T* operator ->()       noexcept override { return _tPtr; }
+    [[nodiscard]] const _T* operator ->() const noexcept override { return _tPtr; }
 
-    [[nodiscard]]       _T* get()       noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] const _T* get() const noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]]       _T* get()       noexcept override { return _tPtr; }
+    [[nodiscard]] const _T* get() const noexcept override { return _tPtr; }
 
-    [[nodiscard]] uSys refCount() const noexcept override { return _ptr ? _ptr->_refCount : 0; }
+    [[nodiscard]] uSys refCount() const noexcept override { return _rcdo ? _rcdo->_refCount : 0; }
 
-    [[nodiscard]] RCDO<_T>*& _getBlock()       noexcept { return _ptr; }
-    [[nodiscard]] RCDO<_T>*  _getBlock() const noexcept { return _ptr; }
+    [[nodiscard]] RCDO<_T>*& _getBlock()       noexcept { return _rcdo; }
+    [[nodiscard]] RCDO<_T>*  _getBlock() const noexcept { return _rcdo; }
 
-    [[nodiscard]] operator bool() const noexcept override { return _ptr; }
+    [[nodiscard]] operator bool() const noexcept override { return _rcdo; }
 
-    [[nodiscard]] bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
-    [[nodiscard]] bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] bool operator ==(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _rcdo == ptr._rcdo; }
+    [[nodiscard]] bool operator !=(const ReferenceCountingPointer<_T>& ptr) const noexcept { return _rcdo != ptr._rcdo; }
 
     [[nodiscard]] bool operator ==(const _T* const & ptr) const noexcept override;
     [[nodiscard]] bool operator !=(const _T* const & ptr) const noexcept override;
 
-    [[nodiscard]] bool operator ==(nullptr_t) const noexcept override { return !_ptr; }
-    [[nodiscard]] bool operator !=(nullptr_t) const noexcept override { return  _ptr; }
+    [[nodiscard]] bool operator ==(nullptr_t) const noexcept override { return !_rcdo; }
+    [[nodiscard]] bool operator !=(nullptr_t) const noexcept override { return  _rcdo; }
 };
 
 template<typename _T>
@@ -216,7 +217,8 @@ public:
 
     [[nodiscard]] static uSys allocSize() noexcept;
 private:
-    SWRC<_T>* _ptr;
+    SWRC<_T>* _swrc;
+    _T* _tPtr;
 public:
     template<typename... _Args>
     explicit StrongReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept;
@@ -227,11 +229,11 @@ public:
     template<typename _TT>
     StrongReferenceCountingPointer(StrongReferenceCountingPointer<_TT>&& rcp) noexcept;
 
-    StrongReferenceCountingPointer(nullptr_t) noexcept;
+    constexpr StrongReferenceCountingPointer(nullptr_t) noexcept;
 
-    StrongReferenceCountingPointer() noexcept;
+    constexpr StrongReferenceCountingPointer() noexcept;
 
-    ~StrongReferenceCountingPointer() noexcept;
+    ~StrongReferenceCountingPointer() noexcept override;
 
     StrongReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& copy) noexcept;
     StrongReferenceCountingPointer(StrongReferenceCountingPointer<_T>&& move) noexcept;
@@ -255,22 +257,22 @@ public:
     template<typename... _Args>
     void reset(TauAllocator& allocator, _Args&&... args) noexcept;
 
-    [[nodiscard]]       _T& operator  *()                override { return _ptr->obj(); }
-    [[nodiscard]] const _T& operator  *() const          override { return _ptr->obj(); }
-    [[nodiscard]]       _T* operator ->()       noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] const _T* operator ->() const noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]]       _T& operator  *()                override { return *_tPtr; }
+    [[nodiscard]] const _T& operator  *() const          override { return *_tPtr; }
+    [[nodiscard]]       _T* operator ->()       noexcept override { return _tPtr; }
+    [[nodiscard]] const _T* operator ->() const noexcept override { return _tPtr; }
 
-    [[nodiscard]]       _T* get()       noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] const _T* get() const noexcept override { return _ptr ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]]       _T* get()       noexcept override { return _tPtr; }
+    [[nodiscard]] const _T* get() const noexcept override { return _tPtr; }
 
-    [[nodiscard]] uSys refCount()       const noexcept override { return _ptr ? _ptr->_strongRefCount : 0; }
-    [[nodiscard]] uSys strongRefCount() const noexcept          { return _ptr ? _ptr->_strongRefCount : 0; }
-    [[nodiscard]] uSys weakRefCount()   const noexcept          { return _ptr ? _ptr->_weakRefCount   : 0; }
+    [[nodiscard]] uSys refCount()       const noexcept override { return _swrc ? _swrc->_strongRefCount : 0; }
+    [[nodiscard]] uSys strongRefCount() const noexcept          { return _swrc ? _swrc->_strongRefCount : 0; }
+    [[nodiscard]] uSys weakRefCount()   const noexcept          { return _swrc ? _swrc->_weakRefCount   : 0; }
 
-    [[nodiscard]] SWRC<_T>*& _getBlock()       noexcept { return _ptr; }
-    [[nodiscard]] SWRC<_T>*  _getBlock() const noexcept { return _ptr; }
+    [[nodiscard]] SWRC<_T>*& _getBlock()       noexcept { return _swrc; }
+    [[nodiscard]] SWRC<_T>*  _getBlock() const noexcept { return _swrc; }
 
-    [[nodiscard]] operator bool() const noexcept override { return _ptr; }
+    [[nodiscard]] operator bool() const noexcept override { return _swrc; }
 
     [[nodiscard]] bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept;
     [[nodiscard]] bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept;
@@ -281,8 +283,8 @@ public:
     [[nodiscard]] bool operator ==(const _T* const& ptr) const noexcept override;
     [[nodiscard]] bool operator !=(const _T* const& ptr) const noexcept override;
 
-    [[nodiscard]] bool operator ==(nullptr_t) const noexcept override { return !_ptr; }
-    [[nodiscard]] bool operator !=(nullptr_t) const noexcept override { return  _ptr; }
+    [[nodiscard]] bool operator ==(nullptr_t) const noexcept override { return !_swrc; }
+    [[nodiscard]] bool operator !=(nullptr_t) const noexcept override { return  _swrc; }
 private:
     friend class WeakReferenceCountingPointer<_T>;
 };
@@ -296,7 +298,8 @@ public:
 
     [[nodiscard]] static uSys allocSize() noexcept;
 private:
-    SWRC<_T>* _ptr;
+    SWRC<_T>* _swrc;
+    _T* _tPtr;
 public:
     WeakReferenceCountingPointer(const StrongReferenceCountingPointer<_T>& ptr) noexcept;
 
@@ -309,11 +312,11 @@ public:
     template<typename _TT>
     WeakReferenceCountingPointer(WeakReferenceCountingPointer<_TT>&& rcp) noexcept;
 
-    WeakReferenceCountingPointer(nullptr_t) noexcept;
+    constexpr WeakReferenceCountingPointer(nullptr_t) noexcept;
 
-    WeakReferenceCountingPointer() noexcept;
+    constexpr WeakReferenceCountingPointer() noexcept;
 
-    ~WeakReferenceCountingPointer() noexcept;
+    ~WeakReferenceCountingPointer() noexcept override;
 
     WeakReferenceCountingPointer(const WeakReferenceCountingPointer<_T>& copy) noexcept;
     WeakReferenceCountingPointer(WeakReferenceCountingPointer<_T>&& move) noexcept;
@@ -332,60 +335,84 @@ public:
     template<typename _TT>
     WeakReferenceCountingPointer<_T>& operator=(WeakReferenceCountingPointer<_TT>&& move) noexcept;
 
-    [[nodiscard]]       _T& operator  *()                override { return _ptr->obj(); }
-    [[nodiscard]] const _T& operator  *() const          override { return _ptr->obj(); }
-    [[nodiscard]]       _T* operator ->()       noexcept override { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] const _T* operator ->() const noexcept override { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]]       _T& operator  *()                override { return *_tPtr; }
+    [[nodiscard]] const _T& operator  *() const          override { return *_tPtr; }
+    [[nodiscard]]       _T* operator ->()       noexcept override { return _swrc && _swrc->_strongRefCount ? _tPtr : nullptr; }
+    [[nodiscard]] const _T* operator ->() const noexcept override { return _swrc && _swrc->_strongRefCount ? _tPtr : nullptr; }
 
-    [[nodiscard]]       _T* get()       noexcept override { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
-    [[nodiscard]] const _T* get() const noexcept override { return _ptr && _ptr->_strongRefCount ? _ptr->objPtr() : nullptr; }
+    [[nodiscard]]       _T* get()       noexcept override { return _swrc && _swrc->_strongRefCount ? _tPtr : nullptr; }
+    [[nodiscard]] const _T* get() const noexcept override { return _swrc && _swrc->_strongRefCount ? _tPtr : nullptr; }
 
-    [[nodiscard]] uSys refCount()       const noexcept override { return _ptr ? _ptr->_weakRefCount   : 0; }
-    [[nodiscard]] uSys strongRefCount() const noexcept          { return _ptr ? _ptr->_strongRefCount : 0; }
-    [[nodiscard]] uSys weakRefCount()   const noexcept          { return _ptr ? _ptr->_weakRefCount   : 0; }
+    [[nodiscard]] uSys refCount()       const noexcept override { return _swrc ? _swrc->_weakRefCount   : 0; }
+    [[nodiscard]] uSys strongRefCount() const noexcept          { return _swrc ? _swrc->_strongRefCount : 0; }
+    [[nodiscard]] uSys weakRefCount()   const noexcept          { return _swrc ? _swrc->_weakRefCount   : 0; }
 
-    [[nodiscard]] SWRC<_T>*& _getBlock()       noexcept { return _ptr; }
-    [[nodiscard]] SWRC<_T>*  _getBlock() const noexcept { return _ptr; }
+    [[nodiscard]] SWRC<_T>*& _getBlock()       noexcept { return _swrc; }
+    [[nodiscard]] SWRC<_T>*  _getBlock() const noexcept { return _swrc; }
 
-    [[nodiscard]] operator bool() const noexcept override { return _ptr && _ptr->_strongRefCount; }
+    [[nodiscard]] operator bool() const noexcept override { return _swrc && _swrc->_strongRefCount; }
 
-    [[nodiscard]] bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
-    [[nodiscard]] bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] bool operator ==(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _swrc == ptr._rcdo; }
+    [[nodiscard]] bool operator !=(const StrongReferenceCountingPointer<_T>& ptr) const noexcept { return _swrc != ptr._rcdo; }
 
-    [[nodiscard]] bool operator ==(const WeakReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr == ptr._ptr; }
-    [[nodiscard]] bool operator !=(const WeakReferenceCountingPointer<_T>& ptr) const noexcept { return _ptr != ptr._ptr; }
+    [[nodiscard]] bool operator ==(const WeakReferenceCountingPointer<_T>& ptr) const noexcept { return _swrc == ptr._swrc; }
+    [[nodiscard]] bool operator !=(const WeakReferenceCountingPointer<_T>& ptr) const noexcept { return _swrc != ptr._swrc; }
 
     [[nodiscard]] bool operator ==(const _T* const& ptr) const noexcept override;
     [[nodiscard]] bool operator !=(const _T* const& ptr) const noexcept override;
 
-    [[nodiscard]] bool operator ==(const nullptr_t) const noexcept override { return !_ptr; }
-    [[nodiscard]] bool operator !=(const nullptr_t) const noexcept override { return  _ptr; }
+    [[nodiscard]] bool operator ==(const nullptr_t) const noexcept override { return !_swrc; }
+    [[nodiscard]] bool operator !=(const nullptr_t) const noexcept override { return  _swrc; }
 private:
     friend class StrongReferenceCountingPointer<_T>;
 };
 
 template<typename _ToT, typename _FromT>
-ReferenceCountingPointer<_ToT> RCPCast(const ReferenceCountingPointer<_FromT>& ptr) noexcept
+ReferenceCountingPointer<_ToT> RCPStaticCast(const ReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return ReferenceCountingPointer<_ToT>(ptr); }
+
+template<typename _ToT, typename _FromT>
+ReferenceCountingPointer<_ToT> RCPStaticCast(ReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return ReferenceCountingPointer<_ToT>(ptr); }
+
+template<typename _ToT, typename _FromT>
+StrongReferenceCountingPointer<_ToT> RCPStaticCast(const StrongReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return StrongReferenceCountingPointer<_ToT>(ptr); }
+
+template<typename _ToT, typename _FromT>
+StrongReferenceCountingPointer<_ToT> RCPStaticCast(StrongReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return StrongReferenceCountingPointer<_ToT>(ptr); }
+
+template<typename _ToT, typename _FromT>
+WeakReferenceCountingPointer<_ToT> RCPStaticCast(const WeakReferenceCountingPointer<_FromT>& ptr) noexcept
+{ return WeakReferenceCountingPointer<_ToT>(ptr); }
+
+template<typename _ToT, typename _FromT>
+WeakReferenceCountingPointer<_ToT> RCPStaticCast(WeakReferenceCountingPointer<_FromT>&& ptr) noexcept
+{ return WeakReferenceCountingPointer<_ToT>(ptr); }
+
+template<typename _ToT, typename _FromT>
+ReferenceCountingPointer<_ToT> RCPReinterpretCast(const ReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const ReferenceCountingPointer<_ToT>&>(ptr); }
 
 template<typename _ToT, typename _FromT>
-ReferenceCountingPointer<_ToT> RCPCast(ReferenceCountingPointer<_FromT>&& ptr) noexcept
+ReferenceCountingPointer<_ToT> RCPReinterpretCast(ReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<ReferenceCountingPointer<_ToT>&&>(ptr); }
 
 template<typename _ToT, typename _FromT>
-StrongReferenceCountingPointer<_ToT> RCPCast(const StrongReferenceCountingPointer<_FromT>& ptr) noexcept
+StrongReferenceCountingPointer<_ToT> RCPReinterpretCast(const StrongReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const StrongReferenceCountingPointer<_ToT>&>(ptr); }
 
 template<typename _ToT, typename _FromT>
-StrongReferenceCountingPointer<_ToT> RCPCast(StrongReferenceCountingPointer<_FromT>&& ptr) noexcept
+StrongReferenceCountingPointer<_ToT> RCPReinterpretCast(StrongReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<StrongReferenceCountingPointer<_ToT>&&>(ptr); }
 
 template<typename _ToT, typename _FromT>
-WeakReferenceCountingPointer<_ToT> RCPCast(const WeakReferenceCountingPointer<_FromT>& ptr) noexcept
+WeakReferenceCountingPointer<_ToT> RCPReinterpretCast(const WeakReferenceCountingPointer<_FromT>& ptr) noexcept
 { return reinterpret_cast<const WeakReferenceCountingPointer<_ToT>&>(ptr); }
 
 template<typename _ToT, typename _FromT>
-WeakReferenceCountingPointer<_ToT> RCPCast(WeakReferenceCountingPointer<_FromT>&& ptr) noexcept
+WeakReferenceCountingPointer<_ToT> RCPReinterpretCast(WeakReferenceCountingPointer<_FromT>&& ptr) noexcept
 { return reinterpret_cast<WeakReferenceCountingPointer<_ToT>&&>(ptr); }
 
 #include "ReferenceCountingPointer.inl"

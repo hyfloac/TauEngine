@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyClangDiagnosticSignCompare
 #pragma once
 
 #include "NumTypes.hpp"
@@ -32,28 +33,58 @@
 #define DEG_2_RAD(__F) DEG_2_RAD_F(__F)
 
 template<typename _T>
-constexpr _T minT(const _T a, const _T b) noexcept
+[[nodiscard]] inline constexpr _T minT(const _T a, const _T b) noexcept
 { return a < b ? a : b; }
 
 template<typename _T>
-constexpr _T minT(const _T a, const _T b, const _T c) noexcept
+[[nodiscard]] inline constexpr _T minT(const _T a, const _T b, const _T c) noexcept
 { return minT(minT(a, b), c); }
 
 template<typename _T>
-constexpr _T minT(const _T a, const _T b, const _T c, const _T d) noexcept
+[[nodiscard]] inline constexpr _T minT(const _T a, const _T b, const _T c, const _T d) noexcept
 { return minT(minT(a, b), minT(c, d)); }
 
 template<typename _T>
-constexpr _T maxT(const _T a, const _T b) noexcept
+[[nodiscard]] inline constexpr _T maxT(const _T a, const _T b) noexcept
 { return a > b ? a : b; }
 
 template<typename _T>
-constexpr _T maxT(const _T a, const _T b, const _T c) noexcept
+[[nodiscard]] inline constexpr _T maxT(const _T a, const _T b, const _T c) noexcept
 { return maxT(maxT(a, b), c); }
 
 template<typename _T>
-constexpr _T maxT(const _T a, const _T b, const _T c, const _T d) noexcept
+[[nodiscard]] inline constexpr _T maxT(const _T a, const _T b, const _T c, const _T d) noexcept
 { return maxT(maxT(a, b), maxT(c, d)); }
+
+template<typename _T0, typename _T1>
+[[nodiscard]] inline constexpr _T0 minT(const _T0 a, const _T1 b) noexcept
+{ return a < b ? a : b; }
+
+template<typename _T0, typename _T1, typename _T2>
+[[nodiscard]] inline constexpr _T0 minT(const _T0 a, const _T1 b, const _T2 c) noexcept
+{ return minT(minT(a, b), c); }
+
+template<typename _T0, typename _T1, typename _T2, typename _T3>
+[[nodiscard]] inline constexpr _T0 minT(const _T0 a, const _T1 b, const _T2 c, const _T3 d) noexcept
+{ return minT(minT(a, b), minT(c, d)); }
+
+template<typename _T0, typename _T1>
+[[nodiscard]] inline constexpr _T0 maxT(const _T0 a, const _T1 b) noexcept
+{ return a > b ? a : b; }
+
+template<typename _T0, typename _T1, typename _T2>
+[[nodiscard]] inline constexpr _T0 maxT(const _T0 a, const _T1 b, const _T2 c) noexcept
+{ return maxT(maxT(a, b), c); }
+
+template<typename _T0, typename _T1, typename _T2, typename _T3>
+[[nodiscard]] inline constexpr _T0 maxT(const _T0 a, const _T1 b, const _T2 c, const _T3 d) noexcept
+{ return maxT(maxT(a, b), maxT(c, d)); }
+
+const u32 tab32[32] = {
+     0,  9,  1, 10, 13, 21,  2, 29,
+    11, 14, 16, 18, 22, 25,  3, 30,
+     8, 12, 20, 28, 15, 17, 24,  7,
+    19, 27, 23,  6, 26,  5,  4, 31 };
 
 const u32 tab64[64] = {
     63,  0, 58,  1, 59, 47, 53,  2,
@@ -65,14 +96,17 @@ const u32 tab64[64] = {
     56, 45, 25, 31, 35, 16,  9, 12,
     44, 24, 15,  8, 23,  7,  6,  5 };
 
+[[nodiscard]] inline u32 log2i_32(u32 value) noexcept
+{
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    return tab32[((value * 0x07C4ACDDu)) >> 27];
+}
 
-const u32 tab32[32] = {
-     0,  9,  1, 10, 13, 21,  2, 29,
-    11, 14, 16, 18, 22, 25,  3, 30,
-     8, 12, 20, 28, 15, 17, 24,  7,
-    19, 27, 23,  6, 26,  5,  4, 31 };
-
-static inline u32 log2i_64(u64 value) noexcept
+[[nodiscard]] inline u32 log2i_64(u64 value) noexcept
 {
     value |= value >> 1;
     value |= value >> 2;
@@ -83,18 +117,126 @@ static inline u32 log2i_64(u64 value) noexcept
     return tab64[((value - (value >> 1)) * 0x07EDD5E59A4E28C2ull) >> 58];
 }
 
-static inline u32 log2i_32(u32 value) noexcept
-{
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    return tab32[((value * 0x07C4ACDDu)) >> 27];
-}
+[[nodiscard]] inline u32 log2i(const u32 value) noexcept
+{ return log2i_32(value); }
 
-static inline u32 log2i(const u64 value) noexcept
+[[nodiscard]] inline u32 log2i(const u64 value) noexcept
 { return log2i_64(value); }
 
-static inline u32 log2i(const u32 value) noexcept
-{ return log2i_32(value); }
+template<typename _T>
+[[nodiscard]] constexpr inline _T _alignTo(const _T val, const _T alignment) noexcept
+{
+    if(alignment == 1)
+    { return val; }
+    return (val + alignment) & ~(alignment - 1);
+}
+
+template<typename _Tv, typename _Ta>
+[[nodiscard]] constexpr inline _Tv _alignTo(const _Tv val, const _Ta _alignment) noexcept
+{
+    const _Tv alignment = static_cast<_Tv>(_alignment);
+
+    if(alignment == 1)
+    { return val; }
+    return (val + alignment) & ~(alignment - 1);
+}
+
+template<typename _T, _T _Alignment>
+[[nodiscard]] constexpr inline _T _alignTo(const _T val) noexcept
+{
+    if(_Alignment == 1)
+    { return val; }
+    return (val + _Alignment) & ~(_Alignment - 1);
+}
+
+template<typename _Tv, typename _Ta, _Ta _Alignment>
+[[nodiscard]] constexpr inline _Tv _alignTo(const _Tv val) noexcept
+{
+    constexpr _Tv alignment = static_cast<_Tv>(_Alignment);
+
+    if(alignment == 1)
+    { return val; }
+    return (val + alignment) & ~(alignment - 1);
+}
+
+#ifdef _WIN32
+#include <Windows.h>
+
+[[nodiscard]] inline u32 _ctz(const u32 v) noexcept
+{
+    unsigned long trailingZero = 0;
+    _BitScanForward(&trailingZero, v);
+    return trailingZero;
+}
+
+[[nodiscard]] inline u32 _clz(const u32 v) noexcept
+{
+    unsigned long leadingZero = 0;
+    _BitScanReverse(&leadingZero, v);
+    return 31 - leadingZero;
+}
+
+[[nodiscard]] inline u64 _ctz(const u64 v) noexcept
+{
+    unsigned long trailingZero = 0;
+    _BitScanForward64(&trailingZero, v);
+    return trailingZero;
+}
+
+[[nodiscard]] inline u64 _clz(const u64 v) noexcept
+{
+    unsigned long leadingZero = 0;
+    _BitScanReverse64(&leadingZero, v);
+    return 63 - leadingZero;
+}
+#else
+[[nodiscard]] inline u32 _ctz(const u32 v) noexcept
+{ return __builtin_ctz(v); }
+
+[[nodiscard]] inline u32 _clz(const u32 v) noexcept
+{ return __builtin_clz(v); }
+
+[[nodiscard]] inline u64 _ctz(const u64 v) noexcept
+{ return __builtin_ctzll(v); }
+
+[[nodiscard]] inline u64 _clz(const u64 v) noexcept
+{ return __builtin_clzll(v); }
+#endif
+
+#if defined(TAU_CROSS_PLATFORM)
+[[nodiscard]] constexpr inline u32 _nextPowerOf2(const u32 v) noexcept
+{
+    --v;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    return v + 1;
+}
+
+[[nodiscard]] constexpr inline u64 _nextPowerOf2(const u64 v) noexcept
+{
+    --v;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v |= v >> 32;
+    return v + 1;
+}
+#else
+[[nodiscard]] inline u32 _nextPowerOf2(const u32 v) noexcept
+{
+    if(v == 1)
+    { return 1; }
+    return 1 << (32 - _clz(v - 1));
+}
+
+[[nodiscard]] inline u64 _nextPowerOf2(const u64 v) noexcept
+{
+    if(v == 1)
+    { return 1; }
+    return 1 << (64 - _clz(v - 1)); }
+#endif

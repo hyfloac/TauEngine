@@ -2,6 +2,7 @@
 
 #include "Objects.hpp"
 #include "NumTypes.hpp"
+#include "Safeties.hpp"
 #include <functional>
 
 template<typename _T>
@@ -77,6 +78,21 @@ template<typename _T>
         { return obj._isRTType<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static bool _isRTType(const _TYPE* const obj) noexcept \
+        { return obj->_isRTType<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType(const CPPRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType(const CPPWeakRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType(const Ref<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType(const StrongRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType(const WeakRef<_TYPE>& obj) noexcept \
         { return obj->_isRTType<_T>(); }
 
 #define RTTD_BASE_CHECK(_TYPE) \
@@ -89,6 +105,21 @@ template<typename _T>
         { return obj._isRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static bool _isRTType_##_TYPE(const _TYPE* const obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType_##_TYPE(const CPPRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType_##_TYPE(const CPPWeakRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType_##_TYPE(const Ref<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType_##_TYPE(const StrongRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static bool _isRTType_##_TYPE(const WeakRef<_TYPE>& obj) noexcept \
         { return obj->_isRTType_##_TYPE<_T>(); }
 
 #define RTT_BASE_CAST(_TYPE) \
@@ -110,7 +141,19 @@ template<typename _T>
         { return obj->_castRTType<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static const _T* _castRTType(const _TYPE* const obj) noexcept \
-        { return obj->_castRTType<_T>(); }
+        { return obj->_castRTType<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType(const CPPRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>() ? RefStaticCast<_T>(obj) : nullptr; } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType(const Ref<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>() ? RefStaticCast<_T>(obj) : nullptr; } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType(const StrongRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>() ? RefStaticCast<_T>(obj) : nullptr; } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType(const WeakRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType<_T>() ? RefStaticCast<_T>(obj) : nullptr; }
 
 #define RTTD_BASE_CAST(_TYPE) \
     public: \
@@ -131,7 +174,19 @@ template<typename _T>
         { return obj->_castRTType_##_TYPE<_T>(); } \
         template<typename _T> \
         [[nodiscard]] static const _T* _castRTType_##_TYPE(const _TYPE* const obj) noexcept \
-        { return obj->_castRTType_##_TYPE<_T>(); }
+        { return obj->_castRTType_##_TYPE<_T>(); } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType_##_TYPE(const CPPRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>() ? RefStaticCast<_T>(obj) : nullptr; } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType_##_TYPE(const Ref<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>() ? RefStaticCast<_T>(obj) : nullptr; } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType_##_TYPE(const StrongRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>() ? RefStaticCast<_T>(obj) : nullptr; } \
+        template<typename _T> \
+        [[nodiscard]] static const _T* _castRTType_##_TYPE(const WeakRef<_TYPE>& obj) noexcept \
+        { return obj->_isRTType_##_TYPE<_T>() ? RefStaticCast<_T>(obj) : nullptr; }
 
 namespace _RTT_Utils
 {
@@ -142,11 +197,21 @@ namespace _RTT_Utils
     template<typename _T>
     using remove_reference_t = typename remove_reference<_T>::type;
 
-    template<typename _T> struct remove_pointer                     { typedef _T type; };
-    template<typename _T> struct remove_pointer<_T*>                { typedef _T type; };
-    template<typename _T> struct remove_pointer<_T* const>          { typedef _T type; };
-    template<typename _T> struct remove_pointer<_T* volatile>       { typedef _T type; };
-    template<typename _T> struct remove_pointer<_T* const volatile> { typedef _T type; };
+    template<typename _T> struct remove_pointer                       { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T*>                  { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T* const>            { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T* volatile>         { typedef _T type; };
+    template<typename _T> struct remove_pointer<_T* const volatile>   { typedef _T type; };
+    template<typename _T> struct remove_pointer<CPPRef<_T>>           { typedef _T type; };
+    template<typename _T> struct remove_pointer<CPPWeakRef<_T>>       { typedef _T type; };
+    template<typename _T> struct remove_pointer<Ref<_T>>              { typedef _T type; };
+    template<typename _T> struct remove_pointer<StrongRef<_T>>        { typedef _T type; };
+    template<typename _T> struct remove_pointer<WeakRef<_T>>          { typedef _T type; };
+    template<typename _T> struct remove_pointer<const CPPRef<_T>>     { typedef _T type; };
+    template<typename _T> struct remove_pointer<const CPPWeakRef<_T>> { typedef _T type; };
+    template<typename _T> struct remove_pointer<const Ref<_T>>        { typedef _T type; };
+    template<typename _T> struct remove_pointer<const StrongRef<_T>>  { typedef _T type; };
+    template<typename _T> struct remove_pointer<const WeakRef<_T>>    { typedef _T type; };
 
     template<typename _T>
     using remove_pointer_t = typename remove_pointer<_T>::type;

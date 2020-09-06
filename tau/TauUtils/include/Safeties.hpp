@@ -389,17 +389,49 @@ template<typename _T>
 using NullableWeakRef = WeakReferenceCountingPointer<_T>;
 
 template<typename _Out, typename _In>
-[[nodiscard]] static inline CPPRef<_Out> RefCast(const CPPRef<_In>& in) noexcept
+[[nodiscard]] static inline CPPRef<_Out> RefStaticCast(const CPPRef<_In>& in) noexcept
 { return std::static_pointer_cast<_Out>(in); }
 
 template<typename _Out, typename _In>
+[[nodiscard]] static inline Ref<_Out> RefStaticCast(const Ref<_In>& in) noexcept
+{ return RCPStaticCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline StrongRef<_Out> RefStaticCast(const StrongRef<_In>& in) noexcept
+{ return RCPStaticCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline WeakRef<_Out> RefStaticCast(const WeakRef<_In>& in) noexcept
+{ return RCPStaticCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline CPPRef<_Out> RefReinterpretCast(const CPPRef<_In>& in) noexcept
+{ return std::reinterpret_pointer_cast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline Ref<_Out> RefReinterpretCast(const Ref<_In>& in) noexcept
+{ return RCPReinterpretCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline StrongRef<_Out> RefReinterpretCast(const StrongRef<_In>& in) noexcept
+{ return RCPReinterpretCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline WeakRef<_Out> RefReinterpretCast(const WeakRef<_In>& in) noexcept
+{ return RCPReinterpretCast<_Out>(in); }
+
+template<typename _Out, typename _In>
+[[nodiscard]] static inline CPPRef<_Out> RefCast(const CPPRef<_In>& in) noexcept
+{ return RefStaticCast<_Out>(in); }
+
+template<typename _Out, typename _In>
 [[nodiscard]] static inline Ref<_Out> RefCast(const Ref<_In>& in) noexcept
-{ return RCPCast<_Out>(in); }
+{ return RefStaticCast<_Out>(in); }
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline StrongRef<_Out> RefCast(const StrongRef<_In>& in) noexcept
-{ return RCPCast<_Out>(in); }
+{ return RefStaticCast<_Out>(in); }
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline WeakRef<_Out> RefCast(const WeakRef<_In>& in) noexcept
-{ return RCPCast<_Out>(in); }
+{ return RefStaticCast<_Out>(in); }

@@ -57,16 +57,16 @@ private:
     uSys _allocIndex;
 public:
     FreeListAllocator(const PageCountVal numReservedPages = PageCountVal { 1024 }, const uSys allocPages = 4) noexcept
-        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
-        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
+        : _allocPages(_nextPowerOf2(allocPages))
+        , _numReservedPages(_alignTo(static_cast<uSys>(numReservedPages), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _allocIndex(0)
     { }
 
     FreeListAllocator(const uSys maxElements, const uSys allocPages = 4) noexcept
-        : _allocPages(_TauAllocatorUtils::_nextPowerOf2(allocPages))
-        , _numReservedPages(_TauAllocatorUtils::_alignTo(static_cast<uSys>((maxElements * BlockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        : _allocPages(_nextPowerOf2(allocPages))
+        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements * BlockSize) / PageAllocator::pageSize() + 1), _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _allocIndex(0)

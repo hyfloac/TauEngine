@@ -151,6 +151,8 @@ public:
         return copy;
     }
 
+    [[nodiscard]] inline uSys index() const noexcept { return _index; }
+
     [[nodiscard]] inline       _T& operator*()       noexcept { return _arr[_index]; }
     [[nodiscard]] inline const _T& operator*() const noexcept { return _arr[_index]; }
 
@@ -253,6 +255,8 @@ public:
         this->operator--();
         return copy;
     }
+
+    [[nodiscard]] inline uSys index() const noexcept { return _index; }
 
     [[nodiscard]] inline const _T& operator*() const noexcept { return _arr[_index]; }
 
