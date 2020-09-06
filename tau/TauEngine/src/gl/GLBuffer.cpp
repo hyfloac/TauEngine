@@ -372,7 +372,7 @@ NullableRef<IVertexBuffer> GLBufferBuilder::buildTauRef(const VertexBufferArgs& 
 
     initBuffer(args, glArgs);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IVertexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IVertexBuffer>(buffer));
 }
 
 NullableStrongRef<IVertexBuffer> GLBufferBuilder::buildTauSRef(const VertexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
@@ -391,7 +391,7 @@ NullableStrongRef<IVertexBuffer> GLBufferBuilder::buildTauSRef(const VertexBuffe
 
     initBuffer(args, glArgs);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IVertexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IVertexBuffer>(buffer));
 }
 
 GLIndexBuffer* GLBufferBuilder::build(const IndexBufferArgs& args, Error* const error) const noexcept
@@ -467,7 +467,7 @@ NullableRef<IIndexBuffer> GLBufferBuilder::buildTauRef(const IndexBufferArgs& ar
 
     initBuffer(args, glArgs);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IIndexBuffer>(buffer));
 }
 
 NullableStrongRef<IIndexBuffer> GLBufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
@@ -486,7 +486,7 @@ NullableStrongRef<IIndexBuffer> GLBufferBuilder::buildTauSRef(const IndexBufferA
 
     initBuffer(args, glArgs);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IIndexBuffer>(buffer));
 }
 
 GLUniformBuffer* GLBufferBuilder::build(const UniformBufferArgs& args, Error* const error) const noexcept
@@ -562,7 +562,7 @@ NullableRef<IUniformBuffer> GLBufferBuilder::buildTauRef(const UniformBufferArgs
 
     initBuffer(args, glArgs);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IUniformBuffer>(buffer));
 }
 
 NullableStrongRef<IUniformBuffer> GLBufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
@@ -581,7 +581,7 @@ NullableStrongRef<IUniformBuffer> GLBufferBuilder::buildTauSRef(const UniformBuf
 
     initBuffer(args, glArgs);
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IUniformBuffer>(buffer));
 }
 
 bool GLBufferBuilder::processArgs(const VertexBufferArgs& args, GLBufferArgs* const glArgs, Error* const error) const noexcept

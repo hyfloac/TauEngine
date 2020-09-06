@@ -33,7 +33,7 @@ public:
         , _currentMapType(static_cast<EResource::MapType>(0))
     { }
 
-    ~GLResourceBuffer() noexcept
+    ~GLResourceBuffer() noexcept override
     {
         delete _atomicMapCount;
     }

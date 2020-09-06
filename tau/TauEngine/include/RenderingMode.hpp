@@ -1,16 +1,13 @@
 #pragma once
 
-#pragma warning(push, 0)
-#include <vector>
-#pragma warning(pop)
-
 #include <NumTypes.hpp>
 #include <Objects.hpp>
+#include <ArrayList.hpp>
 
 class RenderingMode final
 {
     DEFAULT_DESTRUCT(RenderingMode);
-    DEFAULT_COPY(RenderingMode);
+    DEFAULT_CM_PU(RenderingMode);
 public:
     /**
      * Describes the various possible rendering modes.
@@ -45,10 +42,12 @@ public:
 private:
     Mode _currentMode;
     bool _debugMode;
-    std::vector<modeChange_f> _changeHandlers;
+    ArrayList<modeChange_f> _changeHandlers;
 public:
     RenderingMode(const Mode initialMode, const bool debugMode = false) noexcept
-        : _currentMode(initialMode), _debugMode(debugMode)
+        : _currentMode(initialMode)
+        , _debugMode(debugMode)
+        , _changeHandlers(4096)
     { }
 
     [[nodiscard]] inline Mode currentMode() const noexcept { return _currentMode; }
@@ -56,7 +55,7 @@ public:
 
     [[nodiscard]] inline bool debugMode() const noexcept { return _debugMode; }
 
-    void setMode(Mode mode) noexcept
+    void setMode(const Mode mode) noexcept
     {
         for(auto handler : _changeHandlers)
         { handler(_currentMode, _debugMode, mode, _debugMode); }
@@ -64,7 +63,7 @@ public:
         _currentMode = mode;
     }
 
-    void setDebugMode(bool debugMode) noexcept
+    void setDebugMode(const bool debugMode) noexcept
     {
         for(auto handler : _changeHandlers)
         { handler(_currentMode, _debugMode, _currentMode, debugMode); }
@@ -72,7 +71,7 @@ public:
         _debugMode = debugMode;
     }
 
-    void setMode(Mode mode, bool debugMode) noexcept
+    void setMode(const Mode mode, const bool debugMode) noexcept
     {
         for(auto handler : _changeHandlers)
         { handler(_currentMode, _debugMode, mode, debugMode); }
@@ -81,16 +80,16 @@ public:
         _debugMode = debugMode;
     }
 
-    void registerChangeHandler(modeChange_f handler) noexcept
+    void registerChangeHandler(const modeChange_f handler) noexcept
     {
-        _changeHandlers.push_back(handler);
+        _changeHandlers.add(handler);
     }
 
-    void unregisterChangeHandler(modeChange_f handler) noexcept
+    void unregisterChangeHandler(const modeChange_f handler) noexcept
     {
         const auto it = std::find(_changeHandlers.begin(), _changeHandlers.end(), handler);
         if(it != _changeHandlers.end())
-        { _changeHandlers.erase(it); }
+        { _changeHandlers.removeFast(it.index()); }
     }
 
     [[nodiscard]] inline bool isOpenGL() const noexcept

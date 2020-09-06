@@ -12,8 +12,9 @@
 #include "ResourceEnums.hpp"
 #include "BufferEnums.hpp"
 #include "texture/TextureEnums.hpp"
+#include "_GraphicsOpaqueObjects.hpp"
 
-class IRenderingContext;
+class ICommandList;
 class IResourceRawInterface;
 
 /**
@@ -78,8 +79,8 @@ public:
 
     [[nodiscard]] virtual EResource::Type resourceType() const noexcept = 0;
 
-    [[nodiscard]] virtual void* map(IRenderingContext& context, EResource::MapType mapType = EResource::MapType::Default, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none()) noexcept = 0;
-    virtual void unmap(IRenderingContext& context, uSys mipLevel = 0, uSys arrayIndex = 0) noexcept = 0;
+    [[nodiscard]] virtual void* map(ICommandList& context, EResource::MapType mapType = EResource::MapType::Default, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none(), const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
+    virtual void unmap(ICommandList& context, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = null) noexcept = 0;
 
     template<typename _Args>
     [[nodiscard]] const _Args* getArgs() const noexcept { return null; }
@@ -220,38 +221,15 @@ public:
      * @tparam _Args
      *        The ResourceXArgs type. This dictates the type of
      *      resource.
-     * @tparam _Ptr
-     *        The pointer type. This is going to be an IResource*,
-     *      a NullableRef<IResource>, or a
-     *      NullableStrongRef<IResource>.
      */
-    template<typename _Args, typename _Ptr>
+    template<typename _Args>
     [[nodiscard]] uSys allocSize() const noexcept
     { return 0; }
 
-    [[nodiscard]] virtual IResource* build(const ResourceBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IResource* build(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual IResource* build(const ResourceTexture1DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IResource* build(const ResourceTexture1DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTexture1DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTexture1DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual IResource* build(const ResourceTexture2DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IResource* build(const ResourceTexture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTexture2DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTexture2DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-
-    [[nodiscard]] virtual IResource* build(const ResourceTexture3DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IResource* build(const ResourceTexture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IResource> buildCPPRef(const ResourceTexture3DArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IResource> buildTauSRef(const ResourceTexture3DArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 protected:
     [[nodiscard]] virtual uSys _allocSize(uSys type) const noexcept = 0;
 };
@@ -288,50 +266,23 @@ inline const ResourceTexture3DArgs* IResource::getArgs<ResourceTexture3DArgs>() 
     return null;
 }
 
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceBufferArgs, IResource*>() const noexcept
-{ return _allocSize(1); }
+#define RB_AS_BUFFER     1
+#define RB_AS_TEXTURE_1D 2
+#define RB_AS_TEXTURE_2D 3
+#define RB_AS_TEXTURE_3D 4
 
 template<>
-inline uSys IResourceBuilder::allocSize<ResourceBufferArgs, NullableRef<IResource>>() const noexcept
-{ return _allocSize(2); }
+inline uSys IResourceBuilder::allocSize<ResourceBufferArgs>() const noexcept
+{ return _allocSize(RB_AS_BUFFER); }
 
 template<>
-inline uSys IResourceBuilder::allocSize<ResourceBufferArgs, NullableStrongRef<IResource>>() const noexcept
-{ return _allocSize(3); }
+inline uSys IResourceBuilder::allocSize<ResourceTexture1DArgs>() const noexcept
+{ return _allocSize(RB_AS_TEXTURE_1D); }
 
 template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture1DArgs, IResource*>() const noexcept
-{ return _allocSize(4); }
+inline uSys IResourceBuilder::allocSize<ResourceTexture2DArgs>() const noexcept
+{ return _allocSize(RB_AS_TEXTURE_2D); }
 
 template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture1DArgs, NullableRef<IResource>>() const noexcept
-{ return _allocSize(5); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture1DArgs, NullableStrongRef<IResource>>() const noexcept
-{ return _allocSize(6); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture2DArgs, IResource*>() const noexcept
-{ return _allocSize(7); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture2DArgs, NullableRef<IResource>>() const noexcept
-{ return _allocSize(8); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture2DArgs, NullableStrongRef<IResource>>() const noexcept
-{ return _allocSize(9); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture3DArgs, IResource*>() const noexcept
-{ return _allocSize(10); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture3DArgs, NullableRef<IResource>>() const noexcept
-{ return _allocSize(11); }
-
-template<>
-inline uSys IResourceBuilder::allocSize<ResourceTexture3DArgs, NullableStrongRef<IResource>>() const noexcept
-{ return _allocSize(12); }
+inline uSys IResourceBuilder::allocSize<ResourceTexture3DArgs>() const noexcept
+{ return _allocSize(RB_AS_TEXTURE_3D); }

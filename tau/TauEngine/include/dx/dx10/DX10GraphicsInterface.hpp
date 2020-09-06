@@ -44,7 +44,7 @@ private:
     DX10RenderingContextBuilder* _renderingContextBuilder;
 public:
     DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* d3dDevice) noexcept;
-    ~DX10GraphicsInterface() noexcept;
+    ~DX10GraphicsInterface() noexcept override;
 
     [[nodiscard]] const ID3D10Device* d3d10Device() const noexcept { return _d3d10Device; }
     [[nodiscard]] ID3D10Device* d3d10Device() noexcept { return _d3d10Device; }
@@ -71,13 +71,13 @@ struct DX10GraphicsInterfaceArgs final
     RenderingMode mode;
 };
 
-class DX10GraphicsInterfaceBuilder final
+class TAU_DLL DX10GraphicsInterfaceBuilder final
 {
-    DEFAULT_CONSTRUCT_PU(DX10GraphicsInterfaceBuilder);
-    DEFAULT_DESTRUCT(DX10GraphicsInterfaceBuilder);
-    DEFAULT_COPY(DX10GraphicsInterfaceBuilder);
+    DELETE_CONSTRUCT(DX10GraphicsInterfaceBuilder);
+    DELETE_DESTRUCT(DX10GraphicsInterfaceBuilder);
+    DELETE_CM(DX10GraphicsInterfaceBuilder);
 public:
-    [[nodiscard]] static NullableRef<DX10GraphicsInterface> build(const DX10GraphicsInterfaceArgs& args, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept;
+    [[nodiscard]] static NullableRef<DX10GraphicsInterface> build(const GraphicsInterfaceArgs& args, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept;
 };
 
 #endif

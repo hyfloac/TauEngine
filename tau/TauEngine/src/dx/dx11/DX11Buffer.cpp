@@ -476,7 +476,7 @@ NullableRef<IVertexBuffer> DX11BufferBuilder::buildTauRef(const VertexBufferArgs
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IVertexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IVertexBuffer>(buffer));
 }
 
 NullableStrongRef<IVertexBuffer> DX11BufferBuilder::buildTauSRef(const VertexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
@@ -492,7 +492,7 @@ NullableStrongRef<IVertexBuffer> DX11BufferBuilder::buildTauSRef(const VertexBuf
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IVertexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IVertexBuffer>(buffer));
 }
 
 DX11IndexBuffer* DX11BufferBuilder::build(const IndexBufferArgs& args, Error* const error) const noexcept
@@ -556,7 +556,7 @@ NullableRef<IIndexBuffer> DX11BufferBuilder::buildTauRef(const IndexBufferArgs& 
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IIndexBuffer>(buffer));
 }
 
 NullableStrongRef<IIndexBuffer> DX11BufferBuilder::buildTauSRef(const IndexBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
@@ -572,7 +572,7 @@ NullableStrongRef<IIndexBuffer> DX11BufferBuilder::buildTauSRef(const IndexBuffe
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IIndexBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IIndexBuffer>(buffer));
 }
 
 DX11UniformBuffer* DX11BufferBuilder::build(const UniformBufferArgs& args, Error* const error) const noexcept
@@ -636,7 +636,7 @@ NullableRef<IUniformBuffer> DX11BufferBuilder::buildTauRef(const UniformBufferAr
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IUniformBuffer>(buffer));
 }
 
 NullableStrongRef<IUniformBuffer> DX11BufferBuilder::buildTauSRef(const UniformBufferArgs& args, Error* const error, TauAllocator& allocator) const noexcept
@@ -652,7 +652,7 @@ NullableStrongRef<IUniformBuffer> DX11BufferBuilder::buildTauSRef(const UniformB
         ERROR_CODE_N(Error::SystemMemoryAllocationFailure);
     }
 
-    ERROR_CODE_V(Error::NoError, RCPCast<IUniformBuffer>(buffer));
+    ERROR_CODE_V(Error::NoError, RCPReinterpretCast<IUniformBuffer>(buffer));
 }
 
 bool DX11BufferBuilder::processArgs(const VertexBufferArgs& args, ID3D11Buffer** const d3dBuffer, Error* const error) const noexcept

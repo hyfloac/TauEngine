@@ -72,8 +72,8 @@ public:
 
     [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Buffer; }
 
-    [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
-    void unmap(IRenderingContext& context, uSys mipLevel, uSys arrayIndex) noexcept override;
+    [[nodiscard]] void* map(ICommandList& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
+    void unmap(ICommandList& context, uSys mipLevel, uSys arrayIndex) noexcept override;
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };

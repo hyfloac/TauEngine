@@ -6,6 +6,9 @@
 #include "Timings.hpp"
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
+#include "system/SystemInterface.hpp"
+
+#include "dx/dx12/DX12GraphicsInterface.hpp"
 
 bool tauInit() noexcept
 {
@@ -15,6 +18,8 @@ bool tauInit() noexcept
     {
         _initializationComplete = true;
         PageAllocator::init();
+
+        SystemInterface::registerGraphicsInterface(RenderingMode::DirectX12, new(::std::nothrow) DX12GraphicsInterfaceBuilder);
     }
 
     return true;

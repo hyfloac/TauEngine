@@ -1,5 +1,7 @@
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 
+#include "dx/dx10/DX10GraphicsAccelerator.hpp"
+
 #ifdef _WIN32
 #include <dxgi.h>
 #include "dx/dx10/DX10Shader.hpp"
@@ -78,7 +80,7 @@ RefDynArray<NullableRef<IGraphicsAccelerator>> DX10GraphicsInterface::graphicsAc
     {
         CHECK(dxgiFactory->EnumAdapters(i, &dxgiAdapter));
         builder.setAdapter(dxgiAdapter);
-        accelerators[i] = RefCast<IGraphicsAccelerator>(builder.build());
+        accelerators[i] = builder.build();
         dxgiAdapter->Release();
     }
 
@@ -126,14 +128,14 @@ IFrameBufferBuilder& DX10GraphicsInterface::createFrameBuffer() noexcept
 IRenderingContextBuilder& DX10GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }
 
-NullableRef<DX10GraphicsInterface> DX10GraphicsInterfaceBuilder::build(const DX10GraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
+NullableRef<DX10GraphicsInterface> DX10GraphicsInterfaceBuilder::build(const GraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
 {
     ID3D10Device* device;
-    const HRESULT h = D3D10CreateDevice(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, args.mode.debugMode() ? D3D10_CREATE_DEVICE_DEBUG : 0, D3D10_SDK_VERSION, &device);
+    const HRESULT h = D3D10CreateDevice(NULL, D3D10_DRIVER_TYPE_HARDWARE, NULL, args.renderingMode.debugMode() ? D3D10_CREATE_DEVICE_DEBUG : 0, D3D10_SDK_VERSION, &device);
 
     if(FAILED(h))
     { return null; }
 
-    return NullableRef<DX10GraphicsInterface>(allocator, args.mode, device);
+    return NullableRef<DX10GraphicsInterface>(allocator, args.renderingMode, device);
 }
 #endif

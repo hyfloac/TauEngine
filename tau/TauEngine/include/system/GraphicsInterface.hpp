@@ -7,6 +7,8 @@
 #include "GraphicsAccelerator.hpp"
 #include "RenderingMode.hpp"
 
+class IGraphicsCapabilities;
+
 class IShaderBuilder;
 class IShaderProgramBuilder;
 class IResourceBuilder;
@@ -35,6 +37,8 @@ public:
 
     [[nodiscard]] virtual RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept = 0;
 
+    [[nodiscard]] virtual IGraphicsCapabilities& capabilities() noexcept = 0;
+
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
     [[nodiscard]] virtual IShaderProgramBuilder& createShaderProgram() noexcept = 0;
     [[nodiscard]] virtual IResourceBuilder& createResource() noexcept = 0;
@@ -47,4 +51,37 @@ public:
     [[nodiscard]] virtual ITextureUploaderBuilder& createTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IFrameBufferBuilder& createFrameBuffer() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;
+};
+
+struct GraphicsInterfaceArgs final
+{
+    RenderingMode renderingMode;
+    NullableRef<IGraphicsAccelerator> graphicsAccelerator;
+};
+
+class TAU_DLL TAU_NOVTABLE IGraphicsInterfaceBuilder
+{
+    DEFAULT_CONSTRUCT_PO(IGraphicsInterfaceBuilder);
+    DEFAULT_DESTRUCT_VI(IGraphicsInterfaceBuilder);
+    DEFAULT_CM_PO(IGraphicsInterfaceBuilder);
+public:
+    enum Error
+    {
+        NoError = 0,
+        SystemMemoryAllocationFailure,
+        DriverMemoryAllocationFailure,
+        /**
+         * Indicates that a chosen rendering API is not supported.
+         *
+         *   This can be caused by using an unimplemented API, using an
+         * API that does not support the current system, or by using an
+         * API with a graphics accelerator that does not carry support
+         * for that API.
+         */
+        UnsupportedAPI
+    };
+public:
+    [[nodiscard]] virtual IGraphicsInterface* build(const GraphicsInterfaceArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual IGraphicsInterface* build(const GraphicsInterfaceArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IGraphicsInterface> buildTauRef(const GraphicsInterfaceArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

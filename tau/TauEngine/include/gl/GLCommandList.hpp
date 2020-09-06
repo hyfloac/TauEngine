@@ -486,6 +486,7 @@ public:
     [[nodiscard]] uSys commandCount() const noexcept { return _commandCount; }
 
     void reset(const NullableRef<ICommandAllocator>& allocator) noexcept override;
+    void begin() noexcept override;
     void finish() noexcept override;
     void draw(uSys vertexCount, uSys startVertex) noexcept override;
     void drawIndexed(uSys indexCount, uSys startIndex, iSys baseVertex) noexcept override;

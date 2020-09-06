@@ -45,4 +45,28 @@ enum class ShaderAccess
     Pixel
 };
 
+enum class ResourceAlignment
+{
+    Default = 0,
+    MSAA
+};
+
+enum class ResourceHeapDataType
+{
+    Buffer       = 1 << 0,
+    Texture      = 1 << 1,
+    RenderTarget = 1 << 2
+};
+
+#define RHDT_Buffer EGraphics::ResourceHeapDataType::Buffer
+#define RHDT_Texture EGraphics::ResourceHeapDataType::Texture
+#define RHDT_RenderTarget EGraphics::ResourceHeapDataType::RenderTarget
+
+enum class ResourceHeapUsageType
+{
+    Default = 0,
+    Upload,
+    Read
+};
+
 }

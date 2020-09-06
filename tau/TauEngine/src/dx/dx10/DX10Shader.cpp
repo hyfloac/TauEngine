@@ -152,13 +152,13 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPCast<IShader>(NullableRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPCast<IShader>(NullableRef<DX10GeometryShader>(allocator, objects.geometry));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX10GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPCast<IShader>(NullableRef<DX10PixelShader>(allocator, objects.pixel));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX10PixelShader>(allocator, objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
@@ -189,13 +189,13 @@ NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& arg
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPCast<IShader>(NullableStrongRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPCast<IShader>(NullableStrongRef<DX10GeometryShader>(allocator, objects.geometry));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX10GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPCast<IShader>(NullableStrongRef<DX10PixelShader>(allocator, objects.pixel));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX10PixelShader>(allocator, objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:

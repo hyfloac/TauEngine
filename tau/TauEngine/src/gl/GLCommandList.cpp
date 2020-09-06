@@ -20,7 +20,11 @@ GLCommandList::GLCommandList(const NullableRef<GLCommandAllocator>& allocator) n
 
 void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator) noexcept
 {
-#if TAU_GENERAL_SAFETY_CHECK
+#if TAU_NULL_CHECK
+    if(!allocator)
+    { return; }
+#endif
+#if TAU_RTTI_CHECK
     if(!RTT_CHECK(allocator.get(), GLCommandAllocator))
     { return; }
 #endif
@@ -29,6 +33,9 @@ void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator) noexc
     _head = computeHead(_commandAllocator);
     _commandCount = 0;
 }
+
+void GLCommandList::begin() noexcept
+{ }
 
 void GLCommandList::finish() noexcept
 { }

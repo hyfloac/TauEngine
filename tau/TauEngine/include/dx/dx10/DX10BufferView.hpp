@@ -3,8 +3,6 @@
 #include "graphics/BufferView.hpp"
 
 #ifdef _WIN32
-#include "DX10Resource.hpp"
-
 class TAU_DLL DX10BufferViewBuilder final : public IBufferViewBuilder
 {
     DEFAULT_CONSTRUCT_PU(DX10BufferViewBuilder);

@@ -74,7 +74,7 @@ class DX11GraphicsInterfaceBuilder final
     DEFAULT_DESTRUCT(DX11GraphicsInterfaceBuilder);
     DEFAULT_COPY(DX11GraphicsInterfaceBuilder);
 public:
-    [[nodiscard]] static NullableRef<DX11GraphicsInterface> build(const DX11GraphicsInterfaceArgs& args, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept;
+    [[nodiscard]] static NullableRef<DX11GraphicsInterface> build(const GraphicsInterfaceArgs& args, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept;
 };
 
 #endif

@@ -9,12 +9,14 @@
 #include "DescriptorHeap.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 #include "GraphicsEnums.hpp"
+#include "texture/TextureEnums.hpp"
 
 struct PipelineState;
 class IInputLayout;
 class IVertexArray;
 struct IndexBufferView;
 class ICommandAllocator;
+class IResource;
 
 #define COMMAND_LIST_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, ICommandList)
@@ -28,18 +30,30 @@ class TAU_DLL TAU_NOVTABLE ICommandList
     DEFAULT_CM_PO(ICommandList);
 public:
     /**
-     *   Resets the command list to the initial state to begin
+     * @brief Resets the command list to the initial state to begin
      * recording again.
+     *
+     * @param[in] allocator
+     *        The allocator that should be used to store all the
+     *      commands.
+     * @param[in] initialState
+     *        An optional initial pipeline state to use for the
+     *      command list.
      */
-    virtual void reset(const NullableRef<ICommandAllocator>& allocator) noexcept = 0;
+    virtual void reset(const NullableRef<ICommandAllocator>& allocator, PipelineState* initialState) noexcept = 0;
 
     /**
-     * Finishes recording the command list.
+     * @brief Begins recording the command list.
+     */
+    virtual void begin() noexcept = 0;
+
+    /**
+     * @brief Finishes recording the command list.
      */
     virtual void finish() noexcept = 0;
 
     /**
-     * Issues a draw command.
+     * @brief Issues a draw command.
      *
      *   This will assemble primitives by reading off vertices from
      * the vertex buffers in sequential order.
@@ -53,7 +67,7 @@ public:
     virtual void draw(uSys vertexCount, uSys startVertex) noexcept = 0;
 
     /**
-     * Issues a draw command.
+     * @brief Issues a draw command.
      *
      *   This will assemble primitives by reading off indices from
      * the index buffer and selecting the corresponding vertices
@@ -70,7 +84,7 @@ public:
     virtual void drawIndexed(uSys indexCount, uSys startIndex, iSys baseVertex) noexcept = 0;
 
     /**
-     * Issues a draw command with instanced rendering.
+     * @brief Issues a draw command with instanced rendering.
      *
      *   This will assemble primitives by reading off vertices from
      * the vertex buffers in sequential order.
@@ -92,7 +106,7 @@ public:
     virtual void drawInstanced(uSys vertexCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
 
     /**
-     * Issues a draw command with instanced rendering.
+     * @brief Issues a draw command with instanced rendering.
      *
      *   This will assemble primitives by reading off indices from
      * the index buffer and selecting the corresponding vertices
@@ -117,7 +131,7 @@ public:
     virtual void drawIndexedInstanced(uSys indexCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
 
     /**
-     * Sets the draw type.
+     * @brief Sets the draw type.
      *
      *   This is used to control how the list of vertices and
      * indices should be interpreted.
@@ -128,7 +142,7 @@ public:
     virtual void setDrawType(EGraphics::DrawType drawType) noexcept = 0;
 
     /**
-     * Sets the pipeline state.
+     * @brief Sets the pipeline state.
      *
      *   This contains all of the general purpose information
      * needed by the rendering pipeline. This is a homogenous
@@ -142,7 +156,7 @@ public:
     virtual void setPipelineState(const PipelineState& pipelineState) noexcept = 0;
 
     /**
-     * Sets the stencil reference target.
+     * @brief Sets the stencil reference target.
      *
      *   The stencil reference is used during the rendering to
      * determine how to respond to a specific stencil value. This
@@ -163,7 +177,7 @@ public:
     virtual void setStencilRef(uSys stencilRef) noexcept = 0;
 
     /**
-     * Sets the vertex array to render from.
+     * @brief Sets the vertex array to render from.
      *
      * @param[in] va
      *      The vertex array to use.
@@ -171,7 +185,7 @@ public:
     virtual void setVertexArray(const NullableRef<IVertexArray>& va) noexcept = 0;
 
     /**
-     * Sets the index buffer.
+     * @brief Sets the index buffer.
      *
      *   This is used to decode the buffers inside the vertex array
      * into triangles.
@@ -183,7 +197,7 @@ public:
     virtual void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept = 0;
 
     /**
-     * Sets the descriptor layout to use within the shader pipeline.
+     * @brief Sets the descriptor layout to use within the shader pipeline.
      *
      * @param[in] layout
      *      The layout of descriptors.
@@ -191,7 +205,7 @@ public:
     virtual void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept = 0;
 
     /**
-     * Sets a descriptor table to use within the shader pipeline.
+     * @brief Sets a descriptor table to use within the shader pipeline.
      *
      * @param[in] index
      *      The descriptor layout index.
@@ -205,7 +219,7 @@ public:
     virtual void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept = 0;
 
     /**
-     * Executes a command list bundle.
+     * @brief Executes a command list bundle.
      *
      *   This allows you to record a small set of command and reuse
      * them many times. The benefit of doing this is that you can
@@ -217,6 +231,88 @@ public:
      */
     virtual void executeBundle(const NullableRef<ICommandList>& bundle) noexcept = 0;
 
+    /**
+     * @brief Copies an entire resource.
+     *
+     *   Performs a memory copy for a resource on a GPU. This is
+     * required to copy resources that are in VRAM, or to copy
+     * resources that are in system memory to VRAM or vice versa.
+     *
+     * @param[in] dst
+     *      The resource to write to.
+     * @param[in] src
+     *      The resource to copy.
+     */
+    virtual void copyResource(const NullableRef<IResource>& dst, const NullableRef<IResource>& src) noexcept = 0;
+
+    /**
+     * @brief Copies a portion of a buffer.
+     *
+     *   Performs a memory copy for a resource on a GPU. This is
+     * required to copy resources that are in VRAM, or to copy
+     * resources that are in system memory to VRAM or vice versa.
+     *
+     * @param[in] dstBuffer
+     *      The buffer to write to.
+     * @param[in] dstOffset
+     *      The offset to write to in @p dstBuffer.
+     * @param[in] srcBuffer
+     *      The buffer to copy.
+     * @param[in] srcOffset
+     *      The offset to read from in @p srcBuffer.
+     * @param[in] byteCount
+     *      The number of bytes to copy.
+     */
+    virtual void copyBuffer(const NullableRef<IResource>& dstBuffer, u64 dstOffset, const NullableRef<IResource>& srcBuffer, u64 srcOffset, u64 byteCount) noexcept = 0;
+    
+    /**
+     * @brief Copies a portion of a texture.
+     *
+     *   Performs a memory copy for a resource on a GPU. This is
+     * required to copy resources that are in VRAM, or to copy
+     * resources that are in system memory to VRAM or vice versa.
+     *
+     * Specifically used to copy a subresource of a texture.
+     *
+     * @param[in] dstTexture
+     *      The texture to write to.
+     * @param[in] dstSubResource
+     *      The subresource to write to in @p dstTexture.
+     * @param[in] srcTexture
+     *      The texture to copy.
+     * @param[in] srcSubResource
+     *      The subresource to copy from @p srcTexture.
+     */
+    virtual void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const NullableRef<IResource>& srcTexture, u32 srcSubResource) noexcept = 0;
+    
+    /**
+     * @brief Copies a portion of a texture.
+     *
+     *   Performs a memory copy for a resource on a GPU. This is
+     * required to copy resources that are in VRAM, or to copy
+     * resources that are in system memory to VRAM or vice versa.
+     *
+     *   Specifically used to copy a portion of a subresource of a
+     * texture. Use the optional @p srcBox to specify a region of the
+     * source texture to copy. This should only use the appropriate
+     * number of dimensions for that texture, all other values
+     * should be 0.
+     *
+     * @param[in] dstTexture
+     *      The texture to write to.
+     * @param[in] dstSubResource
+     *      The subresource to write to in @p dstTexture.
+     * @param[in] coord
+     *      The coordinate to write to within the subresource.
+     * @param[in] srcTexture
+     *      The texture to copy.
+     * @param[in] srcSubResource
+     *      The subresource to copy from @p srcTexture.
+     * @param[in] srcBox
+     *      An optional region box to copy from.
+     */
+    virtual void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const ETexture::Coord& coord, const NullableRef<IResource>& srcTexture, u32 srcSubResource, const ETexture::EBox* srcBox) noexcept = 0;
+
     RTT_BASE_IMPL(ICommandList);
     RTT_BASE_CHECK(ICommandList);
     RTT_BASE_CAST(ICommandList);
@@ -224,7 +320,8 @@ public:
 
 struct CommandListArgs final
 {
-    
+    NullableRef<ICommandAllocator> commandAllocator;
+    const PipelineState* pipelineState;
 };
 
 class TAU_DLL TAU_NOVTABLE ICommandListBuilder
@@ -241,9 +338,9 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual IVertexArray* build(const CommandListArgs& args, [[tau::out]] Error* error) noexcept = 0;
-    [[nodiscard]] virtual IVertexArray* build(const CommandListArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IVertexArray> buildCPPRef(const CommandListArgs& args, [[tau::out]] Error* error) noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IVertexArray> buildTauRef(const CommandListArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IVertexArray> buildTauSRef(const CommandListArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
+    [[nodiscard]] virtual ICommandList* build(const CommandListArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    [[nodiscard]] virtual ICommandList* build(const CommandListArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept = 0;
+    [[nodiscard]] virtual CPPRef<ICommandList> buildCPPRef(const CommandListArgs& args, [[tau::out]] Error* error) noexcept = 0;
+    [[nodiscard]] virtual NullableRef<ICommandList> buildTauRef(const CommandListArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
+    [[nodiscard]] virtual NullableStrongRef<ICommandList> buildTauSRef(const CommandListArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
 };

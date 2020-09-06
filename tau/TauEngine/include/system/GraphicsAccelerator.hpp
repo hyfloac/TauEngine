@@ -6,19 +6,27 @@
 #include <String.hpp>
 #include <NumTypes.hpp>
 #include <DynArray.hpp>
+#include <RunTimeType.hpp>
+
+#define GRAPHICS_ACCELERATOR_IMPL_BASE(_TYPE) \
+    RTT_IMPL(_TYPE, IGraphicsAccelerator)
+
+#define GRAPHICS_ACCELERATOR_IMPL(_TYPE) GRAPHICS_ACCELERATOR_IMPL_BASE(_TYPE)
 
 class TAU_DLL TAU_NOVTABLE IGraphicsAccelerator
 {
     DEFAULT_DESTRUCT_VI(IGraphicsAccelerator);
-    DELETE_COPY(IGraphicsAccelerator);
+    DEFAULT_CM_PO(IGraphicsAccelerator);
+public:
+    using GDList = RefDynArray<NullableRef<IGraphicsDisplay>>;
 protected:
-    DynString _vendor;
-    DynString _deviceName;
+    WDynString _vendor;
+    WDynString _deviceName;
     uSys _videoMemory;
     uSys _systemMemory;
     uSys _sharedMemory;
 protected:
-    IGraphicsAccelerator(const DynString& vendor, const DynString& deviceName, const u64 videoMemory, const u64 systemMemory, const u64 sharedMemory) noexcept
+    IGraphicsAccelerator(const WDynString& vendor, const WDynString& deviceName, const u64 videoMemory, const u64 systemMemory, const u64 sharedMemory) noexcept
         : _vendor(vendor)
         , _deviceName(deviceName)
         , _videoMemory(videoMemory)
@@ -26,13 +34,13 @@ protected:
         , _sharedMemory(sharedMemory)
     { }
 public:
-    [[nodiscard]] const DynString& vendor() const noexcept { return _vendor; }
-    [[nodiscard]] const DynString& deviceName() const noexcept { return _vendor; }
+    [[nodiscard]] const WDynString& vendor() const noexcept { return _vendor; }
+    [[nodiscard]] const WDynString& deviceName() const noexcept { return _vendor; }
 
     /**
      * The amount of video memory on the GPU.
      */
-    [[nodiscard]] uSys  videoMemory() const noexcept { return _videoMemory;  }
+    [[nodiscard]] uSys videoMemory() const noexcept { return _videoMemory; }
     /**
      * The amount of system memory allocated to the GPU.
      */
@@ -48,5 +56,9 @@ public:
     [[nodiscard]] virtual bool has64BitInt() noexcept = 0;
     [[nodiscard]] virtual bool has16BitInt() noexcept = 0;
 
-    [[nodiscard]] virtual RefDynArray<NullableRef<IGraphicsDisplay>> graphicsDisplays() noexcept = 0;
+    [[nodiscard]] virtual GDList graphicsDisplays() noexcept = 0;
+
+    RTT_BASE_CAST(IGraphicsAccelerator);
+    RTT_BASE_CHECK(IGraphicsAccelerator);
+    RTT_BASE_IMPL(IGraphicsAccelerator);
 };

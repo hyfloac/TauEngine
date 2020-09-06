@@ -14,10 +14,12 @@ private:
     RefDynArray<GraphicsDisplayMode> _displayModes;
 public:
     DX10GraphicsDisplay(IDXGIOutput* const dxgiAdapterOutput, const RefDynArray<GraphicsDisplayMode>& displayModes) noexcept
-        : IGraphicsDisplay(), _dxgiAdapterOutput(dxgiAdapterOutput), _displayModes(displayModes)
+        : IGraphicsDisplay()
+        , _dxgiAdapterOutput(dxgiAdapterOutput)
+        , _displayModes(displayModes)
     { dxgiAdapterOutput->AddRef(); }
 
-    ~DX10GraphicsDisplay() noexcept
+    ~DX10GraphicsDisplay() noexcept override
     { _dxgiAdapterOutput->Release(); }
 
     [[nodiscard]] RefDynArray<GraphicsDisplayMode> displayModes() noexcept override { return _displayModes; }

@@ -12,8 +12,6 @@
 #include "DLL.hpp"
 #include "GraphicsEnums.hpp"
 
-class IResourceView;
-
 #define DESCRIPTOR_HEAP_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, IDescriptorHeap)
 

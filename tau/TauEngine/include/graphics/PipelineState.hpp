@@ -45,11 +45,7 @@ public:
     { }
 
     template<typename _T>
-    [[nodiscard]] _T* get() noexcept
-    { return reinterpret_cast<_T*>(raw); }
-
-    template<typename _T>
-    [[nodiscard]] const _T* get() const noexcept
+    [[nodiscard]] _T* get() const noexcept
     { return reinterpret_cast<_T*>(raw); }
 
     [[nodiscard]] const PipelineArgs& args() const noexcept { return _args; }

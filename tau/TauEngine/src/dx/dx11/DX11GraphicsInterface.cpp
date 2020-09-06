@@ -122,16 +122,16 @@ IFrameBufferBuilder& DX11GraphicsInterface::createFrameBuffer() noexcept
 IRenderingContextBuilder& DX11GraphicsInterface::createRenderingContext() noexcept
 { return *_renderingContextBuilder; }
 
-NullableRef<DX11GraphicsInterface> DX11GraphicsInterfaceBuilder::build(const DX11GraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
+NullableRef<DX11GraphicsInterface> DX11GraphicsInterfaceBuilder::build(const GraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
 {
     D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_11_0 };
 
     ID3D11Device* device;
-    const HRESULT h = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, args.mode.debugMode() ? D3D11_CREATE_DEVICE_DEBUG : 0, featureLevels, 1, D3D11_SDK_VERSION, &device, NULL, NULL);
+    const HRESULT h = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, args.renderingMode.debugMode() ? D3D11_CREATE_DEVICE_DEBUG : 0, featureLevels, 1, D3D11_SDK_VERSION, &device, NULL, NULL);
 
     if(FAILED(h))
     { return null; }
 
-    return NullableRef<DX11GraphicsInterface>(allocator, args.mode, device);
+    return NullableRef<DX11GraphicsInterface>(allocator, args.renderingMode, device);
 }
 #endif

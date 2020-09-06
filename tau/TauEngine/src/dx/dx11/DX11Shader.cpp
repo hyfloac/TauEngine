@@ -177,19 +177,19 @@ NullableRef<IShader> DX11ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPCast<IShader>(NullableRef<DX11VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX11VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Hull:
-            shader = RCPCast<IShader>(NullableRef<DX11HullShader>(allocator, objects.hull));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX11HullShader>(allocator, objects.hull));
             break;
         case EShader::Stage::Domain:
-            shader = RCPCast<IShader>(NullableRef<DX11DomainShader>(allocator, objects.domain));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX11DomainShader>(allocator, objects.domain));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPCast<IShader>(NullableRef<DX11GeometryShader>(allocator, objects.geometry));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX11GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPCast<IShader>(NullableRef<DX11PixelShader>(allocator, objects.pixel));
+            shader = RCPReinterpretCast<IShader>(NullableRef<DX11PixelShader>(allocator, objects.pixel));
             break;
         default:
             dxArgs.dataBlob->Release();
@@ -218,19 +218,19 @@ NullableStrongRef<IShader> DX11ShaderBuilder::buildTauSRef(const ShaderArgs& arg
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPCast<IShader>(NullableStrongRef<DX11VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX11VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Hull:
-            shader = RCPCast<IShader>(NullableStrongRef<DX11HullShader>(allocator, objects.hull));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX11HullShader>(allocator, objects.hull));
             break;
         case EShader::Stage::Domain:
-            shader = RCPCast<IShader>(NullableStrongRef<DX11DomainShader>(allocator, objects.domain));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX11DomainShader>(allocator, objects.domain));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPCast<IShader>(NullableStrongRef<DX11GeometryShader>(allocator, objects.geometry));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX11GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPCast<IShader>(NullableStrongRef<DX11PixelShader>(allocator, objects.pixel));
+            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX11PixelShader>(allocator, objects.pixel));
             break;
         default:
             dxArgs.dataBlob->Release();

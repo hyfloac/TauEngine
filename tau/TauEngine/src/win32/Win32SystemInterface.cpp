@@ -5,40 +5,56 @@
 #include "gl/GLGraphicsInterface.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx11/DX11GraphicsInterface.hpp"
+#include "dx/dx12/DX12GraphicsInterface.hpp"
+#include "dx/dxgi/DXGI11GraphicsAccelerator.hpp"
+#include "dx/dxgi/DXGI13GraphicsAccelerator.hpp"
+#include "dx/dxgi/DXGI16GraphicsAccelerator.hpp"
 
 _SysContainer SystemInterface::_sysContainer;
 
+IGraphicsInterfaceBuilder* SystemInterface::_giBuilders[RenderingMode::_MAX_VALUE];
+
 const _SysContainer& SystemInterface::sysContainer() noexcept
 {
-    if(_sysContainer.programHandle == NULL)
+    if(!_sysContainer.programHandle)
     {
-        _sysContainer.programHandle = GetModuleHandleA(NULL);
+        _sysContainer.programHandle = GetModuleHandleW(NULL);
     }
     return _sysContainer;
 }
 
 static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept;
 
-NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const RenderingMode& renderingMode) noexcept
+SystemInterface::GAList SystemInterface::graphicsAccelerators(const RenderingMode& renderingMode) noexcept
 {
     switch(renderingMode.currentMode())
     {
         case RenderingMode::Mode::DirectX10:
-        {
-            const DX10GraphicsInterfaceArgs dx10Params {
-                renderingMode
-            };
-
-            return RefCast<IGraphicsInterface>(DX10GraphicsInterfaceBuilder::build(dx10Params));
-        }
+            return DXGI11GraphicsAccelerator::graphicsAccelerators();
         case RenderingMode::Mode::DirectX11:
-        {
-            const DX11GraphicsInterfaceArgs dx11Params {
-                renderingMode
-            };
+            return DXGI13GraphicsAccelerator::graphicsAccelerators(renderingMode.debugMode());
+        case RenderingMode::Mode::DirectX12:
+        case RenderingMode::Mode::DirectX12_1:
+            return DXGI16GraphicsAccelerator::graphicsAccelerators(renderingMode.debugMode());
+        default: return GAList();
+    }
+}
 
-            return RefCast<IGraphicsInterface>(DX11GraphicsInterfaceBuilder::build(dx11Params));
-        }
+IGraphicsInterfaceBuilder* SystemInterface::createGraphicsInterface(const RenderingMode::Mode mode) noexcept
+{
+    if(mode > RenderingMode::_MAX_VALUE)
+    { return null; }
+
+    return _giBuilders[mode];
+}
+
+
+NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const GraphicsInterfaceArgs& args) noexcept
+{
+    switch(args.renderingMode.currentMode())
+    {
+        case RenderingMode::Mode::DirectX10: return DX10GraphicsInterfaceBuilder::build(args);
+        case RenderingMode::Mode::DirectX11: return DX11GraphicsInterfaceBuilder::build(args);
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
             return null;
@@ -51,12 +67,23 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const R
         case RenderingMode::Mode::OpenGL4_5:
         case RenderingMode::Mode::OpenGL4_6:
         {
-            GLGraphicsInterfaceArgs glArgs{ renderingMode, 0, 0, static_cast<GLGraphicsInterface::GLProfile>(0), false };
-            getGLArgs(renderingMode, glArgs);
-            return RefCast<IGraphicsInterface>(GLGraphicsInterfaceBuilder::build(glArgs));
+            GLGraphicsInterfaceArgs glArgs{ args.renderingMode, 0, 0, static_cast<GLGraphicsInterface::GLProfile>(0), false };
+            getGLArgs(args.renderingMode, glArgs);
+            return GLGraphicsInterfaceBuilder::build(glArgs);
         }
         default: return null;
     }
+}
+
+void SystemInterface::registerGraphicsInterface(const RenderingMode::Mode mode, IGraphicsInterfaceBuilder* const builder) noexcept
+{
+    if(mode > RenderingMode::_MAX_VALUE)
+    { return; }
+
+    if(_giBuilders[mode])
+    { delete _giBuilders[mode]; }
+
+    _giBuilders[mode] = builder;
 }
 
 void SystemInterface::createAlert(const char* const title, const char* const message) noexcept
