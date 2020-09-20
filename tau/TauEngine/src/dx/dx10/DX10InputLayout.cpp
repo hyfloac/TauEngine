@@ -5,6 +5,7 @@
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "dx/dx10/DX10Shader.hpp"
 #include "TauConfig.hpp"
+#include "dx/DXShaderStubGenerator.hpp"
 #include <array>
 #include <d3dcompiler.h>
 
@@ -118,11 +119,9 @@ NullableStrongRef<IInputLayout> DX10InputLayoutBuilder::buildTauSRef(const Input
     ERROR_CODE_V(Error::NoError, inputLayout);
 }
 
-using SemanticSet = ::std::array<uSys, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>;
+using SemanticSet = ::std::array<UINT, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>;
 
 static void handleInsertion(uSys& insertIndex, u32 bufferIndex, bool instanced, const BufferElementDescriptor& bed, DynArray<D3D10_INPUT_ELEMENT_DESC>& inputElements, SemanticSet& semanticIndices) noexcept;
-
-static ID3D10Blob* generateILShader(const RefDynArray<BufferDescriptor>& descriptors) noexcept;
 
 bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLayoutArgs* dxArgs, Error* error) const noexcept
 {
@@ -154,13 +153,13 @@ bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
     uSys insertIndex = 0;
     for(uSys i = 0; i < args.descriptors.size(); ++i)
     {
-        auto& elements = args.descriptors[i].elements();
+        const auto& elements = args.descriptors[i].elements();
 
         dxArgs->iaStrides[i] = args.descriptors[i].stride();
 
         for(uSys j = 0; j < elements.size(); ++j)
         {
-            handleInsertion(insertIndex, i, args.descriptors[i].instanced(), elements[j], inputElements, semanticIndices);
+            handleInsertion(insertIndex, static_cast<UINT>(i), args.descriptors[i].instanced(), elements[j], inputElements, semanticIndices);
         }
     }
 
@@ -180,17 +179,17 @@ bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
     {
         ERROR_CODE_COND_F(args.shader->shaderStage() != EShader::Stage::Vertex, Error::ShaderMustBeVertexShader);
         ERROR_CODE_COND_F(!RTT_CHECK(args.shader, DX10Shader), Error::InternalError);
-        shaderBlob = reinterpret_cast<DX10VertexShader*>(args.shader)->shaderBlob();
+        shaderBlob = static_cast<DX10VertexShader*>(args.shader)->shaderBlob();
         shouldRelease = false;
     }
     else
     {
-        shaderBlob = generateILShader(args.descriptors);
+        shaderBlob = DXShaderStubGenerator::genShader(args.descriptors.count(), args.descriptors.arr(), "vs_4_0");
         ERROR_CODE_COND_F(!shaderBlob, Error::ShaderNotSet);
         shouldRelease = true;
     }
 
-    const HRESULT h = _gi.d3d10Device()->CreateInputLayout(inputElements, inputElements.count(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &dxArgs->inputLayout);
+    const HRESULT h = _gi.d3d10Device()->CreateInputLayout(inputElements, static_cast<UINT>(inputElements.count()), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &dxArgs->inputLayout);
     if(shouldRelease)
     { shaderBlob->Release(); }
 
@@ -203,7 +202,7 @@ static void handleInsertion(uSys& insertIndex, const u32 bufferIndex, const bool
 {
     const ShaderDataType::Type underlyingType = ShaderDataType::underlyingTypeND(bed.type());
     const uSys columns = DX10InputLayoutBuilder::computeNumElements(bed.type());
-    uSys& semanticIndice = semanticIndices[static_cast<uSys>(bed.semantic())];
+    UINT& semanticIndice = semanticIndices[static_cast<uSys>(bed.semantic())];
 
     for(uSys i = 0; i < columns; ++i, ++insertIndex)
     {
@@ -215,42 +214,6 @@ static void handleInsertion(uSys& insertIndex, const u32 bufferIndex, const bool
         inputElements[insertIndex].InputSlotClass = instanced ? D3D10_INPUT_PER_INSTANCE_DATA : D3D10_INPUT_PER_VERTEX_DATA;
         inputElements[insertIndex].InstanceDataStepRate = 0;
     }
-}
-
-const char* getHLSLTypeName(const ShaderDataType::Type type) noexcept;
-
-void genVarName(char buf[14], u32 i) noexcept;
-
-ID3D10Blob* generateILShader(const RefDynArray<BufferDescriptor>& descriptors) noexcept
-{
-    StringBuilder sb(256);
-
-    sb.append("struct VS_Input {");
-
-    for(uSys i = 0, varIndex = 0; i < descriptors.size(); ++i)
-    {
-        auto& elements = descriptors[i].elements();
-
-        for(uSys j = 0; j < elements.size(); ++j)
-        {
-            auto& element = elements[j];
-            char buf[14];
-            genVarName(buf, varIndex++);
-            sb.append(getHLSLTypeName(element.type())).append(buf);
-        }
-    }
-
-    sb.append("}; struct VS_Output { }; VS_Output main(VS_Input input) { VS_Output output; return output; }");
-
-    D3D_SHADER_MACRO shaderMacros = { NULL, NULL };
-    ID3D10Blob* ret;
-    ID3D10Blob* errors;
-    const HRESULT res = D3DCompile(sb.c_str(), sb.size(), NULL, &shaderMacros, NULL, "main", "vs_4_0", D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &ret, &errors);
-
-    if(FAILED(res) || !ret || errors)
-    { return null; }
-
-    return ret;
 }
 
 uSys DX10InputLayoutBuilder::computeNumElements(const ShaderDataType::Type type) noexcept
@@ -317,36 +280,36 @@ DXGI_FORMAT DX10InputLayoutBuilder::getDXType(const ShaderDataType::Type type) n
 {
     switch(type)
     {
-        case ShaderDataType::Unknown: return DXGI_FORMAT_UNKNOWN;
+        case ShaderDataType::Unknown:         return DXGI_FORMAT_UNKNOWN;
 
-        case ShaderDataType::Vector2Bool: return DXGI_FORMAT_R8G8_UINT;
+        case ShaderDataType::Vector2Bool:     return DXGI_FORMAT_R8G8_UINT;
         case ShaderDataType::Vector3Bool:
-        case ShaderDataType::Vector4Bool: return DXGI_FORMAT_R8G8B8A8_UINT;
-        case ShaderDataType::Bool: return DXGI_FORMAT_R8_UINT;
+        case ShaderDataType::Vector4Bool:     return DXGI_FORMAT_R8G8B8A8_UINT;
+        case ShaderDataType::Bool:            return DXGI_FORMAT_R8_UINT;
 
-        case ShaderDataType::Vector2Int: return DXGI_FORMAT_R32G32_SINT;
-        case ShaderDataType::Vector3Int: return DXGI_FORMAT_R32G32B32_SINT;
-        case ShaderDataType::Vector4Int: return DXGI_FORMAT_R32G32B32A32_SINT;
-        case ShaderDataType::Int: return DXGI_FORMAT_R32_SINT;
+        case ShaderDataType::Vector2Int:      return DXGI_FORMAT_R32G32_SINT;
+        case ShaderDataType::Vector3Int:      return DXGI_FORMAT_R32G32B32_SINT;
+        case ShaderDataType::Vector4Int:      return DXGI_FORMAT_R32G32B32A32_SINT;
+        case ShaderDataType::Int:             return DXGI_FORMAT_R32_SINT;
 
-        case ShaderDataType::Vector2UInt: return DXGI_FORMAT_R32G32_UINT;
-        case ShaderDataType::Vector3UInt: return DXGI_FORMAT_R32G32B32_UINT;
-        case ShaderDataType::Vector4UInt: return DXGI_FORMAT_R32G32B32A32_UINT;
-        case ShaderDataType::UInt: return DXGI_FORMAT_R32_UINT;
+        case ShaderDataType::Vector2UInt:     return DXGI_FORMAT_R32G32_UINT;
+        case ShaderDataType::Vector3UInt:     return DXGI_FORMAT_R32G32B32_UINT;
+        case ShaderDataType::Vector4UInt:     return DXGI_FORMAT_R32G32B32A32_UINT;
+        case ShaderDataType::UInt:            return DXGI_FORMAT_R32_UINT;
 
-        case ShaderDataType::Vector2Float:   return DXGI_FORMAT_R32G32_FLOAT;
-        case ShaderDataType::Vector3Float:   return DXGI_FORMAT_R32G32B32_FLOAT;
-        case ShaderDataType::Vector4Float:   return DXGI_FORMAT_R32G32B32A32_FLOAT;
-        case ShaderDataType::Matrix2x2Float: return DXGI_FORMAT_R32G32_FLOAT;
-        case ShaderDataType::Matrix2x3Float: return DXGI_FORMAT_R32G32B32_FLOAT;
-        case ShaderDataType::Matrix2x4Float: return DXGI_FORMAT_R32G32B32A32_FLOAT;
-        case ShaderDataType::Matrix3x2Float: return DXGI_FORMAT_R32G32_FLOAT;
-        case ShaderDataType::Matrix3x3Float: return DXGI_FORMAT_R32G32B32_FLOAT;
-        case ShaderDataType::Matrix3x4Float: return DXGI_FORMAT_R32G32B32A32_FLOAT;
-        case ShaderDataType::Matrix4x2Float: return DXGI_FORMAT_R32G32_FLOAT;
-        case ShaderDataType::Matrix4x3Float: return DXGI_FORMAT_R32G32B32_FLOAT;
-        case ShaderDataType::Matrix4x4Float: return DXGI_FORMAT_R32G32B32A32_FLOAT;
-        case ShaderDataType::Float: return DXGI_FORMAT_R32_FLOAT;
+        case ShaderDataType::Vector2Float:    return DXGI_FORMAT_R32G32_FLOAT;
+        case ShaderDataType::Vector3Float:    return DXGI_FORMAT_R32G32B32_FLOAT;
+        case ShaderDataType::Vector4Float:    return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        case ShaderDataType::Matrix2x2Float:  return DXGI_FORMAT_R32G32_FLOAT;
+        case ShaderDataType::Matrix2x3Float:  return DXGI_FORMAT_R32G32B32_FLOAT;
+        case ShaderDataType::Matrix2x4Float:  return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        case ShaderDataType::Matrix3x2Float:  return DXGI_FORMAT_R32G32_FLOAT;
+        case ShaderDataType::Matrix3x3Float:  return DXGI_FORMAT_R32G32B32_FLOAT;
+        case ShaderDataType::Matrix3x4Float:  return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        case ShaderDataType::Matrix4x2Float:  return DXGI_FORMAT_R32G32_FLOAT;
+        case ShaderDataType::Matrix4x3Float:  return DXGI_FORMAT_R32G32B32_FLOAT;
+        case ShaderDataType::Matrix4x4Float:  return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        case ShaderDataType::Float:           return DXGI_FORMAT_R32_FLOAT;
 
         case ShaderDataType::Vector2Double:   return DXGI_FORMAT_R32G32B32A32_UINT;
         case ShaderDataType::Vector3Double:   return DXGI_FORMAT_R32G32_UINT;
@@ -360,7 +323,7 @@ DXGI_FORMAT DX10InputLayoutBuilder::getDXType(const ShaderDataType::Type type) n
         case ShaderDataType::Matrix4x2Double: return DXGI_FORMAT_R32G32B32A32_UINT;
         case ShaderDataType::Matrix4x3Double: return DXGI_FORMAT_R32G32_UINT;
         case ShaderDataType::Matrix4x4Double: return DXGI_FORMAT_R32G32B32A32_UINT;
-        case ShaderDataType::Double: return DXGI_FORMAT_R32G32_UINT;
+        case ShaderDataType::Double:          return DXGI_FORMAT_R32G32_UINT;
         default: break;
     }
     return DXGI_FORMAT_UNKNOWN;
@@ -370,102 +333,19 @@ const char* DX10InputLayoutBuilder::getDXSemanticName(const ShaderSemantic::Sema
 {
     switch(semantic)
     {
-        case ShaderSemantic::BiNormal: return "BiNormal";
-        case ShaderSemantic::BlendIndices: return "BlendIndices";
-        case ShaderSemantic::BlendWeight: return "BlendWeight";
-        case ShaderSemantic::Color: return "Color";
-        case ShaderSemantic::Normal: return "Normal";
-        case ShaderSemantic::Position: return "Position";
+        case ShaderSemantic::BiNormal:            return "BiNormal";
+        case ShaderSemantic::BlendIndices:        return "BlendIndices";
+        case ShaderSemantic::BlendWeight:         return "BlendWeight";
+        case ShaderSemantic::Color:               return "Color";
+        case ShaderSemantic::Normal:              return "Normal";
+        case ShaderSemantic::Position:            return "Position";
         case ShaderSemantic::PositionTransformed: return "PositionT";
-        case ShaderSemantic::PointSize: return "PSize";
-        case ShaderSemantic::Tangent: return "Tangent";
-        case ShaderSemantic::TextureCoord: return "TexCoord";
+        case ShaderSemantic::PointSize:           return "PSize";
+        case ShaderSemantic::Tangent:             return "Tangent";
+        case ShaderSemantic::TextureCoord:        return "TexCoord";
 
         case ShaderSemantic::Unknown:
         default: return "Unknown";
     }
-}
-
-const char* getHLSLTypeName(const ShaderDataType::Type type) noexcept
-{
-    switch(type)
-    {
-        case ShaderDataType::Bool:        return "bool1";
-        case ShaderDataType::Vector2Bool: return "bool2";
-        case ShaderDataType::Vector3Bool: return "bool3";
-        case ShaderDataType::Vector4Bool: return "bool4";
-
-        case ShaderDataType::Int:        return "int1";
-        case ShaderDataType::Vector2Int: return "int2";
-        case ShaderDataType::Vector3Int: return "int3";
-        case ShaderDataType::Vector4Int: return "int4";
-
-        case ShaderDataType::UInt:        return "uint1";
-        case ShaderDataType::Vector2UInt: return "uint2";
-        case ShaderDataType::Vector3UInt: return "uint3";
-        case ShaderDataType::Vector4UInt: return "uint4";
-
-        case ShaderDataType::Float:          return "float1";
-        case ShaderDataType::Vector2Float:   return "float2";
-        case ShaderDataType::Vector3Float:   return "float3";
-        case ShaderDataType::Vector4Float:   return "float4";
-        case ShaderDataType::Matrix2x2Float: return "float2x2";
-        case ShaderDataType::Matrix2x3Float: return "float2x3";
-        case ShaderDataType::Matrix2x4Float: return "float2x4";
-        case ShaderDataType::Matrix3x2Float: return "float3x2";
-        case ShaderDataType::Matrix3x3Float: return "float3x3";
-        case ShaderDataType::Matrix3x4Float: return "float3x4";
-        case ShaderDataType::Matrix4x2Float: return "float4x2";
-        case ShaderDataType::Matrix4x3Float: return "float4x3";
-        case ShaderDataType::Matrix4x4Float: return "float4x4";
-
-        case ShaderDataType::Double:          return "double1";
-        case ShaderDataType::Vector2Double:   return "double2";
-        case ShaderDataType::Vector3Double:   return "double3";
-        case ShaderDataType::Vector4Double:   return "double4";
-        case ShaderDataType::Matrix2x2Double: return "double2x2";
-        case ShaderDataType::Matrix2x3Double: return "double2x3";
-        case ShaderDataType::Matrix2x4Double: return "double2x4";
-        case ShaderDataType::Matrix3x2Double: return "double3x2";
-        case ShaderDataType::Matrix3x3Double: return "double3x3";
-        case ShaderDataType::Matrix3x4Double: return "double3x4";
-        case ShaderDataType::Matrix4x2Double: return "double4x2";
-        case ShaderDataType::Matrix4x3Double: return "double4x3";
-        case ShaderDataType::Matrix4x4Double: return "double4x4";
-        default: break;
-    }
-    return "";
-}
-
-/**
- *   Generates a name very quickly, basically itoa, but the number
- * will be backwards. Doesn't really matter, just need a unique name.
- */
-void genVarName(char buf[14], u32 i) noexcept
-{
-    buf[0] = ' ';
-    buf[1] = 'v';
-    uSys index = 2;
-    while(i != 0)
-    {
-        const u32 v = i % 10;
-        i /= 10;
-        switch(v)
-        {
-            case 0: buf[index++] = '0';
-            case 1: buf[index++] = '1';
-            case 2: buf[index++] = '2';
-            case 3: buf[index++] = '3';
-            case 4: buf[index++] = '4';
-            case 5: buf[index++] = '5';
-            case 6: buf[index++] = '6';
-            case 7: buf[index++] = '7';
-            case 8: buf[index++] = '8';
-            case 9: buf[index++] = '9';
-            default: break;
-        }
-    }
-    buf[index++] = ';';
-    buf[index] = '\0';
 }
 #endif

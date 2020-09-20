@@ -29,7 +29,10 @@ public:
     [[nodiscard]] FreeListAllocator& freeList() noexcept { return _freeList; }
 
     void reset(bool releasePages = false) noexcept override
-    { _allocator->Reset(); }
+    {
+        _allocator->Reset();
+        _freeList.reset(releasePages);
+    }
 
 #if TAU_CA_EXPOSE_MEM_STAT
     [[nodiscard]] iSys  reservedMemory() const noexcept override { return -1; }

@@ -30,11 +30,11 @@ public:
     bool frontFaceCounterClockwise;
     CullMode cullMode;
     FillMode fillMode;
-    float depthBias;
+    iSys depthBias;
     float slopeScaledDepthBias;
     float depthBiasClamp;
 public:
-    RasterizerArgs(const bool _enableScissorTest, const bool _frontFaceCounterClockwise, const CullMode _cullMode, const FillMode _fillMode, const float _depthBias, const float _slopScaledDepthBias, const float _depthBiasClamp) noexcept
+    RasterizerArgs(const bool _enableScissorTest, const bool _frontFaceCounterClockwise, const CullMode _cullMode, const FillMode _fillMode, const iSys _depthBias, const float _slopScaledDepthBias, const float _depthBiasClamp) noexcept
         : enableScissorTest(_enableScissorTest)
         , frontFaceCounterClockwise(_frontFaceCounterClockwise)
         , cullMode(_cullMode)

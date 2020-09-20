@@ -62,7 +62,7 @@ public:
     {
         DEFAULT_CONSTRUCT_PO(Typed);
         DEFAULT_DESTRUCT_VI(Typed);
-        DELETE_CM(Typed);
+        DEFAULT_CM_PO(Typed);
     public:
         [[nodiscard]] virtual ShaderDataType::Type dataType() noexcept = 0;
     };
@@ -117,6 +117,12 @@ public:
      */
     static uSys rowCount(Type type) noexcept;
 
+    static bool isBool(Type type) noexcept;
+    static bool isInt(Type type) noexcept;
+    static bool isUInt(Type type) noexcept;
+    static bool isFloat(Type type) noexcept;
+    static bool isDouble(Type type) noexcept;
+    static bool isValidInput(Type type) noexcept;
 };
 
 class ShaderSemantic final
@@ -162,7 +168,7 @@ private:
     BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const u32 offsetCache, const bool normalized = false) noexcept
         : _semantic(semantic)
         , _type(type)
-        , _sizeCache(ShaderDataType::size(type))
+        , _sizeCache(static_cast<u32>(ShaderDataType::size(type)))
         , _offsetCache(offsetCache)
         , _normalized(normalized)
     { }
@@ -170,16 +176,16 @@ public:
     BufferElementDescriptor(const ShaderSemantic::Semantic semantic, const ShaderDataType::Type type, const bool normalized = false) noexcept
         : _semantic(semantic)
         , _type(type)
-        , _sizeCache(ShaderDataType::size(type))
+        , _sizeCache(static_cast<u32>(ShaderDataType::size(type)))
         , _offsetCache(0)
         , _normalized(normalized)
     { }
 
     [[nodiscard]] ShaderSemantic::Semantic semantic() const noexcept { return _semantic; }
     [[nodiscard]] ShaderDataType::Type type() const noexcept { return _type; }
-    [[nodiscard]] bool normalized() const noexcept { return _normalized; }
     [[nodiscard]] u32 size() const noexcept { return _sizeCache; }
     [[nodiscard]] u32 offset() const noexcept { return _offsetCache; }
+    [[nodiscard]] bool normalized() const noexcept { return _normalized; }
 private:
     friend class BufferDescriptorBuilder;
 };

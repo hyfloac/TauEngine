@@ -5,6 +5,7 @@
 #include <NumTypes.hpp>
 
 #include "_GraphicsOpaqueObjects.hpp"
+#include "DLL.hpp"
 
 class IBlendingState;
 class IDepthStencilState;
@@ -49,4 +50,24 @@ public:
     { return reinterpret_cast<_T*>(raw); }
 
     [[nodiscard]] const PipelineArgs& args() const noexcept { return _args; }
+};
+
+class TAU_DLL PipelineStateBuilder
+{
+    DEFAULT_CONSTRUCT_PO(PipelineStateBuilder);
+    DEFAULT_DESTRUCT_VI(PipelineStateBuilder);
+    DEFAULT_CM_PO(PipelineStateBuilder);
+public:
+    enum Error
+    {
+        NoError = 0,
+        InvalidBlendingState,
+        InvalidDepthStencilState,
+        InvalidRasterizerState,
+        InvalidShaderProgram,
+        InvalidInputLayout,
+        DriverMemoryAllocationFailure
+    };
+public:
+    [[nodiscard]]virtual PipelineState build(const PipelineArgs& args, [[tau::out]] Error* error) const noexcept = 0;
 };

@@ -4,11 +4,12 @@
 #include "dx/dx12/DX12CommandAllocator.hpp"
 #include "dx/dx12/DX12Resource.hpp"
 #include "dx/dx12/DX12ResourceBuffer.hpp"
+#include "dx/dx12/DX12VertexArray.hpp"
 #include "dx/dx12/DX12Enums.hpp"
 #include "graphics/PipelineState.hpp"
 #include "TauConfig.hpp"
 
-void DX12CommandList::reset(const NullableRef<ICommandAllocator>& allocator, PipelineState* const initialState) noexcept
+void DX12CommandList::reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* const initialState) noexcept
 {
 #ifdef TAU_NULL_CHECK
     if(!allocator)
@@ -22,15 +23,13 @@ void DX12CommandList::reset(const NullableRef<ICommandAllocator>& allocator, Pip
 
     _cmdAllocator = RefCast<DX12CommandAllocator>(allocator);
 
-    ID3D12CommandAllocator* d3dAllocator = _cmdAllocator->allocator();
-
     ID3D12PipelineState* pipelineState = null;
     if(initialState)
     {
         pipelineState = initialState->get<ID3D12PipelineState>();
     }
     
-    _cmdList->Reset(d3dAllocator, pipelineState);
+    _cmdList->Reset(_cmdAllocator->allocator(), pipelineState);
 }
 
 void DX12CommandList::begin() noexcept
@@ -71,17 +70,58 @@ void DX12CommandList::setPipelineState(const PipelineState& pipelineState) noexc
     _cmdList->SetPipelineState(pipelineState.get<ID3D12PipelineState>());
 }
 
-void DX12CommandList::setStencilRef(uSys stencilRef) noexcept
+void DX12CommandList::setStencilRef(const uSys stencilRef) noexcept
 {
     _cmdList->OMSetStencilRef(static_cast<UINT>(stencilRef));
 }
 
 void DX12CommandList::setVertexArray(const NullableRef<IVertexArray>& va) noexcept
 {
+#if TAU_NULL_CHECK
+    if(!va)
+    { return; }
+#endif
+
+#if TAU_RTTI_CHECK
+    if(!RTT_CHECK(va, DX12VertexArray))
+    { return; }
+#endif
+
+    const DX12VertexArray* const dxVA = static_cast<const DX12VertexArray* const>(va.get());
+
+    _cmdList->IASetVertexBuffers(0, static_cast<UINT>(dxVA->d3dBuffers().count()), dxVA->d3dBuffers().arr());
+    _cmdAllocator->freeList().allocateT<NullableRef<IVertexArray>>(va);
 }
 
 void DX12CommandList::setIndexBuffer(const IndexBufferView& indexBufferView) noexcept
 {
+#if TAU_NULL_CHECK
+    if(!indexBufferView.buffer)
+    { return; }
+#endif
+
+#if TAU_RTTI_CHECK
+    if(!RTTD_CHECK(indexBufferView.buffer, DX12Resource, IResource))
+    { return; }
+#endif
+
+#if TAU_GENERAL_SAFETY_CHECK
+    if(indexBufferView.indexSize != EBuffer::IndexSize::Uint16 ||
+       indexBufferView.indexSize != EBuffer::IndexSize::Uint32)
+    { return; }
+
+    if(indexBufferView.buffer->resourceType() != EResource::Type::Buffer)
+    { return; }
+#endif
+
+    const DX12ResourceBuffer* const buffer = static_cast<const DX12ResourceBuffer* const>(indexBufferView.buffer.get());
+
+    D3D12_INDEX_BUFFER_VIEW d3dView;
+    d3dView.BufferLocation = buffer->d3dResource()->GetGPUVirtualAddress();
+    d3dView.SizeInBytes = static_cast<UINT>(indexBufferView.buffer->size());
+    d3dView.Format = DX12Utils::getDXIndexSize(indexBufferView.indexSize);
+    _cmdList->IASetIndexBuffer(&d3dView);
+    _cmdAllocator->freeList().allocateT<NullableRef<IResource>>(indexBufferView.buffer);
 }
 
 void DX12CommandList::setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept

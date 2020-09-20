@@ -20,7 +20,7 @@ public:
         , _d3dDepthStencilState(d3dDepthStencilState)
     { }
 
-    ~DX11DepthStencilState() noexcept
+    ~DX11DepthStencilState() noexcept override
     { RELEASE_DX(_d3dDepthStencilState); }
 
     DX11DepthStencilState(const DX11DepthStencilState& copy) noexcept

@@ -9,12 +9,21 @@ class DX12CommandAllocator;
 
 class TAU_DLL DX12CommandList final : public ICommandList
 {
+    DELETE_CM(DX12CommandList);
     COMMAND_LIST_IMPL(DX12CommandList);
 private:
     ID3D12GraphicsCommandList* _cmdList;
     NullableRef<DX12CommandAllocator> _cmdAllocator;
 public:
-    void reset(const NullableRef<ICommandAllocator>& allocator, PipelineState* initialState) noexcept override;
+    DX12CommandList(ID3D12GraphicsCommandList* const cmdList, const NullableRef<DX12CommandAllocator>& cmdAllocator) noexcept
+        : _cmdList(cmdList)
+        , _cmdAllocator(cmdAllocator)
+    { }
+
+    ~DX12CommandList() noexcept override
+    { _cmdList->Release(); }
+
+    void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept override;
     void begin() noexcept override;
     void finish() noexcept override;
     void draw(uSys vertexCount, uSys startVertex) noexcept override;

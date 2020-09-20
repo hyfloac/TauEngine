@@ -1,11 +1,11 @@
 #pragma once
 
-#include "model/InputLayout.hpp"
+#include "graphics/InputLayout.hpp"
 
 #ifdef _WIN32
 #include <d3d11.h>
 #include "dx/DXUtils.hpp"
-#include "model/BufferDescriptor.hpp"
+#include "graphics/BufferDescriptor.hpp"
 
 class DX11GraphicsInterface;
 class DX11RenderingContext;
@@ -46,7 +46,7 @@ public:
         , _iaOffsets(dxArgs.iaOffsets)
     { }
 
-    ~DX11InputLayout() noexcept
+    ~DX11InputLayout() noexcept override
     {
         RELEASE_DX(_inputLayout);
         delete[] _iaStrides;

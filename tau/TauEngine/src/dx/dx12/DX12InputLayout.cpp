@@ -1,132 +1,32 @@
-#include "dx/dx11/DX11InputLayout.hpp"
+#include "dx/dx12/DX12InputLayout.hpp"
 
 #ifdef _WIN32
-#include "dx/dx11/DX11GraphicsInterface.hpp"
-#include "dx/dx11/DX11RenderingContext.hpp"
-#include "dx/dx11/DX11Shader.hpp"
-#include "TauConfig.hpp"
-#include "dx/DXShaderStubGenerator.hpp"
 #include <array>
 
-#if TAU_RTTI_CHECK
-  #include "TauEngine.hpp"
-  #define CTX() \
-      if(!RTT_CHECK(context, DX11RenderingContext)) \
-      { TAU_THROW(IncorrectContextException); } \
-      auto& ctx = reinterpret_cast<DX11RenderingContext&>(context)
-#else
-  #define CTX() \
-      auto& ctx = reinterpret_cast<DX11RenderingContext&>(context)
-#endif
-
-void DX11InputLayout::bind(IRenderingContext& context) noexcept
+NullableRef<IInputLayout> DX12InputLayoutBuilder::buildTauRef(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
-    CTX();
-    ctx.d3d11DeviceContext()->IASetInputLayout(_inputLayout);
-    ctx.setBufferData(_iaStrides, _iaOffsets);
-}
-
-void DX11InputLayout::unbind(IRenderingContext& context) noexcept
-{
-    CTX();
-    ctx.d3d11DeviceContext()->IASetInputLayout(null);
-    ctx.setBufferData(null, null);
-}
-
-DX11InputLayout* DX11InputLayoutBuilder::build(const InputLayoutArgs& args, Error* error) noexcept
-{
-    DXInputLayoutArgs dxArgs;
+    DXInputLayoutArgs dxArgs(args.descriptorCount);
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    DX11InputLayout* const inputLayout = new(::std::nothrow) DX11InputLayout(dxArgs);
+    NullableRef<DX12InputLayout> inputLayout(allocator, ::std::move(dxArgs.inputLayout));
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
 
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-DX11InputLayout* DX11InputLayoutBuilder::build(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX11InputLayout* const inputLayout = allocator.allocateT<DX11InputLayout>(dxArgs);
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-CPPRef<IInputLayout> DX11InputLayoutBuilder::buildCPPRef(const InputLayoutArgs& args, Error* error) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX11InputLayout> inputLayout = CPPRef<DX11InputLayout>(new(::std::nothrow) DX11InputLayout(dxArgs));
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-NullableRef<IInputLayout> DX11InputLayoutBuilder::buildTauRef(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableRef<DX11InputLayout> inputLayout(allocator, dxArgs);
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-NullableStrongRef<IInputLayout> DX11InputLayoutBuilder::buildTauSRef(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX11InputLayout> inputLayout(allocator, dxArgs);
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
+    ERROR_CODE_V(Error::NoError, ::std::move(inputLayout));
 }
 
 using SemanticSet = ::std::array<UINT, static_cast<uSys>(ShaderSemantic::MAX_VALUE) + 1>;
 
-static void handleInsertion(uSys& insertIndex, u32 bufferIndex, bool instanced, const BufferElementDescriptor& bed, DynArray<D3D11_INPUT_ELEMENT_DESC>& inputElements, SemanticSet& semanticIndices) noexcept;
+static void handleInsertion(uSys& insertIndex, u32 bufferIndex, bool instanced, const BufferElementDescriptor& bed, RefDynArray<D3D12_INPUT_ELEMENT_DESC>& inputElements, SemanticSet& semanticIndices) noexcept;
+static uSys computeNumElements(ShaderDataType::Type type) noexcept;
+static DXGI_FORMAT getDXType(ShaderDataType::Type type) noexcept;
+static const char* getDXSemanticName(ShaderSemantic::Semantic semantic) noexcept;
 
-bool DX11InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLayoutArgs* dxArgs, Error* error) const noexcept
+bool DX12InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLayoutArgs* dxArgs, Error* error) const noexcept
 {
     uSys bufferDescriptorCount = 0;
 
-    for(uSys i = 0; i < args.descriptors.size(); ++i)
+    for(uSys i = 0; i < args.descriptorCount; ++i)
     {
         const auto& elements = args.descriptors[i].elements();
 
@@ -136,29 +36,17 @@ bool DX11InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
         }
     }
 
-    DynArray<D3D11_INPUT_ELEMENT_DESC> inputElements(bufferDescriptorCount);
-    ERROR_CODE_COND_F(!inputElements, Error::SystemMemoryAllocationFailure);
-
     SemanticSet semanticIndices{ };
     ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(uSys));
 
-    dxArgs->iaStrides = new UINT[args.descriptors.size()];
-    dxArgs->iaOffsets = new UINT[args.descriptors.size()];
-
-    ERROR_CODE_COND_F(!dxArgs->iaStrides, Error::SystemMemoryAllocationFailure);
-    ERROR_CODE_COND_F(!dxArgs->iaOffsets, Error::SystemMemoryAllocationFailure);
-    ::std::memset(dxArgs->iaOffsets, 0, args.descriptors.size() * sizeof(UINT));
-
     uSys insertIndex = 0;
-    for(uSys i = 0; i < args.descriptors.size(); ++i)
+    for(uSys i = 0; i < args.descriptorCount; ++i)
     {
         const auto& elements = args.descriptors[i].elements();
 
-        dxArgs->iaStrides[i] = args.descriptors[i].stride();
-
         for(uSys j = 0; j < elements.size(); ++j)
         {
-            handleInsertion(insertIndex, static_cast<UINT>(i), args.descriptors[i].instanced(), elements[j], inputElements, semanticIndices);
+            handleInsertion(insertIndex, static_cast<UINT>(i), args.descriptors[i].instanced(), elements[j], dxArgs->inputLayout, semanticIndices);
         }
     }
 
@@ -170,51 +58,29 @@ bool DX11InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
             ERROR_CODE_F(Error::MultipleSemanticOfInvalidType);
         }
     }
-    
-    ID3DBlob* shaderBlob;
-    bool shouldRelease;
-    
-    if(args.shader)
-    {
-        ERROR_CODE_COND_F(args.shader->shaderStage() != EShader::Stage::Vertex, Error::ShaderMustBeVertexShader);
-        ERROR_CODE_COND_F(!RTT_CHECK(args.shader, DX11Shader), Error::InternalError);
-        shaderBlob = static_cast<DX11VertexShader*>(args.shader)->shaderBlob();
-        shouldRelease = false;
-    }
-    else
-    {
-        shaderBlob = DXShaderStubGenerator::genShader(args.descriptors.count(), args.descriptors.arr(), "vs_4_0");
-        ERROR_CODE_COND_F(!shaderBlob, Error::ShaderNotSet);
-        shouldRelease = true;
-    }
-
-    const HRESULT h = _gi.d3d11Device()->CreateInputLayout(inputElements, static_cast<UINT>(inputElements.count()), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &dxArgs->inputLayout);
-    if(shouldRelease)
-    { shaderBlob->Release(); }
-    ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     return true;
 }
 
-static void handleInsertion(uSys& insertIndex, const u32 bufferIndex, const bool instanced, const BufferElementDescriptor& bed, DynArray<D3D11_INPUT_ELEMENT_DESC>& inputElements, SemanticSet& semanticIndices) noexcept
+static void handleInsertion(uSys& insertIndex, const u32 bufferIndex, const bool instanced, const BufferElementDescriptor& bed, RefDynArray<D3D12_INPUT_ELEMENT_DESC>& inputElements, SemanticSet& semanticIndices) noexcept
 {
     const ShaderDataType::Type underlyingType = ShaderDataType::underlyingTypeND(bed.type());
-    const uSys columns = DX11InputLayoutBuilder::computeNumElements(bed.type());
+    const uSys columns = computeNumElements(bed.type());
     UINT& semanticIndice = semanticIndices[static_cast<uSys>(bed.semantic())];
 
     for(uSys i = 0; i < columns; ++i, ++insertIndex)
     {
-        inputElements[insertIndex].SemanticName = DX11InputLayoutBuilder::getDXSemanticName(bed.semantic());
+        inputElements[insertIndex].SemanticName = getDXSemanticName(bed.semantic());
         inputElements[insertIndex].SemanticIndex = semanticIndice++;
-        inputElements[insertIndex].Format = DX11InputLayoutBuilder::getDXType(underlyingType);
+        inputElements[insertIndex].Format = getDXType(underlyingType);
         inputElements[insertIndex].InputSlot = bufferIndex;
-        inputElements[insertIndex].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        inputElements[insertIndex].InputSlotClass = instanced ? D3D11_INPUT_PER_INSTANCE_DATA : D3D11_INPUT_PER_VERTEX_DATA;
+        inputElements[insertIndex].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+        inputElements[insertIndex].InputSlotClass = instanced ? D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA : D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
         inputElements[insertIndex].InstanceDataStepRate = 0;
     }
 }
 
-uSys DX11InputLayoutBuilder::computeNumElements(const ShaderDataType::Type type) noexcept
+static uSys computeNumElements(const ShaderDataType::Type type) noexcept
 {
     switch(type)
     {
@@ -274,7 +140,7 @@ uSys DX11InputLayoutBuilder::computeNumElements(const ShaderDataType::Type type)
     return 0;
 }
 
-DXGI_FORMAT DX11InputLayoutBuilder::getDXType(const ShaderDataType::Type type) noexcept
+static DXGI_FORMAT getDXType(const ShaderDataType::Type type) noexcept
 {
     switch(type)
     {
@@ -327,7 +193,7 @@ DXGI_FORMAT DX11InputLayoutBuilder::getDXType(const ShaderDataType::Type type) n
     return DXGI_FORMAT_UNKNOWN;
 }
 
-const char* DX11InputLayoutBuilder::getDXSemanticName(const ShaderSemantic::Semantic semantic) noexcept
+static const char* getDXSemanticName(const ShaderSemantic::Semantic semantic) noexcept
 {
     switch(semantic)
     {

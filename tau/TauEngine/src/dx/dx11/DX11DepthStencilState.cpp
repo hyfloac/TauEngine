@@ -129,8 +129,7 @@ bool DX11DepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, ID3
     ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilFunc) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilCompareFunc);
 
     const HRESULT res = _gi.d3d11Device()->CreateDepthStencilState(&depthStencilDesc, d3dDepthStencilState);
-
-    ERROR_CODE_COND_F(FAILED(res), Error::SystemMemoryAllocationFailure);
+    ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
     return true;
 }

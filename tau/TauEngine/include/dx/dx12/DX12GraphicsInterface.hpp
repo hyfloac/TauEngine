@@ -18,6 +18,8 @@ public:
     using DX12Device = ID3D12Device6;
 private:
     DX12Device* _d3d12Device;
+
+
 public:
     DX12GraphicsInterface(const RenderingMode& mode, DX12Device* const d3d12Device) noexcept
         : IGraphicsInterface(mode)

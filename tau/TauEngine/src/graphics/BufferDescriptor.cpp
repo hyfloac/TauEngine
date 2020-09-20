@@ -1,5 +1,52 @@
-#include "model/BufferDescriptor.hpp"
+#include "graphics/BufferDescriptor.hpp"
 #include "Timings.hpp"
+
+static bool _dummy(ShaderDataType::Type type) noexcept
+{
+    switch(type)
+    {
+        case ShaderDataType::Unknown:     
+        case ShaderDataType::Bool:        
+        case ShaderDataType::Int:         
+        case ShaderDataType::UInt:        
+        case ShaderDataType::Float:       
+        case ShaderDataType::Double:      
+        case ShaderDataType::Vector2Bool: 
+        case ShaderDataType::Vector3Bool: 
+        case ShaderDataType::Vector4Bool: 
+        case ShaderDataType::Vector2Int:  
+        case ShaderDataType::Vector3Int:  
+        case ShaderDataType::Vector4Int:  
+        case ShaderDataType::Vector2UInt:   
+        case ShaderDataType::Vector3UInt:   
+        case ShaderDataType::Vector4UInt:   
+        case ShaderDataType::Vector2Float:  
+        case ShaderDataType::Vector3Float:  
+        case ShaderDataType::Vector4Float:  
+        case ShaderDataType::Vector2Double: 
+        case ShaderDataType::Vector3Double: 
+        case ShaderDataType::Vector4Double: 
+        case ShaderDataType::Matrix2x2Float: 
+        case ShaderDataType::Matrix2x3Float: 
+        case ShaderDataType::Matrix2x4Float: 
+        case ShaderDataType::Matrix3x2Float: 
+        case ShaderDataType::Matrix3x3Float: 
+        case ShaderDataType::Matrix3x4Float: 
+        case ShaderDataType::Matrix4x2Float: 
+        case ShaderDataType::Matrix4x3Float: 
+        case ShaderDataType::Matrix4x4Float: 
+        case ShaderDataType::Matrix2x2Double: 
+        case ShaderDataType::Matrix2x3Double: 
+        case ShaderDataType::Matrix2x4Double: 
+        case ShaderDataType::Matrix3x2Double: 
+        case ShaderDataType::Matrix3x3Double: 
+        case ShaderDataType::Matrix3x4Double: 
+        case ShaderDataType::Matrix4x2Double: 
+        case ShaderDataType::Matrix4x3Double: 
+        case ShaderDataType::Matrix4x4Double: return true;
+        default: return false;
+    }
+}
 
 uSys ShaderDataType::size(const Type type) noexcept
 {
@@ -265,6 +312,109 @@ uSys ShaderDataType::rowCount(const Type type) noexcept
     }
 }
 
+bool ShaderDataType::isBool(const Type type) noexcept
+{
+    switch(type)
+    {  
+        case Bool:         
+        case Vector2Bool: 
+        case Vector3Bool: 
+        case Vector4Bool: return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isInt(const Type type) noexcept
+{
+    switch(type)
+    {     
+        case Int:        
+        case Vector2Int:  
+        case Vector3Int:  
+        case Vector4Int: return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isUInt(const Type type) noexcept
+{
+    switch(type)
+    {     
+        case UInt:         
+        case Vector2UInt:   
+        case Vector3UInt:   
+        case Vector4UInt: return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isFloat(const Type type) noexcept
+{
+    switch(type)
+    {     
+        case Float:         
+        case Vector2Float:  
+        case Vector3Float:  
+        case Vector4Float:  
+        case Vector4Double: 
+        case Matrix2x2Float: 
+        case Matrix2x3Float: 
+        case Matrix2x4Float: 
+        case Matrix3x2Float: 
+        case Matrix3x3Float: 
+        case Matrix3x4Float: 
+        case Matrix4x2Float: 
+        case Matrix4x3Float: 
+        case Matrix4x4Float: return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isDouble(const Type type) noexcept
+{
+    switch(type)
+    {     
+        case Double:      
+        case Vector2Double: 
+        case Vector3Double: 
+        case Vector4Double: 
+        case Matrix2x2Double: 
+        case Matrix2x3Double: 
+        case Matrix2x4Double: 
+        case Matrix3x2Double: 
+        case Matrix3x3Double: 
+        case Matrix3x4Double: 
+        case Matrix4x2Double: 
+        case Matrix4x3Double: 
+        case Matrix4x4Double: return true;
+        default: return false;
+    }
+}
+
+bool ShaderDataType::isValidInput(const Type type) noexcept
+{
+    switch(type)
+    {  
+        case Int:         
+        case UInt:        
+        case Float:       
+        case Double:      
+        case Vector2Int:  
+        case Vector3Int:  
+        case Vector4Int:  
+        case Vector2UInt:   
+        case Vector3UInt:   
+        case Vector4UInt:   
+        case Vector2Float:  
+        case Vector3Float:  
+        case Vector4Float:  
+        case Vector2Double: 
+        case Vector3Double: 
+        case Vector4Double: return true;
+        default: return false;
+    }
+}
+
 ShaderDataType::Type ShaderSemantic::associatedType(const Semantic semantic) noexcept
 {
     switch(semantic)
@@ -317,7 +467,7 @@ void BufferDescriptorBuilder::addDescriptor(const ShaderSemantic::Semantic seman
 {
     _elementDescriptors[_currentIndex++] = BufferElementDescriptor(semantic, type, _stride, normalized);
 
-    const u32 size = ShaderDataType::size(type);
+    const u32 size = static_cast<u32>(ShaderDataType::size(type));
 
     _stride += size;
 }

@@ -26,13 +26,15 @@ protected:
      */
     DynArray<NullableRef<IResource>> _buffers;
 protected:
-    inline IVertexArray(const DynArray<NullableRef<IResource>>& buffers) noexcept
+    IVertexArray(const DynArray<NullableRef<IResource>>& buffers) noexcept
         : _buffers(buffers)
     { }
 
-    inline IVertexArray(DynArray<NullableRef<IResource>>&& buffers) noexcept
+    IVertexArray(DynArray<NullableRef<IResource>>&& buffers) noexcept
         : _buffers(::std::move(buffers))
     { }
+public:
+    [[nodiscard]] const DynArray<NullableRef<IResource>>& buffers() const noexcept { return _buffers; }
 public:
     RTT_BASE_IMPL(IVertexArray);
     RTT_BASE_CHECK(IVertexArray);
@@ -59,6 +61,7 @@ public:
     {
         NoError = 0,
         BuffersNotSet,
+        ResourceIsNotBuffer,
         SystemMemoryAllocationFailure,
         DriverMemoryAllocationFailure,
         InternalError

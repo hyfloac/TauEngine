@@ -116,14 +116,14 @@ public:
         BlendOp colorBlendOp;
         BlendOp alphaBlendOp;
     public:
-        FrameBufferBlendingArgs(const bool enableBlending, const BlendFactor colorSrcFactor, const BlendFactor colorDstFactor, const BlendFactor alphaSrcFactor, const BlendFactor alphaDstFactor, const BlendOp colorBlendOp, const BlendOp alphaBlendOp) noexcept
-            : enableBlending(enableBlending)
-            , colorSrcFactor(colorSrcFactor)
-            , colorDstFactor(colorDstFactor)
-            , alphaSrcFactor(alphaSrcFactor)
-            , alphaDstFactor(alphaDstFactor)
-            , colorBlendOp(colorBlendOp)
-            , alphaBlendOp(alphaBlendOp)
+        FrameBufferBlendingArgs(const bool _enableBlending, const BlendFactor _colorSrcFactor, const BlendFactor _colorDstFactor, const BlendFactor _alphaSrcFactor, const BlendFactor _alphaDstFactor, const BlendOp _colorBlendOp, const BlendOp _alphaBlendOp) noexcept
+            : enableBlending(_enableBlending)
+            , colorSrcFactor(_colorSrcFactor)
+            , colorDstFactor(_colorDstFactor)
+            , alphaSrcFactor(_alphaSrcFactor)
+            , alphaDstFactor(_alphaDstFactor)
+            , colorBlendOp(_colorBlendOp)
+            , alphaBlendOp(_alphaBlendOp)
         { }
 
         FrameBufferBlendingArgs(tau::TIPRecommended) noexcept
@@ -155,8 +155,8 @@ public:
      */
     FrameBufferBlendingArgs frameBuffers[8];
 public:
-    explicit BlendingArgs(const bool independentBlending) noexcept
-        : independentBlending(independentBlending)
+    explicit BlendingArgs(const bool _independentBlending) noexcept
+        : independentBlending(_independentBlending)
         , frameBuffers{}
     { }
 

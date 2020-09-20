@@ -4,6 +4,8 @@
 #include <d3d12.h>
 
 #include "graphics/GraphicsEnums.hpp"
+#include "graphics/ResourceEnums.hpp"
+#include "graphics/BufferEnums.hpp"
 
 namespace DX12Utils {
 
@@ -22,6 +24,16 @@ inline constexpr D3D_PRIMITIVE_TOPOLOGY getDXDrawType(const EGraphics::DrawType 
         case EGraphics::DrawType::TriangleStripAdjacency: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
         case EGraphics::DrawType::Patches:                return D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
         default:                                          return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+    }
+}
+
+inline constexpr DXGI_FORMAT getDXIndexSize(const EBuffer::IndexSize indexSize)
+{
+    switch(indexSize)
+    {
+        case EBuffer::IndexSize::Uint16: return DXGI_FORMAT_R16_UINT;
+        case EBuffer::IndexSize::Uint32: return DXGI_FORMAT_R32_UINT;
+        default:                         return DXGI_FORMAT_UNKNOWN;
     }
 }
 

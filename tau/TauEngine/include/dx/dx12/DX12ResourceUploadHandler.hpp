@@ -44,9 +44,9 @@ public:
     };
 
 #ifdef TAU_PRODUCTION
-    using FBAllocator = FixedBlockArenaAllocator<AllocationTracking::None>;
+    using FBAllocator = FixedBlockAllocator<AllocationTracking::None>;
 #else
-    using FBAllocator = FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount>;
+    using FBAllocator = FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>;
 #endif
 private:
     ID3D12Device* _device;
@@ -103,9 +103,9 @@ public:
     };
 
 #ifdef TAU_PRODUCTION
-    using FBAllocator = FixedBlockArenaAllocator<AllocationTracking::None>;
+    using FBAllocator = FixedBlockAllocator<AllocationTracking::None>;
 #else
-    using FBAllocator = FixedBlockArenaAllocator<AllocationTracking::DoubleDeleteCount>;
+    using FBAllocator = FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>;
 #endif
 private:
     ID3D12Resource* _heap;

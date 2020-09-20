@@ -120,9 +120,6 @@
     <ClCompile Include="src\gl\GLVertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\BufferDescriptor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\camera\Camera3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -439,6 +436,30 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx12\DX12CommandList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\DXShaderStubGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\BufferDescriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12InputLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12BlendingState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12DepthStencilState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12RasterizerState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12PipelineState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1122,6 +1143,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx12\DX12Enums.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12VertexArray.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\DXShaderStubGenerator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12InputLayout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12BlendingState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12DepthStencilState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12RasterizerState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12PipelineState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\DX12ResourceTexture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

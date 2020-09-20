@@ -40,7 +40,7 @@ public:
      *        An optional initial pipeline state to use for the
      *      command list.
      */
-    virtual void reset(const NullableRef<ICommandAllocator>& allocator, PipelineState* initialState) noexcept = 0;
+    virtual void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept = 0;
 
     /**
      * @brief Begins recording the command list.
