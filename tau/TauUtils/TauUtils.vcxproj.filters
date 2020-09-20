@@ -90,6 +90,15 @@
     <ClInclude Include="include\allocator\FreeListAllocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\allocator\LinearAllocator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ds\AVLTree.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ConPrinter.string.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PageAllocator.cpp">

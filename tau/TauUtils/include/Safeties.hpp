@@ -12,7 +12,7 @@
 #define ____str(__X) #__X
 #define ___str(__X) ____str(__X)
 
-#define Assert(__STATE) if(!(__STATE)) { fprintf(stderr, "`" #__STATE "` Evaluated to false at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; }
+#define TauAssert(__STATE) do { if(!(__STATE)) { fprintf(stderr, "`" #__STATE "` Evaluated to false at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; } } while(0)
 
 #define RUNTIME_ERROR(__TEXT) do { fprintf(stderr, __TEXT "\nOccured at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; } while(0)
 
@@ -21,14 +21,18 @@
 #define ERROR_CODE_N(_ERR)       do { if(error) { *error = _ERR; } return nullptr; } while(0)
 #define ERROR_CODE_T(_ERR)       do { if(error) { *error = _ERR; } return true;    } while(0)
 #define ERROR_CODE_F(_ERR)       do { if(error) { *error = _ERR; } return false;   } while(0)
+#define ERROR_CODE_0(_ERR)       do { if(error) { *error = _ERR; } return 0;       } while(0)
+#define ERROR_CODE_1(_ERR)       do { if(error) { *error = _ERR; } return 1;       } while(0)
 #define ERROR_CODE_COND(_COND, _ERR)         do { if((_COND)) { if(error) { *error = _ERR; } return;         } } while(0)
 #define ERROR_CODE_COND_V(_COND, _ERR, _VAL) do { if((_COND)) { if(error) { *error = _ERR; } return _VAL;    } } while(0)
 #define ERROR_CODE_COND_N(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return nullptr; } } while(0)
 #define ERROR_CODE_COND_T(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return true;    } } while(0)
 #define ERROR_CODE_COND_F(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return false;   } } while(0)
+#define ERROR_CODE_COND_0(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return 0;       } } while(0)
+#define ERROR_CODE_COND_1(_COND, _ERR)       do { if((_COND)) { if(error) { *error = _ERR; } return 1;       } } while(0)
 
 #ifdef _DEBUG
-  #define Ensure(__STATE) Assert(__STATE)
+  #define Ensure(__STATE) TauAssert(__STATE)
 #else
   #define Ensure(__STATE)
 #endif

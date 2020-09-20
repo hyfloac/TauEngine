@@ -1,4 +1,5 @@
-#include "ArrayListUnitTest.hpp"
+#include "ArrayListTest.hpp"
+#include "AVLTreeTest.hpp"
 #include "StringTest.hpp"
 #include "RefUnitTest.hpp"
 #include "FixedBlockAllocatorTest.hpp"
@@ -8,6 +9,7 @@
 #include "Vector4fTest.hpp"
 #include "Matrix4x4fTest.hpp"
 #include "UnitTest.hpp"
+#include "ConPrinter.hpp"
 #include <cstdio>
 
 #include "allocator/PageAllocator.hpp"
@@ -159,6 +161,46 @@ int main(int argCount, char* args[]) noexcept
 
     Matrix4x4fTests::mulVecTest();
     printf("Matrix4x4f Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nAVL Tree Tests:\n\n");
+    AVLTreeUnitTest::insertIgnoreTest();
+    AVLTreeUnitTest::insertDuplicateIgnoreTest();
+    AVLTreeUnitTest::emplaceIgnoreTest();
+    AVLTreeUnitTest::emplaceDuplicateIgnoreTest();
+    AVLTreeUnitTest::findIgnoreTest();
+    AVLTreeUnitTest::findDuplicateIgnoreTest();
+    AVLTreeUnitTest::removeIgnoreTest();
+    AVLTreeUnitTest::removeDuplicateIgnoreTest();
+    
+    AVLTreeUnitTest::insertReplaceTest();
+    AVLTreeUnitTest::insertDuplicateReplaceTest();
+    AVLTreeUnitTest::emplaceReplaceTest();
+    AVLTreeUnitTest::emplaceDuplicateReplaceTest();
+    AVLTreeUnitTest::findReplaceTest();
+    AVLTreeUnitTest::findDuplicateReplaceTest();
+    AVLTreeUnitTest::removeReplaceTest();
+    AVLTreeUnitTest::removeDuplicateReplaceTest();
+    
+    AVLTreeUnitTest::insertGreaterTest();
+    AVLTreeUnitTest::insertDuplicateGreaterTest();
+    AVLTreeUnitTest::emplaceGreaterTest();
+    AVLTreeUnitTest::emplaceDuplicateGreaterTest();
+    AVLTreeUnitTest::findGreaterTest();
+    AVLTreeUnitTest::findDuplicateGreaterTest();
+    AVLTreeUnitTest::removeGreaterTest();
+    AVLTreeUnitTest::removeDuplicateGreaterTest();
+    
+    AVLTreeUnitTest::insertLesserTest();
+    AVLTreeUnitTest::insertDuplicateLesserTest();
+    AVLTreeUnitTest::emplaceLesserTest();
+    AVLTreeUnitTest::emplaceDuplicateLesserTest();
+    AVLTreeUnitTest::findLesserTest();
+    AVLTreeUnitTest::findDuplicateLesserTest();
+    AVLTreeUnitTest::removeLesserTest();
+    AVLTreeUnitTest::removeDuplicateLesserTest();
+    printf("AVL Tree Tests Finished\n");
         
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());
     printf("Tests Passed: %d\n", UnitTests::testsPassed());

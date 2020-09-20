@@ -1,4 +1,4 @@
-#include "ArrayListUnitTest.hpp"
+#include "ArrayListTest.hpp"
 #include "UnitTest.hpp"
 #include <ArrayList.hpp>
 

@@ -11,7 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ArrayListUnitTest.cpp" />
+    <ClCompile Include="src\ArrayListTest.cpp" />
+    <ClCompile Include="src\AVLTreeTest.cpp" />
     <ClCompile Include="src\FixedBlockAllocatorTest.cpp" />
     <ClCompile Include="src\FreeListAllocatorTest.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -24,7 +25,8 @@
     <ClCompile Include="src\Vector4fTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ArrayListUnitTest.hpp" />
+    <ClInclude Include="include\ArrayListTest.hpp" />
+    <ClInclude Include="include\AVLTreeTest.hpp" />
     <ClInclude Include="include\FixedBlockAllocatorTest.hpp" />
     <ClInclude Include="include\FreeListAllocatorTest.hpp" />
     <ClInclude Include="include\Matrix4x4fTest.hpp" />

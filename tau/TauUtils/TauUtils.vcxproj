@@ -270,13 +270,16 @@
   <ItemGroup>
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\allocator\FreeListAllocator.hpp" />
+    <ClInclude Include="include\allocator\LinearAllocator.hpp" />
     <ClInclude Include="include\allocator\TauAllocator.hpp" />
     <ClInclude Include="include\ArrayList.hpp" />
     <ClInclude Include="include\AtomicIntrinsics.hpp" />
     <ClInclude Include="include\ConPrinter.hpp" />
+    <ClInclude Include="include\ConPrinter.string.hpp" />
     <ClInclude Include="include\CVersion.hpp" />
     <ClInclude Include="include\allocator\FixedBlockAllocator.hpp" />
     <ClInclude Include="include\allocator\PageAllocator.hpp" />
+    <ClInclude Include="include\ds\AVLTree.hpp" />
     <ClInclude Include="include\String.io.hpp" />
     <ClInclude Include="include\ReferenceCountingPointer.hpp" />
     <ClInclude Include="include\RunTimeType.hpp" />

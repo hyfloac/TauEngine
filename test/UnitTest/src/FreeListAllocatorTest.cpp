@@ -166,7 +166,7 @@ void difPtrTypeResetTest() noexcept
     auto sPtr = allocator.allocateT<NullableStrongRef<AllocTestObj>>(DefaultTauAllocator::Instance(), 2, 3.141592f);
     allocator.allocateT<NullableStrongRef<AllocTestObj>>(DefaultTauAllocator::Instance(), 3, 0.00001f);
     allocator.allocateT<NullableRef<AllocTestObj1>>(DefaultTauAllocator::Instance(), false);
-    allocator.allocateT<NullableWeakRef<AllocTestObj1>>(*sPtr);
+    allocator.allocateT<NullableWeakRef<AllocTestObj>>(*sPtr);
 
     allocator.reset();
 
@@ -185,6 +185,6 @@ void difPtrTypeDestructTest() noexcept
     auto sPtr = allocator.allocateT<NullableStrongRef<AllocTestObj>>(DefaultTauAllocator::Instance(), 2, 3.141592f);
     allocator.allocateT<NullableStrongRef<AllocTestObj>>(DefaultTauAllocator::Instance(), 3, 0.00001f);
     allocator.allocateT<NullableRef<AllocTestObj1>>(DefaultTauAllocator::Instance(), false);
-    allocator.allocateT<NullableWeakRef<AllocTestObj1>>(*sPtr);
+    allocator.allocateT<NullableWeakRef<AllocTestObj>>(*sPtr);
 }
 }

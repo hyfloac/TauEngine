@@ -978,7 +978,7 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcep
         {
             delete _largeString.refCount;
             // Was this allocated as a single block.
-            if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
+            if(reinterpret_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - static_cast<iPtr>(sizeof(uSys)))
             {
                 delete[] _largeString.string;
             }

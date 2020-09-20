@@ -98,16 +98,17 @@ public:
 #define _x_STR0(_X) #_X
 #define _x_STR(_X) _x_STR0(_X)
 
-#define UTAssert(_EXPR) \
-    if(!(_EXPR)) { \
-        Console::Instance().setErrColor(Console::BrightRed, Console::Black); \
-        fprintf(stderr, "Assert Failed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::fail(); \
-        Console::Instance().resetErrColor(); \
-    } else { \
-        Console::Instance().setOutColor(Console::Green, Console::Black); \
-        fprintf(stdout, "Assert Passed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::pass(); \
-        Console::Instance().resetOutColor(); \
-    }
+#define UTAssert(_EXPR) do { \
+        if(!(_EXPR)) { \
+            Console::Instance().setErrColor(Console::BrightRed, Console::Black); \
+            fprintf(stderr, "Assert Failed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::fail(); \
+            Console::Instance().resetErrColor(); \
+        } else { \
+            Console::Instance().setOutColor(Console::Green, Console::Black); \
+            fprintf(stdout, "Assert Passed. Expression: %s\n", _x_STR(_EXPR)); UnitTests::pass(); \
+            Console::Instance().resetOutColor(); \
+        } \
+    } while(0)
 
 #define Assert(_EXPR) UTAssert(_EXPR)
 

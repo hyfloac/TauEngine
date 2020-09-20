@@ -8,6 +8,9 @@
 #include "Objects.hpp"
 
 template<typename _T>
+class ConstRefDynArray;
+
+template<typename _T>
 class DynArrayIterator final
 {
     DEFAULT_DESTRUCT(DynArrayIterator);
@@ -17,49 +20,49 @@ private:
     uSys _length;
     uSys _index;
 public:
-    inline DynArrayIterator(_T* const arr, const uSys length, const uSys index) noexcept
+    DynArrayIterator(_T* const arr, const uSys length, const uSys index) noexcept
         : _arr(arr)
         , _length(length)
         , _index(index)
     { }
 
-    inline DynArrayIterator<_T>& operator++() noexcept
+    DynArrayIterator<_T>& operator++() noexcept
     {
         if(_index < _length)
         { ++_index; }
         return *this;
     }
 
-    inline DynArrayIterator<_T>& operator--() noexcept
+    DynArrayIterator<_T>& operator--() noexcept
     {
         if(_index > 0)
         { --_index; }
         return *this;
     }
 
-    [[nodiscard]] inline DynArrayIterator<_T> operator++(int) noexcept
+    [[nodiscard]] DynArrayIterator<_T> operator++(int) noexcept
     {
         const DynArrayIterator<_T> copy(*this);
         this->operator++();
         return copy;
     }
 
-    [[nodiscard]] inline DynArrayIterator<_T> operator--(int) noexcept
+    [[nodiscard]] DynArrayIterator<_T> operator--(int) noexcept
     {
         const DynArrayIterator<_T> copy(*this);
         this->operator--();
         return copy;
     }
 
-    [[nodiscard]] inline _T& operator*() noexcept
+    [[nodiscard]] _T& operator*() noexcept
     { return _arr[_index]; }
 
-    [[nodiscard]] inline const _T& operator*() const noexcept
+    [[nodiscard]] const _T& operator*() const noexcept
     { return _arr[_index]; }
     
-    [[nodiscard]] inline bool operator ==(const DynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator ==(const DynArrayIterator<_T>& other) const noexcept
     { return _index == other._index; }
-    [[nodiscard]] inline bool operator !=(const DynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator !=(const DynArrayIterator<_T>& other) const noexcept
     { return _index != other._index; }
 };
 
@@ -73,46 +76,46 @@ private:
     uSys _length;
     uSys _index;
 public:
-    inline ConstDynArrayIterator(_T* const arr, const uSys length, const uSys index) noexcept
+    ConstDynArrayIterator(_T* const arr, const uSys length, const uSys index) noexcept
         : _arr(arr)
         , _length(length)
         , _index(index)
     { }
 
-    inline ConstDynArrayIterator<_T>& operator++() noexcept
+    ConstDynArrayIterator<_T>& operator++() noexcept
     {
         if(_index < _length)
         { ++_index; }
         return *this;
     }
 
-    inline ConstDynArrayIterator<_T>& operator--() noexcept
+    ConstDynArrayIterator<_T>& operator--() noexcept
     {
         if(_index > 0)
         { --_index; }
         return *this;
     }
 
-    [[nodiscard]] inline ConstDynArrayIterator<_T> operator++(int) noexcept
+    [[nodiscard]] ConstDynArrayIterator<_T> operator++(int) noexcept
     {
         const ConstDynArrayIterator<_T> copy(*this);
         this->operator++();
         return copy;
     }
 
-    [[nodiscard]] inline ConstDynArrayIterator<_T> operator--(int) noexcept
+    [[nodiscard]] ConstDynArrayIterator<_T> operator--(int) noexcept
     {
         const ConstDynArrayIterator<_T> copy(*this);
         this->operator--();
         return copy;
     }
 
-    [[nodiscard]] inline const _T& operator*() const noexcept
+    [[nodiscard]] const _T& operator*() const noexcept
     { return _arr[_index]; }
     
-    [[nodiscard]] inline bool operator ==(const ConstDynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator ==(const ConstDynArrayIterator<_T>& other) const noexcept
     { return _index == other._index; }
-    [[nodiscard]] inline bool operator !=(const ConstDynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator !=(const ConstDynArrayIterator<_T>& other) const noexcept
     { return _index != other._index; }
 };
 
@@ -125,14 +128,14 @@ private:
     uSys _length;
     uSys _index;
 public:
-    inline RefDynArrayIterator(_T* const arr, uSys* const refCount, const uSys length, const uSys index) noexcept
+    RefDynArrayIterator(_T* const arr, uSys* const refCount, const uSys length, const uSys index) noexcept
         : _arr(arr)
         , _refCount(refCount)
         , _length(length)
         , _index(index)
     { ++(*_refCount); }
 
-    inline ~RefDynArrayIterator() noexcept
+    ~RefDynArrayIterator() noexcept
     {
         if(_refCount && --(*_refCount) == 0)
         {
@@ -201,43 +204,43 @@ public:
         return *this;
     }
 
-    inline RefDynArrayIterator<_T>& operator++() noexcept
+    RefDynArrayIterator<_T>& operator++() noexcept
     {
         if(_index < _length)
         { ++_index; }
         return *this;
     }
 
-    inline RefDynArrayIterator<_T>& operator--() noexcept
+    RefDynArrayIterator<_T>& operator--() noexcept
     {
         if(_index > 0)
         { --_index; }
         return *this;
     }
 
-    [[nodiscard]] inline RefDynArrayIterator<_T> operator++(int) noexcept
+    [[nodiscard]] RefDynArrayIterator<_T> operator++(int) noexcept
     {
         const RefDynArrayIterator<_T> copy(*this);
         this->operator++();
         return copy;
     }
 
-    [[nodiscard]] inline RefDynArrayIterator<_T> operator--(int) noexcept
+    [[nodiscard]] RefDynArrayIterator<_T> operator--(int) noexcept
     {
         const RefDynArrayIterator<_T> copy(*this);
         this->operator--();
         return copy;
     }
 
-    [[nodiscard]] inline _T& operator*() noexcept
+    [[nodiscard]] _T& operator*() noexcept
     { return _arr[_index]; }
 
-    [[nodiscard]] inline const _T& operator*() const noexcept
+    [[nodiscard]] const _T& operator*() const noexcept
     { return _arr[_index]; }
     
-    [[nodiscard]] inline bool operator ==(const RefDynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator ==(const RefDynArrayIterator<_T>& other) const noexcept
     { return _index == other._index; }
-    [[nodiscard]] inline bool operator !=(const RefDynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator !=(const RefDynArrayIterator<_T>& other) const noexcept
     { return _index != other._index; }
 };
 
@@ -250,14 +253,14 @@ private:
     uSys _length;
     uSys _index;
 public:
-    inline ConstRefDynArrayIterator(_T* const arr, uSys* refCount, const uSys length, const uSys index) noexcept
+    ConstRefDynArrayIterator(_T* const arr, uSys* refCount, const uSys length, const uSys index) noexcept
         : _arr(arr)
         , _refCount(refCount)
         , _length(length)
         , _index(index)
     { ++(*_refCount); }
 
-    inline ~ConstRefDynArrayIterator() noexcept
+    ~ConstRefDynArrayIterator() noexcept
     {
         if(_refCount && --(*_refCount) == 0)
         {
@@ -326,40 +329,40 @@ public:
         return *this;
     }
 
-    inline ConstRefDynArrayIterator<_T>& operator++() noexcept
+    ConstRefDynArrayIterator<_T>& operator++() noexcept
     {
         if(_index < _length)
         { ++_index; }
         return *this;
     }
 
-    inline ConstRefDynArrayIterator<_T>& operator--() noexcept
+    ConstRefDynArrayIterator<_T>& operator--() noexcept
     {
         if(_index > 0)
         { --_index; }
         return *this;
     }
 
-    [[nodiscard]] inline ConstRefDynArrayIterator<_T> operator++(int) noexcept
+    [[nodiscard]] ConstRefDynArrayIterator<_T> operator++(int) noexcept
     {
         const ConstRefDynArrayIterator<_T> copy(*this);
         this->operator++();
         return copy;
     }
 
-    [[nodiscard]] inline ConstRefDynArrayIterator<_T> operator--(int) noexcept
+    [[nodiscard]] ConstRefDynArrayIterator<_T> operator--(int) noexcept
     {
         const ConstRefDynArrayIterator<_T> copy(*this);
         this->operator--();
         return copy;
     }
 
-    [[nodiscard]] inline const _T& operator*() const noexcept
+    [[nodiscard]] const _T& operator*() const noexcept
     { return _arr[_index]; }
     
-    [[nodiscard]] inline bool operator ==(const ConstRefDynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator ==(const ConstRefDynArrayIterator<_T>& other) const noexcept
     { return _index == other._index; }
-    [[nodiscard]] inline bool operator !=(const ConstRefDynArrayIterator<_T>& other) const noexcept
+    [[nodiscard]] bool operator !=(const ConstRefDynArrayIterator<_T>& other) const noexcept
     { return _index != other._index; }
 };
 
@@ -430,11 +433,11 @@ public:
 
     [[nodiscard]] operator uSys() const { return _size; }
 
-    [[nodiscard]] inline DynArrayIterator<_T> begin() noexcept { return DynArrayIterator<_T>(_arr, _size, 0); }
-    [[nodiscard]] inline DynArrayIterator<_T> end() noexcept { return DynArrayIterator<_T>(_arr, _size, _size); }
+    [[nodiscard]] DynArrayIterator<_T> begin() noexcept { return DynArrayIterator<_T>(_arr, _size, 0); }
+    [[nodiscard]] DynArrayIterator<_T> end() noexcept { return DynArrayIterator<_T>(_arr, _size, _size); }
 
-    [[nodiscard]] inline ConstDynArrayIterator<_T> begin() const noexcept { return ConstDynArrayIterator<_T>(_arr, _size, 0); }
-    [[nodiscard]] inline ConstDynArrayIterator<_T> end() const noexcept { return ConstDynArrayIterator<_T>(_arr, _size, _size); }
+    [[nodiscard]] ConstDynArrayIterator<_T> begin() const noexcept { return ConstDynArrayIterator<_T>(_arr, _size, 0); }
+    [[nodiscard]] ConstDynArrayIterator<_T> end() const noexcept { return ConstDynArrayIterator<_T>(_arr, _size, _size); }
 };
 
 template<typename _T>
@@ -460,13 +463,13 @@ public:
         }
     }
 
-    inline RefDynArray(const RefDynArray<_T>& copy) noexcept
+    RefDynArray(const RefDynArray<_T>& copy) noexcept
         : _arr(copy._arr)
         , _size(copy._size)
         , _refCount(copy._refCount)
     { ++(*_refCount); }
 
-    inline RefDynArray(RefDynArray<_T>&& move) noexcept
+    RefDynArray(RefDynArray<_T>&& move) noexcept
         : _arr(move._arr)
         , _size(move._size)
         , _refCount(move._refCount)
@@ -475,7 +478,7 @@ public:
         move._refCount = nullptr;
     }
 
-    inline RefDynArray<_T>& operator =(const RefDynArray<_T>& copy) noexcept
+    RefDynArray<_T>& operator =(const RefDynArray<_T>& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
@@ -495,7 +498,7 @@ public:
         return *this;
     }
 
-    inline RefDynArray<_T>& operator =(RefDynArray<_T>&& move) noexcept
+    RefDynArray<_T>& operator =(RefDynArray<_T>&& move) noexcept
     {
         if(this == &move)
         { return *this; }
@@ -528,9 +531,154 @@ public:
 
     [[nodiscard]] operator uSys() const { return _size; }
 
-    [[nodiscard]] inline RefDynArrayIterator<_T> begin() noexcept { return RefDynArrayIterator<_T>(_arr, _refCount, _size, 0); }
-    [[nodiscard]] inline RefDynArrayIterator<_T> end() noexcept { return RefDynArrayIterator<_T>(_arr, _refCount, _size, _size); }
+    [[nodiscard]] RefDynArrayIterator<_T> begin() noexcept { return RefDynArrayIterator<_T>(_arr, _refCount, _size, 0); }
+    [[nodiscard]] RefDynArrayIterator<_T> end() noexcept { return RefDynArrayIterator<_T>(_arr, _refCount, _size, _size); }
 
-    [[nodiscard]] inline ConstRefDynArrayIterator<_T> begin() const noexcept { return ConstRefDynArrayIterator<_T>(_arr, _refCount, _size, 0); }
-    [[nodiscard]] inline ConstRefDynArrayIterator<_T> end() const noexcept { return ConstRefDynArrayIterator<_T>(_arr, _refCount, _size, _size); }
+    [[nodiscard]] ConstRefDynArrayIterator<_T> begin() const noexcept { return ConstRefDynArrayIterator<_T>(_arr, _refCount, _size, 0); }
+    [[nodiscard]] ConstRefDynArrayIterator<_T> end() const noexcept { return ConstRefDynArrayIterator<_T>(_arr, _refCount, _size, _size); }
+private:
+    friend class ConstRefDynArray<_T>;
+};
+
+template<typename _T>
+class ConstRefDynArray final
+{
+private:
+    _T* _arr;
+    uSys _size;
+    uSys* _refCount;
+public:
+    ConstRefDynArray(const RefDynArray<_T>& copy) noexcept
+        : _arr(copy._arr)
+        , _size(copy._size)
+        , _refCount(copy._refCount)
+    { ++(*_refCount); }
+
+    ConstRefDynArray(RefDynArray<_T>&& move) noexcept
+        : _arr(move._arr)
+        , _size(move._size)
+        , _refCount(move._refCount)
+    {
+        move._arr = nullptr;
+        move._refCount = nullptr;
+    }
+
+    ~ConstRefDynArray() noexcept
+    {
+        if(_refCount && --(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+    }
+
+    ConstRefDynArray(const ConstRefDynArray<_T>& copy) noexcept
+        : _arr(copy._arr)
+        , _size(copy._size)
+        , _refCount(copy._refCount)
+    { ++(*_refCount); }
+
+    ConstRefDynArray(ConstRefDynArray<_T>&& move) noexcept
+        : _arr(move._arr)
+        , _size(move._size)
+        , _refCount(move._refCount)
+    {
+        move._arr = nullptr;
+        move._refCount = nullptr;
+    }
+
+    ConstRefDynArray<_T>& operator =(const ConstRefDynArray<_T>& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        if(--(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+
+        _arr = copy._arr;
+        _size = copy._size;
+        _refCount = copy._refCount;
+
+        ++(*_refCount);
+
+        return *this;
+    }
+
+    ConstRefDynArray<_T>& operator =(ConstRefDynArray<_T>&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        if(--(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+
+        _arr = move._arr;
+        _size = move._size;
+        _refCount = move._refCount;
+
+        move._arr = null;
+        move._refCount = null;
+
+        return *this;
+    }
+
+    ConstRefDynArray<_T>& operator =(const RefDynArray<_T>& copy) noexcept
+    {
+        if(this == &copy)
+        { return *this; }
+
+        if(--(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+
+        _arr = copy._arr;
+        _size = copy._size;
+        _refCount = copy._refCount;
+
+        ++(*_refCount);
+
+        return *this;
+    }
+
+    ConstRefDynArray<_T>& operator =(RefDynArray<_T>&& move) noexcept
+    {
+        if(this == &move)
+        { return *this; }
+
+        if(--(*_refCount) == 0)
+        {
+            delete[] _arr;
+            delete _refCount;
+        }
+
+        _arr = move._arr;
+        _size = move._size;
+        _refCount = move._refCount;
+
+        move._arr = null;
+        move._refCount = null;
+
+        return *this;
+    }
+
+    [[nodiscard]] operator const _T* () const noexcept { return _arr; }
+
+    [[nodiscard]] const _T* arr() const noexcept { return _arr; }
+
+    [[nodiscard]] uSys size()   const noexcept { return _size; }
+    [[nodiscard]] uSys length() const noexcept { return _size; }
+    [[nodiscard]] uSys count()  const noexcept { return _size; }
+
+    [[nodiscard]] operator uSys() const { return _size; }
+
+    [[nodiscard]] ConstRefDynArrayIterator<_T> begin() const noexcept { return ConstRefDynArrayIterator<_T>(_arr, _refCount, _size, 0); }
+    [[nodiscard]] ConstRefDynArrayIterator<_T> end() const noexcept { return ConstRefDynArrayIterator<_T>(_arr, _refCount, _size, _size); }
 };

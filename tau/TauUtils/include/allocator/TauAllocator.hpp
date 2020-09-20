@@ -32,6 +32,10 @@ template<typename _T>
 template<typename _T>
 [[nodiscard]] constexpr inline _T&& _forward(_RemoveReferenceT<_T>&& ref) noexcept
 { return static_cast<_T&&>(ref); }
+
+template<typename _T>
+[[nodiscard]] constexpr _RemoveReferenceT<_T>&& _move(_T&& arg) noexcept
+{ return static_cast<_RemoveReferenceT<_T>&&>(arg); }
 }
 
 enum class AllocationAlignment : uSys { };

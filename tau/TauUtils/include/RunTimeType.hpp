@@ -3,6 +3,7 @@
 #include "Objects.hpp"
 #include "NumTypes.hpp"
 #include "Safeties.hpp"
+#include "AtomicIntrinsics.hpp"
 #include <functional>
 
 template<typename _T>
@@ -24,8 +25,9 @@ class RunTimeType final
 public:
     static RunTimeType<_T> define() noexcept
     {
-        static u64 currentUID = 0;
-        return RunTimeType<_T>(++currentUID);
+        static volatile u64 currentUID = 0;
+        const u64 ret = atomicIncrement(&currentUID);
+        return RunTimeType<_T>(ret);
     }
 private:
     u64 _uid;

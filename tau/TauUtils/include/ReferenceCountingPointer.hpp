@@ -4,7 +4,11 @@
 #include "Objects.hpp"
 #include "NumTypes.hpp"
 #include "allocator/TauAllocator.hpp"
-#include <atomic>
+#include "AtomicIntrinsics.hpp"
+
+#ifndef TAU_DEFAULT_ATOMIC
+  #define TAU_DEFAULT_ATOMIC 0
+#endif
 
 namespace _ReferenceCountingPointerUtils {
 /**
@@ -28,11 +32,38 @@ public:
 
     ~_ReferenceCountDataObject() noexcept;
 
-    [[nodiscard]]       _T& obj()       noexcept { return *reinterpret_cast<_T*>(_objRaw); }
-    [[nodiscard]] const _T& obj() const noexcept { return *reinterpret_cast<_T*>(_objRaw); }
-
     [[nodiscard]]       _T* objPtr()       noexcept { return reinterpret_cast<_T*>(_objRaw); }
     [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(_objRaw); }
+
+    uSys addRef() noexcept
+    {
+#if TAU_DEFAULT_ATOMIC
+        return addRefAtomic();
+#else
+        return addRefNonatomic();
+#endif
+    }
+
+    uSys release() noexcept
+    {
+#if TAU_DEFAULT_ATOMIC
+        return releaseAtomic();
+#else          
+        return releaseNonatomic();
+#endif
+    }
+
+    uSys addRefNonatomic() noexcept
+    { return ++_refCount; }
+
+    uSys releaseNonatomic() noexcept
+    { return --_refCount; }
+
+    uSys addRefAtomic() noexcept
+    { return atomicIncrement(&_refCount); }
+
+    uSys releaseAtomic() noexcept
+    { return atomicDecrement(&_refCount); }
 };
 
 /**
@@ -53,13 +84,70 @@ public:
     template<typename... _Args>
     _SWReferenceCount(TauAllocator& allocator, _Args&&... args) noexcept;
 
-    [[nodiscard]]       _T& obj()       noexcept { return *reinterpret_cast<_T*>(_objRaw); }
-    [[nodiscard]] const _T& obj() const noexcept { return *reinterpret_cast<_T*>(_objRaw); }
-
     [[nodiscard]]       _T* objPtr()       noexcept { return reinterpret_cast<_T*>(_objRaw); }
     [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(_objRaw); }
 
     void destroyObj() noexcept { reinterpret_cast<_T*>(_objRaw)->~_T(); }
+
+    uSys addRefStrong() noexcept
+    {
+#if TAU_DEFAULT_ATOMIC
+        return addRefStrongAtomic();
+#else
+        return addRefStrongNonatomic();
+#endif
+    }
+
+    uSys releaseStrong() noexcept
+    {
+#if TAU_DEFAULT_ATOMIC
+        return releaseStrongAtomic();
+#else          
+        return releaseStrongNonatomic();
+#endif
+    }
+
+    uSys addRefWeak() noexcept
+    {
+#if TAU_DEFAULT_ATOMIC
+        return addRefWeakAtomic();
+#else
+        return addRefWeakNonatomic();
+#endif
+    }
+
+    uSys releaseWeak() noexcept
+    {
+#if TAU_DEFAULT_ATOMIC
+        return releaseWeakAtomic();
+#else          
+        return releaseWeakNonatomic();
+#endif
+    }
+
+    uSys addRefStrongNonatomic() noexcept
+    { return ++_strongRefCount; }
+
+    uSys releaseStrongNonatomic() noexcept
+    { return --_strongRefCount; }
+
+    uSys addRefStrongAtomic() noexcept
+    { return atomicIncrement(&_strongRefCount); }
+
+    uSys releaseStrongAtomic() noexcept
+    { return atomicDecrement(&_strongRefCount); }
+
+    uSys addRefWeakNonatomic() noexcept
+    { return ++_weakRefCount; }
+
+    uSys releaseWeakNonatomic() noexcept
+    { return --_weakRefCount; }
+
+    uSys addRefWeakAtomic() noexcept
+    { return atomicIncrement(&_weakRefCount); }
+
+    uSys releaseWeakAtomic() noexcept
+    { return atomicDecrement(&_weakRefCount); }
 };
 
 template<typename _ToT, typename _FromT>
