@@ -23,7 +23,9 @@ public:
     static i32 print(const char c)       noexcept { return fputc(c, stdout);    }
     static i32 print(const wchar_t* str) noexcept { return fputws(str, stdout); }
     static i32 print(const wchar_t c)    noexcept { return fputwc(c, stdout);   }
-
+    
+    static i32 printW(const char* str)    noexcept { return fwprintf(stdout, L"%hs", str);  }
+    static i32 printW(const char c)       noexcept { return fputwc(c, stdout);    }
     static i32 printW(const wchar_t* str) noexcept { return fputws(str, stdout); }
     static i32 printW(const wchar_t c)    noexcept { return fputwc(c, stdout);   }
 
@@ -31,7 +33,9 @@ public:
     static i32 print(FILE* const file, const char c)       noexcept { return fputc(c, file);    }
     static i32 print(FILE* const file, const wchar_t* str) noexcept { return fputws(str, file); }
     static i32 print(FILE* const file, const wchar_t c)    noexcept { return fputwc(c, file);   }
-
+    
+    static i32 printW(FILE* const file, const char* str)    noexcept { return fwprintf(file, L"%hs", str);  }
+    static i32 printW(FILE* const file, const char c)       noexcept { return fputwc(c, file);    }
     static i32 printW(FILE* const file, const wchar_t* str) noexcept { return fputws(str, file); }
     static i32 printW(FILE* const file, const wchar_t c)    noexcept { return fputwc(c, file);   }
 
@@ -151,17 +155,30 @@ public:
         {
             if(fmt[i] == '%')
             {
-                if(fmt[i + 1] == '%')
+                count += print(currArg);
+                count += print(fmt + i + 1, args...);
+                break;
+            }
+            else if(fmt[i] == '\'')
+            {
+                if(fmt[i + 1] == '\'')
                 {
-                    fputc('%', stdout);
+                    fputc('\'', stdout);
                     ++count;
                     ++i;
                 }
+                else if(fmt[i + 1] == '%')
+                {
+                    if(fmt[i + 2] == '\'')
+                    {
+                        fputc('%', stdout);
+                        ++count;
+                        i += 2;
+                    }
+                }
                 else
                 {
-                    count += print(currArg);
-                    count += print(fmt + i + 1, args...);
-                    break;
+                    return count;
                 }
             }
             else
@@ -181,17 +198,30 @@ public:
         {
             if(fmt[i] == L'%')
             {
-                if(fmt[i + 1] == L'%')
+                count += printW(currArg);
+                count += printW(fmt + i + 1, args...);
+                break;
+            }
+            else if(fmt[i] == L'\'')
+            {
+                if(fmt[i + 1] == L'\'')
                 {
-                    fputwc(L'%', stdout);
+                    fputwc(L'\'', stdout);
                     ++count;
                     ++i;
                 }
+                else if(fmt[i + 1] == L'%')
+                {
+                    if(fmt[i + 2] == L'\'')
+                    {
+                        fputwc(L'%', stdout);
+                        ++count;
+                        i += 2;
+                    }
+                }
                 else
                 {
-                    count += printW(currArg);
-                    count += printW(fmt + i + 1, args...);
-                    break;
+                    return count;
                 }
             }
             else
@@ -215,17 +245,30 @@ public:
         {
             if(fmt[i] == '%')
             {
-                if(fmt[i + 1] == '%')
+                count += print(file, currArg);
+                count += print(file, fmt + i + 1, args...);
+                break;
+            }
+            else if(fmt[i] == '\'')
+            {
+                if(fmt[i + 1] == '\'')
                 {
-                    fputc('%', file);
+                    fputc('\'', file);
                     ++count;
                     ++i;
                 }
+                else if(fmt[i + 1] == '%')
+                {
+                    if(fmt[i + 2] == '\'')
+                    {
+                        fputc('%', file);
+                        ++count;
+                        i += 2;
+                    }
+                }
                 else
                 {
-                    count += print(file, currArg);
-                    count += print(file, fmt + i + 1, args...);
-                    break;
+                    return count;
                 }
             }
             else
@@ -245,17 +288,30 @@ public:
         {
             if(fmt[i] == L'%')
             {
-                if(fmt[i + 1] == L'%')
+                count += printW(file, currArg);
+                count += printW(file, fmt + i + 1, args...);
+                break;
+            }
+            else if(fmt[i] == L'\'')
+            {
+                if(fmt[i + 1] == L'\'')
                 {
-                    fputwc(L'%', file);
+                    fputwc(L'\'', stdout);
                     ++count;
                     ++i;
                 }
+                else if(fmt[i + 1] == L'%')
+                {
+                    if(fmt[i + 2] == L'\'')
+                    {
+                        fputwc(L'%', stdout);
+                        ++count;
+                        i += 2;
+                    }
+                }
                 else
                 {
-                    count += print(file, currArg);
-                    count += print(file, fmt + i + 1, args...);
-                    break;
+                    return count;
                 }
             }
             else

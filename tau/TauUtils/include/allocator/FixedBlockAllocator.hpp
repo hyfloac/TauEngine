@@ -83,7 +83,7 @@ public:
 
     FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_nextPowerOf2(allocPages))
-        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements * blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_alignTo((maxElements * blockSize) / PageAllocator::pageSize() + 1, _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
@@ -212,7 +212,7 @@ public:
 
     FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_nextPowerOf2(allocPages))
-        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_alignTo((maxElements* blockSize) / PageAllocator::pageSize() + 1, _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) : blockSize)
@@ -361,7 +361,7 @@ public:
 
     FixedBlockAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_nextPowerOf2(allocPages))
-        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_alignTo((maxElements* blockSize) / PageAllocator::pageSize() + 1, _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize < sizeof(void*) ? sizeof(void*) + sizeof(uSys) : blockSize + sizeof(uSys))
@@ -570,7 +570,7 @@ public:
 
     FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_nextPowerOf2(allocPages))
-        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_alignTo((maxElements* blockSize) / PageAllocator::pageSize() + 1, _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize)
@@ -655,7 +655,7 @@ public:
 
     FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_nextPowerOf2(allocPages))
-        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_alignTo((maxElements* blockSize) / PageAllocator::pageSize() + 1, _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize)
@@ -761,7 +761,7 @@ public:
 
     FixedBlockArenaAllocator(const uSys blockSize, const uSys maxElements, const uSys allocPages = 4) noexcept
         : _allocPages(_nextPowerOf2(allocPages))
-        , _numReservedPages(_alignTo(static_cast<uSys>((maxElements* blockSize) / PageAllocator::pageSize() + 1), _allocPages))
+        , _numReservedPages(_alignTo((maxElements* blockSize) / PageAllocator::pageSize() + 1, _allocPages))
         , _pages(PageAllocator::reserve(_numReservedPages))
         , _committedPages(0)
         , _blockSize(blockSize + sizeof(uSys))

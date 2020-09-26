@@ -1,13 +1,13 @@
 #include "UnitTest.hpp"
-#include "AVLTreeTest.hpp"
+#include "StreamedAVLTreeTest.hpp"
 #include <ConPrinter.hpp>
-#include <ds/AVLTree.hpp>
+#include <ds/StreamedAVLTree.hpp>
 #include <String.hpp>
 
 #define SHOULD_PRINT 1
 #define TEST_ALL 0
 
-namespace AVLTreeUnitTest {
+namespace StreamedAVLTreeUnitTest {
 
 struct Trunk
 {
@@ -30,8 +30,8 @@ void showTrunks(const Trunk* p) noexcept
 	ConPrinter::print(p->str);
 }
 
-template<typename _T>
-inline void printTree(const FastAVLNode<_T>* root, Trunk* const prev, const bool isRight) noexcept
+template<typename _T, typename _IndexT, typename _HeightT, InsertMethod _InsertMethod = InsertMethod::Ignore>
+inline void printTree(const StreamedAVLTree<_T, _IndexT, _HeightT, _InsertMethod>& tree, const _IndexT root, Trunk* const prev, const bool isRight) noexcept
 {
 	if(!root)
 	{ return; }
@@ -39,7 +39,7 @@ inline void printTree(const FastAVLNode<_T>* root, Trunk* const prev, const bool
 	DynString prev_str("    ");
 	Trunk trunk(prev, prev_str);
     
-	printTree(root->right, &trunk, true);
+	printTree(tree.rightTree()[root], &trunk, true);
 
 	if(!prev)
     { trunk.str = "----"; }
@@ -55,21 +55,20 @@ inline void printTree(const FastAVLNode<_T>* root, Trunk* const prev, const bool
 	}
 
 	showTrunks(&trunk);
-	ConPrinter::print("%\n", root->value);
+	ConPrinter::print("%\n", tree.valueTree()[root]);
 
 	if(prev)
     { prev->str = prev_str; }
 	trunk.str = "   |";
 
-	printTree(root->left, &trunk, false);
+	printTree(tree.leftTree()[root], &trunk, false);
 }
 
-template<typename _T>
-inline void printBT(const FastAVLNode<_T>* node) noexcept
+template<typename _T, typename _IndexT, typename _HeightT, InsertMethod _InsertMethod = InsertMethod::Ignore>
+inline void printBT(const StreamedAVLTree<_T, _IndexT, _HeightT, _InsertMethod>& tree, const _IndexT root) noexcept
 {
 #if SHOULD_PRINT
-    // printBT("", node, false);
-    printTree(node, nullptr, false);
+    printTree(tree, root, nullptr, false);
     ConPrinter::print("\n");
 #endif
 }
@@ -79,7 +78,7 @@ void insertTest() noexcept
 {
     UNIT_TEST();
 
-    _Manager manager;
+    _Manager manager(128);
 
     manager.insert(12);
     manager.insert(17);
@@ -100,7 +99,7 @@ void insertDuplicateTest() noexcept
 {
     UNIT_TEST();
 
-    _Manager manager;
+    _Manager manager(128);
 
     manager.insert(12);
     manager.insert(17);
@@ -124,7 +123,7 @@ void insertDuplicateTest() noexcept
 template<typename _Manager>
 void emplaceTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -143,7 +142,7 @@ void emplaceTest() noexcept
 template<typename _Manager>
 void emplaceDuplicateTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -167,7 +166,7 @@ void emplaceDuplicateTest() noexcept
 template<typename _Manager>
 void findTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -227,7 +226,7 @@ void findTest() noexcept
 template<typename _Manager>
 void findDuplicateTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -292,7 +291,7 @@ void findDuplicateTest() noexcept
 template<typename _Manager>
 void removeTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -358,7 +357,7 @@ void removeTest() noexcept
 template<typename _Manager>
 void removeDuplicateTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -429,7 +428,7 @@ void removeDuplicateTest() noexcept
 template<typename _Manager>
 void removeDuplicateMultipleTest() noexcept
 {
-    _Manager manager;
+    _Manager manager(128);
 
     manager.emplace(12);
     manager.emplace(17);
@@ -501,193 +500,193 @@ void removeDuplicateMultipleTest() noexcept
 void insertIgnoreTest() noexcept
 {
     UNIT_TEST();
-    insertTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    insertTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void insertDuplicateIgnoreTest() noexcept
 {
     UNIT_TEST();
-    insertDuplicateTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    insertDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void emplaceIgnoreTest() noexcept
 {
     UNIT_TEST();
-    emplaceTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    emplaceTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void emplaceDuplicateIgnoreTest() noexcept
 {
     UNIT_TEST();
-    emplaceDuplicateTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    emplaceDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void findIgnoreTest() noexcept
 {
     UNIT_TEST();
-    findTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    findTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void findDuplicateIgnoreTest() noexcept
 {
     UNIT_TEST();
-    findDuplicateTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    findDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void removeIgnoreTest() noexcept
 {
     UNIT_TEST();
-    removeTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    removeTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void removeDuplicateIgnoreTest() noexcept
 {
     UNIT_TEST();
-    removeDuplicateTest<FastAVLTree<int, InsertMethod::Ignore>>();
+    removeDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Ignore>>();
 }
 
 void insertReplaceTest() noexcept
 {
     UNIT_TEST();
-    insertTest<FastAVLTree<int, InsertMethod::Replace>>();
+    insertTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void insertDuplicateReplaceTest() noexcept
 {
     UNIT_TEST();
-    insertDuplicateTest<FastAVLTree<int, InsertMethod::Replace>>();
+    insertDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void emplaceReplaceTest() noexcept
 {
     UNIT_TEST();
-    emplaceTest<FastAVLTree<int, InsertMethod::Replace>>();
+    emplaceTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void emplaceDuplicateReplaceTest() noexcept
 {
     UNIT_TEST();
-    emplaceDuplicateTest<FastAVLTree<int, InsertMethod::Replace>>();
+    emplaceDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void findReplaceTest() noexcept
 {
     UNIT_TEST();
-    findTest<FastAVLTree<int, InsertMethod::Replace>>();
+    findTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void findDuplicateReplaceTest() noexcept
 {
     UNIT_TEST();
-    findDuplicateTest<FastAVLTree<int, InsertMethod::Replace>>();
+    findDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void removeReplaceTest() noexcept
 {
     UNIT_TEST();
-    removeTest<FastAVLTree<int, InsertMethod::Replace>>();
+    removeTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void removeDuplicateReplaceTest() noexcept
 {
     UNIT_TEST();
-    removeDuplicateTest<FastAVLTree<int, InsertMethod::Replace>>();
+    removeDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Replace>>();
 }
 
 void insertGreaterTest() noexcept
 {
     UNIT_TEST();
-    insertTest<FastAVLTree<int, InsertMethod::Greater>>();
+    insertTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void insertDuplicateGreaterTest() noexcept
 {
     UNIT_TEST();
-    insertDuplicateTest<FastAVLTree<int, InsertMethod::Greater>>();
+    insertDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void emplaceGreaterTest() noexcept
 {
     UNIT_TEST();
-    emplaceTest<FastAVLTree<int, InsertMethod::Greater>>();
+    emplaceTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void emplaceDuplicateGreaterTest() noexcept
 {
     UNIT_TEST();
-    emplaceDuplicateTest<FastAVLTree<int, InsertMethod::Greater>>();
+    emplaceDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void findGreaterTest() noexcept
 {
     UNIT_TEST();
-    findTest<FastAVLTree<int, InsertMethod::Greater>>();
+    findTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void findDuplicateGreaterTest() noexcept
 {
     UNIT_TEST();
-    findDuplicateTest<FastAVLTree<int, InsertMethod::Greater>>();
+    findDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void removeGreaterTest() noexcept
 {
     UNIT_TEST();
-    removeTest<FastAVLTree<int, InsertMethod::Greater>>();
+    removeTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void removeDuplicateGreaterTest() noexcept
 {
     UNIT_TEST();
-    removeDuplicateMultipleTest<FastAVLTree<int, InsertMethod::Greater>>();
+    removeDuplicateMultipleTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Greater>>();
 }
 
 void insertLesserTest() noexcept
 {
     UNIT_TEST();
-    insertTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    insertTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void insertDuplicateLesserTest() noexcept
 {
     UNIT_TEST();
-    insertDuplicateTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    insertDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void emplaceLesserTest() noexcept
 {
     UNIT_TEST();
-    emplaceTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    emplaceTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void emplaceDuplicateLesserTest() noexcept
 {
     UNIT_TEST();
-    emplaceDuplicateTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    emplaceDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void findLesserTest() noexcept
 {
     UNIT_TEST();
-    findTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    findTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void findDuplicateLesserTest() noexcept
 {
     UNIT_TEST();
-    findDuplicateTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    findDuplicateTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void removeLesserTest() noexcept
 {
     UNIT_TEST();
-    removeTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    removeTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 void removeDuplicateLesserTest() noexcept
 {
     UNIT_TEST();
-    removeDuplicateMultipleTest<FastAVLTree<int, InsertMethod::Lesser>>();
+    removeDuplicateMultipleTest<StreamedAVLTree<int, uSys, uSys, InsertMethod::Lesser>>();
 }
 
 }

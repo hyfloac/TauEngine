@@ -1,5 +1,6 @@
 #include "ArrayListTest.hpp"
 #include "AVLTreeTest.hpp"
+#include "StreamedAVLTreeTest.hpp"
 #include "StringTest.hpp"
 #include "RefUnitTest.hpp"
 #include "FixedBlockAllocatorTest.hpp"
@@ -14,7 +15,7 @@
 
 #include "allocator/PageAllocator.hpp"
 
-#define SHOULD_PAUSE 0
+#define SHOULD_PAUSE 1
 
 #if SHOULD_PAUSE
   #include <conio.h>
@@ -104,16 +105,17 @@ int main(int argCount, char* args[]) noexcept
     PAUSE("Continue");
 
     printf("\nVector2f Tests:\n\n");
-    Vector2fTests::addTest();
-    Vector2fTests::subTest();
-    Vector2fTests::mulTest();
-    Vector2fTests::divTest();
-
-    Vector2fTests::negTest();
-
-    Vector2fTests::magnitudeTest();
-    Vector2fTests::normalizeTest();
-    Vector2fTests::dotTest();
+    Vector2fTests::runTests();
+    // Vector2fTests::addTest();
+    // Vector2fTests::subTest();
+    // Vector2fTests::mulTest();
+    // Vector2fTests::divTest();
+    //
+    // Vector2fTests::negTest();
+    //
+    // Vector2fTests::magnitudeTest();
+    // Vector2fTests::normalizeTest();
+    // Vector2fTests::dotTest();
     printf("Vector2f Tests Finished\n");
 
     PAUSE("Continue");
@@ -201,6 +203,46 @@ int main(int argCount, char* args[]) noexcept
     AVLTreeUnitTest::removeLesserTest();
     AVLTreeUnitTest::removeDuplicateLesserTest();
     printf("AVL Tree Tests Finished\n");
+
+    PAUSE("Continue");
+
+    printf("\nStreamed AVL Tree Tests:\n\n");
+    StreamedAVLTreeUnitTest::insertIgnoreTest();
+    StreamedAVLTreeUnitTest::insertDuplicateIgnoreTest();
+    StreamedAVLTreeUnitTest::emplaceIgnoreTest();
+    StreamedAVLTreeUnitTest::emplaceDuplicateIgnoreTest();
+    StreamedAVLTreeUnitTest::findIgnoreTest();
+    StreamedAVLTreeUnitTest::findDuplicateIgnoreTest();
+    StreamedAVLTreeUnitTest::removeIgnoreTest();
+    StreamedAVLTreeUnitTest::removeDuplicateIgnoreTest();
+    
+    StreamedAVLTreeUnitTest::insertReplaceTest();
+    StreamedAVLTreeUnitTest::insertDuplicateReplaceTest();
+    StreamedAVLTreeUnitTest::emplaceReplaceTest();
+    StreamedAVLTreeUnitTest::emplaceDuplicateReplaceTest();
+    StreamedAVLTreeUnitTest::findReplaceTest();
+    StreamedAVLTreeUnitTest::findDuplicateReplaceTest();
+    StreamedAVLTreeUnitTest::removeReplaceTest();
+    StreamedAVLTreeUnitTest::removeDuplicateReplaceTest();
+    
+    StreamedAVLTreeUnitTest::insertGreaterTest();
+    StreamedAVLTreeUnitTest::insertDuplicateGreaterTest();
+    StreamedAVLTreeUnitTest::emplaceGreaterTest();
+    StreamedAVLTreeUnitTest::emplaceDuplicateGreaterTest();
+    StreamedAVLTreeUnitTest::findGreaterTest();
+    StreamedAVLTreeUnitTest::findDuplicateGreaterTest();
+    StreamedAVLTreeUnitTest::removeGreaterTest();
+    StreamedAVLTreeUnitTest::removeDuplicateGreaterTest();
+    
+    StreamedAVLTreeUnitTest::insertLesserTest();
+    StreamedAVLTreeUnitTest::insertDuplicateLesserTest();
+    StreamedAVLTreeUnitTest::emplaceLesserTest();
+    StreamedAVLTreeUnitTest::emplaceDuplicateLesserTest();
+    StreamedAVLTreeUnitTest::findLesserTest();
+    StreamedAVLTreeUnitTest::findDuplicateLesserTest();
+    StreamedAVLTreeUnitTest::removeLesserTest();
+    StreamedAVLTreeUnitTest::removeDuplicateLesserTest();
+    printf("Streamed AVL Tree Tests Finished\n");
         
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());
     printf("Tests Passed: %d\n", UnitTests::testsPassed());

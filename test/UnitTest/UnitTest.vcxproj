@@ -18,6 +18,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Matrix4x4fTest.cpp" />
     <ClCompile Include="src\RefPtrTest.cpp" />
+    <ClCompile Include="src\StreamedAVLTreeTest.cpp" />
     <ClCompile Include="src\StringTest.cpp" />
     <ClCompile Include="src\UnitTest.cpp" />
     <ClCompile Include="src\Vector2fTest.cpp" />
@@ -31,6 +32,7 @@
     <ClInclude Include="include\FreeListAllocatorTest.hpp" />
     <ClInclude Include="include\Matrix4x4fTest.hpp" />
     <ClInclude Include="include\RefUnitTest.hpp" />
+    <ClInclude Include="include\StreamedAVLTreeTest.hpp" />
     <ClInclude Include="include\StringTest.hpp" />
     <ClInclude Include="include\UnitTest.hpp" />
     <ClInclude Include="include\Vector2fTest.hpp" />

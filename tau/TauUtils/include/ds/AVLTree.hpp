@@ -3,26 +3,27 @@
 #include "Objects.hpp"
 #include "NumTypes.hpp"
 #include "allocator/TauAllocator.hpp"
+#include "TreeUtils.hpp"
 
 template<typename _T, typename _HeightT>
-struct AVLTree final
+struct AVLNode final
 {
-    DEFAULT_DESTRUCT(AVLTree);
-    DEFAULT_CM_PU(AVLTree);
+    DEFAULT_DESTRUCT(AVLNode);
+    DEFAULT_CM_PU(AVLNode);
 public:
-    AVLTree* left;
-    AVLTree* right;
+    AVLNode* left;
+    AVLNode* right;
     _HeightT height;
     _T value;
 public:
-    AVLTree(AVLTree* const _left, AVLTree* const _right, const _HeightT _height, const _T& _value) noexcept
+    AVLNode(AVLNode* const _left, AVLNode* const _right, const _HeightT _height, const _T& _value) noexcept
         : left(_left)
         , right(_right)
         , height(_height)
         , value(_value)
     { }
 
-    AVLTree(AVLTree* const _left, AVLTree* const _right, const _HeightT _height, _T&& _value) noexcept
+    AVLNode(AVLNode* const _left, AVLNode* const _right, const _HeightT _height, _T&& _value) noexcept
         : left(_left)
         , right(_right)
         , height(_height)
@@ -30,7 +31,7 @@ public:
     { }
 
     template<typename... _Args>
-    AVLTree(AVLTree* const _left, AVLTree* const _right, const _HeightT _height, _Args&&... args) noexcept
+    AVLNode(AVLNode* const _left, AVLNode* const _right, const _HeightT _height, _Args&&... args) noexcept
         : left(_left)
         , right(_right)
         , height(_height)
@@ -38,41 +39,31 @@ public:
     { }
 };
 
-enum class InsertMethod
-{
-    Ignore = 0,
-    Replace,
-    Greater,
-    Lesser
-};
-
 template<typename _T, typename _HeightT, InsertMethod _InsertMethod = InsertMethod::Ignore>
-class AVLManager final
+class AVLTree final
 {
-    DELETE_CM(AVLManager);
+    DELETE_CM(AVLTree);
 public:
-    using Tree = AVLTree<_T, _HeightT>;
+    using Node = AVLNode<_T, _HeightT>;
 private:
     TauAllocator& _allocator;
-    Tree* _root;
+    Node* _root;
 public:
-    AVLManager(TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept
+    AVLTree(TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept
         : _allocator(allocator)
         , _root(nullptr)
     { }
 
-    ~AVLManager() noexcept
-    {
-        disposeTree();   
-    }
+    ~AVLTree() noexcept
+    { disposeTree(); }
 
-    [[nodiscard]] Tree* root() noexcept { return _root; }
-    [[nodiscard]] const Tree* root() const noexcept { return _root; }
+    [[nodiscard]]       Node* root()       noexcept { return _root; }
+    [[nodiscard]] const Node* root() const noexcept { return _root; }
 
     template<typename _Search>
     [[nodiscard]] _T* find(const _Search& search) noexcept
     {
-        Tree* const node = find(_root, search);
+        Node* const node = find(_root, search);
         if(!node)
         { return nullptr; }
         return &node->value;
@@ -81,7 +72,7 @@ public:
     template<typename _Search>
     [[nodiscard]] const _T* find(const _Search& search) const noexcept
     {
-        const Tree* const node = find(_root, search);
+        const Node* const node = find(_root, search);
         if(!node)
         { return nullptr; }
         return &node->value;
@@ -90,7 +81,7 @@ public:
     template<typename _SearchT>
     [[nodiscard]] _T* findClosestMatchAbove(const _SearchT& search) noexcept
     {
-        Tree* const node = findClosestMatchAbove(_root, search);
+        Node* const node = findClosestMatchAbove(_root, search);
         if(!node)
         { return nullptr; }
         return &node->value;
@@ -99,7 +90,7 @@ public:
     template<typename _SearchT>
     [[nodiscard]] const _T* findClosestMatchAbove(const _SearchT& search) const noexcept
     {
-        const Tree* const node = findClosestMatchAbove(_root, search);
+        const Node* const node = findClosestMatchAbove(_root, search);
         if(!node)
         { return nullptr; }
         return &node->value;
@@ -108,7 +99,7 @@ public:
     template<typename _SearchT>
     [[nodiscard]] _T* findClosestMatchBelow(const _SearchT& search) noexcept
     {
-        Tree* const node = findClosestMatchBelow(_root, search);
+        Node* const node = findClosestMatchBelow(_root, search);
         if(!node)
         { return nullptr; }
         return &node->value;
@@ -117,45 +108,45 @@ public:
     template<typename _SearchT>
     [[nodiscard]] const _T* findClosestMatchBelow(const _SearchT& search) const noexcept
     {
-        const Tree* const node = findClosestMatchBelow(_root, search);
+        const Node* const node = findClosestMatchBelow(_root, search);
         if(!node)
         { return nullptr; }
         return &node->value;
     }
     
     template<typename _Search>
-    [[nodiscard]] Tree* get(const _Search& search) noexcept
+    [[nodiscard]] Node* get(const _Search& search) noexcept
     { return find(_root, search); }
 
     template<typename _Search>
-    [[nodiscard]] const Tree* get(const _Search& search) const noexcept
+    [[nodiscard]] const Node* get(const _Search& search) const noexcept
     { return find(_root, search); }
 
     template<typename _SearchT>
-    [[nodiscard]] Tree* getClosestMatchAbove(const _SearchT& search) noexcept
+    [[nodiscard]] Node* getClosestMatchAbove(const _SearchT& search) noexcept
     { return findClosestMatchAbove(_root, search); }
 
     template<typename _SearchT>
-    [[nodiscard]] const Tree* getClosestMatchAbove(const _SearchT& search) const noexcept
+    [[nodiscard]] const Node* getClosestMatchAbove(const _SearchT& search) const noexcept
     { return findClosestMatchAbove(_root, search); }
 
     template<typename _SearchT>
-    [[nodiscard]] Tree* getClosestMatchBelow(const _SearchT& search) noexcept
+    [[nodiscard]] Node* getClosestMatchBelow(const _SearchT& search) noexcept
     { return findClosestMatchBelow(_root, search); }
 
     template<typename _SearchT>
-    [[nodiscard]] const Tree* getClosestMatchBelow(const _SearchT& search) const noexcept
+    [[nodiscard]] const Node* getClosestMatchBelow(const _SearchT& search) const noexcept
     { return findClosestMatchBelow(_root, search); }
 
     void insert(const _T& value) noexcept
     {
         if(!_root)
         {
-            _root = _allocator.allocateT<Tree>(nullptr, nullptr, 0, value);
+            _root = _allocator.allocateT<Node>(nullptr, nullptr, 0, value);
         }
         else
         {
-            Tree* newNode = _allocator.allocateT<Tree>(nullptr, nullptr, 0, value);
+            Node* newNode = _allocator.allocateT<Node>(nullptr, nullptr, 0, value);
             _root = insert(_root, newNode, _allocator);
         }
     }
@@ -164,11 +155,11 @@ public:
     {
         if(!_root)
         {
-            _root = _allocator.allocateT<Tree>(nullptr, nullptr, 0, _TauAllocatorUtils::_move(value));
+            _root = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_move(value));
         }
         else
         {
-            Tree* newNode = _allocator.allocateT<Tree>(nullptr, nullptr, 0, _TauAllocatorUtils::_move(value));
+            Node* newNode = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_move(value));
             _root = insert(_root, newNode, _allocator);
         }
     }
@@ -178,11 +169,11 @@ public:
     {
         if(!_root)
         {
-            _root = _allocator.allocateT<Tree>(nullptr, nullptr, 0, _TauAllocatorUtils::_forward<_Args>(args)...);
+            _root = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_forward<_Args>(args)...);
         }
         else
         {
-            Tree* newNode = _allocator.allocateT<Tree>(nullptr, nullptr, 0, _TauAllocatorUtils::_forward<_Args>(args)...);
+            Node* newNode = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_forward<_Args>(args)...);
             _root = insert(_root, newNode, _allocator);
         }
     }
@@ -191,27 +182,16 @@ public:
     void remove(const _SearchT& search) noexcept
     { _root = remove(&_root, search, _allocator); }
 
-    void remove(const Tree* search) noexcept
+    void remove(const Node* search) noexcept
     { _root = remove(&_root, search, _allocator); }
 
     void disposeTree() noexcept
     { disposeTree(_root, _allocator); }
 private:
-    static void disposeTree(Tree* tree, TauAllocator& allocator) noexcept
+    template<typename _NodeT, typename _SearchT>
+    [[nodiscard]] static _NodeT* find(_NodeT* const tree, const _SearchT& search) noexcept
     {
-        if(!tree)
-        { return; }
-
-        disposeTree(tree->left, allocator);
-        disposeTree(tree->right, allocator);
-
-        allocator.deallocateT(tree);
-    }
-
-    template<typename _TreeT, typename _SearchT>
-    [[nodiscard]] static _TreeT* find(_TreeT* tree, const _SearchT& search) noexcept
-    {
-        _TreeT* node = tree;
+        _NodeT* node = tree;
 
         while(node)
         {
@@ -227,11 +207,11 @@ private:
         return nullptr;
     }
 
-    template<typename _TreeT, typename _SearchT>
-    [[nodiscard]] static _TreeT* findClosestMatchAbove(_TreeT* tree, const _SearchT& search) noexcept
+    template<typename _NodeT, typename _SearchT>
+    [[nodiscard]] static _NodeT* findClosestMatchAbove(_NodeT* const tree, const _SearchT& search) noexcept
     {
-        _TreeT* contender = tree;
-        _TreeT* node = tree;
+        _NodeT* contender = tree;
+        _NodeT* node = tree;
 
         while(node)
         {
@@ -251,11 +231,11 @@ private:
         return contender;
     }
 
-    template<typename _TreeT, typename _SearchT>
-    [[nodiscard]] static _TreeT* findClosestMatchBelow(_TreeT* tree, const _SearchT& search) noexcept
+    template<typename _NodeT, typename _SearchT>
+    [[nodiscard]] static _NodeT* findClosestMatchBelow(_NodeT* const tree, const _SearchT& search) noexcept
     {
-        _TreeT* contender = tree;
-        _TreeT* node = tree;
+        _NodeT* contender = tree;
+        _NodeT* node = tree;
 
         while(node)
         {
@@ -275,10 +255,10 @@ private:
         return contender;
     }
 
-    [[nodiscard]] static Tree* rotateRight(Tree* pivot) noexcept
+    [[nodiscard]] static Node* rotateRight(Node* const pivot) noexcept
     {
-        Tree* newRoot = pivot->left;
-        Tree* transferNode = newRoot->right;
+        Node* newRoot = pivot->left;
+        Node* transferNode = newRoot->right;
 
         newRoot->right = pivot;
         pivot->left = transferNode;
@@ -289,10 +269,10 @@ private:
         return newRoot;
     }
 
-    [[nodiscard]] static Tree* rotateLeft(Tree* pivot) noexcept
+    [[nodiscard]] static Node* rotateLeft(Node* const pivot) noexcept
     {
-        Tree* newRoot = pivot->right;
-        Tree* transferNode = newRoot->left;
+        Node* newRoot = pivot->right;
+        Node* transferNode = newRoot->left;
 
         newRoot->left = pivot;
         pivot->right = transferNode;
@@ -303,21 +283,21 @@ private:
         return newRoot;
     }
 
-    [[nodiscard]] static _HeightT height(const Tree* tree) noexcept
+    [[nodiscard]] static _HeightT height(const Node* const tree) noexcept
     {
         if(!tree)
         { return 0; }
         return tree->height;
     }
 
-    [[nodiscard]] static _HeightT computeBalance(const Tree* tree) noexcept
+    [[nodiscard]] static int computeBalance(const Node* const tree) noexcept
     {
         if(!tree)
         { return 0; }
-        return height(tree->left) - height(tree->right);
+        return static_cast<int>(height(tree->left) - height(tree->right));
     }
 
-    [[nodiscard]] static Tree* insert(Tree* tree, Tree* newNode, TauAllocator& allocator) noexcept
+    [[nodiscard]] static Node* insert(Node* const tree, Node* const newNode, TauAllocator& allocator) noexcept
     {
         if(!tree)
         { return newNode; }
@@ -329,7 +309,10 @@ private:
         else
         {
             if constexpr(_InsertMethod == InsertMethod::Ignore)
-            { return tree; }
+            {
+                allocator.deallocateT(newNode);
+                return tree;
+            }
             else if constexpr(_InsertMethod == InsertMethod::Replace)
             {
                 newNode->left = tree->left;
@@ -375,13 +358,28 @@ private:
         return tree;
     }
 
+    [[nodiscard]] static Node** minValueNode(Node** const tree) noexcept
+    {
+        Node* parent = nullptr;
+        Node* current = *tree;
+        while(current->left)
+        {
+            parent = current;
+            current = current->left;
+        }
+
+        if(!parent)
+        { return tree; }
+        return &parent->left;
+    }
+
     template<typename _SearchT>
-    [[nodiscard]] static Tree* remove(Tree** rootHolder, const _SearchT& search, TauAllocator& allocator) noexcept
+    [[nodiscard]] static Node* remove(Node** const rootHolder, const _SearchT& search, TauAllocator& allocator) noexcept
     {
         if(!rootHolder || !(*rootHolder))
         { return nullptr; }
 
-        Tree* root = *rootHolder;
+        Node* root = *rootHolder;
 
         if(search < root->value)
         { root->left = remove(&root->left, search, allocator); }
@@ -391,7 +389,7 @@ private:
         {
             if(!root->left || !root->right)
             {
-                Tree* tmp = root->left ? root->left : root->right;
+                Node* tmp = root->left ? root->left : root->right;
                 if(!tmp)
                 { *rootHolder = nullptr; }
                 else
@@ -401,14 +399,14 @@ private:
             }
             else
             {
-                Tree** tmp = minValueNode(&root->right);
+                Node** tmp = minValueNode(&root->right);
 
-                *rootHolder = *tmp;           // Replace root
-                *tmp = (*tmp)->right;         // Store tmp's right branch in tmp's parent left branch
-                (*rootHolder)->left = root->left;    // Set tmp's left branch to the old root's left branch
-                (*rootHolder)->right = root->right;  // Set tmp's right branch to the old root's right branch
-                allocator.deallocateT(root); // Destroy root 
-                root = *rootHolder;           // Update the actual root variable
+                *rootHolder = *tmp;                 // Replace root
+                *tmp = (*tmp)->right;               // Store tmp's right branch in tmp's parent left branch
+                (*rootHolder)->left = root->left;   // Set tmp's left branch to the old root's left branch
+                (*rootHolder)->right = root->right; // Set tmp's right branch to the old root's right branch
+                allocator.deallocateT(root);        // Destroy root 
+                root = *rootHolder;                 // Update the actual root variable
             }
         }
 
@@ -444,12 +442,12 @@ private:
         return root;
     }
 
-    [[nodiscard]] static Tree* remove(Tree** rootHolder, const Tree* search, TauAllocator& allocator) noexcept
+    [[nodiscard]] static Node* remove(Node** const rootHolder, const Node* const search, TauAllocator& allocator) noexcept
     {
         if(!rootHolder || !(*rootHolder))
         { return nullptr; }
 
-        Tree* root = *rootHolder;
+        Node* root = *rootHolder;
 
         if(search->value < root->value)
         { root->left = remove(&root->left, search, allocator); }
@@ -468,7 +466,7 @@ private:
         {
             if(!root->left || !root->right)
             {
-                Tree* tmp = root->left ? root->left : root->right;
+                Node* tmp = root->left ? root->left : root->right;
                 if(!tmp)
                 { *rootHolder = nullptr; }
                 else
@@ -478,14 +476,14 @@ private:
             }
             else
             {
-                Tree** tmp = minValueNode(&root->right);
+                Node** tmp = minValueNode(&root->right);
 
-                *rootHolder = *tmp;           // Replace root
-                *tmp = (*tmp)->right;         // Store tmp's right branch in tmp's parent left branch
-                (*rootHolder)->left = root->left;    // Set tmp's left branch to the old root's left branch
-                (*rootHolder)->right = root->right;  // Set tmp's right branch to the old root's right branch
-                allocator.deallocateT(root); // Destroy root 
-                root = *rootHolder;           // Update the actual root variable
+                *rootHolder = *tmp;                 // Replace root
+                *tmp = (*tmp)->right;               // Store tmp's right branch in tmp's parent left branch
+                (*rootHolder)->left = root->left;   // Set tmp's left branch to the old root's left branch
+                (*rootHolder)->right = root->right; // Set tmp's right branch to the old root's right branch
+                allocator.deallocateT(root);        // Destroy root 
+                root = *rootHolder;                 // Update the actual root variable
             }
         }
 
@@ -521,31 +519,26 @@ private:
         return root;
     }
 
-    [[nodiscard]] static Tree** minValueNode(Tree** tree) noexcept
+    static void disposeTree(Node* const tree, TauAllocator& allocator) noexcept
     {
-        Tree* parent = nullptr;
-        Tree* current = *tree;
-        while(current->left)
-        {
-            parent = current;
-            current = current->left;
-        }
+        if(!tree)
+        { return; }
 
-        if(!parent)
-        { return tree; }
-        return &parent->left;
+        disposeTree(tree->left, allocator);
+        disposeTree(tree->right, allocator);
+
+        allocator.deallocateT(tree);
     }
 };
 
+template<typename _T>
+using PackedAVLNode = AVLNode<_T, i8>;
 
 template<typename _T>
-using PackedAVLTree = AVLTree<_T, i8>;
-
-template<typename _T>
-using FastAVLTree = AVLTree<_T, iSys>;
+using FastAVLNode = AVLNode<_T, iSys>;
 
 template<typename _T, InsertMethod _InsertMethod = InsertMethod::Ignore>
-using PackedAVLManager = AVLManager<_T, i8, _InsertMethod>;
+using PackedAVLTree = AVLTree<_T, i8, _InsertMethod>;
 
 template<typename _T, InsertMethod _InsertMethod = InsertMethod::Ignore>
-using FastAVLManager = AVLManager<_T, iSys, _InsertMethod>;
+using FastAVLTree = AVLTree<_T, iSys, _InsertMethod>;

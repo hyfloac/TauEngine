@@ -74,15 +74,15 @@ void magnitudeTest() noexcept
     const Vector4f a(1.0f, 2.0f, 3.0f, 4.0f);
 
     const float magnitudeSquared = Vector4f::magnitudeSquared(a);
-    Assert(epsilonEquals(magnitudeSquared, 30.0f));
+    Assert(rEpsilonEquals(magnitudeSquared, 30.0f));
 
     const float magnitude = Vector4f::magnitude(a);
-    Assert(epsilonEquals(magnitude, 5.477225557f));
-    Assert(epsilonEquals(magnitude, sqrt(magnitudeSquared)));
+    Assert(rEpsilonEquals(magnitude, 5.477225557f));
+    Assert(rEpsilonEquals(magnitude, sqrt(magnitudeSquared)));
 
     const float inverseMagnitude = Vector4f::inverseMagnitude(a);
-    Assert(epsilonEquals(inverseMagnitude, 0.182574185f, 1E-3f));
-    Assert(epsilonEquals(inverseMagnitude, 1.0f / magnitude, 1E-3f));
+    Assert(rEpsilonEquals(inverseMagnitude, 0.182574185f, 1E-3f));
+    Assert(rEpsilonEquals(inverseMagnitude, 1.0f / magnitude, 1E-3f));
 }
 
 void normalizeTest() noexcept
@@ -93,26 +93,26 @@ void normalizeTest() noexcept
         const Vector4f b = Vector4f::normalize(a);
 
         const float magnitudeSquared = Vector4f::magnitudeSquared(b);
-        Assert(epsilonEquals(magnitudeSquared, 1.0f, 1E-3f));
+        Assert(rEpsilonEquals(magnitudeSquared, 1.0f, 1E-3f));
 
         const float magnitude = Vector4f::magnitude(b);
-        Assert(epsilonEquals(magnitude, 1.0f, 1E-3f));
+        Assert(rEpsilonEquals(magnitude, 1.0f, 1E-3f));
 
         const float inverseMagnitude = Vector4f::inverseMagnitude(b);
-        Assert(epsilonEquals(inverseMagnitude, 1.0f, 1E-3f));
+        Assert(rEpsilonEquals(inverseMagnitude, 1.0f, 1E-3f));
     }
 
     {
         const Vector4f b = Vector4f::normalizeExact(a);
 
         const float magnitudeSquared = Vector4f::magnitudeSquared(b);
-        Assert(epsilonEquals(magnitudeSquared, 1.0f, 1E-5f));
+        Assert(rEpsilonEquals(magnitudeSquared, 1.0f, 1E-5f));
 
         const float magnitude = Vector4f::magnitude(b);
-        Assert(epsilonEquals(magnitude, 1.0f, 1E-5f));
+        Assert(rEpsilonEquals(magnitude, 1.0f, 1E-5f));
 
         const float inverseMagnitude = Vector4f::inverseMagnitude(b);
-        Assert(epsilonEquals(inverseMagnitude, 1.0f, 1E-3f));
+        Assert(rEpsilonEquals(inverseMagnitude, 1.0f, 1E-3f));
     }
 }
 
@@ -121,11 +121,11 @@ void dotTest() noexcept
     UNIT_TEST();
     const Vector4f a(1.0f, 2.0f, 3.0f, 4.0f);
     const float b = Vector4f::dot(a, a);
-    Assert(epsilonEquals(b, 30.0f));
+    Assert(rEpsilonEquals(b, 30.0f));
 
     const Vector4f c(7.3f, 8.4f, 9.5f, 10.6f);
     const float d = Vector4f::dot(a, c);
-    Assert(epsilonEquals(d, 95.0f));
+    Assert(rEpsilonEquals(d, 95.0f));
 }
 }
 

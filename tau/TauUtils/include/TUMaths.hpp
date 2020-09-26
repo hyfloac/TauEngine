@@ -80,6 +80,23 @@ template<typename _T0, typename _T1, typename _T2, typename _T3>
 [[nodiscard]] inline constexpr _T0 maxT(const _T0 a, const _T1 b, const _T2 c, const _T3 d) noexcept
 { return maxT(maxT(a, b), maxT(c, d)); }
 
+/**
+ * Relative epsilon equals function.
+ */
+template<typename _T>
+static inline bool rEpsilonEquals(const _T x, const _T y, const _T epsilon = 1E-5)
+{
+    const _T epsilonRelative = maxT(fabs(x), fabs(y)) * epsilon;
+    return fabs(x - y) <= epsilonRelative;
+}
+
+/**
+ * Absolute epsilon equals function.
+ */
+template<typename _T>
+static inline bool aEpsilonEquals(const _T x, const _T y, const _T epsilon = 1E-5)
+{ return fabs(x - y) <= epsilon; }
+
 const u32 tab32[32] = {
      0,  9,  1, 10, 13, 21,  2, 29,
     11, 14, 16, 18, 22, 25,  3, 30,
