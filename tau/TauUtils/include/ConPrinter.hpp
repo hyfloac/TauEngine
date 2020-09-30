@@ -25,7 +25,7 @@ public:
     static i32 print(const wchar_t c)    noexcept { return fputwc(c, stdout);   }
     
     static i32 printW(const char* str)    noexcept { return fwprintf(stdout, L"%hs", str);  }
-    static i32 printW(const char c)       noexcept { return fputwc(c, stdout);    }
+    static i32 printW(const char c)       noexcept { return fputwc(c, stdout);   }
     static i32 printW(const wchar_t* str) noexcept { return fputws(str, stdout); }
     static i32 printW(const wchar_t c)    noexcept { return fputwc(c, stdout);   }
 
@@ -35,7 +35,7 @@ public:
     static i32 print(FILE* const file, const wchar_t c)    noexcept { return fputwc(c, file);   }
     
     static i32 printW(FILE* const file, const char* str)    noexcept { return fwprintf(file, L"%hs", str);  }
-    static i32 printW(FILE* const file, const char c)       noexcept { return fputwc(c, file);    }
+    static i32 printW(FILE* const file, const char c)       noexcept { return fputwc(c, file);   }
     static i32 printW(FILE* const file, const wchar_t* str) noexcept { return fputws(str, file); }
     static i32 printW(FILE* const file, const wchar_t c)    noexcept { return fputwc(c, file);   }
 

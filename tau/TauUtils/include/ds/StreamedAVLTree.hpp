@@ -507,7 +507,6 @@ private:
         if(tree == INVALID_VALUE)
         { return newNode; }
 
-
         const _T& newValue = valueTree()[newNode];
         const _T& treeValue = valueTree()[tree];
 
@@ -526,7 +525,7 @@ private:
             {
                 leftTree()[newNode] = leftTree()[tree];
                 rightTree()[newNode] = rightTree()[tree];
-                valueTree()[newNode] = valueTree()[tree];
+                heightTree()[newNode] = heightTree()[tree];
                 _allocator.deallocate(tree);
                 return newNode;
             }
@@ -559,14 +558,14 @@ private:
         // Left Right
         if(balance > 1 && newValue > *lValue)
         {
-            leftTree()[leftBranch] = rotateLeft(leftBranch);
+            leftTree()[tree] = rotateLeft(leftBranch);
             return rotateRight(tree);
         }
-
+        
         // Right Left
         if(balance < -1 && newValue < *rValue)
         {
-            rightTree()[rightBranch] = rotateRight(rightBranch);
+            rightTree()[tree] = rotateRight(rightBranch);
             return rotateLeft(tree);
         }
 

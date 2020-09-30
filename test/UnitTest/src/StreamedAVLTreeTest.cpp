@@ -33,13 +33,13 @@ void showTrunks(const Trunk* p) noexcept
 template<typename _T, typename _IndexT, typename _HeightT, InsertMethod _InsertMethod = InsertMethod::Ignore>
 inline void printTree(const StreamedAVLTree<_T, _IndexT, _HeightT, _InsertMethod>& tree, const _IndexT root, Trunk* const prev, const bool isRight) noexcept
 {
-	if(!root)
+	if(root == tree.INVALID_VALUE)
 	{ return; }
 
 	DynString prev_str("    ");
 	Trunk trunk(prev, prev_str);
     
-	printTree(tree.rightTree()[root], &trunk, true);
+	printTree(tree, tree.rightTree()[root], &trunk, true);
 
 	if(!prev)
     { trunk.str = "----"; }
@@ -61,7 +61,7 @@ inline void printTree(const StreamedAVLTree<_T, _IndexT, _HeightT, _InsertMethod
     { prev->str = prev_str; }
 	trunk.str = "   |";
 
-	printTree(tree.leftTree()[root], &trunk, false);
+	printTree(tree, tree.leftTree()[root], &trunk, false);
 }
 
 template<typename _T, typename _IndexT, typename _HeightT, InsertMethod _InsertMethod = InsertMethod::Ignore>

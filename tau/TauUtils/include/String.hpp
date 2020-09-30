@@ -685,7 +685,7 @@ public:
     inline StringBuilderT<_C>& resetIf(uSys maxSize, uSys newSize) noexcept;
 
     inline StringBuilderT<_C>& backspace() noexcept;
-    inline StringBuilderT<_C>& backspace(const uSys count) noexcept;
+    inline StringBuilderT<_C>& backspace(uSys count) noexcept;
 
 #if __has_feature(__cpp_impl_three_way_comparison)
     [[nodiscard]] i32 operator <=> (const StringBuilderT<_C>& other) const noexcept { return compareTo(other); }

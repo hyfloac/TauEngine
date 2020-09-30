@@ -141,7 +141,7 @@ define <4 x float> @vector4f_normalizeExact(<4 x float> %a) local_unnamed_addr #
     ret <4 x float> %normalized
 }
 
-define float @vector4f_dot(<4 x float> %a, <4 x float> %b)
+define float @vector4f_dot(<4 x float> %a, <4 x float> %b) #0
 {
     %mul = fmul <4 x float> %a, %b
     %x = extractelement <4 x float> %mul, i32 0

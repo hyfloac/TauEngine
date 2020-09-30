@@ -15,7 +15,7 @@
 
 #include "allocator/PageAllocator.hpp"
 
-#define SHOULD_PAUSE 1
+#define SHOULD_PAUSE 0
 
 #if SHOULD_PAUSE
   #include <conio.h>
@@ -104,19 +104,7 @@ int main(int argCount, char* args[]) noexcept
 
     PAUSE("Continue");
 
-    printf("\nVector2f Tests:\n\n");
     Vector2fTests::runTests();
-    // Vector2fTests::addTest();
-    // Vector2fTests::subTest();
-    // Vector2fTests::mulTest();
-    // Vector2fTests::divTest();
-    //
-    // Vector2fTests::negTest();
-    //
-    // Vector2fTests::magnitudeTest();
-    // Vector2fTests::normalizeTest();
-    // Vector2fTests::dotTest();
-    printf("Vector2f Tests Finished\n");
 
     PAUSE("Continue");
 
@@ -137,16 +125,7 @@ int main(int argCount, char* args[]) noexcept
     PAUSE("Continue");
 
     printf("\nVector4f Tests:\n\n");
-    Vector4fTests::addTest();
-    Vector4fTests::subTest();
-    Vector4fTests::mulTest();
-    Vector4fTests::divTest();
-
-    Vector4fTests::negTest();
-
-    Vector4fTests::magnitudeTest();
-    Vector4fTests::normalizeTest();
-    Vector4fTests::dotTest();
+    Vector4fTests::runTests();
     printf("Vector4f Tests Finished\n");
 
     PAUSE("Continue");

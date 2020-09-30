@@ -1,42 +1,33 @@
 #include "UnitTest.hpp"
+#include <AtomicIntrinsics.hpp>
 
-static u32 _testsPerformed = 0;
-static u32 _testsPassed = 0;
-static u32 _testsFailed = 0;
-static u32 _currentCycleFails = 0;
-
-u32 UnitTests::testsPerformed() noexcept
-{ return _testsPerformed; }
-
-u32 UnitTests::testsPassed() noexcept
-{ return _testsPassed; }
-
-u32 UnitTests::testsFailed() noexcept
-{ return _testsFailed; }
+u32 UnitTests::_testsPerformed = 0;
+u32 UnitTests::_testsPassed = 0;
+u32 UnitTests::_testsFailed = 0;
+u32 UnitTests::_currentCycleFails = 0;
 
 void UnitTests::reset() noexcept
 {
-    _currentCycleFails = 0;
+    atomicExchange(&_currentCycleFails, static_cast<u32>(0));
 }
 
 void UnitTests::pass() noexcept
 {
-    ++_testsPerformed;
-    ++_testsPassed;
+    atomicIncrement(&_testsPerformed);
+    atomicIncrement(&_testsPassed);
 }
 
 void UnitTests::fail() noexcept
 {
-    ++_testsPerformed;
-    ++_testsFailed;
-    ++_currentCycleFails;
+    atomicIncrement(&_testsPerformed);
+    atomicIncrement(&_testsFailed);
+    atomicIncrement(&_currentCycleFails);
 }
 
 bool UnitTests::passedPrevious() noexcept
 {
     return _currentCycleFails == 0;
 }
-
 
 Console& Console::Instance() noexcept
 {
@@ -93,9 +84,10 @@ WORD Console::transformColor(const Color foreground, const Color background) noe
     return ret;
 }
 
-Console::Console() noexcept
-    : _outConsole(GetStdHandle(STD_OUTPUT_HANDLE)),
-      _errConsole(GetStdHandle(STD_ERROR_HANDLE))
+Console::Console(const bool shouldWrite) noexcept
+    : _outConsole(GetStdHandle(STD_OUTPUT_HANDLE))
+    , _errConsole(GetStdHandle(STD_ERROR_HANDLE))
+    , _shouldWrite(shouldWrite)
 { }
 
 void Console::setOutColor(const Color foreground, const Color background) const noexcept
