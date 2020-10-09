@@ -97,13 +97,13 @@ template<typename _T>
 static inline bool aEpsilonEquals(const _T x, const _T y, const _T epsilon = 1E-5)
 { return fabs(x - y) <= epsilon; }
 
-const u32 tab32[32] = {
+const u32 clzTab32[32] = {
      0,  9,  1, 10, 13, 21,  2, 29,
     11, 14, 16, 18, 22, 25,  3, 30,
      8, 12, 20, 28, 15, 17, 24,  7,
     19, 27, 23,  6, 26,  5,  4, 31 };
 
-const u32 tab64[64] = {
+const u32 clzTab64[64] = {
     63,  0, 58,  1, 59, 47, 53,  2,
     60, 39, 48, 27, 54, 33, 42,  3,
     61, 51, 37, 40, 49, 18, 28, 20,
@@ -113,32 +113,23 @@ const u32 tab64[64] = {
     56, 45, 25, 31, 35, 16,  9, 12,
     44, 24, 15,  8, 23,  7,  6,  5 };
 
-[[nodiscard]] inline u32 log2i_32(u32 value) noexcept
-{
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    return tab32[((value * 0x07C4ACDDu)) >> 27];
-}
+const u32 ctzTab32[32] = {
+     0,  1, 28,  2, 29, 14, 24,  3,
+    30, 22, 20, 15, 25, 17,  4,  8, 
+    31, 27, 13, 23, 21, 19, 16,  7,
+    26, 12, 18,  6, 11,  5, 10,  9
+};
 
-[[nodiscard]] inline u32 log2i_64(u64 value) noexcept
-{
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    value |= value >> 32;
-    return tab64[((value - (value >> 1)) * 0x07EDD5E59A4E28C2ull) >> 58];
-}
-
-[[nodiscard]] inline u32 log2i(const u32 value) noexcept
-{ return log2i_32(value); }
-
-[[nodiscard]] inline u32 log2i(const u64 value) noexcept
-{ return log2i_64(value); }
+const u32 ctzTab64[64] = {
+    0, 47,  1, 56, 48, 27,  2, 60,
+   57, 49, 41, 37, 28, 16,  3, 61,
+   54, 58, 35, 52, 50, 42, 21, 44,
+   38, 32, 29, 23, 17, 11,  4, 62,
+   46, 55, 26, 59, 40, 36, 15, 53,
+   34, 51, 20, 43, 31, 22, 10, 45,
+   25, 39, 14, 33, 19, 30,  9, 24,
+   13, 18,  8, 12,  7,  6,  5, 63
+};
 
 template<typename _T>
 [[nodiscard]] constexpr inline _T _alignTo(const _T val, const _T alignment) noexcept
@@ -206,6 +197,37 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
     _BitScanReverse64(&leadingZero, v);
     return 63 - leadingZero;
 }
+
+[[nodiscard]] constexpr inline u32 _ctzC(const u32 v) noexcept
+{
+    return ctzTab32[((v ^ (v - 1)) * 0x077CB531u) >> 27];
+}
+
+[[nodiscard]] constexpr inline u32 _clzC(u32 v) noexcept
+{
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    return clzTab32[((v * 0x07C4ACDDu)) >> 27];
+}
+
+[[nodiscard]] constexpr inline u32 _ctzC(const u64 v) noexcept
+{
+    return ctzTab64[((v ^ (v - 1)) * 0x03F79D71B4CB0A89u) >> 58];
+}
+
+[[nodiscard]] constexpr inline u32 _clzC(u64 v) noexcept
+{
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v |= v >> 32;
+    return clzTab64[((v - (v >> 1)) * 0x07EDD5E59A4E28C2ull) >> 58];
+}
 #else
 [[nodiscard]] inline u32 _ctz(const u32 v) noexcept
 { return __builtin_ctz(v); }
@@ -213,15 +235,27 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
 [[nodiscard]] inline u32 _clz(const u32 v) noexcept
 { return __builtin_clz(v); }
 
-[[nodiscard]] inline u64 _ctz(const u64 v) noexcept
+[[nodiscard]] inline u32 _ctz(const u64 v) noexcept
 { return __builtin_ctzll(v); }
 
-[[nodiscard]] inline u64 _clz(const u64 v) noexcept
+[[nodiscard]] inline u32 _clz(const u64 v) noexcept
+{ return __builtin_clzll(v); }
+
+[[nodiscard]] constexpr inline u32 _ctzC(const u32 v) noexcept
+{ return __builtin_ctz(v); }
+
+[[nodiscard]] constexpr inline u32 _clzC(const u32 v) noexcept
+{ return __builtin_clz(v); }
+
+[[nodiscard]] constexpr inline u32 _ctzC(const u64 v) noexcept
+{ return __builtin_ctzll(v); }
+
+[[nodiscard]] constexpr inline u32 _clzC(const u64 v) noexcept
 { return __builtin_clzll(v); }
 #endif
 
 #if defined(TAU_CROSS_PLATFORM)
-[[nodiscard]] constexpr inline u32 _nextPowerOf2(const u32 v) noexcept
+[[nodiscard]] constexpr inline u32 nextPowerOf2(u32 v) noexcept
 {
     --v;
     v |= v >> 1;
@@ -232,7 +266,7 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
     return v + 1;
 }
 
-[[nodiscard]] constexpr inline u64 _nextPowerOf2(const u64 v) noexcept
+[[nodiscard]] constexpr inline u64 nextPowerOf2(u64 v) noexcept
 {
     --v;
     v |= v >> 1;
@@ -243,17 +277,46 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
     v |= v >> 32;
     return v + 1;
 }
-#else
-[[nodiscard]] inline u32 _nextPowerOf2(const u32 v) noexcept
+
+[[nodiscard]] constexpr inline u32 log2i(u32 value) noexcept
 {
-    if(v == 1)
-    { return 1; }
-    return 1 << (32 - _clz(v - 1));
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    return clzTab32[((value * 0x07C4ACDDu)) >> 27];
 }
 
-[[nodiscard]] inline u64 _nextPowerOf2(const u64 v) noexcept
+[[nodiscard]] constexpr inline u32 log2i(u64 value) noexcept
+{
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    value |= value >> 32;
+    return clzTab64[((value - (value >> 1)) * 0x07EDD5E59A4E28C2ull) >> 58];
+}
+#else
+[[nodiscard]] constexpr inline u32 nextPowerOf2(const u32 v) noexcept
 {
     if(v == 1)
     { return 1; }
-    return 1 << (64 - _clz(v - 1)); }
+    return 1 << (32 - _clzC(v - 1));
+}
+
+[[nodiscard]] constexpr inline u64 nextPowerOf2(const u64 v) noexcept
+{
+    if(v == 1)
+    { return 1; }
+    return 1 << (64 - _clzC(v - 1));
+}
+
+
+[[nodiscard]] constexpr inline u32 log2i(const u32 v) noexcept
+{ return _clzC(v); }
+
+[[nodiscard]] constexpr inline u32 log2i(const u64 v) noexcept
+{ return _clzC(v); }
 #endif

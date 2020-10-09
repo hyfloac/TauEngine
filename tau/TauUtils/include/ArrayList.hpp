@@ -367,6 +367,17 @@ public:
         return *ret;
     }
 
+    [[nodiscard]] _T* placement(uSys* index = nullptr) noexcept
+    {
+        assertSize();
+        _T* const placementBlock = _arr + _ctrlBlock->data.elementCount;
+        if(index)
+        { *index = _ctrlBlock->data.elementCount; }
+        ++_ctrlBlock->data.elementCount;
+        _ctrlBlock->data.dataSize += sizeof(_T);
+        return placementBlock;
+    }
+
     void removeFast(const uSys index) noexcept
     {
         if(index + 1 > _ctrlBlock->data.elementCount)

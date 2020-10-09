@@ -39,7 +39,7 @@ private:
     _T* _valueTree;
 public:
     StreamedAVLTreeAllocator(const uSys maxElements, const uSys allocPages = 4) noexcept
-        : _allocPages(_nextPowerOf2(allocPages))
+        : _allocPages(nextPowerOf2(allocPages))
         , _branchReservedPages(_alignTo((maxElements * sizeof(_IndexT)) / PageAllocator::pageSize() + 1, _allocPages))
         , _heightReservedPages(_alignTo((maxElements * sizeof(_HeightT)) / PageAllocator::pageSize() + 1, _allocPages))
         , _valueReservedPages(_alignTo((maxElements * sizeof(_T)) / PageAllocator::pageSize() + 1, _allocPages))

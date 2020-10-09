@@ -26,9 +26,8 @@ Doxyfile.bak
 /libs/fmt-6.0.0/*
 /libs/freetype-2.10.0/*
 /libs/GLEW/*
-/libs/GLFW-3.3/*
 /libs/imgui-1.68/*
-/libs/imgui-1.75/
+/libs/imgui-1.75/*
 /libs/LZMA/*
 /libs/LZMA_CS/*
 /libs/SPDLog/*

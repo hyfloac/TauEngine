@@ -16,7 +16,7 @@
 #elif defined(__GNUC__)
   #ifdef UTILS_DISABLE_PRAGMA
     #define DEPRECATED __attribute__((deprecated))
-    #define DEPRECATED_R(__REASON) __attribute__((deprecated(__REASON))))
+    #define DEPRECATED_R(__REASON) __attribute__((deprecated(__REASON)))
   #else
     #define DEPRECATED INLINE_PRAGMA(deprecated)
     #define DEPRECATED_R(__REASON) INLINE_PRAGMA(deprecated)
@@ -24,7 +24,7 @@
 #elif defined(_MSC_VER)
   #ifdef UTILS_DISABLE_PRAGMA
     #define DEPRECATED __declspec(deprecated)
-    #define DEPRECATED_R(__REASON) __declspec(deprecated(__REASON)))
+    #define DEPRECATED_R(__REASON) __declspec(deprecated(__REASON))
   #else
     #define DEPRECATED INLINE_PRAGMA(deprecated)
     #define DEPRECATED_R(__REASON) INLINE_PRAGMA(deprecated)
