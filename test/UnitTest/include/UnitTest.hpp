@@ -218,7 +218,7 @@ public:
         Console::Instance().resetOutColor();
     }
 
-    void print() const noexcept
+    void print() const
     {
         for(const auto& msg : _messageList)
         {
