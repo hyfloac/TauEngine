@@ -96,7 +96,7 @@ public:
 class EventDispatcher final
 {
     DEFAULT_DESTRUCT(EventDispatcher);
-    DEFAULT_COPY(EventDispatcher);
+    DEFAULT_CM_PU(EventDispatcher);
 private:
     Event& _event;
     Event::EventType _cache;

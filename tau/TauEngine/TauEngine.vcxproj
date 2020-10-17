@@ -67,6 +67,7 @@
     <ClCompile Include="src\dx\dx11\DX11VertexArray.cpp" />
     <ClCompile Include="src\dx\dx12\DX12BlendingState.cpp" />
     <ClCompile Include="src\dx\dx12\DX12CommandList.cpp" />
+    <ClCompile Include="src\dx\dx12\DX12CommandQueue.cpp" />
     <ClCompile Include="src\dx\dx12\DX12DepthStencilState.cpp" />
     <ClCompile Include="src\dx\dx12\DX12GraphicsInterface.cpp" />
     <ClCompile Include="src\dx\dx12\DX12InputLayout.cpp" />
@@ -90,6 +91,7 @@
     <ClCompile Include="src\dx\dxgi\DXGI16GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\DXShaderStubGenerator.cpp" />
     <ClCompile Include="src\entity\Entity.cpp" />
+    <ClCompile Include="src\entity\EntityComponent.cpp" />
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
@@ -226,6 +228,7 @@
     <ClInclude Include="include\dx\dx12\DX12BlendingState.hpp" />
     <ClInclude Include="include\dx\dx12\DX12CommandAllocator.hpp" />
     <ClInclude Include="include\dx\dx12\DX12CommandList.hpp" />
+    <ClInclude Include="include\dx\dx12\DX12CommandQueue.hpp" />
     <ClInclude Include="include\dx\dx12\DX12DepthStencilState.hpp" />
     <ClInclude Include="include\dx\dx12\DX12Enums.hpp" />
     <ClInclude Include="include\dx\dx12\DX12GraphicsInterface.hpp" />
@@ -251,6 +254,8 @@
     <ClInclude Include="include\dx\dxgi\DXGI16GraphicsDisplay.hpp" />
     <ClInclude Include="include\dx\DXShaderStubGenerator.hpp" />
     <ClInclude Include="include\dx\DXUtils.hpp" />
+    <ClInclude Include="include\entity\component\TransformComponent.hpp" />
+    <ClInclude Include="include\entity\EntityComponent.hpp" />
     <ClInclude Include="include\entity\Entity.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
@@ -329,6 +334,7 @@
     <ClInclude Include="include\maths\ComponentVector4.hpp" />
     <ClInclude Include="include\maths\Matrix4x4f.hpp" />
     <ClInclude Include="include\maths\Quaternion.hpp" />
+    <ClInclude Include="include\maths\Transform.hpp" />
     <ClInclude Include="include\maths\Vector2f.hpp" />
     <ClInclude Include="include\maths\Vector3f.hpp" />
     <ClInclude Include="include\maths\Vector3i.hpp" />
