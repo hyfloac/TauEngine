@@ -7,3 +7,11 @@ enum class InsertMethod
     Greater,
     Lesser
 };
+
+enum class IteratorMethod
+{
+    TopDownLR = 0,
+    TopDownRL = 0,
+    HighestToLowest,
+    LowestToHighest
+};

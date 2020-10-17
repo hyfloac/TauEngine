@@ -187,6 +187,22 @@ public:
 
     void disposeTree() noexcept
     { disposeTree(_root, _allocator); }
+
+    template<typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
+    void iterate(const _F& func) noexcept
+    { iterate<_IteratorMethod>(_root, func); }
+
+    template<typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
+    void iterate(const _F& func) const noexcept
+    { Iterate<_IteratorMethod>(_root, func); }
+
+    template<typename _C, typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
+    void iterate(_C* instance, const _F& func) noexcept
+    { Iterate<_IteratorMethod>(_root, instance, func); }
+
+    template<typename _C, typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
+    void iterate(_C* instance, const _F& func) const noexcept
+    { Iterate<_IteratorMethod>(_root, instance, func); }
 private:
     template<typename _NodeT, typename _SearchT>
     [[nodiscard]] static _NodeT* find(_NodeT* const tree, const _SearchT& search) noexcept
@@ -528,6 +544,70 @@ private:
         disposeTree(tree->right, allocator);
 
         allocator.deallocateT(tree);
+    }
+
+    template<typename _Node, typename _F, IteratorMethod _IteratorMethod>
+    static void Iterate(_Node* const tree, const _F& func) noexcept
+    {
+        if(!tree)
+        { return; }
+
+        if constexpr(_IteratorMethod == IteratorMethod::TopDownLR)
+        {
+            func(tree);
+            iterate(tree->left, func);
+            iterate(tree->right, func);
+        }
+        else if constexpr(_IteratorMethod == IteratorMethod::TopDownRL)
+        {
+            func(tree);
+            iterate(tree->right, func);
+            iterate(tree->left, func);
+        }
+        else if constexpr(_IteratorMethod == IteratorMethod::HighestToLowest)
+        {
+            iterate(tree->right, func);
+            iterate(tree->left, func);
+            func(tree);
+        }
+        else if constexpr(_IteratorMethod == IteratorMethod::LowestToHighest)
+        {
+            iterate(tree->left, func);
+            iterate(tree->right, func);
+            func(tree);
+        }
+    }
+
+    template<typename _Node, typename _C, typename _F, IteratorMethod _IteratorMethod>
+    static void Iterate(_Node* const tree, _C* const instance, const _F& func) noexcept
+    {
+        if(!tree)
+        { return; }
+
+        if constexpr(_IteratorMethod == IteratorMethod::TopDownLR)
+        {
+        (instance->*func)(tree);
+            iterate(tree->left, func);
+            iterate(tree->right, func);
+        }
+        else if constexpr(_IteratorMethod == IteratorMethod::TopDownRL)
+        {
+        (instance->*func)(tree);
+            iterate(tree->right, func);
+            iterate(tree->left, func);
+        }
+        else if constexpr(_IteratorMethod == IteratorMethod::HighestToLowest)
+        {
+            iterate(tree->right, func);
+            iterate(tree->left, func);
+        (instance->*func)(tree);
+        }
+        else if constexpr(_IteratorMethod == IteratorMethod::LowestToHighest)
+        {
+            iterate(tree->left, func);
+            iterate(tree->right, func);
+        (instance->*func)(tree);
+        }
     }
 };
 

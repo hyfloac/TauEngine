@@ -270,7 +270,7 @@
   <ItemGroup>
     <ClInclude Include="include\Alignment.h" />
     <ClInclude Include="include\allocator\FreeListAllocator.hpp" />
-    <ClInclude Include="include\allocator\LinearAllocator.hpp" />
+    <ClInclude Include="include\allocator\SlabAllocator.hpp" />
     <ClInclude Include="include\allocator\TauAllocator.hpp" />
     <ClInclude Include="include\ArrayList.hpp" />
     <ClInclude Include="include\AtomicIntrinsics.hpp" />

@@ -23,6 +23,8 @@ public:
     ~DX12CommandList() noexcept override
     { _cmdList->Release(); }
 
+    [[nodiscard]] ID3D12CommandList* cmdList() const noexcept { return _cmdList; }
+
     void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept override;
     void begin() noexcept override;
     void finish() noexcept override;

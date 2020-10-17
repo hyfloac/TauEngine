@@ -6,6 +6,43 @@
 #include "AtomicIntrinsics.hpp"
 #include <functional>
 
+#ifndef TAU_RTTI_DEBUG
+  #ifdef TAU_PRODUCTION
+    #define TAU_RTTI_DEBUG 0
+  #else
+    #define TAU_RTTI_DEBUG 1
+  #endif
+#endif
+
+/**
+ * A lightweight wrapper for RTTI.
+ *
+ *   Depending on whether debug mode is enabled this either
+ * stores an incremental integer or a pointer to itself.
+ *
+ *   When debug mode is enabled this stores a pointer to itself
+ * as well as the types name, and the parent RTTI structure. We
+ * store the pointer because it will be unique, and consistent.
+ * This potentially can make certain parts easier to debug.
+ *
+ *   When debug mode is not enabled this stores an incremental
+ * integer. This integer is incremented at runtime and is
+ * dependent on the order in which RTTI is checked. This is
+ * because the integer is generated when the class is
+ * instantiated. The RTTI structure stored as a static member
+ * within a specialized function. Static function variables are
+ * instantiated on the first call to the function. Thus if the
+ * order in which types are checked changes between runs, the
+ * underlying RTTI value will change, making everything
+ * significantly more obfuscated, while still being able to
+ * uniquely identify each type. This integer is also
+ * incremented using atomics, so it is safe to instantiate the
+ * type from multiple threads simultaneously. There is also a
+ * template type, this is a type safety restriction that
+ * ensures that two entirely different types with the same
+ * underlying RTTI value aren't identified as the same by
+ * accident.
+ */
 template<typename _T>
 class RunTimeType;
 
@@ -17,11 +54,44 @@ namespace std {
     };
 }
 
+#if TAU_RTTI_DEBUG
 template<typename _T>
 class RunTimeType final
 {
     DEFAULT_DESTRUCT(RunTimeType);
-    DEFAULT_CM(RunTimeType);
+    DEFAULT_CM_PU(RunTimeType);
+public:
+    static RunTimeType<_T> define() noexcept
+    {
+        static volatile u64 currentUID = 0;
+        const u64 ret = atomicIncrement(&currentUID);
+        return RunTimeType<_T>(ret);
+    }
+private:
+    void* _uid;
+    const char* _name;
+    const RunTimeType<_T>* _parent;
+public:
+    RunTimeType(const char* const name, const RunTimeType<_T>* const parent = nullptr) noexcept
+        : _uid(this)
+        , _name(name)
+        , _parent(parent)
+    { }
+
+    [[nodiscard]] const char* name() const noexcept { return _name; }
+    [[nodiscard]] const RunTimeType<_T>* parent() const noexcept { return _parent; }
+
+    [[nodiscard]] bool operator ==(const RunTimeType<_T>& other) const noexcept { return _uid == other._uid; }
+    [[nodiscard]] bool operator !=(const RunTimeType<_T>& other) const noexcept { return _uid != other._uid; }
+private:
+    friend struct std::hash<RunTimeType<_T>>;
+};
+#else
+template<typename _T>
+class RunTimeType final
+{
+    DEFAULT_DESTRUCT(RunTimeType);
+    DEFAULT_CM_PU(RunTimeType);
 public:
     static RunTimeType<_T> define() noexcept
     {
@@ -32,29 +102,69 @@ public:
 private:
     u64 _uid;
 private:
-    explicit inline RunTimeType(const u64 uid) noexcept
+    explicit RunTimeType(const u64 uid) noexcept
         : _uid(uid)
     { }
 public:
-    [[nodiscard]] inline bool operator ==(const RunTimeType<_T>& other) const noexcept { return _uid == other._uid; }
-    [[nodiscard]] inline bool operator !=(const RunTimeType<_T>& other) const noexcept { return _uid != other._uid; }
+    [[nodiscard]] const char* name() const noexcept { return nullptr; }
+    [[nodiscard]] const RunTimeType<_T>* parent() const noexcept { return nullptr; }
+
+    [[nodiscard]] bool operator ==(const RunTimeType<_T>& other) const noexcept { return _uid == other._uid; }
+    [[nodiscard]] bool operator !=(const RunTimeType<_T>& other) const noexcept { return _uid != other._uid; }
 private:
     friend struct std::hash<RunTimeType<_T>>;
 };
+#endif
 
 template<typename _T>
 [[nodiscard]] inline ::std::size_t std::hash<RunTimeType<_T>>::operator()(const RunTimeType<_T>& rtt) const noexcept
 { return static_cast<::std::size_t>(rtt._uid); }
 
-#define RTT_BASE_IMPL(_TYPE) \
+#define TAU_RTTI_STRING0(_X) #_X
+#define TAU_RTTI_STRING(_X) TAU_RTTI_STRING0(_X)
+
+#if TAU_RTTI_DEBUG
+  #define RTT_BASE_IMPL(_TYPE) \
+    public: \
+        [[nodiscard]] static RunTimeType<_TYPE> _getStaticRTType() noexcept\
+        { static RunTimeType<_TYPE> type(TAU_RTTI_STRING(_TYPE)); \
+          return type; } \
+        [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType() const noexcept = 0; \
+
+  #define RTTD_BASE_IMPL(_TYPE) \
+    public: \
+        [[nodiscard]] static RunTimeType<_TYPE> _getStaticRTType_##_TYPE() noexcept\
+        { static RunTimeType<_TYPE> type(TAU_RTTI_STRING(_TYPE)); \
+          return type; } \
+        [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType_##_TYPE() const noexcept = 0;
+#else
+  #define RTT_BASE_IMPL(_TYPE) \
     public: \
         [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType() const noexcept = 0;
 
-#define RTTD_BASE_IMPL(_TYPE) \
+  #define RTTD_BASE_IMPL(_TYPE) \
     public: \
         [[nodiscard]] virtual RunTimeType<_TYPE> _getRTType_##_TYPE() const noexcept = 0;
+#endif
 
-#define RTT_IMPL(_TYPE, _BASE_TYPE) \
+#if TAU_RTTI_DEBUG
+  #define RTT_IMPL(_TYPE, _BASE_TYPE) \
+    public: \
+        [[nodiscard]] static RunTimeType<_BASE_TYPE> _getStaticRTType() noexcept \
+        { static RunTimeType<_BASE_TYPE> type(TAU_RTTI_STRING(_TYPE), &_BASE_TYPE::_getStaticRTType()); \
+          return type; } \
+        [[nodiscard]] virtual RunTimeType<_BASE_TYPE> _getRTType() const noexcept override \
+        { return _TYPE::_getStaticRTType(); }
+
+  #define RTTD_IMPL(_TYPE, _BASE_TYPE) \
+    public: \
+        [[nodiscard]] static RunTimeType<_BASE_TYPE> _getStaticRTType_##_BASE_TYPE() noexcept \
+        { static RunTimeType<_BASE_TYPE> type(TAU_RTTI_STRING(_TYPE), &_BASE_TYPE::_getStaticRTType_##_BASE_TYPE()); \
+          return type; } \
+        [[nodiscard]] virtual RunTimeType<_BASE_TYPE> _getRTType_##_BASE_TYPE() const noexcept override \
+        { return _TYPE::_getStaticRTType_##_BASE_TYPE(); }
+#else
+  #define RTT_IMPL(_TYPE, _BASE_TYPE) \
     public: \
         [[nodiscard]] static RunTimeType<_BASE_TYPE> _getStaticRTType() noexcept \
         { static RunTimeType<_BASE_TYPE> type = RunTimeType<_BASE_TYPE>::define(); \
@@ -62,13 +172,14 @@ template<typename _T>
         [[nodiscard]] virtual RunTimeType<_BASE_TYPE> _getRTType() const noexcept override \
         { return _TYPE::_getStaticRTType(); }
 
-#define RTTD_IMPL(_TYPE, _BASE_TYPE) \
+  #define RTTD_IMPL(_TYPE, _BASE_TYPE) \
     public: \
         [[nodiscard]] static RunTimeType<_BASE_TYPE> _getStaticRTType_##_BASE_TYPE() noexcept \
         { static RunTimeType<_BASE_TYPE> type = RunTimeType<_BASE_TYPE>::define(); \
           return type; } \
         [[nodiscard]] virtual RunTimeType<_BASE_TYPE> _getRTType_##_BASE_TYPE() const noexcept override \
         { return _TYPE::_getStaticRTType_##_BASE_TYPE(); }
+#endif
 
 #define RTT_BASE_CHECK(_TYPE) \
     public: \

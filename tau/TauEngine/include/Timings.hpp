@@ -8,7 +8,6 @@
 #include <NumTypes.hpp>
 #include <Safeties.hpp>
 #include <Objects.hpp>
-#include <IFile.hpp>
 #include "DLL.hpp"
 
 /**
@@ -63,8 +62,8 @@ TAU_DLL void computeClockCyclesPerTime(const u64 timeoutMS = 50) noexcept;
  *   Used to compute the {@link ClockCyclesTimeFrame} from how
  * long the program has been running for. This function 
  * produces an average clock speed unlike 
- * {@link computeClockCyclesPerTime(const u64)} which computes
- * a current clock speed.
+ * {@link computeClockCyclesPerTime(const u64) @endlink} which
+ * computes a current clock speed.
  */
 TAU_DLL void computeClockCyclesFromRuntime() noexcept;
 
@@ -81,20 +80,23 @@ class TAU_DLL TimingsWriter final
 {
     DELETE_CONSTRUCT(TimingsWriter);
     DELETE_DESTRUCT(TimingsWriter);
-    DELETE_COPY(TimingsWriter);
+    DELETE_CM(TimingsWriter);
 public:
     struct ProfileResult final
     {
         DEFAULT_DESTRUCT(ProfileResult);
-        DEFAULT_COPY(ProfileResult);
+        DEFAULT_CM_PU(ProfileResult);
     public:
         const char* name;
         u32 threadID;
         u64 start;
         u64 end;
     public:
-        ProfileResult(const char* const name, const u32 threadId, const u64 start, const u64 end) noexcept
-            : name(name), threadID(threadId), start(start), end(end)
+        ProfileResult(const char* const _name, const u32 _threadId, const u64 _start, const u64 _end) noexcept
+            : name(_name)
+            , threadID(_threadId)
+            , start(_start)
+            , end(_end)
         { }
     };
 public:
