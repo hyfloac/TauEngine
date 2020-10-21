@@ -210,7 +210,7 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
     v |= v >> 4;
     v |= v >> 8;
     v |= v >> 16;
-    return clzTab32[((v * 0x07C4ACDDu)) >> 27];
+    return 63 - clzTab32[((v * 0x07C4ACDDu)) >> 27];
 }
 
 [[nodiscard]] constexpr inline u32 _ctzC(const u64 v) noexcept
@@ -226,7 +226,7 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
     v |= v >> 8;
     v |= v >> 16;
     v |= v >> 32;
-    return clzTab64[((v - (v >> 1)) * 0x07EDD5E59A4E28C2ull) >> 58];
+    return 63 - clzTab64[((v - (v >> 1)) * 0x07EDD5E59A4E28C2ull) >> 58];
 }
 #else
 [[nodiscard]] inline u32 _ctz(const u32 v) noexcept
@@ -306,7 +306,7 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
     return 1 << (32 - _clzC(v - 1));
 }
 
-[[nodiscard]] constexpr inline u64 nextPowerOf2(const u64 v) noexcept
+[[nodiscard]] inline u64 nextPowerOf2(const u64 v) noexcept
 {
     if(v == 1)
     { return 1; }

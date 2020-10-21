@@ -294,6 +294,9 @@ public:
 
     [[nodiscard]] bool operator ==(nullptr_t) const noexcept override { return !_rcdo; }
     [[nodiscard]] bool operator !=(nullptr_t) const noexcept override { return  _rcdo; }
+private:
+    template<typename _TT>
+    friend class ReferenceCountingPointer;
 };
 
 template<typename _T>
@@ -375,6 +378,12 @@ public:
     [[nodiscard]] bool operator !=(nullptr_t) const noexcept override { return  _swrc; }
 private:
     friend class WeakReferenceCountingPointer<_T>;
+
+    template<typename _TT>
+    friend class StrongReferenceCountingPointer;
+
+    template<typename _TT>
+    friend class WeakReferenceCountingPointer;
 };
 
 template<typename _T>
@@ -453,6 +462,12 @@ public:
     [[nodiscard]] bool operator !=(const nullptr_t) const noexcept override { return  _swrc; }
 private:
     friend class StrongReferenceCountingPointer<_T>;
+
+    template<typename _TT>
+    friend class StrongReferenceCountingPointer;
+
+    template<typename _TT>
+    friend class WeakReferenceCountingPointer;
 };
 
 template<typename _ToT, typename _FromT>

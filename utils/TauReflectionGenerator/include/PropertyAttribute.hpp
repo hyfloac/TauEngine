@@ -93,11 +93,11 @@ private:
 public:
     template<typename _T, typename... _Args>
     static void registerAttribute(const DynString& attribName, _Args&&... args) noexcept
-    { _attributeHandlers.emplace(attribName, Ref<_T>(::std::forward<_Args>(args...))); }
+    { _attributeHandlers.emplace(attribName, Ref<_T>(DefaultTauAllocator::Instance(), ::std::forward<_Args>(args)...)); }
 
     template<typename _T, typename... _Args>
     static void registerAttribute(DynString&& attribName, _Args&&... args) noexcept
-    { _attributeHandlers.emplace(::std::move(attribName), Ref<_T>(::std::forward<_Args>(args...))); }
+    { _attributeHandlers.emplace(::std::move(attribName), Ref<_T>(DefaultTauAllocator::Instance(), ::std::forward<_Args>(args)...)); }
 
     static Ref<IPropertyAttribute> getAttribute(const DynString& attribName) noexcept;
 

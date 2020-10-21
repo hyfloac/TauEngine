@@ -24,5 +24,5 @@ Ref<tau::IPropertyAttribute> tau::PropertyAttributeManager::getAttribute(const D
     if(_attributeHandlers.count(attribName) == 0)
     { return nullptr; }
 
-    return _attributeHandlers.at(attribName);
+    return _attributeHandlers[attribName];
 }

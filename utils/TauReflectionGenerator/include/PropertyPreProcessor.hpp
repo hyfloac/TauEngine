@@ -1,17 +1,29 @@
 #pragma once
 
 #include <clang/Lex/PPCallbacks.h>
-#include <deque>
+#include <clang/Frontend/FrontendAction.h>
 #include "Property.hpp"
 
 namespace tau {
 
+class PropertyPreProcessorAction : public ::clang::PreprocessorFrontendAction
+{
+private:
+    PropertyDeclQueue& _propertyTags;
+public:
+    PropertyPreProcessorAction(PropertyDeclQueue& propertyTags) noexcept
+        : _propertyTags(propertyTags)
+    { }
+protected:
+    void ExecuteAction() override;
+};
+
 class PropertyPreProcessorCallback : public ::clang::PPCallbacks
 {
 private:
-    ::std::deque<PropertyDeclaration>& _propertyTags;
+    PropertyDeclQueue& _propertyTags;
 public:
-    PropertyPreProcessorCallback(::std::deque<PropertyDeclaration>& propertyTags) noexcept
+    PropertyPreProcessorCallback(PropertyDeclQueue& propertyTags) noexcept
         : _propertyTags(propertyTags)
     { }
 

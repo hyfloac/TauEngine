@@ -199,14 +199,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\attribs\GetAttribute.cpp" />
+    <ClCompile Include="src\attribs\SetAttribute.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Property.cpp" />
+    <ClCompile Include="src\PropertyASTWalker.cpp" />
     <ClCompile Include="src\PropertyAttribute.cpp" />
+    <ClCompile Include="src\PropertyPreProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\attribs\GetAttribute.hpp" />
+    <ClInclude Include="include\attribs\SetAttribute.hpp" />
     <ClInclude Include="include\FrontendFactoryHelper.hpp" />
     <ClInclude Include="include\Property.hpp" />
+    <ClInclude Include="include\PropertyASTWalker.hpp" />
     <ClInclude Include="include\PropertyAttribute.hpp" />
     <ClInclude Include="include\PropertyPreProcessor.hpp" />
   </ItemGroup>
