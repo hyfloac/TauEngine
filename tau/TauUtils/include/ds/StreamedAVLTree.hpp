@@ -325,7 +325,7 @@ public:
         }
     }
 
-    void insert(const _T&& value) noexcept
+    void insert(_T&& value) noexcept
     {
         if(_root == INVALID_VALUE)
         {

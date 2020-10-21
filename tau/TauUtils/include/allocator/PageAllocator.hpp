@@ -8,6 +8,9 @@ class PageAllocator final
     DELETE_CONSTRUCT(PageAllocator);
     DELETE_CM(PageAllocator);
     DELETE_DESTRUCT(PageAllocator);
+private:
+    static uSys _pageSize;
+    static bool _initialized;
 public:
     static void init() noexcept;
 

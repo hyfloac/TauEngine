@@ -1,33 +1,35 @@
+#include "allocator/PageAllocator.hpp"
+
+#ifdef _WIN32
+
 #pragma warning(push, 0)
 #include <Windows.h>
 #pragma warning(pop)
 
-#include "allocator/PageAllocator.hpp"
-
-static bool initialized = false;
-static DWORD _pageSize = 0;
+bool PageAllocator::_initialized = false;
+uSys PageAllocator::_pageSize = 0;
 
 void PageAllocator::init() noexcept
 {
-    if(!initialized)
+    if(!_initialized)
     {
         SYSTEM_INFO sysInfo;
         GetSystemInfo(&sysInfo);
 
         _pageSize = sysInfo.dwPageSize;
 
-        initialized = true;
+        _initialized = true;
     }
 }
 
 void* PageAllocator::reserve(const uSys numPages) noexcept
 {
-    return VirtualAlloc(NULL, numPages * _pageSize, MEM_RESERVE, PAGE_NOACCESS);
+    return VirtualAlloc(nullptr, numPages * _pageSize, MEM_RESERVE, PAGE_NOACCESS);
 }
 
 void* PageAllocator::alloc(const uSys numPages) noexcept
 {
-    return VirtualAlloc(NULL, numPages * _pageSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    return VirtualAlloc(nullptr, numPages * _pageSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 }
 
 void* PageAllocator::commitPage(void* const page) noexcept
@@ -55,19 +57,19 @@ void PageAllocator::free(void* const page) noexcept
     VirtualFree(page, 0, MEM_RELEASE);
 }
 
-void PageAllocator::setReadWrite(void* page, uSys pageCount) noexcept
+void PageAllocator::setReadWrite(void* const page, const uSys pageCount) noexcept
 {
     DWORD oldProtect;
     VirtualProtect(page, pageCount * _pageSize, PAGE_READWRITE, &oldProtect);
 }
 
-void PageAllocator::setReadOnly(void* page, uSys pageCount) noexcept
+void PageAllocator::setReadOnly(void* const page, const uSys pageCount) noexcept
 {
     DWORD oldProtect;
     VirtualProtect(page, pageCount * _pageSize, PAGE_READONLY, &oldProtect);
 }
 
-void PageAllocator::setExecute(void* page, uSys pageCount) noexcept
+void PageAllocator::setExecute(void* const page, const uSys pageCount) noexcept
 {
     DWORD oldProtect;
     VirtualProtect(page, pageCount * _pageSize, PAGE_EXECUTE_READ, &oldProtect);
@@ -75,5 +77,11 @@ void PageAllocator::setExecute(void* page, uSys pageCount) noexcept
 
 uSys PageAllocator::pageSize() noexcept
 {
+    /*   Screw it, I'm tired of dealing with problems of this value
+       not being initialized. */
+    if(!_initialized)
+    { init(); }
     return _pageSize;
 }
+
+#endif

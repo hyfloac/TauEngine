@@ -17,6 +17,10 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="TRG_Release|x64">
+      <Configuration>TRG_Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -49,6 +53,14 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -71,6 +83,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
@@ -89,6 +104,14 @@
     <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\FreeImage\Dist\$(Platform)\;$(SolutionDir)libs\freetype-2.10.0\objs\$(Platform)\$(Configuration) Static\;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>..\..\Analysis.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
     <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauEngine\include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt-6.0.0\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
@@ -269,6 +292,88 @@ fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Sa
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <CompileAsManaged>false</CompileAsManaged>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>false</ExceptionHandling>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <EnableModules>false</EnableModules>
+      <AssemblerOutput>All</AssemblerOutput>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <BrowseInformation>false</BrowseInformation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <DisableSpecificWarnings>4577;4514;4774;4201;4199;4710;4100;4668;4365;4820;4309;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_HAS_EXCEPTIONS=0;_CRT_SECURE_NO_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;GLM_FORCE_LEFT_HANDED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-march=skylake -msse4.2 -mno-avx -mno-avx2 /Zc:dllexportInlines- %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)obj\</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <PerUserRedirection>true</PerUserRedirection>
+      <GenerateMapFile>false</GenerateMapFile>
+      <MapExports>false</MapExports>
+      <SubSystem>Console</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <SetChecksum>true</SetChecksum>
+      <FixedBaseAddress>false</FixedBaseAddress>
+      <AdditionalDependencies>TauEngine.lib;opengl32.lib;GLEW.lib;d3d9.lib;d3d10.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;TauUtils.lib;ResourceLib.lib;freetype.lib;openvr_api.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AssemblyDebug>false</AssemblyDebug>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Profile>true</Profile>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <BuildLog>
+      <Path>$(IntDir)log\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+    <PostBuildEvent>
+      <Command>fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Text\TextVertexShader.hlsl /Fo $(ProjectDir)resources\shader\Text\TextVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Text\TextPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\Text\TextPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SkyboxVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SkyboxVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\SkyboxPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\SkyboxPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\SimpleVertexShader.hlsl /Fo $(ProjectDir)resources\shader\SimpleVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\nanosuit\NanosuitPixel.hlsl  /Fo $(ProjectDir)resources\nanosuit\NanosuitPixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\FrameBufferVertexShader.hlsl /Fo $(ProjectDir)resources\shader\FrameBufferVertexShader.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBufferPixelShader.hlsl  /Fo $(ProjectDir)resources\shader\FrameBufferPixelShader.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\Vertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\Vertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\Pixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\Deferred\FBVertex.hlsl /Fo $(ProjectDir)resources\shader\Deferred\FBVertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\Deferred\FBPixel.hlsl  /Fo $(ProjectDir)resources\shader\Deferred\FBPixel.cso
+fxc /nologo /T vs_4_0 /E vsMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Vertex.hlsl /Fo $(ProjectDir)resources\shader\FrameBuffer\Vertex.cso
+fxc /nologo /T ps_4_0 /E psMain /O3 $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.hlsl  /Fo $(ProjectDir)resources\shader\FrameBuffer\Saturation\Pixel.cso</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>

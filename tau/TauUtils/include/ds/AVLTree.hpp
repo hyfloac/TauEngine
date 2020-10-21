@@ -138,43 +138,49 @@ public:
     [[nodiscard]] const Node* getClosestMatchBelow(const _SearchT& search) const noexcept
     { return findClosestMatchBelow(_root, search); }
 
-    void insert(const _T& value) noexcept
+    Node* insert(const _T& value) noexcept
     {
         if(!_root)
         {
             _root = _allocator.allocateT<Node>(nullptr, nullptr, 0, value);
+            return _root;
         }
         else
         {
             Node* newNode = _allocator.allocateT<Node>(nullptr, nullptr, 0, value);
             _root = insert(_root, newNode, _allocator);
+            return newNode;
         }
     }
 
-    void insert(const _T&& value) noexcept
+    Node* insert(_T&& value) noexcept
     {
         if(!_root)
         {
             _root = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_move(value));
+            return _root;
         }
         else
         {
             Node* newNode = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_move(value));
             _root = insert(_root, newNode, _allocator);
+            return newNode;
         }
     }
     
     template<typename... _Args>
-    void emplace(_Args&&... args) noexcept
+    Node* emplace(_Args&&... args) noexcept
     {
         if(!_root)
         {
             _root = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_forward<_Args>(args)...);
+            return _root;
         }
         else
         {
             Node* newNode = _allocator.allocateT<Node>(nullptr, nullptr, 0, _TauAllocatorUtils::_forward<_Args>(args)...);
             _root = insert(_root, newNode, _allocator);
+            return newNode;
         }
     }
 
@@ -190,19 +196,19 @@ public:
 
     template<typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
     void iterate(const _F& func) noexcept
-    { iterate<_IteratorMethod>(_root, func); }
+    { Iterate<Node, _F, _IteratorMethod>(_root, func); }
 
     template<typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
     void iterate(const _F& func) const noexcept
-    { Iterate<_IteratorMethod>(_root, func); }
+    { Iterate<Node, _F, _IteratorMethod>(_root, func); }
 
     template<typename _C, typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
     void iterate(_C* instance, const _F& func) noexcept
-    { Iterate<_IteratorMethod>(_root, instance, func); }
+    { Iterate<Node, _C, _F, _IteratorMethod>(_root, instance, func); }
 
     template<typename _C, typename _F, IteratorMethod _IteratorMethod = IteratorMethod::TopDownLR>
     void iterate(_C* instance, const _F& func) const noexcept
-    { Iterate<_IteratorMethod>(_root, instance, func); }
+    { Iterate<Node, _C, _F, _IteratorMethod>(_root, instance, func); }
 private:
     template<typename _NodeT, typename _SearchT>
     [[nodiscard]] static _NodeT* find(_NodeT* const tree, const _SearchT& search) noexcept
@@ -555,25 +561,25 @@ private:
         if constexpr(_IteratorMethod == IteratorMethod::TopDownLR)
         {
             func(tree);
-            iterate(tree->left, func);
-            iterate(tree->right, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->left, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->right, func);
         }
         else if constexpr(_IteratorMethod == IteratorMethod::TopDownRL)
         {
             func(tree);
-            iterate(tree->right, func);
-            iterate(tree->left, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->right, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->left, func);
         }
         else if constexpr(_IteratorMethod == IteratorMethod::HighestToLowest)
         {
-            iterate(tree->right, func);
-            iterate(tree->left, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->right, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->left, func);
             func(tree);
         }
         else if constexpr(_IteratorMethod == IteratorMethod::LowestToHighest)
         {
-            iterate(tree->left, func);
-            iterate(tree->right, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->left, func);
+            Iterate<_Node, _F, _IteratorMethod>(tree->right, func);
             func(tree);
         }
     }
@@ -586,27 +592,27 @@ private:
 
         if constexpr(_IteratorMethod == IteratorMethod::TopDownLR)
         {
-        (instance->*func)(tree);
-            iterate(tree->left, func);
-            iterate(tree->right, func);
+            (instance->*func)(tree);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->left, func);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->right, func);
         }
         else if constexpr(_IteratorMethod == IteratorMethod::TopDownRL)
         {
-        (instance->*func)(tree);
-            iterate(tree->right, func);
-            iterate(tree->left, func);
+            (instance->*func)(tree);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->right, func);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->left, func);
         }
         else if constexpr(_IteratorMethod == IteratorMethod::HighestToLowest)
         {
-            iterate(tree->right, func);
-            iterate(tree->left, func);
-        (instance->*func)(tree);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->right, func);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->left, func);
+            (instance->*func)(tree);
         }
         else if constexpr(_IteratorMethod == IteratorMethod::LowestToHighest)
         {
-            iterate(tree->left, func);
-            iterate(tree->right, func);
-        (instance->*func)(tree);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->left, func);
+            Iterate<_Node, _C, _F, _IteratorMethod>(tree->right, func);
+            (instance->*func)(tree);
         }
     }
 };

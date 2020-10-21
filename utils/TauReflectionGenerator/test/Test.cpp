@@ -9,7 +9,7 @@ int main()
     std::cout << "Test::date " << test.date() << std::endl;
     std::cout << std::endl;
 
-    int* time = Test::GetStaticClass().getProperty<int>(&test, "_time");
+    int** time = Test::GetStaticClass().getProperty<int*>(&test, "_time");
     long* date = Test::GetStaticClass().getProperty<long>(&test, "_date");
     Vector* vec = test.getClass().getProperty<Vector>(&test, "_vec");
     const Vector* cvec = test.getClass().getProperty<Vector>(const_cast<const Test*>(&test), "_vec");
@@ -21,7 +21,7 @@ int main()
 
     std::cout << std::endl;
 
-    *time = 234;
+    **time = 234;
     std::cout << "Test::time " << test.time() << std::endl;
     std::cout << "Test::date " << test.date() << std::endl;
     std::cout << "Test::vec (" << cvec->x << ", " << cvec->y << ", " << cvec->z << ")" << std::endl;

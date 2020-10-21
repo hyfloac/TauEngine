@@ -10,9 +10,9 @@
 #include <deque>
 #include <vector>
 #include <fstream>
+#include <NumTypes.hpp>
 
-#include "NumTypes.hpp"
-
+#include "FrontendFactoryHelper.hpp"
 
 struct PropertyIndex final
 {
@@ -40,9 +40,6 @@ struct PropertyData final
 };
 
 static void printGeneratedHeader(std::vector<PropertyData>& finalizedProperties);
-
-static std::deque<PropertyIndex>* _g_properties;
-static std::vector<PropertyData>* _g_finalizedProperties;
 
 class FindNamedClassVisitor : public clang::RecursiveASTVisitor<FindNamedClassVisitor>
 {
@@ -112,11 +109,6 @@ private:
     std::deque<PropertyIndex>& _properties;
     std::vector<PropertyData>& _finalizedProperties;
 public:
-    FindNamedClassAction()
-        : _properties(*_g_properties)
-        , _finalizedProperties(*_g_finalizedProperties)
-    { }
-
     FindNamedClassAction(std::deque<PropertyIndex>& properties, std::vector<PropertyData>& finalizedProperties)
         : _properties(properties)
         , _finalizedProperties(finalizedProperties)
@@ -188,10 +180,6 @@ class TestPreprocessorAction : public clang::PreprocessorFrontendAction
 private:
     std::deque<PropertyIndex>& _properties;
 public:
-    TestPreprocessorAction()
-        : _properties(*_g_properties)
-    { }
-
     TestPreprocessorAction(std::deque<PropertyIndex>& properties)
         : _properties(properties)
     { }
@@ -236,14 +224,12 @@ int main(int argCount, const char* args[])
 
     std::deque<PropertyIndex> properties;
     std::vector<PropertyData> finalizedProperties;
-    _g_properties = &properties;
-    _g_finalizedProperties = &finalizedProperties;
 
-    int result = Tool.run(clang::tooling::newFrontendActionFactory<TestPreprocessorAction>().get());
+    int result = Tool.run(clang::helperExt::newFrontendActionFactory<TestPreprocessorAction>(properties).get());
     if(result)
     { return result; }
 
-    result = Tool.run(clang::tooling::newFrontendActionFactory<FindNamedClassAction>().get());
+    result = Tool.run(clang::helperExt::newFrontendActionFactory<FindNamedClassAction>(properties, finalizedProperties).get());
 
     if(finalizedProperties.empty())
     {
@@ -271,7 +257,7 @@ static void printGeneratedHeader(std::vector<PropertyData>& finalizedProperties)
     std::error_code ec;
     llvm::raw_fd_ostream stream(llvm::StringRef(R"(D:\TauEngine\utils\TauReflectionGenerator\test\Test.generated.hpp)"), ec);
     
-    std::string currentClass = finalizedProperties[0].className;
+    const std::string currentClass = finalizedProperties[0].className;
 
     stream << "#pragma once\n";
     stream << "\n";
@@ -291,24 +277,28 @@ static void printGeneratedHeader(std::vector<PropertyData>& finalizedProperties)
     stream << "            ~TauClassImpl() noexcept override = default; \\\n";
     stream << "            \\\n";
     stream << "            template<typename _T> \\\n";
-    stream << "            _T* getProperty(" << currentClass << "* object, const char* name) noexcept \\\n";
-    stream << "            { return reinterpret_cast<_T*>(getProperty(object, name)); } \\\n";
+    stream << "            _T* getProperty(" << currentClass << "* const object, const char* const propName) noexcept \\\n";
+    stream << "            { return reinterpret_cast<_T*>(getProperty(object, propName)); } \\\n";
     stream << "            \\\n";
     stream << "            template<typename _T> \\\n";
-    stream << "            const _T* getProperty(const " << currentClass << "* object, const char* name) noexcept \\\n";
-    stream << "            { return reinterpret_cast<const _T*>(getProperty(object, name)); } \\\n";
-    stream << "       protected: \\\n";
-    stream << "            void* getProperty(void* object, const char* name) noexcept override { return getProperty(reinterpret_cast<" << currentClass << "*>(object), name); } \\\n";
-    stream << "            const void* getProperty(const void* object, const char* name) noexcept override { return getProperty(reinterpret_cast<const " << currentClass << "*>(object), name); } \\\n";
+    stream << "            const _T* getProperty(const " << currentClass << "* const object, const char* propName) noexcept \\\n";
+    stream << "            { return reinterpret_cast<const _T*>(getProperty(object, propName)); } \\\n";
     stream << "            \\\n";
-    stream << "            void* getProperty(" << currentClass << "* object, const char* name) noexcept { \\\n";
+    stream << "            template<typename _T> \\\n";
+    stream << "            void setProperty(" << currentClass << "* const object, const char* propName, const _T& value) noexcept \\\n";
+    stream << "            { setProperty(object, propName, value); } \\\n";
+    stream << "       protected: \\\n";
+    stream << "            void* getProperty(void* const object, const char* const propName) noexcept override { return getProperty(reinterpret_cast<" << currentClass << "*>(object), propName); } \\\n";
+    stream << "            const void* getProperty(const void* const object, const char* const propName) noexcept override { return getProperty(reinterpret_cast<const " << currentClass << "*>(object), propName); } \\\n";
+    stream << "            \\\n";
+    stream << "            void* getProperty(" << currentClass << "* object, const char* propName) noexcept { \\\n";
 
     bool reset = true;
     for(iSys i = 0; i < static_cast<iSys>(finalizedProperties.size()); ++i)
     {
         if(!reset || finalizedProperties[i].index.genSet)
         {
-            stream << "                if(::std::strcmp(name, \"" << finalizedProperties[i].index.varName << "\") == 0) { \\\n";
+            stream << "                if(::std::strcmp(propName, \"" << finalizedProperties[i].index.varName << "\") == 0) { \\\n";
             stream << "                    return &object->" << finalizedProperties[i].index.varName << "; \\\n";
             stream << "                } \\\n";
         }
@@ -319,7 +309,7 @@ static void printGeneratedHeader(std::vector<PropertyData>& finalizedProperties)
             reset = false;
             stream << "                return nullptr; \\\n";
             stream << "            } \\\n";
-            stream << "            const void* getProperty(const " << currentClass << "* object, const char* name) noexcept { \\\n";
+            stream << "            const void* getProperty(const " << currentClass << "* const object, const char* const propName) noexcept { \\\n";
         }
     }
     
