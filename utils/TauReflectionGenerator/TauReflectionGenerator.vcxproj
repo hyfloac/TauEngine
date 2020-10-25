@@ -198,25 +198,28 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Attribute.cpp" />
+    <ClCompile Include="src\HeaderGenerator.cpp" />
     <ClCompile Include="src\attribs\GetAttribute.cpp" />
     <ClCompile Include="src\attribs\SetAttribute.cpp" />
-    <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\Property.cpp" />
-    <ClCompile Include="src\PropertyASTWalker.cpp" />
-    <ClCompile Include="src\PropertyAttribute.cpp" />
-    <ClCompile Include="src\PropertyPreProcessor.cpp" />
+    <ClCompile Include="src\TauReflGenerator.cpp" />
+    <ClCompile Include="src\property\PropertyASTWalker.cpp" />
+    <ClCompile Include="src\TagPreProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Attribute.hpp" />
+    <ClInclude Include="include\class\Class.hpp" />
     <ClInclude Include="include\attribs\GetAttribute.hpp" />
     <ClInclude Include="include\attribs\SetAttribute.hpp" />
     <ClInclude Include="include\FrontendFactoryHelper.hpp" />
-    <ClInclude Include="include\Property.hpp" />
-    <ClInclude Include="include\PropertyASTWalker.hpp" />
-    <ClInclude Include="include\PropertyAttribute.hpp" />
-    <ClInclude Include="include\PropertyPreProcessor.hpp" />
+    <ClInclude Include="include\HeaderGenerator.hpp" />
+    <ClInclude Include="include\property\Property.hpp" />
+    <ClInclude Include="include\property\PropertyASTWalker.hpp" />
+    <ClInclude Include="include\TagPreProcessor.hpp" />
+    <ClInclude Include="include\TagDeclaration.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\PropertyAttribute.inl" />
+    <None Include="include\Attribute.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

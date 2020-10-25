@@ -1,12 +1,13 @@
 #pragma once
 
-#if defined(STRING_IN_DEV)
+#if defined(STRING_IN_DEV) || 1
 #include "String.hpp"
 #endif
 
 #include <cstring>
 #include <cwctype>
 #include <locale>
+#include "TUMaths.hpp"
 
 template<>
 inline char toLower<char>(const char c) noexcept
@@ -123,6 +124,9 @@ inline uSys findHashCode(const _C* str, const uSys len) noexcept
 template<typename _C>
 inline uSys strLength(const _C* const str) noexcept
 {
+    if(!str)
+    { return 0; }
+
     uSys i = 0;
     // ReSharper disable once CppPossiblyErroneousEmptyStatements
     for(; str[i]; ++i);
@@ -346,6 +350,31 @@ inline constexpr bool ConstExprStringT<_C>::equals(const _C(&str)[_Len]) const n
 }
 
 template<typename _C>
+inline bool ConstExprStringT<_C>::equals(const ConstExprStringT<_C>& other) const noexcept
+{
+    if(_string == other._string) { return true; }
+    if(_length != other._length) { return false; }
+    if(_hash != other._hash) { return false; }
+    return strCompare(_string, other.c_str()) == 0;
+}
+
+template<typename _C>
+inline bool ConstExprStringT<_C>::equals(const DynStringT<_C>& other) const noexcept
+{
+    if(_length != other._length || _hash != other._hash)
+    { return false; }
+    return strCompare(_string, other.c_str()) == 0;
+}
+
+template<typename _C>
+inline bool ConstExprStringT<_C>::equals(const DynStringViewT<_C>& other) const noexcept
+{
+    if(_length != other._length || _hash != other._hash)
+    { return false; }
+    return strCompare(_string, other.c_str(), _length) == 0;
+}
+
+template<typename _C>
 inline bool ConstExprStringT<_C>::equals(const _C* const str) const noexcept
 {
     if(_string == str) { return true; }
@@ -353,297 +382,29 @@ inline bool ConstExprStringT<_C>::equals(const _C* const str) const noexcept
 }
 
 template<typename _C>
+inline i32 ConstExprStringT<_C>::compareTo(const ConstExprStringT<_C>& other) const noexcept
+{ return strCompare(_string, other._string()); }
+
+template<typename _C>
+inline i32 ConstExprStringT<_C>::compareTo(const DynStringT<_C>& other) const noexcept
+{ return strCompare(_string, other.c_str()); }
+
+template<typename _C>
+inline i32 ConstExprStringT<_C>::compareTo(const DynStringViewT<_C>& other) const noexcept
+{ return strCompare(_string, other._string, _length); }
+
+template<typename _C>
+inline i32 ConstExprStringT<_C>::compareTo(const _C* const str) const noexcept
+{ return strCompare(_string, str); }
+
+template<typename _C>
 inline _C ConstExprStringT<_C>::operator[](const uSys index) const noexcept
-{ return c_str()[index]; }
+{ return _string[index]; }
 
 template<typename _C>
 inline _C ConstExprStringT<_C>::at(const uSys index) const noexcept
 {
-    if(index >= _length) { return '\0'; }
-    return c_str()[index];
-}
-
-template<typename _C>
-inline StringT<_C>::StringT(const NotNull<const _C>& string) noexcept
-    : _string(string)
-    , _length(strLength(string))
-    , _hash(findHashCode(string()))
-{ }
-
-template<typename _C>
-inline StringT<_C>::StringT(const _C* const string) noexcept
-    : _string(string)
-    , _length(strLength(string))
-    , _hash(findHashCode(string))
-{ Ensure(string != null); }
-
-template<typename _C>
-template<uSys _Len>
-inline constexpr StringT<_C>::StringT(const _C(&str)[_Len]) noexcept
-    : _string(str)
-    , _length(_Len - 1)
-    , _hash(cexpr::findHashCode(str))
-{ }
-
-template<typename _C>
-inline StringT<_C>& StringT<_C>::operator=(const _C* const str) noexcept
-{
-    if(!str)
-    { return *this; }
-
-    _string = str;
-    _length = strLength(str);
-    _hash = findHashCode(str);
-
-    return *this;
-}
-
-template<typename _C>
-inline StringT<_C>& StringT<_C>::operator=(const NotNull<const _C>& str) noexcept
-{
-    _string = str;
-    _length = strLength(str);
-    _hash = findHashCode(str());
-
-    return *this;
-}
-
-template<typename _C>
-template<uSys _Len>
-inline constexpr StringT<_C>& StringT<_C>::operator=(const _C(&str)[_Len]) noexcept
-{
-    _string = str;
-    _length = _Len - 1;
-    _hash = cexpr::findHashCode(str);
-
-    return *this;
-}
-
-template<typename _C>
-inline bool StringT<_C>::equals(const StringT<_C>& other) const noexcept
-{
-    if(this == &other || _string == other._string) { return true; }
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringT<_C>::equals(const StringViewT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringT<_C>::equals(const DynStringT<_C>& other) const noexcept
-{
-    if(_string == other.c_str()) { return true; }
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other.c_str()) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringT<_C>::equals(const DynStringViewT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringT<_C>::equals(const _C* const str) const noexcept
-{
-    if(_string == str) 
-    { return true; }
-    return strCompare(_string, str) == 0;
-}
-
-template<typename _C>
-inline i32 StringT<_C>::compareTo(const StringT<_C>& other) const noexcept
-{
-    if(this == &other || _string == other._string) { return 0; }
-    return strCompare(_string, other._string);
-}
-
-template<typename _C>
-inline i32 StringT<_C>::compareTo(const StringViewT<_C>& other) const noexcept
-{
-    return strCompare(_string, other._string, minT(_length, other._length));
-}
-
-template<typename _C>
-inline i32 StringT<_C>::compareTo(const DynStringT<_C>& other) const noexcept
-{
-    if(_string == other.c_str()) { return 0; }
-    return strCompare(_string, other.c_str());
-}
-
-template<typename _C>
-inline i32 StringT<_C>::compareTo(const DynStringViewT<_C>& other) const noexcept
-{
-    return strCompare(_string, other._string, other._length);
-}
-
-template<typename _C>
-inline i32 StringT<_C>::compareTo(const _C* const str) const noexcept
-{
-    if(_string == str) { return 0; }
-    return strCompare(_string, str);
-}
-
-template<typename _C>
-inline _C StringT<_C>::operator[](const uSys index) const noexcept
-{ return _string[index]; }
-
-template<typename _C>
-inline _C StringT<_C>::at(const uSys index) const noexcept
-{
-    if(index >= _length) { return '\0'; }
-    return _string[index];
-}
-
-template<typename _C>
-inline StringViewT<_C>::StringViewT(const uSys begin, const uSys length, const StringT<_C>& str) noexcept
-    : _string(str._string + begin)
-    , _length(length)
-    , _hash(findHashCode(_string, length))
-{ }
-
-template<typename _C>
-inline StringViewT<_C>::StringViewT(const StringT<_C>& str, const uSys begin, const uSys end) noexcept
-    : _string(str._string + begin)
-    , _length(end - begin)
-    , _hash(findHashCode(_string, _length))
-{ }
-
-template<typename _C>
-inline StringViewT<_C> StringViewT<_C>::create(const StringT<_C>& str, const uSys begin, const uSys length) noexcept
-{ return StringViewT(begin, length, str); }
-
-template<typename _C>
-inline StringViewT<_C>& StringViewT<_C>::reset(const StringT<_C>& str, const uSys begin, const uSys end) noexcept
-{
-    if(end > str._length)
-    { return *this; }
-
-    _string = str._string + begin;
-    _length = end - begin;
-    _hash = findHashCode(_string, _length);
-
-    return *this;
-}
-
-template<typename _C>
-inline StringViewT<_C>& StringViewT<_C>::resetLen(const StringT<_C>& str, const uSys begin, const uSys length) noexcept
-{
-    if(begin + length > str._length)
-    { return *this; }
-
-    _string = str._string + begin;
-    _length = length;
-    _hash = findHashCode(_string, _length);
-
-    return *this;
-}
-
-template<typename _C>
-inline bool StringViewT<_C>::equals(const StringT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string, _length) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringViewT<_C>::equals(const StringViewT<_C>& other) const noexcept
-{
-    if(this == &other) { return true; }
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string, _length) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringViewT<_C>::equals(const DynStringT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other.c_str(), _length) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringViewT<_C>::equals(const DynStringViewT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string, minT(_length, other._length)) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool StringViewT<_C>::equals(const _C* str) const noexcept
-{
-    return strCompare(_string, str, _length) == 0;
-}
-
-template<typename _C>
-inline i32 StringViewT<_C>::compareTo(const StringT<_C>& other) const noexcept
-{
-    return strCompare(_string, other._string, minT(_length, other._length));
-}
-
-template<typename _C>
-inline i32 StringViewT<_C>::compareTo(const StringViewT<_C>& other) const noexcept
-{
-    if(this == &other) { return 0; }
-    return strCompare(_string, other._string, minT(_length, other._length));
-}
-
-template<typename _C>
-inline i32 StringViewT<_C>::compareTo(const DynStringT<_C>& other) const noexcept
-{
-    return strCompare(_string, other.c_str(), other._length);
-}
-
-template<typename _C>
-inline i32 StringViewT<_C>::compareTo(const DynStringViewT<_C>& other) const noexcept
-{
-    return strCompare(_string, other._string, minT(_length, other._length));
-}
-
-template<typename _C>
-inline i32 StringViewT<_C>::compareTo(const _C* const str) const noexcept
-{
-    return strCompare(_string, str, _length);
-}
-
-template<typename _C>
-inline _C StringViewT<_C>::operator [](const uSys index) const noexcept
-{ return _string[index]; }
-
-template<typename _C>
-inline _C StringViewT<_C>::at(const uSys index) const noexcept
-{
-    if(index >= _length)
-    { return '\0'; }
+    if(index >= _length) { return _C{ '\0' }; }
     return _string[index];
 }
 
@@ -693,34 +454,11 @@ inline DynStringT<_C>::DynStringT() noexcept
 { }
 
 template<typename _C>
-inline DynStringT<_C>::DynStringT(const NotNull<const _C>& string) noexcept
-    : _largeString { null, null }
-    , _length(strLength(string))
-    , _hash(findHashCode(string()))
-{
-    if(_length >= 16)
-    {
-        void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
-
-        _largeString.refCount = new(placement) uSys(1);
-        _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
-
-        ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-        _largeString.string = str;
-    }
-    else
-    {
-        ::std::memcpy(_stackString, string, (_length + 1) * sizeof(_C));
-    }
-}
-
-template<typename _C>
 inline DynStringT<_C>::DynStringT(const _C* const string) noexcept
     : _largeString { null, null }
     , _length(strLength(string))
     , _hash(findHashCode(string))
 {
-    Ensure(string != null);
     if(_length >= 16)
     {
         void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
@@ -860,75 +598,6 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(DynStringT<_C>&& move) noexcept
 }
 
 template<typename _C>
-inline DynStringT<_C>& DynStringT<_C>::operator=(const NotNull<const _C>& string) noexcept
-{
-    /**
-     * _largeString.string and _stackString store the same address.
-     */
-    if(string == _largeString.string)
-    { return *this; }
-
-    const uSys length = strLength(string);
-
-    if(_length >= 16 && length >= 16 && *_largeString.refCount == 1)
-    {
-        _length = length;
-
-        // Was this allocated as a single block.
-        if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
-        {
-            delete[] _largeString.string;
-
-            _C* const str = new(::std::nothrow) _C[_length + 1];
-            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-            _largeString.string = str;
-        }
-        else
-        {
-            delete _largeString.refCount;
-
-            void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
-
-            _largeString.refCount = new(placement) uSys(1);
-            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
-
-            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-            _largeString.string = str;
-        }
-    }
-    else
-    {
-        if(_length >= 16 && --(*_largeString.refCount) == 0)
-        {
-            delete _largeString.refCount;
-            // Was this allocated as a single block.
-            if(static_cast<iPtr>(_largeString.refCount) != reinterpret_cast<iPtr>(_largeString.string) - sizeof(uSys))
-            {
-                delete[] _largeString.string;
-            }
-        }
-
-        _length = length;
-        if(_length >= 16)
-        {
-            void* const placement = new(::std::nothrow) u8[sizeof(uSys) + (_length + 1) * sizeof(_C)];
-
-            _largeString.refCount = new(placement) uSys(1);
-            _C* const str = new(placement + sizeof(uSys)) _C[_length + 1];
-
-            ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-            _largeString.string = str;
-        }
-        else
-        {
-            ::std::memcpy(_stackString, string, (_length + 1) * sizeof(_C));
-        }
-    }
-
-    return *this;
-}
-
-template<typename _C>
 inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcept
 {
     if(!string)
@@ -1005,32 +674,11 @@ inline DynStringT<_C>& DynStringT<_C>::operator=(const _C* const string) noexcep
 }
 
 template<typename _C>
-inline bool DynStringT<_C>::equals(const StringT<_C>& other) const noexcept
+inline bool DynStringT<_C>::equals(const ConstExprStringT<_C>& other) const noexcept
 {
-    if(_length == other._length && _hash == other._hash)
-    {
-        if(_length >= 16)
-        {
-            if(_largeString.string == other._string) 
-            { return true; }
-            return strCompare(_largeString.string, other._string) == 0;
-        }
-        else
-        {
-            return strCompare(_stackString, other._string) == 0;
-        }
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool DynStringT<_C>::equals(const StringViewT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(c_str(), other._string, other._length) == 0;
-    }
-    return false;
+    if(_length != other._length ) { return false; }
+    if(_hash != other._hash) { return false; }
+    return strCompare(c_str(), other._string) == 0;
 }
 
 template<typename _C>
@@ -1058,11 +706,9 @@ inline bool DynStringT<_C>::equals(const DynStringT<_C>& other) const noexcept
 template<typename _C>
 inline bool DynStringT<_C>::equals(const DynStringViewT<_C>& other) const noexcept
 {
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(c_str(), other._string, other._length) == 0;
-    }
-    return false;
+    if(_length != other._length ) { return false; }
+    if(_hash != other._hash) { return false; }
+    return strCompare(c_str(), other._string, _length) == 0;
 }
 
 template<typename _C>
@@ -1070,12 +716,8 @@ inline bool DynStringT<_C>::equals(const _C* const str) const noexcept
 { return strCompare(c_str(), str) == 0; }
 
 template<typename _C>
-inline i32 DynStringT<_C>::compareTo(const StringT<_C>& other) const noexcept
-{ return strCompare(c_str(), other._string); }
-
-template<typename _C>
-inline i32 DynStringT<_C>::compareTo(const StringViewT<_C>& other) const noexcept
-{ return strCompare(c_str(), other._string, other._length); }
+inline i32 DynStringT<_C>::compareTo(const ConstExprStringT<_C>& other) const noexcept
+{ return strCompare(c_str(), other._string()); }
 
 template<typename _C>
 inline i32 DynStringT<_C>::compareTo(const DynStringT<_C>& other) const noexcept
@@ -1083,41 +725,27 @@ inline i32 DynStringT<_C>::compareTo(const DynStringT<_C>& other) const noexcept
 
 template<typename _C>
 inline i32 DynStringT<_C>::compareTo(const DynStringViewT<_C>& other) const noexcept
-{ return strCompare(c_str(), other._string, other._length); }
+{ return strCompare(c_str(), other._string, _length); }
 
 template<typename _C>
 inline i32 DynStringT<_C>::compareTo(const _C* const str) const noexcept
 { return strCompare(c_str(), str); }
 
 template<typename _C>
-inline DynStringT<_C> DynStringT<_C>::concat(const StringT<_C>& other) const noexcept
-{ return _concat(other._length, other._string); }
-
-template<typename _C>
-inline DynStringT<_C> DynStringT<_C>::concat(const StringViewT<_C>& other) const noexcept
+inline DynStringT<_C> DynStringT<_C>::concat(const ConstExprStringT<_C>& other) const noexcept
 { return _concat(other._length, other._string); }
 
 template<typename _C>
 inline DynStringT<_C> DynStringT<_C>::concat(const DynStringT<_C>& other) const noexcept
-{ return _concat(other._length, other._length >= 16 ? other._largeString.string : other._stackString); }
+{ return _concat(other._length, other.c_str()); }
 
 template<typename _C>
 inline DynStringT<_C> DynStringT<_C>::concat(const DynStringViewT<_C>& other) const noexcept
 { return _concat(other._length, other._string); }
 
 template<typename _C>
-inline DynStringT<_C> DynStringT<_C>::concat(const NotNull<const _C>& other) const noexcept
-{
-    const uSys otherLen = strLength(other);
-    return _concat(otherLen, other);
-}
-
-template<typename _C>
 inline DynStringT<_C> DynStringT<_C>::concat(const _C* const other) const noexcept
-{
-    const uSys otherLen = strLength(other);
-    return _concat(otherLen, other);
-}
+{ return _concat(strLength(other), other); }
 
 template<typename _C>
 inline DynStringT<_C> DynStringT<_C>::_concat(const uSys len, const _C* const str) const noexcept
@@ -1127,9 +755,9 @@ inline DynStringT<_C> DynStringT<_C>::_concat(const uSys len, const _C* const st
     {
         _C* const newStr = new(::std::nothrow) _C[newLen + 1];
         newStr[newLen] = '\0';
-        ::std::memcpy(newStr, _length >= 16 ? _largeString.string : _stackString, _length * sizeof(_C));
+        ::std::memcpy(newStr, c_str(), _length * sizeof(_C));
         ::std::memcpy(newStr + _length, str, len * sizeof(_C));
-        return DynStringT(newStr, newLen);
+        return DynStringT<_C>(newStr, newLen);
     }
     else
     {
@@ -1147,7 +775,7 @@ inline DynStringT<_C> DynStringT<_C>::subString(const uSys begin, const uSys end
 {
     if(begin >= end || end > _length)
     {
-        return DynStringT("");
+        return DynStringT<_C>("");
     }
 
     const uSys length = end - begin;
@@ -1157,10 +785,10 @@ inline DynStringT<_C> DynStringT<_C>::subString(const uSys begin, const uSys end
         _C* const sub = new(::std::nothrow) _C[length + 1];
         sub[length] = '\0';
         ::std::memcpy(sub, c_str() + begin, length * sizeof(_C));
-        return DynStringT(sub, length);
+        return DynStringT<_C>(sub, length);
     }
 
-    return DynStringT(length, c_str() + begin);
+    return DynStringT<_C>(length, c_str() + begin);
 }
 
 template<typename _C>
@@ -1168,7 +796,7 @@ inline DynStringT<_C> DynStringT<_C>::subStringLen(const uSys begin, const uSys 
 {
     if(begin + length > _length)
     {
-        return DynStringT("");
+        return DynStringT<_C>("");
     }
 
     if(length >= 16)
@@ -1176,10 +804,10 @@ inline DynStringT<_C> DynStringT<_C>::subStringLen(const uSys begin, const uSys 
         _C* const sub = new(::std::nothrow) _C[length + 1];
         sub[length] = '\0';
         ::std::memcpy(sub, c_str() + begin, length * sizeof(_C));
-        return DynStringT(sub, length);
+        return DynStringT<_C>(sub, length);
     }
 
-    return DynStringT(length, c_str() + begin);
+    return DynStringT<_C>(length, c_str() + begin);
 }
 
 template<typename _C>
@@ -1187,7 +815,7 @@ inline DynStringT<_C> DynStringT<_C>::subString(const uSys from) const noexcept
 {
     if(from > _length)
     {
-        return DynStringT("");
+        return DynStringT<_C>("");
     }
 
     const uSys length = _length - from;
@@ -1197,10 +825,10 @@ inline DynStringT<_C> DynStringT<_C>::subString(const uSys from) const noexcept
         _C* const sub = new(::std::nothrow) _C[length + 1];
         sub[length] = '\0';
         ::std::memcpy(sub, c_str() + from, length * sizeof(_C));
-        return DynStringT(sub, length);
+        return DynStringT<_C>(sub, length);
     }
 
-    return DynStringT(length, c_str() + from);
+    return DynStringT<_C>(length, c_str() + from);
 }
 
 template<typename _C>
@@ -1422,31 +1050,11 @@ inline DynStringViewT<_C>& DynStringViewT<_C>::resetLen(const DynStringT<_C>& st
 }
 
 template<typename _C>
-inline bool DynStringViewT<_C>::equals(const StringT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string, _length) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
-inline bool DynStringViewT<_C>::equals(const StringViewT<_C>& other) const noexcept
-{
-    if(_length == other._length && _hash == other._hash)
-    {
-        return strCompare(_string, other._string, _length) == 0;
-    }
-    return false;
-}
-
-template<typename _C>
 inline bool DynStringViewT<_C>::equals(const DynStringT<_C>& other) const noexcept
 {
     if(_length == other._length && _hash == other._hash)
     {
-        return strCompare(_string, other.c_str(), _length) == 0;
+        return strCompare(_string, other.c_str()) == 0;
     }
     return false;
 }
@@ -1469,18 +1077,6 @@ inline bool DynStringViewT<_C>::equals(const _C* str) const noexcept
 }
 
 template<typename _C>
-inline i32 DynStringViewT<_C>::compareTo(const StringViewT<_C>& other) const noexcept
-{
-    return strCompare(_string, other._string, minT(_length, other._length));
-}
-
-template<typename _C>
-inline i32 DynStringViewT<_C>::compareTo(const StringT<_C>& other) const noexcept
-{
-    return strCompare(_string, other._string, minT(_length, other._length));
-}
-
-template<typename _C>
 inline i32 DynStringViewT<_C>::compareTo(const DynStringViewT<_C>& other) const noexcept
 {
     if(this == &other) { return 0; }
@@ -1500,27 +1096,12 @@ inline i32 DynStringViewT<_C>::compareTo(const _C* str) const noexcept
 }
 
 template<typename _C>
-inline DynStringT<_C> DynStringViewT<_C>::concat(const StringT<_C>& other) const noexcept
-{ return _concat(other._length, other._string); }
-
-template<typename _C>
-inline DynStringT<_C> DynStringViewT<_C>::concat(const StringViewT<_C>& other) const noexcept
-{ return _concat(other._length, other._string); }
-
-template<typename _C>
 inline DynStringT<_C> DynStringViewT<_C>::concat(const DynStringT<_C>& other) const noexcept
 { return _concat(other._length, other._length >= 16 ? other._largeString.string : other._stackString); }
 
 template<typename _C>
 inline DynStringT<_C> DynStringViewT<_C>::concat(const DynStringViewT<_C>& other) const noexcept
 { return _concat(other._length, other._string); }
-
-template<typename _C>
-inline DynStringT<_C> DynStringViewT<_C>::concat(const NotNull<const _C>& other) const noexcept
-{
-    const uSys otherLen = strlen(other);
-    return _concat(otherLen, other);
-}
 
 template<typename _C>
 inline DynStringT<_C> DynStringViewT<_C>::concat(const _C* const other) const noexcept
@@ -1627,21 +1208,10 @@ inline StringBuilderT<_C>::StringBuilderT() noexcept
 
 template<typename _C>
 inline StringBuilderT<_C>::StringBuilderT(const uSys initialSize) noexcept
-    : _string(new(::std::nothrow) _C[initialSize])
+    : _string(new(::std::nothrow) _C[maxT(initialSize, 1)])
     , _length(0)
-    , _size(initialSize)
-{ Ensure(initialSize != 0); }
-
-template<typename _C>
-inline StringBuilderT<_C>::StringBuilderT(const NotNull<const _C>& string) noexcept
-    : _string(null)
-    , _length(strLength(string()))
-    , _size(_length + 64)
-{
-    _C* str = new(::std::nothrow) _C[_size];
-    ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
-    _string = str;
-}
+    , _size(maxT(initialSize, 1))
+{ }
 
 template<typename _C>
 inline StringBuilderT<_C>::StringBuilderT(const _C* const string) noexcept
@@ -1649,9 +1219,11 @@ inline StringBuilderT<_C>::StringBuilderT(const _C* const string) noexcept
     , _length(strLength(string))
     , _size(_length + 64)
 {
-    Ensure(string != null);
-    _C* str = new(::std::nothrow) _C[_size];
-    ::std::memcpy(str, string, (_length + 1) * sizeof(_C));
+    _C* const str = new(::std::nothrow) _C[_size];
+
+    if(string)
+    { ::std::memcpy(str, string, (_length + 1) * sizeof(_C)); }
+
     _string = str;
 }
 
@@ -1710,10 +1282,10 @@ inline StringBuilderT<_C>& StringBuilderT<_C>::operator=(StringBuilderT<_C>&& mo
 template<typename _C>
 inline bool StringBuilderT<_C>::equals(const StringBuilderT<_C>& other) const noexcept
 {
-    if(this == &other || _string == other._string) { return true; }
-    if(this->_length == other._length)
+    if(_string == other._string) { return true; }
+    if(_length == other._length)
     {
-        return strCompare(this->_string, other._string) == 0;
+        return strCompare(_string, other._string) == 0;
     }
     return false;
 }
@@ -1721,19 +1293,12 @@ inline bool StringBuilderT<_C>::equals(const StringBuilderT<_C>& other) const no
 template<typename _C>
 inline i32 StringBuilderT<_C>::compareTo(const StringBuilderT<_C>& other) const noexcept
 {
-    if(this == &other || _string == other._string) { return 0; }
-    return strCompare(this->_string, other._string);
+    if(_string == other._string) { return 0; }
+    return strCompare(_string, other._string);
 }
 
 template<typename _C>
-inline StringBuilderT<_C>& StringBuilderT<_C>::append(const StringT<_C>& string) noexcept
-{
-    append(string._string, string._length);
-    return *this;
-}
-
-template<typename _C>
-inline StringBuilderT<_C>& StringBuilderT<_C>::append(const StringViewT<_C>& string) noexcept
+inline StringBuilderT<_C>& StringBuilderT<_C>::append(const ConstExprStringT<_C>& string) noexcept
 {
     append(string._string, string._length);
     return *this;
@@ -1761,13 +1326,6 @@ inline StringBuilderT<_C>& StringBuilderT<_C>::append(const StringBuilderT<_C>& 
 }
 
 template<typename _C>
-inline StringBuilderT<_C>& StringBuilderT<_C>::append(const NotNull<const _C>& string) noexcept
-{
-    append(string, strLength(string));
-    return *this;
-}
-
-template<typename _C>
 inline StringBuilderT<_C>& StringBuilderT<_C>::append(const _C* const string) noexcept
 {
     append(string, strLength(string));
@@ -1777,7 +1335,7 @@ inline StringBuilderT<_C>& StringBuilderT<_C>::append(const _C* const string) no
 template<typename _C>
 inline StringBuilderT<_C>& StringBuilderT<_C>::append(const _C c) noexcept
 {
-    _C string[2] = { c, L'\0' };
+    _C string[2] = { c,_C{ '\0' } };
     append(string, 1);
     return *this;
 }
@@ -1931,20 +1489,6 @@ template<typename _C>
 struct hash<ConstExprStringT<_C>>
 {
     inline uSys operator()(const ConstExprStringT<_C>& str) const noexcept
-    { return str.hashCode(); }
-};
-
-template<typename _C>
-struct hash<StringT<_C>>
-{
-    inline uSys operator()(const StringT<_C>& str) const noexcept
-    { return str.hashCode(); }
-};
-
-template<typename _C>
-struct hash<StringViewT<_C>>
-{
-    inline uSys operator()(const StringViewT<_C>& str) const noexcept
     { return str.hashCode(); }
 };
 

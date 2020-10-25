@@ -6,7 +6,6 @@
 #pragma warning(pop)
 
 #include <NumTypes.hpp>
-#include <Utils.hpp>
 #include <ReferenceCountingPointer.hpp>
 
 #define ____str(__X) #__X
@@ -37,8 +36,12 @@
   #define Ensure(__STATE)
 #endif
 
+#ifndef TAU_NO_NULLABILITY
+
 #define NonNull  /* Guaranteed to not be null. */
 #define Nullable /* Potentially could be null. */
+
+#endif
 
 /**
  *   A wrapper to print an error and trigger a breakpoint if

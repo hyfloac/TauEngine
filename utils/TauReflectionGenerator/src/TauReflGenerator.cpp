@@ -2,65 +2,70 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Frontend/CompilerInstance.h>
 
-#include "PropertyASTWalker.hpp"
-#include "PropertyPreProcessor.hpp"
+#include "property/PropertyASTWalker.hpp"
+#include "class/Class.hpp"
+#include "TagPreProcessor.hpp"
 #include "attribs/GetAttribute.hpp"
 #include "attribs/SetAttribute.hpp"
 #include "FrontendFactoryHelper.hpp"
+#include "HeaderGenerator.hpp"
 
 static void printGeneratedHeader(tau::PropertyList& properties) noexcept;
 
 int main(int argCount, const char* args[])
 {
     llvm::cl::OptionCategory category("tau-refl-gen cat");
+    
+    tau::AttributeManager::registerAttribute<tau::attribs::GetPropertyAttribute>("get");
+    tau::AttributeManager::registerAttribute<tau::attribs::SetPropertyAttribute>("set");
+
+    {
+        tau::BaseGenerator baseGen(R"(D:\TauEngine\utils\TauReflectionGenerator\test\Base.hpp)");
+        baseGen.generate();
+    }
 
     {
         std::error_code ec;
         llvm::raw_fd_ostream stream(llvm::StringRef(R"(D:\TauEngine\utils\TauReflectionGenerator\test\Test.generated.hpp)"), ec);
         stream << "#pragma once \n";
         stream << "#include \"Base.hpp\" \n";
-        stream << "#ifdef GENERATED_BODY \n";
-        stream << "  #undef GENERATED_BODY \n";
+        stream << "#ifdef TAU_GENERATED_BODY \n";
+        stream << "  #undef TAU_GENERATED_BODY \n";
         stream << "#endif \n";
-        stream << "#define GENERATED_BODY()\n";
+        stream << "#define TAU_GENERATED_BODY(_CLASS)\n";
     }
 
     clang::tooling::CommonOptionsParser op(argCount, args, category);
     clang::tooling::ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-    llvm::outs() << "\n\n";
+    tau::TagDeclQueue classTags;
+    tau::TagDeclQueue propertyTags;
+    tau::ClassList classes;
 
-    tau::PropertyAttributeManager::registerAttribute<tau::attribs::GetPropertyAttribute>("get");
-    tau::PropertyAttributeManager::registerAttribute<tau::attribs::SetPropertyAttribute>("set");
-
-    tau::PropertyDeclQueue propertyTags;
-    tau::PropertyList properties;
-
-    int result = Tool.run(::clang::helperExt::newFrontendActionFactory<::tau::PropertyPreProcessorAction>(propertyTags).get());
+    int result = Tool.run(::clang::helperExt::newFrontendActionFactory<::tau::TagPreProcessorAction>(classTags, propertyTags).get());
     if(result)
     { return result; }
 
-    result = Tool.run(::clang::helperExt::newFrontendActionFactory<::tau::PropertyASTWalkerAction>(propertyTags, properties).get());
+    result = Tool.run(::clang::helperExt::newFrontendActionFactory<::tau::PropertyASTWalkerAction>(classTags, propertyTags, classes).get());
     if(result)
     { return result; }
 
-    if(properties.empty())
+    if(classes.empty())
     {
         llvm::outs() << "No properties found\n";
         return 0;
     }
 
-    const DynString& firstClass = properties[0].className();
-    for(uSys i = 1; i < properties.size(); ++i)
     {
-        if(firstClass != properties[i].className())
+        tau::HeaderGenerator headerGen(R"(D:\TauEngine\utils\TauReflectionGenerator\test\Test.generated.hpp)");
+        headerGen.generateBegin();
+        for(const auto& clazz : classes)
         {
-            llvm::errs() << "Multiple classes found in file.\n";
-            return -1;
+            headerGen.generateClassBody(clazz);
         }
     }
 
-    printGeneratedHeader(properties);
+    // printGeneratedHeader(properties);
 
     return result;
 }
@@ -78,7 +83,7 @@ static void printGeneratedHeader(tau::PropertyList& properties) noexcept
     std::error_code ec;
     llvm::raw_fd_ostream stream(llvm::StringRef(R"(D:\TauEngine\utils\TauReflectionGenerator\test\Test.generated.hpp)"), ec);
     
-    const DynString& currentClass = properties[0].className();
+    const DynString& currentClass = properties[0]->parentClass()->name();
 
     stream << "#pragma once\n";
     stream << "\n";
@@ -86,8 +91,8 @@ static void printGeneratedHeader(tau::PropertyList& properties) noexcept
     stream << "\n";
     stream << "#include \"Base.hpp\"\n";
     
-    stream << "#ifdef GENERATED_BODY \n";
-    stream << "  #undef GENERATED_BODY \n";
+    stream << "#ifdef TAU_GENERATED_BODY \n";
+    stream << "  #undef TAU_GENERATED_BODY \n";
     stream << "#endif \n";
     stream << "\n";
     stream << "#define GENERATED_BODY() \\\n";
@@ -118,14 +123,14 @@ static void printGeneratedHeader(tau::PropertyList& properties) noexcept
     GenStage stage = GenStage::Get;
     for(iSys i = 0; i < static_cast<iSys>(properties.size()); ++i)
     {
-        stream << "                if(::std::strcmp(propName, \"" << properties[i].name() << "\") == 0) { \\\n";
-        if(stage == GenStage::GetConst || (stage == GenStage::Get && properties[i].declaration()->hasAttribute("set")))
+        stream << "                if(::std::strcmp(propName, \"" << properties[i]->name() << "\") == 0) { \\\n";
+        if(stage == GenStage::GetConst || (stage == GenStage::Get && properties[i]->declaration()->hasAttribute("set")))
         {
-            stream << "                    return &object->" << properties[i].name() << "; \\\n";
+            stream << "                    return &object->" << properties[i]->name() << "; \\\n";
         }
-        else if(stage == GenStage::Set && properties[i].declaration()->hasAttribute("set"))
+        else if(stage == GenStage::Set && properties[i]->declaration()->hasAttribute("set"))
         {
-            stream << "                    object->" << properties[i].name() << " = *reinterpret_cast<" << properties[i].typeName() << " const *>(value); \\\n";
+            stream << "                    object->" << properties[i]->name() << " = *reinterpret_cast<" << properties[i]->typeName() << " const *>(value); \\\n";
         }
         stream << "                } \\\n";
 

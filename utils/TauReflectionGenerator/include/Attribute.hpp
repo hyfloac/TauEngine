@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include <Objects.hpp>
 #include <String.hpp>
 #include <Safeties.hpp>
@@ -11,38 +12,43 @@ namespace clang {
     class MacroArgs;
 }
 
+namespace llvm {
+    class raw_fd_ostream;
+}
+
 namespace tau {
 
-class IPropertyAttribute;
+class IAttribute;
+class ReflClass;
 
-class PropertyAttributeData final
+class AttributeData final
 {
-    DEFAULT_DESTRUCT(PropertyAttributeData);
-    DEFAULT_CM_PU(PropertyAttributeData);
+    DEFAULT_DESTRUCT(AttributeData);
+    DEFAULT_CM_PU(AttributeData);
 private:
-    IPropertyAttribute* _handler;
+    const IAttribute* _handler;
     void* _data;
     DynString _attribName;
 public:
-    PropertyAttributeData() noexcept
+    AttributeData() noexcept
         : _handler(nullptr)
         , _data(nullptr)
         , _attribName("")
     { }
 
-    PropertyAttributeData(IPropertyAttribute* const handler, void* const data, const DynString& attribName) noexcept
+    AttributeData(const IAttribute* const handler, void* const data, const DynString& attribName) noexcept
         : _handler(handler)
         , _data(data)
         , _attribName(attribName)
     { }
 
-    PropertyAttributeData(IPropertyAttribute* const handler, void* const data, DynString&& attribName) noexcept
+    AttributeData(const IAttribute* const handler, void* const data, DynString&& attribName) noexcept
         : _handler(handler)
         , _data(data)
         , _attribName(::std::move(attribName))
     { }
 
-    [[nodiscard]] IPropertyAttribute* handler() const noexcept { return _handler; }
+    [[nodiscard]] const IAttribute* handler() const noexcept { return _handler; }
     [[nodiscard]] const DynString& attribName() const noexcept { return _attribName; }
 
     template<typename _T>
@@ -52,12 +58,16 @@ public:
     [[nodiscard]] const _T* data() const noexcept { return reinterpret_cast<const _T*>(_data); }
 };
 
-class IPropertyAttribute
+class IAttribute
 {
-    DEFAULT_CONSTRUCT_PO(IPropertyAttribute);
-    DEFAULT_DESTRUCT_VI(IPropertyAttribute);
-    DEFAULT_CM_PO(IPropertyAttribute);
+    DEFAULT_CONSTRUCT_PO(IAttribute);
+    DEFAULT_DESTRUCT_VI(IAttribute);
+    DEFAULT_CM_PO(IAttribute);
 public:
+    [[nodiscard]] virtual bool isForClass() const noexcept { return false; }
+    [[nodiscard]] virtual bool isForProperty() const noexcept { return false; }
+    [[nodiscard]] virtual bool isForFunction() const noexcept { return false; }
+
     /**
      *   The parser should set currentToken to the token directly
      * after the final token it needed to parse. In a simple
@@ -72,21 +82,33 @@ public:
      * @param currentToken
      *      The current argument token.
      */
-    virtual PropertyAttributeData parseAttribute(const DynString& attribName, const clang::MacroArgs* Args, const clang::Token*& currentToken) noexcept = 0;
+    virtual AttributeData parseAttribute(const DynString& attribName, const clang::MacroArgs* Args, const clang::Token*& currentToken) const noexcept = 0;
 
-    virtual void destroyData(PropertyAttributeData& data) noexcept { }
+    virtual void destroyData(AttributeData& data) const noexcept { }
+
+    virtual void generateBaseClass(::llvm::raw_fd_ostream& base) const noexcept { }
+    virtual void generateImplClass(::llvm::raw_fd_ostream& base, const Ref<ReflClass>& clazz) const noexcept { }
 protected:
     static const clang::Token* getNextToken(const clang::Token* currentToken) noexcept;
 };
 
-class PropertyAttributeManager final
+class AttributeManager final
 {
-    DELETE_CONSTRUCT(PropertyAttributeManager);
-    DELETE_DESTRUCT(PropertyAttributeManager);
-    DELETE_CM(PropertyAttributeManager);
+    DELETE_CONSTRUCT(AttributeManager);
+    DELETE_DESTRUCT(AttributeManager);
+    DELETE_CM(AttributeManager);
 public:
-    using AttribHandlerSet = ::std::unordered_map<DynString, Ref<IPropertyAttribute>>;
+    using AttribHandlerSet = ::std::unordered_map<DynString, Ref<IAttribute>>;
     using FBAllocator = FixedBlockAllocator<AllocationTracking::None>;
+
+    struct AttribIterator final
+    {
+        AttribHandlerSet::const_iterator _begin;
+        AttribHandlerSet::const_iterator _end;
+
+        [[nodiscard]] AttribHandlerSet::const_iterator begin() const noexcept { return _begin; }
+        [[nodiscard]] AttribHandlerSet::const_iterator   end() const noexcept { return _end;   }
+    };
 private:
     static AttribHandlerSet _attributeHandlers;
     static FBAllocator _attribTreeAllocator;
@@ -99,11 +121,14 @@ public:
     static void registerAttribute(DynString&& attribName, _Args&&... args) noexcept
     { _attributeHandlers.emplace(::std::move(attribName), Ref<_T>(DefaultTauAllocator::Instance(), ::std::forward<_Args>(args)...)); }
 
-    static Ref<IPropertyAttribute> getAttribute(const DynString& attribName) noexcept;
+    static Ref<IAttribute> getAttribute(const DynString& attribName) noexcept;
+
+    [[nodiscard]] static AttribIterator getAttributes() noexcept
+    { return { _attributeHandlers.begin(), _attributeHandlers.end() }; }
 
     [[nodiscard]] static FBAllocator& getAllocator() noexcept { return _attribTreeAllocator; }
 };
 
 }
 
-#include "PropertyAttribute.inl"
+#include "Attribute.inl"

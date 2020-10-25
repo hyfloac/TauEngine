@@ -43,6 +43,12 @@ typedef double f64;
 typedef ::std::intptr_t  iPtr;
 typedef ::std::uintptr_t uPtr;
 
+constexpr uSys operator "" _uz(const unsigned long long n) noexcept
+{ return n; }
+
+constexpr iSys operator "" _iz(const unsigned long long n) noexcept
+{ return n; }
+
 template<typename _T>
 struct IntMaxMin final
 {

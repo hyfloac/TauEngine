@@ -1,13 +1,18 @@
 #pragma once
 
-#include "PropertyAttribute.hpp"
+#include "Attribute.hpp"
 
 namespace tau { namespace attribs {
 
-class SetPropertyAttribute final : public IPropertyAttribute
+class SetPropertyAttribute final : public IAttribute
 {
 public:
-    PropertyAttributeData parseAttribute(const DynString& attribName, const clang::MacroArgs* Args, const clang::Token*& currentToken) noexcept override;
+    [[nodiscard]] bool isForProperty() const noexcept override { return true; }
+
+    AttributeData parseAttribute(const DynString& attribName, const clang::MacroArgs* Args, const clang::Token*& currentToken) const noexcept override;
+
+    void generateBaseClass(::llvm::raw_fd_ostream& base) const noexcept override;
+    void generateImplClass(::llvm::raw_fd_ostream& base, const Ref<ReflClass>& clazz) const noexcept override;
 };
 
 }}

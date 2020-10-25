@@ -15,25 +15,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Main.cpp">
+    <ClCompile Include="src\property\PropertyASTWalker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PropertyAttribute.cpp">
+    <ClCompile Include="src\HeaderGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Attribute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\attribs\GetAttribute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Property.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PropertyPreProcessor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PropertyASTWalker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\attribs\SetAttribute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TagPreProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TauReflGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,27 +41,36 @@
     <ClInclude Include="include\FrontendFactoryHelper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Property.hpp">
+    <ClInclude Include="include\property\PropertyASTWalker.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\PropertyAttribute.hpp">
+    <ClInclude Include="include\property\Property.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HeaderGenerator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\class\Class.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Attribute.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TagDeclaration.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\attribs\GetAttribute.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\PropertyPreProcessor.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\PropertyASTWalker.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\attribs\SetAttribute.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TagPreProcessor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\PropertyAttribute.inl">
+    <None Include="include\Attribute.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -14,12 +14,11 @@ template<typename... _Args>
 inline _ReferenceCountDataObject<_T>::_ReferenceCountDataObject(TauAllocator& allocator, _Args&&... args) noexcept
     : _refCount(1)
     , _allocator(allocator)
-    , _objRaw { }
-{ (void) new(_objRaw) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
+{ (void) new(this + 1) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
 
 template<typename _T>
 inline _ReferenceCountDataObject<_T>::~_ReferenceCountDataObject() noexcept
-{ reinterpret_cast<_T*>(_objRaw)->~_T(); }
+{ reinterpret_cast<_T*>(this + 1)->~_T(); }
 
 template<typename _T>
 template<typename... _Args>
@@ -27,8 +26,7 @@ inline _SWReferenceCount<_T>::_SWReferenceCount(TauAllocator& allocator, _Args&&
     : _strongRefCount(1)
     , _weakRefCount(0)
     , _allocator(allocator)
-    , _objRaw { }
-{ (void) new(_objRaw) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
+{ (void) new(this + 1) _T(_TauAllocatorUtils::_forward<_Args>(args)...); }
 
 template<typename _ToT, typename _FromT>
 inline const _ReferenceCountDataObject<_ToT>& RCDOCast(const _ReferenceCountDataObject<_FromT>& obj) noexcept
@@ -60,11 +58,26 @@ inline uSys ReferenceCountingPointer<_T>::allocSize() noexcept
 { return sizeof(RCDO<_T>); }
 
 template<typename _T>
-template<typename... _Args>
-inline ReferenceCountingPointer<_T>::ReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept
-    : _rcdo(allocator.allocateT<RCDO<_T>>(allocator, args...))
-    , _tPtr(_rcdo->objPtr())
-{ }
+template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int>>
+ReferenceCountingPointer<_T>::ReferenceCountingPointer(_Allocator& allocator, _Args&&... args) noexcept
+    : _rcdo(nullptr)
+    , _tPtr(nullptr)
+{
+    void* raw = allocator.allocate(sizeof(RCDO<_T>) + sizeof(_T));
+    _rcdo = new(raw) RCDO<_T>(allocator, _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _rcdo->objPtr();
+}
+
+template<typename _T>
+template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int>>
+ReferenceCountingPointer<_T>::ReferenceCountingPointer(_Arg0&& arg0, _Args&&... args) noexcept
+    : _rcdo(nullptr)
+    , _tPtr(nullptr)
+{
+    void* raw = DefaultTauAllocator::Instance().allocate(sizeof(RCDO<_T>) + sizeof(_T));
+    _rcdo = new(raw) RCDO<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Arg0>(arg0), _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _rcdo->objPtr();
+}
 
 template<typename _T>
 template<typename _TT>
@@ -243,11 +256,37 @@ inline uSys StrongReferenceCountingPointer<_T>::allocSize() noexcept
 { return sizeof(SWRC<_T>); }
 
 template<typename _T>
+template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int>>
+StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(_Allocator& allocator, _Args&&... args) noexcept
+    : _swrc(nullptr)
+    , _tPtr(nullptr)
+{
+    void* raw = allocator.allocate(sizeof(SWRC<_T>) + sizeof(_T));
+    _swrc = new(raw) SWRC<_T>(allocator, _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _swrc->objPtr();
+}
+
+template<typename _T>
+template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int>>
+StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(_Arg0&& arg0, _Args&&... args) noexcept
+    : _swrc(nullptr)
+    , _tPtr(nullptr)
+{
+    void* raw = DefaultTauAllocator::Instance().allocate(sizeof(SWRC<_T>) + sizeof(_T));
+    _swrc = new(raw) SWRC<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Arg0>(arg0), _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _swrc->objPtr();
+}
+
+template<typename _T>
 template<typename... _Args>
-inline StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept
-    : _swrc(allocator.allocateT<SWRC<_T>>(allocator, args...))
-    , _tPtr(_swrc->objPtr())
-{ }
+inline StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(_Args&&... args) noexcept
+    : _swrc(nullptr)
+    , _tPtr(nullptr)
+{
+    void* raw = DefaultTauAllocator::Instance().allocate(sizeof(SWRC<_T>) + sizeof(_T));
+    _swrc = new(raw) SWRC<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _swrc->objPtr();
+}
 
 template<typename _T>
 template<typename _TT>

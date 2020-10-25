@@ -25,15 +25,15 @@ struct _ReferenceCountDataObject final
 public:
     uSys _refCount;
     TauAllocator& _allocator;
-    u8 _objRaw[sizeof(_T)];
+    // u8 _objRaw[sizeof(_T)];
 public:
     template<typename... _Args>
     _ReferenceCountDataObject(TauAllocator& allocator, _Args&&... args) noexcept;
 
     ~_ReferenceCountDataObject() noexcept;
 
-    [[nodiscard]]       _T* objPtr()       noexcept { return reinterpret_cast<_T*>(_objRaw); }
-    [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(_objRaw); }
+    [[nodiscard]]       _T* objPtr()       noexcept { return reinterpret_cast<_T*>(this + 1); }
+    [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(this + 1); }
 
     uSys addRef() noexcept
     {
@@ -79,15 +79,15 @@ public:
     uSys _strongRefCount;
     uSys _weakRefCount;
     TauAllocator& _allocator;
-    u8 _objRaw[sizeof(_T)];
+    // u8 _objRaw[sizeof(_T)];
 public:
     template<typename... _Args>
     _SWReferenceCount(TauAllocator& allocator, _Args&&... args) noexcept;
 
-    [[nodiscard]]       _T* objPtr()       noexcept { return reinterpret_cast<_T*>(_objRaw); }
-    [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(_objRaw); }
+    [[nodiscard]]       _T* objPtr()       noexcept { return reinterpret_cast<_T*>(this + 1); }
+    [[nodiscard]] const _T* objPtr() const noexcept { return reinterpret_cast<_T*>(this + 1); }
 
-    void destroyObj() noexcept { reinterpret_cast<_T*>(_objRaw)->~_T(); }
+    void destroyObj() noexcept { reinterpret_cast<_T*>(this + 1)->~_T(); }
 
     uSys addRefStrong() noexcept
     {
@@ -239,8 +239,11 @@ private:
     RCDO<_T>* _rcdo;
     _T* _tPtr;
 public:
-    template<typename... _Args>
-    explicit ReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept;
+    template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int> = 0>
+    explicit ReferenceCountingPointer(_Allocator& allocator, _Args&&... args) noexcept;
+
+    template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int> = 0>
+    explicit ReferenceCountingPointer(_Arg0&& arg0, _Args&&... args) noexcept;
 
     template<typename _TT>
     ReferenceCountingPointer(const ReferenceCountingPointer<_TT>& rcp) noexcept;
@@ -311,8 +314,14 @@ private:
     SWRC<_T>* _swrc;
     _T* _tPtr;
 public:
+    template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int> = 0>
+    explicit StrongReferenceCountingPointer(_Allocator& allocator, _Args&&... args) noexcept;
+
+    template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int> = 0>
+    explicit StrongReferenceCountingPointer(_Arg0&& arg0, _Args&&... args) noexcept;
+
     template<typename... _Args>
-    explicit StrongReferenceCountingPointer(TauAllocator& allocator, _Args&&... args) noexcept;
+    explicit StrongReferenceCountingPointer(_Args&&... args) noexcept;
 
     template<typename _TT>
     StrongReferenceCountingPointer(const StrongReferenceCountingPointer<_TT>& rcp) noexcept;

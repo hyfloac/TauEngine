@@ -14,7 +14,7 @@ public:
 TAU_CLASS()
 class Test
 {
-    GENERATED_BODY()
+    TAU_GENERATED_BODY(Test)
 private:
     int _timeRaw;
 
@@ -29,3 +29,18 @@ public:
     int time() const noexcept { return _timeRaw; }
     long date() const noexcept { return _date; }
 };
+
+TAU_CLASS()
+class Foo
+{
+    TAU_GENERATED_BODY(Foo)
+private:
+    TAU_PROPERTY(get, set)
+    int _bar;
+    TAU_PROPERTY(set)
+    float _baz;
+public:
+    int bar() const noexcept { return _bar; }
+    float baz() const noexcept { return _baz; }
+};
+

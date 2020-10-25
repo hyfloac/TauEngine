@@ -26,5 +26,21 @@ int main()
     std::cout << "Test::date " << test.date() << std::endl;
     std::cout << "Test::vec (" << cvec->x << ", " << cvec->y << ", " << cvec->z << ")" << std::endl;
 
+    std::cout << std::endl;
+
+    Foo foo;
+
+    int* bar = foo.getClass().getProperty<int>(&foo, "_bar");
+    Foo::GetStaticClass().setProperty<float>(&foo, "_baz", 2.718f);
+
+    *bar = 128;
+
+    std::cout << "&Foo::bar " << bar << std::endl;
+
+    std::cout << std::endl;
+
+    std::cout << "Foo::bar " << foo.bar() << std::endl;
+    std::cout << "Foo::baz " << foo.baz() << std::endl;
+
     return 0;
 }
