@@ -1,17 +1,17 @@
-#include "TagPreProcessor.hpp"
+#include "reflection/processing/TagPreProcessor.hpp"
 #include <clang/Lex/Token.h>
 #include <clang/Tooling/Tooling.h>
 #include <clang/Lex/MacroInfo.h>
 #include <clang/Lex/MacroArgs.h>
 #include <clang/Frontend/CompilerInstance.h>
 
-namespace tau {
+namespace tau { namespace reflection { namespace processing { 
 
 void TagPreProcessorAction::ExecuteAction()
 {
     ::clang::Preprocessor& pp = getCompilerInstance().getPreprocessor();
 
-    pp.addPPCallbacks(::std::make_unique<TagPreProcessorCallback>(pp, _classTags, _propertyTags));
+    pp.addPPCallbacks(::std::make_unique<TagPreProcessorCallback>(pp, _classTags, _propertyTags, _functionTags));
 
     // Ignore unknown pragmas.
     pp.IgnorePragmas();
@@ -26,52 +26,51 @@ void TagPreProcessorAction::ExecuteAction()
     } while(tok.isNot(::clang::tok::eof));
 }
 
-enum class TagType
-{
-    Unknown = 0,
-    Class,
-    Property,
-    Function
-};
-
 static void reportIncorrectAttribForTag(TagType tagType, const Ref<IAttribute>& attribHandler, const ::clang::Token* token, ::clang::DiagnosticsEngine& diagEngine, unsigned diagID) noexcept;
 
-void TagPreProcessorCallback::MacroExpands(const clang::Token& MacroNameTok, const clang::MacroDefinition& MD, const clang::SourceRange Range, const clang::MacroArgs* const Args)
+void TagPreProcessorCallback::MacroExpands(const clang::Token& MacroNameTok, const clang::MacroDefinition&, const clang::SourceRange Range, const clang::MacroArgs* const Args)
 {
+    // Macro is not named for some reason.
     if(!MacroNameTok.isAnyIdentifier())
     { return; }
-
+    
+    /*   Check if the macro is one of our reflection types and then
+       add the declaration to its queue. */
+    Ref<TagDeclaration> decl;
     TagType tagType;
     if(MacroNameTok.getIdentifierInfo()->getName() == "TAU_CLASS")
     {
         tagType = TagType::Class;
         _classTags.emplace_back(Range);
+        decl = _classTags.back();
     }
     else if(MacroNameTok.getIdentifierInfo()->getName() == "TAU_PROPERTY")
     {
         tagType = TagType::Property;
         _propertyTags.emplace_back(Range);
+        decl = _propertyTags.back();
+    }
+    else if(MacroNameTok.getIdentifierInfo()->getName() == "TAU_FUNCTION")
+    {
+        tagType = TagType::Function;
+        _functionTags.emplace_back(Range);
+        decl = _functionTags.back();
     }
     else
     { return; }
 
-    if(!Args || Args->isVarargsElidedUse()) // Are there 0 arguments/attributes.
+    // Are there 0 arguments/attributes.
+    if(!Args || Args->isVarargsElidedUse()) 
     { return; }
 
-    Ref<TagDeclaration> decl;
-    if(tagType == TagType::Class)
-    {
-        decl = _classTags.back();
-    }
-    else if(tagType == TagType::Property)
-    {
-        decl = _propertyTags.back();
-    }
-
+    /*   Get the argument list for this macro, because it's a
+       varargs function all arguments are stored in argument 0. */
     const ::clang::Token* token = Args->getUnexpArgument(0u);
 
+    // All tokens for the argument are stored in sequence.
     for(; token->isNot(::clang::tok::eof); ++token)
     {
+        // The beginning to every argument must be a name.
         if(!token->isAnyIdentifier())
         {
             ::clang::DiagnosticsEngine& diagEngine = _pp.getDiagnostics();
@@ -86,6 +85,7 @@ void TagPreProcessorCallback::MacroExpands(const clang::Token& MacroNameTok, con
 
         Ref<IAttribute> attribHandler = AttributeManager::getAttribute(attribName);
 
+        // Attribute was not registered.
         if(!attribHandler)
         {
             ::clang::DiagnosticsEngine& diagEngine = _pp.getDiagnostics();
@@ -96,16 +96,24 @@ void TagPreProcessorCallback::MacroExpands(const clang::Token& MacroNameTok, con
             return;
         }
 
+        /*   Check to see if the attribute is applicable to this
+          reflection type (class, property, function) and report an
+          error otherwise. */
         reportIncorrectAttribForTag(tagType, attribHandler, token, _pp.getDiagnostics(), _incorrectAttribForTagDiagID);
 
+        /*   parseAttribute takes a reference to the token and
+           increments during its processing procedure. */
         const ::clang::Token* const preDigressionToken = token;
 
         AttributeData attribData = attribHandler->parseAttribute(attribName, Args, token);
         decl->addAttribute(::std::move(attribData));
 
+        // Exit if this was the final argument.
         if(!token || token->is(::clang::tok::eof))
         { break; }
-        
+
+        /*   If this was not the final argument ensure that it is
+           part of a comma delimited list. */
         if(token->isNot(::clang::tok::comma))
         {
             ::clang::DiagnosticsEngine& diagEngine = _pp.getDiagnostics();
@@ -196,4 +204,4 @@ static void reportIncorrectAttribForTag(const TagType tagType, const Ref<IAttrib
     }
 }
 
-}
+} } }

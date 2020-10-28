@@ -5,7 +5,7 @@
 #include "Attribute.hpp"
 #include <deque>
 
-namespace tau {
+namespace tau { namespace reflection {
 
 class TagDeclaration final
 {
@@ -52,4 +52,4 @@ public:
 
 using TagDeclQueue = ::std::deque<Ref<TagDeclaration>>;
 
-}
+} }

@@ -1,8 +1,8 @@
-#include "HeaderGenerator.hpp"
-#include "Attribute.hpp"
-#include "class/Class.hpp"
+#include "reflection/processing/HeaderGenerator.hpp"
+#include "reflection/Attribute.hpp"
+#include "reflection/Class.hpp"
 
-namespace tau {
+namespace tau { namespace reflection { namespace processing { 
 
 void BaseGenerator::generate() noexcept
 {
@@ -25,6 +25,7 @@ void BaseGenerator::printBasicMacros() noexcept
     _header << 
         "#define TAU_CLASS(...)\n"
         "#define TAU_PROPERTY(...)\n"
+        "#define TAU_FUNCTION(...)\n"
         "\n";
 }
 
@@ -46,10 +47,16 @@ void BaseGenerator::printClass() noexcept
 
     for(const auto& handler : AttributeManager::getAttributes())
     {
-        handler.second->generateBaseClass(_header);
+        handler.second->generateBaseTauClass(_header);
     }
 
     _header << "};\n";
+}
+
+void HeaderGenerator::generateDummy() noexcept
+{
+    printHeaderBegin();
+    printDummyMacros();
 }
 
 void HeaderGenerator::generateBegin() noexcept
@@ -58,7 +65,7 @@ void HeaderGenerator::generateBegin() noexcept
     printBasicMacros();
 }
 
-void HeaderGenerator::generateClassBody(const Ref<ReflClass>& clazz) noexcept
+void HeaderGenerator::generateClassBody(const Ref<Class>& clazz) noexcept
 {
     _header << 
         "#ifdef _TAU_GENERATED_BODY_" << clazz->name() << "\n"
@@ -81,11 +88,18 @@ void HeaderGenerator::generateClassBody(const Ref<ReflClass>& clazz) noexcept
     
     for(const auto& handler : AttributeManager::getAttributes())
     {
-        handler.second->generateImplClass(_header, clazz);
+        handler.second->generateImplTauClass(_header, clazz);
     }
 
     _header << 
-        "        };                                                                         \\\n"
+        "        };                                                                         \\\n";
+
+    for(const auto& handler : AttributeManager::getAttributes())
+    {
+        handler.second->generateImplClass(_header, clazz);
+    }
+
+    _header <<
         "    [[nodiscard]] static TauClassImpl& GetStaticClass() noexcept                   \\\n"
         "    {                                                                              \\\n"
         "        static TauClassImpl tauClass;                                              \\\n"
@@ -126,4 +140,14 @@ void HeaderGenerator::printBasicMacros() noexcept
         "\n";
 }
 
+void HeaderGenerator::printDummyMacros() noexcept
+{
+    _header <<
+        "#ifdef TAU_GENERATED_BODY\n"
+        "  #undef TAU_GENERATED_BODY\n"
+        "#endif\n"
+        "\n"
+        "#define TAU_GENERATED_BODY(_CLASS) \n";
 }
+
+} } }

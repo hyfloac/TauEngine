@@ -8,12 +8,22 @@
 #include <NumTypes.hpp>
 #include <ReferenceCountingPointer.hpp>
 
-#define ____str(__X) #__X
-#define ___str(__X) ____str(__X)
+#define TAU_SAFETIES_str0(_X) #_X
+#define TAU_SAFETIES_str(_X) TAU_SAFETIES_str0(_X)
 
-#define TauAssert(__STATE) do { if(!(__STATE)) { fprintf(stderr, "`" #__STATE "` Evaluated to false at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; } } while(0)
+#define TauAssert(_STATE) \
+    do { \
+        if(!(_STATE)) { \
+            fprintf(stderr, "`" #_STATE "` Evaluated to false at line " TAU_SAFETIES_str(__LINE__) " in file \"" TAU_SAFETIES_str(__FILE__) "\".\n"); \
+            DEBUG_BREAK; \
+        } \
+    } while(0)
 
-#define RUNTIME_ERROR(__TEXT) do { fprintf(stderr, __TEXT "\nOccured at line " ___str(__LINE__) " in file `" ___str(__FILE__) ".\n"); DEBUG_BREAK; } while(0)
+#define RUNTIME_ERROR(_TEXT) \
+    do { \
+        fprintf(stderr, __TEXT "\nOccured at line " TAU_SAFETIES_str(__LINE__) " in file \"" TAU_SAFETIES_str(__FILE__) "\".\n"); \
+        DEBUG_BREAK; \
+    } while(0)
 
 #define ERROR_CODE(_ERR)         do { if(error) { *error = _ERR; } return;         } while(0)
 #define ERROR_CODE_V(_ERR, _VAL) do { if(error) { *error = _ERR; } return _VAL;    } while(0)
@@ -381,7 +391,7 @@ template<typename _T>
 using Ref = ReferenceCountingPointer<_T>;
 
 template<typename _T>
-using NullableRef = ReferenceCountingPointer<_T>;
+using NullableRef = Ref<_T>;
 
 template<typename _T>
 using StrongRef = StrongReferenceCountingPointer<_T>;
@@ -390,10 +400,10 @@ template<typename _T>
 using WeakRef = WeakReferenceCountingPointer<_T>;
 
 template<typename _T>
-using NullableStrongRef = StrongReferenceCountingPointer<_T>;
+using NullableStrongRef = StrongRef<_T>;
 
 template<typename _T>
-using NullableWeakRef = WeakReferenceCountingPointer<_T>;
+using NullableWeakRef = WeakRef<_T>;
 
 template<typename _Out, typename _In>
 [[nodiscard]] static inline CPPRef<_Out> RefStaticCast(const CPPRef<_In>& in) noexcept

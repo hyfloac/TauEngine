@@ -168,6 +168,8 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
 }
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 
 [[nodiscard]] inline u32 _ctz(const u32 v) noexcept

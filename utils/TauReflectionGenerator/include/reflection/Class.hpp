@@ -1,20 +1,22 @@
 #pragma once
 
 #include "TagDeclaration.hpp"
-#include "property/Property.hpp"
+#include "Property.hpp"
+#include "Function.hpp"
 
-namespace tau {
+namespace tau { namespace reflection {
 
 class Property;
 
-class ReflClass final
+class Class final
 {
 private:
     Ref<TagDeclaration> _declaration;
     DynString _name;
     PropertyList _properties;
+    FunctionList _functions;
 public:
-    ReflClass(const Ref<TagDeclaration>& declaration, const DynString& name) noexcept
+    Class(const Ref<TagDeclaration>& declaration, const DynString& name) noexcept
         : _declaration(declaration)
         , _name(name)
     { }
@@ -24,8 +26,11 @@ public:
 
     [[nodiscard]]       PropertyList& properties()       noexcept { return _properties; }
     [[nodiscard]] const PropertyList& properties() const noexcept { return _properties; }
+
+    [[nodiscard]]       FunctionList& functions()       noexcept { return _functions; }
+    [[nodiscard]] const FunctionList& functions() const noexcept { return _functions; }
 };
 
-using ClassList = ::std::vector<Ref<ReflClass>>;
+using ClassList = ::std::vector<Ref<Class>>;
 
-}
+} }

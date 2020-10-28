@@ -42,5 +42,8 @@ private:
 public:
     int bar() const noexcept { return _bar; }
     float baz() const noexcept { return _baz; }
+
+    TAU_FUNCTION()
+    int testFunc() const noexcept { return 0; }
 };
 

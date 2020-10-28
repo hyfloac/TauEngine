@@ -4,9 +4,13 @@
 #include <String.hpp>
 #include <Safeties.hpp>
 
-namespace tau {
+namespace tau { namespace reflection {
+    
+class Class;
 
-class ReflClass;
+} }
+
+namespace tau { namespace reflection { namespace processing {
 
 class BaseGenerator
 {
@@ -36,11 +40,13 @@ public:
         : _header(::llvm::StringRef(header.c_str(), header.length()), _ec)
     { }
 
+    void generateDummy() noexcept;
     void generateBegin() noexcept;
-    void generateClassBody(const Ref<ReflClass>& clazz) noexcept;
+    void generateClassBody(const Ref<Class>& clazz) noexcept;
 private:
     void printHeaderBegin() noexcept;
     void printBasicMacros() noexcept;
+    void printDummyMacros() noexcept;
 };
 
-}
+} } }

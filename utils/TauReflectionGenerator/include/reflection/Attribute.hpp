@@ -1,6 +1,5 @@
 #pragma once
 
-#define NOMINMAX
 #include <Objects.hpp>
 #include <String.hpp>
 #include <Safeties.hpp>
@@ -16,10 +15,10 @@ namespace llvm {
     class raw_fd_ostream;
 }
 
-namespace tau {
+namespace tau { namespace reflection {
 
 class IAttribute;
-class ReflClass;
+class Class;
 
 class AttributeData final
 {
@@ -77,17 +76,18 @@ public:
      * @param attribName
      *      The name of the attribute that triggered this
      *    invocation.
-     * @param Args
+     * @param args
      *      The arguments that were passed into the macro.
      * @param currentToken
      *      The current argument token.
      */
-    virtual AttributeData parseAttribute(const DynString& attribName, const clang::MacroArgs* Args, const clang::Token*& currentToken) const noexcept = 0;
+    virtual AttributeData parseAttribute(const DynString& attribName, const ::clang::MacroArgs* args, const ::clang::Token*& currentToken) const noexcept = 0;
 
     virtual void destroyData(AttributeData& data) const noexcept { }
 
-    virtual void generateBaseClass(::llvm::raw_fd_ostream& base) const noexcept { }
-    virtual void generateImplClass(::llvm::raw_fd_ostream& base, const Ref<ReflClass>& clazz) const noexcept { }
+    virtual void generateBaseTauClass(::llvm::raw_fd_ostream& base) const noexcept { }
+    virtual void generateImplTauClass(::llvm::raw_fd_ostream& base, const Ref<Class>& clazz) const noexcept { }
+    virtual void generateImplClass(::llvm::raw_fd_ostream& base, const Ref<Class>& clazz) const noexcept { }
 protected:
     static const clang::Token* getNextToken(const clang::Token* currentToken) noexcept;
 };
@@ -129,6 +129,6 @@ public:
     [[nodiscard]] static FBAllocator& getAllocator() noexcept { return _attribTreeAllocator; }
 };
 
-}
+} }
 
 #include "Attribute.inl"
