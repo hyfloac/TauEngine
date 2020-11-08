@@ -15,3 +15,5 @@ This engine uses:
 - [LZMA](https://www.7-zip.org/sdk.html)
 - [OpenVR](https://github.com/ValveSoftware/openvr)
 - [SPDLog](https://github.com/gabime/spdlog)
+- [D3D12MemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator)
+  - Minor changes have been made to make its coding format more inline with the rest of TauEngine.

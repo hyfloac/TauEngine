@@ -305,20 +305,19 @@ template<typename _Tv, typename _Ta, _Ta _Alignment>
 {
     if(v == 1)
     { return 1; }
-    return 1 << (32 - _clzC(v - 1));
+    return 1u << (32u - _clzC(v - 1u));
 }
 
-[[nodiscard]] inline u64 nextPowerOf2(const u64 v) noexcept
+[[nodiscard]] constexpr inline u64 nextPowerOf2(const u64 v) noexcept
 {
     if(v == 1)
     { return 1; }
-    return 1 << (64 - _clzC(v - 1));
+    return 1ull << (64ull - _clzC(v - 1ull));
 }
 
-
 [[nodiscard]] constexpr inline u32 log2i(const u32 v) noexcept
-{ return _clzC(v); }
+{ return 63 - _clzC(v); }
 
 [[nodiscard]] constexpr inline u32 log2i(const u64 v) noexcept
-{ return _clzC(v); }
+{ return 63 - _clzC(v); }
 #endif

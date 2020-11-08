@@ -261,15 +261,6 @@ public:
     DynStringT() noexcept;
     DynStringT(const _C* string) noexcept;
 
-    /**
-     * Enabled only if _Len is less than 16.
-     *
-     *   This is because new cannot (assuming a well formed
-     * compiler) be called from a constexpr function.
-     */
-    template<uSys _Len, ::std::enable_if_t<_Len <= 16, int> = 0>
-    constexpr DynStringT(const _C(&str)[_Len]) noexcept;
-
     ~DynStringT() noexcept;
 
     DynStringT(const DynStringT<_C>& copy) noexcept;

@@ -6,6 +6,12 @@
 #include <d3d12.h>
 #include <Safeties.hpp>
 
+namespace D3D12MA {
+
+class Allocator;
+
+}
+
 class TAU_DLL DX12GraphicsInterface final : public IGraphicsInterface
 {
 public:
@@ -18,13 +24,18 @@ public:
     using DX12Device = ID3D12Device6;
 private:
     DX12Device* _d3d12Device;
-
-
+    D3D12MA::Allocator* _gpuAllocator;
 public:
-    DX12GraphicsInterface(const RenderingMode& mode, DX12Device* const d3d12Device) noexcept
+    DX12GraphicsInterface(const RenderingMode& mode, DX12Device* const d3d12Device, D3D12MA::Allocator* const gpuAllocator) noexcept
         : IGraphicsInterface(mode)
         , _d3d12Device(d3d12Device)
+        , _gpuAllocator(gpuAllocator)
     { }
+
+    ~DX12GraphicsInterface() noexcept;
+
+    [[nodiscard]] DX12Device* d3dDevice() const noexcept { return _d3d12Device; }
+    [[nodiscard]] D3D12MA::Allocator* gpuAllocator() const noexcept { return _gpuAllocator; }
 
     [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
 
@@ -53,6 +64,7 @@ public:
     struct DXGraphicsInterfaceArgs final
     {
         DX12GraphicsInterface::DX12Device* d3dDevice;
+        D3D12MA::Allocator* gpuAllocator;
     };
 public:
     [[nodiscard]] IGraphicsInterface* build(const GraphicsInterfaceArgs& args, Error* error) const noexcept override;

@@ -29,23 +29,30 @@ void ImplicitAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, const
         "            {                                                                                              \\\n"
         "                static const char* _properties[] = {                                                       \\\n";
 
+    uSys propCount = 0;
+
     for(uSys i = 0; i < clazz->properties().size(); ++i)
     {
+        if(clazz->properties()[i]->declaration()->hasAttribute("nolist"))
+        { continue; }
+
+        ++propCount;
+
         base <<
             "                    \"" << clazz->properties()[i]->name() << "\"";
         if(i < clazz->properties().size() - 1)
         {
-            base << ", \\\n";
+            base << ",                                                                                              \\\n";
         }
         else
         {
-            base << " \\\n";
+            base << "                                                                                               \\\n";
         }
     }
 
     base <<
         "                };                                                                                         \\\n"
-        "                *count = " << clazz->properties().size() << ";                                             \\\n"
+        "                *count = " << propCount << ";                                                              \\\n"
         "                return _properties;                                                                        \\\n"
         "            }                                                                                              \\\n"
         "                                                                                                           \\\n"
@@ -53,34 +60,46 @@ void ImplicitAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, const
         "            {                                                                                              \\\n"
         "                static const char* _functions[] = {                                                        \\\n";
     
+    uSys funcCount = 0;
+
     for(uSys i = 0; i < clazz->functions().size(); ++i)
     {
+        if(clazz->functions()[i]->declaration()->hasAttribute("nolist"))
+        { continue; }
+
+        ++funcCount;
+
         base <<
             "                    \"" << clazz->functions()[i]->name() << "\"";
         if(i < clazz->functions().size() - 1)
         {
-            base << ", \\\n";
+            base << ",                                                                                              \\\n";
         }
         else
         {
-            base << " \\\n";
+            base << "                                                                                               \\\n";
         }
     }
 
     base <<
         "                };                                                                                         \\\n"
-        "                *count = " << clazz->functions().size() << ";                                              \\\n"
+        "                *count = " << funcCount << ";                                                              \\\n"
         "                return _functions;                                                                         \\\n"
         "            }                                                                                              \\\n"
         "                                                                                                           \\\n"
         "            [[nodiscard]] unsigned getPropertyIndex(const char* const propName) const noexcept override    \\\n"
         "            {                                                                                              \\\n";
 
+    uSys propIndex = 0;
+
     for(uSys i = 0; i < clazz->properties().size(); ++i)
     {
+        if(clazz->properties()[i]->declaration()->hasAttribute("nolist"))
+        { continue; }
+
         base <<
-            "                if(::std::strcmp(propName, \"" << clazz->properties()[i]->name() << "\") == 0) \\\n"
-            "                { return " << i << "; } \\\n";
+            "                if(::std::strcmp(propName, \"" << clazz->properties()[i]->name() << "\") == 0)         \\\n"
+            "                { return " << propIndex++ << "; }                                                      \\\n";
     }
 
     base <<
@@ -89,12 +108,17 @@ void ImplicitAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, const
         "                                                                                                           \\\n"
         "            [[nodiscard]] unsigned getFunctionIndex(const char* const funcName) const noexcept override    \\\n"
         "            {                                                                                              \\\n";
+    
+    uSys funcIndex = 0;
 
     for(uSys i = 0; i < clazz->functions().size(); ++i)
     {
+        if(clazz->functions()[i]->declaration()->hasAttribute("nolist"))
+        { continue; }
+
         base <<
-            "                if(::std::strcmp(funcName, \"" << clazz->functions()[i]->name() << "\") == 0) \\\n"
-            "                { return " << i << "; } \\\n";
+            "                if(::std::strcmp(funcName, \"" << clazz->functions()[i]->name() << "\") == 0)          \\\n"
+            "                { return " << funcIndex++ << "; }                                                      \\\n";
     }
 
     base <<

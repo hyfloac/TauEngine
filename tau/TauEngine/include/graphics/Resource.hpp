@@ -226,7 +226,7 @@ public:
     [[nodiscard]] uSys allocSize() const noexcept
     { return 0; }
 
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs&    args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;

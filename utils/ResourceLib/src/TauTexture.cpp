@@ -287,7 +287,7 @@ void TauTextureCodec::writeTextureHeader(WriteState& writeState, const TauTextur
 
     switch(writeState.version)
     {
-        case TAU_TEXTURE_VERSION_0_1: writeTextureInfo_0_1(writeState, info, debugData, error);
+        case TAU_TEXTURE_VERSION_0_1: writeTextureInfo_0_1(writeState, info, debugData, error); break;
         default: ERROR_CODE(Error::UnsupportedVersion);
     }
 }

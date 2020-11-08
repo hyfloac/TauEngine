@@ -476,14 +476,6 @@ inline DynStringT<_C>::DynStringT(const _C* const string) noexcept
 }
 
 template<typename _C>
-template<uSys _Len, ::std::enable_if_t<_Len <= 16, int>>
-inline constexpr DynStringT<_C>::DynStringT(const _C(&str)[_Len]) noexcept
-    : _largeString { null, null }
-    , _length(_Len - 1)
-    , _hash(cexpr::findHashCode(str))
-{ ::std::memcpy(_stackString, str, _Len * sizeof(_C)); }
-
-template<typename _C>
 inline DynStringT<_C>::~DynStringT() noexcept
 {
     if(_length >= 16 && _largeString.string && --(*_largeString.refCount) == 0)
@@ -774,9 +766,7 @@ template<typename _C>
 inline DynStringT<_C> DynStringT<_C>::subString(const uSys begin, const uSys end) const noexcept
 {
     if(begin >= end || end > _length)
-    {
-        return DynStringT<_C>("");
-    }
+    { return DynStringT<_C>(); }
 
     const uSys length = end - begin;
 
@@ -899,7 +889,7 @@ inline DynStringViewT<_C>::~DynStringViewT() noexcept
     {
         delete _refCount;
         // Was this allocated as a single block.
-        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - sizeof(uSys))
+        if(reinterpret_cast<iPtr>(_refCount) != reinterpret_cast<iPtr>(_string) - static_cast<iPtr>(sizeof(uSys)))
         {
             delete[] _string;
         }
@@ -1137,7 +1127,7 @@ template<typename _C>
 inline DynStringT<_C> DynStringViewT<_C>::subString(const uSys begin, const uSys end) const noexcept
 {
     if(begin >= end || end > _length)
-    { return DynStringT<_C>(""); }
+    { return DynStringT<_C>(); }
 
     const uSys length = end - begin;
 

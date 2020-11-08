@@ -42,11 +42,11 @@ WDynString PathSanitizer::sanitizePath(const WDynString& path) noexcept
 
     const uSys pathLength = ::std::wcslen(newPath);
 
-    const uSys fullPathLen = GetFullPathNameW(newPath, 0, NULL, NULL);
+    const uSys fullPathLen = GetFullPathNameW(newPath, 0, nullptr, nullptr);
 
     wchar_t* const fullPath = new(::std::nothrow) wchar_t[fullPathLen + 1];
     fullPath[fullPathLen] = L'\0';
-    if(GetFullPathNameW(newPath, fullPathLen, fullPath, NULL) != fullPathLen)
+    if(GetFullPathNameW(newPath, static_cast<DWORD>(fullPathLen), fullPath, nullptr) != fullPathLen)
     {
         delete[] newPath;
         delete[] fullPath;
@@ -82,10 +82,8 @@ static bool isValidCharset(const uSys length, const wchar_t* const path) noexcep
 
     for(uSys i = 0; i < length; ++i)
     {
-        if(path[i] >= 0 && path[i] <= 31)
-        {
-            continue;
-        }
+        if(path[i] <= 31)
+        { continue; }
 
         switch(path[i])
         {
@@ -516,7 +514,7 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
         }
 
         /**
-         *   Technically a device does not have to at the end of a
+         *   Technically a device does not have to be at the end of a
          * path, they are allowed to have arbitrary characters
          * (except '\') after the device, as long as the these
          * characters are prefixed by a '.' or ':', this delimiter is

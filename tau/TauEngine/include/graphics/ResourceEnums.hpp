@@ -65,6 +65,10 @@ enum class UsageType
      */
     Dynamic,
     /**
+     * Intended to be updated by the CPU before every use by the GPU.
+     */
+    Streaming,
+    /**
      * Used for retrieving data from the GPU.
      */
     Readable

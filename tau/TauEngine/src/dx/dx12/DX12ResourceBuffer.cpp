@@ -3,6 +3,8 @@
 #ifdef _WIN32
 #include "dx/dx12/d3dx12.h"
 #include "graphics/CommandList.hpp"
+#include "dx/dx12/DX12GraphicsInterface.hpp"
+#include "dx/dx12/D3D12MemAlloc.h"
 
 void* DX12ResourceBuffer::map(ICommandList& cmdList, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
 {
@@ -50,67 +52,88 @@ void* DX12ResourceBuffer::map(ICommandList& cmdList, const EResource::MapType ma
         }
         return mapping;
     }
-    else if(_resourceUsage == EGraphics::ResourceHeapUsageType::Default)
-    {
-        if(mapWriteRange && mapWriteRange->begin >= mapWriteRange->end)
-        { return null; }
-
-        if(!mapWriteRange)
-        {
-            _uploadBuffer = getResourceUploader()->allocAuto(_args.size);
-        }
-        else
-        {
-            _uploadBuffer = getResourceUploader()->allocAuto(mapWriteRange->length());
-        }
-
-        if(!_uploadBuffer)
-        { return null; }
-
-        void* mapping;
-        const CD3DX12_RANGE range(0, 0);
-        const HRESULT res = _uploadBuffer->allocation().resource->Map(0, &range, &mapping);
-        if(FAILED(res))
-        {
-            _uploadBuffer = null;
-            return null;
-        }
-
-        return mapping;
-    }
 
     return null;
 }
 
 void DX12ResourceBuffer::unmap(ICommandList& cmdList, uSys, uSys, const ResourceMapRange* mapWriteRange) noexcept
 {
-    if(_uploadBuffer)
+    if(mapWriteRange)
     {
-        ID3D12GraphicsCommandList* d3dCmdList = null;
-
-        if(mapWriteRange)
-        {
-            CD3DX12_RANGE range(mapWriteRange->begin, mapWriteRange->end);
-            _uploadBuffer->allocation().resource->Unmap(0, &range);
-            d3dCmdList->CopyBufferRegion(_d3dResource, mapWriteRange->begin, _uploadBuffer->allocation().resource, _uploadBuffer->allocation().offset, _uploadBuffer->allocation().size);
-        }
-        else
-        {
-            _uploadBuffer->allocation().resource->Unmap(0, null);
-            d3dCmdList->CopyBufferRegion(_d3dResource, 0, _uploadBuffer->allocation().resource, _uploadBuffer->allocation().offset, _uploadBuffer->allocation().size);
-        }
+        CD3DX12_RANGE range(mapWriteRange->begin, mapWriteRange->end);
+        _d3dResource->Unmap(0, &range);
     }
     else
     {
-        if(mapWriteRange)
-        {
-            CD3DX12_RANGE range(mapWriteRange->begin, mapWriteRange->end);
-            _d3dResource->Unmap(0, &range);
-        }
-        else
-        {
-            _d3dResource->Unmap(0, null);
-        }
+        _d3dResource->Unmap(0, null);
+    }
+}
+
+
+void* DX12ResourceBufferIndirectMapping::map(ICommandList& cmdList, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange*, const ResourceMapRange* const mapWriteRange) noexcept
+{
+    if(mapWriteRange && mapWriteRange->begin >= mapWriteRange->end)
+    { return null; }
+
+    if(!_uploadBuffer)
+    {
+        D3D12MA::ALLOCATION_DESC allocDesc;
+        allocDesc.Flags = D3D12MA::ALLOCATION_FLAG_NONE;
+        allocDesc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+
+        const CD3DX12_RESOURCE_DESC uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(_args.size);
+
+        const HRESULT res = _gi.gpuAllocator()->CreateResource(&allocDesc, &uploadDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, &_uploadAllocation, IID_PPV_ARGS(&_uploadBuffer));
+
+        if(FAILED(res))
+        { return null; }
+    }
+
+    if(!_uploadBuffer)
+    { return null; }
+
+    void* mapping;
+    const CD3DX12_RANGE range(0, 0);
+    const HRESULT res = _uploadBuffer->Map(0, &range, &mapping);
+    if(FAILED(res))
+    {
+        _uploadBuffer->Release();
+        _uploadBuffer = null;
+
+        _uploadAllocation->Release();
+        _uploadAllocation = null;
+        return null;
+    }
+
+    return mapping;
+}
+
+void DX12ResourceBufferIndirectMapping::unmap(ICommandList& cmdList, uSys, uSys, const ResourceMapRange* mapWriteRange) noexcept
+{
+    if(!_uploadBuffer)
+    { return; }
+
+    ID3D12GraphicsCommandList* d3dCmdList = null;
+
+    if(mapWriteRange)
+    {
+        CD3DX12_RANGE range(mapWriteRange->begin, mapWriteRange->end);
+        _uploadBuffer->Unmap(0, &range);
+        d3dCmdList->CopyBufferRegion(_d3dResource, mapWriteRange->begin, _uploadBuffer, mapWriteRange->begin, mapWriteRange->length());
+    }
+    else
+    {
+        _uploadBuffer->Unmap(0, null);
+        d3dCmdList->CopyBufferRegion(_d3dResource, 0, _uploadBuffer, 0, _args.size);
+    }
+
+    if(!_keepUploadAllocation)
+    {
+        _uploadBuffer->Release();
+        _uploadBuffer = null;
+
+        _uploadAllocation->Release();
+        _uploadAllocation = null;
     }
 }
 #endif

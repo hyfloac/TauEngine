@@ -221,13 +221,26 @@ inline ReferenceCountingPointer<_T>& ReferenceCountingPointer<_T>::operator=(Ref
 }
 
 template<typename _T>
-template<typename... _Args>
-inline void ReferenceCountingPointer<_T>::reset(TauAllocator& allocator, _Args&&... args) noexcept
+template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int>>
+inline void ReferenceCountingPointer<_T>::reset(_Allocator& allocator, _Args&&... args) noexcept
 {
     if(_rcdo && _rcdo->release() == 0)
     { _rcdo->_allocator.deallocateT(_rcdo); }
 
-    _rcdo = allocator.allocateT<RCDO<_T>>(allocator, args...);
+    void* raw = allocator.allocate(sizeof(RCDO<_T>) + sizeof(_T));
+    _rcdo = new(raw) RCDO<_T>(allocator, _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _rcdo->objPtr();
+}
+
+template<typename _T>
+template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int>>
+inline void ReferenceCountingPointer<_T>::reset(_Arg0&& arg0, _Args&&... args) noexcept
+{
+    if(_rcdo && _rcdo->release() == 0)
+    { _rcdo->_allocator.deallocateT(_rcdo); }
+
+    void* raw = DefaultTauAllocator::Instance().allocate(sizeof(RCDO<_T>) + sizeof(_T));
+    _rcdo = new(raw) RCDO<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Arg0>(arg0), _TauAllocatorUtils::_forward<_Args>(args)...);
     _tPtr = _rcdo->objPtr();
 }
 
@@ -509,8 +522,8 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
 }
 
 template<typename _T>
-template<typename... _Args>
-inline void StrongReferenceCountingPointer<_T>::reset(TauAllocator& allocator, _Args&&... args) noexcept
+template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int>>
+inline void StrongReferenceCountingPointer<_T>::reset(_Allocator& allocator, _Args&&... args) noexcept
 {
     if(_swrc && _swrc->releaseStrong() == 0)
     {
@@ -519,7 +532,24 @@ inline void StrongReferenceCountingPointer<_T>::reset(TauAllocator& allocator, _
         { _swrc->_allocator.deallocateT(_swrc); }
     }
 
-    _swrc = allocator.allocateT<SWRC<_T>>(allocator, args...);
+    void* raw = allocator.allocate(sizeof(SWRC<_T>) + sizeof(_T));
+    _swrc = new(raw) SWRC<_T>(allocator, _TauAllocatorUtils::_forward<_Args>(args)...);
+    _tPtr = _swrc->objPtr();
+}
+
+template<typename _T>
+template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int>>
+inline void StrongReferenceCountingPointer<_T>::reset(_Arg0&& arg0, _Args&&... args) noexcept
+{
+    if(_swrc && _swrc->releaseStrong() == 0)
+    {
+        _swrc->destroyObj();
+        if(!_swrc->_weakRefCount)
+        { _swrc->_allocator.deallocateT(_swrc); }
+    }
+
+    void* raw = DefaultTauAllocator::Instance().allocate(sizeof(SWRC<_T>) + sizeof(_T));
+    _swrc = new(raw) SWRC<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Arg0>(arg0), _TauAllocatorUtils::_forward<_Args>(args)...);
     _tPtr = _swrc->objPtr();
 }
 

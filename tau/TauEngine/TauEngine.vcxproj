@@ -69,6 +69,7 @@
     <ClCompile Include="src\dx\dx11\DX11TextureUploader.cpp" />
     <ClCompile Include="src\dx\dx11\DX11TextureView.cpp" />
     <ClCompile Include="src\dx\dx11\DX11VertexArray.cpp" />
+    <ClCompile Include="src\dx\dx12\D3D12MemAlloc.cpp" />
     <ClCompile Include="src\dx\dx12\DX12BlendingState.cpp" />
     <ClCompile Include="src\dx\dx12\DX12CommandList.cpp" />
     <ClCompile Include="src\dx\dx12\DX12CommandQueue.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="include\dx\dx11\DX11TextureSampler.hpp" />
     <ClInclude Include="include\dx\dx11\DX11TextureView.hpp" />
     <ClInclude Include="include\dx\dx11\DX11VertexArray.hpp" />
+    <ClInclude Include="include\dx\dx12\D3D12MemAlloc.h" />
     <ClInclude Include="include\dx\dx12\d3dx12.h" />
     <ClInclude Include="include\dx\dx12\DX12BlendingState.hpp" />
     <ClInclude Include="include\dx\dx12\DX12CommandAllocator.hpp" />

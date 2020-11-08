@@ -49,8 +49,6 @@ You have complete control over how the attribute arguments are parsed. As long a
 
 For code generation you can use `generateBaseTauClass` which will let you generate code in `TauClass` in base header. Use `generateImplTauClass` to implement the methods that you put into the base class. Use `generateImplClass` to inject functions or data into the original type.
 
-
-
 After that you just need to register the attribute.
 
 ```c++

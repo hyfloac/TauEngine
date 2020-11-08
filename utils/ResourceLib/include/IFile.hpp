@@ -27,12 +27,10 @@ enum class FileProps
  */
 class IFile
 {
+    DEFAULT_CONSTRUCT_PO(IFile);
+    DEFAULT_DESTRUCT_VI(IFile);
     DEFAULT_CM_PO(IFile);
 public:
-    IFile() noexcept = default;
-
-    virtual ~IFile() noexcept = default;
-
     [[nodiscard]] virtual i64 size() noexcept = 0;
 
     [[nodiscard]] virtual bool exists() noexcept = 0;
@@ -66,7 +64,7 @@ public:
 
     virtual RefDynArray<u8> readFile() noexcept
     {
-        const ::std::size_t size_ = size();
+        const uSys size_ = size();
         RefDynArray<u8> arr(size_ + 1);
         readBytes(arr.arr(), size_);
         arr[size_] = '\0';
@@ -93,10 +91,10 @@ public:
     { return writeBytes(reinterpret_cast<const u8*>(buffer), len); }
 
     virtual i64 writeString(const char* const str) noexcept
-    { return writeBytes(reinterpret_cast<const u8*>(str), std::strlen(str) * sizeof(char)); }
+    { return writeBytes(reinterpret_cast<const u8*>(str), ::std::strlen(str) * sizeof(char)); }
 
     virtual i64 writeString(const wchar_t* const str) noexcept
-    { return writeBytes(reinterpret_cast<const u8*>(str), std::wcslen(str) * sizeof(wchar_t)); }
+    { return writeBytes(reinterpret_cast<const u8*>(str), ::std::wcslen(str) * sizeof(wchar_t)); }
 
     template<typename _T>
     i64 readType(_T* t) noexcept

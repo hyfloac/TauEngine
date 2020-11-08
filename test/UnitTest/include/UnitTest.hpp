@@ -182,6 +182,55 @@ enum class TauComparisonType
     LesserEqual
 };
 
+class TestCaseConsole final
+{
+    DEFAULT_DESTRUCT(TestCaseConsole);
+    DELETE_CM(TestCaseConsole);
+private:
+    ::std::list<::std::wstring> _messageList;
+    bool _shouldWrite;
+public:
+    TestCaseConsole() noexcept
+        : _shouldWrite(false)
+    { }
+
+    [[nodiscard]] bool& shouldWrite()       noexcept { return _shouldWrite; }
+    [[nodiscard]] bool  shouldWrite() const noexcept { return _shouldWrite; }
+
+    [[nodiscard]]       ::std::list<::std::wstring>& messageList()       noexcept { return _messageList; }
+    [[nodiscard]] const ::std::list<::std::wstring>& messageList() const noexcept { return _messageList; }
+
+    template<typename... _Args>
+    TestCaseConsole& printW(const ::std::wstring& format, const _Args&... args) noexcept
+    {
+        if(_shouldWrite)
+        { _messageList.push_back(fmt::format(format, args...)); }
+        return *this;
+    }
+
+    template<typename... _Args>
+    TestCaseConsole& printW(const fmt::text_style& style, const ::std::wstring& format, const _Args&... args) noexcept
+    {
+        if(_shouldWrite)
+        { _messageList.push_back(fmt::format(style, format, args...)); }
+        return *this;
+    }
+
+    template<typename... _Args>
+    TestCaseConsole& internalPrintW(const ::std::wstring& format, const _Args&... args) noexcept
+    {
+        _messageList.push_back(fmt::format(format, args...));
+        return *this;
+    }
+
+    template<typename... _Args>
+    TestCaseConsole& internalPrintW(const fmt::text_style& style, const ::std::wstring& format, const _Args&... args) noexcept
+    {
+        _messageList.push_back(fmt::format(style, format, args...));
+        return *this;
+    }
+};
+
 class ITestCase
 {
     DEFAULT_DESTRUCT_VI(ITestCase);
@@ -190,7 +239,7 @@ public:
     ITestCase* _next;
     const wchar_t* _testSuite;
     const wchar_t* _testCase;
-    ::std::list<::std::wstring> _messageList;
+    TestCaseConsole _console;
 public:
     ITestCase(const wchar_t* const testSuite, const wchar_t* const testCase) noexcept
         : _next(nullptr)
@@ -201,26 +250,26 @@ public:
     void test()
     {
         // Console::Instance().setOutColor(Console::White, Console::Black);
-        _messageList.push_back(fmt::format(fg(fmt::color::white) | bg(fmt::color::black), L"Starting Test: {}\n", _testCase));
+        _console.internalPrintW(fg(fmt::color::white) | bg(fmt::color::black), L"Starting Test: {}\n", _testCase);
         Console::Instance().resetOutColor();
         UnitTests::reset();
 
         _test();
 
         // Console::Instance().setOutColor(Console::White, Console::Black);
-        _messageList.push_back(fmt::format(fg(fmt::color::white) | bg(fmt::color::black), L"Finishing Test: {}\n", _testCase));
+        _console.internalPrintW(fg(fmt::color::white) | bg(fmt::color::black), L"Finishing Test: {}\n", _testCase);
 
         if(UnitTests::passedPrevious())
-        { _messageList.push_back(fmt::format(fg(fmt::color::white) | bg(fmt::color::black), L"Passed Tests: {}\n\n", _testCase)); }
+        { _console.internalPrintW(fg(fmt::color::white) | bg(fmt::color::black), L"Passed Tests: {}\n\n", _testCase); }
         else
-        { _messageList.push_back(fmt::format(fg(fmt::color::white) | bg(fmt::color::black), L"Failed Tests: {}\n\n", _testCase)); }
+        { _console.internalPrintW(fg(fmt::color::white) | bg(fmt::color::black), L"Failed Tests: {}\n\n", _testCase); }
 
         Console::Instance().resetOutColor();
     }
 
     void print() const
     {
-        for(const auto& msg : _messageList)
+        for(const auto& msg : _console.messageList())
         {
             fmt::print(msg);
         }
@@ -243,13 +292,13 @@ struct TauUnitAssert<_Actual, _Expected, TauComparisonType::Equal> final
     {
         if(a == b)
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} == {} ({} == {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} == {} ({} == {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} == {} ({} == {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} == {} ({} == {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -263,13 +312,13 @@ struct TauUnitAssert<_Actual, _Expected, TauComparisonType::NotEqual> final
     {
         if(a != b)
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} != {} ({} != {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} != {} ({} != {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} != {} ({} != {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} != {} ({} != {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -283,13 +332,13 @@ struct TauUnitAssert<_Actual, _Expected, TauComparisonType::Greater> final
     {
         if(a > b)
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} > {} ({} > {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} > {} ({} > {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} > {} ({} > {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} > {} ({} > {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -303,13 +352,13 @@ struct TauUnitAssert<_Actual, _Expected, TauComparisonType::Lesser> final
     {
         if(a < b)
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} < {} ({} < {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} < {} ({} < {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} < {} ({} < {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} < {} ({} < {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -323,13 +372,13 @@ struct TauUnitAssert<_Actual, _Expected, TauComparisonType::GreaterEqual> final
     {
         if(a >= b)
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} >= {} ({} >= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} >= {} ({} >= {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} >= {} ({} >= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} >= {} ({} >= {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -343,13 +392,255 @@ struct TauUnitAssert<_Actual, _Expected, TauComparisonType::LesserEqual> final
     {
         if(a <= b)
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} <= {} ({} <= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} <= {} ({} <= {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} <= {} ({} <= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} <= {} ({} <= {})\n", aStr, bStr, a, b);
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+
+template<>
+struct TauUnitAssert<const char*, const char*, TauComparisonType::Equal> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const char* a, const char* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::strcmp(a, b) == 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} == {} (\"{}\" == \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} == {} (\"{}\" == \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const char*, const char*, TauComparisonType::NotEqual> final
+{
+    [[nodiscard]] bool static tauAssert(ITestCase& test, const char* a, const char* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::strcmp(a, b) != 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} != {} (\"{}\" != \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} != {} (\"{}\" != \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const char*, const char*, TauComparisonType::Greater> final
+{
+    [[nodiscard]] bool static tauAssert(ITestCase& test, const char* a, const char* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::strcmp(a, b) > 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} > {} (\"{}\" > \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} > {} (\"{}\" > \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const char*, const char*, TauComparisonType::Lesser> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const char* a, const char* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::strcmp(a, b) < 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} < {} (\"{}\" < \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} < {} (\"{}\" < \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const char*, const char*, TauComparisonType::GreaterEqual> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const char* a, const char* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::strcmp(a, b) >= 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} >= {} (\"{}\" >= \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} >= {} (\"{}\" >= \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const char*, const char*, TauComparisonType::LesserEqual> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const char* a, const char* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::strcmp(a, b) <= 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} <= {} (\"{}\" <= \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} <= {} (\"{}\" <= \"{}\")\n", aStr, bStr, StringCast<wchar_t>(DynString(a)).c_str(), StringCast<wchar_t>(DynString(b)).c_str());
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+
+template<>
+struct TauUnitAssert<const wchar_t*, const wchar_t*, TauComparisonType::Equal> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const wchar_t* a, const wchar_t* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::wcscmp(a, b) == 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} == {} (\"{}\" == \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} == {} (\"{}\" == \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const wchar_t*, const wchar_t*, TauComparisonType::NotEqual> final
+{
+    [[nodiscard]] bool static tauAssert(ITestCase& test, const wchar_t* a, const wchar_t* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::wcscmp(a, b) != 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} != {} (\"{}\" != \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} != {} (\"{}\" != \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const wchar_t*, const wchar_t*, TauComparisonType::Greater> final
+{
+    [[nodiscard]] bool static tauAssert(ITestCase& test, const wchar_t* a, const wchar_t* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::wcscmp(a, b) > 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} > {} (\"{}\" > \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} > {} (\"{}\" > \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const wchar_t*, const wchar_t*, TauComparisonType::Lesser> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const wchar_t* a, const wchar_t* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::wcscmp(a, b) < 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} < {} (\"{}\" < \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} < {} (\"{}\" < \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const wchar_t*, const wchar_t*, TauComparisonType::GreaterEqual> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const wchar_t* a, const wchar_t* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::wcscmp(a, b) >= 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} >= {} (\"{}\" >= \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} >= {} (\"{}\" >= \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::fail();
+            return false;
+        }
+    }
+};
+
+template<>
+struct TauUnitAssert<const wchar_t*, const wchar_t*, TauComparisonType::LesserEqual> final
+{
+    [[nodiscard]] static bool tauAssert(ITestCase& test, const wchar_t* a, const wchar_t* b, const wchar_t* const aStr, const wchar_t* const bStr)
+    {
+        if(::std::wcscmp(a, b) <= 0)
+        {
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} <= {} (\"{}\" <= \"{}\")\n", aStr, bStr, a, b);
+            UnitTests::pass();
+            return true;
+        }
+        else
+        {
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} <= {} (\"{}\" <= \"{}\")\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -370,13 +661,13 @@ struct TauUnitAssertFloat<_Actual, _Expected, TauComparisonType::Equal, true, _E
     {
         if(rEpsilonEquals(a, b, epsilon))
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -390,13 +681,13 @@ struct TauUnitAssertFloat<_Actual, _Expected, TauComparisonType::Equal, false, _
     {
         if(aEpsilonEquals(a, b, epsilon))
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~== {} ({} ~== {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -410,13 +701,13 @@ struct TauUnitAssertFloat<_Actual, _Expected, TauComparisonType::NotEqual, true,
     {
         if(!rEpsilonEquals(a, b, epsilon))
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -430,13 +721,13 @@ struct TauUnitAssertFloat<_Actual, _Expected, TauComparisonType::NotEqual, false
     {
         if(!aEpsilonEquals(a, b, epsilon))
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b);
             UnitTests::pass();
             return true;
         }
         else
         {
-            test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b));
+            test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {} ~!= {} ({} ~!= {})\n", aStr, bStr, a, b);
             UnitTests::fail();
             return false;
         }
@@ -447,14 +738,14 @@ struct TauUnitAssertFloat<_Actual, _Expected, TauComparisonType::NotEqual, false
 {
     if(expr)
     {
-        test._messageList.push_back(fmt::format(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {}\n", exprStr));
+        test._console.internalPrintW(fg(fmt::color::green) | bg(fmt::color::black), L"Assert Passed. Expression: {}\n", exprStr);
         UnitTests::pass();
         return true;
     }
     else
     {
         
-        test._messageList.push_back(fmt::format(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {}\n", exprStr));
+        test._console.internalPrintW(fg(fmt::color::red) | bg(fmt::color::black), L"Assert Failed. Expression: {}\n", exprStr);
         UnitTests::fail();
         return false;
     }
@@ -462,43 +753,43 @@ struct TauUnitAssertFloat<_Actual, _Expected, TauComparisonType::NotEqual, false
 
 #define TAU_ASSERT_(_EXPR, _SHOULD_RET) \
     if(!tauAssert(*this, _EXPR, _tau_STRINGIFY(_EXPR))) { \
-        Console::Instance().shouldWrite() = true;  \
+        _console.shouldWrite() = true;  \
         if constexpr(_SHOULD_RET)                  \
         { return; }                                \
     } else {                                       \
-        Console::Instance().shouldWrite() = false; \
+        _console.shouldWrite() = false; \
     }                                              \
-    (void) Console::Instance()
+    (void) _console
 
 #define TAU_ASSERT_OPERATOR_(_A, _B, _OP, _SHOULD_RET) \
     if(!TauUnitAssert<decltype(_A), decltype(_B), _OP>::tauAssert(*this, _A, _B, _tau_STRINGIFY(_A), _tau_STRINGIFY(_B))) { \
-        Console::Instance().shouldWrite() = true;             \
+        _console.shouldWrite() = true;             \
         if constexpr(_SHOULD_RET)                  \
         { return; }                                \
     } else {                                       \
-        Console::Instance().shouldWrite() = false; \
+        _console.shouldWrite() = false; \
     }                                              \
-    (void) Console::Instance()
+    (void) _console
 
 #define TAU_ASSERT_OPERATOR_FP_(_A, _B, _OP, _IS_RELATIVE, _SHOULD_RET) \
     if(!TauUnitAssertFloat<decltype(_A), decltype(_B), _OP, _IS_RELATIVE>::tauAssert(*this, _A, _B, _tau_STRINGIFY(_A), _tau_STRINGIFY(_B))) { \
-        Console::Instance().shouldWrite() = true;  \
+        _console.shouldWrite() = true;  \
         if constexpr(_SHOULD_RET)                  \
         { return; }                                \
     } else {                                       \
-        Console::Instance().shouldWrite() = false; \
+        _console.shouldWrite() = false; \
     }                                              \
-    (void) Console::Instance()
+    (void) _console
 
 #define TAU_ASSERT_OPERATOR_FPE_(_A, _B, _OP, _IS_RELATIVE, _EPSILON, _SHOULD_RET) \
     if(!TauUnitAssertFloat<decltype(_A), decltype(_B), _OP, _IS_RELATIVE, decltype(_EPSILON)>::tauAssert(*this, _A, _B, _tau_STRINGIFY(_A), _tau_STRINGIFY(_B), _EPSILON)) { \
-        Console::Instance().shouldWrite() = true;  \
+        _console.shouldWrite() = true;  \
         if constexpr(_SHOULD_RET)                  \
         { return; }                                \
     } else {                                       \
-        Console::Instance().shouldWrite() = false; \
+        _console.shouldWrite() = false; \
     }                                              \
-    (void) Console::Instance()
+    (void) _console
 
 
 #define TAU_ASSERT(_EXPR) TAU_ASSERT_(_EXPR, true)

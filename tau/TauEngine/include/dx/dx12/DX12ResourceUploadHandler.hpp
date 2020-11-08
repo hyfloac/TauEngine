@@ -5,6 +5,7 @@
 #include <Objects.hpp>
 #include <NumTypes.hpp>
 #include <allocator/FixedBlockAllocator.hpp>
+#include <allocator/SlabAllocator.hpp>
 #include <Safeties.hpp>
 #include "DLL.hpp"
 
@@ -17,6 +18,7 @@ struct DX12Allocation final
 
 class DX12AutoAllocation;
 class DX12AutoAllocation2;
+class DX12AutoAllocation3;
 
 class TAU_DLL DX12BufferResourceUploadHandler final
 {
@@ -140,6 +142,87 @@ private:
     void mergeFreeBlock(FreeBlock* freeBlock) noexcept;
 };
 
+class TAU_DLL DX12BufferResourceUploadHandler3 final : public SlabAllocatorHelper
+{
+#ifdef TAU_PRODUCTION
+    using FBAllocator =  FixedBlockAllocator<AllocationTracking::None>;
+#else
+    using FBAllocator =  FixedBlockAllocator<AllocationTracking::DoubleDeleteCount>;
+#endif
+private:
+    ID3D12Device* _d3dDevice;
+    FBAllocator _heaps;
+public:
+    DX12BufferResourceUploadHandler3(ID3D12Device* const d3dDevice) noexcept
+        : SlabAllocatorHelper(14, 12, 256)
+        , _d3dDevice(d3dDevice)
+        , _heaps(sizeof(ID3D12Resource*), 512, 1)
+    { }
+
+    ~DX12BufferResourceUploadHandler3() noexcept override
+    {
+        for(uSys i = 0; i < _heaps.size(); ++i)
+        {
+            _heaps[i]->Unmap(0, nullptr);
+            _heaps[i]->Release();
+        }
+    }
+
+    [[nodiscard]] DX12Allocation alloc(uSys minSize) noexcept
+    {
+    }
+
+    [[nodiscard]] NullableRef<DX12AutoAllocation3> allocAuto(uSys minSize) noexcept;
+
+    void free(DX12Allocation& resource) noexcept;
+protected:
+    bool allocateBlock(Block* const block) noexcept override
+    {
+        ID3D12Resource* heap;
+
+        D3D12_HEAP_PROPERTIES heapProps;
+        heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+        heapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        heapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        heapProps.CreationNodeMask = 0;
+        heapProps.VisibleNodeMask = 0;
+
+        D3D12_RESOURCE_DESC resourceDesc;
+        resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        resourceDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+        resourceDesc.Width = 256 * 1024 * 1024;
+        resourceDesc.Height = 1;
+        resourceDesc.DepthOrArraySize = 1;
+        resourceDesc.MipLevels = 1;
+        resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+        resourceDesc.SampleDesc.Count = 1;
+        resourceDesc.SampleDesc.Quality = 0;
+        resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+        resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+        HRESULT res = _d3dDevice->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS | D3D12_HEAP_FLAG_CREATE_NOT_ZEROED, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&heap));
+
+        if(FAILED(res))
+        { return false; }
+
+        void* mapping;
+        D3D12_RANGE readRange { 0, 0 };
+        res = heap->Map(0, &readRange, &mapping);
+
+        if(FAILED(res))
+        {
+            heap->Release();
+            return false;
+        }
+
+        new(block) Block(mapping, resourceDesc.Width);
+
+        _heaps.add(heap);
+
+        return true;
+    }
+};
+
 class DX12AutoAllocation final
 {
     DELETE_CM(DX12AutoAllocation);
@@ -169,6 +252,25 @@ public:
     { }
 
     ~DX12AutoAllocation2() noexcept
+    { _handler.free(_allocation); }
+
+    [[nodiscard]] DX12Allocation allocation() const noexcept { return _allocation; }
+    [[nodiscard]] DX12Allocation& allocation() noexcept { return _allocation; }
+};
+
+class DX12AutoAllocation3 final
+{
+    DELETE_CM(DX12AutoAllocation3);
+private:
+    DX12Allocation _allocation;
+    DX12BufferResourceUploadHandler3& _handler;
+public:
+    DX12AutoAllocation3(const DX12Allocation& allocation, DX12BufferResourceUploadHandler3& handler) noexcept
+        : _allocation(allocation)
+        , _handler(handler)
+    { }
+
+    ~DX12AutoAllocation3() noexcept
     { _handler.free(_allocation); }
 
     [[nodiscard]] DX12Allocation allocation() const noexcept { return _allocation; }

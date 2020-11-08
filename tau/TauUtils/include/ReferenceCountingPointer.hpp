@@ -5,6 +5,7 @@
 #include "NumTypes.hpp"
 #include "allocator/TauAllocator.hpp"
 #include "AtomicIntrinsics.hpp"
+#include <type_traits>
 
 #ifndef TAU_DEFAULT_ATOMIC
   #define TAU_DEFAULT_ATOMIC 0
@@ -271,8 +272,11 @@ public:
     template<typename _TT>
     ReferenceCountingPointer<_T>& operator=(ReferenceCountingPointer<_TT>&& move) noexcept;
 
-    template<typename... _Args>
-    void reset(TauAllocator& allocator, _Args&&... args) noexcept;
+    template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int> = 0>
+    void reset(_Allocator& allocator, _Args&&... args) noexcept;
+
+    template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int> = 0>
+    void reset(_Arg0&& arg0, _Args&&... args) noexcept;
 
     [[nodiscard]]       _T& operator  *()                override { return *_tPtr; }
     [[nodiscard]] const _T& operator  *() const          override { return *_tPtr; }
@@ -354,8 +358,11 @@ public:
     template<typename _TT>
     StrongReferenceCountingPointer<_T>& operator=(const WeakReferenceCountingPointer<_TT>& copy) noexcept;
 
-    template<typename... _Args>
-    void reset(TauAllocator& allocator, _Args&&... args) noexcept;
+    template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int> = 0>
+    void reset(_Allocator& allocator, _Args&&... args) noexcept;
+
+    template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int> = 0>
+    void reset(_Arg0&& arg0, _Args&&... args) noexcept;
 
     [[nodiscard]]       _T& operator  *()                override { return *_tPtr; }
     [[nodiscard]] const _T& operator  *() const          override { return *_tPtr; }

@@ -468,6 +468,9 @@
     <ClCompile Include="src\entity\EntityComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\dx\dx12\D3D12MemAlloc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DLL.hpp">
@@ -1185,6 +1188,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\entity\component\TransformComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dx\dx12\D3D12MemAlloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

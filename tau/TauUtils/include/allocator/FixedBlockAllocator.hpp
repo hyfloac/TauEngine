@@ -4,6 +4,7 @@
 #include "Objects.hpp"
 #include "TauAllocator.hpp"
 #include "PageAllocator.hpp"
+#include "TUMaths.hpp"
 
 /**
  * An allocator which only allocates a fixed size block.
@@ -133,12 +134,12 @@ public:
         if(!obj)
         { return; }
 
-        if(reinterpret_cast<u8*>(_pages) + (_allocIndex - _blockSize) == obj)
-        {
-            --_allocIndex;
-            attemptRelease();
-            return;
-        }
+        // if(reinterpret_cast<u8*>(_pages) + (_allocIndex - _blockSize) == obj)
+        // {
+        //     --_allocIndex;
+        //     attemptRelease();
+        //     return;
+        // }
 
         if(_lastFree)
         {
@@ -275,12 +276,12 @@ public:
 
         --_allocationDifference;
 
-        if(reinterpret_cast<u8*>(_pages) + (_allocIndex - _blockSize) == obj)
-        {
-            --_allocIndex;
-            attemptRelease();
-            return;
-        }
+        // if(reinterpret_cast<u8*>(_pages) + (_allocIndex - _blockSize) == obj)
+        // {
+        //     --_allocIndex;
+        //     attemptRelease();
+        //     return;
+        // }
 
         if(_lastFree)
         {
@@ -456,12 +457,12 @@ public:
             return;
         }
 
-        if(reinterpret_cast<u8*>(_pages) + (_allocIndex - _blockSize) == obj)
-        {
-            --_allocIndex;
-            attemptRelease();
-            return;
-        }
+        // if(reinterpret_cast<u8*>(_pages) + (_allocIndex - _blockSize) == obj)
+        // {
+        //     --_allocIndex;
+        //     attemptRelease();
+        //     return;
+        // }
 
         if(_lastFree)
         {

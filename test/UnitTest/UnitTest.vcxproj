@@ -20,8 +20,11 @@
     <ClCompile Include="src\FixedBlockAllocatorTest.cpp" />
     <ClCompile Include="src\FreeListAllocatorTest.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\MathTest.cpp" />
     <ClCompile Include="src\Matrix4x4fTest.cpp" />
+    <ClCompile Include="src\MemoryFileTest.cpp" />
     <ClCompile Include="src\RefPtrTest.cpp" />
+    <ClCompile Include="src\SlabAllocatorTest.cpp" />
     <ClCompile Include="src\StreamedAVLTreeTest.cpp" />
     <ClCompile Include="src\StringTest.cpp" />
     <ClCompile Include="src\UnitTest.cpp" />
@@ -34,8 +37,11 @@
     <ClInclude Include="include\AVLTreeTest.hpp" />
     <ClInclude Include="include\FixedBlockAllocatorTest.hpp" />
     <ClInclude Include="include\FreeListAllocatorTest.hpp" />
+    <ClInclude Include="include\MathTest.hpp" />
     <ClInclude Include="include\Matrix4x4fTest.hpp" />
+    <ClInclude Include="include\MemoryFileTest.hpp" />
     <ClInclude Include="include\RefUnitTest.hpp" />
+    <ClInclude Include="include\SlabAllocatorTest.hpp" />
     <ClInclude Include="include\StreamedAVLTreeTest.hpp" />
     <ClInclude Include="include\StringTest.hpp" />
     <ClInclude Include="include\UnitTest.hpp" />
@@ -90,21 +96,21 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)tau\TauMathLib\include\;$(SolutionDir)libs\fmt\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)tau\TauMathLib\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)tau\TauMathLib\include\;$(SolutionDir)libs\fmt\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)tau\TauMathLib\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)tau\TauMathLib\include\;$(SolutionDir)libs\fmt\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)tau\TauMathLib\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -132,7 +138,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <AdditionalDependencies>TauUtils.lib;TauMathLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauUtils.lib;TauMathLib.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
@@ -172,7 +178,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>TauUtils.lib;TauMathLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauUtils.lib;TauMathLib.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -210,7 +216,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>TauUtils.lib;TauMathLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>TauUtils.lib;TauMathLib.lib;ResourceLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LibraryPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LargeAddressAware>true</LargeAddressAware>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>

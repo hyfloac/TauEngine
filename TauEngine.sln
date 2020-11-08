@@ -42,6 +42,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceLib", "utils\Resour
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "test\UnitTest\UnitTest.vcxproj", "{7121518C-E7B8-4FCE-9A95-540D23949660}"
 	ProjectSection(ProjectDependencies) = postProject
+		{9933887F-700C-4176-A185-10FEFF66DC5C} = {9933887F-700C-4176-A185-10FEFF66DC5C}
 		{C112A295-50D5-4DDC-8748-E01A33B601D0} = {C112A295-50D5-4DDC-8748-E01A33B601D0}
 		{26293AE2-B33C-45FF-8D0D-F2B82B8F4C60} = {26293AE2-B33C-45FF-8D0D-F2B82B8F4C60}
 	EndProjectSection
@@ -50,9 +51,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VulkanTest", "test\VulkanTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B76203E6-F303-4253-A2A9-DDDAC4455BA7}"
 	ProjectSection(SolutionItems) = preProject
+		tau\TauEngine\natvis\D3D12MemAlloc.natvis = tau\TauEngine\natvis\D3D12MemAlloc.natvis
 		tau\TauEngine\natvis\DynArray.natvis = tau\TauEngine\natvis\DynArray.natvis
 		tau\TauEngine\natvis\ReferenceCountingPointer.natvis = tau\TauEngine\natvis\ReferenceCountingPointer.natvis
-		RunTimeType.natvis = RunTimeType.natvis
+		tau\TauEngine\natvis\RunTimeType.natvis = tau\TauEngine\natvis\RunTimeType.natvis
 		tau\TauEngine\natvis\Vector.natvis = tau\TauEngine\natvis\Vector.natvis
 		tau\TauEngine\natvis\Window.natvis = tau\TauEngine\natvis\Window.natvis
 	EndProjectSection

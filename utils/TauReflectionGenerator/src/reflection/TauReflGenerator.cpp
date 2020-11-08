@@ -8,6 +8,7 @@
 #include "reflection/attribs/GetAttribute.hpp"
 #include "reflection/attribs/SetAttribute.hpp"
 #include "reflection/attribs/ImplicitAttribute.hpp"
+#include "reflection/attribs/NoListAttribute.hpp"
 
 static ::llvm::cl::OptionCategory tauReflCategory("tau-reflection-generator options");
 
@@ -20,6 +21,7 @@ int main(int argCount, const char* args[])
     UNUSED(commonHelp);
 
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::ImplicitAttribute>("__implicit_base_0__");
+    tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::NoListAttribute>("nolist");
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::GetPropertyAttribute>("get");
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::SetPropertyAttribute>("set");
 

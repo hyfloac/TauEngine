@@ -345,6 +345,7 @@
     <ClInclude Include="include\FileReader.hpp" />
     <ClInclude Include="include\FileWriter.hpp" />
     <ClInclude Include="include\IFile.hpp" />
+    <ClInclude Include="include\MemoryFile.hpp" />
     <ClInclude Include="include\PathSanitizer.hpp" />
     <ClInclude Include="include\ResourceSelector.hpp" />
     <ClInclude Include="include\TauModelPart.hpp" />
@@ -365,6 +366,7 @@
     <ClCompile Include="src\FileReader.cpp" />
     <ClCompile Include="src\FileWriter.cpp" />
     <ClCompile Include="src\IFile.cpp" />
+    <ClCompile Include="src\MemoryFile.cpp" />
     <ClCompile Include="src\PathSanitizer.cpp" />
     <ClCompile Include="src\ResourceSelector.cpp" />
     <ClCompile Include="src\TauModelPart.cpp" />

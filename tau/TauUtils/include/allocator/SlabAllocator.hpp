@@ -8,6 +8,7 @@
 
 class SlabAllocatorHelper
 {
+    DEFAULT_DESTRUCT_VI(SlabAllocatorHelper);
 public:
     struct AllocPoint final
     {
@@ -80,8 +81,8 @@ public:
         : _basePower(basePower)
         , _slabs(slabCount)
         , _blocks(maxBlocks)
-        , _allocPointAllocator(4096)
-    { }
+        , _allocPointAllocator(sizeof(AllocPoint), maxAllocations)
+    { ::std::memset(_slabs.arr(), 0, _slabs.size() * sizeof(SlabSet)); }
 
     [[nodiscard]] Allocation allocate(const uSys size) noexcept
     {
@@ -151,7 +152,7 @@ protected:
      * ceiling the value. Afterwords we just have to offset the
      * slab index to fit our minimum slab size.
      */
-    [[nodiscard]] constexpr uSys computeSlabIndex(const uSys blockSize) const noexcept
+    [[nodiscard]] uSys computeSlabIndex(const uSys blockSize) const noexcept
     {
         /* Compute the power of slab we need.
          *
@@ -161,7 +162,7 @@ protected:
 
         if(power <= _basePower)
         { return 0; }
-        return power - _basePower;
+        return power - _basePower - 1;
     }
 
     virtual bool allocateBlock(Block* block) noexcept = 0;
@@ -170,6 +171,7 @@ protected:
     {
         Block& block = _blocks[blockIndex];
 
+        // Is block already carved?
         if(block.activeAllocations)
         { return false; }
 
@@ -184,9 +186,9 @@ protected:
         {
             didAllocate = false;
 
-            for(uSys i = _basePower + _slabs.count() - 1; i >= _basePower; --i)
+            for(iSys i = static_cast<iSys>(_basePower) + static_cast<iSys>(_slabs.count()) - 1; i >= static_cast<iSys>(_basePower); --i)
             {
-                const uSys slabIndex = i - _basePower;
+                const uSys slabIndex = static_cast<uSys>(i) - _basePower;
                 const uSys slabSize = 1 << i;
                 if(slabSize > remainingSize)
                 { continue; }

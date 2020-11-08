@@ -4,6 +4,7 @@
 #include "TauAllocator.hpp"
 #include "PageAllocator.hpp"
 #include "ReferenceCountingPointer.hpp"
+#include "TUMaths.hpp"
 
 /**
  *   This allocator is intended for use with free lists of

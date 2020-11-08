@@ -39,6 +39,9 @@
     <ClCompile Include="src\reflection\processing\TagPreProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\reflection\attribs\NoListAttribute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\reflection\Property.hpp">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\reflection\Function.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\reflection\attribs\NoListAttribute.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

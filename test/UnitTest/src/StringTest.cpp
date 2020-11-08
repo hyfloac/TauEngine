@@ -39,40 +39,6 @@ constexpr str_array<_CTo, _Length - 1> str_array_cast(const _CFrom(&arr)[_Length
 }
 
 template<typename _C>
-void stringWrapTest() noexcept
-{
-    static constexpr auto _str0 = str_array_cast<_C>("Hello World!");
-    static constexpr auto _str1 = str_array_cast<_C>("Hello World!");
-    // static constexpr auto _str2 = str_array_cast<_C>("heLLo World!");
-
-    const StringT<_C> str(_str0.c_str());
-    UTAssert(strCompare(_str1.c_str(), str.c_str()) == 0);
-    // UTAssert(equalsIgnoreCase(_str2.c_str(), str.c_str()));
-}
-
-template<typename _C>
-void stringViewTest() noexcept
-{
-    static constexpr auto _str0 = str_array_cast<_C>("Hello World!");
-    static constexpr auto _str1 = str_array_cast<_C>("Hello");
-    static constexpr auto _str2 = str_array_cast<_C>("World");
-
-    {
-        const StringT<_C> str(_str0.c_str());
-        const StringViewT<_C> strView(str, 0, 5);
-        UTAssert(strView == _str1.c_str());
-        UTAssert(strView != str);
-    }
-
-    {
-        const StringT<_C> str(_str0.c_str());
-        const StringViewT<_C> strView = StringViewT<_C>::create(str, 6, 5);
-        UTAssert(strView == _str2.c_str());
-        UTAssert(strView != str);
-    }
-}
-
-template<typename _C>
 void dynStringViewTest() noexcept
 {
     static constexpr auto _str0 = str_array_cast<_C>("Hello World!");
@@ -131,20 +97,6 @@ void dynStringTest() noexcept
         UTAssert(str0 == _str4.c_str());
         UTAssert(str0 != str1);
     }
-}
-
-void stringWrapTest() noexcept
-{
-    UNIT_TEST();
-    stringWrapTest<char>();
-    stringWrapTest<wchar_t>();
-}
-
-void stringViewTest() noexcept
-{
-    UNIT_TEST();
-    stringViewTest<char>();
-    stringViewTest<wchar_t>();
 }
 
 void dynStringViewTest() noexcept

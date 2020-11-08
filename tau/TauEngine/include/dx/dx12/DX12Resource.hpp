@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <d3d12.h>
+#include "D3D12MemAlloc.h"
 #include "graphics/ResourceRawInterface.hpp"
 #include "graphics/GraphicsEnums.hpp"
 
@@ -29,66 +30,30 @@ private:
 
 class TAU_DLL TAU_NOVTABLE DX12Resource : public IResource
 {
+    DELETE_CM(DX12Resource);
     RESOURCE_IMPL(DX12Resource);
 protected:
     DX12ResourceRawInterface _rawInterface;
     __declspec(property(get = d3dResource, put = setD3DResource)) ID3D12Resource* _d3dResource;
     EGraphics::ResourceHeapUsageType _resourceUsage;
+    D3D12MA::Allocation* _allocation;
+    DX12GraphicsInterface& _gi;
 public:
-    DX12Resource(const uSys size, ID3D12Resource* const d3dResource, const EGraphics::ResourceHeapUsageType resourceUsage) noexcept
+    DX12Resource(const uSys size, ID3D12Resource* const d3dResource, const EGraphics::ResourceHeapUsageType resourceUsage, D3D12MA::Allocation* const allocation, DX12GraphicsInterface& gi) noexcept
         : IResource(size)
         , _rawInterface(d3dResource)
         , _resourceUsage(resourceUsage)
+        , _allocation(allocation)
+        , _gi(gi)
     { }
 
     ~DX12Resource() noexcept override
     {
         if(_rawInterface._d3dResource)
         { _rawInterface._d3dResource->Release(); }
-    }
 
-    DX12Resource(const DX12Resource& copy)
-        : IResource(copy)
-        , _rawInterface(copy._rawInterface)
-        , _resourceUsage(copy._resourceUsage)
-    { _rawInterface._d3dResource->AddRef(); }
-
-    DX12Resource(DX12Resource&& move) noexcept
-        : IResource(std::move(move))
-        , _rawInterface(std::move(move._rawInterface))
-        , _resourceUsage(move._resourceUsage)
-    { }
-
-    DX12Resource& operator=(const DX12Resource& copy)
-    {
-        if(this == &copy)
-        { return *this; }
-
-        _rawInterface._d3dResource->Release();
-
-        IResource::operator=(copy);
-        _rawInterface = copy._rawInterface;
-        _resourceUsage = copy._resourceUsage;
-
-        _rawInterface._d3dResource->AddRef();
-
-        return *this;
-    }
-
-    DX12Resource& operator=(DX12Resource&& move) noexcept
-    {
-        if(this == &move)
-        { return *this; }
-        
-        _rawInterface._d3dResource->Release();
-
-        IResource::operator=(std::move(move));
-        _rawInterface = std::move(move._rawInterface);
-        _resourceUsage = move._resourceUsage;
-
-        move._rawInterface._d3dResource = null;
-
-        return *this;
+        if(_allocation)
+        { _allocation->Release(); }
     }
 
     [[nodiscard]] ID3D12Resource* d3dResource() const noexcept { return _rawInterface._d3dResource; }
@@ -99,5 +64,24 @@ protected:
 #if defined(_MSVC_LANG) || 1
     void setD3DResource(ID3D12Resource* resource) noexcept { _rawInterface._d3dResource = resource; }
 #endif
+};
+
+class TAU_DLL DX12ResourceBuilder final : public IResourceBuilder
+{
+    DEFAULT_DESTRUCT(DX12ResourceBuilder);
+    DELETE_CM(DX12ResourceBuilder);
+private:
+    DX12GraphicsInterface& _gi;
+public:
+    DX12ResourceBuilder(DX12GraphicsInterface& gi) noexcept
+        : _gi(gi)
+    { }
+
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, ResourceHeap heap, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, ResourceHeap heap, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, ResourceHeap heap, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, ResourceHeap heap, Error* error, TauAllocator& allocator) const noexcept override;
+protected:
+    [[nodiscard]] uSys _allocSize(uSys type) const noexcept override;
 };
 #endif

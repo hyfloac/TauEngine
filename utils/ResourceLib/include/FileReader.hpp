@@ -93,7 +93,7 @@ public:
 
     [[nodiscard]] const CPPRef<IFile>& file() const noexcept { return _file; }
     [[nodiscard]] u64 index() const noexcept { return _fileIndex; }
-
+    
     /**
      * Reads data into a buffer.
      *
@@ -130,7 +130,7 @@ public:
     *
     *   This is a special version intended to generate more
     * optimized memcpy code. In this case the buffer is smaller
-    * than a standard page, and thus will generate optimized
+    * than a standard page, and thus will generate more optimized
     * assembly.
     *
     * @param[out] buffer
@@ -148,7 +148,7 @@ public:
      * Reads in a type from a file.
      *
      *   This is intended to make it easier to read specific types
-     * such as a primitive or a structure. To aid with this, it
+     * such as a primitive or a POD structure. To aid with this, it
      * also supports explicitly setting the target endianness of
      * the data.
      *
@@ -164,7 +164,7 @@ public:
      *      The target endianness to parse the data as. By default
      *    this will treat it as the compiling system endianness.
      * @param[out] t
-     *      A pointer to variable to read in from the file.
+     *      A pointer to the variable to read in from the file.
      * @return
      *      The number of bytes read in.
      */
@@ -172,6 +172,14 @@ public:
     i64 readT(_T* t) noexcept
     { return _FRUtils::ReadVal<_T, _Endian>::read(t, *this); }
 private:
+    /**
+     * Buffers in a block of data from the file.
+     *
+     * @return
+     *      The number of bytes read in.
+     */    
+    [[nodiscard]] i64 bufferData() noexcept;
+
     /**
      * Called from a specialization of @link readS @endlink.
      *
@@ -191,21 +199,33 @@ private:
      *      The number of bytes read in. 
      */
     [[nodiscard]] i64 read2(void* buffer) noexcept;
-
+    
     /**
-     * Buffers in a block of data from the file.
+     * Called from @link readCountSafe @endlink.
      *
+     *   This is used when the buffer size is less than a page. in
+     * that case it is able to always perform the copy with 1 or 2
+     * memcpy's. This version does not take in the size as a
+     * template argument. This is because templating generates a
+     * lot code, and we don't want 4096 different versions of the
+     * same thing.
+     *
+     * @param[out] buffer
+     *      The buffer where the data will get stored.
+     * @param bufferSize
+     *      The size of the buffer in bytes.
      * @return
-     *      The number of bytes read in.
-     */    
-    [[nodiscard]] i64 bufferData() noexcept;
-
+     *      The number of bytes read in. 
+     */
+    [[nodiscard]] i64 readCountSafe(void* buffer, uSys bufferSize) noexcept;
+    
     /**
      * Called from @link readS @endlink.
      *
      *   This is used when the buffer size is less than a page. in
      * that case it is able to always perform the copy with 1 or 2
-     * memcpy's.
+     * memcpy's. This version redirects to the non templated
+     * version to reduce code output size.
      *
      * @param[out] buffer
      *      The buffer where the data will get stored.
@@ -214,8 +234,28 @@ private:
      * @return
      *      The number of bytes read in. 
      */
-    template<uSys _BufferSize>
-    [[nodiscard]] i64 readCountSafe(void* buffer) noexcept
+    template<uSys _BufferSize, ::std::enable_if_t<(_BufferSize > 64), int>* = nullptr>
+    [[nodiscard]] i64 readCountSafe(void* const buffer) noexcept
+    { return readCountSafe(buffer, _BufferSize); }
+
+    /**
+     * Called from @link readS @endlink.
+     *
+     *   This is used when the buffer size is less than a page. in
+     * that case it is able to always perform the copy with 1 or 2
+     * memcpy's. This version will have up to 64 unique versions.
+     * These versions will be taking advantage of the intrinsic
+     * version of memcpy.
+     *
+     * @param[out] buffer
+     *      The buffer where the data will get stored.
+     * @tparam _BufferSize
+     *      The size of the buffer in bytes.
+     * @return
+     *      The number of bytes read in. 
+     */
+    template<uSys _BufferSize, ::std::enable_if_t<(_BufferSize <= 64), int>* = nullptr>
+    [[nodiscard]] i64 readCountSafe(void* const buffer) noexcept
     {
         // Are we at the end of the buffer.
         if(_bufferIndex == _bufferFillCount)
@@ -243,7 +283,7 @@ private:
 
             // Copy in the remaining data.            
             (void) ::std::memcpy(reinterpret_cast<u8*>(buffer) + readSize, _buffer, _BufferSize - readSize);
-            _bufferIndex += _BufferSize - readSize;
+            _bufferIndex = _BufferSize - readSize;
         }
         else
         {
@@ -257,11 +297,11 @@ private:
 };
 
 template<>
-inline i64 FileReader::readS<1>(void* buffer) noexcept
+inline i64 FileReader::readS<1>(void* const buffer) noexcept
 { return read1(buffer); }
 
 template<>
-inline i64 FileReader::readS<2>(void* buffer) noexcept
+inline i64 FileReader::readS<2>(void* const buffer) noexcept
 { return read2(buffer); }
 
 namespace _FRUtils {

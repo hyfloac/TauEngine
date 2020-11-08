@@ -5,8 +5,9 @@
 #include <memory>
 #pragma warning(pop)
 
-#include <NumTypes.hpp>
-#include <ReferenceCountingPointer.hpp>
+#include "NumTypes.hpp"
+#include "ReferenceCountingPointer.hpp"
+#include "Utils.hpp"
 
 #define TAU_SAFETIES_str0(_X) #_X
 #define TAU_SAFETIES_str(_X) TAU_SAFETIES_str0(_X)

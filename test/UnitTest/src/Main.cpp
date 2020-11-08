@@ -9,8 +9,11 @@
 #include "Vector3fTest.hpp"
 #include "Vector4fTest.hpp"
 #include "Matrix4x4fTest.hpp"
+#include "SlabAllocatorTest.hpp"
+#include "MathTest.hpp"
 #include "UnitTest.hpp"
 #include "ConPrinter.hpp"
+#include "MemoryFileTest.hpp"
 #include <cstdio>
 
 #include "allocator/PageAllocator.hpp"
@@ -24,7 +27,7 @@
   #define PAUSE(_MSG)
 #endif
 
-int main(int argCount, char* args[]) noexcept
+int main(int argCount, char* args[])
 {
     PageAllocator::init();
 
@@ -39,8 +42,6 @@ int main(int argCount, char* args[]) noexcept
     PAUSE("Continue");
 
     printf("\nString Tests:\n\n");
-    StringTest::stringWrapTest();
-    StringTest::stringViewTest();
     StringTest::dynStringViewTest();
     StringTest::dynStringTest();
     printf("String Tests Finished\n");
@@ -223,6 +224,24 @@ int main(int argCount, char* args[]) noexcept
     StreamedAVLTreeUnitTest::removeDuplicateLesserTest();
     printf("Streamed AVL Tree Tests Finished\n");
         
+    PAUSE("Continue");
+
+    printf("\nSlab Allocator Tests:\n\n");
+    SlabAllocatorUnitTest::runTests();
+    printf("Slab Allocator Tests Finished\n");
+        
+    PAUSE("Continue");
+
+    printf("\nMath Tests:\n\n");
+    MathTest::runTests();
+    printf("Math Tests Finished\n");
+        
+    PAUSE("Continue");
+
+    printf("\nMemory File Tests:\n\n");
+    MemoryFileTest::runTests();
+    printf("Memory File Tests Finished\n");
+
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());
     printf("Tests Passed: %d\n", UnitTests::testsPassed());
     printf("Tests Failed: %d\n", UnitTests::testsFailed());

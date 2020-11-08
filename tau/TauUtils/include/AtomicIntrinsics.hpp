@@ -5,7 +5,7 @@
 #ifdef _WIN32
 #pragma warning(push, 0)
 #include <intrin0.h>
-#include <winnt.h>
+// #include <winnt.h>
 #pragma warning(pop)
 
 template<typename _T>

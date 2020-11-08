@@ -6,42 +6,37 @@
 
 #include <Objects.hpp>
 
+#ifndef TAU_MUTEX_USE_DBG
+  #ifdef TAU_PRODUCTION
+    #define TAU_MUTEX_USE_DBG 0
+  #else
+    #define TAU_MUTEX_USE_DBG 1
+  #endif
+#endif
+
 class CSMutex final
 {
     DELETE_CM(CSMutex);
 private:
     CRITICAL_SECTION _criticalSection;
 public:
-    inline CSMutex() noexcept
+    CSMutex() noexcept
     {
-        InitializeCriticalSectionEx(&_criticalSection, 512,
-                                #ifdef TAU_PRODUCTION
-                                    CRITICAL_SECTION_NO_DEBUG_INFO
-                                #else
-                                    0
-                                #endif
-        );
+        const DWORD flags = TAU_MUTEX_USE_DBG ? 0 : CRITICAL_SECTION_NO_DEBUG_INFO;
+        InitializeCriticalSectionEx(&_criticalSection, 512, flags);
     }
 
-    inline ~CSMutex() noexcept
-    {
-        DeleteCriticalSection(&_criticalSection);
-    }
+    ~CSMutex() noexcept
+    { DeleteCriticalSection(&_criticalSection); }
 
-    inline void lock() noexcept
-    {
-        EnterCriticalSection(&_criticalSection);
-    }
+    void lock() noexcept
+    { EnterCriticalSection(&_criticalSection); }
 
-    inline bool try_lock() noexcept
-    {
-        return TryEnterCriticalSection(&_criticalSection) != 0;
-    }
+    bool try_lock() noexcept
+    { return TryEnterCriticalSection(&_criticalSection) != 0; }
 
-    inline void unlock() noexcept
-    {
-        LeaveCriticalSection(&_criticalSection);
-    }
+    void unlock() noexcept
+    { LeaveCriticalSection(&_criticalSection); }
 };
 
 class SRWMutex final
@@ -51,22 +46,34 @@ class SRWMutex final
 private:
     SRWLOCK _srw;
 public:
-    inline SRWMutex() noexcept
+    SRWMutex() noexcept
         : _srw(SRWLOCK_INIT)
     { }
 
-    inline void lock() noexcept
-    {
-        AcquireSRWLockExclusive(&_srw);
-    }
+    void lockRead() noexcept
+    { AcquireSRWLockShared(&_srw); }
 
-    inline bool try_lock() noexcept
-    {
-        return TryAcquireSRWLockExclusive(&_srw) != 0;
-    }
+    bool tryLockRead() noexcept
+    { return TryAcquireSRWLockShared(&_srw) != 0; }
 
-    inline void unlock() noexcept
-    {
-        ReleaseSRWLockExclusive(&_srw);
-    }
+    void unlockRead() noexcept
+    { ReleaseSRWLockShared(&_srw); }
+
+    void lockWrite() noexcept
+    { AcquireSRWLockExclusive(&_srw); }
+
+    bool tryLockWrite() noexcept
+    { return TryAcquireSRWLockExclusive(&_srw) != 0; }
+
+    void unlockWrite() noexcept
+    { ReleaseSRWLockExclusive(&_srw); }
+
+    void lock() noexcept
+    { lockWrite(); }
+
+    bool try_lock() noexcept
+    { return tryLockWrite(); }
+
+    void unlock() noexcept
+    { unlockWrite(); }
 };
