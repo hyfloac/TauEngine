@@ -11,6 +11,9 @@
 # Caching
 /tau/TauEditor/resources/cache/
 
+# Old License
+LICENSE.old
+
 # VS Code
 .vscode
 
