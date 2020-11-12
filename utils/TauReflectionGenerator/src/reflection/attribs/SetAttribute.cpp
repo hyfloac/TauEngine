@@ -40,37 +40,37 @@ void SetPropertyAttribute::generateBaseTauClass(::llvm::raw_fd_ostream& base) co
 void SetPropertyAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, const Ref<Class>& clazz) const noexcept
 {
     base << 
-        "        public:                                                                                                                            \\\n"
-        "            template<typename _T>                                                                                                          \\\n"
-        "            [[nodiscard]] _T* getProperty(" << clazz->name() << "* const object, const char* const propName) const noexcept                \\\n"
-        "            { return reinterpret_cast<_T*>(getPropertyImpl(object, propName)); }                                                           \\\n"
-        "                                                                                                                                           \\\n"
-        "            template<typename _T>                                                                                                          \\\n"
-        "            [[nodiscard]] _T* getProperty(" << clazz->name() << "* const object, const unsigned propIndex) const noexcept                  \\\n"
-        "            { return reinterpret_cast<_T*>(getPropertyImpl(object, propIndex)); }                                                          \\\n"
-        "                                                                                                                                           \\\n"
-        "            template<typename _T>                                                                                                          \\\n"
-        "            void setProperty(" << clazz->name() << "* const object, const char* const propName, const _T& value) const noexcept            \\\n"
-        "            { return setPropertyImpl(object, propName, &value); }                                                                          \\\n"
-        "                                                                                                                                           \\\n"
-        "            template<typename _T>                                                                                                          \\\n"
-        "            void setProperty(" << clazz->name() << "* const object, const unsigned propIndex, const _T& value) const noexcept              \\\n"
-        "            { return setPropertyImpl(object, propIndex, &value); }                                                                         \\\n"
-        "        protected:                                                                                                                         \\\n"
-        "            [[nodiscard]] void* _getProperty(void* const object, const char* const propName) const noexcept override                       \\\n"
-        "            { return getPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propName); }                                      \\\n"
-        "                                                                                                                                           \\\n"
-        "            [[nodiscard]] void* _getProperty(void* const object, const unsigned propIndex) const noexcept override                         \\\n"
-        "            { return getPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propIndex); }                                     \\\n"
-        "                                                                                                                                           \\\n"
-        "            void _setProperty(void* const object, const char* const propName, const void* const value) const noexcept override             \\\n"
-        "            { return setPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propName, value); }                               \\\n"
-        "                                                                                                                                           \\\n"
-        "            void _setProperty(void* const object, const unsigned propIndex, const void* const value) const noexcept override               \\\n"
-        "            { return setPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propIndex, value); }                              \\\n"
-        "                                                                                                                                           \\\n"
-        "            [[nodiscard]] void* getPropertyImpl(" << clazz->name() << "* const object, const char* const propName) const noexcept          \\\n"
-        "            {                                                                                                                              \\\n";
+        "        public:                                                                                                                                \\\n"
+        "            template<typename _T>                                                                                                              \\\n"
+        "            [[nodiscard]] _T* getProperty(" << clazz->name() << "* const object, const char* const propName) const noexcept                    \\\n"
+        "            { return reinterpret_cast<_T*>(getPropertyImpl(object, propName)); }                                                               \\\n"
+        "                                                                                                                                               \\\n"
+        "            template<typename _T>                                                                                                              \\\n"
+        "            [[nodiscard]] _T* getProperty(" << clazz->name() << "* const object, const unsigned propIndex) const noexcept                      \\\n"
+        "            { return reinterpret_cast<_T*>(getPropertyImpl(object, propIndex)); }                                                              \\\n"
+        "                                                                                                                                               \\\n"
+        "            template<typename _T>                                                                                                              \\\n"
+        "            void setProperty(" << clazz->name() << "* const object, const char* const propName, const _T& value) const noexcept                \\\n"
+        "            { return setPropertyImpl(object, propName, &value); }                                                                              \\\n"
+        "                                                                                                                                               \\\n"
+        "            template<typename _T>                                                                                                              \\\n"
+        "            void setProperty(" << clazz->name() << "* const object, const unsigned propIndex, const _T& value) const noexcept                  \\\n"
+        "            { return setPropertyImpl(object, propIndex, &value); }                                                                             \\\n"
+        "        protected:                                                                                                                             \\\n"
+        "            [[nodiscard]] void* _getProperty(void* const object, const char* const propName) const noexcept override                           \\\n"
+        "            { return getPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propName); }                                          \\\n"
+        "                                                                                                                                               \\\n"
+        "            [[nodiscard]] void* _getProperty(void* const object, const unsigned propIndex) const noexcept override                             \\\n"
+        "            { return getPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propIndex); }                                         \\\n"
+        "                                                                                                                                               \\\n"
+        "            void _setProperty(void* const object, const char* const propName, const void* const value) const noexcept override                 \\\n"
+        "            { return setPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propName, value); }                                   \\\n"
+        "                                                                                                                                               \\\n"
+        "            void _setProperty(void* const object, const unsigned propIndex, const void* const value) const noexcept override                   \\\n"
+        "            { return setPropertyImpl(reinterpret_cast<" << clazz->name() << "*>(object), propIndex, value); }                                  \\\n"
+        "                                                                                                                                               \\\n"
+        "            [[nodiscard]] void* getPropertyImpl(" << clazz->name() << "* const object, const char* const propName) const noexcept              \\\n"
+        "            {                                                                                                                                  \\\n";
 
     for(uSys i = 0; i < clazz->properties().size(); ++i)
     {
@@ -83,13 +83,13 @@ void SetPropertyAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, co
     }
 
     base << 
-        "                return nullptr;                                                                                                            \\\n"
-        "            }                                                                                                                              \\\n"
-        "                                                                                                                                           \\\n"
-        "            [[nodiscard]] void* getPropertyImpl(" << clazz->name() << "* const object, const unsigned propIndex) const noexcept            \\\n"
-        "            {                                                                                                                              \\\n"
-        "                switch(propIndex)                                                                                                          \\\n"
-        "                {                                                                                                                          \\\n";
+        "                return nullptr;                                                                                                                \\\n"
+        "            }                                                                                                                                  \\\n"
+        "                                                                                                                                               \\\n"
+        "            [[nodiscard]] void* getPropertyImpl(" << clazz->name() << "* const object, const unsigned propIndex) const noexcept                \\\n"
+        "            {                                                                                                                                  \\\n"
+        "                switch(propIndex)                                                                                                              \\\n"
+        "                {                                                                                                                              \\\n";
     
     for(uSys i = 0; i < clazz->properties().size(); ++i)
     {
@@ -101,12 +101,12 @@ void SetPropertyAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, co
     }
 
     base <<
-        "                    default: return nullptr;                                                                                               \\\n"
-        "                }                                                                                                                          \\\n"
-        "            }                                                                                                                              \\\n"
-        "                                                                                                                                           \\\n"
-        "            void setPropertyImpl(" << clazz->name() << "* const object, const char* propName, const void* const value) const noexcept      \\\n"
-        "            {                                                                                                                              \\\n";
+        "                    default: return nullptr;                                                                                                   \\\n"
+        "                }                                                                                                                              \\\n"
+        "            }                                                                                                                                  \\\n"
+        "                                                                                                                                               \\\n"
+        "            void setPropertyImpl(" << clazz->name() << "* const object, const char* const propName, const void* const value) const noexcept    \\\n"
+        "            {                                                                                                                                  \\\n";
     
     for(uSys i = 0; i < clazz->properties().size(); ++i)
     {
@@ -119,16 +119,16 @@ void SetPropertyAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, co
     }
 
     base <<
-        "            }                                                                                                                              \\\n"
-        "                                                                                                                                           \\\n"
-        "            void setPropertyImpl(" << clazz->name() << "* const object, const unsigned propIndex, const void* const value) const noexcept  \\\n"
-        "            {                                                                                                                              \\\n"
-        "                switch(propIndex)                                                                                                          \\\n"
-        "                {                                                                                                                          \\\n";
+        "            }                                                                                                                                  \\\n"
+        "                                                                                                                                               \\\n"
+        "            void setPropertyImpl(" << clazz->name() << "* const object, const unsigned propIndex, const void* const value) const noexcept      \\\n"
+        "            {                                                                                                                                  \\\n"
+        "                switch(propIndex)                                                                                                              \\\n"
+        "                {                                                                                                                              \\\n";
 
     for(uSys i = 0; i < clazz->properties().size(); ++i)
     {
-        if(!clazz->properties()[i]->declaration()->hasAttribute("get") || !clazz->properties()[i]->declaration()->hasAttribute("set"))
+        if(!clazz->properties()[i]->declaration()->hasAttribute("set"))
         { continue; }
 
         base << 
@@ -136,9 +136,9 @@ void SetPropertyAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, co
     }
     
     base <<
-        "                    default: break;                                                                                                        \\\n"
-        "                }                                                                                                                          \\\n"
-        "            }                                                                                                                              \\\n";
+        "                    default: break;                                                                                                            \\\n"
+        "                }                                                                                                                              \\\n"
+        "            }                                                                                                                                  \\\n";
 }
 
 } } }

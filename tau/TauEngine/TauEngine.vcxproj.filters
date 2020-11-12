@@ -432,9 +432,6 @@
     <ClCompile Include="src\dx\dx12\DX12ResourceBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\dx\dx12\DX12ResourceUploadHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\dx\dx12\DX12CommandList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -469,6 +466,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dx\dx12\D3D12MemAlloc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Resource.debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dx\dx12\DX12ResourceTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1142,9 +1145,6 @@
     <ClInclude Include="include\dx\dx12\DX12ResourceBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\dx\dx12\DX12ResourceUploadHandler.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\dx\dx12\DX12CommandList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1191,6 +1191,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\dx\dx12\D3D12MemAlloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics\Resource.debug.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

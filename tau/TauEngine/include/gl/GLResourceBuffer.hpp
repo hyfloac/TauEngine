@@ -23,7 +23,7 @@ private:
     volatile EResource::MapType _currentMapType;
 public:
     GLResourceBuffer(const ResourceBufferArgs& args, const GLenum glBufferType, const GLenum glUsage, const GLuint buffer) noexcept
-        : GLResource(args.size)
+        : GLResource(args.size, EResource::Type::Buffer)
         , _args(args)
         , _glBufferType(glBufferType)
         , _glUsage(glUsage)
@@ -40,8 +40,6 @@ public:
 
     [[nodiscard]] GLenum glUsage() const noexcept { return _glUsage; }
     [[nodiscard]] GLuint buffer() const noexcept { return _buffer; }
-
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Buffer; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
     void unmap(IRenderingContext& context, uSys mipLevel, uSys arrayIndex) noexcept override;

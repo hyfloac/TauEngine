@@ -13,6 +13,7 @@
 #include "BufferEnums.hpp"
 #include "texture/TextureEnums.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
+#include "Resource.debug.hpp"
 
 class ICommandList;
 class IResourceRawInterface;
@@ -66,18 +67,49 @@ public:
  */
 class TAU_DLL TAU_NOVTABLE IResource
 {
-    DEFAULT_DESTRUCT_VI(IResource);
-    DEFAULT_CM_PO(IResource);
+    DELETE_CM(IResource);
 protected:
     uSys _size;
+    EResource::Type _resourceType;
+#if TAU_RESOURCE_DEBUG_DATA
+    const tau::debug::ResourceDebugData* _debugData;
+#endif
 protected:
-    IResource(const uSys size) noexcept
+#if TAU_RESOURCE_DEBUG_DATA
+    IResource(const uSys size, const EResource::Type resourceType) noexcept
         : _size(size)
+        , _resourceType(resourceType)
+        , _debugData(nullptr)
     { }
+#else
+    IResource(const uSys size, const EResource::Type resourceType) noexcept
+        : _size(size)
+        , _resourceType(resourceType)
+    { }
+#endif
 public:
+    virtual ~IResource() noexcept
+    { delete _debugData; }
+
     [[nodiscard]] uSys size() const noexcept { return _size; }
 
-    [[nodiscard]] virtual EResource::Type resourceType() const noexcept = 0;
+    [[nodiscard]] EResource::Type resourceType() const noexcept { return _resourceType; };
+
+#if TAU_RESOURCE_DEBUG_DATA
+    [[nodiscard]] const tau::debug::ResourceDebugData* debugData() const noexcept { return _debugData; }
+
+    [[nodiscard]] void attachDebugData(const tau::debug::ResourceDebugCategory& category, const WDynString& name) noexcept
+    {
+        delete _debugData;
+        _debugData = new(::std::nothrow) tau::debug::ResourceDebugData(category, name);
+    }
+
+    [[nodiscard]] void attachDebugData(const tau::debug::ResourceDebugCategory& category, WDynString&& name) noexcept
+    {
+        delete _debugData;
+        _debugData = new(::std::nothrow) tau::debug::ResourceDebugData(category, ::std::move(name));
+    }
+#endif
 
     [[nodiscard]] virtual void* map(ICommandList& context, EResource::MapType mapType = EResource::MapType::Default, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none(), const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
     virtual void unmap(ICommandList& context, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = null) noexcept = 0;
@@ -237,7 +269,7 @@ protected:
 template<>
 inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const noexcept
 {
-    if(resourceType() == EResource::Type::Buffer)
+    if(_resourceType == EResource::Type::Buffer)
     { return reinterpret_cast<const ResourceBufferArgs*>(_getArgs()); }
     return null;
 }
@@ -245,7 +277,7 @@ inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const 
 template<>
 inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() const noexcept
 {
-    if(resourceType() == EResource::Type::Texture1D)
+    if(_resourceType == EResource::Type::Texture1D)
     { return reinterpret_cast<const ResourceTexture1DArgs*>(_getArgs()); }
     return null;
 }
@@ -253,7 +285,7 @@ inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() 
 template<>
 inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() const noexcept
 {
-    if(resourceType() == EResource::Type::Texture2D)
+    if(_resourceType == EResource::Type::Texture2D)
     { return reinterpret_cast<const ResourceTexture2DArgs*>(_getArgs()); }
     return null;
 }
@@ -261,7 +293,7 @@ inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() 
 template<>
 inline const ResourceTexture3DArgs* IResource::getArgs<ResourceTexture3DArgs>() const noexcept
 {
-    if(resourceType() == EResource::Type::Texture3D)
+    if(_resourceType == EResource::Type::Texture3D)
     { return reinterpret_cast<const ResourceTexture3DArgs*>(_getArgs()); }
     return null;
 }

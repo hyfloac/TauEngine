@@ -1,0 +1,34 @@
+%<fragment>(GetPropBegin)
+#pragma once
+#include <cstring>
+%<endfragment>
+
+%<fragment>(GetPropIndex)
+unsigned getPropertyIndex(const char* const propName) noexcept
+{
+%<loop>(%prop : %class.props)
+    %<if>(%prop.hasAttribute("nolist"))
+        %<continue>(0)
+    %<endif>
+    if(::std::strcmp(propName, %<str>(%prop.name)) == 0)
+    { return %<loopindex>(0); }
+%<endloop>
+
+    return static_cast<unsigned>(-1);
+}
+%<endfragment>
+
+%<fragment>(SetProp)
+void setProperty(%(class.name)* const object, const char* const propName, const void* const value) noexcept
+{
+%<loop>(%prop : %class.props)
+    %<if>(!%prop.hasAttribute("set"))
+        %<continue>(0)
+    %<endif>
+    if(::std::strcmp(propName, %<str>(%prop.name)) == 0)
+    { 
+        object->%(prop.name) = *reinterpret_cast<%(prop.typename) const *>(value);
+    }
+%<endloop>
+}
+%<endfragment>

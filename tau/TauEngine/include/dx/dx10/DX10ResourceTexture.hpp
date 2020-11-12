@@ -13,7 +13,7 @@ private:
     ID3D10Texture1D* _d3dTexture;
 public:
     DX10ResourceTexture1D(const ResourceTexture1DArgs& args, ID3D10Texture1D* const d3dTexture) noexcept
-        : DX10Resource(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.mipLevels, args.arrayCount))
+        : DX10Resource(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.mipLevels, args.arrayCount), EResource::Type::Texture1D)
         , _args(args)
         , _d3dTexture(d3dTexture)
     { }
@@ -23,8 +23,6 @@ public:
 
     [[nodiscard]]       ID3D10Texture1D* d3dTexture()       noexcept { return _d3dTexture; }
     [[nodiscard]] const ID3D10Texture1D* d3dTexture() const noexcept { return _d3dTexture; }
-
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture1D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
     void unmap(IRenderingContext& context, uSys subResource, uSys arrayIndex) noexcept override;
@@ -40,7 +38,7 @@ private:
     ID3D10Texture2D* _d3dTexture;
 public:
     DX10ResourceTexture2D(const ResourceTexture2DArgs& args, ID3D10Texture2D* const d3dTexture) noexcept
-        : DX10Resource(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.height, args.mipLevels, args.arrayCount))
+        : DX10Resource(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.height, args.mipLevels, args.arrayCount), EResource::Type::Texture2D)
         , _args(args)
         , _d3dTexture(d3dTexture)
     { }
@@ -50,8 +48,6 @@ public:
 
     [[nodiscard]]       ID3D10Texture2D* d3dTexture()       noexcept { return _d3dTexture; }
     [[nodiscard]] const ID3D10Texture2D* d3dTexture() const noexcept { return _d3dTexture; }
-
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture2D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
     void unmap(IRenderingContext& context, uSys subResource, uSys arrayIndex) noexcept override;
@@ -67,7 +63,7 @@ private:
     ID3D10Texture3D* _d3dTexture;
 public:
     DX10ResourceTexture3D(const ResourceTexture3DArgs& args, ID3D10Texture3D* const d3dTexture) noexcept
-        : DX10Resource(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.height, args.depth, args.mipLevels))
+        : DX10Resource(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.height, args.depth, args.mipLevels), EResource::Type::Texture3D)
         , _args(args)
         , _d3dTexture(d3dTexture)
     { }
@@ -77,8 +73,6 @@ public:
 
     [[nodiscard]]       ID3D10Texture3D* d3dTexture()       noexcept { return _d3dTexture; }
     [[nodiscard]] const ID3D10Texture3D* d3dTexture() const noexcept { return _d3dTexture; }
-
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture3D; }
 
     [[nodiscard]] void* map(IRenderingContext& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
     void unmap(IRenderingContext& context, uSys subResource, uSys arrayIndex) noexcept override;

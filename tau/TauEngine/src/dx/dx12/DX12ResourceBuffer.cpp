@@ -6,8 +6,11 @@
 #include "dx/dx12/DX12GraphicsInterface.hpp"
 #include "dx/dx12/D3D12MemAlloc.h"
 
-void* DX12ResourceBuffer::map(ICommandList& cmdList, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
+void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMapRange* mapReadRange) noexcept
 {
+    if(_args.usageType == EResource::UsageType::Immutable)
+    { return null; }
+
     if(_resourceUsage == EGraphics::ResourceHeapUsageType::Upload)
     {
         if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
@@ -56,8 +59,11 @@ void* DX12ResourceBuffer::map(ICommandList& cmdList, const EResource::MapType ma
     return null;
 }
 
-void DX12ResourceBuffer::unmap(ICommandList& cmdList, uSys, uSys, const ResourceMapRange* mapWriteRange) noexcept
+void DX12ResourceBuffer::unmap(const ResourceMapRange* mapWriteRange) noexcept
 {
+    if(_args.usageType == EResource::UsageType::Immutable)
+    { return; }
+
     if(mapWriteRange)
     {
         CD3DX12_RANGE range(mapWriteRange->begin, mapWriteRange->end);
@@ -69,12 +75,8 @@ void DX12ResourceBuffer::unmap(ICommandList& cmdList, uSys, uSys, const Resource
     }
 }
 
-
-void* DX12ResourceBufferIndirectMapping::map(ICommandList& cmdList, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange*, const ResourceMapRange* const mapWriteRange) noexcept
+void* DX12ResourceBufferIndirectMapping::map() noexcept
 {
-    if(mapWriteRange && mapWriteRange->begin >= mapWriteRange->end)
-    { return null; }
-
     if(!_uploadBuffer)
     {
         D3D12MA::ALLOCATION_DESC allocDesc;
@@ -108,7 +110,7 @@ void* DX12ResourceBufferIndirectMapping::map(ICommandList& cmdList, const EResou
     return mapping;
 }
 
-void DX12ResourceBufferIndirectMapping::unmap(ICommandList& cmdList, uSys, uSys, const ResourceMapRange* mapWriteRange) noexcept
+void DX12ResourceBufferIndirectMapping::unmap(ICommandList& cmdList, const ResourceMapRange* mapWriteRange) noexcept
 {
     if(!_uploadBuffer)
     { return; }

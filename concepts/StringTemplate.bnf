@@ -1,0 +1,45 @@
+<num> ::= [0-9]
+<alpha-lower> ::= [a-z]
+<alpha-upper> ::= [A-Z]
+<alpha> ::= <alpha-lower> | <alpha-upper>
+<alpha-num> ::= <alpha> | <num>
+<alpha-lower-u> ::= <alpha-lower> | '_'
+<alpha-upper-u> ::= <alpha-upper> | '_'
+<alpha-u> ::= <alpha> | '_'
+<alpha-num-u> ::= <alpha-num> | '_'
+<all-chars> ::= [^]
+<ws-chars> ::= ' ' | '\t' | '\n' | '\r'
+<non-ws-chars> ::= ^<ws-chars>
+<ws> ::= { <ws-chars> }
+<opt-ws> ::= [ <ws> ]
+
+<identifier> ::= <alpha-u> [ { <alpha-num-u> } ]
+
+<var-decl> ::= '%' <opt-ws> [ '(' <opt-ws> ] <identifier> [ <opt-ws> ')' ]
+
+<int> ::= [ '-' | '+' ] { <num> }
+<string> ::= '"' [ { <all-chars> } ] '"'
+<char> ::= '\'' <all-chars> '\''
+
+<arg-list> ::= '(' <opt-ws> [ [ { <expression> <opt-ws> ',' <opt-ws> } ] <expression> <opt-ws> ] ')'
+
+<literal-exp> ::= <int> | <string> | <char>
+<member-exp> ::= <identifer> <opt-ws> '.' <opt-ws> <identifier>
+<paren-exp> ::= '(' <opt-ws> <expression> <opt-s> ')'
+<func-call-exp> ::= ( <identifier> | <member-exp> ) <opt-ws> <arg-list>
+
+<expression> ::= <literal-ex> | <identifier> | <member-exp> | <func-call-exp> | <paren-exp>
+
+<begin-fragment> ::= '%' <opt-ws> '<' <opt-ws> "fragment" <opt-ws> '>' <opt-ws> '(' <opt-ws> <identifier> <opt-ws> ')'
+<end-fragment> ::= '%' <opt-ws> '<' <opt-ws> "endfragment" <opt-ws> '>'
+
+<begin-loop> ::= '%' <opt-ws> '<' <opt-ws> "loop" <opt-ws> '>' <opt-ws> '(' <opt-ws> <var-decl> <opt-ws> ':' <opt-ws> <expression> <opt-ws> ')'
+<end-loop> ::= '%' <opt-ws> '<' <opt-ws> "endloop" <opt-ws> '>'
+
+<begin-if> ::= '%' <opt-ws> '<' <opt-ws> "if" <opt-ws> '>' <opt-ws> '(' <opt-ws> <expression> <opt-ws> ')'
+<else-if> ::= '%' <opt-ws> '<' <opt-ws> "elif" <opt-ws> '>' <opt-ws> '(' <opt-ws> <expression> <opt-ws> ')'
+<else> ::= '%' <opt-ws> '<' <opt-ws> "else" <opt-ws> '>'
+<end-if> ::= '%' <opt-ws> '<' <opt-ws> "endif" <opt-ws> '>'
+
+<continue> ::= '%' <opt-ws> '<' <opt-ws> "continue" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
+<break> ::= '%' <opt-ws> '<' <opt-ws> "break" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'

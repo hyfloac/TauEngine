@@ -136,8 +136,8 @@ static _T* AllocateArray(const ALLOCATION_CALLBACKS& allocs, const uSys count) n
 #define D3D12MA_NEW(allocs, type) new(D3D12MA::Allocate<type>(allocs))(type)
 #define D3D12MA_NEW_ARRAY(allocs, type, count) new(D3D12MA::AllocateArray<type>((allocs), (count)))(type)
 
-template<typename T>
-static void D3D12MA_DELETE(const ALLOCATION_CALLBACKS& allocs, T* const memory) noexcept
+template<typename _T>
+static void D3D12MA_DELETE(const ALLOCATION_CALLBACKS& allocs, _T* const memory) noexcept
 {
     if(memory)
     {
@@ -146,8 +146,8 @@ static void D3D12MA_DELETE(const ALLOCATION_CALLBACKS& allocs, T* const memory) 
     }
 }
 
-template<typename T>
-static void D3D12MA_DELETE_ARRAY(const ALLOCATION_CALLBACKS& allocs, T* const memory, const uSys count) noexcept
+template<typename _T>
+static void D3D12MA_DELETE_ARRAY(const ALLOCATION_CALLBACKS& allocs, _T* const memory, const uSys count) noexcept
 {
     if(memory)
     {
@@ -242,18 +242,18 @@ If providing your own implementation, you need to implement a subset of std::ato
 // Aligns given value up to nearest multiply of align value. For example: AlignUp(11, 8) = 16.
 // Use types like UINT, uint64_t as T.
 template<typename _T>
-static inline _T AlignUp(const _T val, const _T align) noexcept
+static inline constexpr _T AlignUp(const _T val, const _T align) noexcept
 { return (val + align - 1) / align * align; }
 
-// Aligns given value down to nearest multiply of align value. For example: AlignUp(11, 8) = 8.
+// Aligns given value down to nearest multiply of align value. For example: AlignDown(11, 8) = 8.
 // Use types like UINT, uint64_t as T.
 template<typename _T>
-static inline _T AlignDown(const _T val, const _T align) noexcept
+static inline constexpr _T AlignDown(const _T val, const _T align) noexcept
 { return val / align * align; }
 
 // Division with mathematical rounding to nearest number.
 template<typename _T>
-static inline _T RoundDiv(const _T x, const _T y) noexcept
+static inline constexpr _T RoundDiv(const _T x, const _T y) noexcept
 { return (x + (y / static_cast<_T>(2))) / y; }
 
 /*
@@ -262,7 +262,7 @@ T must be unsigned integer number or signed integer but always nonnegative.
 For 0 returns true.
 */
 template<typename _T>
-inline bool IsPow2(_T x) noexcept
+static inline constexpr bool IsPow2(_T x) noexcept
 { return (x & (x-1)) == 0; }
 
 // Helper RAII class to lock a mutex in constructor and unlock it in destructor (at the end of scope).
@@ -298,7 +298,7 @@ public:
         { m_pMutex->LockRead(); }
     }
 
-    ~MutexLockRead()
+    ~MutexLockRead() noexcept
     {
         if(m_pMutex)
         { m_pMutex->UnlockRead(); }
@@ -319,7 +319,7 @@ public:
         { m_pMutex->LockWrite(); }
     }
 
-    ~MutexLockWrite()
+    ~MutexLockWrite() noexcept
     {
         if(m_pMutex)
         { m_pMutex->UnlockWrite(); }
@@ -468,6 +468,7 @@ public:
 
     [[nodiscard]] bool empty() const noexcept { return m_Count == 0; }
     [[nodiscard]] uSys size() const noexcept { return m_Count; }
+
     [[nodiscard]]       _T* data()       noexcept { return m_pArray; }
     [[nodiscard]] const _T* data() const noexcept { return m_pArray; }
 
@@ -512,17 +513,13 @@ public:
         newCapacity = D3D12MA_MAX(newCapacity, m_Count);
 
         if((newCapacity < m_Capacity) && !freeMemory)
-        {
-            newCapacity = m_Capacity;
-        }
+        { newCapacity = m_Capacity; }
 
         if(newCapacity != m_Capacity)
         {
             _T* const newArray = newCapacity ? AllocateArray<_T>(m_AllocationCallbacks, newCapacity) : nullptr;
             if(m_Count != 0)
-            {
-                ::std::memcpy(newArray, m_pArray, m_Count * sizeof(_T));
-            }
+            { ::std::memcpy(newArray, m_pArray, m_Count * sizeof(_T)); }
             Free(m_AllocationCallbacks, m_pArray);
             m_Capacity = newCapacity;
             m_pArray = newArray;
@@ -533,22 +530,16 @@ public:
     {
         uSys newCapacity = m_Capacity;
         if(newCount > m_Capacity)
-        {
-            newCapacity = D3D12MA_MAX(newCount, D3D12MA_MAX(m_Capacity * 3 / 2, static_cast<uSys>(8)));
-        }
+        { newCapacity = D3D12MA_MAX(newCount, D3D12MA_MAX(m_Capacity * 3 / 2, static_cast<uSys>(8))); }
         else if(freeMemory)
-        {
-            newCapacity = newCount;
-        }
+        { newCapacity = newCount; }
 
         if(newCapacity != m_Capacity)
         {
             _T* const newArray = newCapacity ? AllocateArray<_T>(m_AllocationCallbacks, newCapacity) : nullptr;
             const uSys elementsToCopy = D3D12MA_MIN(m_Count, newCount);
             if(elementsToCopy != 0)
-            {
-                memcpy(newArray, m_pArray, elementsToCopy * sizeof(_T));
-            }
+            { ::std::memcpy(newArray, m_pArray, elementsToCopy * sizeof(_T)); }
             Free(m_AllocationCallbacks, m_pArray);
             m_Capacity = newCapacity;
             m_pArray = newArray;
@@ -1280,17 +1271,32 @@ protected:
     const ALLOCATION_CALLBACKS* m_pAllocationCallbacks;
 public:
     BlockMetadata(const ALLOCATION_CALLBACKS* allocationCallbacks) noexcept;
+    
+    [[nodiscard]] UINT64 GetSize() const noexcept { return m_Size; }
+
+    [[nodiscard]] virtual uSys GetAllocationCount() const noexcept = 0;
+    [[nodiscard]] virtual UINT64 GetSumFreeSize() const noexcept = 0;
+    [[nodiscard]] virtual UINT64 GetUnusedRangeSizeMax() const noexcept = 0;
 
     virtual void Init(const UINT64 size) noexcept { m_Size = size; }
 
-    // Validates all data structures inside this object. If not valid, returns false.
-    virtual bool Validate() const = 0;
-    UINT64 GetSize() const { return m_Size; }
-    virtual uSys GetAllocationCount() const = 0;
-    virtual UINT64 GetSumFreeSize() const = 0;
-    virtual UINT64 GetUnusedRangeSizeMax() const = 0;
-    // Returns true if this block is empty - contains only single free suballocation.
-    virtual bool IsEmpty() const = 0;
+    /**
+     *   Validates all data structures inside this object. If not
+     * valid, returns false.
+     *
+     * @return
+     *      Whether or not the data object is valid.
+     */
+    virtual bool Validate() const noexcept = 0;
+
+    /**
+     *   Returns true if this block is empty - contains only single
+     * free suballocation.
+     *
+     * @return
+     *      Whether or not the block is empty.
+     */
+    virtual bool IsEmpty() const noexcept = 0;
 
     // Tries to find a place for suballocation with given parameters inside this block.
     // If succeeded, fills pAllocationRequest and returns true.
@@ -1298,19 +1304,19 @@ public:
     virtual bool CreateAllocationRequest(
         UINT64 allocSize,
         UINT64 allocAlignment,
-        AllocationRequest* pAllocationRequest) = 0;
+        AllocationRequest* pAllocationRequest) noexcept = 0;
 
     // Makes actual allocation based on request. Request must already be checked and valid.
     virtual void Alloc(
         const AllocationRequest& request,
         UINT64 allocSize,
-        Allocation* Allocation) = 0;
+        Allocation* Allocation) noexcept = 0;
 
     // Frees suballocation assigned to given memory region.
-    virtual void Free(const Allocation* allocation) = 0;
-    virtual void FreeAtOffset(UINT64 offset) = 0;
+    virtual void Free(const Allocation* allocation) noexcept = 0;
+    virtual void FreeAtOffset(UINT64 offset) noexcept = 0;
 protected:
-    const ALLOCATION_CALLBACKS* GetAllocs() const { return m_pAllocationCallbacks; }
+    [[nodiscard]] const ALLOCATION_CALLBACKS* GetAllocs() const noexcept { return m_pAllocationCallbacks; }
 };
 
 class BlockMetadata_Generic : public BlockMetadata
@@ -1329,48 +1335,65 @@ public:
 
     void Init(UINT64 size) noexcept override;
 
-    bool Validate() const override;
-    uSys GetAllocationCount() const override { return m_Suballocations.size() - m_FreeCount; }
-    UINT64 GetSumFreeSize() const override { return m_SumFreeSize; }
-    UINT64 GetUnusedRangeSizeMax() const override;
-    bool IsEmpty() const override;
+    bool Validate() const noexcept override;
+
+    uSys GetAllocationCount() const noexcept override { return m_Suballocations.size() - m_FreeCount; }
+    UINT64 GetSumFreeSize() const noexcept override { return m_SumFreeSize; }
+    UINT64 GetUnusedRangeSizeMax() const noexcept override;
+    bool IsEmpty() const noexcept override;
 
     bool CreateAllocationRequest(
         UINT64 allocSize,
         UINT64 allocAlignment,
-        AllocationRequest* pAllocationRequest) override;
+        AllocationRequest* pAllocationRequest) noexcept override;
 
     void Alloc(
         const AllocationRequest& request,
         UINT64 allocSize,
-        Allocation* hAllocation) override;
+        Allocation* hAllocation) noexcept override;
 
-    void Free(const Allocation* allocation) override;
-    void FreeAtOffset(UINT64 offset) override;
+    void Free(const Allocation* allocation) noexcept override;
+    void FreeAtOffset(UINT64 offset) noexcept override;
 private:
-    bool ValidateFreeSuballocationList() const;
+    bool ValidateFreeSuballocationList() const noexcept;
 
-    // Checks if requested suballocation with given parameters can be placed in given pFreeSuballocItem.
-    // If yes, fills pOffset and returns true. If no, returns false.
+    /**
+     *   Checks if requested suballocation with given parameters
+     * can be placed in given pFreeSuballocItem. If yes, fills
+     * pOffset and returns true. If no, returns false.
+     */
     bool CheckAllocation(
         UINT64 allocSize,
         UINT64 allocAlignment,
         SuballocationList::const_iterator suballocItem,
         UINT64* pOffset,
         UINT64* pSumFreeSize,
-        UINT64* pSumItemSize) const;
-    // Given free suballocation, it merges it with following one, which must also be free.
-    void MergeFreeWithNext(SuballocationList::iterator item);
-    // Releases given suballocation, making it free.
-    // Merges it with adjacent free suballocations if applicable.
-    // Returns iterator to new free suballocation at this place.
-    SuballocationList::iterator FreeSuballocation(SuballocationList::iterator suballocItem);
-    // Given free suballocation, it inserts it into sorted list of
-    // m_FreeSuballocationsBySize if it's suitable.
-    void RegisterFreeSuballocation(SuballocationList::iterator item);
-    // Given free suballocation, it removes it from sorted list of
-    // m_FreeSuballocationsBySize if it's suitable.
-    void UnregisterFreeSuballocation(SuballocationList::iterator item);
+        UINT64* pSumItemSize) const noexcept;
+
+    /**
+     *   Given free suballocation, it merges it with following
+     * one, which must also be free.
+     */
+    void MergeFreeWithNext(SuballocationList::iterator item) noexcept;
+
+    /**
+     * Releases given suballocation, making it free.
+     * Merges it with adjacent free suballocations if applicable.
+     * Returns iterator to new free suballocation at this place.
+     */
+    SuballocationList::iterator FreeSuballocation(SuballocationList::iterator suballocItem) noexcept;
+
+    /**
+     *   Given free suballocation, it inserts it into sorted list
+     * of m_FreeSuballocationsBySize if it's suitable.
+     */
+    void RegisterFreeSuballocation(SuballocationList::iterator item) noexcept;
+
+    /**
+     *   Given free suballocation, it removes it from sorted list
+     * of m_FreeSuballocationsBySize if it's suitable.
+     */
+    void UnregisterFreeSuballocation(SuballocationList::iterator item) noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1406,15 +1429,15 @@ public:
         D3D12_HEAP_TYPE newHeapType,
         ID3D12Heap* newHeap,
         UINT64 newSize,
-        UINT id);
+        UINT id) noexcept;
 
     // Always call before destruction.
-    void Destroy(AllocatorPimpl* allocator);
+    void Destroy(AllocatorPimpl* allocator) noexcept;
 
-    BlockVector* GetBlockVector() const { return m_BlockVector; }
-    ID3D12Heap* GetHeap() const { return m_Heap; }
-    D3D12_HEAP_TYPE GetHeapType() const { return m_HeapType; }
-    UINT GetId() const { return m_Id; }
+    BlockVector* GetBlockVector() const noexcept { return m_BlockVector; }
+    ID3D12Heap* GetHeap() const noexcept { return m_Heap; }
+    D3D12_HEAP_TYPE GetHeapType() const noexcept { return m_HeapType; }
+    UINT GetId() const noexcept { return m_Id; }
 
     // Validates all data structures inside this object. If not valid, returns false.
     bool Validate() const;
@@ -1432,37 +1455,9 @@ Synchronized internally with a mutex.
 class BlockVector
 {
     DELETE_CM(BlockVector);
-public:
-    BlockVector(
-        AllocatorPimpl* hAllocator,
-        D3D12_HEAP_TYPE heapType,
-        D3D12_HEAP_FLAGS heapFlags,
-        UINT64 preferredBlockSize,
-        uSys minBlockCount,
-        uSys maxBlockCount,
-        bool explicitBlockSize);
-    ~BlockVector();
-
-    HRESULT CreateMinBlocks();
-
-    UINT GetHeapType() const { return m_HeapType; }
-    UINT64 GetPreferredBlockSize() const { return m_PreferredBlockSize; }
-
-    bool IsEmpty() const { return m_Blocks.empty(); }
-
-    HRESULT Allocate(
-        UINT64 size,
-        UINT64 alignment,
-        const ALLOCATION_DESC& createInfo,
-        uSys allocationCount,
-        Allocation** pAllocations);
-
-    void Free(
-        Allocation* hAllocation);
-
 private:
-    static UINT64 HeapFlagsToAlignment(D3D12_HEAP_FLAGS flags);
-
+    static UINT64 HeapFlagsToAlignment(D3D12_HEAP_FLAGS flags) noexcept;
+private:
     AllocatorPimpl* const m_hAllocator;
     const D3D12_HEAP_TYPE m_HeapType;
     const D3D12_HEAP_FLAGS m_HeapFlags;
@@ -1478,31 +1473,58 @@ private:
     // Incrementally sorted by sumFreeSize, ascending.
     Vector<DeviceMemoryBlock*> m_Blocks;
     UINT m_NextBlockId;
+public:
+    BlockVector(
+        AllocatorPimpl* hAllocator,
+        D3D12_HEAP_TYPE heapType,
+        D3D12_HEAP_FLAGS heapFlags,
+        UINT64 preferredBlockSize,
+        uSys minBlockCount,
+        uSys maxBlockCount,
+        bool explicitBlockSize);
 
-    UINT64 CalcMaxBlockSize() const;
+    ~BlockVector();
+
+    HRESULT CreateMinBlocks();
+
+    UINT GetHeapType() const noexcept { return m_HeapType; }
+    UINT64 GetPreferredBlockSize() const noexcept { return m_PreferredBlockSize; }
+
+    bool IsEmpty() const noexcept { return m_Blocks.empty(); }
+
+    HRESULT Allocate(
+        UINT64 size,
+        UINT64 alignment,
+        const ALLOCATION_DESC& createInfo,
+        uSys allocationCount,
+        Allocation** pAllocations) noexcept;
+
+    void Free(Allocation* hAllocation) noexcept;
+private:
+    UINT64 CalcMaxBlockSize() const noexcept;
 
     // Finds and removes given block from vector.
-    void Remove(DeviceMemoryBlock* pBlock);
+    void Remove(DeviceMemoryBlock* pBlock) noexcept;
 
     // Performs single step in sorting m_Blocks. They may not be fully sorted
     // after this call.
-    void IncrementallySortBlocks();
+    void IncrementallySortBlocks() noexcept;
 
     HRESULT AllocatePage(
         UINT64 size,
         UINT64 alignment,
         const ALLOCATION_DESC& createInfo,
-        Allocation** pAllocation);
+        Allocation** pAllocation) noexcept;
 
     HRESULT AllocateFromBlock(
         DeviceMemoryBlock* pBlock,
         UINT64 size,
         UINT64 alignment,
         ALLOCATION_FLAGS allocFlags,
-        Allocation** pAllocation);
+        Allocation** pAllocation) noexcept;
 
-    HRESULT CreateBlock(UINT64 blockSize, uSys* pNewBlockIndex);
-    HRESULT CreateD3d12Heap(ID3D12Heap*& outHeap, UINT64 size) const;
+    HRESULT CreateBlock(UINT64 blockSize, uSys* pNewBlockIndex) noexcept;
+    HRESULT CreateD3d12Heap(ID3D12Heap*& outHeap, UINT64 size) const noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1520,7 +1542,7 @@ private:
      * Heuristics that decides whether a resource should better be placed in its own,
      * dedicated allocation (committed resource rather than placed resource).
      */
-    static bool PrefersCommittedAllocation(const D3D12_RESOURCE_DESC& resourceDesc);
+    static bool PrefersCommittedAllocation(const D3D12_RESOURCE_DESC& resourceDesc) noexcept;
 private:
     bool m_UseMutex;
     ID3D12Device* m_Device;
@@ -1539,14 +1561,20 @@ public:
 
     ~AllocatorPimpl() noexcept;
 
-    HRESULT Init();
+    HRESULT Init() noexcept;
 
-    ID3D12Device* GetDevice() const { return m_Device; }
-    // Shortcut for "Allocation Callbacks", because this function is called so often.
-    const ALLOCATION_CALLBACKS& GetAllocs() const { return m_AllocationCallbacks; }
-    const D3D12_FEATURE_DATA_D3D12_OPTIONS& GetD3D12Options() const { return m_D3D12Options; }
-    bool SupportsResourceHeapTier2() const { return m_D3D12Options.ResourceHeapTier >= D3D12_RESOURCE_HEAP_TIER_2; }
-    bool UseMutex() const { return m_UseMutex; }
+    [[nodiscard]] ID3D12Device* GetDevice() const noexcept { return m_Device; }
+
+    /**
+     * Shortcut for "Allocation Callbacks", because this function is called so often.
+     */
+    [[nodiscard]] const ALLOCATION_CALLBACKS& GetAllocs() const noexcept { return m_AllocationCallbacks; }
+
+    [[nodiscard]] const D3D12_FEATURE_DATA_D3D12_OPTIONS& GetD3D12Options() const noexcept { return m_D3D12Options; }
+
+    [[nodiscard]] bool SupportsResourceHeapTier2() const noexcept { return m_D3D12Options.ResourceHeapTier >= D3D12_RESOURCE_HEAP_TIER_2; }
+
+    [[nodiscard]] bool UseMutex() const noexcept { return m_UseMutex; }
 
     HRESULT CreateResource(
         const ALLOCATION_DESC* pAllocDesc,
@@ -1555,17 +1583,40 @@ public:
         const D3D12_CLEAR_VALUE *pOptimizedClearValue,
         Allocation** ppAllocation,
         REFIID riidResource,
-        void** ppvResource);
+        void** ppvResource) noexcept;
 
     // Unregisters allocation from the collection of dedicated allocations.
     // Allocation object must be deleted externally afterwards.
-    void FreeCommittedMemory(Allocation* allocation);
+    void FreeCommittedMemory(Allocation* allocation) noexcept;
     // Unregisters allocation from the collection of placed allocations.
     // Allocation object must be deleted externally afterwards.
-    void FreePlacedMemory(Allocation* allocation);
+    void FreePlacedMemory(Allocation* allocation) noexcept;
 private:
-    // Allocates and registers new committed resource with implicit heap, as dedicated allocation.
-    // Creates and returns Allocation objects.
+    /**
+     *   Allocates and registers new committed resource with
+     * implicit heap, as dedicated allocation.
+     *
+     * Creates and returns Allocation objects.
+     *
+     * @param[in] pAllocDesc
+     *      The arguments for the allocator.
+     * @param[in] pResourceDesc
+     *      The arguments for the resource.
+     * @param[in] resAllocInfo
+     *      Size and alignment info.
+     * @param[in] InitialResourceState
+     *      The initial state the resource should be put in.
+     * @param[in] pOptimizedClearValue
+     *      The value to be used for initially clearing a texture.
+     * @param[out] ppAllocation
+     *      A pointer to store the allocation info at.
+     * @param[in] riidResource
+     *      The COM type of the resource.
+     * @param[out] ppvResource
+     *      A pointer to store the resource at.
+     * @return
+     *      A success or failure code.
+     */
     HRESULT AllocateCommittedMemory(
         const ALLOCATION_DESC* pAllocDesc,
         const D3D12_RESOURCE_DESC* pResourceDesc,
@@ -1574,24 +1625,24 @@ private:
         const D3D12_CLEAR_VALUE *pOptimizedClearValue,
         Allocation** ppAllocation,
         REFIID riidResource,
-        void** ppvResource);
+        void** ppvResource) noexcept;
 
-    /*
-    If SupportsResourceHeapTier2():
-        0: D3D12_HEAP_TYPE_DEFAULT
-        1: D3D12_HEAP_TYPE_UPLOAD
-        2: D3D12_HEAP_TYPE_READBACK
-    else:
-        0: D3D12_HEAP_TYPE_DEFAULT + buffer
-        1: D3D12_HEAP_TYPE_DEFAULT + texture
-        2: D3D12_HEAP_TYPE_DEFAULT + texture RT or DS
-        3: D3D12_HEAP_TYPE_UPLOAD + buffer
-        4: D3D12_HEAP_TYPE_UPLOAD + texture
-        5: D3D12_HEAP_TYPE_UPLOAD + texture RT or DS
-        6: D3D12_HEAP_TYPE_READBACK + buffer
-        7: D3D12_HEAP_TYPE_READBACK + texture
-        8: D3D12_HEAP_TYPE_READBACK + texture RT or DS
-    */
+    /**
+     * If SupportsResourceHeapTier2():
+     *     0: D3D12_HEAP_TYPE_DEFAULT
+     *     1: D3D12_HEAP_TYPE_UPLOAD
+     *     2: D3D12_HEAP_TYPE_READBACK
+     * else:
+     *     0: D3D12_HEAP_TYPE_DEFAULT + buffer
+     *     1: D3D12_HEAP_TYPE_DEFAULT + texture
+     *     2: D3D12_HEAP_TYPE_DEFAULT + texture RT or DS
+     *     3: D3D12_HEAP_TYPE_UPLOAD + buffer
+     *     4: D3D12_HEAP_TYPE_UPLOAD + texture
+     *     5: D3D12_HEAP_TYPE_UPLOAD + texture RT or DS
+     *     6: D3D12_HEAP_TYPE_READBACK + buffer
+     *     7: D3D12_HEAP_TYPE_READBACK + texture
+     *     8: D3D12_HEAP_TYPE_READBACK + texture RT or DS
+     */
     UINT CalcDefaultPoolCount() const noexcept;
     UINT CalcDefaultPoolIndex(const ALLOCATION_DESC& allocDesc, const D3D12_RESOURCE_DESC& resourceDesc) const noexcept;
     void CalcDefaultPoolParams(D3D12_HEAP_TYPE& outHeapType, D3D12_HEAP_FLAGS& outHeapFlags, UINT index) const noexcept;
@@ -1638,7 +1689,7 @@ void BlockMetadata_Generic::Init(const UINT64 size) noexcept
     m_FreeSuballocationsBySize.push_back(suballocItem);
 }
 
-bool BlockMetadata_Generic::Validate() const
+bool BlockMetadata_Generic::Validate() const noexcept
 {
     D3D12MA_VALIDATE(!m_Suballocations.empty());
 
@@ -1720,27 +1771,23 @@ bool BlockMetadata_Generic::Validate() const
     return true;
 }
 
-UINT64 BlockMetadata_Generic::GetUnusedRangeSizeMax() const
+UINT64 BlockMetadata_Generic::GetUnusedRangeSizeMax() const noexcept
 {
     if(!m_FreeSuballocationsBySize.empty())
-    {
-        return m_FreeSuballocationsBySize.back()->size;
-    }
+    { return m_FreeSuballocationsBySize.back()->size; }
     else
-    {
-        return 0;
-    }
+    { return 0; }
 }
 
-bool BlockMetadata_Generic::IsEmpty() const
+bool BlockMetadata_Generic::IsEmpty() const noexcept
 {
     return (m_Suballocations.size() == 1) && (m_FreeCount == 1);
 }
 
 bool BlockMetadata_Generic::CreateAllocationRequest(
-    UINT64 allocSize,
-    UINT64 allocAlignment,
-    AllocationRequest* pAllocationRequest)
+    const UINT64 allocSize,
+    const UINT64 allocAlignment,
+    AllocationRequest* const pAllocationRequest) noexcept
 {
     D3D12MA_ASSERT(allocSize > 0);
     D3D12MA_ASSERT(pAllocationRequest != nullptr);
@@ -1748,9 +1795,7 @@ bool BlockMetadata_Generic::CreateAllocationRequest(
 
     // There is not enough total free space in this block to fulfill the request: Early return.
     if(m_SumFreeSize < allocSize + 2 * D3D12MA_DEBUG_MARGIN)
-    {
-        return false;
-    }
+    { return false; }
 
     // New algorithm, efficiently searching freeSuballocationsBySize.
     const uSys freeSuballocCount = m_FreeSuballocationsBySize.size();
@@ -1762,8 +1807,8 @@ bool BlockMetadata_Generic::CreateAllocationRequest(
             m_FreeSuballocationsBySize.data() + freeSuballocCount,
             allocSize + 2 * D3D12MA_DEBUG_MARGIN,
             SuballocationItemSizeLess());
-        uSys index = it - m_FreeSuballocationsBySize.data();
-        for(; index < freeSuballocCount; ++index)
+
+        for(uSys index = it - m_FreeSuballocationsBySize.data(); index < freeSuballocCount; ++index)
         {
             if(CheckAllocation(
                 allocSize,
@@ -1784,8 +1829,8 @@ bool BlockMetadata_Generic::CreateAllocationRequest(
 
 void BlockMetadata_Generic::Alloc(
     const AllocationRequest& request,
-    UINT64 allocSize,
-    Allocation* allocation)
+    const UINT64 allocSize,
+    Allocation* const allocation) noexcept
 {
     D3D12MA_ASSERT(request.item != m_Suballocations.end());
     Suballocation& suballoc = *request.item;
@@ -1809,7 +1854,7 @@ void BlockMetadata_Generic::Alloc(
     // If there are any free bytes remaining at the end, insert new free suballocation after current one.
     if(paddingEnd)
     {
-        Suballocation paddingSuballoc = {};
+        Suballocation paddingSuballoc = { };
         paddingSuballoc.offset = request.offset + allocSize;
         paddingSuballoc.size = paddingEnd;
         paddingSuballoc.type = SUBALLOCATION_TYPE_FREE;
@@ -1823,7 +1868,7 @@ void BlockMetadata_Generic::Alloc(
     // If there are any free bytes remaining at the beginning, insert new free suballocation before current one.
     if(paddingBegin)
     {
-        Suballocation paddingSuballoc = {};
+        Suballocation paddingSuballoc = { };
         paddingSuballoc.offset = request.offset - paddingBegin;
         paddingSuballoc.size = paddingBegin;
         paddingSuballoc.type = SUBALLOCATION_TYPE_FREE;
@@ -1835,17 +1880,13 @@ void BlockMetadata_Generic::Alloc(
     // Update totals.
     m_FreeCount = m_FreeCount - 1;
     if(paddingBegin > 0)
-    {
-        ++m_FreeCount;
-    }
+    { ++m_FreeCount; }
     if(paddingEnd > 0)
-    {
-        ++m_FreeCount;
-    }
+    {  ++m_FreeCount; }
     m_SumFreeSize -= allocSize;
 }
 
-void BlockMetadata_Generic::Free(const Allocation* allocation)
+void BlockMetadata_Generic::Free(const Allocation* const allocation) noexcept
 {
     for(SuballocationList::iterator suballocItem = m_Suballocations.begin();
         suballocItem != m_Suballocations.end();
@@ -1859,10 +1900,11 @@ void BlockMetadata_Generic::Free(const Allocation* allocation)
             return;
         }
     }
+
     D3D12MA_ASSERT(0 && "Not found!");
 }
 
-void BlockMetadata_Generic::FreeAtOffset(UINT64 offset)
+void BlockMetadata_Generic::FreeAtOffset(const UINT64 offset) noexcept
 {
     for(SuballocationList::iterator suballocItem = m_Suballocations.begin();
         suballocItem != m_Suballocations.end();
@@ -1875,10 +1917,11 @@ void BlockMetadata_Generic::FreeAtOffset(UINT64 offset)
             return;
         }
     }
+
     D3D12MA_ASSERT(0 && "Not found!");
 }
 
-bool BlockMetadata_Generic::ValidateFreeSuballocationList() const
+bool BlockMetadata_Generic::ValidateFreeSuballocationList() const noexcept
 {
     UINT64 lastSize = 0;
     for(uSys i = 0, count = m_FreeSuballocationsBySize.size(); i < count; ++i)
@@ -1894,12 +1937,12 @@ bool BlockMetadata_Generic::ValidateFreeSuballocationList() const
 }
 
 bool BlockMetadata_Generic::CheckAllocation(
-    UINT64 allocSize,
-    UINT64 allocAlignment,
-    SuballocationList::const_iterator suballocItem,
-    UINT64* pOffset,
-    UINT64* pSumFreeSize,
-    UINT64* pSumItemSize) const
+    const UINT64 allocSize,
+    const UINT64 allocAlignment,
+    const SuballocationList::const_iterator suballocItem,
+    UINT64* const pOffset,
+    UINT64* const pSumFreeSize,
+    UINT64* const pSumItemSize) const noexcept
 {
     D3D12MA_ASSERT(allocSize > 0);
     D3D12MA_ASSERT(suballocItem != m_Suballocations.cend());
@@ -1915,18 +1958,14 @@ bool BlockMetadata_Generic::CheckAllocation(
 
     // Size of this suballocation is too small for this request: Early return.
     if(suballoc.size < allocSize)
-    {
-        return false;
-    }
+    { return false; }
 
     // Start from offset equal to beginning of this suballocation.
     *pOffset = suballoc.offset;
 
     // Apply D3D12MA_DEBUG_MARGIN at the beginning.
     if constexpr(D3D12MA_DEBUG_MARGIN > 0)
-    {
-        *pOffset += D3D12MA_DEBUG_MARGIN;
-    }
+    { *pOffset += D3D12MA_DEBUG_MARGIN; }
 
     // Apply alignment.
     *pOffset = AlignUp(*pOffset, allocAlignment);
@@ -1939,15 +1978,13 @@ bool BlockMetadata_Generic::CheckAllocation(
 
     // Fail if requested size plus margin before and after is bigger than size of this suballocation.
     if(paddingBegin + allocSize + requiredEndMargin > suballoc.size)
-    {
-        return false;
-    }
+    { return false; }
 
     // All tests passed: Success. pOffset is already filled.
     return true;
 }
 
-void BlockMetadata_Generic::MergeFreeWithNext(SuballocationList::iterator item)
+void BlockMetadata_Generic::MergeFreeWithNext(const SuballocationList::iterator item) noexcept
 {
     D3D12MA_ASSERT(item != m_Suballocations.end());
     D3D12MA_ASSERT(item->type == SUBALLOCATION_TYPE_FREE);
@@ -1962,7 +1999,7 @@ void BlockMetadata_Generic::MergeFreeWithNext(SuballocationList::iterator item)
     m_Suballocations.erase(nextItem);
 }
 
-SuballocationList::iterator BlockMetadata_Generic::FreeSuballocation(SuballocationList::iterator suballocItem)
+SuballocationList::iterator BlockMetadata_Generic::FreeSuballocation(const SuballocationList::iterator suballocItem) noexcept
 {
     // Change this suballocation to be marked as free.
     Suballocation& suballoc = *suballocItem;
@@ -1989,9 +2026,7 @@ SuballocationList::iterator BlockMetadata_Generic::FreeSuballocation(Suballocati
     {
         --prevItem;
         if(prevItem->type == SUBALLOCATION_TYPE_FREE)
-        {
-            mergeWithPrev = true;
-        }
+        { mergeWithPrev = true; }
     }
 
     if(mergeWithNext)
@@ -2014,7 +2049,7 @@ SuballocationList::iterator BlockMetadata_Generic::FreeSuballocation(Suballocati
     }
 }
 
-void BlockMetadata_Generic::RegisterFreeSuballocation(const SuballocationList::iterator item)
+void BlockMetadata_Generic::RegisterFreeSuballocation(const SuballocationList::iterator item) noexcept
 {
     D3D12MA_ASSERT(item->type == SUBALLOCATION_TYPE_FREE);
     D3D12MA_ASSERT(item->size > 0);
@@ -2034,12 +2069,10 @@ void BlockMetadata_Generic::RegisterFreeSuballocation(const SuballocationList::i
             m_FreeSuballocationsBySize.InsertSorted(item, SuballocationItemSizeLess());
         }
     }
-
-    //D3D12MA_HEAVY_ASSERT(ValidateFreeSuballocationList());
 }
 
 
-void BlockMetadata_Generic::UnregisterFreeSuballocation(const SuballocationList::iterator item)
+void BlockMetadata_Generic::UnregisterFreeSuballocation(const SuballocationList::iterator item) noexcept
 {
     D3D12MA_ASSERT(item->type == SUBALLOCATION_TYPE_FREE);
     D3D12MA_ASSERT(item->size > 0);
@@ -2084,12 +2117,12 @@ DeviceMemoryBlock::DeviceMemoryBlock() noexcept
 { }
 
 void DeviceMemoryBlock::Init(
-    AllocatorPimpl* allocator,
-    BlockVector* blockVector,
-    D3D12_HEAP_TYPE newHeapType,
-    ID3D12Heap* newHeap,
-    UINT64 newSize,
-    UINT id)
+    AllocatorPimpl* const allocator,
+    BlockVector* const blockVector,
+    const D3D12_HEAP_TYPE newHeapType,
+    ID3D12Heap* const newHeap,
+    const UINT64 newSize,
+    const UINT id) noexcept
 {
     D3D12MA_ASSERT(m_Heap == nullptr);
 
@@ -2104,7 +2137,7 @@ void DeviceMemoryBlock::Init(
     m_pMetadata->Init(newSize);
 }
 
-void DeviceMemoryBlock::Destroy(AllocatorPimpl* allocator)
+void DeviceMemoryBlock::Destroy(AllocatorPimpl* const allocator) noexcept
 {
     // THIS IS THE MOST IMPORTANT ASSERT IN THE ENTIRE LIBRARY!
     // Hitting it means you have some memory leak - unreleased Allocation objects.
@@ -2128,29 +2161,28 @@ bool DeviceMemoryBlock::Validate() const
 // Private class BlockVector implementation
 
 BlockVector::BlockVector(
-    AllocatorPimpl* hAllocator,
-    D3D12_HEAP_TYPE heapType,
-    D3D12_HEAP_FLAGS heapFlags,
-    UINT64 preferredBlockSize,
-    uSys minBlockCount,
-    uSys maxBlockCount,
-    bool explicitBlockSize) :
-    m_hAllocator(hAllocator),
-    m_HeapType(heapType),
-    m_HeapFlags(heapFlags),
-    m_PreferredBlockSize(preferredBlockSize),
-    m_MinBlockCount(minBlockCount),
-    m_MaxBlockCount(maxBlockCount),
-    m_ExplicitBlockSize(explicitBlockSize),
-    m_HasEmptyBlock(false),
-    m_Blocks(hAllocator->GetAllocs()),
-    m_NextBlockId(0)
-{
-}
+    AllocatorPimpl* const hAllocator,
+    const D3D12_HEAP_TYPE heapType,
+    const D3D12_HEAP_FLAGS heapFlags,
+    const UINT64 preferredBlockSize,
+    const uSys minBlockCount,
+    const uSys maxBlockCount,
+    const bool explicitBlockSize)
+    : m_hAllocator(hAllocator)
+    , m_HeapType(heapType)
+    , m_HeapFlags(heapFlags)
+    , m_PreferredBlockSize(preferredBlockSize)
+    , m_MinBlockCount(minBlockCount)
+    , m_MaxBlockCount(maxBlockCount)
+    , m_ExplicitBlockSize(explicitBlockSize)
+    , m_HasEmptyBlock(false)
+    , m_Blocks(hAllocator->GetAllocs())
+    , m_NextBlockId(0)
+{ }
 
 BlockVector::~BlockVector()
 {
-    for(uSys i = m_Blocks.size(); i--; )
+    for(uSys i = m_Blocks.size() - 1; i > 0; --i)
     {
         m_Blocks[i]->Destroy(m_hAllocator);
         D3D12MA_DELETE(m_hAllocator->GetAllocs(), m_Blocks[i]);
@@ -2169,11 +2201,11 @@ HRESULT BlockVector::CreateMinBlocks()
 }
 
 HRESULT BlockVector::Allocate(
-    UINT64 size,
-    UINT64 alignment,
+    const UINT64 size,
+    const UINT64 alignment,
     const ALLOCATION_DESC& createInfo,
-    uSys allocationCount,
-    Allocation** pAllocations)
+    const uSys allocationCount,
+    Allocation** const pAllocations) noexcept
 {
     uSys allocIndex;
     HRESULT hr = S_OK;
@@ -2188,9 +2220,7 @@ HRESULT BlockVector::Allocate(
                 createInfo,
                 pAllocations + allocIndex);
             if(FAILED(hr))
-            {
-                break;
-            }
+            { break; }
         }
     }
 
@@ -2201,23 +2231,21 @@ HRESULT BlockVector::Allocate(
         {
             Free(pAllocations[allocIndex]);
         }
-        memset(pAllocations, 0, sizeof(Allocation*) * allocationCount);
+        ::std::memset(pAllocations, 0, sizeof(Allocation*) * allocationCount);
     }
 
     return hr;
 }
 
 HRESULT BlockVector::AllocatePage(
-    UINT64 size,
-    UINT64 alignment,
+    const UINT64 size,
+    const UINT64 alignment,
     const ALLOCATION_DESC& createInfo,
-    Allocation** pAllocation)
+    Allocation** const pAllocation) noexcept
 {
     // Early reject: requested allocation size is larger that maximum block size for this block vector.
     if(size + 2 * D3D12MA_DEBUG_MARGIN > m_PreferredBlockSize)
-    {
-        return E_OUTOFMEMORY;
-    }
+    { return E_OUTOFMEMORY; }
 
     const bool canCreateNewBlock =
         ((createInfo.Flags & ALLOCATION_FLAG_NEVER_ALLOCATE) == 0) &&
@@ -2228,95 +2256,81 @@ HRESULT BlockVector::AllocatePage(
         // 1. Search existing allocations. Try to allocate without making other allocations lost.
         const ALLOCATION_FLAGS allocFlagsCopy = createInfo.Flags;
 
+        // Forward order in m_Blocks - prefer blocks with smallest amount of free space.
+        for(uSys blockIndex = 0; blockIndex < m_Blocks.size(); ++blockIndex )
         {
-            {
-                // Forward order in m_Blocks - prefer blocks with smallest amount of free space.
-                for(uSys blockIndex = 0; blockIndex < m_Blocks.size(); ++blockIndex )
-                {
-                    DeviceMemoryBlock* const pCurrBlock = m_Blocks[blockIndex];
-                    D3D12MA_ASSERT(pCurrBlock);
-                    const HRESULT hr = AllocateFromBlock(
-                        pCurrBlock,
-                        size,
-                        alignment,
-                        allocFlagsCopy,
-                        pAllocation);
-                    if(SUCCEEDED(hr))
-                    {
-                        return hr;
-                    }
-                }
-            }
+            DeviceMemoryBlock* const pCurrBlock = m_Blocks[blockIndex];
+            D3D12MA_ASSERT(pCurrBlock);
+            const HRESULT hr = AllocateFromBlock(
+                pCurrBlock,
+                size,
+                alignment,
+                allocFlagsCopy,
+                pAllocation);
+            if(SUCCEEDED(hr))
+            { return hr; }
         }
 
         // 2. Try to create new block.
-        if(canCreateNewBlock)
+            
+        // Calculate optimal size for new block.
+        UINT64 newBlockSize = m_PreferredBlockSize;
+        UINT newBlockSizeShift = 0;
+        const UINT NEW_BLOCK_SIZE_SHIFT_MAX = 3;
+
+        if(!m_ExplicitBlockSize)
         {
-            // Calculate optimal size for new block.
-            UINT64 newBlockSize = m_PreferredBlockSize;
-            UINT newBlockSizeShift = 0;
-            const UINT NEW_BLOCK_SIZE_SHIFT_MAX = 3;
-
-            if(!m_ExplicitBlockSize)
+            // Allocate 1/8, 1/4, 1/2 as first blocks.
+            const UINT64 maxExistingBlockSize = CalcMaxBlockSize();
+            for(UINT i = 0; i < NEW_BLOCK_SIZE_SHIFT_MAX; ++i)
             {
-                // Allocate 1/8, 1/4, 1/2 as first blocks.
-                const UINT64 maxExistingBlockSize = CalcMaxBlockSize();
-                for(UINT i = 0; i < NEW_BLOCK_SIZE_SHIFT_MAX; ++i)
+                const UINT64 smallerNewBlockSize = newBlockSize / 2;
+                if(smallerNewBlockSize > maxExistingBlockSize && smallerNewBlockSize >= size * 2)
                 {
-                    const UINT64 smallerNewBlockSize = newBlockSize / 2;
-                    if(smallerNewBlockSize > maxExistingBlockSize && smallerNewBlockSize >= size * 2)
-                    {
-                        newBlockSize = smallerNewBlockSize;
-                        ++newBlockSizeShift;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            uSys newBlockIndex = 0;
-            HRESULT hr = CreateBlock(newBlockSize, &newBlockIndex);
-            // Allocation of this size failed? Try 1/2, 1/4, 1/8 of m_PreferredBlockSize.
-            if(!m_ExplicitBlockSize)
-            {
-                while(FAILED(hr) && newBlockSizeShift < NEW_BLOCK_SIZE_SHIFT_MAX)
-                {
-                    const UINT64 smallerNewBlockSize = newBlockSize / 2;
-                    if(smallerNewBlockSize >= size)
-                    {
-                        newBlockSize = smallerNewBlockSize;
-                        ++newBlockSizeShift;
-                        hr = CreateBlock(newBlockSize, &newBlockIndex);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if(SUCCEEDED(hr))
-            {
-                DeviceMemoryBlock* const pBlock = m_Blocks[newBlockIndex];
-                D3D12MA_ASSERT(pBlock->m_pMetadata->GetSize() >= size);
-
-                hr = AllocateFromBlock(
-                    pBlock,
-                    size,
-                    alignment,
-                    allocFlagsCopy,
-                    pAllocation);
-                if(SUCCEEDED(hr))
-                {
-                    return hr;
+                    newBlockSize = smallerNewBlockSize;
+                    ++newBlockSizeShift;
                 }
                 else
+                { break; }
+            }
+        }
+
+        uSys newBlockIndex = 0;
+        HRESULT hr = CreateBlock(newBlockSize, &newBlockIndex);
+        // Allocation of this size failed? Try 1/2, 1/4, 1/8 of m_PreferredBlockSize.
+        if(!m_ExplicitBlockSize)
+        {
+            while(FAILED(hr) && newBlockSizeShift < NEW_BLOCK_SIZE_SHIFT_MAX)
+            {
+                const UINT64 smallerNewBlockSize = newBlockSize / 2;
+                if(smallerNewBlockSize >= size)
                 {
-                    // Allocation from new block failed, possibly due to D3D12MA_DEBUG_MARGIN or alignment.
-                    return E_OUTOFMEMORY;
+                    newBlockSize = smallerNewBlockSize;
+                    ++newBlockSizeShift;
+                    hr = CreateBlock(newBlockSize, &newBlockIndex);
                 }
+                else
+                { break; }
+            }
+        }
+
+        if(SUCCEEDED(hr))
+        {
+            DeviceMemoryBlock* const pBlock = m_Blocks[newBlockIndex];
+            D3D12MA_ASSERT(pBlock->m_pMetadata->GetSize() >= size);
+
+            hr = AllocateFromBlock(
+                pBlock,
+                size,
+                alignment,
+                allocFlagsCopy,
+                pAllocation);
+            if(SUCCEEDED(hr))
+            { return hr; }
+            else
+            {
+                // Allocation from new block failed, possibly due to D3D12MA_DEBUG_MARGIN or alignment.
+                return E_OUTOFMEMORY;
             }
         }
     }
@@ -2324,7 +2338,7 @@ HRESULT BlockVector::AllocatePage(
     return E_OUTOFMEMORY;
 }
 
-void BlockVector::Free(Allocation* hAllocation)
+void BlockVector::Free(Allocation* const hAllocation) noexcept
 {
     DeviceMemoryBlock* pBlockToDelete = nullptr;
 
@@ -2332,7 +2346,7 @@ void BlockVector::Free(Allocation* hAllocation)
     {
         MutexLockWrite lock(m_Mutex, m_hAllocator->UseMutex());
 
-        DeviceMemoryBlock* pBlock = hAllocation->GetBlock();
+        DeviceMemoryBlock* const pBlock = hAllocation->GetBlock();
 
         pBlock->m_pMetadata->Free(hAllocation);
         D3D12MA_HEAVY_ASSERT(pBlock->Validate());
@@ -2377,7 +2391,7 @@ void BlockVector::Free(Allocation* hAllocation)
     }
 }
 
-UINT64 BlockVector::HeapFlagsToAlignment(D3D12_HEAP_FLAGS flags)
+UINT64 BlockVector::HeapFlagsToAlignment(const D3D12_HEAP_FLAGS flags) noexcept
 {
     /*
     Documentation of D3D12_HEAP_DESC structure says:
@@ -2398,7 +2412,7 @@ UINT64 BlockVector::HeapFlagsToAlignment(D3D12_HEAP_FLAGS flags)
         D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT : D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 }
 
-UINT64 BlockVector::CalcMaxBlockSize() const
+UINT64 BlockVector::CalcMaxBlockSize() const noexcept
 {
     UINT64 result = 0;
     for(uSys i = m_Blocks.size(); i--; )
@@ -2412,7 +2426,7 @@ UINT64 BlockVector::CalcMaxBlockSize() const
     return result;
 }
 
-void BlockVector::Remove(DeviceMemoryBlock* pBlock)
+void BlockVector::Remove(DeviceMemoryBlock* const pBlock) noexcept
 {
     for(UINT blockIndex = 0; blockIndex < m_Blocks.size(); ++blockIndex)
     {
@@ -2425,7 +2439,7 @@ void BlockVector::Remove(DeviceMemoryBlock* pBlock)
     D3D12MA_ASSERT(0);
 }
 
-void BlockVector::IncrementallySortBlocks()
+void BlockVector::IncrementallySortBlocks() noexcept
 {
     // Bubble sort only until first swap.
     for(uSys i = 1; i < m_Blocks.size(); ++i)
@@ -2439,11 +2453,11 @@ void BlockVector::IncrementallySortBlocks()
 }
 
 HRESULT BlockVector::AllocateFromBlock(
-    DeviceMemoryBlock* pBlock,
-    UINT64 size,
-    UINT64 alignment,
-    ALLOCATION_FLAGS allocFlags,
-    Allocation** pAllocation)
+    DeviceMemoryBlock* const pBlock,
+    const UINT64 size,
+    const UINT64 alignment,
+    const ALLOCATION_FLAGS allocFlags,
+    Allocation** const pAllocation) noexcept
 {
     AllocationRequest currRequest = {};
     if(pBlock->m_pMetadata->CreateAllocationRequest(
@@ -2471,7 +2485,7 @@ HRESULT BlockVector::AllocateFromBlock(
     return E_OUTOFMEMORY;
 }
 
-HRESULT BlockVector::CreateBlock(const UINT64 blockSize, uSys* const pNewBlockIndex)
+HRESULT BlockVector::CreateBlock(const UINT64 blockSize, uSys* const pNewBlockIndex) noexcept
 {
     ID3D12Heap* heap = nullptr;
     const HRESULT hr = CreateD3d12Heap(heap, blockSize);
@@ -2489,16 +2503,14 @@ HRESULT BlockVector::CreateBlock(const UINT64 blockSize, uSys* const pNewBlockIn
 
     m_Blocks.push_back(pBlock);
     if(pNewBlockIndex)
-    {
-        *pNewBlockIndex = m_Blocks.size() - 1;
-    }
+    { *pNewBlockIndex = m_Blocks.size() - 1; }
 
     return hr;
 }
 
-HRESULT BlockVector::CreateD3d12Heap(ID3D12Heap*& outHeap, const UINT64 size) const
+HRESULT BlockVector::CreateD3d12Heap(ID3D12Heap*& outHeap, const UINT64 size) const noexcept
 {
-    D3D12_HEAP_DESC heapDesc = {};
+    D3D12_HEAP_DESC heapDesc = { };
     heapDesc.SizeInBytes = size;
     heapDesc.Properties.Type = m_HeapType;
     heapDesc.Alignment = HeapFlagsToAlignment(m_HeapFlags);
@@ -2546,7 +2558,7 @@ AllocatorPimpl::~AllocatorPimpl() noexcept
     }
 }
 
-HRESULT AllocatorPimpl::Init()
+HRESULT AllocatorPimpl::Init() noexcept
 {
     const HRESULT hr = m_Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &m_D3D12Options, sizeof(m_D3D12Options));
     if(FAILED(hr))
@@ -2580,7 +2592,7 @@ HRESULT AllocatorPimpl::CreateResource(
     const D3D12_CLEAR_VALUE *pOptimizedClearValue,
     Allocation** ppAllocation,
     REFIID riidResource,
-    void** ppvResource)
+    void** ppvResource) noexcept
 {
     if(pAllocDesc->HeapType != D3D12_HEAP_TYPE_DEFAULT &&
        pAllocDesc->HeapType != D3D12_HEAP_TYPE_UPLOAD &&
@@ -2665,35 +2677,34 @@ HRESULT AllocatorPimpl::CreateResource(
     }
 }
 
-bool AllocatorPimpl::PrefersCommittedAllocation(const D3D12_RESOURCE_DESC& resourceDesc)
+bool AllocatorPimpl::PrefersCommittedAllocation(const D3D12_RESOURCE_DESC&) noexcept
 {
     // Intentional. It may change in the future.
     return false;
 }
 
 HRESULT AllocatorPimpl::AllocateCommittedMemory(
-    const ALLOCATION_DESC* pAllocDesc,
-    const D3D12_RESOURCE_DESC* pResourceDesc,
+    const ALLOCATION_DESC* const pAllocDesc,
+    const D3D12_RESOURCE_DESC* const pResourceDesc,
     const D3D12_RESOURCE_ALLOCATION_INFO& resAllocInfo,
-    D3D12_RESOURCE_STATES InitialResourceState,
-    const D3D12_CLEAR_VALUE *pOptimizedClearValue,
-    Allocation** ppAllocation,
+    const D3D12_RESOURCE_STATES InitialResourceState,
+    const D3D12_CLEAR_VALUE* const pOptimizedClearValue,
+    Allocation** const ppAllocation,
     REFIID riidResource,
-    void** ppvResource)
+    void** const ppvResource) noexcept
 {
     if((pAllocDesc->Flags & ALLOCATION_FLAG_NEVER_ALLOCATE) != 0)
-    {
-        return E_OUTOFMEMORY;
-    }
+    { return E_OUTOFMEMORY; }
 
-    D3D12_HEAP_PROPERTIES heapProps = {};
+    D3D12_HEAP_PROPERTIES heapProps = { };
     heapProps.Type = pAllocDesc->HeapType;
     const HRESULT hr = m_Device->CreateCommittedResource(
         &heapProps, D3D12_HEAP_FLAG_NONE, pResourceDesc, InitialResourceState,
         pOptimizedClearValue, riidResource, ppvResource);
+
     if(SUCCEEDED(hr))
     {
-        Allocation* alloc = D3D12MA_NEW(m_AllocationCallbacks, Allocation)();
+        Allocation* const alloc = D3D12MA_NEW(m_AllocationCallbacks, Allocation)();
         alloc->InitCommitted(this, resAllocInfo.SizeInBytes, pAllocDesc->HeapType);
         *ppAllocation = alloc;
 
@@ -2706,19 +2717,16 @@ HRESULT AllocatorPimpl::AllocateCommittedMemory(
             committedAllocations->InsertSorted(alloc, PointerLess());
         }
     }
+
     return hr;
 }
 
 UINT AllocatorPimpl::CalcDefaultPoolCount() const noexcept
 {
     if(SupportsResourceHeapTier2())
-    {
-        return 3;
-    }
+    { return 3; }
     else
-    {
-        return 9;
-    }
+    { return 9; }
 }
 
 UINT AllocatorPimpl::CalcDefaultPoolIndex(const ALLOCATION_DESC& allocDesc, const D3D12_RESOURCE_DESC& resourceDesc) const noexcept
@@ -2790,7 +2798,7 @@ void AllocatorPimpl::CalcDefaultPoolParams(D3D12_HEAP_TYPE& outHeapType, D3D12_H
     }
 }
 
-void AllocatorPimpl::FreeCommittedMemory(Allocation* const allocation)
+void AllocatorPimpl::FreeCommittedMemory(Allocation* const allocation) noexcept
 {
     D3D12MA_ASSERT(allocation && allocation->m_Type == Allocation::TYPE_COMMITTED);
     const UINT heapTypeIndex = HeapTypeToIndex(allocation->m_Committed.heapType);
@@ -2804,7 +2812,7 @@ void AllocatorPimpl::FreeCommittedMemory(Allocation* const allocation)
     }
 }
 
-void AllocatorPimpl::FreePlacedMemory(Allocation* allocation)
+void AllocatorPimpl::FreePlacedMemory(Allocation* const allocation) noexcept
 {
     D3D12MA_ASSERT(allocation && allocation->m_Type == Allocation::TYPE_PLACED);
     
@@ -2902,13 +2910,13 @@ void Allocation::InitPlaced(AllocatorPimpl* const allocator, const UINT64 size, 
     m_Placed.block = block;
 }
 
-DeviceMemoryBlock* Allocation::GetBlock()
+DeviceMemoryBlock* Allocation::GetBlock() noexcept
 {
     D3D12MA_ASSERT(m_Type == TYPE_PLACED);
     return m_Placed.block;
 }
 
-void Allocation::FreeName()
+void Allocation::FreeName() noexcept
 {
     if(m_Name)
     {
@@ -2921,14 +2929,12 @@ void Allocation::FreeName()
 ////////////////////////////////////////////////////////////////////////////////
 // Public class Allocator implementation
 
-Allocator::Allocator(const ALLOCATION_CALLBACKS& allocationCallbacks, const ALLOCATOR_DESC& desc)
+Allocator::Allocator(const ALLOCATION_CALLBACKS& allocationCallbacks, const ALLOCATOR_DESC& desc) noexcept
     : m_Pimpl(D3D12MA_NEW(allocationCallbacks, AllocatorPimpl)(allocationCallbacks, desc))
 { }
 
-Allocator::~Allocator()
-{
-    D3D12MA_DELETE(m_Pimpl->GetAllocs(), m_Pimpl);
-}
+Allocator::~Allocator() noexcept
+{ D3D12MA_DELETE(m_Pimpl->GetAllocs(), m_Pimpl); }
 
 void Allocator::Release()
 {
@@ -2940,7 +2946,7 @@ void Allocator::Release()
 }
 
 
-const D3D12_FEATURE_DATA_D3D12_OPTIONS& Allocator::GetD3D12Options() const
+const D3D12_FEATURE_DATA_D3D12_OPTIONS& Allocator::GetD3D12Options() const noexcept
 {
     return m_Pimpl->GetD3D12Options();
 }
@@ -2952,7 +2958,7 @@ HRESULT Allocator::CreateResource(
     const D3D12_CLEAR_VALUE *pOptimizedClearValue,
     Allocation** ppAllocation,
     REFIID riidResource,
-    void** ppvResource)
+    void** ppvResource) noexcept
 {
     D3D12MA_ASSERT(pAllocDesc && pResourceDesc && ppAllocation && riidResource != IID_NULL && ppvResource);
     D3D12MA_DEBUG_GLOBAL_MUTEX_LOCK
@@ -2962,7 +2968,7 @@ HRESULT Allocator::CreateResource(
 ////////////////////////////////////////////////////////////////////////////////
 // Public global functions
 
-HRESULT CreateAllocator(const ALLOCATOR_DESC* pDesc, Allocator** ppAllocator)
+HRESULT CreateAllocator(const ALLOCATOR_DESC* const pDesc, Allocator** const ppAllocator) noexcept
 {
     D3D12MA_ASSERT(pDesc && ppAllocator);
     D3D12MA_ASSERT(pDesc->pDevice);

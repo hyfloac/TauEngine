@@ -198,6 +198,13 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\codgen\ast\StringTemplateAST.cpp" />
+    <ClCompile Include="src\codgen\ast\StringTemplateFragmentAST.cpp" />
+    <ClCompile Include="src\codgen\ast\StringTemplateIfAST.cpp" />
+    <ClCompile Include="src\codgen\ast\StringTemplateLoopAST.cpp" />
+    <ClCompile Include="src\codgen\ast\StringTemplateVarAST.cpp" />
+    <ClCompile Include="src\codgen\StringTemplateLexer.cpp" />
+    <ClCompile Include="src\codgen\StringTemplateVisitor.cpp" />
     <ClCompile Include="src\reflection\attribs\ImplicitAttribute.cpp" />
     <ClCompile Include="src\reflection\attribs\NoListAttribute.cpp" />
     <ClCompile Include="src\reflection\Attribute.cpp" />
@@ -209,6 +216,13 @@
     <ClCompile Include="src\reflection\processing\TagPreProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\codegen\ast\StringTemplateFragmentAST.hpp" />
+    <ClInclude Include="include\codegen\ast\StringTemplateIfAST.hpp" />
+    <ClInclude Include="include\codegen\ast\StringTemplateLoopAST.hpp" />
+    <ClInclude Include="include\codegen\ast\StringTemplateVarAST.hpp" />
+    <ClInclude Include="include\codegen\StringTemplateLexer.hpp" />
+    <ClInclude Include="include\codegen\StringTemplateParser.hpp" />
+    <ClInclude Include="include\codegen\StringTemplateVisitor.hpp" />
     <ClInclude Include="include\reflection\attribs\ImplicitAttribute.hpp" />
     <ClInclude Include="include\reflection\attribs\NoListAttribute.hpp" />
     <ClInclude Include="include\reflection\Attribute.hpp" />
@@ -222,6 +236,7 @@
     <ClInclude Include="include\reflection\Function.hpp" />
     <ClInclude Include="include\reflection\processing\TagPreProcessor.hpp" />
     <ClInclude Include="include\reflection\TagDeclaration.hpp" />
+    <ClInclude Include="include\codegen\ast\StringTemplateAST.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\reflection\Attribute.inl" />

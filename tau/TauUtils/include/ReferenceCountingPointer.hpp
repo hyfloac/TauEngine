@@ -235,7 +235,7 @@ public:
     template<typename _TT>
     using RCDO = _ReferenceCountingPointerUtils::_ReferenceCountDataObject<_TT>;
 
-    [[nodiscard]] static uSys allocSize() noexcept;
+    [[nodiscard]] static constexpr uSys allocSize() noexcept;
 private:
     RCDO<_T>* _rcdo;
     _T* _tPtr;
@@ -313,7 +313,7 @@ public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
 
-    [[nodiscard]] static uSys allocSize() noexcept;
+    [[nodiscard]] static constexpr uSys allocSize() noexcept;
 private:
     SWRC<_T>* _swrc;
     _T* _tPtr;
@@ -409,7 +409,7 @@ public:
     template<typename _TT>
     using SWRC = _ReferenceCountingPointerUtils::_SWReferenceCount<_TT>;
 
-    [[nodiscard]] static uSys allocSize() noexcept;
+    [[nodiscard]] static constexpr uSys allocSize() noexcept;
 private:
     SWRC<_T>* _swrc;
     _T* _tPtr;

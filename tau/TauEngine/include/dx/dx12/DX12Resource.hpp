@@ -35,16 +35,14 @@ class TAU_DLL TAU_NOVTABLE DX12Resource : public IResource
 protected:
     DX12ResourceRawInterface _rawInterface;
     __declspec(property(get = d3dResource, put = setD3DResource)) ID3D12Resource* _d3dResource;
-    EGraphics::ResourceHeapUsageType _resourceUsage;
     D3D12MA::Allocation* _allocation;
-    DX12GraphicsInterface& _gi;
+    EGraphics::ResourceHeapUsageType _resourceUsage;
 public:
-    DX12Resource(const uSys size, ID3D12Resource* const d3dResource, const EGraphics::ResourceHeapUsageType resourceUsage, D3D12MA::Allocation* const allocation, DX12GraphicsInterface& gi) noexcept
-        : IResource(size)
+    DX12Resource(const uSys size, const EResource::Type resourceType, ID3D12Resource* const d3dResource, D3D12MA::Allocation* const allocation, const EGraphics::ResourceHeapUsageType resourceUsage) noexcept
+        : IResource(size, resourceType)
         , _rawInterface(d3dResource)
-        , _resourceUsage(resourceUsage)
         , _allocation(allocation)
-        , _gi(gi)
+        , _resourceUsage(resourceUsage)
     { }
 
     ~DX12Resource() noexcept override
@@ -57,6 +55,7 @@ public:
     }
 
     [[nodiscard]] ID3D12Resource* d3dResource() const noexcept { return _rawInterface._d3dResource; }
+    [[nodiscard]] D3D12MA::Allocation* allocation() const noexcept { return _allocation; }
     [[nodiscard]] EGraphics::ResourceHeapUsageType resourceUsage() const noexcept { return _resourceUsage; }
 
     [[nodiscard]] const IResourceRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }

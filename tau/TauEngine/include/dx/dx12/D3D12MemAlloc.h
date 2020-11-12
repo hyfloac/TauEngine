@@ -498,8 +498,8 @@ private:
 
     void InitCommitted(AllocatorPimpl* allocator, UINT64 size, D3D12_HEAP_TYPE heapType) noexcept;
     void InitPlaced(AllocatorPimpl* allocator, UINT64 size, UINT64 offset, UINT64 alignment, DeviceMemoryBlock* block) noexcept;
-    DeviceMemoryBlock* GetBlock();
-    void FreeName();
+    DeviceMemoryBlock* GetBlock() noexcept;
+    void FreeName() noexcept;
 };
 
 /// \brief Bit flags to be used with ALLOCATOR_DESC::Flags.
@@ -552,6 +552,12 @@ right after Direct3D 12 is initialized and keep it alive until before Direct3D d
 class Allocator final
 {
     DELETE_CM(Allocator);
+private:
+    AllocatorPimpl* m_Pimpl;
+private:
+    Allocator(const ALLOCATION_CALLBACKS& allocationCallbacks, const ALLOCATOR_DESC& desc) noexcept;
+
+    ~Allocator() noexcept;
 public:
     /** \brief Deletes this object.
     
@@ -561,18 +567,18 @@ public:
     void Release();
     
     /// Returns cached options retrieved from D3D12 device.
-    const D3D12_FEATURE_DATA_D3D12_OPTIONS& GetD3D12Options() const;
+    const D3D12_FEATURE_DATA_D3D12_OPTIONS& GetD3D12Options() const noexcept;
 
     /** \brief Allocates memory and creates a D3D12 resource (buffer or texture). This is the main allocation function.
-
-    The function is similar to `ID3D12Device::CreateCommittedResource`, but it may
-    really call `ID3D12Device::CreatePlacedResource` to assign part of a larger,
-    existing memory heap to the new resource, which is the main purpose of this
-    whole library.
-
-    Two objects are created and returned: allocation and resource. You need to
-    destroy them both.
-    */
+     * 
+     * The function is similar to `ID3D12Device::CreateCommittedResource`, but it may
+     * really call `ID3D12Device::CreatePlacedResource` to assign part of a larger,
+     * existing memory heap to the new resource, which is the main purpose of this
+     * whole library.
+     * 
+     * Two objects are created and returned: allocation and resource. You need to
+     * destroy them both.
+     */
     HRESULT CreateResource(
         const ALLOCATION_DESC* pAllocDesc,
         const D3D12_RESOURCE_DESC* pResourceDesc,
@@ -580,23 +586,18 @@ public:
         const D3D12_CLEAR_VALUE *pOptimizedClearValue,
         Allocation** ppAllocation,
         REFIID riidResource,
-        void** ppvResource);
-
+        void** ppvResource) noexcept;
 private:
-    friend HRESULT CreateAllocator(const ALLOCATOR_DESC*, Allocator**);
+    friend HRESULT CreateAllocator(const ALLOCATOR_DESC*, Allocator**) noexcept;
     // template<typename T> friend void D3D12MA_DELETE(const ALLOCATION_CALLBACKS&, T*);
-
-    Allocator(const ALLOCATION_CALLBACKS& allocationCallbacks, const ALLOCATOR_DESC& desc);
-    ~Allocator();
-    
-    AllocatorPimpl* m_Pimpl;
 };
 
-/** \brief Creates new main Allocator object and returns it through `ppAllocator`.
-
-You normally only need to call it once and keep a single Allocator object for your `ID3D12Device`.
-*/
-HRESULT CreateAllocator(const ALLOCATOR_DESC* pDesc, Allocator** ppAllocator);
+/**
+ * \brief Creates new main Allocator object and returns it through `ppAllocator`.
+ *
+ * You normally only need to call it once and keep a single Allocator object for your `ID3D12Device`.
+ */
+HRESULT CreateAllocator(const ALLOCATOR_DESC* pDesc, Allocator** ppAllocator) noexcept;
 
 } // namespace D3D12MA
 

@@ -18,8 +18,8 @@ private:
     void* volatile _currentMapping;
     Win32ManualEvent _mappingEvent;
 protected:
-    GLResourceTexture(const uSys size, const GLuint texture) noexcept
-        : GLResource(size)
+    GLResourceTexture(const uSys size, const EResource::Type resourceType, const GLuint texture) noexcept
+        : GLResource(size, resourceType)
         , _texture(texture)
         , _atomicMapCount(new(::std::nothrow) iSys(0))
         , _currentMapping(null)
@@ -46,11 +46,10 @@ private:
     ResourceTexture1DArgs _args;
 public:
     GLResourceTexture1D(const ResourceTexture1DArgs& args, const GLuint texture) noexcept
-        : GLResourceTexture(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.mipLevels, args.arrayCount), texture)
+        : GLResourceTexture(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.mipLevels, args.arrayCount), EResource::Type::Texture1D, texture)
         , _args(args)
     { }
 
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture1D; }
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 
@@ -67,11 +66,9 @@ private:
     ResourceTexture2DArgs _args;
 public:
     GLResourceTexture2D(const ResourceTexture2DArgs& args, const GLuint texture) noexcept
-        : GLResourceTexture(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.height, args.mipLevels, args.arrayCount), texture)
+        : GLResourceTexture(ETexture::computeSizeMipArr(args.dataFormat, args.width, args.height, args.mipLevels, args.arrayCount), EResource::Type::Texture2D, texture)
         , _args(args)
     { }
-
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture2D; }
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 
@@ -88,11 +85,9 @@ private:
     ResourceTexture3DArgs _args;
 public:
     GLResourceTexture3D(const ResourceTexture3DArgs& args, const GLuint texture) noexcept
-        : GLResourceTexture(ETexture::computeSizeMip(args.dataFormat, args.width, args.height, args.depth, args.mipLevels), texture)
+        : GLResourceTexture(ETexture::computeSizeMip(args.dataFormat, args.width, args.height, args.depth, args.mipLevels), EResource::Type::Texture3D, texture)
         , _args(args)
     { }
-
-    [[nodiscard]] EResource::Type resourceType() const noexcept override { return EResource::Type::Texture3D; }
 protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 

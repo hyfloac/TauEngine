@@ -13,8 +13,8 @@ class TAU_DLL TAU_NOVTABLE DX10Resource : public IResource
     DEFAULT_CM_PO(DX10Resource);
     RESOURCE_IMPL(DX10Resource);
 protected:
-    DX10Resource(const uSys size) noexcept
-        : IResource(size)
+    DX10Resource(const uSys size, const EResource::Type resourceType) noexcept
+        : IResource(size, resourceType)
     { }
 };
 

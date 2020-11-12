@@ -10,15 +10,26 @@
 #include "reflection/attribs/ImplicitAttribute.hpp"
 #include "reflection/attribs/NoListAttribute.hpp"
 
+#include "codegen/StringTemplateLexer.hpp"
+#include <fstream>
+
 static ::llvm::cl::OptionCategory tauReflCategory("tau-reflection-generator options");
 
 static ::llvm::cl::opt<::std::string> baseHeaderLoc("base-loc", ::llvm::cl::desc("The path to where the base header should be placed"), ::llvm::cl::cat(tauReflCategory));
 static ::llvm::cl::opt<::std::string> outHeader("o", ::llvm::cl::desc("The path and name of the output file"), ::llvm::cl::cat(tauReflCategory));
 
+static void dumpTokens(::std::istream& file) noexcept;
+
 int main(int argCount, const char* args[])
 {
     static ::llvm::cl::extrahelp commonHelp(::clang::tooling::CommonOptionsParser::HelpMessage);
     UNUSED(commonHelp);
+
+
+    // {
+    //     ::std::fstream file(R"(D:\TauEngine\concepts\StringTemplateExample.template)");
+    //     dumpTokens(file);
+    // }
 
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::ImplicitAttribute>("__implicit_base_0__");
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::NoListAttribute>("nolist");
@@ -75,4 +86,100 @@ int main(int argCount, const char* args[])
     }
 
     return result;
+}
+
+static void dumpTokens(::std::istream& file) noexcept
+{
+    using namespace tau::codegen::string;
+    Lexer lexer(file);
+
+    int parenDepth = 0;
+
+    bool simpleCtrlIdent = false;
+
+    do
+    {
+        switch(lexer.getNextToken())
+        {
+            case Token::Identifier:
+                llvm::outs() << "Generic Identifier: " << lexer.identifierValue() << "\n";
+                break;
+            case Token::BeginFragment:
+            case Token::EndFragment:
+            case Token::BeginLoop:
+            case Token::EndLoop:
+            case Token::BeginIf:
+            case Token::Else:
+            case Token::ElseIf:
+            case Token::EndIf:
+            case Token::Continue:
+            case Token::Break:
+            case Token::LoopIndex:
+            case Token::Stringify:
+                llvm::outs() << "Control Identifier: " << lexer.identifierValue() << "\n";
+                break;
+            case Token::TextBlock:
+                llvm::outs() << "Text Block:\n" << lexer.strValue() << "\n";
+                break;
+            case Token::Character:
+                llvm::outs() << "Raw Character: " << lexer.charValue() << "\n";
+                if(lexer.charValue() == '(')
+                {
+                    ++parenDepth;
+                }
+                else if(lexer.charValue() == ')')
+                {
+                    if(--parenDepth == 0)
+                    {
+                        lexer.inControlSequence() = false;
+                    }
+                }
+                else if(lexer.charValue() == '>' && simpleCtrlIdent)
+                {
+                    lexer.inControlSequence() = false;
+                }
+                break;
+            case Token::StringLiteral:
+                llvm::outs() << "String Literal: \"" << lexer.strValue() << "\"\n";
+                break;
+            case Token::CharacterLiteral:
+                llvm::outs() << "Character Literal: '" << lexer.charValue() << "'\n";
+                break;
+            case Token::IntegerLiteral:
+                llvm::outs() << "Integer Literal: " << lexer.intValue() << "\n";
+                break;
+            default: break;
+        }
+
+        switch(lexer.currentToken())
+        {
+            case Token::EndFragment:
+            case Token::EndLoop:
+            case Token::EndIf:
+                simpleCtrlIdent = true;
+                break;
+            case Token::BeginFragment:
+            case Token::BeginLoop:
+            case Token::BeginIf:
+            case Token::Else:
+            case Token::ElseIf:
+            case Token::Continue:
+            case Token::Break:
+            case Token::LoopIndex:
+            case Token::Stringify:
+                simpleCtrlIdent = false;
+                break;
+            default: break;
+        }
+
+    } while(lexer.currentToken() != Token::EndOfFile && lexer.currentToken() != Token::Unknown);
+
+    if(lexer.currentToken() == Token::Unknown)
+    {
+        llvm::outs() << "Unknown Token Encountered.\n";
+    }
+    else
+    {
+        llvm::outs() << "End of file.\n";
+    }
 }

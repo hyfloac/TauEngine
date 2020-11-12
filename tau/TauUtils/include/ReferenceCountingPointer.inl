@@ -54,7 +54,7 @@ inline _SWReferenceCount<_ToT>&& SWRCCast(_SWReferenceCount<_FromT>&& obj) noexc
 }
 
 template<typename _T>
-inline uSys ReferenceCountingPointer<_T>::allocSize() noexcept
+inline constexpr uSys ReferenceCountingPointer<_T>::allocSize() noexcept
 { return sizeof(RCDO<_T>); }
 
 template<typename _T>
@@ -265,7 +265,7 @@ inline bool ReferenceCountingPointer<_T>::operator!=(const _T* const& ptr) const
 }
 
 template<typename _T>
-inline uSys StrongReferenceCountingPointer<_T>::allocSize() noexcept
+inline constexpr uSys StrongReferenceCountingPointer<_T>::allocSize() noexcept
 { return sizeof(SWRC<_T>); }
 
 template<typename _T>
@@ -590,7 +590,7 @@ inline bool StrongReferenceCountingPointer<_T>::operator!=(const _T* const& ptr)
 }
 
 template<typename _T>
-inline uSys WeakReferenceCountingPointer<_T>::allocSize() noexcept
+inline constexpr uSys WeakReferenceCountingPointer<_T>::allocSize() noexcept
 { return sizeof(SWRC<_T>); }
 
 template<typename _T>

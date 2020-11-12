@@ -81,7 +81,7 @@ private:
     uSys _fileLine;
     uSys _lineIndex;
 public:
-    inline ShaderBundleLexer(const CPPRef<IFile>& file) noexcept
+    ShaderBundleLexer(const CPPRef<IFile>& file) noexcept
         : _file(file)
         , _currentToken(SBPToken::Unknown)
         , _strValue("")
