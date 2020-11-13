@@ -2,12 +2,6 @@
 
 #include "StringTemplateAST.hpp"
 
-namespace tau { namespace codegen { namespace string {
-
-class IStringTemplateVisitor;
-
-} } }
-
 namespace tau { namespace codegen { namespace string { namespace ast {
 
 class StringTemplateEndFragmentAST;

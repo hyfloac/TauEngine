@@ -33,18 +33,20 @@ public:
     virtual void visit(IStringTemplateVisitor& visitor) noexcept = 0;
 };
 
-class StringTemplateExprAST : public StringTemplateAST
+class StringTemplateRootAST : public StringTemplateAST
 {
-    DEFAULT_DESTRUCT_VI(StringTemplateExprAST);
-    DELETE_CM(StringTemplateExprAST);
+    DEFAULT_DESTRUCT_VI(StringTemplateRootAST);
+    DELETE_CM(StringTemplateRootAST);
 protected:
-    StringTemplateExprAST(const StrongRef<StringTemplateExprAST>& next, const WeakRef<StringTemplateAST>& prev) noexcept
+    StringTemplateRootAST(const StrongRef<StringTemplateRootAST>& next, const WeakRef<StringTemplateAST>& prev) noexcept
         : StringTemplateAST(next, prev)
     { }
 };
 
 class StringTemplateTextBlockAST final : public StringTemplateAST
 {
+    DEFAULT_DESTRUCT(StringTemplateTextBlockAST);
+    DELETE_CM(StringTemplateTextBlockAST);
 private:
     DynString _text;
 public:

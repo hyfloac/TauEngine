@@ -1,12 +1,7 @@
 #pragma once
 
 #include "StringTemplateAST.hpp"
-
-namespace tau { namespace codegen { namespace string {
-
-class IStringTemplateVisitor;
-
-} } }
+#include "StringTemplateExprAST.hpp"
 
 namespace tau { namespace codegen { namespace string { namespace ast {
 

@@ -3,12 +3,6 @@
 #include "StringTemplateAST.hpp"
 #include "StringTemplateVarAST.hpp"
 
-namespace tau { namespace codegen { namespace string {
-
-class IStringTemplateVisitor;
-
-} } }
-
 namespace tau { namespace codegen { namespace string { namespace ast {
 
 class StringTemplateEndLoopAST;
@@ -55,6 +49,39 @@ public:
 
     [[nodiscard]]       WeakRef<StringTemplateBeginLoopAST>& begin()       noexcept { return _begin; }
     [[nodiscard]] const WeakRef<StringTemplateBeginLoopAST>& begin() const noexcept { return _begin; }
+
+    void visit(IStringTemplateVisitor& visitor) noexcept override;
+};
+
+enum class LoopControlType
+{
+    Continue = 0,
+    Break,
+    LoopIndex
+};
+
+class StringTemplateLoopControlAST final : public StringTemplateAST
+{
+    DEFAULT_DESTRUCT_VI(StringTemplateLoopControlAST);
+    DELETE_CM(StringTemplateLoopControlAST);
+public:
+private:
+    WeakRef<StringTemplateBeginLoopAST> _loop;
+    LoopControlType _controlType;
+    u32 _loopIndex;
+public:
+    StringTemplateLoopControlAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const WeakRef<StringTemplateBeginLoopAST>& loop, const LoopControlType controlType, const u32 loopIndex) noexcept
+        : StringTemplateAST(next, prev)
+        , _loop(loop)
+        , _controlType(controlType)
+        , _loopIndex(loopIndex)
+    { }
+
+    [[nodiscard]]       WeakRef<StringTemplateBeginLoopAST>& loop()       noexcept { return _loop; }
+    [[nodiscard]] const WeakRef<StringTemplateBeginLoopAST>& loop() const noexcept { return _loop; }
+
+    [[nodiscard]] LoopControlType controlType() const noexcept { return _controlType; }
+    [[nodiscard]] u32 loopIndex() const noexcept { return _loopIndex; }
 
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };

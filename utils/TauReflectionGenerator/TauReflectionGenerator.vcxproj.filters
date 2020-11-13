@@ -63,6 +63,18 @@
     <ClCompile Include="src\codgen\ast\StringTemplateIfAST.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\codgen\StringTemplateParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codgen\ast\StringTemplateExprAST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codgen\ast\StringTemplateStringify.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codgen\ast\StringTemplateMemberExprAST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\reflection\Property.hpp">
@@ -126,6 +138,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\codegen\ast\StringTemplateIfAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\codegen\ast\StringTemplateExprAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\codegen\ast\StringTemplateStringifyAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\codegen\ast\StringTemplateMemberExprAST.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
