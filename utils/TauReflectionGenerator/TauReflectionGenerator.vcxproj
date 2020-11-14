@@ -161,7 +161,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;NDEBUG;_CONSOLE;TRG_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -199,6 +199,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\codgen\ast\StringTemplateAST.cpp" />
+    <ClCompile Include="src\codgen\ast\StringTemplateBooleanExprAST.cpp" />
     <ClCompile Include="src\codgen\ast\StringTemplateExprAST.cpp" />
     <ClCompile Include="src\codgen\ast\StringTemplateFragmentAST.cpp" />
     <ClCompile Include="src\codgen\ast\StringTemplateIfAST.cpp" />
@@ -220,6 +221,7 @@
     <ClCompile Include="src\reflection\processing\TagPreProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\codegen\ast\StringTemplateBooleanExprAST.hpp" />
     <ClInclude Include="include\codegen\ast\StringTemplateExprAST.hpp" />
     <ClInclude Include="include\codegen\ast\StringTemplateFragmentAST.hpp" />
     <ClInclude Include="include\codegen\ast\StringTemplateIfAST.hpp" />

@@ -2,22 +2,31 @@
 
 #include "StringTemplateAST.hpp"
 
-namespace tau { namespace codegen { namespace string {
-
-class IStringTemplateVisitor;
-
-} } }
-
 namespace tau { namespace codegen { namespace string { namespace ast {
 
 class StringTemplateExprAST : public StringTemplateAST
 {
+    DEFAULT_CONSTRUCT_PO(StringTemplateExprAST);
     DEFAULT_DESTRUCT_VI(StringTemplateExprAST);
     DELETE_CM(StringTemplateExprAST);
-protected:
-    StringTemplateExprAST(const StrongRef<StringTemplateExprAST>& next, const WeakRef<StringTemplateAST>& prev) noexcept
-        : StringTemplateAST(next, prev)
+};
+
+class StringTemplateWildExprAST final : public StringTemplateSequenceAST
+{
+    DEFAULT_DESTRUCT(StringTemplateWildExprAST);
+    DELETE_CM(StringTemplateWildExprAST);
+private:
+    StrongRef<StringTemplateExprAST> _expr;
+public:
+    StringTemplateWildExprAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateExprAST>& expr) noexcept
+        : StringTemplateSequenceAST(next, prev)
+        , _expr(expr)
     { }
+    
+    [[nodiscard]]       StrongRef<StringTemplateExprAST>& expr()       noexcept { return _expr; }
+    [[nodiscard]] const StrongRef<StringTemplateExprAST>& expr() const noexcept { return _expr; }
+
+    void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
 class StringTemplateStringExprAST final : public StringTemplateExprAST
@@ -27,14 +36,12 @@ class StringTemplateStringExprAST final : public StringTemplateExprAST
 private:
     DynString _string;
 public:
-    StringTemplateStringExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const DynString& string) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _string(string)
+    StringTemplateStringExprAST(const DynString& string) noexcept
+        : _string(string)
     { }
 
-    StringTemplateStringExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, DynString&& string) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _string(::std::move(string))
+    StringTemplateStringExprAST(DynString&& string) noexcept
+        : _string(::std::move(string))
     { }
 
     [[nodiscard]] const DynString& string() const noexcept { return _string; }
@@ -49,9 +56,8 @@ class StringTemplateIntegerExprAST final : public StringTemplateExprAST
 private:
     int _int;
 public:
-    StringTemplateIntegerExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const int intVal) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _int(intVal)
+    StringTemplateIntegerExprAST(const int intVal) noexcept
+        : _int(intVal)
     { }
 
     [[nodiscard]] int intVal() const noexcept { return _int; }

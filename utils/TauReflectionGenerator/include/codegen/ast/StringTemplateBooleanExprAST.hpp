@@ -4,16 +4,15 @@
 
 namespace tau { namespace codegen { namespace string { namespace ast {
 
-class StringTemplateStringifyAST final : public StringTemplateSequenceAST
+class StringTemplateBooleanInvertExprAST final : public StringTemplateExprAST
 {
-    DEFAULT_DESTRUCT(StringTemplateStringifyAST);
-    DELETE_CM(StringTemplateStringifyAST);
+    DEFAULT_DESTRUCT(StringTemplateBooleanInvertExprAST);
+    DELETE_CM(StringTemplateBooleanInvertExprAST);
 private:
     StrongRef<StringTemplateExprAST> _expr;
 public:
-    StringTemplateStringifyAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateExprAST>& expr) noexcept
-        : StringTemplateSequenceAST(next, prev)
-        , _expr(expr)
+    StringTemplateBooleanInvertExprAST(const StrongRef<StringTemplateExprAST>& expr) noexcept
+        : _expr(expr)
     { }
     
     [[nodiscard]]       StrongRef<StringTemplateExprAST>& expr()       noexcept { return _expr; }

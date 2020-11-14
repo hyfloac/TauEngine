@@ -335,12 +335,14 @@ inline constexpr StrongReferenceCountingPointer<_T>::StrongReferenceCountingPoin
 template<typename _T>
 inline StrongReferenceCountingPointer<_T>::~StrongReferenceCountingPointer() noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 }
 
 template<typename _T>
@@ -366,12 +368,14 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
     if(this == &copy)
     { return *this; }
 
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
 
@@ -389,12 +393,14 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
     if(this == &move)
     { return *this; }
 
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     TReferenceCountingPointerBase<_T>::operator =(::std::move(move));
 
@@ -409,12 +415,14 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
 template<typename _T>
 inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const nullptr_t) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     _swrc = nullptr;
     _tPtr = nullptr;
@@ -426,12 +434,14 @@ template<typename _T>
 template<typename _TT>
 inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const StrongReferenceCountingPointer<_TT>& copy) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
 
@@ -447,12 +457,14 @@ template<typename _T>
 template<typename _TT>
 inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(StrongReferenceCountingPointer<_TT>&& move) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     TReferenceCountingPointerBase<_T>::operator =(::std::move(move));
 
@@ -467,12 +479,14 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
 template<typename _T>
 inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const WeakReferenceCountingPointer<_T>& copy) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocate(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
 
@@ -496,12 +510,14 @@ template <typename _T>
 template <typename _TT>
 inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::operator=(const WeakReferenceCountingPointer<_TT>& copy) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocate(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
 
@@ -525,12 +541,14 @@ template<typename _T>
 template<typename _Allocator, typename... _Args, ::std::enable_if_t<::std::is_base_of_v<TauAllocator, _Allocator>, int>>
 inline void StrongReferenceCountingPointer<_T>::reset(_Allocator& allocator, _Args&&... args) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     void* raw = allocator.allocate(sizeof(SWRC<_T>) + sizeof(_T));
     _swrc = new(raw) SWRC<_T>(allocator, _TauAllocatorUtils::_forward<_Args>(args)...);
@@ -541,12 +559,14 @@ template<typename _T>
 template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int>>
 inline void StrongReferenceCountingPointer<_T>::reset(_Arg0&& arg0, _Args&&... args) noexcept
 {
-    if(_swrc && _swrc->releaseStrong() == 0)
+    if(_swrc && _swrc->_strongRefCount == 1)
     {
         _swrc->destroyObj();
         if(!_swrc->_weakRefCount)
         { _swrc->_allocator.deallocateT(_swrc); }
     }
+    else if(_swrc && _swrc->_strongRefCount > 1)
+    { _swrc->releaseStrong(); }
 
     void* raw = DefaultTauAllocator::Instance().allocate(sizeof(SWRC<_T>) + sizeof(_T));
     _swrc = new(raw) SWRC<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Arg0>(arg0), _TauAllocatorUtils::_forward<_Args>(args)...);
@@ -675,7 +695,7 @@ inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::opera
     if(this == &copy)
     { return *this; }
 
-    if(_swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
+    if(_swrc && _swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
     { _swrc->_allocator.deallocate(_swrc); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
@@ -695,7 +715,7 @@ inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::opera
     if(this == &move)
     { return *this; }
 
-    if(_swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
+    if(_swrc && _swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
     { _swrc->_allocator.deallocate(_swrc); }
 
     TReferenceCountingPointerBase<_T>::operator =(::std::move(move));
@@ -711,12 +731,12 @@ inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::opera
 template<typename _T>
 inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(const StrongReferenceCountingPointer<_T>& copy) noexcept
 {
-    if(_swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
+    if(_swrc && _swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
     { _swrc->_allocator.deallocate(_swrc); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
 
-    _swrc = copy._rcdo;
+    _swrc = copy._swrc;
     _tPtr = copy._tPtr;
 
     if(_swrc) 
@@ -729,7 +749,7 @@ template<typename _T>
 template<typename _TT>
 inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(const StrongReferenceCountingPointer<_TT>& copy) noexcept
 {
-    if(_swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
+    if(_swrc && _swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
     { _swrc->_allocator.deallocate(_swrc); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
@@ -747,7 +767,7 @@ template<typename _T>
 template<typename _TT>
 inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(const WeakReferenceCountingPointer<_TT>& copy) noexcept
 {
-    if(_swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
+    if(_swrc && _swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
     { _swrc->_allocator.deallocate(_swrc); }
 
     TReferenceCountingPointerBase<_T>::operator =(copy);
@@ -765,7 +785,7 @@ template<typename _T>
 template<typename _TT>
 inline WeakReferenceCountingPointer<_T>& WeakReferenceCountingPointer<_T>::operator=(WeakReferenceCountingPointer<_TT>&& move) noexcept
 {
-    if(_swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
+    if(_swrc && _swrc->releaseWeak() == 0 && !_swrc->_strongRefCount)
     { _swrc->_allocator.deallocate(_swrc); }
 
     TReferenceCountingPointerBase<_T>::operator=(::std::move(move));

@@ -5,20 +5,20 @@
 
 namespace tau { namespace codegen { namespace string { namespace ast {
 
-class StringTemplateVarDeclAST final : public StringTemplateAST
+class StringTemplateVarDeclAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT(StringTemplateVarDeclAST);
     DELETE_CM(StringTemplateVarDeclAST);
 private:
     DynString _varName;
 public:
-    StringTemplateVarDeclAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const DynString& varName) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateVarDeclAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const DynString& varName) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _varName(varName)
     { }
 
-    StringTemplateVarDeclAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, DynString&& varName) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateVarDeclAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, DynString&& varName) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _varName(::std::move(varName))
     { }
 
@@ -35,15 +35,13 @@ private:
     DynString _varName;
     StrongRef<StringTemplateExprAST> _assignmentExpr;
 public:
-    StringTemplateVarAssignExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const DynString& varName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _varName(varName)
+    StringTemplateVarAssignExprAST(const DynString& varName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
+        : _varName(varName)
         , _assignmentExpr(assignmentExpr)
     { }
 
-    StringTemplateVarAssignExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, DynString&& varName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _varName(::std::move(varName))
+    StringTemplateVarAssignExprAST(DynString&& varName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
+        : _varName(::std::move(varName))
         , _assignmentExpr(assignmentExpr)
     { }
 
@@ -62,14 +60,12 @@ class StringTemplateVarRetrieveExprAST final : public StringTemplateExprAST
 private:
     DynString _varName;
 public:
-    StringTemplateVarRetrieveExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const DynString& varName) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _varName(varName)
+    StringTemplateVarRetrieveExprAST(const DynString& varName) noexcept
+        : _varName(varName)
     { }
 
-    StringTemplateVarRetrieveExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, DynString&& varName) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _varName(::std::move(varName))
+    StringTemplateVarRetrieveExprAST(DynString&& varName) noexcept
+        : _varName(::std::move(varName))
     { }
 
     [[nodiscard]] const DynString& varName() const noexcept { return _varName; }

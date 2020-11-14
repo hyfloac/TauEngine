@@ -9,4 +9,7 @@ void StringTemplateBeginLoopAST::visit(IStringTemplateVisitor& visitor) noexcept
 void StringTemplateEndLoopAST::visit(IStringTemplateVisitor& visitor) noexcept
 { visitor.visit(*this); }
 
+void StringTemplateLoopControlAST::visit(IStringTemplateVisitor& visitor) noexcept
+{ visitor.visit(*this); }
+
 } } } }

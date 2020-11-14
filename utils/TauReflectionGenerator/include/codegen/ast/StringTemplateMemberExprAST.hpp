@@ -16,16 +16,14 @@ private:
     DynString _memberName;
     StrongRef<StringTemplateExprAST> _assignmentExpr;
 public:
-    StringTemplateMemberAssignExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& objectExpr, const DynString& memberName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _objectExpr(objectExpr)
+    StringTemplateMemberAssignExprAST(const StrongRef<StringTemplateExprAST>& objectExpr, const DynString& memberName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
+        : _objectExpr(objectExpr)
         , _memberName(memberName)
         , _assignmentExpr(assignmentExpr)
     { }
 
-    StringTemplateMemberAssignExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& objectExpr, DynString&& memberName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _objectExpr(objectExpr)
+    StringTemplateMemberAssignExprAST(const StrongRef<StringTemplateExprAST>& objectExpr, DynString&& memberName, const StrongRef<StringTemplateExprAST>& assignmentExpr) noexcept
+        : _objectExpr(objectExpr)
         , _memberName(::std::move(memberName))
         , _assignmentExpr(assignmentExpr)
     { }
@@ -49,15 +47,13 @@ private:
     StrongRef<StringTemplateExprAST> _objectExpr;
     DynString _memberName;
 public:
-    StringTemplateMemberAccessExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& objectExpr, const DynString& memberName) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _objectExpr(objectExpr)
+    StringTemplateMemberAccessExprAST(const StrongRef<StringTemplateExprAST>& objectExpr, const DynString& memberName) noexcept
+        : _objectExpr(objectExpr)
         , _memberName(memberName)
     { }
 
-    StringTemplateMemberAccessExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& objectExpr, DynString&& memberName) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _objectExpr(objectExpr)
+    StringTemplateMemberAccessExprAST(const StrongRef<StringTemplateExprAST>& objectExpr, DynString&& memberName) noexcept
+        : _objectExpr(objectExpr)
         , _memberName(::std::move(memberName))
     { }
 
@@ -78,15 +74,13 @@ private:
     DynString _methodName;
     ::std::vector<StrongRef<StringTemplateExprAST>> _arguments;
 public:
-    StringTemplateMethodAccessExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& objectExpr, const DynString& methodName) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _objectExpr(objectExpr)
+    StringTemplateMethodAccessExprAST(const StrongRef<StringTemplateExprAST>& objectExpr, const DynString& methodName) noexcept
+        : _objectExpr(objectExpr)
         , _methodName(methodName)
     { }
 
-    StringTemplateMethodAccessExprAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& objectExpr, DynString&& methodName) noexcept
-        : StringTemplateExprAST(next, prev)
-        , _objectExpr(objectExpr)
+    StringTemplateMethodAccessExprAST(const StrongRef<StringTemplateExprAST>& objectExpr, DynString&& methodName) noexcept
+        : _objectExpr(objectExpr)
         , _methodName(::std::move(methodName))
     { }
 

@@ -11,13 +11,21 @@
 #include "reflection/attribs/NoListAttribute.hpp"
 
 #include "codegen/StringTemplateLexer.hpp"
+#include "codegen/StringTemplateParser.hpp"
+#include "codegen/StringTemplateVisitor.hpp"
+#include "codegen/ast/StringTemplateAST.hpp"
 #include <fstream>
+
+#ifndef TRG_RELEASE
+#error "Tau Reflection Generator can only be compiled in TRG_Release mode."
+#endif
 
 static ::llvm::cl::OptionCategory tauReflCategory("tau-reflection-generator options");
 
 static ::llvm::cl::opt<::std::string> baseHeaderLoc("base-loc", ::llvm::cl::desc("The path to where the base header should be placed"), ::llvm::cl::cat(tauReflCategory));
 static ::llvm::cl::opt<::std::string> outHeader("o", ::llvm::cl::desc("The path and name of the output file"), ::llvm::cl::cat(tauReflCategory));
 
+static void parseTest(::std::istream& file) noexcept;
 static void dumpTokens(::std::istream& file) noexcept;
 
 int main(int argCount, const char* args[])
@@ -26,10 +34,11 @@ int main(int argCount, const char* args[])
     UNUSED(commonHelp);
 
 
-    // {
-    //     ::std::fstream file(R"(D:\TauEngine\concepts\StringTemplateExample.template)");
-    //     dumpTokens(file);
-    // }
+    {
+        ::std::fstream file(R"(D:\TauEngine\concepts\StringTemplateExample.template)");
+        // dumpTokens(file);
+        parseTest(file);
+    }
 
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::ImplicitAttribute>("__implicit_base_0__");
     tau::reflection::AttributeManager::registerAttribute<tau::reflection::attribs::NoListAttribute>("nolist");
@@ -86,6 +95,20 @@ int main(int argCount, const char* args[])
     }
 
     return result;
+}
+
+static void parseTest(::std::istream& file) noexcept
+{
+    using namespace tau::codegen::string;
+    Parser parser(file);
+
+    auto ast = parser.parse();
+
+    llvm::outs() << "\n\n";
+
+    StringTemplatePrintingVisitor printer;
+
+    printer.visit(ast);
 }
 
 static void dumpTokens(::std::istream& file) noexcept

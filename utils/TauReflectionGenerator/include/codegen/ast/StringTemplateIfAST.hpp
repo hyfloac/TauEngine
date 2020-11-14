@@ -7,7 +7,7 @@ namespace tau { namespace codegen { namespace string { namespace ast {
 
 class StringTemplateEndLoopAST;
 
-class StringTemplateBeginIfAST final : public StringTemplateAST
+class StringTemplateBeginIfAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateBeginIfAST);
     DELETE_CM(StringTemplateBeginIfAST);
@@ -15,8 +15,8 @@ private:
     StrongRef<StringTemplateExprAST> _controlExpr;
     WeakRef<StringTemplateEndLoopAST> _end;
 public:
-    StringTemplateBeginIfAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& controlExpr, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateBeginIfAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateExprAST>& controlExpr, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _controlExpr(controlExpr)
         , _end(end)
     { }
@@ -30,7 +30,7 @@ public:
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
-class StringTemplateElseIfAST final : public StringTemplateAST
+class StringTemplateElseIfAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateElseIfAST);
     DELETE_CM(StringTemplateElseIfAST);
@@ -39,8 +39,8 @@ private:
     WeakRef<StringTemplateBeginIfAST> _begin;
     WeakRef<StringTemplateEndLoopAST> _end;
 public:
-    StringTemplateElseIfAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateExprAST>& controlExpr, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateElseIfAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateExprAST>& controlExpr, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _controlExpr(controlExpr)
         , _begin(begin)
         , _end(end)
@@ -58,7 +58,7 @@ public:
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
-class StringTemplateElseAST final : public StringTemplateAST
+class StringTemplateElseAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateElseAST);
     DELETE_CM(StringTemplateElseAST);
@@ -66,8 +66,8 @@ private:
     WeakRef<StringTemplateBeginIfAST> _begin;
     WeakRef<StringTemplateEndLoopAST> _end;
 public:
-    StringTemplateElseAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateElseAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _begin(begin)
         , _end(end)
     { }
@@ -81,15 +81,15 @@ public:
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
-class StringTemplateEndIfAST final : public StringTemplateAST
+class StringTemplateEndIfAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateEndIfAST);
     DELETE_CM(StringTemplateEndIfAST);
 private:
     WeakRef<StringTemplateBeginIfAST> _begin;
 public:
-    StringTemplateEndIfAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const WeakRef<StringTemplateBeginIfAST>& begin) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateEndIfAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const WeakRef<StringTemplateBeginIfAST>& begin) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _begin(begin)
     { }
 

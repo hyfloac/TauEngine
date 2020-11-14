@@ -69,6 +69,9 @@ int main(int argCount, char* args[])
     RefPtrTest::nullableRefResetTest();
     RefPtrTest::strongRefResetTest();
     RefPtrTest::nullableStrongRefResetTest();
+
+    RefPtrTest::strongParentChildTest();
+    RefPtrTest::strongParentChildReverseTest();
     printf("Reference Counting Pointer Tests Finished\n");
 
     PAUSE("Continue");

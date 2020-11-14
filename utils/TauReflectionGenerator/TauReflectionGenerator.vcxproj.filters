@@ -75,6 +75,9 @@
     <ClCompile Include="src\codgen\ast\StringTemplateMemberExprAST.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\codgen\ast\StringTemplateBooleanExprAST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\reflection\Property.hpp">
@@ -147,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\codegen\ast\StringTemplateMemberExprAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\codegen\ast\StringTemplateBooleanExprAST.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

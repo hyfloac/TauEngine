@@ -26,6 +26,46 @@ public:
     [[nodiscard]] inline int& y() noexcept { return _y; }
 };
 
+class Child;
+
+class Parent final
+{
+    DELETE_CM(Parent);
+private:
+    StrongReferenceCountingPointer<Child> _child;
+    int _x;
+public:
+    Parent(const int x) noexcept
+        : _child(nullptr)
+        , _x(x)
+    { printf("Created Parent: %d\n", x); }
+
+    ~Parent() noexcept
+    { printf("Destroying Parent: %d\n", _x); }
+
+    void initChild(const StrongReferenceCountingPointer<Parent>& thisParent, const int x) noexcept
+    { _child.reset(thisParent, x); }
+
+    void destroyChild()
+    { _child = nullptr; }
+};
+
+class Child final
+{
+    DELETE_CM(Child);
+private:
+    WeakReferenceCountingPointer<Parent> _parent;
+    int _x;
+public:
+    Child(const StrongReferenceCountingPointer<Parent>& parent, const int x) noexcept
+        : _parent(parent)
+        , _x(x)
+    { printf("Created child: %d\n", x); }
+
+    ~Child() noexcept
+    { printf("Destroying Child: %d\n", _x); }
+};
+
 namespace RefPtrTest {
 
 template<typename _PtrType>
@@ -234,6 +274,23 @@ void nullableStrongRefResetTest() noexcept
 {
     UNIT_TEST();
     _resetTest<StrongReferenceCountingPointer<PtrData>>();
+}
+
+void strongParentChildTest() noexcept
+{
+    UNIT_TEST();
+
+    StrongReferenceCountingPointer<Parent> parent(13);
+    parent->initChild(parent, 72);
+}
+
+void strongParentChildReverseTest() noexcept
+{
+    UNIT_TEST();
+
+    StrongReferenceCountingPointer<Parent> parent(13);
+    parent->initChild(parent, 72);
+    parent->destroyChild();
 }
 
 }

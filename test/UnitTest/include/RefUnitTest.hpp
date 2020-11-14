@@ -23,4 +23,7 @@ void refResetTest() noexcept;
 void nullableRefResetTest() noexcept;
 void strongRefResetTest() noexcept;
 void nullableStrongRefResetTest() noexcept;
+
+void strongParentChildTest() noexcept;
+void strongParentChildReverseTest() noexcept;
 }

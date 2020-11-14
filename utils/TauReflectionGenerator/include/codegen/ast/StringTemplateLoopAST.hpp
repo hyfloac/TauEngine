@@ -7,7 +7,7 @@ namespace tau { namespace codegen { namespace string { namespace ast {
 
 class StringTemplateEndLoopAST;
 
-class StringTemplateBeginLoopAST final : public StringTemplateAST
+class StringTemplateBeginLoopAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateBeginLoopAST);
     DELETE_CM(StringTemplateBeginLoopAST);
@@ -16,8 +16,8 @@ private:
     StrongRef<StringTemplateExprAST> _rangeExpr;
     WeakRef<StringTemplateEndLoopAST> _end;
 public:
-    StringTemplateBeginLoopAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const StrongRef<StringTemplateVarDeclAST>& varDecl, const StrongRef<StringTemplateExprAST>& rangeExpr, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateBeginLoopAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateVarDeclAST>& varDecl, const StrongRef<StringTemplateExprAST>& rangeExpr, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _varDecl(varDecl)
         , _rangeExpr(rangeExpr)
         , _end(end)
@@ -35,15 +35,15 @@ public:
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
-class StringTemplateEndLoopAST final : public StringTemplateAST
+class StringTemplateEndLoopAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateEndLoopAST);
     DELETE_CM(StringTemplateEndLoopAST);
 private:
     WeakRef<StringTemplateBeginLoopAST> _begin;
 public:
-    StringTemplateEndLoopAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const WeakRef<StringTemplateBeginLoopAST>& begin) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateEndLoopAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const WeakRef<StringTemplateBeginLoopAST>& begin) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _begin(begin)
     { }
 
@@ -60,7 +60,7 @@ enum class LoopControlType
     LoopIndex
 };
 
-class StringTemplateLoopControlAST final : public StringTemplateAST
+class StringTemplateLoopControlAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateLoopControlAST);
     DELETE_CM(StringTemplateLoopControlAST);
@@ -70,8 +70,8 @@ private:
     LoopControlType _controlType;
     u32 _loopIndex;
 public:
-    StringTemplateLoopControlAST(const StrongRef<StringTemplateAST>& next, const WeakRef<StringTemplateAST>& prev, const WeakRef<StringTemplateBeginLoopAST>& loop, const LoopControlType controlType, const u32 loopIndex) noexcept
-        : StringTemplateAST(next, prev)
+    StringTemplateLoopControlAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const WeakRef<StringTemplateBeginLoopAST>& loop, const LoopControlType controlType, const u32 loopIndex) noexcept
+        : StringTemplateSequenceAST(next, prev)
         , _loop(loop)
         , _controlType(controlType)
         , _loopIndex(loopIndex)
