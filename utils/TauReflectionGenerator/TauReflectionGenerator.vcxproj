@@ -207,8 +207,10 @@
     <ClCompile Include="src\codgen\ast\StringTemplateMemberExprAST.cpp" />
     <ClCompile Include="src\codgen\ast\StringTemplateStringify.cpp" />
     <ClCompile Include="src\codgen\ast\StringTemplateVarAST.cpp" />
+    <ClCompile Include="src\codgen\StringTemplateDumpVisitor.cpp" />
     <ClCompile Include="src\codgen\StringTemplateLexer.cpp" />
     <ClCompile Include="src\codgen\StringTemplateParser.cpp" />
+    <ClCompile Include="src\codgen\StringTemplateRepairVisitor.cpp" />
     <ClCompile Include="src\codgen\StringTemplateVisitor.cpp" />
     <ClCompile Include="src\reflection\attribs\ImplicitAttribute.cpp" />
     <ClCompile Include="src\reflection\attribs\NoListAttribute.cpp" />
@@ -229,8 +231,10 @@
     <ClInclude Include="include\codegen\ast\StringTemplateMemberExprAST.hpp" />
     <ClInclude Include="include\codegen\ast\StringTemplateStringifyAST.hpp" />
     <ClInclude Include="include\codegen\ast\StringTemplateVarAST.hpp" />
+    <ClInclude Include="include\codegen\StringTemplateDumpVisitor.hpp" />
     <ClInclude Include="include\codegen\StringTemplateLexer.hpp" />
     <ClInclude Include="include\codegen\StringTemplateParser.hpp" />
+    <ClInclude Include="include\codegen\StringTemplateRepairVisitor.hpp" />
     <ClInclude Include="include\codegen\StringTemplateVisitor.hpp" />
     <ClInclude Include="include\reflection\attribs\ImplicitAttribute.hpp" />
     <ClInclude Include="include\reflection\attribs\NoListAttribute.hpp" />

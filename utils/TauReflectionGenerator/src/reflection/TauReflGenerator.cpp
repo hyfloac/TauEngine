@@ -12,7 +12,8 @@
 
 #include "codegen/StringTemplateLexer.hpp"
 #include "codegen/StringTemplateParser.hpp"
-#include "codegen/StringTemplateVisitor.hpp"
+#include "codegen/StringTemplateRepairVisitor.hpp"
+#include "codegen/StringTemplateDumpVisitor.hpp"
 #include "codegen/ast/StringTemplateAST.hpp"
 #include <fstream>
 
@@ -106,9 +107,16 @@ static void parseTest(::std::istream& file) noexcept
 
     llvm::outs() << "\n\n";
 
-    StringTemplatePrintingVisitor printer;
+    StringTemplateReportErrorsVisitor errorReporter;
+    errorReporter.visit(ast);
 
-    printer.visit(ast);
+    llvm::outs() << "\n\n";
+
+    StringTemplateRepairVisitor repairVisitor;
+    repairVisitor.visit(ast);
+
+    StringTemplateDumpVisitor dumpVisitor;
+    dumpVisitor.visit(ast);
 }
 
 static void dumpTokens(::std::istream& file) noexcept

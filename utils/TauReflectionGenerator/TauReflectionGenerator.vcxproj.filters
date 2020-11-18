@@ -78,6 +78,12 @@
     <ClCompile Include="src\codgen\ast\StringTemplateBooleanExprAST.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\codgen\StringTemplateRepairVisitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\codgen\StringTemplateDumpVisitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\reflection\Property.hpp">
@@ -153,6 +159,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\codegen\ast\StringTemplateBooleanExprAST.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\codegen\StringTemplateRepairVisitor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\codegen\StringTemplateDumpVisitor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

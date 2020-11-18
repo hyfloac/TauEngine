@@ -14,6 +14,25 @@
 
 #include "llvm/Support/raw_ostream.h"
 
+/**
+ * Basic BNF elements.
+ *
+ * <num> ::= [0-9]                              // A single number
+ * <alpha-lower> ::= [a-z]                      // A single lowercase letter from a to z
+ * <alpha-upper> ::= [A-Z]                      // An single uppercase letter from A to Z
+ * <alpha> ::= <alpha-lower> | <alpha-upper>    // An single letter from a-Z
+ * <alpha-num> ::= <alpha> | <num>              // A single letter or a number
+ * <alpha-lower-u> ::= <alpha-lower> | '_'      // A single lowercase letter or an underscore
+ * <alpha-upper-u> ::= <alpha-upper> | '_'      // A single uppercase letter or an underscore
+ * <alpha-u> ::= <alpha> | '_'                  // A single letter or underscore
+ * <alpha-num-u> ::= <alpha-num> | '_'          // A single letter, number, or an underscore
+ * <all-chars> ::= [^]                          // All possible characters
+ * <ws-chars> ::= ' ' | '\t' | '\n' | '\r'      // One of the 4 whitespace characters
+ * <non-ws-chars> ::= ^<ws-chars>               // All non-whitespace characters
+ * <ws> ::= { <ws-chars> }                      // A string of whitespace characters
+ * <opt-ws> ::= [ <ws> ]                        // An optional string of whitespace characters
+ */
+
 namespace tau { namespace codegen { namespace string {
 
 StrongRef<ast::StringTemplateRootAST> Parser::parse() noexcept
@@ -190,6 +209,11 @@ StrongRef<ast::StringTemplateTextBlockAST> Parser::parseTextBlock() noexcept
     return StrongRef<ast::StringTemplateTextBlockAST>(nullptr, nullptr, _lexer.strValue());
 }
 
+/**
+ * <begin-fragment> ::= '%' <opt-ws> '<' <opt-ws> "fragment" <opt-ws> '>' <opt-ws> '(' <opt-ws> <identifier> <opt-ws> ')'
+ *
+ * %<fragment>(FragmentName)
+ */
 StrongRef<ast::StringTemplateBeginFragmentAST> Parser::parseBeginFragment() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -222,6 +246,11 @@ StrongRef<ast::StringTemplateBeginFragmentAST> Parser::parseBeginFragment() noex
     return StrongRef<ast::StringTemplateBeginFragmentAST>(nullptr, nullptr, ::std::move(fragmentName), nullptr);
 }
 
+/**
+ * <end-fragment> ::= '%' <opt-ws> '<' <opt-ws> "endfragment" <opt-ws> '>'
+ *
+ * %<endfragment>
+ */
 StrongRef<ast::StringTemplateEndFragmentAST> Parser::parseEndFragment() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -237,6 +266,11 @@ StrongRef<ast::StringTemplateEndFragmentAST> Parser::parseEndFragment() noexcept
     return StrongRef<ast::StringTemplateEndFragmentAST>(nullptr, nullptr, nullptr);
 }
 
+/**
+ * <begin-loop> ::= '%' <opt-ws> '<' <opt-ws> "loop" <opt-ws> '>' <opt-ws> '(' <opt-ws> <var-decl> <opt-ws> ':' <opt-ws> <expression> <opt-ws> ')'
+ *
+ * %<loop>(%var : %iterator)
+ */
 StrongRef<ast::StringTemplateBeginLoopAST> Parser::parseBeginLoop() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -287,6 +321,11 @@ StrongRef<ast::StringTemplateBeginLoopAST> Parser::parseBeginLoop() noexcept
     return StrongRef<ast::StringTemplateBeginLoopAST>(nullptr, nullptr, ::std::move(varDecl), ::std::move(rangeExpr), nullptr);
 }
 
+/**
+ * <end-loop> ::= '%' <opt-ws> '<' <opt-ws> "endloop" <opt-ws> '>'
+ *
+ * %<endloop>
+ */
 StrongRef<ast::StringTemplateEndLoopAST> Parser::parseEndLoop() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -302,6 +341,15 @@ StrongRef<ast::StringTemplateEndLoopAST> Parser::parseEndLoop() noexcept
     return StrongRef<ast::StringTemplateEndLoopAST>(nullptr, nullptr, nullptr);
 }
 
+/**
+ * <continue> ::= '%' <opt-ws> '<' <opt-ws> "continue" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
+ * <break> ::= '%' <opt-ws> '<' <opt-ws> "break" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
+ * <loopindex> ::= '%' <opt-ws> '<' <opt-ws> "loopindex" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
+ *
+ * %<continue>(0)
+ * %<break>(0)
+ * %<loopindex>(0)
+ */
 StrongRef<ast::StringTemplateLoopControlAST> Parser::parseLoopControl(const ast::LoopControlType controlType) noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -345,6 +393,11 @@ StrongRef<ast::StringTemplateLoopControlAST> Parser::parseLoopControl(const ast:
     return StrongRef<ast::StringTemplateLoopControlAST>(nullptr, nullptr, nullptr, controlType, loopIndex);
 }
 
+/**
+ * <begin-if> ::= '%' <opt-ws> '<' <opt-ws> "if" <opt-ws> '>' <opt-ws> '(' <opt-ws> <expression> <opt-ws> ')'
+ *
+ * %<if>(%expr)
+ */
 StrongRef<ast::StringTemplateBeginIfAST> Parser::parseIf() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -381,6 +434,11 @@ StrongRef<ast::StringTemplateBeginIfAST> Parser::parseIf() noexcept
     return StrongRef<ast::StringTemplateBeginIfAST>(nullptr, nullptr, ::std::move(controlExpr), nullptr);
 }
 
+/**
+ * <else-if> ::= '%' <opt-ws> '<' <opt-ws> "elif" <opt-ws> '>' <opt-ws> '(' <opt-ws> <expression> <opt-ws> ')'
+ *
+ * %<elif>(%expr)
+ */
 StrongRef<ast::StringTemplateElseIfAST> Parser::parseElseIf() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -417,6 +475,11 @@ StrongRef<ast::StringTemplateElseIfAST> Parser::parseElseIf() noexcept
     return StrongRef<ast::StringTemplateElseIfAST>(nullptr, nullptr, ::std::move(controlExpr), nullptr, nullptr);
 }
 
+/**
+ * <else> ::= '%' <opt-ws> '<' <opt-ws> "else" <opt-ws> '>'
+ *
+ * %<else>
+ */
 StrongRef<ast::StringTemplateElseAST> Parser::parseElse() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -432,6 +495,11 @@ StrongRef<ast::StringTemplateElseAST> Parser::parseElse() noexcept
     return StrongRef<ast::StringTemplateElseAST>(nullptr, nullptr, nullptr, nullptr);
 }
 
+/**
+ * <end-if> ::= '%' <opt-ws> '<' <opt-ws> "endif" <opt-ws> '>'
+ *
+ * %<endif>
+ */
 StrongRef<ast::StringTemplateEndIfAST> Parser::parseEndIf() noexcept
 {
     if(_lexer.getNextToken() != Token::Character)
@@ -447,6 +515,11 @@ StrongRef<ast::StringTemplateEndIfAST> Parser::parseEndIf() noexcept
     return StrongRef<ast::StringTemplateEndIfAST>(nullptr, nullptr, nullptr);
 }
 
+/**
+ * <stringify> ::= '%' <opt-ws> '<' <opt-ws> "str" <opt-ws> '>' <opt-ws> '(' <opt-ws> <expression> <opt-ws> ')'
+ *
+ * %<str>(%expr)
+ */
 StrongRef<ast::StringTemplateStringifyAST> Parser::parseStringify() noexcept
 {
     llvm::outs() << "Parsing stringify\n";
@@ -480,6 +553,12 @@ StrongRef<ast::StringTemplateStringifyAST> Parser::parseStringify() noexcept
     return StrongRef<ast::StringTemplateStringifyAST>(nullptr, nullptr, expr);
 }
 
+/**
+ * <var-decl> ::= '%' <opt-ws> [ '(' <opt-ws> ] <identifier> [ <opt-ws> ')' ]
+ *
+ * %var
+ * %(var)
+ */
 StrongRef<ast::StringTemplateVarDeclAST> Parser::parseVarDecl() noexcept
 {
     llvm::outs() << "Parsing var decl: " << _lexer.identifierValue() << "\n";
@@ -514,6 +593,11 @@ StrongRef<ast::StringTemplateExprAST> Parser::parseExpression() noexcept
     return nullptr;
 }
 
+/**
+ * <string> ::= '"' [ { <all-chars> } ] '"'
+ *
+ * "string"
+ */
 StrongRef<ast::StringTemplateStringExprAST> Parser::parseStringExpression() noexcept
 {
     llvm::outs() << "Parsing string expression: \"" << _lexer.strValue() << "\"\n";
@@ -521,6 +605,13 @@ StrongRef<ast::StringTemplateStringExprAST> Parser::parseStringExpression() noex
     return StrongRef<ast::StringTemplateStringExprAST>(_lexer.strValue());
 }
 
+/**
+ * <int> ::= [ '-' | '+' ] { <num> }
+ *
+ * 13
+ * -13
+ * +13
+ */
 StrongRef<ast::StringTemplateIntegerExprAST> Parser::parseIntegerExpression() noexcept
 {
     llvm::outs() << "Parsing integer: " << _lexer.intValue() << "\n";

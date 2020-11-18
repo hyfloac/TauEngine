@@ -30,6 +30,8 @@ public:
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
+class StringTemplateEndIfAST;
+
 class StringTemplateElseIfAST final : public StringTemplateSequenceAST
 {
     DEFAULT_DESTRUCT_VI(StringTemplateElseIfAST);
@@ -37,9 +39,9 @@ class StringTemplateElseIfAST final : public StringTemplateSequenceAST
 private:
     StrongRef<StringTemplateExprAST> _controlExpr;
     WeakRef<StringTemplateBeginIfAST> _begin;
-    WeakRef<StringTemplateEndLoopAST> _end;
+    WeakRef<StringTemplateEndIfAST> _end;
 public:
-    StringTemplateElseIfAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateExprAST>& controlExpr, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
+    StringTemplateElseIfAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const StrongRef<StringTemplateExprAST>& controlExpr, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndIfAST>& end) noexcept
         : StringTemplateSequenceAST(next, prev)
         , _controlExpr(controlExpr)
         , _begin(begin)
@@ -52,8 +54,8 @@ public:
     [[nodiscard]]       WeakRef<StringTemplateBeginIfAST>& begin()       noexcept { return _begin; }
     [[nodiscard]] const WeakRef<StringTemplateBeginIfAST>& begin() const noexcept { return _begin; }
 
-    [[nodiscard]]       WeakRef<StringTemplateEndLoopAST>& end()       noexcept { return _end; }
-    [[nodiscard]] const WeakRef<StringTemplateEndLoopAST>& end() const noexcept { return _end; }
+    [[nodiscard]]       WeakRef<StringTemplateEndIfAST>& end()       noexcept { return _end; }
+    [[nodiscard]] const WeakRef<StringTemplateEndIfAST>& end() const noexcept { return _end; }
 
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
@@ -64,9 +66,9 @@ class StringTemplateElseAST final : public StringTemplateSequenceAST
     DELETE_CM(StringTemplateElseAST);
 private:
     WeakRef<StringTemplateBeginIfAST> _begin;
-    WeakRef<StringTemplateEndLoopAST> _end;
+    WeakRef<StringTemplateEndIfAST> _end;
 public:
-    StringTemplateElseAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndLoopAST>& end) noexcept
+    StringTemplateElseAST(const StrongRef<StringTemplateSequenceAST>& next, const WeakRef<StringTemplateSequenceAST>& prev, const WeakRef<StringTemplateBeginIfAST>& begin, const WeakRef<StringTemplateEndIfAST>& end) noexcept
         : StringTemplateSequenceAST(next, prev)
         , _begin(begin)
         , _end(end)
@@ -75,8 +77,8 @@ public:
     [[nodiscard]]       WeakRef<StringTemplateBeginIfAST>& begin()       noexcept { return _begin; }
     [[nodiscard]] const WeakRef<StringTemplateBeginIfAST>& begin() const noexcept { return _begin; }
 
-    [[nodiscard]]       WeakRef<StringTemplateEndLoopAST>& end()       noexcept { return _end; }
-    [[nodiscard]] const WeakRef<StringTemplateEndLoopAST>& end() const noexcept { return _end; }
+    [[nodiscard]]       WeakRef<StringTemplateEndIfAST>& end()       noexcept { return _end; }
+    [[nodiscard]] const WeakRef<StringTemplateEndIfAST>& end() const noexcept { return _end; }
 
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };

@@ -43,3 +43,6 @@
 
 <continue> ::= '%' <opt-ws> '<' <opt-ws> "continue" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
 <break> ::= '%' <opt-ws> '<' <opt-ws> "break" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
+<loopindex> ::= '%' <opt-ws> '<' <opt-ws> "loopindex" <opt-ws> '>' <opt-ws> '(' <opt-ws> <int> <opt-ws> ')'
+
+<stringify> ::= '%' <opt-ws> '<' <opt-ws> "str" <opt-ws> '>' <opt-ws> '(' <opt-ws> <expression> <opt-ws> ')'

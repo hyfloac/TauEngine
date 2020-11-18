@@ -291,17 +291,6 @@ StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(_Arg0&& arg0,
 }
 
 template<typename _T>
-template<typename... _Args>
-inline StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(_Args&&... args) noexcept
-    : _swrc(nullptr)
-    , _tPtr(nullptr)
-{
-    void* raw = DefaultTauAllocator::Instance().allocate(sizeof(SWRC<_T>) + sizeof(_T));
-    _swrc = new(raw) SWRC<_T>(DefaultTauAllocator::Instance(), _TauAllocatorUtils::_forward<_Args>(args)...);
-    _tPtr = _swrc->objPtr();
-}
-
-template<typename _T>
 template<typename _TT>
 inline StrongReferenceCountingPointer<_T>::StrongReferenceCountingPointer(const StrongReferenceCountingPointer<_TT>& rcp) noexcept
     : TReferenceCountingPointerBase<_T>(rcp)
@@ -382,7 +371,8 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
     _swrc = copy._swrc;
     _tPtr = copy._tPtr;
 
-    if(_swrc) { _swrc->addRefStrong(); }
+    if(_swrc) 
+    { _swrc->addRefStrong(); }
 
     return *this;
 }
@@ -448,7 +438,8 @@ inline StrongReferenceCountingPointer<_T>& StrongReferenceCountingPointer<_T>::o
     _swrc = reinterpret_cast<SWRC<_T>*>(copy._getBlock());
     _tPtr = static_cast<_T*>(copy._tPtr);
 
-    _swrc->addRefStrong();
+    if(_swrc)
+    { _swrc->addRefStrong(); }
 
     return *this;
 }

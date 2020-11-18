@@ -324,9 +324,6 @@ public:
     template<typename _Arg0, typename... _Args, ::std::enable_if_t<!::std::is_base_of_v<TauAllocator, _Arg0>, int> = 0>
     explicit StrongReferenceCountingPointer(_Arg0&& arg0, _Args&&... args) noexcept;
 
-    template<typename... _Args>
-    explicit StrongReferenceCountingPointer(_Args&&... args) noexcept;
-
     template<typename _TT>
     StrongReferenceCountingPointer(const StrongReferenceCountingPointer<_TT>& rcp) noexcept;
 
