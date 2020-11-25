@@ -80,6 +80,7 @@
     <ClCompile Include="src\dx\dx12\DX12RasterizerState.cpp" />
     <ClCompile Include="src\dx\dx12\DX12Resource.cpp" />
     <ClCompile Include="src\dx\dx12\DX12ResourceBuffer.cpp" />
+    <ClCompile Include="src\dx\dx12\DX12ResourceStateManager.cpp" />
     <ClCompile Include="src\dx\dx12\DX12ResourceTexture.cpp" />
     <ClCompile Include="src\dx\dx12\DX12VertexArray.cpp" />
     <ClCompile Include="src\dx\dxgi\DXGI11GraphicsAccelerator.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="include\dx\dx12\DX12RasterizerState.hpp" />
     <ClInclude Include="include\dx\dx12\DX12Resource.hpp" />
     <ClInclude Include="include\dx\dx12\DX12ResourceBuffer.hpp" />
+    <ClInclude Include="include\dx\dx12\DX12ResourceStateManager.hpp" />
     <ClInclude Include="include\dx\dx12\DX12ResourceTexture.hpp" />
     <ClInclude Include="include\dx\dx12\DX12VertexArray.hpp" />
     <ClInclude Include="include\dx\dxgi\DXGI11GraphicsAccelerator.hpp" />

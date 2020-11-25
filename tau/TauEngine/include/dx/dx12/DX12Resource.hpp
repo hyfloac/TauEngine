@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <d3d12.h>
+#include <atomic>
 #include "D3D12MemAlloc.h"
 #include "graphics/ResourceRawInterface.hpp"
 #include "graphics/GraphicsEnums.hpp"

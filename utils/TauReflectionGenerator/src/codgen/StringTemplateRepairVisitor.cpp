@@ -185,8 +185,7 @@ StringTemplateRepairVisitor::StringTemplateRepairVisitor() noexcept
     : _repairIfTarget(-1)
 { }
 
-StringTemplateRepairVisitor::~StringTemplateRepairVisitor() noexcept
-{ }
+StringTemplateRepairVisitor::~StringTemplateRepairVisitor() noexcept = default;
 
 void StringTemplateRepairVisitor::visit(ast::StringTemplateStringExprAST&) noexcept
 { }

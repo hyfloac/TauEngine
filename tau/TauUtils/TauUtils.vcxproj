@@ -342,6 +342,7 @@
     <ClInclude Include="include\allocator\TauAllocator.hpp" />
     <ClInclude Include="include\ArrayList.hpp" />
     <ClInclude Include="include\AtomicIntrinsics.hpp" />
+    <ClInclude Include="include\BitSet.hpp" />
     <ClInclude Include="include\ConPrinter.hpp" />
     <ClInclude Include="include\ConPrinter.string.hpp" />
     <ClInclude Include="include\CVersion.hpp" />

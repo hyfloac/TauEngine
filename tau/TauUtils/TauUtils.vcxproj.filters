@@ -108,6 +108,9 @@
     <ClInclude Include="include\allocator\SlabAllocator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\BitSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\PageAllocator.cpp">

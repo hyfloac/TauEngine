@@ -14,10 +14,10 @@ class Semaphore final
     DELETE_CM(Semaphore);
 private:
     _Mutex _mutex;
-    std::condition_variable _cv;
-    std::size_t _count;
+    ::std::condition_variable _cv;
+    ::std::size_t _count;
 public:
-    inline Semaphore() noexcept
+    Semaphore() noexcept
         : _mutex()
         , _count(0)
     { }
@@ -61,4 +61,3 @@ public:
 using CPPSemaphore = Semaphore<std::mutex>;
 using CSSemaphore = Semaphore<CSMutex>;
 using SRWSemaphore = Semaphore<SRWMutex>;
-

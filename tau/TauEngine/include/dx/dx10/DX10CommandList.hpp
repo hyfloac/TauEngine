@@ -300,7 +300,7 @@ public:
     DX10CommandList(const uSys maxCommands = 4096) noexcept
         : _maxCommands(maxCommands)
         , _commands(maxCommands)
-        , _refCountList(_maxCommands* MaxVertexBuffers)
+        , _refCountList(_maxCommands * MaxVertexBuffers)
         , _currentVA(null)
     { }
 

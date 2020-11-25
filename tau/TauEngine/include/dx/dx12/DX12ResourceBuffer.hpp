@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DX12Resource.hpp"
+#include <system/Win32Event.hpp>
 
 #ifdef _WIN32
 class TAU_DLL DX12ResourceBuffer : public DX12Resource
@@ -15,7 +16,7 @@ public:
         , _args(args)
     { }
 
-    [[nodiscard]] void* map(ICommandList&, EResource::MapType mapType, uSys, uSys, const ResourceMapRange* const mapReadRange, const ResourceMapRange*) noexcept override
+    [[nodiscard]] void* map(ICommandList&, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* const mapReadRange, const ResourceMapRange*) noexcept override
     { return map(mapType, mapReadRange); }
 
     void unmap(ICommandList&, uSys, uSys, const ResourceMapRange* const mapWriteRange) noexcept override
@@ -27,54 +28,19 @@ protected:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
 };
 
-/**
- * A form of buffer that cannot be mapped by itself.
- *
- *   In this case an upload buffer must be allocated to be used
- * to store the data. After unmapping a copy instruction is
- * automatically added to the command list.
- *
- *   If this buffer has a usage type of Default the upload
- * buffer is released after unmapping. If this buffer has a
- * usage type of Dynamic then it will keep the buffer for
- * better performance. If you want to create a buffer
- * specifically for uploading then use the usage type
- * Streaming.
- */
-class TAU_DLL DX12ResourceBufferIndirectMapping final : public DX12ResourceBuffer
+class TAU_DLL DX12ResourceBufferNoMapping final : public DX12ResourceBuffer
 {
-    DELETE_CM(DX12ResourceBufferIndirectMapping);
-private:
-    ID3D12Resource* _uploadBuffer;
-    D3D12MA::Allocation* _uploadAllocation;
-    DX12GraphicsInterface& _gi;
-    bool _keepUploadAllocation;
+    DEFAULT_DESTRUCT(DX12ResourceBufferNoMapping);
+    DELETE_CM(DX12ResourceBufferNoMapping);
 public:
-    DX12ResourceBufferIndirectMapping(const uSys size, ID3D12Resource* const d3dResource, D3D12MA::Allocation* const allocation, const EGraphics::ResourceHeapUsageType resourceUsage, const ResourceBufferArgs& args, DX12GraphicsInterface& gi, const bool keepUploadAllocation) noexcept
+    DX12ResourceBufferNoMapping(const uSys size, ID3D12Resource* const d3dResource, D3D12MA::Allocation* const allocation, const EGraphics::ResourceHeapUsageType resourceUsage, const ResourceBufferArgs& args) noexcept
         : DX12ResourceBuffer(size, d3dResource, allocation, resourceUsage, args)
-        , _uploadBuffer(nullptr)
-        , _uploadAllocation(nullptr)
-        , _gi(gi)
-        , _keepUploadAllocation(keepUploadAllocation)
     { }
 
-    ~DX12ResourceBufferIndirectMapping() noexcept override
-    {
-        if(_uploadBuffer)
-        { _uploadBuffer->Release(); }
-
-        if(_uploadAllocation)
-        { _uploadAllocation->Release(); }
-    }
-
-    [[nodiscard]] void* map(ICommandList& cmdList, EResource::MapType mapType, uSys, uSys, const ResourceMapRange* mapReadRange, const ResourceMapRange* mapWriteRange) noexcept override;
-    { return map(); }
+    [[nodiscard]] void* map(ICommandList& cmdList, EResource::MapType mapType, uSys, uSys, const ResourceMapRange* mapReadRange, const ResourceMapRange* mapWriteRange) noexcept override
+    { return nullptr; }
 
     void unmap(ICommandList& cmdList, uSys, uSys, const ResourceMapRange* mapWriteRange) noexcept override
-    { unmap(cmdList, mapWriteRange); }
-
-    [[nodiscard]] void* map() noexcept;
-    void unmap(ICommandList& cmdList, const ResourceMapRange* mapWriteRange) noexcept;
+    { }
 };
-
 #endif

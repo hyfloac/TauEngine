@@ -14,26 +14,20 @@ class Win32Event final
 private:
     HANDLE _handle;
 public:
-    inline Win32Event() noexcept
-        : _handle(CreateEvent(NULL, FALSE, FALSE, NULL))
+    Win32Event() noexcept
+        : _handle(CreateEventW(nullptr, FALSE, FALSE, nullptr))
     { }
 
-    inline ~Win32Event() noexcept
-    {
-        CloseHandle(_handle);
-    }
+    ~Win32Event() noexcept
+    { CloseHandle(_handle); }
 
-    inline void signal() const noexcept
-    {
-        SetEvent(_handle);
-    }
+    void signal() const noexcept
+    { SetEvent(_handle); }
 
-    inline bool waitUntilSignaled(unsigned timeoutMS = INFINITE) const noexcept
-    {
-        return WaitForSingleObject(_handle, timeoutMS) == WAIT_OBJECT_0;
-    }
+    bool waitUntilSignaled(unsigned timeoutMS = INFINITE) const noexcept
+    { return WaitForSingleObject(_handle, timeoutMS) == WAIT_OBJECT_0; }
 
-    inline bool checkIfSignaled() const noexcept { return waitUntilSignaled(0); }
+    bool checkIfSignaled() const noexcept { return waitUntilSignaled(0); }
 };
 
 class Win32ManualEvent final
@@ -42,30 +36,22 @@ class Win32ManualEvent final
 private:
     HANDLE _handle;
 public:
-    inline Win32ManualEvent() noexcept
-        : _handle(CreateEvent(NULL, TRUE, FALSE, NULL))
+    Win32ManualEvent() noexcept
+        : _handle(CreateEventW(nullptr, TRUE, FALSE, nullptr))
     { }
 
-    inline ~Win32ManualEvent() noexcept
-    {
-        CloseHandle(_handle);
-    }
+    ~Win32ManualEvent() noexcept
+    { CloseHandle(_handle); }
 
-    inline void signal() const noexcept
-    {
-        SetEvent(_handle);
-    }
+    void signal() const noexcept
+    { SetEvent(_handle); }
 
-    inline void reset() const noexcept
-    {
-        ResetEvent(_handle);
-    }
+    void reset() const noexcept
+    { ResetEvent(_handle); }
 
-    inline bool waitUntilSignaled(unsigned timeoutMS = INFINITE) const noexcept
-    {
-        return WaitForSingleObject(_handle, timeoutMS) == WAIT_OBJECT_0;
-    }
+    bool waitUntilSignaled(unsigned timeoutMS = INFINITE) const noexcept
+    { return WaitForSingleObject(_handle, timeoutMS) == WAIT_OBJECT_0; }
 
-    inline bool checkIfSignaled() const noexcept { return waitUntilSignaled(0); }
+    bool checkIfSignaled() const noexcept { return waitUntilSignaled(0); }
 };
 #endif

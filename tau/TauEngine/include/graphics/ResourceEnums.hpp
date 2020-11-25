@@ -57,10 +57,6 @@ enum class UsageType
      */
     Default = 1,
     /**
-     * Cannot be rewritten by either the GPU or CPU
-     */
-    Immutable,
-    /**
      * Intended to be frequently updated by the CPU.
      */
     Dynamic,

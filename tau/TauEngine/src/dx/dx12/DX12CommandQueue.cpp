@@ -15,33 +15,22 @@ void DX12CommandQueue::executeCommandLists(const uSys count, const ICommandList*
 
     UINT realCount = 0;
     DynArray<ID3D12CommandList*> d3dLists(count);
-
-#if TAU_RTTI_CHECK
+    
     for(uSys i = 0; i < count; ++i)
     {
-  #if TAU_NULL_CHECK
+#if TAU_NULL_CHECK
         if(!lists[i])
         { continue; }
-  #endif
+#endif
 
-        if(RTT_CHECK(lists[i], DX12CommandList))
-        {
-            d3dLists[realCount] = static_cast<const DX12CommandList*>(lists[i])->cmdList();
-            ++realCount;
-        }
-    }
-#else
-    for(uSys i = 0; i < count; ++i)
-    {
-  #if TAU_NULL_CHECK
-        if(!lists[i])
-        { continue; }-
-  #endif
+#if TAU_RTTI_CHECK
+        if(!RTT_CHECK(lists[i], DX12CommandList))
+        { continue; }
+#endif
 
         d3dLists[realCount] = static_cast<const DX12CommandList*>(lists[i])->cmdList();
         ++realCount;
     }
-#endif
 
     _d3dQueue->ExecuteCommandLists(realCount, d3dLists);
 }

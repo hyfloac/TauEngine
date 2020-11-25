@@ -13,17 +13,7 @@ NullableRef<IResource> DX12ResourceBuilder::buildTauRef(const ResourceBufferArgs
     {
         ERROR_CODE_COND_F(args.size == 0, Error::InvalidSize);
 
-        D3D12_RESOURCE_DESC desc;
-        desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        desc.Alignment = 0;
-        desc.Width = args.size;
-        desc.Height = 1;
-        desc.DepthOrArraySize = 1;
-        desc.MipLevels = 1;
-        desc.Format = DXGI_FORMAT_UNKNOWN;
-        desc.SampleDesc = { 1, 0 };
-        desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+        CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(args.size);
 
         D3D12MA::ALLOCATION_DESC allocDesc;
         allocDesc.Flags = D3D12MA::ALLOCATION_FLAG_NONE;
@@ -35,7 +25,6 @@ NullableRef<IResource> DX12ResourceBuilder::buildTauRef(const ResourceBufferArgs
         switch(args.usageType)
         {
             case EResource::UsageType::Default:
-            case EResource::UsageType::Immutable:
             case EResource::UsageType::Dynamic:
                 allocDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
                 heapUsage = EGraphics::ResourceHeapUsageType::Default;
@@ -53,25 +42,20 @@ NullableRef<IResource> DX12ResourceBuilder::buildTauRef(const ResourceBufferArgs
 
         D3D12MA::Allocation* allocation;
         ID3D12Resource* d3dResource;
-        HRESULT res = _gi.gpuAllocator()->CreateResource(&allocDesc, &desc, initialState, nullptr, &allocation, IID_PPV_ARGS(&d3dResource));
+        const HRESULT res = _gi.gpuAllocator()->CreateResource(&allocDesc, &desc, initialState, nullptr, &allocation, IID_PPV_ARGS(&d3dResource));
 
         ERROR_CODE_COND_F(FAILED(res), Error::DriverMemoryAllocationFailure);
 
-
-
-        bool keepUploadAllocation = false;
         NullableRef<DX12ResourceBuffer> resource = nullptr;
 
         switch(args.usageType)
         {
             case EResource::UsageType::Default:
-                keepUploadAllocation = true;
             case EResource::UsageType::Dynamic:
             {
-                resource = NullableRef<DX12ResourceBufferIndirectMapping>(allocator, args.size, d3dResource, allocation, heapUsage, args, _gi, keepUploadAllocation);
+                resource = NullableRef<DX12ResourceBufferNoMapping>(allocator, args.size, d3dResource, allocation, heapUsage, args);
                 break;
             }
-            case EResource::UsageType::Immutable:
             case EResource::UsageType::Streaming:
             case EResource::UsageType::Readable:
             {
@@ -85,25 +69,7 @@ NullableRef<IResource> DX12ResourceBuilder::buildTauRef(const ResourceBufferArgs
             switch(args.usageType)
             {
                 case EResource::UsageType::Default:
-                case EResource::UsageType::Dynamic:
-                {
-                    break;
-                }
-                case EResource::UsageType::Immutable:
-                {
-                    CD3DX12_RANGE readRange(0, 0);
-                    void* mapping;
-                    res = d3dResource->Map(0, &readRange, &mapping);
-
-                    if(FAILED(res))
-                    { break; }
-
-                    (void) ::std::memcpy(mapping, args.initialBuffer, args.size);
-
-                    d3dResource->Unmap(0, nullptr);
-
-                    break;
-                }
+                case EResource::UsageType::Dynamic: break;
                 case EResource::UsageType::Streaming:
                 {
                     void* mapping = resource->map(EResource::MapType::Discard, ResourceMapRange::none());
@@ -123,7 +89,7 @@ NullableRef<IResource> DX12ResourceBuilder::buildTauRef(const ResourceBufferArgs
     }
     else
     {
-        ERROR_CODE_N(Error::InternalError);
+        
     }
 
     ERROR_CODE_N(Error::InternalError);

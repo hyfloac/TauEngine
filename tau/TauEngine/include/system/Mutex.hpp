@@ -77,3 +77,65 @@ public:
     void unlock() noexcept
     { unlockWrite(); }
 };
+
+template<typename _Mutex>
+class Lock final
+{
+    DELETE_CM(Lock);
+private:
+    _Mutex& _mutex;
+public:
+    Lock(_Mutex& mutex) noexcept
+        : _mutex(mutex)
+    { _mutex.lock(); }
+
+    ~Lock() noexcept
+    { _mutex.unlock(); }
+};
+
+template<typename _Mutex>
+class UniqueLock final
+{
+    DELETE_COPY(UniqueLock);
+private:
+    _Mutex* _mutex;
+public:
+    UniqueLock(_Mutex& mutex) noexcept
+        : _mutex(&mutex)
+    { _mutex->lock(); }
+
+    ~UniqueLock() noexcept
+    {
+        if(_mutex)
+        { _mutex->unlock(); }
+    }
+
+    UniqueLock(UniqueLock<_Mutex>&& move) noexcept
+        : _mutex(move._mutex)
+    { move._mutex = nullptr; }
+
+    UniqueLock& operator=(UniqueLock<_Mutex>&& move) noexcept = delete;
+
+    void lock() noexcept
+    { _mutex->lock(); }
+
+    bool try_lock() noexcept
+    { return _mutex->try_lock(); }
+
+    void unlock() noexcept
+    { _mutex->unlock(); }
+};
+
+class ReadLock final
+{
+    DELETE_CM(ReadLock);
+private:
+    SRWMutex& _mutex;
+public:
+    ReadLock(SRWMutex& mutex) noexcept
+        : _mutex(mutex)
+    { _mutex.lockRead(); }
+
+    ~ReadLock() noexcept
+    { _mutex.unlockRead(); }
+};

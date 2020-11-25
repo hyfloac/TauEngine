@@ -7,15 +7,15 @@ class Keyboard final
 public:
     enum class Flags : u16
     {
-        Shift = 1 << 0,
-        Ctrl = 1 << 1,
-        Alt = 1 << 2,
-        LeftShift = 1 << 3,
+        Shift      = 1 << 0,
+        Ctrl       = 1 << 1,
+        Alt        = 1 << 2,
+        LeftShift  = 1 << 3,
         RightShift = 1 << 4,
-        LeftCtrl = 1 << 5,
-        RightCtrl = 1 << 6,
-        LeftAlt = 1 << 7,
-        RightAlt = 1 << 8,
+        LeftCtrl   = 1 << 5,
+        RightCtrl  = 1 << 6,
+        LeftAlt    = 1 << 7,
+        RightAlt   = 1 << 8,
     };
 
     enum class Event : u8
@@ -83,7 +83,7 @@ public:
 
     enum class LockState
     {
-        Locked,
+        Locked = 0,
         NotLocked,
         NotValidForLocking
     };
