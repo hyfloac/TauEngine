@@ -4,76 +4,62 @@
 #include <d3d10.h>
 #include "dx/DXUtils.hpp"
 #include "DX10Resource.hpp"
+#include "graphics/ResourceRawInterface.hpp"
+
+class TAU_DLL DX10ResourceBufferRawInterface final : public IResourceRawInterface
+{
+private:
+    ID3D10Buffer* _d3dBuffer;
+public:
+    DX10ResourceBufferRawInterface(ID3D10Buffer* const d3dBuffer) noexcept
+        : _d3dBuffer(d3dBuffer)
+    { }
+
+    [[nodiscard]] void* rawHandle() const noexcept override { return _d3dBuffer; }
+
+    [[nodiscard]] ID3D10Resource* dx10Resource() const noexcept override { return _d3dBuffer; }
+    [[nodiscard]] ID3D10Buffer* dx10Buffer() const noexcept override { return _d3dBuffer; }
+private:
+    friend class DX10ResourceBuffer;
+};
 
 class TAU_DLL DX10ResourceBuffer final : public DX10Resource
 {
+    DELETE_CM(DX10ResourceBuffer);
 public:
     static DXGI_FORMAT dxIndexSize(EBuffer::IndexSize indexSize) noexcept;
 private:
     ResourceBufferArgs _args;
-    ID3D10Buffer* _d3dBuffer;
+    DX10ResourceBufferRawInterface _rawInterface;
+    __declspec(property(get = d3dBuffer, put = setD3DBuffer)) ID3D10Buffer* _d3dBuffer;
 public:
     DX10ResourceBuffer(const ResourceBufferArgs& args, ID3D10Buffer* const d3dBuffer) noexcept
         : DX10Resource(args.size, EResource::Type::Buffer)
         , _args(args)
-        , _d3dBuffer(d3dBuffer)
+        , _rawInterface(d3dBuffer)
     { }
 
     ~DX10ResourceBuffer() noexcept override
     { RELEASE_DX(_d3dBuffer); }
-
-    DX10ResourceBuffer(const DX10ResourceBuffer& copy) noexcept
-        : DX10Resource(copy)
-        , _args(copy._args)
-        , _d3dBuffer(copy._d3dBuffer)
-    { _d3dBuffer->AddRef(); }
-
-    DX10ResourceBuffer(DX10ResourceBuffer&& move) noexcept
-        : DX10Resource(::std::move(move))
-        , _args(::std::move(move._args))
-        , _d3dBuffer(move._d3dBuffer)
-    { move._d3dBuffer = null; }
-
-    DX10ResourceBuffer& operator=(const DX10ResourceBuffer& copy) noexcept
-    {
-        if(this == &copy)
-        { return *this; }
-
-        RELEASE_DX(_d3dBuffer);
-
-        DX10Resource::operator=(copy);
-
-        _args = copy._args;
-        _d3dBuffer = copy._d3dBuffer;
-
-        _d3dBuffer->AddRef();
-
-        return *this;
-    }
-
-    DX10ResourceBuffer& operator=(DX10ResourceBuffer&& move) noexcept
-    {
-        if(this == &move)
-        { return *this; }
-
-        RELEASE_DX(_d3dBuffer);
-
-        DX10Resource::operator=(::std::move(move));
-
-        _args = move._args;
-        _d3dBuffer = move._d3dBuffer;
-
-        move._d3dBuffer = null;
-
-        return *this;
-    }
     
-    [[nodiscard]] ID3D10Buffer* d3dBuffer() const noexcept { return _d3dBuffer; }
+    [[nodiscard]] ID3D10Buffer* d3dBuffer() const noexcept { return _rawInterface._d3dBuffer; }
 
-    [[nodiscard]] void* map(ICommandList& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange) noexcept override;
-    void unmap(ICommandList& context, uSys mipLevel, uSys arrayIndex) noexcept override;
-protected:
+    [[nodiscard]] void* map(ICommandList&, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept override
+    { return map(mapType, mapReadRange, mapWriteRange); }
+
+    void unmap(ICommandList&, uSys, uSys, const ResourceMapRange*) noexcept override
+    { unmap(); }
+
+    [[nodiscard]] void* map(EResource::MapType mapType, const ResourceMapRange* mapReadRange, const ResourceMapRange* mapWriteRange) noexcept;
+    void unmap() noexcept;
+
+    [[nodiscard]] const IResourceRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
+private:
     [[nodiscard]] const void* _getArgs() const noexcept override { return &_args; }
+
+#if defined(_MSVC_LANG) || 1
+    void setD3DBuffer(ID3D10Buffer* const buffer) noexcept { _rawInterface._d3dBuffer = buffer; }
+#endif
 };
 
 inline DXGI_FORMAT DX10ResourceBuffer::dxIndexSize(const EBuffer::IndexSize indexSize) noexcept

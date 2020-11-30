@@ -62,7 +62,7 @@ public:
     [[nodiscard]] const IResourceRawInterface& _getRawHandle() const noexcept override { return _rawInterface; }
 protected:
 #if defined(_MSVC_LANG) || 1
-    void setD3DResource(ID3D12Resource* resource) noexcept { _rawInterface._d3dResource = resource; }
+    void setD3DResource(ID3D12Resource* const resource) noexcept { _rawInterface._d3dResource = resource; }
 #endif
 };
 

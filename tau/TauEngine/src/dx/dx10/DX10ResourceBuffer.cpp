@@ -1,13 +1,13 @@
 #include "dx/dx10/DX10ResourceBuffer.hpp"
 
 #ifdef _WIN32
-void* DX10ResourceBuffer::map(ICommandList&, const EResource::MapType mapType, uSys, uSys, const ResourceMapRange* mapReadRange) noexcept
+void* DX10ResourceBuffer::map(const EResource::MapType mapType, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
 {
     void* mapping;
 
     if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
     {
-        if(mapType == EResource::MapType::NoWrite)
+        if(mapType == EResource::MapType::NoWrite || (mapWriteRange && mapWriteRange->isNone()))
         {
             _d3dBuffer->Map(D3D10_MAP_READ, 0, &mapping);
         }
@@ -32,12 +32,17 @@ void* DX10ResourceBuffer::map(ICommandList&, const EResource::MapType mapType, u
             default: return null;
         }
         _d3dBuffer->Map(dxMapType, 0, &mapping);
+
+        if(mapWriteRange && !mapWriteRange->isNone())
+        {
+            mapping = reinterpret_cast<u8*>(mapping) + mapWriteRange->begin;
+        }
     }
 
     return mapping;
 }
 
-void DX10ResourceBuffer::unmap(ICommandList&, uSys, uSys) noexcept
+void DX10ResourceBuffer::unmap() noexcept
 {
     _d3dBuffer->Unmap();
 }

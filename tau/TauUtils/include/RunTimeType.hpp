@@ -330,6 +330,14 @@ namespace _RTT_Utils
     using remove_pointer_t = typename remove_pointer<_T>::type;
 }
 
+template<typename _TargetType, typename _InputType, ::std::enable_if_t<::std::is_base_of_v<_RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<_InputType>>, _TargetType>, int> = 0>
+[[nodiscard]] bool rtt_check(const _InputType& in) noexcept
+{ return _RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<_InputType>>::template _isRTType<_TargetType>(in); }
+
+template<typename _TargetType, typename _InputType, ::std::enable_if_t<::std::is_base_of_v<_RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<_InputType>>, _TargetType>, int> = 0>
+[[nodiscard]] _TargetType* rtt_cast(const _InputType& in) noexcept
+{ return _RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<_InputType>>::_castRTType(in); }
+
 #define RTT_CHECK(_VAR, _T) (_RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<decltype(_VAR)>>::_isRTType<_T>(_VAR))
 #define RTT_CAST(_VAR, _T) (_RTT_Utils::remove_pointer_t<_RTT_Utils::remove_reference_t<decltype(_VAR)>>::_castRTType<_T>(_VAR))
 

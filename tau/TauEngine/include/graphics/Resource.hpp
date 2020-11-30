@@ -49,6 +49,8 @@ public:
     { }
 
     [[nodiscard]] uSys length() const noexcept { return end - begin; }
+
+    [[nodiscard]] bool isNone() const noexcept { return begin >= end; }
 };
 
 #define RESOURCE_IMPL_BASE(_TYPE) \

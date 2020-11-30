@@ -16,7 +16,7 @@ UniformBufferView DX10BufferViewBuilder::build(const UniformBufferViewArgs& args
     const DX10ResourceBuffer* const buffer = static_cast<const DX10ResourceBuffer*>(resource);
 
     ID3D10Buffer** const dxBuffer = new(handle) ID3D10Buffer* (buffer->d3dBuffer());
-    (*dxBuffer)->AddRef();
+    // (*dxBuffer)->AddRef();
 
     ERROR_CODE_V(Error::NoError, dxBuffer);
 }

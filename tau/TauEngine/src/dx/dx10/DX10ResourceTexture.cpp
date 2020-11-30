@@ -1,15 +1,15 @@
 #include "dx/dx10/DX10ResourceTexture.hpp"
 
 #ifdef _WIN32
-void* DX10ResourceTexture1D::map(IRenderingContext&, const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
+void* DX10ResourceTexture1D::map(const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
 {
-    const uSys subResource = D3D10CalcSubresource(mipLevel, arrayIndex, _args.mipLevels);
+    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
 
     void* mapping;
 
     if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
     {
-        if(mapType == EResource::MapType::NoWrite)
+        if(mapType == EResource::MapType::NoWrite || (mapWriteRange && mapWriteRange->isNone()))
         {
             _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
         }
@@ -34,21 +34,26 @@ void* DX10ResourceTexture1D::map(IRenderingContext&, const EResource::MapType ma
             default: return null;
         }
         _d3dTexture->Map(subResource, dxMapType, 0, &mapping);
+
+        if(mapWriteRange && !mapWriteRange->isNone())
+        {
+            mapping = reinterpret_cast<u8*>(mapping) + mapWriteRange->begin;
+        }
     }
 
     return mapping;
 }
 
-void DX10ResourceTexture1D::unmap(IRenderingContext&, const uSys mipLevel, const uSys arrayIndex) noexcept
+void DX10ResourceTexture1D::unmap(const uSys mipLevel, const uSys arrayIndex) noexcept
 {
-    const uSys subResource = D3D10CalcSubresource(mipLevel, arrayIndex, _args.mipLevels);
+    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
 
     _d3dTexture->Unmap(subResource);
 }
 
-void* DX10ResourceTexture2D::map(IRenderingContext&, const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
+void* DX10ResourceTexture2D::map(const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
 {
-    const uSys subResource = D3D10CalcSubresource(mipLevel, arrayIndex, _args.mipLevels);
+    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
 
     D3D10_MAPPED_TEXTURE2D mapping;
 
@@ -84,16 +89,16 @@ void* DX10ResourceTexture2D::map(IRenderingContext&, const EResource::MapType ma
     return mapping.pData;
 }
 
-void DX10ResourceTexture2D::unmap(IRenderingContext&, const uSys mipLevel, const uSys arrayIndex) noexcept
+void DX10ResourceTexture2D::unmap(const uSys mipLevel, const uSys arrayIndex) noexcept
 {
-    const uSys subResource = D3D10CalcSubresource(mipLevel, arrayIndex, _args.mipLevels);
+    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
 
     _d3dTexture->Unmap(subResource);
 }
 
-void* DX10ResourceTexture3D::map(IRenderingContext&, const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
+void* DX10ResourceTexture3D::map(const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
 {
-    const uSys subResource = D3D10CalcSubresource(mipLevel, arrayIndex, _args.mipLevels);
+    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
 
     D3D10_MAPPED_TEXTURE3D mapping;
 
@@ -129,9 +134,9 @@ void* DX10ResourceTexture3D::map(IRenderingContext&, const EResource::MapType ma
     return mapping.pData;
 }
 
-void DX10ResourceTexture3D::unmap(IRenderingContext&, const uSys mipLevel, const uSys arrayIndex) noexcept
+void DX10ResourceTexture3D::unmap(const uSys mipLevel, const uSys arrayIndex) noexcept
 {
-    const uSys subResource = D3D10CalcSubresource(mipLevel, arrayIndex, _args.mipLevels);
+    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
 
     _d3dTexture->Unmap(subResource);
 }

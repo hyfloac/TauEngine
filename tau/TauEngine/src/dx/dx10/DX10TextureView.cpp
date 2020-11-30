@@ -8,7 +8,14 @@
 
 TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, CPUDescriptorHandle handle, Error* error) const noexcept
 {
-    DXTextureViewArgs dxArgs{ handle.as<ID3D10ShaderResourceView*>() };
+    ID3D10ShaderResourceView** placementView = handle.as<ID3D10ShaderResourceView*>();
+    if(*placementView)
+    {
+        // If there is already a resource view here, release it.
+        (*placementView)->Release();
+    }
+
+    DXTextureViewArgs dxArgs{ placementView };
     if(!processArgs(args, &dxArgs, error))
     { return { null }; }
 

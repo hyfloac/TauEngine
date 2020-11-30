@@ -265,7 +265,6 @@ public:
     }
 };
 
-
 struct CommandResourceUsage final
 {
     DEFAULT_CONSTRUCT_PU(CommandResourceUsage);

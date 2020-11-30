@@ -26,7 +26,7 @@ public:
         , _currentMapping(null)
     { }
 
-    ~DX10VertexBuffer() noexcept
+    ~DX10VertexBuffer() noexcept override
     { RELEASE_DX(_d3dBuffer); }
 
     DX10VertexBuffer(const DX10VertexBuffer& copy) noexcept

@@ -2,11 +2,32 @@
 
 #ifdef _WIN32
 DX10TextureViewDescriptorHeap::DX10TextureViewDescriptorHeap(uSys maxDescriptors) noexcept
-    : _placement(::std::malloc(sizeof(ID3D10ShaderResourceView*) * maxDescriptors))
-{ }
+    : _placement(::std::malloc(sizeof(ID3D10ShaderResourceView*) * maxDescriptors + sizeof(uSys)))
+{
+    // Store array count
+    *reinterpret_cast<uSys*>(_placement) = maxDescriptors;
+    _placement = reinterpret_cast<u8*>(_placement) + sizeof(uSys);
+
+    // Zero memory to help with ID3D10ShaderResourceView releasing
+    ::std::memset(_placement, 0, sizeof(ID3D10ShaderResourceView*) * maxDescriptors);
+}
 
 DX10TextureViewDescriptorHeap::~DX10TextureViewDescriptorHeap() noexcept
-{ ::std::free(_placement); }
+{
+    // Retrieve the array count
+    const uSys descriptorCount = *(reinterpret_cast<uSys*>(_placement) - 1);
+
+    for(uSys i = 0; i < descriptorCount; ++i)
+    {
+        if(_heap[i])
+        {
+            // Release any active ID3DShaderResourceView's
+            _heap[i]->Release();
+        }
+    }
+
+    ::std::free(_placement);
+}
 
 DX10UniformBufferViewDescriptorHeap::DX10UniformBufferViewDescriptorHeap(uSys maxDescriptors) noexcept
     : _placement(::std::malloc(sizeof(ID3D10Buffer*) * maxDescriptors))

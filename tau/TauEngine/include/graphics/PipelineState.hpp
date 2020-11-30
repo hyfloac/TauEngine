@@ -69,5 +69,5 @@ public:
         DriverMemoryAllocationFailure
     };
 public:
-    [[nodiscard]]virtual PipelineState build(const PipelineArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual PipelineState build(const PipelineArgs& args, [[tau::out]] Error* error) const noexcept = 0;
 };

@@ -8,7 +8,7 @@
 
 static inline const void* computeHead(const NullableRef<GLCommandAllocator>& allocator) noexcept
 {
-    const void* head = allocator->head();
+    const void* const head = allocator->head();
     return reinterpret_cast<const u8*>(head) + allocator->allocIndex();
 }
 
@@ -18,12 +18,13 @@ GLCommandList::GLCommandList(const NullableRef<GLCommandAllocator>& allocator) n
     , _commandCount(0)
 { }
 
-void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator) noexcept
+void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* const initialState) noexcept
 {
 #if TAU_NULL_CHECK
     if(!allocator)
     { return; }
 #endif
+
 #if TAU_RTTI_CHECK
     if(!RTT_CHECK(allocator.get(), GLCommandAllocator))
     { return; }
@@ -32,6 +33,9 @@ void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator) noexc
     _commandAllocator = RefCast<GLCommandAllocator>(allocator);
     _head = computeHead(_commandAllocator);
     _commandCount = 0;
+    
+    if(initialState)
+    { setPipelineState(*initialState); }
 }
 
 void GLCommandList::begin() noexcept

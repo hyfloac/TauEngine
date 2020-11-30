@@ -8,6 +8,7 @@
 #include <allocator/FreeListAllocator.hpp>
 
 class DX10VertexArray;
+class DX10CommandAllocator;
 
 namespace DX10CL {
 enum class CommandType
@@ -18,11 +19,16 @@ enum class CommandType
     DrawIndexedInstanced,
     SetDrawType,
     SetPipelineState,
+    SetBlendFactor,
     SetStencilRef,
     SetVertexArray,
     SetIndexBuffer,
     SetGDescriptorLayout,
-    SetGDescriptorTable
+    SetGDescriptorTable,
+    CopyResource,
+    CopySubresourceRegion0,
+    CopySubresourceRegion1,
+    CopySubresourceRegion2
 };
 
 struct CommandDraw final
@@ -123,6 +129,22 @@ public:
     { }
 };
 
+struct CommandSetBlendFactor final
+{
+    DEFAULT_DESTRUCT(CommandSetBlendFactor);
+    DEFAULT_CM_PU(CommandSetBlendFactor);
+public:
+    const float blendFactor[4];
+public:
+    CommandSetBlendFactor() noexcept
+        : blendFactor { 1.0f, 1.0f, 1.0f, 1.0f }
+    { }
+
+    CommandSetBlendFactor(const float _blendFactor[4]) noexcept
+        : blendFactor{ _blendFactor[0], _blendFactor[1], _blendFactor[2], _blendFactor[3] }
+    { }
+};
+
 struct CommandSetStencilRef final
 {
     DEFAULT_CONSTRUCT_PU(CommandSetStencilRef);
@@ -200,6 +222,76 @@ public:
     { }
 };
 
+struct CommandCopyResource final
+{
+    DEFAULT_CONSTRUCT_PU(CommandCopyResource);
+    DEFAULT_DESTRUCT(CommandCopyResource);
+    DEFAULT_CM_PU(CommandCopyResource);
+public:
+    ID3D10Resource* dst;
+    ID3D10Resource* src;
+public:
+    CommandCopyResource(ID3D10Resource* const _dst, ID3D10Resource* const _src) noexcept
+        : dst(_dst)
+        , src(_src)
+    { }
+};
+
+/**
+ *   This is split into 3 different commands to reduce the
+ * overall size of all commands, because unions. Ultimately
+ * a small price to pay to get a 65% reduction in command
+ * size.
+ */
+struct CommandCopySubresourceRegion0 final
+{
+    DEFAULT_CONSTRUCT_PU(CommandCopySubresourceRegion0);
+    DEFAULT_DESTRUCT(CommandCopySubresourceRegion0);
+    DEFAULT_CM_PU(CommandCopySubresourceRegion0);
+public:
+    ID3D10Resource* dst;
+    UINT dstSubresource;
+    ID3D10Resource* src;
+    UINT srcSubresource;
+public:
+    CommandCopySubresourceRegion0(ID3D10Resource* const _dst, const UINT _dstSubresource, ID3D10Resource* const _src, const UINT _srcSubresource) noexcept
+        : dst(_dst)
+        , dstSubresource(_dstSubresource)
+        , src(_src)
+        , srcSubresource(_srcSubresource)
+    { }
+};
+    
+struct CommandCopySubresourceRegion1 final
+{
+    DEFAULT_CONSTRUCT_PU(CommandCopySubresourceRegion1);
+    DEFAULT_DESTRUCT(CommandCopySubresourceRegion1);
+    DEFAULT_CM_PU(CommandCopySubresourceRegion1);
+public:
+    ETexture::Coord coord;
+    bool hasSrcBox;
+public:
+    CommandCopySubresourceRegion1(const ETexture::Coord& _coord, const ETexture::EBox* const _srcBox) noexcept
+        : coord(_coord)
+        , hasSrcBox(_srcBox)
+    { }
+};
+    
+struct CommandCopySubresourceRegion2 final
+{
+    DEFAULT_CONSTRUCT_PU(CommandCopySubresourceRegion2);
+    DEFAULT_DESTRUCT(CommandCopySubresourceRegion2);
+    DEFAULT_CM_PU(CommandCopySubresourceRegion2);
+public:
+    ETexture::EBox srcBox;
+public:
+    CommandCopySubresourceRegion2(const ETexture::EBox* const _srcBox) noexcept
+    {
+        if(_srcBox)
+        { srcBox = *_srcBox; }
+    }
+};
+
 struct Command final
 {
     DEFAULT_DESTRUCT(Command);
@@ -215,11 +307,16 @@ public:
         CommandDrawIndexedInstanced drawIndexedInstanced;
         CommandSetDrawType setDrawType;
         CommandSetPipelineState setPipelineState;
+        CommandSetBlendFactor setBlendFactor;
         CommandSetStencilRef setStencilRef;
         CommandSetVertexArray setVertexArray;
         CommandSetIndexBuffer setIndexBuffer;
         CommandSetGDescriptorLayout setGDescriptorLayout;
         CommandSetGDescriptorTable setGDescriptorTable;
+        CommandCopyResource copyResource;
+        CommandCopySubresourceRegion0 copySubresourceRegion0;
+        CommandCopySubresourceRegion1 copySubresourceRegion1;
+        CommandCopySubresourceRegion2 copySubresourceRegion2;
     };
 public:
     Command() noexcept
@@ -257,6 +354,11 @@ public:
         , setPipelineState(_setPipelineState)
     { }
 
+    Command(const CommandSetBlendFactor& _setBlendFactor) noexcept
+        : type(CommandType::SetBlendFactor)
+        , setBlendFactor(_setBlendFactor)
+    { }
+
     Command(const CommandSetStencilRef& _setStencilRef) noexcept
         : type(CommandType::SetStencilRef)
         , setStencilRef(_setStencilRef)
@@ -281,6 +383,26 @@ public:
         : type(CommandType::SetGDescriptorTable)
         , setGDescriptorTable(_setGDescriptorTable)
     { }
+
+    Command(const CommandCopyResource& _copyResource) noexcept
+        : type(CommandType::CopyResource)
+        , copyResource(_copyResource)
+    { }
+
+    Command(const CommandCopySubresourceRegion0& _copySubresourceRegion0) noexcept
+        : type(CommandType::CopySubresourceRegion0)
+        , copySubresourceRegion0(_copySubresourceRegion0)
+    { }
+
+    Command(const CommandCopySubresourceRegion1& _copySubresourceRegion1) noexcept
+        : type(CommandType::CopySubresourceRegion1)
+        , copySubresourceRegion1(_copySubresourceRegion1)
+    { }
+
+    Command(const CommandCopySubresourceRegion2& _copySubresourceRegion2) noexcept
+        : type(CommandType::CopySubresourceRegion2)
+        , copySubresourceRegion2(_copySubresourceRegion2)
+    { }
 };
 }
 
@@ -290,23 +412,17 @@ class TAU_DLL DX10CommandList final : public ICommandList
     DELETE_CM(DX10CommandList);
     COMMAND_LIST_IMPL(DX10CommandList);
 private:
-    static constexpr uSys MaxVertexBuffers = 64;
-private:
-    uSys _maxCommands;
-    ArrayList<DX10CL::Command> _commands;
-    FreeListAllocator _refCountList;
-    const DX10VertexArray* _currentVA;
+    NullableRef<DX10CommandAllocator> _commandAllocator;
+    const void* _head;
+    uSys _commandCount;
 public:
-    DX10CommandList(const uSys maxCommands = 4096) noexcept
-        : _maxCommands(maxCommands)
-        , _commands(maxCommands)
-        , _refCountList(_maxCommands * MaxVertexBuffers)
-        , _currentVA(null)
-    { }
+    DX10CommandList(const NullableRef<DX10CommandAllocator>& allocator) noexcept;
 
-    [[nodiscard]] const ArrayList<DX10CL::Command>& commands() const noexcept { return _commands; }
+    [[nodiscard]] const void* head() const noexcept { return _head; }
+    [[nodiscard]] uSys commandCount() const noexcept { return _commandCount; }
 
-    void reset() noexcept override;
+    void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept override;
+    void begin() noexcept override;
     void finish() noexcept override;
     void draw(uSys exCount, uSys startVertex) noexcept override;
     void drawIndexed(uSys exCount, uSys startIndex, iSys baseVertex) noexcept override;
@@ -314,11 +430,19 @@ public:
     void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setDrawType(EGraphics::DrawType drawType) noexcept override;
     void setPipelineState(const PipelineState& pipelineState) noexcept override;
+    void setBlendFactor(const float blendFactor[4]) noexcept override;
     void setStencilRef(uSys stencilRef) noexcept override;
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
     void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
     void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept override;
+    void executeBundle(const NullableRef<ICommandList>& bundle) noexcept override;
+    void copyResource(const NullableRef<IResource>& dst, const NullableRef<IResource>& src) noexcept override;
+    void copyBuffer(const NullableRef<IResource>& dstBuffer, u64 dstOffset, const NullableRef<IResource>& srcBuffer, u64 srcOffset, u64 byteCount) noexcept override;
+    void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const NullableRef<IResource>& srcTexture, u32 srcSubResource) noexcept override;
+    void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const ETexture::Coord& coord, const NullableRef<IResource>& srcTexture, u32 srcSubResource, const ETexture::EBox* srcBox) noexcept override;
+private:
+    friend class DX10CommandQueue;
 };
 
 #endif

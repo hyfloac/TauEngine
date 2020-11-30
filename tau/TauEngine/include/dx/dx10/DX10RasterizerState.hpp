@@ -63,8 +63,7 @@ public:
         return *this;
     }
 
-    [[nodiscard]]       ID3D10RasterizerState* d3dRasterizerState()       noexcept { return _d3dRasterizerState; }
-    [[nodiscard]] const ID3D10RasterizerState* d3dRasterizerState() const noexcept { return _d3dRasterizerState; }
+    [[nodiscard]] ID3D10RasterizerState* d3dRasterizerState() const noexcept { return _d3dRasterizerState; }
 
     void apply(DX10RenderingContext& ctx) const noexcept;
 };

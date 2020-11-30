@@ -2,12 +2,15 @@
 
 #ifdef _WIN32
 #include "graphics/PipelineState.hpp"
+#include "dx/dx10/DX10BlendingState.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
+#include "dx/dx10/DX10RasterizerState.hpp"
 #include "dx/dx10/DX10InputLayout.hpp"
 #include "dx/dx10/DX10DescriptorHeap.hpp"
+#include "dx/dx10/DX10CommandAllocator.hpp"
 #include "TauConfig.hpp"
 
-void DX10CommandQueue::executeCommandLists(uSys count, const ICommandList* const * lists) noexcept
+void DX10CommandQueue::executeCommandLists(const uSys count, const ICommandList* const * lists) noexcept
 {
 #if TAU_NULL_CHECK
     if(!lists)
@@ -36,15 +39,19 @@ void DX10CommandQueue::executeCommandLists(uSys count, const ICommandList* const
 
 void DX10CommandQueue::executeCommandList(const ICommandList* list) noexcept
 {
-    const DX10CommandList* const glList = static_cast<const DX10CommandList*>(list);
-    /*
-     * Copy the command array so that the list can be reset.
-     * This will perform a reference count copy.
-     */
-    const ArrayList<DX10CL::Command> commands = glList->commands();  // NOLINT(performance-unnecessary-copy-initialization)
+    const DX10CommandList* const dxList = static_cast<const DX10CommandList*>(list);
 
-    for(auto cmd : commands)
+    const u8* const head = reinterpret_cast<const u8*>(dxList->_head);
+    const uSys commandCount = dxList->_commandCount;
+    const uSys blockSize = dxList->_commandAllocator->blockSize();
+
+    DX10CL::CommandCopySubresourceRegion0 copy0;
+    DX10CL::CommandCopySubresourceRegion1 copy1;
+
+    for(uSys i = 0, offset = 0; i < commandCount; ++i, offset += blockSize)
     {
+        const DX10CL::Command& cmd = *reinterpret_cast<const DX10CL::Command*>(head + offset);
+
 #define DISPATCH(__CMD, __FUNC, __ARG) case DX10CL::CommandType::__CMD: __FUNC(cmd.__ARG); break
 
         switch(cmd.type)
@@ -55,11 +62,22 @@ void DX10CommandQueue::executeCommandList(const ICommandList* list) noexcept
             DISPATCH(DrawIndexedInstanced, _drawIndexedInstanced, drawIndexedInstanced);
             DISPATCH(SetDrawType, _setDrawType, setDrawType);
             DISPATCH(SetPipelineState, _setPipelineState, setPipelineState);
+            DISPATCH(SetBlendFactor, _setBlendFactor, setBlendFactor);
             DISPATCH(SetStencilRef, _setStencilRef, setStencilRef);
             DISPATCH(SetVertexArray, _setVertexArray, setVertexArray);
             DISPATCH(SetIndexBuffer, _setIndexBuffer, setIndexBuffer);
             DISPATCH(SetGDescriptorLayout, _setGDescriptorLayout, setGDescriptorLayout);
             DISPATCH(SetGDescriptorTable, _setGDescriptorTable, setGDescriptorTable);
+            DISPATCH(CopyResource, _copyResource, copyResource);
+            case DX10CL::CommandType::CopySubresourceRegion0:
+                copy0 = cmd.copySubresourceRegion0;
+                break;
+            case DX10CL::CommandType::CopySubresourceRegion1:
+                copy1 = cmd.copySubresourceRegion1;
+                break;
+            case DX10CL::CommandType::CopySubresourceRegion2:
+                _copySubresourceRegion(copy0, copy1, cmd.copySubresourceRegion2);
+                break;
             default: break;
         }
 #undef DISPATCH
@@ -95,15 +113,48 @@ void DX10CommandQueue::_setPipelineState(const DX10CL::CommandSetPipelineState& 
 {
     _currentPipelineState = cmd.pipelineState;
 
-    _currentInputLayout = RefCast<DX10InputLayout>(cmd.pipelineState->args().inputLayout);
+    const auto& args = cmd.pipelineState->args();
 
-    const DX10DepthStencilState* const depthStencilState = RTT_CAST(cmd.pipelineState->args().depthStencilState.get(), DX10DepthStencilState);
-    _currentDepthStencilState = depthStencilState->d3dDepthStencilState();
+    _currentInputLayout = RefCast<DX10InputLayout>(args.inputLayout);
+
+    const DX10BlendingState* const blendingState = rtt_cast<DX10BlendingState>(args.blendingState);
+    if(_currentBlendState != blendingState->d3dBlendState())
+    {
+        _currentBlendState = blendingState->d3dBlendState();
+        _d3d10Device->OMSetBlendState(_currentBlendState, _blendingFactors, 0xFFFFFFFF);
+    }
+
+    const DX10DepthStencilState* const depthStencilState = rtt_cast<DX10DepthStencilState>(args.depthStencilState);
+    if(_currentDepthStencilState != depthStencilState->d3dDepthStencilState())
+    {
+        _currentDepthStencilState = depthStencilState->d3dDepthStencilState();
+        _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, static_cast<UINT>(_stencilRef));
+    }
+
+    const DX10RasterizerState* const rasterizerState = rtt_cast<DX10RasterizerState>(args.rasterizerState);
+    if(_currentRasterizerState != rasterizerState->d3dRasterizerState())
+    {
+        _currentRasterizerState = rasterizerState->d3dRasterizerState();
+        _d3d10Device->RSSetState(_currentRasterizerState);
+    }
+}
+
+void DX10CommandQueue::_setBlendFactor(const DX10CL::CommandSetBlendFactor& cmd) noexcept
+{
+    if(::std::memcmp(cmd.blendFactor, _blendingFactors, sizeof(float) * 4) != 0)
+    {
+        ::std::memcpy(_blendingFactors, cmd.blendFactor, sizeof(float) * 4);
+        _d3d10Device->OMSetBlendState(_currentBlendState, cmd.blendFactor, 0xFFFFFFFF);
+    }
 }
 
 void DX10CommandQueue::_setStencilRef(const DX10CL::CommandSetStencilRef& cmd) noexcept
 {
-    _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, static_cast<UINT>(cmd.stencilRef));
+    if(cmd.stencilRef != _stencilRef)
+    {
+        _stencilRef = cmd.stencilRef;
+        _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, static_cast<UINT>(cmd.stencilRef));
+    }
 }
 
 void DX10CommandQueue::_setVertexArray(const DX10CL::CommandSetVertexArray& cmd) noexcept
@@ -201,5 +252,24 @@ void DX10CommandQueue::_setGDescriptorTable(const DX10CL::CommandSetGDescriptorT
                 break;
         }
     }
+}
+
+void DX10CommandQueue::_copyResource(const DX10CL::CommandCopyResource& cmd) noexcept
+{
+    _d3d10Device->CopyResource(cmd.dst, cmd.src);
+}
+
+void DX10CommandQueue::_copySubresourceRegion(const DX10CL::CommandCopySubresourceRegion0& cmd0, const DX10CL::CommandCopySubresourceRegion1& cmd1, const DX10CL::CommandCopySubresourceRegion2& cmd2) noexcept
+{
+    D3D10_BOX box;
+    const D3D10_BOX* pBox = nullptr;
+
+    if(cmd1.hasSrcBox)
+    {
+        box = D3D10_BOX { cmd2.srcBox.left, cmd2.srcBox.top, cmd2.srcBox.front, cmd2.srcBox.right, cmd2.srcBox.bottom, cmd2.srcBox.back };
+        pBox = &box;
+    }
+
+    _d3d10Device->CopySubresourceRegion(cmd0.dst, cmd0.dstSubresource, cmd1.coord.x, cmd1.coord.y, cmd1.coord.z, cmd0.src, cmd0.srcSubresource, pBox);
 }
 #endif

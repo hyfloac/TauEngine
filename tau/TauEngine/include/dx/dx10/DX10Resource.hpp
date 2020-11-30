@@ -10,7 +10,7 @@ class DX10GraphicsInterface;
 class TAU_DLL TAU_NOVTABLE DX10Resource : public IResource
 {
     DEFAULT_DESTRUCT_VI(DX10Resource);
-    DEFAULT_CM_PO(DX10Resource);
+    DELETE_CM(DX10Resource);
     RESOURCE_IMPL(DX10Resource);
 protected:
     DX10Resource(const uSys size, const EResource::Type resourceType) noexcept
@@ -58,33 +58,14 @@ public:
         : _gi(gi)
     { }
 
-    [[nodiscard]] DX10Resource* build(const ResourceBufferArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10Resource* build(const ResourceBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IResource> buildCPPRef(const ResourceBufferArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IResource> buildTauSRef(const ResourceBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-
-    [[nodiscard]] DX10Resource* build(const ResourceTexture1DArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10Resource* build(const ResourceTexture1DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IResource> buildCPPRef(const ResourceTexture1DArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IResource> buildTauSRef(const ResourceTexture1DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-
-    [[nodiscard]] DX10Resource* build(const ResourceTexture2DArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10Resource* build(const ResourceTexture2DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IResource> buildCPPRef(const ResourceTexture2DArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IResource> buildTauSRef(const ResourceTexture2DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-
-    [[nodiscard]] DX10Resource* build(const ResourceTexture3DArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] DX10Resource* build(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IResource> buildCPPRef(const ResourceTexture3DArgs& args, Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IResource> buildTauSRef(const ResourceTexture3DArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceBufferArgs&    args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 protected:
     [[nodiscard]] uSys _allocSize(uSys type) const noexcept override;
 private:
-    [[nodiscard]] bool processArgs(const ResourceBufferArgs& args, [[tau::out]] DXResourceBufferArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const ResourceBufferArgs&    args, [[tau::out]] DXResourceBufferArgs*    dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs(const ResourceTexture1DArgs& args, [[tau::out]] DXResourceTexture1DArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs(const ResourceTexture2DArgs& args, [[tau::out]] DXResourceTexture2DArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processArgs(const ResourceTexture3DArgs& args, [[tau::out]] DXResourceTexture3DArgs* dxArgs, [[tau::out]] Error* error) const noexcept;

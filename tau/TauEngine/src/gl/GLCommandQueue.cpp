@@ -42,7 +42,7 @@ void GLCommandQueue::executeCommandList(const ICommandList* const list) noexcept
 {
     const GLCommandList* const glList = static_cast<const GLCommandList*>(list);
 
-    const u8* head = reinterpret_cast<const u8*>(glList->_head);
+    const u8* const head = reinterpret_cast<const u8*>(glList->_head);
     const uSys commandCount = glList->_commandCount;
     const uSys blockSize = glList->_commandAllocator->blockSize();
 

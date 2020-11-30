@@ -67,9 +67,5 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual IVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept = 0;
-    [[nodiscard]] virtual IVertexArray* build(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IVertexArray> buildCPPRef(const VertexArrayArgs& args, [[tau::out]] Error* error) noexcept = 0;
     [[nodiscard]] virtual NullableRef<IVertexArray> buildTauRef(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IVertexArray> buildTauSRef(const VertexArrayArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
 };

@@ -5,10 +5,10 @@
 #include <allocator/FixedBlockAllocator.hpp>
 #include <allocator/FreeListAllocator.hpp>
 
-#include "Safeties.hpp"
-
 class TAU_DLL GLCommandAllocator final : public ICommandAllocator
 {
+    DEFAULT_DESTRUCT(GLCommandAllocator);
+    DELETE_CM(GLCommandAllocator);
     COMMAND_ALLOCATOR_IMPL(GLCommandAllocator);
 private:
     FixedBlockArenaAllocator<> _fbAllocator;

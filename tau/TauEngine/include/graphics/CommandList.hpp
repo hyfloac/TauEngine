@@ -154,6 +154,17 @@ public:
      *      The homogenous pipeline state to use.
      */
     virtual void setPipelineState(const PipelineState& pipelineState) noexcept = 0;
+    
+    /**
+     * @brief Sets the blending factor for the blending state.
+     *
+     *   The blending factor is only used if one of the
+     * BlendingFactor's was BlendConstant or InvBlendConstant.
+     *
+     * @param[in] blendFactor
+     *      The RGBA blending factor.
+     */
+    virtual void setBlendFactor(const float blendFactor[4]) noexcept = 0;
 
     /**
      * @brief Sets the stencil reference target.

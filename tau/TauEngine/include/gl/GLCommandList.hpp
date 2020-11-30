@@ -485,7 +485,7 @@ public:
     [[nodiscard]] const void* head() const noexcept { return _head; }
     [[nodiscard]] uSys commandCount() const noexcept { return _commandCount; }
 
-    void reset(const NullableRef<ICommandAllocator>& allocator) noexcept override;
+    void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept override;
     void begin() noexcept override;
     void finish() noexcept override;
     void draw(uSys vertexCount, uSys startVertex) noexcept override;
