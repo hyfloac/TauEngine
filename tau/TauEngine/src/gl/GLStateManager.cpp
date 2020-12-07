@@ -1,4 +1,5 @@
 #include "gl/GLStateManager.hpp"
+#include <cstring>
 
 GLStateManager::GLStateManager() noexcept
     : _vao(0)
@@ -24,6 +25,10 @@ GLStateManager::GLStateManager() noexcept
     , _frontFace(GL_CCW)
     , _faceCullingMode(GL_BACK)
     , _polygonFillMode(GL_FILL)
+    , _clearColor{ 0.0f, 0.0f, 0.0f, 0.0f }
+    , _clearDepthF(1.0f)
+    , _clearDepthD(1.0)
+    , _clearStencil(0)
 {
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxUniformBufferBindings));
     glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, reinterpret_cast<GLint*>(&_maxShaderStorageBufferBindings));
@@ -250,7 +255,7 @@ void GLStateManager::activeTexture(const uSys unit) noexcept
     if(unit != _activeTextureUnit)
     {
         _activeTextureUnit = unit;
-        glActiveTexture(GL_TEXTURE0 + unit);
+        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + unit));
     }
 }
 
@@ -278,7 +283,7 @@ void GLStateManager::bindTexture(const GLenum target, const GLuint texture, cons
         if(unit != _activeTextureUnit)
         {
             _activeTextureUnit = unit;
-            glActiveTexture(GL_TEXTURE0 + unit);
+            glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + unit));
         }
 
         binding.target = target;
@@ -328,11 +333,11 @@ void GLStateManager::setBlending(const uSys index, const bool state) noexcept
         _blendingControls[index].active = state;
         if(state)
         {
-            glEnablei(GL_BLEND, index);
+            glEnablei(GL_BLEND, static_cast<GLuint>(index));
         }
         else
         {
-            glDisablei(GL_BLEND, index);
+            glDisablei(GL_BLEND, static_cast<GLuint>(index));
         }
     }
 }
@@ -360,7 +365,7 @@ void GLStateManager::enableBlending(const uSys index) noexcept
     if(_blendingControls[index].active != true)
     {
         _blendingControls[index].active = true;
-        glEnablei(GL_BLEND, index);
+        glEnablei(GL_BLEND, static_cast<GLuint>(index));
     }
 }
 
@@ -387,7 +392,7 @@ void GLStateManager::disableBlending(const uSys index) noexcept
     if(_blendingControls[index].active != false)
     {
         _blendingControls[index].active = false;
-        glDisablei(GL_BLEND, index);
+        glDisablei(GL_BLEND, static_cast<GLuint>(index));
     }
 }
 
@@ -561,11 +566,11 @@ void GLStateManager::set(const GLenum capability, const uSys index, const bool s
         default:
             if(state)
             {
-                glEnablei(capability, index);
+                glEnablei(capability, static_cast<GLuint>(index));
             }
             else
             {
-                glDisablei(capability, index);
+                glDisablei(capability, static_cast<GLuint>(index));
             }
             break;
     }
@@ -593,7 +598,7 @@ void GLStateManager::enable(const GLenum capability, const uSys index) noexcept
         case GL_STENCIL_TEST: enableStencilTest(); break;
         case GL_SCISSOR_TEST: enableScissorTest(); break;
         case GL_CULL_FACE: enableFaceCulling(); break;
-        default: glEnablei(capability, index); break;
+        default: glEnablei(capability, static_cast<GLuint>(index)); break;
     }
 }
 
@@ -619,7 +624,7 @@ void GLStateManager::disable(const GLenum capability, const uSys index) noexcept
         case GL_STENCIL_TEST: disableStencilTest(); break;
         case GL_SCISSOR_TEST: disableScissorTest(); break;
         case GL_CULL_FACE: disableFaceCulling(); break;
-        default: glDisablei(capability, index); break;
+        default: glDisablei(capability, static_cast<GLuint>(index)); break;
     }
 }
 
@@ -676,7 +681,7 @@ void GLStateManager::blendFunc(const uSys index, const GLenum src, const GLenum 
         _blendingControls[index].srcAlpha = src;
         _blendingControls[index].destColor = dest;
         _blendingControls[index].destAlpha = dest;
-        glBlendFunci(index, src, dest);
+        glBlendFunci(static_cast<GLuint>(index), src, dest);
     }
 }
 
@@ -689,7 +694,7 @@ void GLStateManager::blendFunc(const uSys index, const GLenum srcColor, const GL
         _blendingControls[index].srcAlpha = srcAlpha;
         _blendingControls[index].destColor = destColor;
         _blendingControls[index].destAlpha = destAlpha;
-        glBlendFuncSeparatei(index, srcColor, srcAlpha, destColor, destAlpha);
+        glBlendFuncSeparatei(static_cast<GLuint>(index), srcColor, srcAlpha, destColor, destAlpha);
     }
 }
 
@@ -737,7 +742,7 @@ void GLStateManager::blendEquation(const uSys index, const GLenum equation) noex
     {
         _blendingControls[index].equationColor = equation;
         _blendingControls[index].equationAlpha = equation;
-        glBlendEquationi(index, equation);
+        glBlendEquationi(static_cast<GLuint>(index), equation);
     }
 }
 
@@ -747,7 +752,7 @@ void GLStateManager::blendEquation(const uSys index, const GLenum equationColor,
     {
         _blendingControls[index].equationColor = equationColor;
         _blendingControls[index].equationAlpha = equationAlpha;
-        glBlendEquationSeparatei(index, equationColor, equationAlpha);
+        glBlendEquationSeparatei(static_cast<GLuint>(index), equationColor, equationAlpha);
     }
 }
 
@@ -1128,7 +1133,7 @@ void GLStateManager::stencilRef(const GLenum face, const GLint reference) noexce
 
 void GLStateManager::polygonOffset(const GLfloat factor, const GLfloat units) noexcept
 {
-    if(_polygonOffset.factor != factor || _polygonOffset.units != units)
+    if(_polygonOffset.factor != factor || _polygonOffset.units != units)  // NOLINT(clang-diagnostic-float-equal)
     {
         _polygonOffset.factor = factor;
         _polygonOffset.units = units;
@@ -1138,7 +1143,7 @@ void GLStateManager::polygonOffset(const GLfloat factor, const GLfloat units) no
 
 void GLStateManager::polygonOffset(const GLfloat factor, const GLfloat units, const GLfloat clamp) noexcept
 {
-    if(_polygonOffset.factor != factor || _polygonOffset.units != units || _polygonOffset.depthClamp != clamp)
+    if(_polygonOffset.factor != factor || _polygonOffset.units != units || _polygonOffset.depthClamp != clamp)  // NOLINT(clang-diagnostic-float-equal)
     {
         _polygonOffset.factor = factor;
         _polygonOffset.units = units;
@@ -1253,5 +1258,55 @@ void GLStateManager::polygonMode(const GLenum mode) noexcept
     {
         _polygonFillMode = mode;
         glPolygonMode(GL_FRONT_AND_BACK, mode);
+    }
+}
+
+void GLStateManager::clearColor(const GLfloat color[4]) noexcept
+{
+    if(color)
+    {
+        if(::std::memcmp(_clearColor, color, sizeof(GLfloat) * 4) != 0)
+        {
+            (void) ::std::memcpy(_clearColor, color, sizeof(GLfloat) * 4);
+            glClearColor(color[0], color[1], color[2], color[3]);
+        }
+    }
+}
+
+void GLStateManager::clearColor(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a) noexcept
+{
+    const GLfloat color[] { r, g, b, a };
+
+    if(::std::memcmp(_clearColor, color, sizeof(GLfloat) * 4) != 0)
+    {
+        (void) ::std::memcpy(_clearColor, color, sizeof(GLfloat) * 4);
+        glClearColor(r, g, b, a);
+    }
+}
+
+void GLStateManager::clearDepth(const GLfloat depth) noexcept
+{
+    if(_clearDepth != static_cast<GLdouble>(depth))  // NOLINT(clang-diagnostic-float-equal)
+    {
+        _clearDepth = static_cast<GLdouble>(depth);
+        glClearDepthf(depth);
+    }
+}
+
+void GLStateManager::clearDepth(const GLdouble depth) noexcept
+{
+    if(_clearDepth != depth)  // NOLINT(clang-diagnostic-float-equal)
+    {
+        _clearDepth = depth;
+        glClearDepth(depth);
+    }
+}
+
+void GLStateManager::clearStencil(const GLint stencil) noexcept
+{
+    if(_clearStencil != stencil)
+    {
+        _clearStencil = stencil;
+        glClearStencil(stencil);
     }
 }

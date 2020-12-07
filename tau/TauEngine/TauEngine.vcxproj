@@ -409,7 +409,7 @@
     <ClInclude Include="include\texture\NullTexture.hpp" />
     <ClInclude Include="include\texture\TextureRawInterface.hpp" />
     <ClInclude Include="include\texture\TextureView.hpp" />
-    <ClInclude Include="include\texture\RenderTarget.hpp" />
+    <ClInclude Include="include\graphics\RenderTarget.hpp" />
     <ClInclude Include="include\texture\TextureEnums.hpp" />
     <ClInclude Include="include\texture\TextureSampler.hpp" />
     <ClInclude Include="include\Timings.hpp" />

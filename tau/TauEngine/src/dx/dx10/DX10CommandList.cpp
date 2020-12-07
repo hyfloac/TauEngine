@@ -6,6 +6,8 @@
 #include "dx/dx10/DX10VertexArray.hpp"
 #include "dx/dx10/DX10ResourceBuffer.hpp"
 #include "dx/dx10/DX10CommandAllocator.hpp"
+#include "dx/dx10/DX10FrameBuffer.hpp"
+#include "dx/dx10/DX10RenderTarget.hpp"
 #include "dx/dx10/DX10Enums.hpp"
 #include "graphics/BufferView.hpp"
 #include "TauConfig.hpp"
@@ -87,6 +89,57 @@ void DX10CommandList::setPipelineState(const PipelineState& pipelineState) noexc
 {
     const DX10CL::CommandSetPipelineState setPipelineState(&pipelineState);
     (void) _commandAllocator->allocateT<DX10CL::Command>(setPipelineState);
+    ++_commandCount;
+}
+
+void DX10CommandList::setFrameBuffer(const NullableRef<IFrameBuffer>& frameBuffer) noexcept
+{
+#if TAU_RTTI_CHECK
+    if(!rtt_check<DX10FrameBuffer>(frameBuffer))
+    { return; }
+#endif
+
+    const NullableRef<DX10FrameBuffer> dxFrameBuffer = RefCast<DX10FrameBuffer>(frameBuffer);
+
+    const DX10CL::CommandSetRenderTargets setRenderTargets(static_cast<UINT>(frameBuffer->colorAttachments().count()), dxFrameBuffer->d3dColorAttachments(), RefCast<DX10DepthStencilView>(frameBuffer->depthStencilAttachment())->d3dDepthStencilView());
+    (void) _commandAllocator->allocateT<DX10CL::Command>(setRenderTargets);
+    ++_commandCount;
+}
+
+void DX10CommandList::clearRenderTargetView(const NullableRef<IFrameBuffer>& frameBuffer, const uSys renderTargetIndex, const float color[4], uSys, const ETexture::ERect*) noexcept
+{
+#if TAU_RTTI_CHECK
+    if(!rtt_check<DX10FrameBuffer>(frameBuffer))
+    { return; }
+#endif
+
+#if TAU_GENERAL_SAFETY_CHECK
+    if(renderTargetIndex >= frameBuffer->colorAttachments().count())
+    { return; }
+#endif
+    
+    const NullableRef<DX10RenderTargetView> dxRenderTarget = RefCast<DX10RenderTargetView>(frameBuffer->colorAttachments()[renderTargetIndex]);
+
+    const DX10CL::CommandClearRenderTarget clearRenderTarget(dxRenderTarget->d3dRenderTargetView(), color);
+    (void) _commandAllocator->allocateT<DX10CL::Command>(clearRenderTarget);
+    ++_commandCount;
+}
+
+void DX10CommandList::clearDepthStencilView(const NullableRef<IFrameBuffer>& frameBuffer, const bool clearDepth, const bool clearStencil, const float depth, const u8 stencil, uSys, const ETexture::ERect*) noexcept
+{
+#if TAU_RTTI_CHECK
+    if(!rtt_check<DX10FrameBuffer>(frameBuffer))
+    { return; }
+#endif
+    
+    const NullableRef<DX10DepthStencilView> dxDepthStencil = RefCast<DX10DepthStencilView>(frameBuffer->depthStencilAttachment());
+
+    UINT clearFlags = 0;
+    if(clearDepth)   { clearFlags  = D3D10_CLEAR_DEPTH;   }
+    if(clearStencil) { clearFlags |= D3D10_CLEAR_STENCIL; }
+
+    const DX10CL::CommandClearDepthStencil clearDepthStencil(dxDepthStencil->d3dDepthStencilView(), clearFlags, depth, stencil);
+    (void) _commandAllocator->allocateT<DX10CL::Command>(clearDepthStencil);
     ++_commandCount;
 }
 

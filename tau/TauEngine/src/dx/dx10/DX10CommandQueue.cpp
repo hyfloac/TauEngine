@@ -62,6 +62,9 @@ void DX10CommandQueue::executeCommandList(const ICommandList* list) noexcept
             DISPATCH(DrawIndexedInstanced, _drawIndexedInstanced, drawIndexedInstanced);
             DISPATCH(SetDrawType, _setDrawType, setDrawType);
             DISPATCH(SetPipelineState, _setPipelineState, setPipelineState);
+            DISPATCH(SetRenderTargets, _setRenderTargets, setRenderTargets);
+            DISPATCH(ClearRenderTarget, _clearRenderTarget, clearRenderTarget);
+            DISPATCH(ClearDepthStencil, _clearDepthStencil, clearDepthStencil);
             DISPATCH(SetBlendFactor, _setBlendFactor, setBlendFactor);
             DISPATCH(SetStencilRef, _setStencilRef, setStencilRef);
             DISPATCH(SetVertexArray, _setVertexArray, setVertexArray);
@@ -115,7 +118,12 @@ void DX10CommandQueue::_setPipelineState(const DX10CL::CommandSetPipelineState& 
 
     const auto& args = cmd.pipelineState->args();
 
-    _currentInputLayout = RefCast<DX10InputLayout>(args.inputLayout);
+    const NullableRef<DX10InputLayout> inputLayout = RefCast<DX10InputLayout>(args.inputLayout);
+    if(_currentInputLayout != inputLayout)
+    {
+        _currentInputLayout = inputLayout;
+        _d3d10Device->IASetInputLayout(inputLayout->inputLayout());
+    }
 
     const DX10BlendingState* const blendingState = rtt_cast<DX10BlendingState>(args.blendingState);
     if(_currentBlendState != blendingState->d3dBlendState())
@@ -137,6 +145,21 @@ void DX10CommandQueue::_setPipelineState(const DX10CL::CommandSetPipelineState& 
         _currentRasterizerState = rasterizerState->d3dRasterizerState();
         _d3d10Device->RSSetState(_currentRasterizerState);
     }
+}
+
+void DX10CommandQueue::_setRenderTargets(const DX10CL::CommandSetRenderTargets& cmd) noexcept
+{
+    _d3d10Device->OMSetRenderTargets(cmd.numRenderTargets, cmd.renderTargets, cmd.depthStencil);
+}
+
+void DX10CommandQueue::_clearRenderTarget(const DX10CL::CommandClearRenderTarget& cmd) noexcept
+{
+    _d3d10Device->ClearRenderTargetView(cmd.renderTarget, cmd.color);
+}
+
+void DX10CommandQueue::_clearDepthStencil(const DX10CL::CommandClearDepthStencil& cmd) noexcept
+{
+    _d3d10Device->ClearDepthStencilView(cmd.depthStencil, cmd.clearFlags, cmd.depth, cmd.stencil);
 }
 
 void DX10CommandQueue::_setBlendFactor(const DX10CL::CommandSetBlendFactor& cmd) noexcept

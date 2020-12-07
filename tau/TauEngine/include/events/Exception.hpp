@@ -13,6 +13,15 @@
   #endif
 #endif
 
+#if TAU_RTTI_DEBUG
+#define EXCEPTION_IMPL_BASE(_TYPE) \
+    public: \
+        [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
+        { static Exception::ExceptionType type("Exception::" TAU_RTTI_STRING(_TYPE), nullptr); \
+          return type; } \
+        [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
+        { return _TYPE::getStaticType(); }
+#else
 #define EXCEPTION_IMPL_BASE(_TYPE) \
     public: \
         [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
@@ -20,6 +29,8 @@
           return type; } \
         [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
         { return _TYPE::getStaticType(); }
+#endif
+
 
 #if EXCEPTION_GEN_NAMES
   #define EXCEPTION_IMPL(_TYPE) \
@@ -40,7 +51,7 @@ class TAU_DLL Exception
 public:
     using ExceptionType = RunTimeType<Exception>;
 public:
-    [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept = 0;
+    [[nodiscard]] virtual ExceptionType getExceptionType() const noexcept = 0;
 
 #if EXCEPTION_GEN_NAMES
     [[nodiscard]] virtual const char* getName() const noexcept = 0;

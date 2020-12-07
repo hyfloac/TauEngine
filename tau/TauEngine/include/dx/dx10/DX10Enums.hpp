@@ -4,7 +4,6 @@
 #include <d3d10.h>
 
 #include "graphics/GraphicsEnums.hpp"
-#include "graphics/BufferEnums.hpp"
 
 namespace DX10Utils {
 

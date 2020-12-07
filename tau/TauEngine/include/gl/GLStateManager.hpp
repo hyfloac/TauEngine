@@ -107,6 +107,10 @@ private:
     GLenum _frontFace;
     GLenum _faceCullingMode;
     GLenum _polygonFillMode;
+
+    GLfloat _clearColor[4];
+    GLdouble _clearDepth;
+    GLint _clearStencil;
 public:
     GLStateManager() noexcept;
 
@@ -248,6 +252,14 @@ public:
     { polygonModePoints(); }
                
     void polygonMode(GLenum mode) noexcept;
+
+    void clearColor(const GLfloat color[4]) noexcept;
+    void clearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) noexcept;
+
+    void clearDepth(GLfloat depth) noexcept;
+    void clearDepth(GLdouble depth) noexcept;
+
+    void clearStencil(GLint stencil) noexcept;
 private:
     static void _glPolygonOffsetFallback(GLfloat factor, GLfloat units, GLfloat clamp) noexcept;
 };

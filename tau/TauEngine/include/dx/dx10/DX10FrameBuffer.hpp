@@ -10,27 +10,19 @@ class DX10GraphicsInterface;
 class TAU_DLL DX10FrameBuffer final : public IFrameBuffer
 {
     DELETE_CM(DX10FrameBuffer);
+    FRAME_BUFFER_IMPL(DX10FrameBuffer);
 private:
-    ID3D10RenderTargetView** _d3dColorAttachments;
+    ID3D10RenderTargetView* const * _d3dColorAttachments;
 public:
-    inline DX10FrameBuffer(const RefDynArray<CPPRef<ITexture>>& colorAttachments, const CPPRef<ITextureDepthStencil>& depthStencilAttachment, ID3D10RenderTargetView** const d3dColorAttachments) noexcept
-        : IFrameBuffer(colorAttachments, depthStencilAttachment),  _d3dColorAttachments(d3dColorAttachments)
+    DX10FrameBuffer(const RefDynArray<NullableRef<IRenderTargetView>>& colorAttachments, const NullableRef<IDepthStencilView>& depthStencilAttachment, ID3D10RenderTargetView* const * const d3dColorAttachments) noexcept
+        : IFrameBuffer(colorAttachments, depthStencilAttachment)
+        , _d3dColorAttachments(d3dColorAttachments)
     { }
 
-    ~DX10FrameBuffer() noexcept
-    {
-        for(uSys i = 0; i < _colorAttachments.count(); ++i)
-        {
-            _d3dColorAttachments[i]->Release();
-        }
+    ~DX10FrameBuffer() noexcept override
+    { delete[] _d3dColorAttachments; }
 
-        delete[] _d3dColorAttachments;
-    }
-
-    void bind(IRenderingContext& context, AccessMode mode) noexcept override;
-    void unbind(IRenderingContext& context) noexcept override;
-
-    void clearFrameBuffer(IRenderingContext& context, bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept override;
+    [[nodiscard]] ID3D10RenderTargetView* const * d3dColorAttachments() const noexcept { return _d3dColorAttachments; }
 };
 
 class TAU_DLL DX10FrameBufferBuilder final : public IFrameBufferBuilder
@@ -45,23 +37,11 @@ public:
     public:
         ID3D10RenderTargetView** d3dColorAttachments;
 
-        ~DX10FrameBufferArgs()
-        {
-            delete[] d3dColorAttachments;
-        }
+        ~DX10FrameBufferArgs() noexcept
+        { delete[] d3dColorAttachments; }
     };
-private:
-    DX10GraphicsInterface& _gi;
 public:
-    inline DX10FrameBufferBuilder(DX10GraphicsInterface& gi) noexcept
-        : _gi(gi)
-    { }
-
-    [[nodiscard]] DX10FrameBuffer* build(const FrameBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] DX10FrameBuffer* build(const FrameBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IFrameBuffer> buildCPPRef(const FrameBufferArgs& args, [[tau::out]] Error* error) const noexcept override;
     [[nodiscard]] NullableRef<IFrameBuffer> buildTauRef(const FrameBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IFrameBuffer> buildTauSRef(const FrameBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const FrameBufferArgs& args, DX10FrameBufferArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 };

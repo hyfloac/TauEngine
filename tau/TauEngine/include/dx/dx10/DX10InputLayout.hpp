@@ -53,8 +53,7 @@ public:
         delete[] _iaOffsets;
     }
 
-    [[nodiscard]]       ID3D10InputLayout* inputLayout()       noexcept { return _inputLayout; }
-    [[nodiscard]] const ID3D10InputLayout* inputLayout() const noexcept { return _inputLayout; }
+    [[nodiscard]] ID3D10InputLayout* inputLayout() const noexcept { return _inputLayout; }
 
     [[nodiscard]] const UINT* strides() const noexcept { return _iaStrides; }
     [[nodiscard]] const UINT* offsets() const noexcept { return _iaOffsets; }

@@ -7,7 +7,7 @@
 #include <functional>
 
 #ifndef TAU_RTTI_DEBUG
-  #ifdef TAU_PRODUCTION
+  #if defined(TAU_PRODUCTION)
     #define TAU_RTTI_DEBUG 0
   #else
     #define TAU_RTTI_DEBUG 1
@@ -28,17 +28,17 @@
  *   When debug mode is not enabled this stores an incremental
  * integer. This integer is incremented at runtime and is
  * dependent on the order in which RTTI is checked. This is
- * because the integer is generated when the class is
- * instantiated. The RTTI structure stored as a static member
- * within a specialized function. Static function variables are
- * instantiated on the first call to the function. Thus if the
- * order in which types are checked changes between runs, the
- * underlying RTTI value will change, making everything
- * significantly more obfuscated, while still being able to
- * uniquely identify each type. This integer is also
- * incremented using atomics, so it is safe to instantiate the
- * type from multiple threads simultaneously. There is also a
- * template type, this is a type safety restriction that
+ * because the integer is generated when the class is lazily
+ * instantiated. The RTTI structure is stored as a static
+ * member within a specialized function. Static function
+ * variables are instantiated on the first call to the
+ * function. Thus if the order in which types are checked
+ * changes between runs, the underlying RTTI value will change,
+ * making everything significantly more obfuscated, while still
+ * being able to uniquely identify each type. This integer is
+ * also incremented using atomics, so it is safe to instantiate
+ * the type from multiple threads simultaneously. There is also
+ * a template type, this is a type safety restriction that
  * ensures that two entirely different types with the same
  * underlying RTTI value aren't identified as the same by
  * accident.
@@ -60,13 +60,6 @@ class RunTimeType final
 {
     DEFAULT_DESTRUCT(RunTimeType);
     DEFAULT_CM_PU(RunTimeType);
-public:
-    static RunTimeType<_T> define() noexcept
-    {
-        static volatile u64 currentUID = 0;
-        const u64 ret = atomicIncrement(&currentUID);
-        return RunTimeType<_T>(ret);
-    }
 private:
     void* _uid;
     const char* _name;

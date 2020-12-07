@@ -24,7 +24,7 @@ inline i16 atomicIncrement<i16>(volatile i16* const t) noexcept
 template<>
 inline i32 atomicIncrement<i32>(volatile i32* const t) noexcept
 {
-    static_assert(sizeof(i32) == sizeof(long));
+    static_assert(sizeof(i32) == sizeof(long), "NumTypes i32 [int] does not match the size of long.");
     return _InterlockedIncrement(reinterpret_cast<volatile long*>(t));
 }
 
@@ -39,7 +39,7 @@ inline u16 atomicIncrement<u16>(volatile u16* const t) noexcept
 template<>
 inline u32 atomicIncrement<u32>(volatile u32* const t) noexcept
 {
-    static_assert(sizeof(u32) == sizeof(long));
+    static_assert(sizeof(u32) == sizeof(long), "NumTypes u32 [unsigned int] does not match the size of long.");
     return _InterlockedIncrement(reinterpret_cast<volatile long*>(t));
 }
 
@@ -54,7 +54,7 @@ inline i16 atomicDecrement<i16>(volatile i16* const t) noexcept
 template<>
 inline i32 atomicDecrement<i32>(volatile i32* const t) noexcept
 {
-    static_assert(sizeof(i32) == sizeof(long));
+    static_assert(sizeof(i32) == sizeof(long), "NumTypes i32 [int] does not match the size of long.");
     return _InterlockedDecrement(reinterpret_cast<volatile long*>(t));
 }
 
@@ -69,7 +69,7 @@ inline u16 atomicDecrement<u16>(volatile u16* const t) noexcept
 template<>
 inline u32 atomicDecrement<u32>(volatile u32* const t) noexcept
 {
-    static_assert(sizeof(u32) == sizeof(long));
+    static_assert(sizeof(u32) == sizeof(long), "NumTypes u32 [unsigned int] does not match the size of long.");
     return _InterlockedDecrement(reinterpret_cast<volatile long*>(t));
 }
 
@@ -88,7 +88,7 @@ inline i16 atomicExchange<i16>(volatile i16* const t, const i16 value) noexcept
 template<>
 inline i32 atomicExchange<i32>(volatile i32* const t, const i32 value) noexcept
 {
-    static_assert(sizeof(i32) == sizeof(long));
+    static_assert(sizeof(i32) == sizeof(long), "NumTypes i32 [int] does not match the size of long.");
     return _InterlockedExchange(reinterpret_cast<volatile long*>(t), value);
 }
 
@@ -107,7 +107,7 @@ inline u16 atomicExchange<u16>(volatile u16* const t, const u16 value) noexcept
 template<>
 inline u32 atomicExchange<u32>(volatile u32* const t, const u32 value) noexcept
 {
-    static_assert(sizeof(u32) == sizeof(long));
+    static_assert(sizeof(u32) == sizeof(long), "NumTypes u32 [unsigned int] does not match the size of long.");
     return _InterlockedExchange(reinterpret_cast<volatile long*>(t), value);
 }
 

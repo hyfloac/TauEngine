@@ -46,6 +46,9 @@ private:
     void _drawIndexedInstanced(const DX10CL::CommandDrawIndexedInstanced& cmd) noexcept;
     void _setDrawType(const DX10CL::CommandSetDrawType& cmd) noexcept;
     void _setPipelineState(const DX10CL::CommandSetPipelineState& cmd) noexcept;
+    void _setRenderTargets(const DX10CL::CommandSetRenderTargets& cmd) noexcept;
+    void _clearRenderTarget(const DX10CL::CommandClearRenderTarget& cmd) noexcept;
+    void _clearDepthStencil(const DX10CL::CommandClearDepthStencil& cmd) noexcept;
     void _setBlendFactor(const DX10CL::CommandSetBlendFactor& cmd) noexcept;
     void _setStencilRef(const DX10CL::CommandSetStencilRef& cmd) noexcept;
     void _setVertexArray(const DX10CL::CommandSetVertexArray& cmd) noexcept;

@@ -1,18 +1,19 @@
 #pragma once
 
-#include "DLL.hpp"
-#include "texture/Texture.hpp"
-#include "Color.hpp"
-
-#include <Objects.hpp>
 #include <NumTypes.hpp>
+#include <Objects.hpp>
 #include <Safeties.hpp>
 #include <DynArray.hpp>
-#include <TUMaths.hpp>
+#include <RunTimeType.hpp>
+
+#include "DLL.hpp"
+#include "graphics/RenderTarget.hpp"
 
 #ifndef TAU_MAX_FRAME_BUFFER_ATTACHMENTS
   #define TAU_MAX_FRAME_BUFFER_ATTACHMENTS (static_cast<uSys>(8))
 #endif
+
+#define FRAME_BUFFER_IMPL(_TYPE) RTT_IMPL(_TYPE, IFrameBuffer)
 
 class IRenderingContext;
 
@@ -28,21 +29,31 @@ public:
         ReadWrite
     };
 protected:
-    RefDynArray<CPPRef<ITexture>> _colorAttachments;
-    CPPRef<ITextureDepthStencil> _depthStencilAttachment;
+    RefDynArray<NullableRef<IRenderTargetView>> _colorAttachments;
+    NullableRef<IDepthStencilView> _depthStencilAttachment;
 protected:
-    inline IFrameBuffer(const RefDynArray<CPPRef<ITexture>>& colorAttachments, const CPPRef<ITextureDepthStencil>& depthStencilAttachment) noexcept
+    IFrameBuffer(const RefDynArray<NullableRef<IRenderTargetView>>& colorAttachments, const NullableRef<IDepthStencilView>& depthStencilAttachment) noexcept
         : _colorAttachments(colorAttachments)
         , _depthStencilAttachment(depthStencilAttachment)
     { }
 public:
-    [[nodiscard]] inline const RefDynArray<CPPRef<ITexture>>& colorAttachments() const noexcept { return _colorAttachments; }
-    [[nodiscard]] inline const CPPRef<ITextureDepthStencil>& depthStencilAttachment() const noexcept { return _depthStencilAttachment; }
+    [[nodiscard]] const RefDynArray<NullableRef<IRenderTargetView>>& colorAttachments() const noexcept { return _colorAttachments; }
+    [[nodiscard]] const NullableRef<IDepthStencilView>& depthStencilAttachment() const noexcept { return _depthStencilAttachment; }
+    
+    RTT_BASE_IMPL(IFrameBuffer);
+    RTT_BASE_CHECK(IFrameBuffer);
+    RTT_BASE_CAST(IFrameBuffer);
+};
 
-    virtual void bind(IRenderingContext& context, AccessMode mode = AccessMode::ReadWrite) noexcept = 0;
-    virtual void unbind(IRenderingContext& context) noexcept = 0;
-
-    virtual void clearFrameBuffer(IRenderingContext& context, bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue = 1.0f, u8 stencilValue = 0) noexcept = 0;
+class TAU_DLL BasicFrameBuffer final : public IFrameBuffer
+{
+    DEFAULT_DESTRUCT_VI(BasicFrameBuffer);
+    DEFAULT_CM_PU(BasicFrameBuffer);
+    FRAME_BUFFER_IMPL(BasicFrameBuffer);
+public:
+    BasicFrameBuffer(const RefDynArray<NullableRef<IRenderTargetView>>& colorAttachments, const NullableRef<IDepthStencilView>& depthStencilAttachment) noexcept
+        : IFrameBuffer(colorAttachments, depthStencilAttachment)
+    { }
 };
 
 struct FrameBufferArgs final
@@ -50,8 +61,8 @@ struct FrameBufferArgs final
     DEFAULT_DESTRUCT(FrameBufferArgs);
     DEFAULT_CM_PU(FrameBufferArgs);
 public:
-    RefDynArray<CPPRef<ITexture>> colorAttachments;
-    CPPRef<ITextureDepthStencil> depthStencilAttachment;
+    RefDynArray<NullableRef<IRenderTargetView>> colorAttachments;
+    NullableRef<IDepthStencilView> depthStencilAttachment;
 public:
     FrameBufferArgs(const uSys colorAttachmentCount = TAU_MAX_FRAME_BUFFER_ATTACHMENTS) noexcept
         : colorAttachments(minT(colorAttachmentCount, TAU_MAX_FRAME_BUFFER_ATTACHMENTS))
@@ -83,9 +94,5 @@ public:
         DriverMemoryAllocationFailure
     };
 public:
-    [[nodiscard]] virtual IFrameBuffer* build(const FrameBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IFrameBuffer* build(const FrameBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IFrameBuffer> buildCPPRef(const FrameBufferArgs& args, [[tau::out]] Error* error) const noexcept = 0;
     [[nodiscard]] virtual NullableRef<IFrameBuffer> buildTauRef(const FrameBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IFrameBuffer> buildTauSRef(const FrameBufferArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

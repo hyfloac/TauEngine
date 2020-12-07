@@ -20,7 +20,7 @@ public:
         , _d3dRasterizerState(d3dRasterizerState)
     { }
 
-    ~DX10RasterizerState() noexcept
+    ~DX10RasterizerState() noexcept override
     { RELEASE_DX(_d3dRasterizerState); }
 
     DX10RasterizerState(const DX10RasterizerState& copy) noexcept

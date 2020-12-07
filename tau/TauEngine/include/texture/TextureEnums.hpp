@@ -244,8 +244,15 @@ template<Positioning _Positioning>
 struct Box final
 { };
 
+template<Positioning _Positioning>
+struct Rect final
+{ };
+
 using RBox = Box<Positioning::Relative>;
 using EBox = Box<Positioning::Exact>;
+
+using RRect = Rect<Positioning::Relative>;
+using ERect = Rect<Positioning::Exact>;
 
 template<>
 struct Box<Positioning::Relative> final
@@ -275,6 +282,30 @@ public:
     [[nodiscard]] operator Box<Positioning::Relative>() const noexcept { return toRelative(); }
 };
 
+template<>
+struct Rect<Positioning::Relative> final
+{
+    u32 xPos;
+    u32 xSize;
+    u32 yPos;
+    u32 ySize;
+public:
+    [[nodiscard]] Rect<Positioning::Exact> toExact() const noexcept;
+    [[nodiscard]] operator Rect<Positioning::Exact>() const noexcept { return toExact(); }
+};
+
+template<>
+struct Rect<Positioning::Exact> final
+{
+    u32 left;
+    u32 right;
+    u32 top;
+    u32 bottom;
+public:
+    [[nodiscard]] Rect<Positioning::Relative> toRelative() const noexcept;
+    [[nodiscard]] operator Rect<Positioning::Relative>() const noexcept { return toRelative(); }
+};
+
 inline Box<Positioning::Exact> Box<Positioning::Relative>::toExact() const noexcept
 {
     return { xPos, xPos + xSize, yPos, yPos + ySize, zPos, zPos + zSize };
@@ -283,6 +314,16 @@ inline Box<Positioning::Exact> Box<Positioning::Relative>::toExact() const noexc
 inline Box<Positioning::Relative> Box<Positioning::Exact>::toRelative() const noexcept
 {
     return { left, right - left, top, bottom - top, front, back - front };
+}
+
+inline Rect<Positioning::Exact> Rect<Positioning::Relative>::toExact() const noexcept
+{
+    return { xPos, xPos + xSize, yPos, yPos + ySize };
+}
+
+inline Rect<Positioning::Relative> Rect<Positioning::Exact>::toRelative() const noexcept
+{
+    return { left, right - left, top, bottom - top };
 }
 
 /**
@@ -566,13 +607,13 @@ static constexpr bool isCompatible(const Format formatA, const Format formatB)
  *
  * This divides the side length by 2, and clamps it to 1.
  */
-static inline u64 computeMipSide(const u64 width) noexcept
+static constexpr inline u64 computeMipSide(const u64 width) noexcept
 { return maxT(width / 2, 1); }
 
 /**
  * Computes the side length at a specific mip level.
  */
-static inline u64 computeMipSide(const u64 width, const u16 mipLevel) noexcept
+static constexpr inline u64 computeMipSide(const u64 width, const u16 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return maxT(width / divisor, 1);
@@ -585,7 +626,7 @@ static inline u64 computeMipSide(const u64 width, const u16 mipLevel) noexcept
  * @param[in] width
  *      The width of the texture.
  */
-static inline u64 computeMipLevels(const u64 width) noexcept
+static constexpr inline u64 computeMipLevels(const u64 width) noexcept
 { return 1 + log2i(width); }
 
 /**
@@ -597,7 +638,7 @@ static inline u64 computeMipLevels(const u64 width) noexcept
  * @param[in] height
  *      The height of the texture.
  */
-static inline u64 computeMipLevels(const u64 width, const u32 height) noexcept
+static constexpr inline u64 computeMipLevels(const u64 width, const u32 height) noexcept
 { return 1 + log2i(maxT(width, height)); }
 
 /**
@@ -611,7 +652,7 @@ static inline u64 computeMipLevels(const u64 width, const u32 height) noexcept
  * @param[in] depth
  *      The depth of the texture.
  */
-static inline u64 computeMipLevels(const u64 width, const u32 height, const u16 depth) noexcept
+static constexpr inline u64 computeMipLevels(const u64 width, const u32 height, const u16 depth) noexcept
 { return 1 + log2i(maxT(width, height, depth)); }
 
 /**
@@ -631,7 +672,7 @@ static inline u64 computeMipLevels(const u64 width, const u32 height, const u16 
  * @param[in] mipmapLevels
  *      The number of mipmap levels each texture has.
  */
-static inline u32 computeSubResource(const u16 mipTarget, const u16 arrayIndex, const u16 mipmapLevels) noexcept
+static constexpr inline u32 computeSubResource(const u16 mipTarget, const u16 arrayIndex, const u16 mipmapLevels) noexcept
 { return mipTarget + (arrayIndex * mipmapLevels); }
 
 /**
@@ -646,7 +687,7 @@ static inline u32 computeSubResource(const u16 mipTarget, const u16 arrayIndex, 
  * @param[in] width
  *      The width of the sub resource mipmap level.
  */
-static inline u64 computeSubResourceSize(const Format format, const u64 width) noexcept
+static constexpr inline u64 computeSubResourceSize(const Format format, const u64 width) noexcept
 { return width * bytesPerPixel(format); }
 
 /**
@@ -663,7 +704,7 @@ static inline u64 computeSubResourceSize(const Format format, const u64 width) n
  * @param[in] height
  *      The height of the sub resource mipmap level.
  */
-static inline u64 computeSubResourceSize(const Format format, const u64 width, const u32 height) noexcept
+static constexpr inline u64 computeSubResourceSize(const Format format, const u64 width, const u32 height) noexcept
 { return width * height * bytesPerPixel(format); }
 
 /**
@@ -682,7 +723,7 @@ static inline u64 computeSubResourceSize(const Format format, const u64 width, c
  * @param[in] depth
  *      The depth of the sub resource mipmap level.
  */
-static inline u64 computeSubResourceSize(const Format format, const u64 width, const u32 height, const u16 depth) noexcept
+static constexpr inline u64 computeSubResourceSize(const Format format, const u64 width, const u32 height, const u16 depth) noexcept
 { return width * height * depth * bytesPerPixel(format); }
 
 /**
@@ -704,7 +745,7 @@ static inline u64 computeSubResourceSize(const Format format, const u64 width, c
  *        The mipmap level in question; this automatically
  *      dissolves the base size into the target mipmap size.
  */
-static inline u64 computeSubResourceSizeMip(const Format format, const u64 width, const u16 mipLevel) noexcept
+static constexpr inline u64 computeSubResourceSizeMip(const Format format, const u64 width, const u16 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return (width / divisor) * bytesPerPixel(format);
@@ -731,7 +772,7 @@ static inline u64 computeSubResourceSizeMip(const Format format, const u64 width
  *        The mipmap level in question; this automatically
  *      dissolves the base size into the target mipmap size.
  */
-static inline u64 computeSubResourceSizeMip(const Format format, const u64 width, const u32 height, const u16 mipLevel) noexcept
+static constexpr inline u64 computeSubResourceSizeMip(const Format format, const u64 width, const u32 height, const u16 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return (width / divisor) * (height / divisor) * bytesPerPixel(format);
@@ -760,7 +801,7 @@ static inline u64 computeSubResourceSizeMip(const Format format, const u64 width
  *        The mipmap level in question; this automatically
  *      dissolves the base size into the target mipmap size.
  */
-static inline u64 computeSubResourceSizeMip(const Format format, const u64 width, const u32 height, const u16 depth, const u16 mipLevel) noexcept
+static constexpr inline u64 computeSubResourceSizeMip(const Format format, const u64 width, const u32 height, const u16 depth, const u16 mipLevel) noexcept
 {
     const u32 divisor = 1 << mipLevel;
     return (width / divisor) * (height / divisor) * (depth / divisor) * bytesPerPixel(format);
@@ -783,7 +824,7 @@ static inline u64 computeSubResourceSizeMip(const Format format, const u64 width
  * @param[in] width
  *      The base width of the texture.
  */
-static inline u64 computeSize(const Format format, const u64 width) noexcept
+static constexpr inline u64 computeSize(const Format format, const u64 width) noexcept
 {
     u64 size = 0;
 
@@ -813,7 +854,7 @@ static inline u64 computeSize(const Format format, const u64 width) noexcept
  * @param[in] arrayCount
  *      The number of textures in the array.
  */
-static inline u64 computeSizeArr(const Format format, const u64 width, const u16 arrayCount) noexcept
+static constexpr inline u64 computeSizeArr(const Format format, const u64 width, const u16 arrayCount) noexcept
 {
     u64 size = 0;
 
@@ -842,7 +883,7 @@ static inline u64 computeSizeArr(const Format format, const u64 width, const u16
  * @param[in] height
  *      The base height of the texture.
  */
-static inline u64 computeSize(const Format format, const u64 width, const u32 height) noexcept
+static constexpr inline u64 computeSize(const Format format, const u64 width, const u32 height) noexcept
 {
     u64 size = 0;
 
@@ -874,7 +915,7 @@ static inline u64 computeSize(const Format format, const u64 width, const u32 he
  * @param[in] arrayCount
  *      The number of textures in the array.
  */
-static inline u64 computeSizeArr(const Format format, const u64 width, const u32 height, const u16 arrayCount) noexcept
+static constexpr inline u64 computeSizeArr(const Format format, const u64 width, const u32 height, const u16 arrayCount) noexcept
 {
     u64 size = 0;
 
@@ -905,7 +946,7 @@ static inline u64 computeSizeArr(const Format format, const u64 width, const u32
  * @param[in] depth
  *      The base depth of the texture.
  */
-static inline u64 computeSize(const Format format, const u64 width, const u32 height, const u16 depth) noexcept
+static constexpr inline u64 computeSize(const Format format, const u64 width, const u32 height, const u16 depth) noexcept
 {
     u64 size = 0;
 
@@ -940,7 +981,7 @@ static inline u64 computeSize(const Format format, const u64 width, const u32 he
  *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
  *      cannot be 5.
  */
-static inline u64 computeSizeMip(const Format format, const u64 width, const u16 mipmapLevels) noexcept
+static constexpr inline u64 computeSizeMip(const Format format, const u64 width, const u16 mipmapLevels) noexcept
 {
     u64 size = 0;
 
@@ -977,7 +1018,7 @@ static inline u64 computeSizeMip(const Format format, const u64 width, const u16
  * @param[in] arrayCount
  *      The number of textures in the array.
  */
-static inline u64 computeSizeMipArr(const Format format, const u64 width, const u16 mipmapLevels, const u16 arrayCount) noexcept
+static constexpr inline u64 computeSizeMipArr(const Format format, const u64 width, const u16 mipmapLevels, const u16 arrayCount) noexcept
 {
     u64 size = 0;
 
@@ -1014,7 +1055,7 @@ static inline u64 computeSizeMipArr(const Format format, const u64 width, const 
  *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
  *      cannot be 5.
  */
-static inline u64 computeSizeMip(const Format format, const u64 width, const u32 height, const u16 mipmapLevels) noexcept
+static constexpr inline u64 computeSizeMip(const Format format, const u64 width, const u32 height, const u16 mipmapLevels) noexcept
 {
     u64 size = 0;
 
@@ -1053,7 +1094,7 @@ static inline u64 computeSizeMip(const Format format, const u64 width, const u32
  * @param[in] arrayCount
  *      The number of textures in the array.
  */
-static inline u64 computeSizeMipArr(const Format format, const u64 width, const u32 height, const u16 mipmapLevels, const u16 arrayCount) noexcept
+static constexpr inline u64 computeSizeMipArr(const Format format, const u64 width, const u32 height, const u16 mipmapLevels, const u16 arrayCount) noexcept
 {
     u64 size = 0;
 
@@ -1092,7 +1133,7 @@ static inline u64 computeSizeMipArr(const Format format, const u64 width, const 
  *      has 4 mipmap levels (8, 4, 2, 1), and thus mipmapLevels
  *      cannot be 5.
  */
-static inline u64 computeSizeMip(const Format format, const u64 width, const u32 height, const u16 depth, const u16 mipmapLevels) noexcept
+static constexpr inline u64 computeSizeMip(const Format format, const u64 width, const u32 height, const u16 depth, const u16 mipmapLevels) noexcept
 {
     u64 size = 0;
 

@@ -19,6 +19,9 @@ enum class CommandType
     DrawIndexedInstanced,
     SetDrawType,
     SetPipelineState,
+    SetRenderTargets,
+    ClearRenderTarget,
+    ClearDepthStencil,
     SetBlendFactor,
     SetStencilRef,
     SetVertexArray,
@@ -126,6 +129,61 @@ public:
 public:
     CommandSetPipelineState(const PipelineState* const _pipelineState) noexcept
         : pipelineState(_pipelineState)
+    { }
+};
+
+struct CommandSetRenderTargets final
+{
+    DEFAULT_CONSTRUCT_PU(CommandSetRenderTargets);
+    DEFAULT_DESTRUCT(CommandSetRenderTargets);
+    DEFAULT_CM_PU(CommandSetRenderTargets);
+public:
+    UINT numRenderTargets;
+    ID3D10RenderTargetView* const * renderTargets;
+    ID3D10DepthStencilView*  depthStencil;
+public:
+    CommandSetRenderTargets(const UINT _numRenderTargets, ID3D10RenderTargetView* const * const _renderTargets, ID3D10DepthStencilView* const _depthStencil) noexcept
+        : numRenderTargets(_numRenderTargets)
+        , renderTargets(_renderTargets)
+        , depthStencil(_depthStencil)
+    { }
+};
+
+struct CommandClearRenderTarget final
+{
+    DEFAULT_DESTRUCT(CommandClearRenderTarget);
+    DEFAULT_CM_PU(CommandClearRenderTarget);
+public:
+    ID3D10RenderTargetView* renderTarget;
+    const float color[4];
+public:
+    CommandClearRenderTarget() noexcept
+        : renderTarget(nullptr)
+        , color{ 0.0f, 0.0f, 0.0f, 0.0f }
+    { }
+
+    CommandClearRenderTarget(ID3D10RenderTargetView* const _renderTarget, const float _color[4]) noexcept
+        : renderTarget(_renderTarget)
+        , color{ _color[0], _color[1], _color[2], _color[3] }
+    { }
+};
+
+struct CommandClearDepthStencil final
+{
+    DEFAULT_CONSTRUCT_PU(CommandClearDepthStencil);
+    DEFAULT_DESTRUCT(CommandClearDepthStencil);
+    DEFAULT_CM_PU(CommandClearDepthStencil);
+public:
+    ID3D10DepthStencilView* depthStencil;
+    UINT clearFlags;
+    float depth;
+    u8 stencil;
+public:
+    CommandClearDepthStencil(ID3D10DepthStencilView* const _depthStencil, const UINT _clearFlags, const float _depth, const u8 _stencil) noexcept
+        : depthStencil(_depthStencil)
+        , clearFlags(_clearFlags)
+        , depth(_depth)
+        , stencil(_stencil)
     { }
 };
 
@@ -307,6 +365,9 @@ public:
         CommandDrawIndexedInstanced drawIndexedInstanced;
         CommandSetDrawType setDrawType;
         CommandSetPipelineState setPipelineState;
+        CommandSetRenderTargets setRenderTargets;
+        CommandClearRenderTarget clearRenderTarget;
+        CommandClearDepthStencil clearDepthStencil;
         CommandSetBlendFactor setBlendFactor;
         CommandSetStencilRef setStencilRef;
         CommandSetVertexArray setVertexArray;
@@ -352,6 +413,21 @@ public:
     Command(const CommandSetPipelineState& _setPipelineState) noexcept
         : type(CommandType::SetPipelineState)
         , setPipelineState(_setPipelineState)
+    { }
+
+    Command(const CommandSetRenderTargets& _setRenderTargets) noexcept
+        : type(CommandType::SetRenderTargets)
+        , setRenderTargets(_setRenderTargets)
+    { }
+
+    Command(const CommandClearRenderTarget& _clearRenderTarget) noexcept
+        : type(CommandType::ClearRenderTarget)
+        , clearRenderTarget(_clearRenderTarget)
+    { }
+
+    Command(const CommandClearDepthStencil& _clearDepthStencil) noexcept
+        : type(CommandType::ClearDepthStencil)
+        , clearDepthStencil(_clearDepthStencil)
     { }
 
     Command(const CommandSetBlendFactor& _setBlendFactor) noexcept
@@ -430,6 +506,9 @@ public:
     void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setDrawType(EGraphics::DrawType drawType) noexcept override;
     void setPipelineState(const PipelineState& pipelineState) noexcept override;
+    void setFrameBuffer(const NullableRef<IFrameBuffer>& frameBuffer) noexcept override;
+    void clearRenderTargetView(const NullableRef<IFrameBuffer>& frameBuffer, uSys renderTargetIndex, const float color[4], uSys rectCount, const ETexture::ERect* rects) noexcept override;
+    void clearDepthStencilView(const NullableRef<IFrameBuffer>& frameBuffer, bool clearDepth, bool clearStencil, float depth, u8 stencil, uSys rectCount, const ETexture::ERect* rects) noexcept override;
     void setBlendFactor(const float blendFactor[4]) noexcept override;
     void setStencilRef(uSys stencilRef) noexcept override;
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;

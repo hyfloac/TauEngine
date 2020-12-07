@@ -17,11 +17,11 @@ class IVertexArray;
 struct IndexBufferView;
 class ICommandAllocator;
 class IResource;
+class IFrameBuffer;
+class IRenderTargetView;
+class IDepthStencilView;
 
-#define COMMAND_LIST_IMPL_BASE(_TYPE) \
-    RTT_IMPL(_TYPE, ICommandList)
-
-#define COMMAND_LIST_IMPL(_TYPE) COMMAND_LIST_IMPL_BASE(_TYPE)
+#define COMMAND_LIST_IMPL(_TYPE) RTT_IMPL(_TYPE, ICommandList)
 
 class TAU_DLL TAU_NOVTABLE ICommandList
 {
@@ -154,7 +154,19 @@ public:
      *      The homogenous pipeline state to use.
      */
     virtual void setPipelineState(const PipelineState& pipelineState) noexcept = 0;
-    
+
+    /**
+     * @brief Sets the framebuffer and render targets to use.
+     *
+     * @param[in] frameBuffer
+     *      The set of render targets to use during rendering.
+     */
+    virtual void setFrameBuffer(const NullableRef<IFrameBuffer>& frameBuffer) noexcept = 0;
+
+    virtual void clearRenderTargetView(const NullableRef<IFrameBuffer>& frameBuffer, uSys renderTargetIndex, const float color[4], uSys rectCount, const ETexture::ERect* rects) noexcept = 0;
+
+    virtual void clearDepthStencilView(const NullableRef<IFrameBuffer>& frameBuffer, bool clearDepth, bool clearStencil, float depth, u8 stencil, uSys rectCount, const ETexture::ERect* rects) noexcept = 0;
+
     /**
      * @brief Sets the blending factor for the blending state.
      *

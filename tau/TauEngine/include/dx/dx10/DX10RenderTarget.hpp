@@ -1,42 +1,42 @@
 #pragma once
 
-#include "texture/RenderTarget.hpp"
+#include "graphics/RenderTarget.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>
 #include "dx/DXUtils.hpp"
 
-class TAU_DLL DX10RenderTarget final : public IRenderTarget
+class TAU_DLL DX10RenderTargetView final : public IRenderTargetView
 {
-    RENDER_TARGET_IMPL(DX10RenderTarget);
+    RTV_IMPL(DX10RenderTargetView);
 private:
     ID3D10RenderTargetView* _d3dRenderTargetView;
 public:
-    inline DX10RenderTarget(ID3D10RenderTargetView* const d3dRenderTargetView) noexcept
+    DX10RenderTargetView(ID3D10RenderTargetView* const d3dRenderTargetView) noexcept
         : _d3dRenderTargetView(d3dRenderTargetView)
     { }
 
-    ~DX10RenderTarget() noexcept
+    ~DX10RenderTargetView() noexcept override
     { RELEASE_DX(_d3dRenderTargetView); }
 
-    DX10RenderTarget(const DX10RenderTarget& copy) noexcept
-        : IRenderTarget(copy)
+    DX10RenderTargetView(const DX10RenderTargetView& copy) noexcept
+        : IRenderTargetView(copy)
         , _d3dRenderTargetView(copy._d3dRenderTargetView)
     { _d3dRenderTargetView->AddRef(); }
 
-    DX10RenderTarget(DX10RenderTarget&& move) noexcept
-        : IRenderTarget(::std::move(move))
+    DX10RenderTargetView(DX10RenderTargetView&& move) noexcept
+        : IRenderTargetView(::std::move(move))
         , _d3dRenderTargetView(move._d3dRenderTargetView)
     { move._d3dRenderTargetView = null; }
 
-    DX10RenderTarget& operator=(const DX10RenderTarget& copy) noexcept
+    DX10RenderTargetView& operator=(const DX10RenderTargetView& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
         RELEASE_DX(_d3dRenderTargetView);
 
-        IRenderTarget::operator=(copy);
+        IRenderTargetView::operator=(copy);
 
         _d3dRenderTargetView = copy._d3dRenderTargetView;
         _d3dRenderTargetView->AddRef();
@@ -44,14 +44,14 @@ public:
         return *this;
     }
 
-    DX10RenderTarget& operator=(DX10RenderTarget&& move) noexcept
+    DX10RenderTargetView& operator=(DX10RenderTargetView&& move) noexcept
     {
         if(this == &move)
         { return *this; }
 
         RELEASE_DX(_d3dRenderTargetView);
 
-        IRenderTarget::operator=(::std::move(move));
+        IRenderTargetView::operator=(::std::move(move));
 
         _d3dRenderTargetView = move._d3dRenderTargetView;
         move._d3dRenderTargetView = null;
@@ -59,41 +59,40 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline const ID3D10RenderTargetView* d3dRenderTargetView() const noexcept { return _d3dRenderTargetView; }
-    [[nodiscard]] inline       ID3D10RenderTargetView* d3dRenderTargetView()       noexcept { return _d3dRenderTargetView; }
+    [[nodiscard]] ID3D10RenderTargetView* d3dRenderTargetView() const noexcept { return _d3dRenderTargetView; }
 };
 
-class TAU_DLL DX10DepthStencilTarget final : public IRenderTarget
+class TAU_DLL DX10DepthStencilView final : public IDepthStencilView
 {
-    RENDER_TARGET_IMPL(DX10DepthStencilTarget);
+    DSV_IMPL(DX10DepthStencilView);
 private:
     ID3D10DepthStencilView* _d3dDepthStencilView;
 public:
-    inline DX10DepthStencilTarget(ID3D10DepthStencilView* const d3dDepthStencilView) noexcept
+    DX10DepthStencilView(ID3D10DepthStencilView* const d3dDepthStencilView) noexcept
         : _d3dDepthStencilView(d3dDepthStencilView)
     { }
 
-    ~DX10DepthStencilTarget() noexcept
+    ~DX10DepthStencilView() noexcept override
     { RELEASE_DX(_d3dDepthStencilView); }
 
-    DX10DepthStencilTarget(const DX10DepthStencilTarget& copy) noexcept
-        : IRenderTarget(copy)
+    DX10DepthStencilView(const DX10DepthStencilView& copy) noexcept
+        : IDepthStencilView(copy)
         , _d3dDepthStencilView(copy._d3dDepthStencilView)
     { _d3dDepthStencilView->AddRef(); }
 
-    DX10DepthStencilTarget(DX10DepthStencilTarget&& move) noexcept
-        : IRenderTarget(::std::move(move))
+    DX10DepthStencilView(DX10DepthStencilView&& move) noexcept
+        : IDepthStencilView(::std::move(move))
         , _d3dDepthStencilView(move._d3dDepthStencilView)
     { move._d3dDepthStencilView = null; }
 
-    DX10DepthStencilTarget& operator=(const DX10DepthStencilTarget& copy) noexcept
+    DX10DepthStencilView& operator=(const DX10DepthStencilView& copy) noexcept
     {
         if(this == &copy)
         { return *this; }
 
         RELEASE_DX(_d3dDepthStencilView);
 
-        IRenderTarget::operator=(copy);
+        IDepthStencilView::operator=(copy);
 
         _d3dDepthStencilView = copy._d3dDepthStencilView;
         _d3dDepthStencilView->AddRef();
@@ -101,14 +100,14 @@ public:
         return *this;
     }
 
-    DX10DepthStencilTarget& operator=(DX10DepthStencilTarget&& move) noexcept
+    DX10DepthStencilView& operator=(DX10DepthStencilView&& move) noexcept
     {
         if(this == &move)
         { return *this; }
 
         RELEASE_DX(_d3dDepthStencilView);
 
-        IRenderTarget::operator=(::std::move(move));
+        IDepthStencilView::operator=(::std::move(move));
 
         _d3dDepthStencilView = move._d3dDepthStencilView;
         move._d3dDepthStencilView = null;
@@ -116,7 +115,6 @@ public:
         return *this;
     }
 
-    [[nodiscard]] inline const ID3D10DepthStencilView* d3dDepthStencilView() const noexcept { return _d3dDepthStencilView; }
-    [[nodiscard]] inline       ID3D10DepthStencilView* d3dDepthStencilView()       noexcept { return _d3dDepthStencilView; }
+    [[nodiscard]] ID3D10DepthStencilView* d3dDepthStencilView() const noexcept { return _d3dDepthStencilView; }
 };
 #endif
