@@ -9,112 +9,20 @@
 #include <array>
 #include <d3dcompiler.h>
 
-#if TAU_RTTI_CHECK
-  #include "TauEngine.hpp"
-  #define CTX() \
-      if(!RTT_CHECK(context, DX10RenderingContext)) \
-      { TAU_THROW(IncorrectContextException); } \
-      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
-#else
-  #define CTX() \
-      auto& ctx = reinterpret_cast<DX10RenderingContext&>(context)
-#endif
-
-void DX10InputLayout::bind(IRenderingContext& context) noexcept
-{
-    CTX();
-    ctx.d3dDevice()->IASetInputLayout(_inputLayout);
-    ctx.setBufferData(_iaStrides, _iaOffsets);
-}
-
-void DX10InputLayout::unbind(IRenderingContext& context) noexcept
-{
-    CTX();
-    ctx.d3dDevice()->IASetInputLayout(null);
-    ctx.setBufferData(null, null);
-}
-
-DX10InputLayout* DX10InputLayoutBuilder::build(const InputLayoutArgs& args, Error* error) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10InputLayout* const inputLayout = new(::std::nothrow) DX10InputLayout(dxArgs);
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-DX10InputLayout* DX10InputLayoutBuilder::build(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    DX10InputLayout* const inputLayout = allocator.allocateT<DX10InputLayout>(dxArgs);
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-CPPRef<IInputLayout> DX10InputLayoutBuilder::buildCPPRef(const InputLayoutArgs& args, Error* error) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const CPPRef<DX10InputLayout> inputLayout = CPPRef<DX10InputLayout>(new(::std::nothrow) DX10InputLayout(dxArgs));
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-NullableRef<IInputLayout> DX10InputLayoutBuilder::buildTauRef(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) noexcept
+NullableRef<IInputLayout> DX10InputLayoutBuilder::buildTauRef(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
     const NullableRef<DX10InputLayout> inputLayout(allocator, dxArgs);
+#if TAU_NULL_CHECK
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
+#endif
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
-
-    ERROR_CODE_V(Error::NoError, inputLayout);
-}
-
-NullableStrongRef<IInputLayout> DX10InputLayoutBuilder::buildTauSRef(const InputLayoutArgs& args, Error* error, TauAllocator& allocator) noexcept
-{
-    DXInputLayoutArgs dxArgs;
-    if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const NullableStrongRef<DX10InputLayout> inputLayout(allocator, dxArgs);
-    ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
-
-    // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
+    dxArgs.iaStrides = nullptr;
+    dxArgs.inputLayout = nullptr;
 
     ERROR_CODE_V(Error::NoError, inputLayout);
 }
@@ -127,7 +35,7 @@ bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
 {
     uSys bufferDescriptorCount = 0;
 
-    for(uSys i = 0; i < args.descriptors.size(); ++i)
+    for(uSys i = 0; i < args.descriptorCount; ++i)
     {
         const auto& elements = args.descriptors[i].elements();
 
@@ -138,20 +46,23 @@ bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
     }
 
     DynArray<D3D10_INPUT_ELEMENT_DESC> inputElements(bufferDescriptorCount);
+#if TAU_NULL_CHECK
     ERROR_CODE_COND_F(!inputElements, Error::SystemMemoryAllocationFailure);
+#endif
 
     SemanticSet semanticIndices{ };
-    ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(uSys));
+    ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(unsigned));
 
-    dxArgs->iaStrides = new UINT[args.descriptors.size()];
-    dxArgs->iaOffsets = new UINT[args.descriptors.size()];
-
+    dxArgs->iaStrides = new(::std::nothrow) UINT[args.descriptorCount * 2];
+    dxArgs->iaOffsets = dxArgs->iaStrides + args.descriptorCount;
+    
+#if TAU_NULL_CHECK
     ERROR_CODE_COND_F(!dxArgs->iaStrides, Error::SystemMemoryAllocationFailure);
-    ERROR_CODE_COND_F(!dxArgs->iaOffsets, Error::SystemMemoryAllocationFailure);
-    ::std::memset(dxArgs->iaOffsets, 0, args.descriptors.size() * sizeof(UINT));
+#endif
+    ::std::memset(dxArgs->iaOffsets, 0, args.descriptorCount * 2 * sizeof(UINT));
 
     uSys insertIndex = 0;
-    for(uSys i = 0; i < args.descriptors.size(); ++i)
+    for(uSys i = 0; i < args.descriptorCount; ++i)
     {
         const auto& elements = args.descriptors[i].elements();
 
@@ -177,15 +88,21 @@ bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
     
     if(args.shader)
     {
+#if TAU_GENERAL_SAFETY_CHECK
         ERROR_CODE_COND_F(args.shader->shaderStage() != EShader::Stage::Vertex, Error::ShaderMustBeVertexShader);
+#endif
+#if TAU_RTTI_CHECK
         ERROR_CODE_COND_F(!RTT_CHECK(args.shader, DX10Shader), Error::InternalError);
+#endif
         shaderBlob = static_cast<DX10VertexShader*>(args.shader)->shaderBlob();
         shouldRelease = false;
     }
     else
     {
-        shaderBlob = DXShaderStubGenerator::genShader(args.descriptors.count(), args.descriptors.arr(), "vs_4_0");
+        shaderBlob = DXShaderStubGenerator::genShader(args.descriptorCount, args.descriptors, "vs_4_0");
+#if TAU_GENERAL_SAFETY_CHECK
         ERROR_CODE_COND_F(!shaderBlob, Error::ShaderNotSet);
+#endif
         shouldRelease = true;
     }
 

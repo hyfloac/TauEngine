@@ -115,7 +115,7 @@ class TAU_DLL APIBlockAST final : public AST
     DEFAULT_DESTRUCT(APIBlockAST);
     DEFAULT_CM_PU(APIBlockAST);
 public:
-    using APISet = ::std::bitset<static_cast<uSys>(RenderingMode::Mode::_MAX_VALUE) + 1>;
+    using APISet = ::std::bitset<static_cast<uSys>(RenderingMode::Mode::MAX_VALUE) + 1>;
 private:
     APISet _apis;
     NullableStrongRef<ShaderStageBlockAST> _vertex;

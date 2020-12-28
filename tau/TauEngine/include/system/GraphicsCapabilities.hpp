@@ -1,27 +1,28 @@
 #pragma once
 
 #include <Objects.hpp>
+#include <NumTypes.hpp>
 #include "DLL.hpp"
 
 struct CommandListCapabilities final
 {
-    bool nativeCommandListSupport;
-    bool bundleInheritsState;
+    b8 nativeCommandListSupport : 1;
+    b8 bundleInheritsState : 1;
 };
 
 struct ShaderCapabilities final
 {
-    bool supportsGeometry;
-    bool supportsTessellation;
-    bool supportsMesh;
-    bool supportsRayTracing;
-    bool supportsCompute;
+    b8 supportsGeometry : 1;
+    b8 supportsTessellation : 1;
+    b8 supportsMesh : 1;
+    b8 supportsRayTracing : 1;
+    b8 supportsCompute : 1;
 };
 
 struct HeapCapabilities final
 {
-    bool supportsUserHeap;
-    bool supportsMultiType;
+    b8 supportsUserHeap : 1;
+    b8 supportsMultiType : 1;
 };
 
 class TAU_DLL TAU_NOVTABLE IGraphicsCapabilities

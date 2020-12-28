@@ -90,8 +90,12 @@ protected:
     { }
 #endif
 public:
+#if TAU_RESOURCE_DEBUG_DATA
     virtual ~IResource() noexcept
     { delete _debugData; }
+#else
+    virtual ~IResource() noexcept = default;
+#endif
 
     [[nodiscard]] uSys size() const noexcept { return _size; }
 

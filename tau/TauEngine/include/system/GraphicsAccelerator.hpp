@@ -1,17 +1,15 @@
 #pragma once
 
-#include "DLL.hpp"
-#include "system/GraphicsDisplay.hpp"
 #include <Objects.hpp>
 #include <String.hpp>
 #include <NumTypes.hpp>
 #include <DynArray.hpp>
 #include <RunTimeType.hpp>
 
-#define GRAPHICS_ACCELERATOR_IMPL_BASE(_TYPE) \
-    RTT_IMPL(_TYPE, IGraphicsAccelerator)
+#include "DLL.hpp"
+#include "system/GraphicsDisplay.hpp"
 
-#define GRAPHICS_ACCELERATOR_IMPL(_TYPE) GRAPHICS_ACCELERATOR_IMPL_BASE(_TYPE)
+#define GRAPHICS_ACCELERATOR_IMPL(_TYPE) RTT_IMPL(_TYPE, IGraphicsAccelerator)
 
 class TAU_DLL TAU_NOVTABLE IGraphicsAccelerator
 {

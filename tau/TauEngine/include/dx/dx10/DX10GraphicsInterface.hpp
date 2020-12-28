@@ -8,6 +8,7 @@
 
 class DX10ShaderBuilder;
 class DX10ShaderProgramBuilder;
+class DX10ResourceBuilder;
 class DX10InputLayoutBuilder;
 class DX10VertexArrayBuilder;
 class DX10BufferBuilder;
@@ -31,15 +32,14 @@ private:
 
     DX10ShaderBuilder* _shaderBuilder;
     DX10ShaderProgramBuilder* _shaderProgramBuilder;
+    DX10ResourceBuilder* _resourceBuilder;
     DX10InputLayoutBuilder* _inputLayoutBuilder;
     DX10VertexArrayBuilder* _vertexArrayBuilder;
     DX10BufferBuilder* _bufferBuilder;
     DX10DepthStencilStateBuilder* _depthStencilStateBuilder;
     DX10RasterizerStateBuilder* _rasterizerStateBuilder;
     DX10BlendingStateBuilder* _blendingStateBuilder;
-    DX10TextureBuilder* _textureBuilder;
     DX10TextureSamplerBuilder* _textureSamplerBuilder;
-    DX10TextureUploaderBuilder* _textureUploaderBuilder;
     DX10FrameBufferBuilder* _frameBufferBuilder;
     DX10RenderingContextBuilder* _renderingContextBuilder;
 public:
@@ -49,19 +49,15 @@ public:
     [[nodiscard]] const ID3D10Device* d3d10Device() const noexcept { return _d3d10Device; }
     [[nodiscard]] ID3D10Device* d3d10Device() noexcept { return _d3d10Device; }
 
-    [[nodiscard]] RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept override;
-
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
     [[nodiscard]] IShaderProgramBuilder& createShaderProgram() noexcept override;
+    [[nodiscard]] IResourceBuilder& createResource() noexcept override;
     [[nodiscard]] IInputLayoutBuilder& createInputLayout() noexcept override;
     [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
-    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
-    [[nodiscard]] ITextureBuilder& createTexture() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };

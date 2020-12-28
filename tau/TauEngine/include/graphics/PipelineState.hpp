@@ -19,7 +19,7 @@ struct PipelineArgs final
     DEFAULT_DESTRUCT(PipelineArgs);
     DEFAULT_CM_PU(PipelineArgs);
 public:
-    DescriptorLayout descriptorLayout;
+    NullableRef<IDescriptorLayout> descriptorLayout;
 
     NullableRef<IBlendingState> blendingState;
     NullableRef<IDepthStencilState> depthStencilState;
@@ -31,25 +31,35 @@ public:
     uSys numRenderTargets;
 };
 
-struct PipelineState final
+#define PIPELINE_STATE_IMPL(_TYPE) RTT_IMPL(_TYPE, IPipelineState)
+
+class TAU_DLL TAU_NOVTABLE IPipelineState
 {
-    DEFAULT_CONSTRUCT_PU(PipelineState);
-    DEFAULT_DESTRUCT(PipelineState);
-    DEFAULT_CM_PU(PipelineState);
-public:
-    void* raw;
+    DEFAULT_DESTRUCT_VI(IPipelineState);
+    DEFAULT_CM_PO(IPipelineState);
+private:
     PipelineArgs _args;
 public:
-    PipelineState(void* const _raw, const PipelineArgs& args) noexcept
-        : raw(_raw)
-        , _args(args)
+    IPipelineState(const PipelineArgs& args) noexcept
+        : _args(args)
     { }
 
-    template<typename _T>
-    [[nodiscard]] _T* get() const noexcept
-    { return reinterpret_cast<_T*>(raw); }
-
     [[nodiscard]] const PipelineArgs& args() const noexcept { return _args; }
+
+    RTT_BASE_IMPL(IPipelineState);
+    RTT_BASE_CHECK(IPipelineState);
+    RTT_BASE_CAST(IPipelineState);
+};
+
+class TAU_DLL SimplePipelineState final : public IPipelineState
+{
+    PIPELINE_STATE_IMPL(SimplePipelineState);
+    DEFAULT_DESTRUCT(SimplePipelineState);
+    DEFAULT_CM_PU(SimplePipelineState);
+public:
+    SimplePipelineState(const PipelineArgs& args) noexcept
+        : IPipelineState(args)
+    { }
 };
 
 class TAU_DLL PipelineStateBuilder
@@ -66,8 +76,9 @@ public:
         InvalidRasterizerState,
         InvalidShaderProgram,
         InvalidInputLayout,
-        DriverMemoryAllocationFailure
+        DriverMemoryAllocationFailure,
+        SystemMemoryAllocationFailure
     };
 public:
-    [[nodiscard]] virtual PipelineState build(const PipelineArgs& args, [[tau::out]] Error* error) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IPipelineState> build(const PipelineArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

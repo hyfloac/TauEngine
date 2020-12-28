@@ -9,6 +9,9 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include <TexturePacker2D.hpp>
+
+
 #include "texture/Texture.hpp"
 #include "model/BufferDescriptor.hpp"
 #include "model/VertexArray.hpp"
@@ -223,47 +226,76 @@ TextHandler::FileData* TextHandler::load2(RefDynArray<u8> file, LoadData* ld) no
     return new FileData { face, file };
 }
 
-GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRenderingContext& context, const DynString& glyphSetName, const char minChar, const char maxChar, const bool smooth, FT_Face face) noexcept
+GlyphSetHandle TextHandler::generateBitmapCharacters(IGraphicsInterface& gi, IRenderingContext& context, const DynString& glyphSetName, const wchar_t minChar, const wchar_t maxChar, const bool smooth, FT_Face face) noexcept
 {
     PERF();
-    // GlyphSet& gs = _glyphSets.emplace_back(glyphSetName, minChar, maxChar);
+    using Packer = TexturePacker2D<wchar_t, u16>;
 
     GlyphSetHandle gs(DefaultTauAllocator::Instance(), glyphSetName, minChar, maxChar);
+    DynArray<Packer::Texture> textures(maxChar - minChar + 1);
 
-    Texture2DArgs args;
-    args.mipmapLevels = 1;
-    args.dataFormat = ETexture::Format::Red8UnsignedInt;
-    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::GenerateMipmaps;
+    uSys index = 0;
 
-    for(GLchar c = minChar; c <= maxChar; ++c)
+    for(wchar_t c = minChar; c <= maxChar; ++c)
     {
         if(FT_Load_Char(face, c, FT_LOAD_RENDER)) { continue; }
 
-        ITexture2D* texture;
-
         if(face->glyph->bitmap.buffer)
         {
-            args.width = face->glyph->bitmap.width;
-            args.height = face->glyph->bitmap.rows;
-            args.initialBuffer = face->glyph->bitmap.buffer;
-
-            texture = gi.createTexture().build(args, null);
-
-            texture->textureView()->generateMipmaps(context);
+            textures[index].handle = c;
+            textures[index].width = face->glyph->bitmap.width;
+            textures[index].height = face->glyph->bitmap.rows;
+            ++index;
         }
-        else
+    }
+
+    Packer packer(index);
+    packer.pack(textures.arr(), index, 65536, 1);
+
+    u8* const raw = reinterpret_cast<u8*>(operator new(packer.packedWidth() * packer.packedHeight(), ::std::nothrow));
+
+    ::std::memset(raw, 0x00, packer.packedWidth() * packer.packedHeight());
+
+    for(const auto& loc : packer.allocatedSpaces())
+    {
+        if(FT_Load_Char(face, loc.handle, FT_LOAD_RENDER)) { continue; }
+
+        const uSys width = face->glyph->bitmap.width;
+        const uSys maxY = loc.y + face->glyph->bitmap.rows;
+
+        uSys readIndex = 0;
+
+        for(uSys y = loc.y; y < maxY; ++y)
         {
-            texture = new(::std::nothrow) NullTexture2D;
+            const uSys writeIndex = y * width + loc.x;
+
+            ::std::memcpy(raw + writeIndex, face->glyph->bitmap.buffer + readIndex, width);
+            readIndex += width;
         }
 
-        auto& glyph = gs->glyphs[c - gs->minGlyph];
-        glyph.texture = texture;
+        auto& glyph = gs->glyphs[loc.handle - gs->minGlyph];
+        glyph.coord = Vector2f(static_cast<float>(loc.x), static_cast<float>(loc.y));
         glyph.size = Vector2f(static_cast<float>(face->glyph->bitmap.width), static_cast<float>(face->glyph->bitmap.rows));
         glyph.bearing = Vector2f(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top));
         glyph.advance = face->glyph->advance.x;
     }
 
-    // return _glyphSets.size() - 1;
+    ResourceTexture2DArgs args;
+
+    args.width = packer.packedWidth();
+    args.height = packer.packedHeight();
+    args.arrayCount = 1;
+    args.mipLevels = 0;
+    args.dataFormat = ETexture::Format::Red8UnsignedInt;
+    args.flags = ETexture::BindFlags::ShaderAccess | ETexture::BindFlags::RenderTarget | ETexture::BindFlags::GenerateMipmaps;
+    args.usageType = EResource::UsageType::Default;
+    args.initialBuffers = reinterpret_cast<void* const*>(&raw);
+
+    IResourceBuilder::Error error;
+    gs->texture = gi.createResource().buildTauRef(args, nullptr, &error);
+
+    operator delete(raw, ::std::nothrow);
+
     return gs;
 }
 
@@ -462,28 +494,28 @@ float TextHandler::computeHeight(GlyphSetHandle glyphSetHandle, const char* str,
 }
 
 #ifdef _WIN32
-DynString findSystemFont(const char* fontName) noexcept
+WDynString findSystemFont(const WDynString& fontName) noexcept
 {
     PERF();
-    static const LPCSTR fontRegistryPath = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
+    static constexpr const wchar_t* fontRegistryPath = L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
 
     HKEY hKey;
-    LONG result = RegOpenKeyExA(HKEY_LOCAL_MACHINE, fontRegistryPath, 0, KEY_READ, &hKey);
+    LONG result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, fontRegistryPath, 0, KEY_READ, &hKey);
     if(result != ERROR_SUCCESS)
-    { return ""; }
+    { return L""; }
 
     DWORD maxValueNameSize, maxValueDataSize;
-    result = RegQueryInfoKey(hKey, 
-                             NULL, NULL, NULL, 
-                             NULL, NULL, NULL, NULL, 
-                             &maxValueNameSize, &maxValueDataSize, 
-                             NULL, NULL);
+    result = RegQueryInfoKeyW(hKey, 
+                              NULL, NULL, NULL, 
+                              NULL, NULL, NULL, NULL, 
+                              &maxValueNameSize, &maxValueDataSize, 
+                              NULL, NULL);
     if(result != ERROR_SUCCESS)
-    { return ""; }
+    { return L""; }
 
     DWORD valueIndex = 0;
-    LPSTR  valueName = new CHAR[maxValueNameSize];
-    LPBYTE valueData = new BYTE[maxValueDataSize];
+    WCHAR* const valueName = new WCHAR[maxValueNameSize];
+    BYTE* const valueData = new BYTE[maxValueDataSize];
     DWORD valueNameSize, valueDataSize, valueType;
 
     do
@@ -491,37 +523,39 @@ DynString findSystemFont(const char* fontName) noexcept
         valueNameSize = maxValueNameSize;
         valueDataSize = maxValueDataSize;
 
-        result = RegEnumValueA(hKey, valueIndex++, valueName, &valueNameSize, 0, &valueType, valueData, &valueDataSize);
+        result = RegEnumValueW(hKey, valueIndex++, valueName, &valueNameSize, 0, &valueType, valueData, &valueDataSize);
         if(result != ERROR_SUCCESS && valueType != REG_SZ)
         { continue; }
 
         valueName[valueNameSize] = '\0';
 
-        if(strcmp(fontName, valueName) == 0)
+        if(::std::wcscmp(fontName, valueName) == 0)
         {
             valueData[valueDataSize] = '\0';
             break;
         }
-    }
-    while(result != ERROR_NO_MORE_ITEMS);
+    } while(result != ERROR_NO_MORE_ITEMS);
 
     delete[] valueName;
 
-    RegCloseKey(hKey);
+    (void) RegCloseKey(hKey);
 
-    CHAR winDir[MAX_PATH];
-    GetWindowsDirectory(winDir, MAX_PATH);
+    const UINT winDirLen = GetWindowsDirectoryW(nullptr, 0);
 
-    DynString ret(winDir);
+    WCHAR* const winDir = new WCHAR[winDirLen + 1];
+    winDir[winDirLen] = L'\0';
+    (void) GetWindowsDirectoryW(winDir, winDirLen + 1);
 
-    ret = ret.concat("\\Fonts\\").concat(reinterpret_cast<char*>(valueData));
+    WDynString ret(winDir);
+
+    ret = ret.concat(L"\\Fonts\\").concat(reinterpret_cast<wchar_t*>(valueData));
 
     delete[] valueData;
 
     return ret;
 }
 #else
-DynString findSystemFont(const char* fontName) noexcept
+WDynString findSystemFont(const WDynString& fontName) noexcept
 {
     return "";
 }

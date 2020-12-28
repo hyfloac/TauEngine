@@ -18,8 +18,10 @@ class IDepthStencilStateBuilder;
 class IRasterizerStateBuilder;
 class IBlendingStateBuilder;
 class ITextureSamplerBuilder;
-class ITextureUploaderBuilder;
 class IFrameBufferBuilder;
+class IDescriptorHeapBuilder;
+class IDescriptorLayoutBuilder;
+class ITextureViewBuilder;
 class IRenderingContextBuilder;
 
 class TAU_DLL TAU_NOVTABLE IGraphicsInterface
@@ -35,8 +37,6 @@ protected:
 public:
     [[nodiscard]] const RenderingMode& renderingMode() const noexcept { return _mode; }
 
-    [[nodiscard]] virtual RefDynArray<NullableRef<IGraphicsAccelerator>> graphicsAccelerators() noexcept = 0;
-
     [[nodiscard]] virtual IGraphicsCapabilities& capabilities() noexcept = 0;
 
     [[nodiscard]] virtual IShaderBuilder& createShader() noexcept = 0;
@@ -48,8 +48,10 @@ public:
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
     [[nodiscard]] virtual IBlendingStateBuilder& createBlendingState() noexcept = 0;
     [[nodiscard]] virtual ITextureSamplerBuilder& createTextureSampler() noexcept = 0;
-    [[nodiscard]] virtual ITextureUploaderBuilder& createTextureUploader() noexcept = 0;
     [[nodiscard]] virtual IFrameBufferBuilder& createFrameBuffer() noexcept = 0;
+    [[nodiscard]] virtual IDescriptorHeapBuilder& createDescriptorHeap() noexcept = 0;
+    [[nodiscard]] virtual IDescriptorLayoutBuilder& createDescriptorLayout() noexcept = 0;
+    [[nodiscard]] virtual ITextureViewBuilder& createTextureView() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;
 };
 

@@ -8,7 +8,7 @@ class ResourceLoader final
 {
     DELETE_CONSTRUCT(ResourceLoader);
     DELETE_DESTRUCT(ResourceLoader);
-    DELETE_COPY(ResourceLoader);
+    DELETE_CM(ResourceLoader);
 public:
     typedef void* (*__cdecl parseFile_f)(RefDynArray<u8> file, void* parseParam);
     typedef void (*__cdecl finalizeLoad_f)(void* file, void* finalizeParam);
@@ -31,10 +31,10 @@ public:
     static void loadFile(const CPPRef<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
 
     template<typename _TParse, typename _TFinalize, typename _F>
-    static void loadFileT(const CPPRef<IFile>& file, parseFileT_f<_TParse, _F> parseFile, _TParse* parseParam, finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* finalizeParam) noexcept
+    static void loadFileT(const CPPRef<IFile>& file, const parseFileT_f<_TParse, _F> parseFile, _TParse* const parseParam, const finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* const finalizeParam) noexcept
     {
         loadFile(file,
-                 reinterpret_cast<parseFile_f>(parseFile), reinterpret_cast<void*>(parseParam),
-                 reinterpret_cast<finalizeLoad_f>(finalizeLoad), reinterpret_cast<void*>(finalizeParam));
+                 reinterpret_cast<parseFile_f>(parseFile), parseParam,
+                 reinterpret_cast<finalizeLoad_f>(finalizeLoad), finalizeParam);
     }
 };

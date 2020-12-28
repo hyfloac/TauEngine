@@ -38,11 +38,13 @@
     <ClCompile Include="src\dx\dx10\DX10CommandQueue.cpp" />
     <ClCompile Include="src\dx\dx10\DX10DepthStencilState.cpp" />
     <ClCompile Include="src\dx\dx10\DX10DescriptorHeap.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10DescriptorLayout.cpp" />
     <ClCompile Include="src\dx\dx10\DX10FrameBuffer.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsAccelerator.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsDisplay.cpp" />
     <ClCompile Include="src\dx\dx10\DX10GraphicsInterface.cpp" />
     <ClCompile Include="src\dx\dx10\DX10InputLayout.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10PipelineState.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RasterizerState.cpp" />
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Resource.cpp" />
@@ -130,6 +132,7 @@
     <ClCompile Include="src\model\Material.cpp" />
     <ClCompile Include="src\model\MeshGenerator.cpp" />
     <ClCompile Include="src\pbr\SphereGenerator.cpp" />
+    <ClCompile Include="src\renderer\BatchRenderer.cpp" />
     <ClCompile Include="src\shader\PointLight.cpp" />
     <ClCompile Include="src\shader\PrintShaderBundleVisitor.cpp" />
     <ClCompile Include="src\shader\ShaderBindMap.cpp" />
@@ -174,8 +177,10 @@
     <ClCompile Include="src\maths\Vector4f.cpp" />
     <ClCompile Include="src\ui\UIButton.cpp" />
     <ClCompile Include="src\vr\VRUtils.cpp" />
+    <ClCompile Include="src\win32\Win32GraphicsAPILoader.cpp" />
     <ClCompile Include="src\win32\Win32Mouse.cpp" />
     <ClCompile Include="src\win32\Win32Keyboard.cpp" />
+    <ClCompile Include="src\win32\Win32SystemInformation.cpp" />
     <ClCompile Include="src\win32\Win32SystemInterface.cpp" />
     <ClCompile Include="src\win32\Win32Window.cpp" />
   </ItemGroup>
@@ -367,6 +372,7 @@
     <ClInclude Include="include\random\FastRand.hpp" />
     <ClInclude Include="include\random\Random.hpp" />
     <ClInclude Include="include\random\WyHash64.hpp" />
+    <ClInclude Include="include\renderer\BatchRenderer.hpp" />
     <ClInclude Include="include\renderer\Renderer.hpp" />
     <ClInclude Include="include\RenderingMode.hpp" />
     <ClInclude Include="include\ResourceLoader.hpp" />
@@ -388,6 +394,8 @@
     <ClInclude Include="include\shader\PointLight.hpp" />
     <ClInclude Include="include\shader\SpotLight.hpp" />
     <ClInclude Include="include\system\GraphicsAccelerator.hpp" />
+    <ClInclude Include="include\system\GraphicsAPI.h" />
+    <ClInclude Include="include\system\GraphicsAPILoader.hpp" />
     <ClInclude Include="include\system\GraphicsCapabilities.hpp" />
     <ClInclude Include="include\system\GraphicsDisplay.hpp" />
     <ClInclude Include="include\system\GraphicsInterface.hpp" />
@@ -398,6 +406,7 @@
     <ClInclude Include="include\system\Mutex.hpp" />
     <ClInclude Include="include\system\RenderingContext.hpp" />
     <ClInclude Include="include\system\Semaphore.hpp" />
+    <ClInclude Include="include\system\SystemInformation.hpp" />
     <ClInclude Include="include\system\SystemInterface.hpp" />
     <ClInclude Include="include\system\Win32Event.hpp" />
     <ClInclude Include="include\TauConfig.hpp" />
@@ -588,7 +597,7 @@
       <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TAU_ENGINE_BUILD;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -675,7 +684,7 @@
       <Optimization>Custom</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TAU_ENGINE_BUILD;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -764,7 +773,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TAU_ENGINE_BUILD;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -849,7 +858,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TAU_ENGINE_BUILD;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -934,7 +943,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TAU_ENGINE_BUILD;GLEW_NO_GLU;FMT_HEADER_ONLY;SPDLOG_FMT_EXTERNAL;_CRT_SECURE_NO_WARNINGS;_HAS_EXCEPTIONS=0;_WIN32;TAU_PRODUCTION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4201;4100;4530;4309</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>$(IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>

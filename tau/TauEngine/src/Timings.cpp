@@ -1,6 +1,7 @@
 /** @file */
-#include <Timings.hpp>
-#include "system/Mutex.hpp"
+
+#include "Timings.hpp"
+#include "TauEngine.hpp"
 
 #include <Win32File.hpp>
 #include <VFS.hpp>
@@ -33,7 +34,7 @@ u64 currentTimeMillis() noexcept
     FILETIME fileTime;
     ULARGE_INTEGER fileTimeInt;
 
-    /* Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it
+    /* Get the amount of 100 nanoseconds intervals elapsed since January 1, 1601 (UTC) and copy it
      * to a LARGE_INTEGER structure. */
     GetSystemTimeAsFileTime(&fileTime);
     fileTimeInt.LowPart = fileTime.dwLowDateTime;
@@ -41,7 +42,7 @@ u64 currentTimeMillis() noexcept
 
     u64 ret = static_cast<u64>(fileTimeInt.QuadPart);
     ret -= 116444736000000000uLL; /* Convert from file time to UNIX epoch time. */
-    ret /= 10000; /* From 100 nano seconds (10^-7) to 1 millisecond (10^-3) intervals */
+    ret /= 10000; /* From 100 nanoseconds (10^-7) to 1 millisecond (10^-3) intervals */
 
     return ret;
 #else
@@ -68,14 +69,14 @@ u64 microTime() noexcept
     FILETIME fileTime;
     ULARGE_INTEGER fileTimeInt;
 
-    /* Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it
+    /* Get the amount of 100 nanoseconds intervals elapsed since January 1, 1601 (UTC) and copy it
      * to a LARGE_INTEGER structure. */
     GetSystemTimeAsFileTime(&fileTime);
     fileTimeInt.LowPart = fileTime.dwLowDateTime;
     fileTimeInt.HighPart = fileTime.dwHighDateTime;
 
     u64 ret = static_cast<u64>(fileTimeInt.QuadPart);
-    ret /= 10; /* From 100 nano seconds (10^-7) to microseconds (10^-6) intervals */
+    ret /= 10; /* From 100 nanoseconds (10^-7) to microseconds (10^-6) intervals */
 
     return ret;
 #else
@@ -114,35 +115,36 @@ void computeClockCyclesPerTime(const u64 timeoutMS) noexcept
     clockCycles.clockCyclesPerSecondF = clockCycles.clockCyclesPerMillisecondF / 1000.0;
     clockCycles.clockCyclesPerSecond = static_cast<u64>(clockCycles.clockCyclesPerSecondF);
 
-    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerMicrosecondF = static_cast<f64>(clock * 1000) / static_cast<f64>(time);
     clockCycles.clockCyclesPerMicrosecond = static_cast<u64>(clockCycles.clockCyclesPerMicrosecondF);
 
-    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerNanosecondF = static_cast<f64>(clock * 1000000) / static_cast<f64>(time);
     clockCycles.clockCyclesPerNanosecond = static_cast<u64>(clockCycles.clockCyclesPerNanosecondF);
 }
 
 /**
  *   The unix epoch for which the program started. This is 
- * initialized in {@link initProgramStartTimes(void)} which is 
- * called from {@link DLLMain(HMODULE,DWORD,LPVOID)}, so it
- * is really initialized at the time the DLL is first loaded.
+ * initialized in @link initProgramStartTimes(void) @endlink
+ * which is  called from @link tauMain(void) @endlink, so it
+ * is really initialized at the time the engine is first
+ * loaded.
  */
 static u64 programStartTime = 0;
 
 /**
- *   The number of clock cycles that have occured when the 
+ *   The number of clock cycles that have occurred when the 
  * program started. This is initialized in 
- * {@link initProgramStartTimes(void)} which is called from 
- * {@link DLLMain(HMODULE,DWORD,LPVOID)}, so it is really 
- * initialized at the time the DLL is first loaded.
+ * @link initProgramStartTimes(void) @endlink which is called
+ * from  @link tauMain(void) @endlink, so it is really 
+ * initialized at the time the engine is first loaded.
  */
 static u64 programStartClockCycles = 0;
 
 /**
  *   This is a mostly hidden function used to initialize the 
- * variables {@link programStartTime} and 
- * {@link programStartClockCycles}. It is called from 
- * {@link DLLMain(HMODULE,DWORD,LPVOID)}.
+ * variables @link programStartTime @endlink and 
+ * @link programStartClockCycles @endlink. It is called from 
+ * @link tauMain(void) @endlink.
  */
 void initProgramStartTimes() noexcept
 {
@@ -166,30 +168,28 @@ void computeClockCyclesFromRuntime() noexcept
     clockCycles.clockCyclesPerSecondF = clockCycles.clockCyclesPerMillisecondF / 1000.0;
     clockCycles.clockCyclesPerSecond = static_cast<u64>(clockCycles.clockCyclesPerSecondF);
 
-    clockCycles.clockCyclesPerMicrosecondF = (clock * 1000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerMicrosecondF = static_cast<f64>(clock * 1000) / static_cast<f64>(time);
     clockCycles.clockCyclesPerMicrosecond = static_cast<u64>(clockCycles.clockCyclesPerMicrosecondF);
 
-    clockCycles.clockCyclesPerNanosecondF = (clock * 1000000.0) / static_cast<f64>(time);
+    clockCycles.clockCyclesPerNanosecondF = static_cast<f64>(clock * 1000000) / static_cast<f64>(time);
     clockCycles.clockCyclesPerNanosecond = static_cast<u64>(clockCycles.clockCyclesPerNanosecondF);
 }
 
 const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept
-{
-    return &clockCycles;
-}
+{ return &clockCycles; }
 
-static CPPRef<IFile> _profileFile = null;
-static u32 _profileCount = 0;
-static SRWMutex _mutex;
+CPPRef<IFile> TimingsWriter::_profileFile = nullptr;
+u32 TimingsWriter::_profileCount = 0;
+SRWMutex TimingsWriter::_mutex;
 
-void TimingsWriter::begin(const char* name, const char* fileName) noexcept
+void TimingsWriter::begin(const char* const name, const WDynString& fileName) noexcept
 {
     _mutex.lock();
     if(!_profileFile)
     {
         _profileFile = VFS::Instance().openFile(fileName, FileProps::WriteNew);
         _profileCount = 0;
-        TimingsWriter::writeHeader(name);
+        writeHeader(name);
     }
     _mutex.unlock();
 }
@@ -200,7 +200,7 @@ void TimingsWriter::end() noexcept
     if(_profileFile)
     {
         writeFooter();
-        _profileFile = null;
+        _profileFile = nullptr;
     }
     _mutex.unlock();
 }
@@ -267,18 +267,12 @@ void TimingsWriter::writeFooter() noexcept
 void PerfTimer::stop() noexcept
 {
     const u64 end = microTime();
-    const u32 threadID = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    const u32 threadID = static_cast<u32>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
     TimingsWriter::write(TimingsWriter::ProfileResult(_name, threadID, _start, end));
     _stopped = true;
 }
 
-DeltaTime::DeltaTime() noexcept
-    : _us(0.0f), _ms(0.0f), _s(0.0f),
-      _usSinceLastUpdate(0.0f), _msSinceLastUpdate(0.0f), _sSinceLastUpdate(0.0f),
-      _usSinceLaunch(0.0f), _msSinceLaunch(0.0f), _sSinceLaunch(0.0f)
-{ }
-
-void DeltaTime::setDeltaMicro(float us) noexcept
+void DeltaTime::setDeltaMicro(const float us) noexcept
 {
     _us = us;
     _ms = _us / 1000.0f;
@@ -297,4 +291,3 @@ void DeltaTime::onUpdate() noexcept
     _msSinceLastUpdate = 0.0f;
     _sSinceLastUpdate = 0.0f;
 }
-

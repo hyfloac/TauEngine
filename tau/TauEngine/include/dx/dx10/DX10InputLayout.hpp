@@ -27,7 +27,6 @@ public:
     ~DXInputLayoutArgs() noexcept
     {
         delete[] iaStrides;
-        delete[] iaOffsets;
         RELEASE_DX(inputLayout);
     }
 };
@@ -46,20 +45,16 @@ public:
         , _iaOffsets(dxArgs.iaOffsets)
     { }
 
-    ~DX10InputLayout() noexcept
+    ~DX10InputLayout() noexcept override
     {
         RELEASE_DX(_inputLayout);
         delete[] _iaStrides;
-        delete[] _iaOffsets;
     }
 
     [[nodiscard]] ID3D10InputLayout* inputLayout() const noexcept { return _inputLayout; }
 
     [[nodiscard]] const UINT* strides() const noexcept { return _iaStrides; }
     [[nodiscard]] const UINT* offsets() const noexcept { return _iaOffsets; }
-
-    void bind(IRenderingContext& context) noexcept override;
-    void unbind(IRenderingContext& context) noexcept override;
 };
 
 class TAU_DLL DX10InputLayoutBuilder final : public IInputLayoutBuilder
@@ -84,11 +79,10 @@ public:
         : _gi(gi)
     { }
 
-    [[nodiscard]] DX10InputLayout* build(const InputLayoutArgs& args, [[tau::out]] Error* error) noexcept override;
-    [[nodiscard]] DX10InputLayout* build(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
-    [[nodiscard]] CPPRef<IInputLayout> buildCPPRef(const InputLayoutArgs& args, [[tau::out]] Error* error) noexcept override;
-    [[nodiscard]] NullableRef<IInputLayout> buildTauRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
-    [[nodiscard]] NullableStrongRef<IInputLayout> buildTauSRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept override;
+    [[nodiscard]] NullableRef<IInputLayout> buildTauRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+protected:
+    [[nodiscard]] uSys _allocSize() const noexcept override
+    { return NullableRef<DX10InputLayout>::allocSize(); }
 private:
     [[nodiscard]] bool processArgs(const InputLayoutArgs& args, DXInputLayoutArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 };

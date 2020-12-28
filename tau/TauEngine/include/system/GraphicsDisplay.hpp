@@ -7,10 +7,7 @@
 
 #include "DLL.hpp"
 
-#define GRAPHICS_DISPLAY_IMPL_BASE(_TYPE) \
-    RTT_IMPL(_TYPE, IGraphicsDisplay)
-
-#define GRAPHICS_DISPLAY_IMPL(_TYPE) GRAPHICS_DISPLAY_IMPL_BASE(_TYPE)
+#define GRAPHICS_DISPLAY_IMPL(_TYPE) RTT_IMPL(_TYPE, IGraphicsDisplay)
 
 class TAU_DLL TAU_NOVTABLE IGraphicsDisplay
 {
@@ -20,10 +17,10 @@ class TAU_DLL TAU_NOVTABLE IGraphicsDisplay
 public:
     struct GraphicsDisplayMode final
     {
-        u32 width;
-        u32 height;
-        u32 refreshRateNumerator;
-        u32 refreshRateDenominator;
+        uSys width;
+        uSys height;
+        uSys refreshRateNumerator;
+        uSys refreshRateDenominator;
     };
 public:
     [[nodiscard]] virtual const RefDynArray<GraphicsDisplayMode>& displayModes() const noexcept = 0;

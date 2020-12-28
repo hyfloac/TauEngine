@@ -7,11 +7,10 @@
 
 #include "DLL.hpp"
 #include "DescriptorHeap.hpp"
-#include "_GraphicsOpaqueObjects.hpp"
 #include "GraphicsEnums.hpp"
 #include "texture/TextureEnums.hpp"
 
-struct PipelineState;
+class IPipelineState;
 class IInputLayout;
 class IVertexArray;
 struct IndexBufferView;
@@ -20,6 +19,7 @@ class IResource;
 class IFrameBuffer;
 class IRenderTargetView;
 class IDepthStencilView;
+class IDescriptorLayout;
 
 #define COMMAND_LIST_IMPL(_TYPE) RTT_IMPL(_TYPE, ICommandList)
 
@@ -40,7 +40,7 @@ public:
      *        An optional initial pipeline state to use for the
      *      command list.
      */
-    virtual void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept = 0;
+    virtual void reset(const NullableRef<ICommandAllocator>& allocator, const NullableRef<IPipelineState>& initialState) noexcept = 0;
 
     /**
      * @brief Begins recording the command list.
@@ -153,7 +153,7 @@ public:
      * @param[in] pipelineState
      *      The homogenous pipeline state to use.
      */
-    virtual void setPipelineState(const PipelineState& pipelineState) noexcept = 0;
+    virtual void setPipelineState(const NullableRef<IPipelineState>& pipelineState) noexcept = 0;
 
     /**
      * @brief Sets the framebuffer and render targets to use.
@@ -163,8 +163,59 @@ public:
      */
     virtual void setFrameBuffer(const NullableRef<IFrameBuffer>& frameBuffer) noexcept = 0;
 
+    /**
+     * @brief Clears a render target
+     *
+     *   This will clear a specific color based render target from
+     * within a framebuffer. For some API's full functionality may
+     * not be available. A framebuffer must be passed in as some
+     * API's (OpenGL) don't allow you to clear individual render
+     * targets from outside of the framebuffer.
+     *
+     * @param[in] frameBuffer
+     *      The framebuffer containing the render target to clear.
+     * @param[in] renderTargetIndex
+     *      The index of the render target within the framebuffer
+     *    to clear.
+     * @param[in] color
+     *      The color to clear with.
+     * @param[in] rectCount
+     *      The number of rects to clear with. Pass in 0 to clear
+     *    the full render target.
+     * @param[in] rects
+     *      An array of rectangular subsections to clear within the
+     *    render target. This may not be fully supported in some
+     *    API's. Pass in nullptr to clear the full render target.
+     */
     virtual void clearRenderTargetView(const NullableRef<IFrameBuffer>& frameBuffer, uSys renderTargetIndex, const float color[4], uSys rectCount, const ETexture::ERect* rects) noexcept = 0;
-
+    
+    /**
+     * @brief Clears a depth-stencil render target
+     *
+     *   This will clear a specific depth-stencil render target
+     * from within a framebuffer. For some API's full functionality
+     * may not be available. A framebuffer must be passed in as
+     * some API's (OpenGL) don't allow you to clear teh depth
+     * stencil render target from outside of the framebuffer.
+     *
+     * @param[in] frameBuffer
+     *      The framebuffer containing the render target to clear.
+     * @param[in] clearDepth
+     *      Whether or not the depth value should be cleared.
+     * @param[in] clearStencil
+     *      Whether or not the stencil value should be cleared.
+     * @param[in] depth
+     *      The value to clear the depth portion with.
+     * @param[in] stencil
+     *      The value to clear the stencil portion with.
+     * @param[in] rectCount
+     *      The number of rects to clear with. Pass in 0 to clear
+     *    the full render target.
+     * @param[in] rects
+     *      An array of rectangular subsections to clear within the
+     *    render target. This may not be fully supported in some
+     *    API's. Pass in nullptr to clear the full render target.
+     */
     virtual void clearDepthStencilView(const NullableRef<IFrameBuffer>& frameBuffer, bool clearDepth, bool clearStencil, float depth, u8 stencil, uSys rectCount, const ETexture::ERect* rects) noexcept = 0;
 
     /**
@@ -218,14 +269,14 @@ public:
      *      buffer and the size of the indices.
      */
     virtual void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept = 0;
-
-    /**
-     * @brief Sets the descriptor layout to use within the shader pipeline.
-     *
-     * @param[in] layout
-     *      The layout of descriptors.
-     */
-    virtual void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept = 0;
+    
+    // /**
+    //  * @brief Sets the descriptor layout to use within the shader pipeline.
+    //  *
+    //  * @param[in] layout
+    //  *      The layout of descriptors.
+    //  */
+    // virtual void setGraphicsDescriptorLayout(const NullableRef<IDescriptorLayout>& layout) noexcept = 0;
 
     /**
      * @brief Sets a descriptor table to use within the shader pipeline.
@@ -344,7 +395,7 @@ public:
 struct CommandListArgs final
 {
     NullableRef<ICommandAllocator> commandAllocator;
-    const PipelineState* pipelineState;
+    NullableRef<IPipelineState> pipelineState;
 };
 
 class TAU_DLL TAU_NOVTABLE ICommandListBuilder

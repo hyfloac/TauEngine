@@ -1,15 +1,11 @@
 /**
  * @file
  * 
- * The Win32 implementation of {@link Window @endlink}.
+ * The Win32 implementation of @link Window @endlink.
  */
 #ifdef _WIN32
 #pragma warning(push, 0)
 #include <windowsx.h>
-#include <GL/glew.h>
-#include <GL/wglew.h>
-#include <cstdio>
-#include <utility>
 #pragma warning(pop)
 
 #include "system/Keyboard.hpp"
@@ -37,7 +33,7 @@ struct WindowNode final
 {
     DEFAULT_CONSTRUCT_PU(WindowNode);
     DEFAULT_DESTRUCT(WindowNode);
-    DEFAULT_COPY(WindowNode);
+    DEFAULT_CM_PU(WindowNode);
 public:
     static i32 height(const WindowNode* const node) noexcept
     {
@@ -103,8 +99,8 @@ public:
     {
         if(root->key() == nodeKey)
         {
-            root->window = null;
-            return null;
+            root->window = nullptr;
+            return nullptr;
         }
 
         if(nodeKey < root->key())
@@ -171,11 +167,11 @@ public:
         : window(window), left(null), right(null)
     { }
 
-    [[nodiscard]] inline HWND key() const noexcept { return window->_windowContainer.windowHandle; }
+    [[nodiscard]] HWND key() const noexcept { return window->_windowContainer.windowHandle; }
 
-    [[nodiscard]] inline i32 getBalance() const noexcept { return height(left) - height(right); }
+    [[nodiscard]] i32 getBalance() const noexcept { return height(left) - height(right); }
 
-    [[nodiscard]] inline WindowNode* minValueNode() noexcept
+    [[nodiscard]] WindowNode* minValueNode() noexcept
     {
         WindowNode* current = this;
 
@@ -185,7 +181,7 @@ public:
         return current;
     }
 
-    [[nodiscard]] inline WindowNode* find(HWND findKey) noexcept
+    [[nodiscard]] WindowNode* find(HWND findKey) noexcept
     {
         if(key() == findKey)
         {
@@ -198,7 +194,7 @@ public:
             {
                 return right->find(findKey);
             }
-            return null;
+            return nullptr;
         }
         else
         {
@@ -206,7 +202,7 @@ public:
             {
                 return left->find(findKey);
             }
-            return null;
+            return nullptr;
         }
     }
 };
@@ -215,11 +211,11 @@ public:
 /**
  * The maximum number of windows that are being stored.
  * 
- *   This is used with {@link windowHandles @endlink} to be able to 
- * retrieve a {@link Window @endlink} from an {@link HWND @endlink}.
+ *   This is used with @link windowHandles @endlink to be able to 
+ * retrieve a @link Window @endlink from an @link HWND @endlink.
  * 
  *   This can be overriden by defining `MAX_WINDOW_COUNT`
- * in the pre processor before building the DLL.
+ * in the pre processor before building the library.
  */
  #define MAX_WINDOW_COUNT 16
 #endif
@@ -231,7 +227,7 @@ public:
  */
 static WindowNode windowHandles[MAX_WINDOW_COUNT];
 
-static WindowNode* root = null;
+static WindowNode* root = nullptr;
 
 static uSys windowCount() noexcept
 {
@@ -249,13 +245,13 @@ static uSys windowCount() noexcept
 }
 
 /**
- * Subtracts a window to {@link windowHandles @endlink}.
+ * Subtracts a window to @link windowHandles @endlink.
  * 
  * @param[in] systemWindowContainer
- *    The {@link Window @endlink} to put into {@link windowHandles @endlink}.
+ *    The @link Window @endlink to put into @link windowHandles @endlink.
  * @return 
  *      Returns true if the `systemWindowContainer` was 
- *    successfully added to {@link windowHandles @endlink}.
+ *    successfully added to @link windowHandles @endlink.
  */
 static bool addWindow(Window& systemWindowContainer) noexcept
 {
@@ -293,7 +289,7 @@ static bool addWindow(Window& systemWindowContainer) noexcept
  * necessary.
  * 
  * @param[in] systemWindowContainer
- *    The {@link Window @endlink} to remove from {@link windowHandles @endlink}.
+ *    The @link Window @endlink to remove from @link windowHandles @endlink.
  */
 static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
 {
@@ -304,13 +300,13 @@ static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
 }
 
 /**
- * Retrieves a {@link Window @endlink} from {@link windowHandles @endlink}.
+ * Retrieves a @link Window @endlink from @link windowHandles @endlink.
  * 
  * @param[in] handle
- *    The handle of the {@link Window @endlink} to retrieve.
+ *    The handle of the @link Window @endlink to retrieve.
  * @return 
- *      A pointer to the {@link Window @endlink} containing the 
- *    {@link HWND @endlink} `handle`. returns null if no window is 
+ *      A pointer to the @link Window @endlink containing the 
+ *    @link HWND @endlink `handle`. returns null if no window is 
  *    currently holding the referenced handle.
  */
 static Nullable Window* getWindowFromHandle(HWND handle) noexcept
@@ -324,25 +320,25 @@ static Nullable Window* getWindowFromHandle(HWND handle) noexcept
         }
     }
 
-    return null;
+    return nullptr;
 }
 
 /**
- *   Returns a {@link Mouse::Flags @endlink} bit field represented by the 
- * {@link WPARAM @endlink}.
+ *   Returns a @link Mouse::Flags @endlink bit field represented by the 
+ * @link WPARAM @endlink.
  * 
  *   If `TRUST_RAW_MOUSE_PARAM` is defined as `true` then this 
  * is just a simple cast, otherwise we manually go through 
  * each flag and binary OR in the equivalent 
- * {@link Mouse::Flags @endlink}.
+ * @link Mouse::Flags @endlink.
  * 
  * @param[in] wParam
- *      The {@link WPARAM @endlink} representing a bit mask of flags 
+ *      The @link WPARAM @endlink representing a bit mask of flags 
  *    for use with mouse events.
  * @return
- *    An equivalent {@link Mouse::Flags @endlink} enum bit mask.
+ *    An equivalent @link Mouse::Flags @endlink enum bit mask.
  */
-static Mouse::Flags mouseFlagsFromWParam(WPARAM wParam) noexcept
+static Mouse::Flags mouseFlagsFromWParam(const WPARAM wParam) noexcept
 {
 #ifdef TRUST_RAW_MOUSE_PARAM
     return static_cast<MouseFlags>(wParam);
@@ -397,7 +393,7 @@ static Mouse::Flags mouseFlagsFromWParam(WPARAM wParam) noexcept
  * @return
  *    A {@link Mouse::Event @endlink} representing which event was fired.
  */
-static Mouse::Event mouseEventFromMsg(UINT uMsg, WPARAM wParam) noexcept
+static Mouse::Event mouseEventFromMsg(const UINT uMsg, const WPARAM wParam) noexcept
 {
     const UINT xButton = GET_XBUTTON_WPARAM(wParam);
     switch(uMsg)
@@ -421,7 +417,7 @@ static Mouse::Event mouseEventFromMsg(UINT uMsg, WPARAM wParam) noexcept
     return static_cast<Mouse::Event>(0xFF);
 }
 
-static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept
+static void callWindowResizeHandler(Window& window, const LPARAM) noexcept
 {
     if(!window._eventHandler) { return; }
 
@@ -442,7 +438,7 @@ static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcep
     window._cHeight = cHeight;
 }
 
-LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
+LRESULT CALLBACK WindowProc(HWND windowHandle, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) noexcept
 {
     Window* window = getWindowFromHandle(windowHandle);
 
@@ -511,12 +507,12 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
             {
                 if(lParam & (1 << 30))
                 {
-                    WindowKeyEvent evt(*window, Keyboard::Event::Held, Keyboard::keyboardFlags(), Keyboard::convertFromSysVKey(wParam));
+                    WindowKeyEvent evt(*window, Keyboard::Event::Held, Keyboard::keyboardFlags(), Keyboard::convertFromSysVKey(static_cast<int>(wParam)));
                     window->_eventHandler(window->_userContainer, evt);
                 }
                 else
                 {
-                    WindowKeyEvent evt(*window, Keyboard::Event::Pressed, Keyboard::keyboardFlags(), Keyboard::convertFromSysVKey(wParam));
+                    WindowKeyEvent evt(*window, Keyboard::Event::Pressed, Keyboard::keyboardFlags(), Keyboard::convertFromSysVKey(static_cast<int>(wParam)));
                     window->_eventHandler(window->_userContainer, evt);
                 }
             }
@@ -525,7 +521,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
         case WM_SYSKEYUP:
             if(window && window->_eventHandler)
             {
-                WindowKeyEvent evt(*window, Keyboard::Event::Released, Keyboard::keyboardFlags(), Keyboard::convertFromSysVKey(wParam));
+                WindowKeyEvent evt(*window, Keyboard::Event::Released, Keyboard::keyboardFlags(), Keyboard::convertFromSysVKey(static_cast<int>(wParam)));
                 window->_eventHandler(window->_userContainer, evt);
             }
             break;
@@ -555,7 +551,7 @@ LRESULT CALLBACK WindowProc(HWND windowHandle, UINT uMsg, WPARAM wParam, LPARAM 
     return 0;
 }
 
-Window::Window(u32 width, u32 height, const WDynString& title, Nullable void* userContainer, Nullable const Window* parent) noexcept
+Window::Window(const u32 width, const u32 height, const WDynString& title, void* userContainer, const Window* parent) noexcept
     : _width(width)
     , _height(height)
     , _cWidth(0)
@@ -563,7 +559,23 @@ Window::Window(u32 width, u32 height, const WDynString& title, Nullable void* us
     , _xPos(0)
     , _yPos(0)
     , _title(title)
-    , _windowContainer({ { }, null, null })
+    , _windowContainer({ { }, nullptr, nullptr })
+    , _userContainer(userContainer)
+    , _parent(parent)
+    , _renderingMode(RenderingMode::getGlobalMode())
+    , _windowState(WindowState::NEITHER)
+    , _eventHandler(null)
+{ }
+
+Window::Window(const u32 width, const u32 height, WDynString&& title, void* userContainer, const Window* parent) noexcept
+    : _width(width)
+    , _height(height)
+    , _cWidth(0)
+    , _cHeight(0)
+    , _xPos(0)
+    , _yPos(0)
+    , _title(::std::move(title))
+    , _windowContainer({ { }, nullptr, nullptr })
     , _userContainer(userContainer)
     , _parent(parent)
     , _renderingMode(RenderingMode::getGlobalMode())
@@ -579,7 +591,7 @@ void Window::resize(const u32 width, const u32 height) noexcept
     PERF();
     _width = width;
     _height = height;
-    SetWindowPos(_windowContainer.windowHandle, null, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+    SetWindowPos(_windowContainer.windowHandle, nullptr, 0, 0, static_cast<int>(width), static_cast<int>(height), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
 void Window::move(const u32 xPos, const u32 yPos) noexcept
@@ -587,7 +599,7 @@ void Window::move(const u32 xPos, const u32 yPos) noexcept
     PERF();
     _xPos = xPos;
     _yPos = yPos;
-    SetWindowPos(_windowContainer.windowHandle, null, static_cast<int>(xPos), static_cast<int>(yPos), 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+    SetWindowPos(_windowContainer.windowHandle, nullptr, static_cast<int>(xPos), static_cast<int>(yPos), 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
 void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, const u32 height) noexcept
@@ -597,7 +609,7 @@ void Window::moveAndResize(const u32 xPos, const u32 yPos, const u32 width, cons
     _yPos = yPos;
     _width = width;
     _height = height;
-    SetWindowPos(_windowContainer.windowHandle, null, xPos, yPos, width, height, SWP_NOOWNERZORDER | SWP_NOZORDER);
+    SetWindowPos(_windowContainer.windowHandle, nullptr, xPos, yPos, width, height, SWP_NOOWNERZORDER | SWP_NOZORDER);
 }
 
 void Window::setTitle(const WDynString& title) noexcept
@@ -619,17 +631,17 @@ bool Window::createWindow() noexcept
     windowClass->lpfnWndProc = WindowProc;
     windowClass->cbClsExtra = 0;
     windowClass->cbWndExtra = 0;
-    windowClass->hInstance = GetModuleHandleW(null);
-    windowClass->hIcon = null;
-    windowClass->hCursor = null;
-    windowClass->hbrBackground = null;
-    windowClass->lpszMenuName = null;
+    windowClass->hInstance = GetModuleHandleW(nullptr);
+    windowClass->hIcon = nullptr;
+    windowClass->hCursor = nullptr;
+    windowClass->hbrBackground = nullptr;
+    windowClass->lpszMenuName = nullptr;
     windowClass->lpszClassName = L"TauWndCls";
-    windowClass->hIconSm = null;
+    windowClass->hIconSm = nullptr;
     
     RegisterClassExW(windowClass);
 
-    HWND parent = null;
+    HWND parent = nullptr;
 
     if(_parent)
     {
@@ -646,7 +658,7 @@ bool Window::createWindow() noexcept
         static_cast<i32>(_width), 
         static_cast<i32>(_height),
         parent, 
-        null, 
+        nullptr, 
         windowClass->hInstance, 
         this);
 
@@ -694,10 +706,10 @@ void Window::setBorderlessFullscreen() noexcept
 
     GetMonitorInfoW(currentMonitor, &monitorInfo);
 
-    RECT screen = monitorInfo.rcMonitor;
+    const RECT screen = monitorInfo.rcMonitor;
 
     SetWindowLongW(_windowContainer.windowHandle, GWL_STYLE, WS_POPUP);
-    SetWindowPos(_windowContainer.windowHandle, NULL, screen.left, screen.top, screen.right, screen.bottom, SWP_SHOWWINDOW);
+    SetWindowPos(_windowContainer.windowHandle, nullptr, screen.left, screen.top, screen.right, screen.bottom, SWP_SHOWWINDOW);
 
     _xPos = screen.left;
     _yPos = screen.top;
@@ -714,10 +726,10 @@ void Window::setBorderlessWorkspace() noexcept
 
     GetMonitorInfoW(currentMonitor, &monitorInfo);
 
-    RECT screen = monitorInfo.rcWork;
+    const RECT screen = monitorInfo.rcWork;
 
     SetWindowLongW(_windowContainer.windowHandle, GWL_STYLE, WS_POPUP);
-    SetWindowPos(_windowContainer.windowHandle, NULL, screen.left, screen.top, screen.right, screen.bottom, SWP_SHOWWINDOW);
+    SetWindowPos(_windowContainer.windowHandle, nullptr, screen.left, screen.top, screen.right, screen.bottom, SWP_SHOWWINDOW);
 
     _xPos = screen.left;
     _yPos = screen.top;
@@ -728,7 +740,7 @@ void Window::setBorderlessWorkspace() noexcept
 void Window::setWindowed(const u32 width, const u32 height) noexcept
 {
     SetWindowLongW(_windowContainer.windowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-    SetWindowPos(_windowContainer.windowHandle, NULL, CW_USEDEFAULT, CW_USEDEFAULT, width, height, SWP_SHOWWINDOW);
+    SetWindowPos(_windowContainer.windowHandle, nullptr, CW_USEDEFAULT, CW_USEDEFAULT, width, height, SWP_SHOWWINDOW);
 }
 
 static BOOL CALLBACK enumWindowsProc(HWND hWnd, LPARAM lParam);
@@ -738,7 +750,7 @@ void Window::setAsDesktopBackground() noexcept
     if(_parent)
     { return; }
 
-    HWND progMan = FindWindowW(L"Progman", NULL);
+    HWND progMan = FindWindowW(L"Progman", nullptr);
     DWORD_PTR result;
     SendMessageTimeoutW(progMan, 0x052C, 0, 0, SMTO_NORMAL, 1000, &result);
 
@@ -756,14 +768,14 @@ void Window::removeFromDesktopBackground() noexcept
     SetParent(_windowContainer.windowHandle, null);
 }
 
-static BOOL CALLBACK enumWindowsProc(HWND topHandle, LPARAM lParam)
+static BOOL CALLBACK enumWindowsProc(HWND topHandle, const LPARAM lParam)
 {
-    HWND defView = FindWindowExW(topHandle, NULL, L"SHELLDLL_DefView", NULL);
+    HWND defView = FindWindowExW(topHandle, nullptr, L"SHELLDLL_DefView", nullptr);
 
     if(defView)
     {
         HWND* workerW = reinterpret_cast<HWND*>(lParam);
-        *workerW = FindWindowExW(NULL, topHandle, L"WorkerW", NULL);
+        *workerW = FindWindowExW(nullptr, topHandle, L"WorkerW", nullptr);
     }
 
     return true;

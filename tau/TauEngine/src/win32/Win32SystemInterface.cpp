@@ -12,13 +12,14 @@
 
 _SysContainer SystemInterface::_sysContainer;
 
-IGraphicsInterfaceBuilder* SystemInterface::_giBuilders[RenderingMode::_MAX_VALUE];
+SystemInterface::GIMap SystemInterface::_giBuilders;
+IGraphicsInterfaceBuilder* SystemInterface::_giBuilders0[RenderingMode::MAX_VALUE];
 
 const _SysContainer& SystemInterface::sysContainer() noexcept
 {
     if(!_sysContainer.programHandle)
     {
-        _sysContainer.programHandle = GetModuleHandleW(NULL);
+        _sysContainer.programHandle = GetModuleHandleW(nullptr);
     }
     return _sysContainer;
 }
@@ -42,12 +43,19 @@ SystemInterface::GAList SystemInterface::graphicsAccelerators(const RenderingMod
 
 IGraphicsInterfaceBuilder* SystemInterface::createGraphicsInterface(const RenderingMode::Mode mode) noexcept
 {
-    if(mode > RenderingMode::_MAX_VALUE)
+    if(mode > RenderingMode::MAX_VALUE)
     { return null; }
 
-    return _giBuilders[mode];
+    return _giBuilders0[mode];
 }
 
+IGraphicsInterfaceBuilder* SystemInterface::createGraphicsInterface(const DynString& modeName) noexcept
+{
+    if(_giBuilders.count(modeName))
+    { return _giBuilders[modeName]; }
+
+    return nullptr;
+}
 
 NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const GraphicsInterfaceArgs& args) noexcept
 {
@@ -75,12 +83,31 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const G
     }
 }
 
+SystemInterface::GIMapKeyIterator SystemInterface::iterateGraphicsInterfaceTypes() noexcept
+{
+    return { _giBuilders.begin(), _giBuilders.end() };
+}
+
+
+SystemInterface::GIMapIterator SystemInterface::iterateGraphicsInterfaces() noexcept
+{
+    return { _giBuilders.begin(), _giBuilders.end() };
+}
+
 void SystemInterface::registerGraphicsInterface(const RenderingMode::Mode mode, IGraphicsInterfaceBuilder* const builder) noexcept
 {
-    if(mode > RenderingMode::_MAX_VALUE)
+    if(mode > RenderingMode::MAX_VALUE)
     { return; }
 
-    if(_giBuilders[mode])
+    if(_giBuilders0[mode])
+    { delete _giBuilders0[mode]; }
+
+    _giBuilders0[mode] = builder;
+}
+
+void SystemInterface::registerGraphicsInterface(const DynString& mode, IGraphicsInterfaceBuilder* builder) noexcept
+{
+    if(_giBuilders.count(mode))
     { delete _giBuilders[mode]; }
 
     _giBuilders[mode] = builder;
@@ -88,7 +115,7 @@ void SystemInterface::registerGraphicsInterface(const RenderingMode::Mode mode, 
 
 void SystemInterface::createAlert(const char* const title, const char* const message) noexcept
 {
-    (void) MessageBoxA(NULL, message, title, MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
+    (void) MessageBoxA(nullptr, message, title, MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
 }
 
 static void getGLArgs(const RenderingMode& mode, GLGraphicsInterfaceArgs& args) noexcept

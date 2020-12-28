@@ -8,7 +8,9 @@
 #include <NumTypes.hpp>
 #include <Safeties.hpp>
 #include <Objects.hpp>
+#include <String.hpp>
 #include "DLL.hpp"
+#include "system/Mutex.hpp"
 
 /**
  *   This retrieves the number of clock cycles that has passed
@@ -34,7 +36,7 @@ TAU_DLL u64 microTime() noexcept;
  *   This structure stores the number of clock cycles that 
  * occur over a set period of time.
  */
-struct ClockCyclesTimeFrame
+struct ClockCyclesTimeFrame final
 {
     u64 clockCyclesPerSecond;
     f64 clockCyclesPerSecondF;
@@ -76,6 +78,8 @@ TAU_DLL void computeClockCyclesFromRuntime() noexcept;
  */
 TAU_DLL NonNull const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept;
 
+class IFile;
+
 class TAU_DLL TimingsWriter final
 {
     DELETE_CONSTRUCT(TimingsWriter);
@@ -99,8 +103,12 @@ public:
             , end(_end)
         { }
     };
+private:
+    static CPPRef<IFile> _profileFile;
+    static u32 _profileCount;
+    static SRWMutex _mutex;
 public:
-    static void begin(const char* name, const char* fileName = "results.json") noexcept;
+    static void begin(const char* name, const WDynString& fileName = L"results.json") noexcept;
 
     static void end() noexcept;
 
@@ -112,14 +120,16 @@ private:
 
 class TAU_DLL PerfTimer final
 {
-    DEFAULT_COPY(PerfTimer);
+    DEFAULT_CM_PU(PerfTimer);
 private:
     const char* _name;
     u64 _start;
     bool _stopped;
 public:
     PerfTimer(const char* const name) noexcept
-        : _name(name), _start(microTime()), _stopped(false)
+        : _name(name)
+        , _start(microTime())
+        , _stopped(false)
     { }
 
     ~PerfTimer() noexcept
@@ -158,7 +168,17 @@ private:
     float _msSinceLaunch;
     float _sSinceLaunch;
 public:
-    DeltaTime() noexcept;
+    DeltaTime() noexcept
+        : _us(0.0f)
+        , _ms(0.0f)
+        , _s(0.0f)
+        , _usSinceLastUpdate(0.0f)
+        , _msSinceLastUpdate(0.0f)
+        , _sSinceLastUpdate(0.0f)
+        , _usSinceLaunch(0.0f)
+        , _msSinceLaunch(0.0f)
+        , _sSinceLaunch(0.0f)
+    { }
 
     [[nodiscard]] float us() const noexcept { return _us; }
     [[nodiscard]] float ms() const noexcept { return _ms; }

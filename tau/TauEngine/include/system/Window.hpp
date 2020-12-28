@@ -14,13 +14,11 @@
 #pragma once
 
 #include <NumTypes.hpp>
-#include <system/_SysContainer.hpp>
-#include <DLL.hpp>
-#include <Utils.hpp>
 #include <Safeties.hpp>
-#include <RenderingMode.hpp>
+#include "RenderingMode.hpp"
 #include "events/WindowEvent.hpp"
-#include "system/RenderingContext.hpp"
+#include "system/_SysContainer.hpp"
+#include "DLL.hpp"
 
 class Window;
 
@@ -109,7 +107,8 @@ private:
     WindowState _windowState;
     onEvent_f _eventHandler;
 public:
-    Window(u32 width, u32 height, const WDynString& title, Nullable void* userContainer = null, Nullable const Window* parent = null) noexcept;
+    Window(u32 width, u32 height, const WDynString& title, void* userContainer = nullptr, const Window* parent = nullptr) noexcept;
+    Window(u32 width, u32 height, WDynString&& title, void* userContainer = nullptr, const Window* parent = nullptr) noexcept;
 
     ~Window() noexcept;
 
@@ -163,7 +162,7 @@ public:
 
     void setTitle(const WDynString& title) noexcept;
 
-    inline void setEventHandler(Nullable onEvent_f eventHandler) noexcept { _eventHandler = eventHandler;  }
+    void setEventHandler(onEvent_f eventHandler) noexcept { _eventHandler = eventHandler;  }
 
     bool createWindow()      noexcept;
     void closeWindow() const noexcept;
@@ -182,7 +181,7 @@ public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;
     friend void removeWindow(NotNull<const Window>) noexcept;
-    friend Nullable Window* getWindowFromHandle(HWND) noexcept;
+    friend Window* getWindowFromHandle(HWND) noexcept;
     friend void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
     friend struct WindowNode;
 #endif

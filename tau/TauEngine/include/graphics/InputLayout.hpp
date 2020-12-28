@@ -64,11 +64,15 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual NullableRef<IInputLayout> buildTauRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    /**
+     * Gets the size required for an allocation.
+     *
+     * This is useful for fixed block allocators.
+     */
+    [[nodiscard]] uSys allocSize() const noexcept
+    { return _allocSize(); }
 
-    [[nodiscard]] virtual IInputLayout* build(const InputLayoutArgs& args, [[tau::out]] Error* error) noexcept = 0;
-    [[nodiscard]] virtual IInputLayout* build(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IInputLayout> buildCPPRef(const InputLayoutArgs& args, [[tau::out]] Error* error) noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IInputLayout> buildTauRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IInputLayout> buildTauSRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IInputLayout> buildTauRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+protected:
+    [[nodiscard]] virtual uSys _allocSize() const noexcept = 0;
 };

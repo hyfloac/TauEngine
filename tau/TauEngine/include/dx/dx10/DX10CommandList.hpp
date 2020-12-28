@@ -6,9 +6,11 @@
 #include <d3d10.h>
 #include <ArrayList.hpp>
 #include <allocator/FreeListAllocator.hpp>
+#include "graphics/DescriptorLayout.hpp"
 
 class DX10VertexArray;
 class DX10CommandAllocator;
+class DX10CommandList;
 
 namespace DX10CL {
 enum class CommandType
@@ -26,8 +28,9 @@ enum class CommandType
     SetStencilRef,
     SetVertexArray,
     SetIndexBuffer,
-    SetGDescriptorLayout,
+    // SetGDescriptorLayout,
     SetGDescriptorTable,
+    ExecuteBundle,
     CopyResource,
     CopySubresourceRegion0,
     CopySubresourceRegion1,
@@ -125,9 +128,9 @@ struct CommandSetPipelineState final
     DEFAULT_DESTRUCT(CommandSetPipelineState);
     DEFAULT_CM_PU(CommandSetPipelineState);
 public:
-    const PipelineState* pipelineState;
+    const IPipelineState* pipelineState;
 public:
-    CommandSetPipelineState(const PipelineState* const _pipelineState) noexcept
+    CommandSetPipelineState(const IPipelineState* const _pipelineState) noexcept
         : pipelineState(_pipelineState)
     { }
 };
@@ -248,18 +251,18 @@ public:
     { }
 };
 
-struct CommandSetGDescriptorLayout final
-{
-    DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorLayout);
-    DEFAULT_DESTRUCT(CommandSetGDescriptorLayout);
-    DEFAULT_CM_PU(CommandSetGDescriptorLayout);
-public:
-    DescriptorLayout layout;
-public:
-    CommandSetGDescriptorLayout(const DescriptorLayout _layout) noexcept
-        : layout(_layout)
-    { }
-};
+// struct CommandSetGDescriptorLayout final
+// {
+//     DEFAULT_CONSTRUCT_PU(CommandSetGDescriptorLayout);
+//     DEFAULT_DESTRUCT(CommandSetGDescriptorLayout);
+//     DEFAULT_CM_PU(CommandSetGDescriptorLayout);
+// public:
+//     DescriptorLayout layout;
+// public:
+//     CommandSetGDescriptorLayout(const DescriptorLayout _layout) noexcept
+//         : layout(_layout)
+//     { }
+// };
 
 struct CommandSetGDescriptorTable final
 {
@@ -277,6 +280,19 @@ public:
         , type(_type)
         , descriptorCount(_descriptorCount)
         , handle(_handle)
+    { }
+};
+
+struct CommandExecuteBundle final
+{
+    DEFAULT_CONSTRUCT_PU(CommandExecuteBundle);
+    DEFAULT_DESTRUCT(CommandExecuteBundle);
+    DEFAULT_CM_PU(CommandExecuteBundle);
+public:
+    const DX10CommandList* bundle;
+public:
+    CommandExecuteBundle(const DX10CommandList* const _bundle) noexcept
+        : bundle(_bundle)
     { }
 };
 
@@ -372,8 +388,9 @@ public:
         CommandSetStencilRef setStencilRef;
         CommandSetVertexArray setVertexArray;
         CommandSetIndexBuffer setIndexBuffer;
-        CommandSetGDescriptorLayout setGDescriptorLayout;
+        // CommandSetGDescriptorLayout setGDescriptorLayout;
         CommandSetGDescriptorTable setGDescriptorTable;
+        CommandExecuteBundle executeBundle;
         CommandCopyResource copyResource;
         CommandCopySubresourceRegion0 copySubresourceRegion0;
         CommandCopySubresourceRegion1 copySubresourceRegion1;
@@ -450,14 +467,19 @@ public:
         , setIndexBuffer(_setIndexBuffer)
     { }
 
-    Command(const CommandSetGDescriptorLayout& _setGDescriptorLayout) noexcept
-        : type(CommandType::SetGDescriptorLayout)
-        , setGDescriptorLayout(_setGDescriptorLayout)
-    { }
+    // Command(const CommandSetGDescriptorLayout& _setGDescriptorLayout) noexcept
+    //     : type(CommandType::SetGDescriptorLayout)
+    //     , setGDescriptorLayout(_setGDescriptorLayout)
+    // { }
 
     Command(const CommandSetGDescriptorTable& _setGDescriptorTable) noexcept
         : type(CommandType::SetGDescriptorTable)
         , setGDescriptorTable(_setGDescriptorTable)
+    { }
+
+    Command(const CommandExecuteBundle& _executeBundle) noexcept
+        : type(CommandType::ExecuteBundle)
+        , executeBundle(_executeBundle)
     { }
 
     Command(const CommandCopyResource& _copyResource) noexcept
@@ -491,13 +513,15 @@ private:
     NullableRef<DX10CommandAllocator> _commandAllocator;
     const void* _head;
     uSys _commandCount;
+
+    const SimpleDescriptorLayout* _currentLayout;
 public:
     DX10CommandList(const NullableRef<DX10CommandAllocator>& allocator) noexcept;
 
     [[nodiscard]] const void* head() const noexcept { return _head; }
     [[nodiscard]] uSys commandCount() const noexcept { return _commandCount; }
 
-    void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept override;
+    void reset(const NullableRef<ICommandAllocator>& allocator, const NullableRef<IPipelineState>& initialState) noexcept override;
     void begin() noexcept override;
     void finish() noexcept override;
     void draw(uSys exCount, uSys startVertex) noexcept override;
@@ -505,7 +529,7 @@ public:
     void drawInstanced(uSys exCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void drawIndexedInstanced(uSys exCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setDrawType(EGraphics::DrawType drawType) noexcept override;
-    void setPipelineState(const PipelineState& pipelineState) noexcept override;
+    void setPipelineState(const NullableRef<IPipelineState>& pipelineState) noexcept override;
     void setFrameBuffer(const NullableRef<IFrameBuffer>& frameBuffer) noexcept override;
     void clearRenderTargetView(const NullableRef<IFrameBuffer>& frameBuffer, uSys renderTargetIndex, const float color[4], uSys rectCount, const ETexture::ERect* rects) noexcept override;
     void clearDepthStencilView(const NullableRef<IFrameBuffer>& frameBuffer, bool clearDepth, bool clearStencil, float depth, u8 stencil, uSys rectCount, const ETexture::ERect* rects) noexcept override;
@@ -513,7 +537,7 @@ public:
     void setStencilRef(uSys stencilRef) noexcept override;
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
-    void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
+    // void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
     void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept override;
     void executeBundle(const NullableRef<ICommandList>& bundle) noexcept override;
     void copyResource(const NullableRef<IResource>& dst, const NullableRef<IResource>& src) noexcept override;

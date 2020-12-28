@@ -26,7 +26,11 @@ void GameRecorder::addBlipHandler(RunTimeType<Blip> type, blipHandler_f handler,
 
 static RunTimeType<GameRecorder::Blip> getRTT() noexcept
 {
+#if TAU_RTTI_DEBUG
+    static RunTimeType<GameRecorder::Blip> _rtt("GameRecorder::Blip");
+#else
     static RunTimeType<GameRecorder::Blip> _rtt = RunTimeType<GameRecorder::Blip>::define();
+#endif
     return _rtt;
 }
 

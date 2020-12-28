@@ -29,7 +29,7 @@ public:
         OpenGL4_4,
         OpenGL4_5,
         OpenGL4_6,
-        _MAX_VALUE = OpenGL4_6
+        MAX_VALUE = OpenGL4_6
     };
 
     typedef void(__cdecl * modeChange_f)(Mode oldMode, bool oldDebugMode, Mode newMode, bool newDebugMode);

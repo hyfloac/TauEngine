@@ -3,20 +3,15 @@
 #include "graphics/DescriptorLayout.hpp"
 
 #ifdef _WIN32
-#include <d3d10.h>
-#include <DynArray.hpp>
-
-class TAU_DLL DX10DescriptorLayout final
+class TAU_DLL DX10DescriptorLayoutBuilder final : public IDescriptorLayoutBuilder
 {
-    DEFAULT_DESTRUCT(DX10DescriptorLayout);
-    DELETE_CM(DX10DescriptorLayout);
-private:
-    RefDynArray<DescriptorLayoutEntry> _entries;
+    DEFAULT_CONSTRUCT_PU(DX10DescriptorLayoutBuilder);
+    DEFAULT_DESTRUCT(DX10DescriptorLayoutBuilder);
+    DEFAULT_CM_PU(DX10DescriptorLayoutBuilder);
 public:
-    DX10DescriptorLayout(const RefDynArray<DescriptorLayoutEntry>& entries) noexcept
-        : _entries(entries)
-    { }
-
-    [[nodiscard]] const RefDynArray<DescriptorLayoutEntry>& entries() const noexcept { return _entries; }
+    [[nodiscard]] NullableRef<IDescriptorLayout> build(const DescriptorLayoutArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
+protected:
+    [[nodiscard]] uSys _allocSize() const noexcept override
+    { return NullableRef<SimpleDescriptorLayout>::allocSize(); }
 };
 #endif

@@ -106,7 +106,7 @@ public:
      */
     [[nodiscard]] static bool isKeyActive(Key key) noexcept;
 
-    [[nodiscard]] static Keyboard::Flags keyboardFlags() noexcept;
+    [[nodiscard]] static Flags keyboardFlags() noexcept;
 
     [[nodiscard]] static int convertToSysVKey(Key key) noexcept;
 

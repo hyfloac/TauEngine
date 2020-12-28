@@ -16,7 +16,7 @@
 #include "maths/Vector3f.hpp"
 #include "shader/Uniform.hpp"
 #include "ResourceLoader.hpp"
-#include "shader/TextureUploader.hpp"
+#include "graphics/Resource.hpp"
 
 struct LoadData;
 class Window;
@@ -30,78 +30,46 @@ class IGraphicsInterface;
 
 struct GlyphCharacter final
 {
-    DELETE_COPY(GlyphCharacter);
+    DEFAULT_DESTRUCT(GlyphCharacter);
+    DELETE_CM(GlyphCharacter);
 public:
-    // CPPRef<ITexture2D> texture;
-    ITexture2D* texture;
+    Vector2f coord; // Location in font map texture
     Vector2f size;
     Vector2f bearing; // Offset from baseline to left/top of glyph
     u32      advance; // Offset to advance to next glyph
 
-    inline GlyphCharacter() noexcept
-        : texture(null)
-        , size(0.0f, 0.0f)
+    GlyphCharacter() noexcept
+        : size(0.0f, 0.0f)
         , bearing(0.0f, 0.0f)
         , advance(0)
     { }
 
-    inline GlyphCharacter(ITexture2D* _texture, Vector2f _size, Vector2f _bearing, u32 _advance) noexcept
-        : texture(_texture)
-        , size(_size)
+    GlyphCharacter(const Vector2f _size, const Vector2f _bearing, const u32 _advance) noexcept
+        : size(_size)
         , bearing(_bearing)
         , advance(_advance)
     { }
-
-    // inline GlyphCharacter(const GlyphCharacter& copy) noexcept = delete;
-    //
-    // inline GlyphCharacter(GlyphCharacter&& move) noexcept
-    //     : texture(move.texture)
-    //     , size(move.size)
-    //     , bearing(move.bearing)
-    //     , advance(move.advance)
-    // { move.texture = null; }
-    //
-    // inline GlyphCharacter& operator=(const GlyphCharacter & copy) noexcept = delete;
-    //
-    // inline GlyphCharacter& operator=(GlyphCharacter && move) noexcept
-    // {
-    //     if(this == &move)
-    //     { return *this; }
-    //
-    //     texture = move.texture;
-    //     size = move.size;
-    //     bearing = move.bearing;
-    //     advance = move.advance;
-    //
-    //     move.texture = null;
-    //
-    //     return *this;
-    // }
-
-    inline ~GlyphCharacter() noexcept
-    {
-        delete texture;
-        texture = null;
-    }
 };
 
 struct GlyphSet final
 {
-    DEFAULT_COPY(GlyphSet);
     DEFAULT_DESTRUCT(GlyphSet);
+    DEFAULT_CM(GlyphSet);
 public:
     DynString setName;
-    char minGlyph;
-    char maxGlyph;
-    size_t glyphCount;
+    wchar_t minGlyph;
+    wchar_t maxGlyph;
+    uSys glyphCount;
     DynArray<GlyphCharacter> glyphs;
+    NullableRef<IResource> texture;
 
-    inline GlyphSet(const DynString& _setName, char _minGlyph, char _maxGlyph) noexcept
+    GlyphSet(const DynString& _setName, const wchar_t _minGlyph, const wchar_t _maxGlyph) noexcept
         : setName(_setName)
         , minGlyph(_minGlyph)
         , maxGlyph(_maxGlyph)
         , glyphCount(_maxGlyph - _minGlyph + 1)
         , glyphs(glyphCount)
+        , texture(nullptr)
     { }
 };
 
@@ -115,13 +83,14 @@ public:
     struct FileData final
     {
         DEFAULT_CONSTRUCT_PU(FileData);
-        DEFAULT_COPY(FileData);
+        DEFAULT_CM_PU(FileData);
     public:
         FT_Face face;
         RefDynArray<u8> data;
     public:
         FileData(const FT_Face _face, const RefDynArray<u8>& _data)
-            : face(_face), data(_data)
+            : face(_face)
+            , data(_data)
         { }
 
         ~FileData() noexcept
@@ -166,7 +135,7 @@ public:
     [[nodiscard]] FileData* loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight) const noexcept;
     [[nodiscard]] int loadTTFFile(const char* fileName, FT_UInt pixelWidth, FT_UInt pixelHeight, ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* userParam) noexcept;
 
-    GlyphSetHandle generateBitmapCharacters(IGraphicsInterface& gi, IRenderingContext& context, const DynString& glyphSetName, char minChar, char maxChar, bool smooth, FT_Face face) noexcept;
+    GlyphSetHandle generateBitmapCharacters(IGraphicsInterface& gi, IRenderingContext& context, const DynString& glyphSetName, wchar_t minChar, wchar_t maxChar, bool smooth, FT_Face face) noexcept;
 
     void renderText(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj) noexcept;
     float renderTextLineWrapped(IRenderingContext& context, GlyphSetHandle glyphSetHandle, const char* str, float x, float y, float scale, Vector3f color, const glm::mat4& proj, const Window& window, float lineHeight) noexcept;
@@ -177,4 +146,4 @@ private:
     static FileData* __cdecl load2(RefDynArray<u8> file, LoadData* ld) noexcept;
 };
 
-DynString findSystemFont(const char* fontName) noexcept;
+WDynString findSystemFont(const WDynString& fontName) noexcept;

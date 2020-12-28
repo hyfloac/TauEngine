@@ -69,7 +69,7 @@ void DX10CommandQueue::executeCommandList(const ICommandList* list) noexcept
             DISPATCH(SetStencilRef, _setStencilRef, setStencilRef);
             DISPATCH(SetVertexArray, _setVertexArray, setVertexArray);
             DISPATCH(SetIndexBuffer, _setIndexBuffer, setIndexBuffer);
-            DISPATCH(SetGDescriptorLayout, _setGDescriptorLayout, setGDescriptorLayout);
+            // DISPATCH(SetGDescriptorLayout, _setGDescriptorLayout, setGDescriptorLayout);
             DISPATCH(SetGDescriptorTable, _setGDescriptorTable, setGDescriptorTable);
             DISPATCH(CopyResource, _copyResource, copyResource);
             case DX10CL::CommandType::CopySubresourceRegion0:
@@ -115,31 +115,32 @@ void DX10CommandQueue::_setDrawType(const DX10CL::CommandSetDrawType& cmd) noexc
 void DX10CommandQueue::_setPipelineState(const DX10CL::CommandSetPipelineState& cmd) noexcept
 {
     _currentPipelineState = cmd.pipelineState;
-
     const auto& args = cmd.pipelineState->args();
 
-    const NullableRef<DX10InputLayout> inputLayout = RefCast<DX10InputLayout>(args.inputLayout);
+    _currentLayout = static_cast<const SimpleDescriptorLayout*>(args.descriptorLayout.get());
+
+    const DX10InputLayout* const inputLayout = static_cast<const DX10InputLayout*>(args.inputLayout.get());
     if(_currentInputLayout != inputLayout)
     {
         _currentInputLayout = inputLayout;
         _d3d10Device->IASetInputLayout(inputLayout->inputLayout());
     }
 
-    const DX10BlendingState* const blendingState = rtt_cast<DX10BlendingState>(args.blendingState);
+    const DX10BlendingState* const blendingState = static_cast<const DX10BlendingState*>(args.blendingState.get());
     if(_currentBlendState != blendingState->d3dBlendState())
     {
         _currentBlendState = blendingState->d3dBlendState();
         _d3d10Device->OMSetBlendState(_currentBlendState, _blendingFactors, 0xFFFFFFFF);
     }
 
-    const DX10DepthStencilState* const depthStencilState = rtt_cast<DX10DepthStencilState>(args.depthStencilState);
+    const DX10DepthStencilState* const depthStencilState = static_cast<const DX10DepthStencilState*>(args.depthStencilState.get());
     if(_currentDepthStencilState != depthStencilState->d3dDepthStencilState())
     {
         _currentDepthStencilState = depthStencilState->d3dDepthStencilState();
         _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, static_cast<UINT>(_stencilRef));
     }
 
-    const DX10RasterizerState* const rasterizerState = rtt_cast<DX10RasterizerState>(args.rasterizerState);
+    const DX10RasterizerState* const rasterizerState = static_cast<const DX10RasterizerState*>(args.rasterizerState.get());
     if(_currentRasterizerState != rasterizerState->d3dRasterizerState())
     {
         _currentRasterizerState = rasterizerState->d3dRasterizerState();
@@ -190,30 +191,15 @@ void DX10CommandQueue::_setIndexBuffer(const DX10CL::CommandSetIndexBuffer& cmd)
     _d3d10Device->IASetIndexBuffer(cmd.buffer, cmd.format, 0);
 }
 
-void DX10CommandQueue::_setGDescriptorLayout(const DX10CL::CommandSetGDescriptorLayout& cmd) noexcept
-{
-    _currentLayout = cmd.layout.get<DX10DescriptorLayout>();
-}
+// void DX10CommandQueue::_setGDescriptorLayout(const DX10CL::CommandSetGDescriptorLayout& cmd) noexcept
+// {
+//     _currentLayout = cmd.layout.get<DX10DescriptorLayout>();
+// }
 
 void DX10CommandQueue::_setGDescriptorTable(const DX10CL::CommandSetGDescriptorTable& cmd) noexcept
 {
-#if TAU_GENERAL_SAFETY_CHECK
-    // Counts don't match
-    if(cmd.descriptorCount != _currentLayout->entries()[cmd.index].count)
-    { return; }
-#endif
-
     if(cmd.type == EGraphics::DescriptorType::TextureView)
     {
-#if TAU_GENERAL_SAFETY_CHECK
-        // Types don't match
-        if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::TextureView)
-        { return; }
-        // Counts don't match
-        if(_currentLayout->entries()[cmd.index].count != cmd.descriptorCount)
-        { return; }
-#endif
-
         ID3D10ShaderResourceView** const texViews = cmd.handle.as<ID3D10ShaderResourceView*>();
 
         const UINT begin = static_cast<UINT>(_currentLayout->entries()[cmd.index].begin);
@@ -241,15 +227,6 @@ void DX10CommandQueue::_setGDescriptorTable(const DX10CL::CommandSetGDescriptorT
     }
     else if(cmd.type == EGraphics::DescriptorType::UniformBufferView)
     {
-#if TAU_GENERAL_SAFETY_CHECK
-        // Types don't match
-        if(_currentLayout->entries()[cmd.index].type != DescriptorLayoutEntry::Type::UniformBufferView)
-        { return; }
-        // Counts don't match
-        if(_currentLayout->entries()[cmd.index].count != cmd.descriptorCount)
-        { return; }
-#endif
-
         ID3D10Buffer** const buffers = cmd.handle.as<ID3D10Buffer*>();
 
         const UINT begin = static_cast<UINT>(_currentLayout->entries()[cmd.index].begin);
@@ -275,6 +252,11 @@ void DX10CommandQueue::_setGDescriptorTable(const DX10CL::CommandSetGDescriptorT
                 break;
         }
     }
+}
+
+void DX10CommandQueue::_executeBundle(const DX10CL::CommandExecuteBundle& cmd) noexcept
+{
+    executeCommandList(cmd.bundle);
 }
 
 void DX10CommandQueue::_copyResource(const DX10CL::CommandCopyResource& cmd) noexcept

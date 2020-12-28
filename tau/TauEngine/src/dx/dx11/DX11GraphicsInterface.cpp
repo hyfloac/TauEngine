@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 #include <dxgi.h>
-#include "dx/dx10/DX10GraphicsAccelerator.hpp"
+#include "dx/dxgi/DXGI13GraphicsAccelerator.hpp"
 #include "dx/dx11/DX11Shader.hpp"
 #include "dx/dx11/DX11InputLayout.hpp"
 #include "dx/dx11/DX11VertexArray.hpp"
@@ -124,13 +124,24 @@ IRenderingContextBuilder& DX11GraphicsInterface::createRenderingContext() noexce
 
 NullableRef<DX11GraphicsInterface> DX11GraphicsInterfaceBuilder::build(const GraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
 {
+    IDXGIAdapter1* dxgiAdapter = nullptr;
+
+    if(args.graphicsAccelerator)
+    {
+        if(!rtt_check<DXGI13GraphicsAccelerator>(args.graphicsAccelerator))
+        { return nullptr; }
+
+        const DXGI13GraphicsAccelerator* const gpu = static_cast<const DXGI13GraphicsAccelerator*>(args.graphicsAccelerator.get());
+        dxgiAdapter = gpu->dxgiAdapter();
+    }
+
     D3D_FEATURE_LEVEL featureLevels[1] = { D3D_FEATURE_LEVEL_11_0 };
 
     ID3D11Device* device;
-    const HRESULT h = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, args.renderingMode.debugMode() ? D3D11_CREATE_DEVICE_DEBUG : 0, featureLevels, 1, D3D11_SDK_VERSION, &device, NULL, NULL);
+    const HRESULT h = D3D11CreateDevice(dxgiAdapter, D3D_DRIVER_TYPE_HARDWARE, NULL, args.renderingMode.debugMode() ? D3D11_CREATE_DEVICE_DEBUG : 0, featureLevels, 1, D3D11_SDK_VERSION, &device, nullptr, nullptr);
 
     if(FAILED(h))
-    { return null; }
+    { return nullptr; }
 
     return NullableRef<DX11GraphicsInterface>(allocator, args.renderingMode, device);
 }
