@@ -40,6 +40,12 @@
   #define UINT64_MAX       0xffffffffffffffffui64
 #endif
 
+// Boolean bit masks
+typedef u8 b8;
+typedef u16 b16;
+typedef u32 b32;
+typedef u64 b64;
+
 #if !defined(__cpp_char8_t)
   enum char8_t : unsigned char { };
 #endif

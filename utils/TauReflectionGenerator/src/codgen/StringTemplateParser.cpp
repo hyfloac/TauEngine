@@ -1,20 +1,5 @@
-#include "codegen/StringTemplateParser.hpp"
-
-#include <vector>
-
-#include "codegen/ast/StringTemplateAST.hpp"
-#include "codegen/ast/StringTemplateStringifyAST.hpp"
-#include "codegen/ast/StringTemplateExprAST.hpp"
-#include "codegen/ast/StringTemplateVarAST.hpp"
-#include "codegen/ast/StringTemplateMemberExprAST.hpp"
-#include "codegen/ast/StringTemplateBooleanExprAST.hpp"
-#include "codegen/ast/StringTemplateFragmentAST.hpp"
-#include "codegen/ast/StringTemplateLoopAST.hpp"
-#include "codegen/ast/StringTemplateIfAST.hpp"
-
-#include "llvm/Support/raw_ostream.h"
-
 /**
+ * @file 
  * Basic BNF elements.
  *
  * <num> ::= [0-9]                              // A single number
@@ -32,6 +17,23 @@
  * <ws> ::= { <ws-chars> }                      // A string of whitespace characters
  * <opt-ws> ::= [ <ws> ]                        // An optional string of whitespace characters
  */
+
+#include "codegen/StringTemplateParser.hpp"
+
+#include <vector>
+
+#include "codegen/ast/StringTemplateAST.hpp"
+#include "codegen/ast/StringTemplateStringifyAST.hpp"
+#include "codegen/ast/StringTemplateExprAST.hpp"
+#include "codegen/ast/StringTemplateVarAST.hpp"
+#include "codegen/ast/StringTemplateMemberExprAST.hpp"
+#include "codegen/ast/StringTemplateBooleanExprAST.hpp"
+#include "codegen/ast/StringTemplateFragmentAST.hpp"
+#include "codegen/ast/StringTemplateLoopAST.hpp"
+#include "codegen/ast/StringTemplateIfAST.hpp"
+
+#include "llvm/Support/raw_ostream.h"
+
 
 namespace tau { namespace codegen { namespace string {
 

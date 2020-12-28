@@ -14,6 +14,7 @@
 #include "UnitTest.hpp"
 #include "ConPrinter.hpp"
 #include "MemoryFileTest.hpp"
+#include "TexturePackingTest.hpp"
 #include <cstdio>
 
 #include "allocator/PageAllocator.hpp"
@@ -244,6 +245,12 @@ int main(int argCount, char* args[])
     printf("\nMemory File Tests:\n\n");
     MemoryFileTest::runTests();
     printf("Memory File Tests Finished\n");
+        
+    PAUSE("Continue");
+
+    printf("\nTexture Packing Tests Tests:\n\n");
+    TexturePackingTests::runTests();
+    printf("Texture Packing Tests Tests Finished\n");
 
     printf("\nTests Performed: %d\n", UnitTests::testsPerformed());
     printf("Tests Passed: %d\n", UnitTests::testsPassed());

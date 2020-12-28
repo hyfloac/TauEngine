@@ -389,7 +389,7 @@ public:
         if(index == _ctrlBlock->data.elementCount)
         { return; }
 
-        (void) std::memcpy(_arr + index, _arr + _ctrlBlock->data.elementCount - 1, sizeof(_T));
+        (void) std::memcpy(_arr + index, _arr + _ctrlBlock->data.elementCount, sizeof(_T));
         _ctrlBlock->data.dataSize -= sizeof(_T);
 
         attemptRelease();
@@ -406,7 +406,7 @@ public:
         if(index == _ctrlBlock->data.elementCount)
         { return; }
 
-        (void) std::memcpy(_arr + index, _arr + index + sizeof(_T), (_ctrlBlock->data.elementCount - index - 1) * sizeof(_T));
+        (void) std::memmove(_arr + index, _arr + index + 1, (_ctrlBlock->data.elementCount - index) * sizeof(_T));
         _ctrlBlock->data.dataSize -= sizeof(_T);
 
         attemptRelease();
@@ -418,6 +418,9 @@ public:
         {
             _arr[i].~_T();
         }
+
+        _ctrlBlock->data.dataSize = sizeof(ControlBlock);
+        _ctrlBlock->data.elementCount = 0;
 
         if(releasePages)
         {

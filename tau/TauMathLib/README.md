@@ -91,3 +91,27 @@ vec3_add:
     ret
 ```
 
+
+
+## Premake Setup
+
+This project takes a little bit of work to setup with premake.
+
+1. right click on the project and go to `Build Dependencies -> Build Customizations`.
+
+2. Click `Find Existing` and open the `BuildLlvmIR.targets` file in the project.
+
+3. Enable the `BuildLlvmIR` customization.
+
+4. In visual studio go to the `src` directory and select all of the `*.ll` files.
+
+5. Right click and select `Exclude From Project`.
+
+6. Right click and select `Include In Project`. This will refresh all of the files to using `BuildLlvmIR` customization.
+
+After this we need to setup Clang.
+
+1. Open the project properties.
+2. In `General` set the `Platform Toolset` to `LLVM (clang-cl)`.
+3. In `Advanced` set `Whole Program Optimization` to `Use Link Time Code Generation`.
+4. In `Librarian -> General` set `Link Time Code Generation` to `No`.  This option is specific to MSVC and breaks `llvm-lib`.

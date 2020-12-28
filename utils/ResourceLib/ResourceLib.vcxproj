@@ -350,6 +350,7 @@
     <ClInclude Include="include\ResourceSelector.hpp" />
     <ClInclude Include="include\TauModelPart.hpp" />
     <ClInclude Include="include\TauTexture.hpp" />
+    <ClInclude Include="include\TexturePacker2D.hpp" />
     <ClInclude Include="include\VFS.hpp" />
     <ClInclude Include="include\WavefrontObj.hpp" />
     <ClInclude Include="include\Win32File.hpp" />
