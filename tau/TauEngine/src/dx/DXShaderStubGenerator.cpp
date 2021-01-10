@@ -18,7 +18,7 @@ ID3DBlob* DXShaderStubGenerator::genShader(const uSys bufferCount, const BufferD
     sb.append("struct VS_Input {");
 
     SemanticSet semanticIndices { };
-    ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(uSys));
+    (void) ::std::memset(semanticIndices.data(), 0, semanticIndices.size() * sizeof(UINT));
 
     u32 varIndex = 0;
     for(uSys i = 0; i < bufferCount; ++i)

@@ -330,9 +330,6 @@
     <ClCompile Include="src\gl\GLInputLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\shader\ShaderProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\dx\dx10\DX10Resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

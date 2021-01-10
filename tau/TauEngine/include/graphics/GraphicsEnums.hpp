@@ -69,4 +69,11 @@ enum class ResourceHeapUsageType
     Read
 };
 
+enum class CommandListType
+{
+    Graphics = 0,
+    Compute,
+    Upload
+};
+
 }

@@ -25,6 +25,12 @@ struct HeapCapabilities final
     b8 supportsMultiType : 1;
 };
 
+struct ResourceCapabilities final
+{
+    b8 supportsAliasing : 1;
+    b8 supportsDirectModify : 1;
+};
+
 class TAU_DLL TAU_NOVTABLE IGraphicsCapabilities
 {
     DEFAULT_CONSTRUCT_PO(IGraphicsCapabilities);
@@ -33,4 +39,6 @@ class TAU_DLL TAU_NOVTABLE IGraphicsCapabilities
 public:
     [[nodiscard]] virtual const CommandListCapabilities& commandListCapabilities() const noexcept = 0;
     [[nodiscard]] virtual const ShaderCapabilities& shaderCapabilities() const noexcept = 0;
+    [[nodiscard]] virtual const HeapCapabilities& heapCapabilities() const noexcept = 0;
+    [[nodiscard]] virtual const ResourceCapabilities& resourceCapabilities() const noexcept = 0;
 };

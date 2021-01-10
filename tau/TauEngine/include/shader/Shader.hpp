@@ -10,10 +10,7 @@
 
 class IRenderingContext;
 
-#define SHADER_IMPL_BASE(_TYPE) \
-    RTT_IMPL(_TYPE, IShader)
-
-#define SHADER_IMPL(_TYPE) SHADER_IMPL_BASE(_TYPE)
+#define SHADER_IMPL(_TYPE) RTTD_IMPL(_TYPE, IShader)
 
 /**
  * Represents an abstract, library independent shader.
@@ -29,22 +26,40 @@ public:
     [[nodiscard]] virtual uSys mapUniform(const uSys virtualIndex) const noexcept { return virtualIndex; }
     [[nodiscard]] virtual uSys mapTexture(const uSys virtualIndex) const noexcept { return virtualIndex; }
 
-    RTT_BASE_IMPL(IShader);
-    RTT_BASE_CHECK(IShader);
-    RTT_BASE_CAST(IShader);
+    RTTD_BASE_IMPL(IShader);
+    RTTD_BASE_CHECK(IShader);
+    RTTD_BASE_CAST(IShader);
 };
 
-struct ShaderArgs final
+struct ShaderFileArgs final
 {
-    DEFAULT_DESTRUCT(ShaderArgs);
-    DEFAULT_CM(ShaderArgs);
+    DEFAULT_DESTRUCT(ShaderFileArgs);
+    DEFAULT_CM_PU(ShaderFileArgs);
 public:
     CPPRef<IFile> file;
     EShader::Stage stage;
 public:
-	inline ShaderArgs() noexcept
-        : file(null)
+	ShaderFileArgs() noexcept
+        : file(nullptr)
         , stage(static_cast<EShader::Stage>(0))
+    { }
+
+	ShaderFileArgs(const CPPRef<IFile>& _file, const EShader::Stage _stage) noexcept
+        : file(_file)
+        , stage(_stage)
+    { }
+};
+
+struct ShaderSourceArgs final
+{
+    DEFAULT_DESTRUCT(ShaderSourceArgs);
+    DEFAULT_CM_PU(ShaderSourceArgs);
+public:
+    DynString source;
+    EShader::Stage stage;
+public:
+	ShaderSourceArgs() noexcept
+        : stage(static_cast<EShader::Stage>(0))
     { }
 };
 
@@ -60,17 +75,15 @@ public:
         InvalidShaderStage,
         CompileError,
         InvalidFile,
+        InvalidSource,
         InvalidInclude,
         SystemMemoryAllocationFailure,
         DriverMemoryAllocationFailure,
         InternalError
     };
 public:
-    [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual IShader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept = 0;
-    [[nodiscard]] virtual CPPRef<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableStrongRef<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IShader> buildTauRef(const ShaderFileArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IShader> buildTauRef(const ShaderSourceArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };
 
 class IncorrectAPIShaderException final : public Exception

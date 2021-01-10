@@ -18,132 +18,21 @@ void DX10PixelShader::bind(DX10RenderingContext& context) noexcept
 { context.d3dDevice()->PSSetShader(_shader); }
 
 void DX10VertexShader::unbind(DX10RenderingContext& context) noexcept
-{ context.d3dDevice()->VSSetShader(NULL); }
+{ context.d3dDevice()->VSSetShader(nullptr); }
 
 void DX10GeometryShader::unbind(DX10RenderingContext& context) noexcept
-{ context.d3dDevice()->GSSetShader(NULL); }
+{ context.d3dDevice()->GSSetShader(nullptr); }
 
 void DX10PixelShader::unbind(DX10RenderingContext& context) noexcept
-{ context.d3dDevice()->PSSetShader(NULL); }
+{ context.d3dDevice()->PSSetShader(nullptr); }
 
-DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error) const noexcept
+NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderFileArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    DXShaderArgs dxArgs {};
+    DXShaderArgs dxArgs { };
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const D3D10ShaderObjects objects = createD3DShader(args, dxArgs, error);
-	if(!objects.vertex)
-    { return null; }
-	
-    DX10Shader* shader;
-
-    switch(args.stage)
-    {
-        case EShader::Stage::Vertex:
-            shader = new(::std::nothrow) DX10VertexShader(objects.vertex, dxArgs.dataBlob);
-            break;
-        case EShader::Stage::Geometry:
-            shader = new(::std::nothrow) DX10GeometryShader(objects.geometry);
-            break;
-        case EShader::Stage::Pixel:
-            shader = new(::std::nothrow) DX10PixelShader(objects.pixel);
-            break;
-        case EShader::Stage::TessellationControl:
-        case EShader::Stage::TessellationEvaluation:
-        default:
-            dxArgs.dataBlob->Release();
-            ERROR_CODE_N(Error::InvalidShaderStage);
-    }
-
-    dxArgs.dataBlob->Release();
-
-    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
-	
-    ERROR_CODE_V(Error::NoError, shader);
-}
-
-DX10Shader* DX10ShaderBuilder::build(const ShaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    DXShaderArgs dxArgs {};
-	if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const D3D10ShaderObjects objects = createD3DShader(args, dxArgs, error);
-	if(!objects.vertex)
-    { return null; }
-	
-    DX10Shader* shader;
-
-    switch(args.stage)
-    {
-        case EShader::Stage::Vertex:
-            shader = allocator.allocateT<DX10VertexShader>(objects.vertex, dxArgs.dataBlob);
-            break;
-        case EShader::Stage::Geometry:
-            shader = allocator.allocateT<DX10GeometryShader>(objects.geometry);
-            break;
-        case EShader::Stage::Pixel:
-            shader = allocator.allocateT<DX10PixelShader>(objects.pixel);
-            break;
-        case EShader::Stage::TessellationControl:
-        case EShader::Stage::TessellationEvaluation:
-        default:
-            dxArgs.dataBlob->Release();
-            ERROR_CODE_N(Error::InvalidShaderStage);
-    }
-
-    dxArgs.dataBlob->Release();
-
-    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
-	
-    ERROR_CODE_V(Error::NoError, shader);
-}
-
-CPPRef<IShader> DX10ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* const error) const noexcept
-{
-    DXShaderArgs dxArgs {};
-	if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const D3D10ShaderObjects objects = createD3DShader(args, dxArgs, error);
-	if(!objects.vertex)
-    { return null; }
-	
-    CPPRef<DX10Shader> shader;
-
-    switch(args.stage)
-    {
-        case EShader::Stage::Vertex:
-            shader = CPPRef<DX10Shader>(new(::std::nothrow) DX10VertexShader(objects.vertex, dxArgs.dataBlob));
-            break;
-        case EShader::Stage::Geometry:
-            shader = CPPRef<DX10Shader>(new(::std::nothrow) DX10GeometryShader(objects.geometry));
-            break;
-        case EShader::Stage::Pixel:
-            shader = CPPRef<DX10Shader>(new(::std::nothrow) DX10PixelShader(objects.pixel));
-            break;
-        case EShader::Stage::TessellationControl:
-        case EShader::Stage::TessellationEvaluation:
-        default:
-            dxArgs.dataBlob->Release();
-            ERROR_CODE_N(Error::InvalidShaderStage);
-    }
-
-    dxArgs.dataBlob->Release();
-
-    ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
-	
-    ERROR_CODE_V(Error::NoError, shader);
-}
-
-NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
-{
-    DXShaderArgs dxArgs {};
-	if(!processArgs(args, &dxArgs, error))
-    { return null; }
-
-    const D3D10ShaderObjects objects = createD3DShader(args, dxArgs, error);
+    const D3D10ShaderObjects objects = createD3DShader(args.stage, dxArgs, error);
 	if(!objects.vertex)
     { return null; }
 	
@@ -152,13 +41,13 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPReinterpretCast<IShader>(NullableRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RefCast<IShader>(NullableRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPReinterpretCast<IShader>(NullableRef<DX10GeometryShader>(allocator, objects.geometry));
+            shader = RefCast<IShader>(NullableRef<DX10GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPReinterpretCast<IShader>(NullableRef<DX10PixelShader>(allocator, objects.pixel));
+            shader = RefCast<IShader>(NullableRef<DX10PixelShader>(allocator, objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
@@ -174,28 +63,28 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
+NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderSourceArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    DXShaderArgs dxArgs {};
+    DXShaderArgs dxArgs { };
 	if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const D3D10ShaderObjects objects = createD3DShader(args, dxArgs, error);
+    const D3D10ShaderObjects objects = createD3DShader(args.stage, dxArgs, error);
 	if(!objects.vertex)
     { return null; }
 	
-    NullableStrongRef<IShader> shader;
+    NullableRef<IShader> shader;
 
     switch(args.stage)
     {
         case EShader::Stage::Vertex:
-            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
+            shader = RefCast<IShader>(NullableRef<DX10VertexShader>(allocator, objects.vertex, dxArgs.dataBlob));
             break;
         case EShader::Stage::Geometry:
-            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX10GeometryShader>(allocator, objects.geometry));
+            shader = RefCast<IShader>(NullableRef<DX10GeometryShader>(allocator, objects.geometry));
             break;
         case EShader::Stage::Pixel:
-            shader = RCPReinterpretCast<IShader>(NullableStrongRef<DX10PixelShader>(allocator, objects.pixel));
+            shader = RefCast<IShader>(NullableRef<DX10PixelShader>(allocator, objects.pixel));
             break;
         case EShader::Stage::TessellationControl:
         case EShader::Stage::TessellationEvaluation:
@@ -211,23 +100,30 @@ NullableStrongRef<IShader> DX10ShaderBuilder::buildTauSRef(const ShaderArgs& arg
     ERROR_CODE_V(Error::NoError, shader);
 }
 
-bool DX10ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* const dxArgs, Error* const error) const noexcept
+bool DX10ShaderBuilder::processArgs(const ShaderFileArgs& args, DXShaderArgs* const dxArgs, Error* const error) const noexcept
 {
     ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 
-    const DynString path = args.file->name();
+    const WDynString path = args.file->name();
 
-    if(VFS::getFileExt(path, false) == "tausi")
+    if(VFS::getFileExt(path, false) == L"tausi")
     {
         return processBundle(args, dxArgs, error);
     }
     else
     {
-        return processShader(args.file, args.stage, dxArgs, error);
+        return processShader(args.file, dxArgs, error);
     }
 }
 
-bool DX10ShaderBuilder::processBundle(const ShaderArgs& args, DXShaderArgs* dxArgs, Error* error) const noexcept
+bool DX10ShaderBuilder::processArgs(const ShaderSourceArgs& args, DXShaderArgs* const dxArgs, Error* const error) const noexcept
+{
+    ERROR_CODE_COND_F(!args.source, Error::InvalidSource);
+    
+    return processShader(args.source, dxArgs, error);
+}
+
+bool DX10ShaderBuilder::processBundle(const ShaderFileArgs& args, DXShaderArgs* dxArgs, Error* error) const noexcept
 {
     ShaderBundleParser parser(args.file);
 
@@ -239,13 +135,13 @@ bool DX10ShaderBuilder::processBundle(const ShaderArgs& args, DXShaderArgs* dxAr
     const sbp::ShaderInfo& info = _visitor->get(args.stage);
 
     const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
-    if(!processShader(file, args.stage, dxArgs, error))
+    if(!processShader(file, dxArgs, error))
     { return false; }
 
     return true;
 }
 
-bool DX10ShaderBuilder::processShader(const CPPRef<IFile>& file, const EShader::Stage stage, DXShaderArgs* dxArgs, Error* error) const noexcept
+bool DX10ShaderBuilder::processShader(const CPPRef<IFile>& file, DXShaderArgs* dxArgs, Error* error) const noexcept
 {
     const i64 fileSize = file->size();
 
@@ -253,18 +149,31 @@ bool DX10ShaderBuilder::processShader(const CPPRef<IFile>& file, const EShader::
     ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
-    (void)file->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
+    (void) file->read(dataBuffer, fileSize);
 
     return true;
 }
 
-DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, Error* const error) const noexcept
+bool DX10ShaderBuilder::processShader(const DynString& source, DXShaderArgs* dxArgs, Error* error) const noexcept
+{
+    const uSys fileSize = source.length() * sizeof(char);
+
+    const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
+    ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
+
+    void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
+    ::std::memcpy(dataBuffer, source.c_str(), fileSize);
+
+    return true;
+}
+
+DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const EShader::Stage stage, const DXShaderArgs& dxArgs, Error* const error) const noexcept
 {
     D3D10ShaderObjects objects = { null };
 
     HRESULT h;
 	
-    switch(args.stage)
+    switch(stage)
     {
         case EShader::Stage::Vertex:
             h = _gi.d3d10Device()->CreateVertexShader(dxArgs.dataBlob->GetBufferPointer(), dxArgs.dataBlob->GetBufferSize(), &objects.vertex);

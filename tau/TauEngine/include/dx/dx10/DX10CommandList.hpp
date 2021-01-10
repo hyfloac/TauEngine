@@ -11,8 +11,12 @@
 class DX10VertexArray;
 class DX10CommandAllocator;
 class DX10CommandList;
+class DX10Resource;
 
 namespace DX10CL {
+
+#pragma pack(push, 1)
+
 enum class CommandType
 {
     Draw = 1,
@@ -302,12 +306,14 @@ struct CommandCopyResource final
     DEFAULT_DESTRUCT(CommandCopyResource);
     DEFAULT_CM_PU(CommandCopyResource);
 public:
-    ID3D10Resource* dst;
-    ID3D10Resource* src;
+    DX10Resource* dst;
+    DX10Resource* src;
+    void* data;
 public:
-    CommandCopyResource(ID3D10Resource* const _dst, ID3D10Resource* const _src) noexcept
+    CommandCopyResource(DX10Resource* const _dst, DX10Resource* const _src, void* const _data) noexcept
         : dst(_dst)
         , src(_src)
+        , data(_data)
     { }
 };
 
@@ -323,12 +329,12 @@ struct CommandCopySubresourceRegion0 final
     DEFAULT_DESTRUCT(CommandCopySubresourceRegion0);
     DEFAULT_CM_PU(CommandCopySubresourceRegion0);
 public:
-    ID3D10Resource* dst;
+    DX10Resource* dst;
     UINT dstSubresource;
-    ID3D10Resource* src;
+    DX10Resource* src;
     UINT srcSubresource;
 public:
-    CommandCopySubresourceRegion0(ID3D10Resource* const _dst, const UINT _dstSubresource, ID3D10Resource* const _src, const UINT _srcSubresource) noexcept
+    CommandCopySubresourceRegion0(DX10Resource* const _dst, const UINT _dstSubresource, DX10Resource* const _src, const UINT _srcSubresource) noexcept
         : dst(_dst)
         , dstSubresource(_dstSubresource)
         , src(_src)
@@ -342,11 +348,13 @@ struct CommandCopySubresourceRegion1 final
     DEFAULT_DESTRUCT(CommandCopySubresourceRegion1);
     DEFAULT_CM_PU(CommandCopySubresourceRegion1);
 public:
+    void* data;
     ETexture::Coord coord;
     bool hasSrcBox;
 public:
-    CommandCopySubresourceRegion1(const ETexture::Coord& _coord, const ETexture::EBox* const _srcBox) noexcept
-        : coord(_coord)
+    CommandCopySubresourceRegion1(void* const _data, const ETexture::Coord& _coord, const ETexture::EBox* const _srcBox) noexcept
+        : data(_data)
+        , coord(_coord)
         , hasSrcBox(_srcBox)
     { }
 };
@@ -502,6 +510,8 @@ public:
         , copySubresourceRegion2(_copySubresourceRegion2)
     { }
 };
+
+#pragma pack(pop)
 }
 
 class TAU_DLL DX10CommandList final : public ICommandList
@@ -539,6 +549,8 @@ public:
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
     // void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
     void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept override;
+    void setGraphicsDescriptorConstant(uSys index, u32 constant) noexcept override;
+    void setGraphicsDescriptorConstants(uSys index, uSys constantCount, const void* constants) noexcept override;
     void executeBundle(const NullableRef<ICommandList>& bundle) noexcept override;
     void copyResource(const NullableRef<IResource>& dst, const NullableRef<IResource>& src) noexcept override;
     void copyBuffer(const NullableRef<IResource>& dstBuffer, u64 dstOffset, const NullableRef<IResource>& srcBuffer, u64 srcOffset, u64 byteCount) noexcept override;
@@ -546,6 +558,9 @@ public:
     void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const ETexture::Coord& coord, const NullableRef<IResource>& srcTexture, u32 srcSubResource, const ETexture::EBox* srcBox) noexcept override;
 private:
     friend class DX10CommandQueue;
+    friend class DX10ResourceBuffer;
+    friend class DX10ResourceTexture1D;
+    friend class DX10ResourceTexture2D;
+    friend class DX10ResourceTexture3D;
 };
-
 #endif

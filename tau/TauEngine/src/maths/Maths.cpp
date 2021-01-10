@@ -1,9 +1,18 @@
 /**
  * @file
  */
-#include <maths/Maths.hpp>
+#include "maths/Maths.hpp"
 #include <MathDefines.hpp>
 #include <Safeties.hpp>
+#include <bit>
+
+#if defined(TAU_PRODUCTION)
+  #define SIN_ENSURE(_X)
+#else
+  #define SIN_ENSURE(_X) \
+      Ensure((_X) == (_X)); /* Is NaN? */ \
+      Ensure(!::std::isinf(_X))
+#endif
 
 /**
  * A unit circle with 2**16 elements.
@@ -47,74 +56,65 @@ static constexpr double SC_RAD_SCALAR_D = 10430.3783504704527249495663163811;
 static constexpr float  SC_DEG_SCALAR_F = 182.044444444444444444444444444444F;
 static constexpr double SC_DEG_SCALAR_D = 182.044444444444444444444444444444444444444444444444444444444444444444444444444444F;
 
-float fastSinR(float radians) noexcept
+float fastSinR(const float radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     return SIN_TABLE_F[static_cast<u32>(radians * SC_RAD_SCALAR_F) & 65535];
 }
 
-double fastSinR(double radians) noexcept
+double fastSinR(const double radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     return SIN_TABLE_D[static_cast<u32>(radians * SC_RAD_SCALAR_D) & 65535];
 }
 
-float fastSinD(float degrees) noexcept
+float fastSinD(const float degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     return SIN_TABLE_F[static_cast<u32>(degrees * SC_DEG_SCALAR_F) & 65535];
 }
 
-double fastSinD(double degrees) noexcept
+double fastSinD(const double degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     return SIN_TABLE_D[static_cast<u32>(degrees * SC_DEG_SCALAR_D) & 65535];
 }
 
-float fastCosR(float radians) noexcept
+float fastCosR(const float radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     return SIN_TABLE_F[(static_cast<u32>(radians * SC_RAD_SCALAR_F) + 16384) & 65535];
 }
 
-double fastCosR(double radians) noexcept
+double fastCosR(const double radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     return SIN_TABLE_D[(static_cast<u32>(radians * SC_RAD_SCALAR_D) + 16384) & 65535];
 }
 
-float fastCosD(float degrees) noexcept
+float fastCosD(const float degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     return SIN_TABLE_F[(static_cast<u32>(degrees * SC_DEG_SCALAR_F) + 16384) & 65535];
 }
 
-double fastCosD(double degrees) noexcept
+double fastCosD(const double degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     return SIN_TABLE_D[(static_cast<u32>(degrees * SC_DEG_SCALAR_D) + 16384) & 65535];
 }
 
-SinCos<float> fastSinCosR(float radians) noexcept
+SinCos<float> fastSinCosR(const float radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     const u32 index = static_cast<u32>(radians * SC_RAD_SCALAR_F);
 
@@ -124,10 +124,9 @@ SinCos<float> fastSinCosR(float radians) noexcept
     return { _sin, _cos };
 }
 
-SinCos<double> fastSinCosR(double radians) noexcept
+SinCos<double> fastSinCosR(const double radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     const u32 index = static_cast<u32>(radians * SC_RAD_SCALAR_D);
 
@@ -137,10 +136,9 @@ SinCos<double> fastSinCosR(double radians) noexcept
     return { _sin, _cos };
 }
 
-SinCos<float> fastSinCosD(float degrees) noexcept
+SinCos<float> fastSinCosD(const float degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     const u32 index = static_cast<u32>(degrees * SC_DEG_SCALAR_F);
 
@@ -150,10 +148,9 @@ SinCos<float> fastSinCosD(float degrees) noexcept
     return { _sin, _cos };
 }
 
-SinCos<double> fastSinCosD(double degrees) noexcept
+SinCos<double> fastSinCosD(const double degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     const u32 index = static_cast<u32>(degrees * SC_DEG_SCALAR_D);
 
@@ -163,10 +160,9 @@ SinCos<double> fastSinCosD(double degrees) noexcept
     return { _sin, _cos };
 }
 
-float fastTanR(float radians) noexcept
+float fastTanR(const float radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     const u32 index = static_cast<u32>(radians * SC_RAD_SCALAR_F);
 
@@ -176,10 +172,9 @@ float fastTanR(float radians) noexcept
     return _sin / _cos;
 }
 
-double fastTanR(double radians) noexcept
+double fastTanR(const double radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     const u32 index = static_cast<u32>(radians * SC_RAD_SCALAR_D);
 
@@ -189,10 +184,9 @@ double fastTanR(double radians) noexcept
     return _sin / _cos;
 }
 
-float fastTanD(float degrees) noexcept
+float fastTanD(const float degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     const u32 index = static_cast<u32>(degrees * SC_DEG_SCALAR_F);
 
@@ -202,10 +196,9 @@ float fastTanD(float degrees) noexcept
     return _sin / _cos;
 }
 
-double fastTanD(double degrees) noexcept
+double fastTanD(const double degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     const u32 index = static_cast<u32>(degrees * SC_DEG_SCALAR_D);
 
@@ -215,10 +208,9 @@ double fastTanD(double degrees) noexcept
     return _sin / _cos;
 }
 
-float fastCotR(float radians) noexcept
+float fastCotR(const float radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     const u32 index = static_cast<u32>(radians * SC_RAD_SCALAR_F);
 
@@ -228,10 +220,9 @@ float fastCotR(float radians) noexcept
     return _cos / _sin;
 }
 
-double fastCotR(double radians) noexcept
+double fastCotR(const double radians) noexcept
 {
-    Ensure(radians == radians);
-    Ensure(!isinf(radians));
+    SIN_ENSURE(radians);
 
     const u32 index = static_cast<u32>(radians * SC_RAD_SCALAR_D);
 
@@ -241,10 +232,9 @@ double fastCotR(double radians) noexcept
     return _cos / _sin;
 }
 
-float fastCotD(float degrees) noexcept
+float fastCotD(const float degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     const u32 index = static_cast<u32>(degrees * SC_DEG_SCALAR_F);
 
@@ -254,10 +244,9 @@ float fastCotD(float degrees) noexcept
     return _cos / _sin;
 }
 
-double fastCotD(double degrees) noexcept
+double fastCotD(const double degrees) noexcept
 {
-    Ensure(degrees == degrees);
-    Ensure(!isinf(degrees));
+    SIN_ENSURE(degrees);
 
     const u32 index = static_cast<u32>(degrees * SC_DEG_SCALAR_D);
 
@@ -267,24 +256,24 @@ double fastCotD(double degrees) noexcept
     return _cos / _sin;
 }
 
-float fastInverseSqrt(float x) noexcept
+float fastInverseSqrt(const float x) noexcept
 {
     const float halfX = x * 0.5f;
-    i32 i = *reinterpret_cast<i32*>(&x);
+    i32 i = ::std::bit_cast<i32>(x);
 
     i = 0x5F3759DF - (i >> 1);
-    const float y = *reinterpret_cast<float*>(&i);
+    const float y = ::std::bit_cast<float>(i);
 
     return y * (1.5f - (halfX * y * y));
 }
 
-double fastInverseSqrt(double x) noexcept
+double fastInverseSqrt(const double x) noexcept
 {
-    const double halfX = x * 0.5f;
-    i64 i = *reinterpret_cast<i64*>(&x);
+    const double halfX = x * 0.5;
+    i64 i = ::std::bit_cast<i64>(x);
 
-    i = 0x5FE6EB50C7B537A9 - (i >> 1);
-    const double y = *reinterpret_cast<double*>(&i);
+    i = 0x5FE6EB50C7B537A9ull - (i >> 1);
+    const double y = ::std::bit_cast<double>(i);
 
-    return y * (1.5f - (halfX * y * y));
+    return y * (1.5 - (halfX * y * y));
 }

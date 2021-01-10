@@ -25,7 +25,7 @@
  *    The value to find the logarithm of.
  */
 template<u32 _Base>
-float logN(float x) noexcept
+float logN(const float x) noexcept
 {
     return log(x) / log(_Base);
 }
@@ -37,7 +37,7 @@ float logN(float x) noexcept
  *    The value to find the logarithm of.
  */
 template<u32 _Base>
-double logN(double x) noexcept
+double logN(const double x) noexcept
 {
     return log(x) / log(_Base);
 }
@@ -50,7 +50,7 @@ double logN(double x) noexcept
  *    The value to find the logarithm of.
  */
 template<u32 _Base>
-long double logN(long double x) noexcept
+long double logN(const long double x) noexcept
 {
     return log(x) / log(_Base);
 }
@@ -191,7 +191,7 @@ TAU_DLL double fastCotD(double degrees) noexcept;
 
 TAU_DLL float fastInverseSqrt(float x) noexcept;
 
-static inline float rSqrt(float x) noexcept
+static inline float rSqrt(const float x) noexcept
 {
     return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
 }
@@ -214,7 +214,7 @@ static inline constexpr _Int rotL(const _Int n, unsigned int c) noexcept
 template<typename _Int>
 static inline constexpr _Int rotR(const _Int n, unsigned int c) noexcept
 {
-    static_assert(std::is_unsigned<_Int>::value, "Rotate Left only makes sense for unsigned types");
+    static_assert(std::is_unsigned<_Int>::value, "Rotate Right only makes sense for unsigned types");
 
     constexpr _Int mask = 8 * sizeof(n) - 1;
     c &= mask;

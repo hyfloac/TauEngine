@@ -9,7 +9,7 @@ void* DX10ResourceTexture1D::map(const EResource::MapType mapType, const uSys mi
 
     if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
     {
-        if(mapType == EResource::MapType::NoWrite || (mapWriteRange && mapWriteRange->isNone()))
+        if(mapType == EResource::MapType::ReadOnly || (mapWriteRange && mapWriteRange->isNone()))
         {
             _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
         }
@@ -30,7 +30,7 @@ void* DX10ResourceTexture1D::map(const EResource::MapType mapType, const uSys mi
             case EResource::MapType::Default:     dxMapType = D3D10_MAP_WRITE; break;
             case EResource::MapType::Discard:     dxMapType = D3D10_MAP_WRITE_DISCARD; break;
             case EResource::MapType::NoOverwrite: dxMapType = D3D10_MAP_WRITE_NO_OVERWRITE; break;
-            case EResource::MapType::NoWrite:
+            case EResource::MapType::ReadOnly:
             default: return null;
         }
         _d3dTexture->Map(subResource, dxMapType, 0, &mapping);
@@ -59,7 +59,7 @@ void* DX10ResourceTexture2D::map(const EResource::MapType mapType, const uSys mi
 
     if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
     {
-        if(mapType == EResource::MapType::NoWrite)
+        if(mapType == EResource::MapType::ReadOnly)
         {
             _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
         }
@@ -80,7 +80,7 @@ void* DX10ResourceTexture2D::map(const EResource::MapType mapType, const uSys mi
             case EResource::MapType::Default:     dxMapType = D3D10_MAP_WRITE; break;
             case EResource::MapType::Discard:     dxMapType = D3D10_MAP_WRITE_DISCARD; break;
             case EResource::MapType::NoOverwrite: dxMapType = D3D10_MAP_WRITE_NO_OVERWRITE; break;
-            case EResource::MapType::NoWrite:
+            case EResource::MapType::ReadOnly:
             default: return null;
         }
         _d3dTexture->Map(subResource, dxMapType, 0, &mapping);
@@ -104,7 +104,7 @@ void* DX10ResourceTexture3D::map(const EResource::MapType mapType, const uSys mi
 
     if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
     {
-        if(mapType == EResource::MapType::NoWrite)
+        if(mapType == EResource::MapType::ReadOnly)
         {
             _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
         }
@@ -125,7 +125,7 @@ void* DX10ResourceTexture3D::map(const EResource::MapType mapType, const uSys mi
             case EResource::MapType::Default:     dxMapType = D3D10_MAP_WRITE; break;
             case EResource::MapType::Discard:     dxMapType = D3D10_MAP_WRITE_DISCARD; break;
             case EResource::MapType::NoOverwrite: dxMapType = D3D10_MAP_WRITE_NO_OVERWRITE; break;
-            case EResource::MapType::NoWrite:
+            case EResource::MapType::ReadOnly:
             default: return null;
         }
         _d3dTexture->Map(subResource, dxMapType, 0, &mapping);

@@ -296,9 +296,8 @@ D3D10_USAGE DX10ResourceBuilder::dxUsage(const EResource::UsageType usage) noexc
     switch(usage)
     {
         case EResource::UsageType::Default:   return D3D10_USAGE_DEFAULT;
-        // case EResource::UsageType::Immutable: return D3D10_USAGE_IMMUTABLE;
-        case EResource::UsageType::Dynamic:   return D3D10_USAGE_DYNAMIC;
-        case EResource::UsageType::Readable:  return D3D10_USAGE_STAGING;
+        case EResource::UsageType::Upload:    return D3D10_USAGE_DYNAMIC;
+        case EResource::UsageType::ReadBack:  return D3D10_USAGE_STAGING;
         default:                              return D3D10_USAGE_DEFAULT;
     }
 }
@@ -307,10 +306,9 @@ D3D10_CPU_ACCESS_FLAG DX10ResourceBuilder::dxAccess(const EResource::UsageType u
 {
     switch(usage)
     {
-        case EResource::UsageType::Default:   
-        // case EResource::UsageType::Immutable: 
-        case EResource::UsageType::Dynamic:   return D3D10_CPU_ACCESS_WRITE;
-        case EResource::UsageType::Readable:  return D3D10_CPU_ACCESS_READ;
+        case EResource::UsageType::Default:   return static_cast<D3D10_CPU_ACCESS_FLAG>(0);
+        case EResource::UsageType::Upload:    return D3D10_CPU_ACCESS_WRITE;
+        case EResource::UsageType::ReadBack:  return D3D10_CPU_ACCESS_READ;
         default:                              return static_cast<D3D10_CPU_ACCESS_FLAG>(0);
     }
 }

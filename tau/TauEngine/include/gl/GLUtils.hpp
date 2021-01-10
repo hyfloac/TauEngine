@@ -55,13 +55,13 @@ namespace spdlog { class logger; }
 TAU_DLL void setupDefaultDebugMessageCallback(const CPPRef<spdlog::logger>& logger, bool synchronous) noexcept;
 TAU_DLL void stopDefaultDebugOutput() noexcept;
 
-TAU_DLL void __internal__clearGLErrors() noexcept;
-TAU_DLL bool __internal__logGLCall(const char* glFunc, const char* file, u32 line) noexcept;
+TAU_DLL void tau_internal_clearGLErrors() noexcept;
+TAU_DLL bool tau_internal_logGLCall(const char* glFunc, const char* file, u32 line) noexcept;
 
-#define ___ASSERT(__TEST) if(!(__TEST)) { DEBUG_BREAK; }
+#define GL_ASSERT(__TEST) if(!(__TEST)) { DEBUG_BREAK; }
 
 #if !defined(TAU_PRODUCTION)
-  #define CALL_GL_FUNC(__CALL) (__internal__clearGLErrors(), __CALL); ___ASSERT(__internal__logGLCall(#__CALL, __FILE__, __LINE__))
+  #define CALL_GL_FUNC(__CALL) (tau_internal_clearGLErrors(), __CALL); GL_ASSERT(tau_internal_logGLCall(#__CALL, __FILE__, __LINE__))
 #else
   #define CALL_GL_FUNC(__CALL)
 #endif

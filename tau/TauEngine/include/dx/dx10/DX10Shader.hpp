@@ -28,10 +28,11 @@ private:
     ID3D10Blob* _shaderBlob;
 public:
     DX10VertexShader(ID3D10VertexShader* const shader, ID3D10Blob* const shaderBlob) noexcept
-        : _shader(shader), _shaderBlob(shaderBlob)
+        : _shader(shader)
+        , _shaderBlob(shaderBlob)
     { shaderBlob->AddRef(); }
 
-    ~DX10VertexShader() noexcept
+    ~DX10VertexShader() noexcept override
     {
         RELEASE_DX(_shader);
         RELEASE_DX(_shaderBlob);
@@ -60,6 +61,9 @@ public:
         if(this == &copy)
         { return *this; }
 
+        RELEASE_DX(_shader);
+        RELEASE_DX(_shaderBlob);
+
         DX10Shader::operator=(copy);
 
         _shader = copy._shader;
@@ -75,6 +79,9 @@ public:
     {
         if(this == &move)
         { return *this; }
+
+        RELEASE_DX(_shader);
+        RELEASE_DX(_shaderBlob);
 
         DX10Shader::operator=(::std::move(move));
 
@@ -107,7 +114,7 @@ public:
         : _shader(shader)
     { }
 
-    ~DX10GeometryShader() noexcept
+    ~DX10GeometryShader() noexcept override
     { RELEASE_DX(_shader); }
 
     DX10GeometryShader(const DX10GeometryShader& copy) noexcept
@@ -125,6 +132,8 @@ public:
         if(this == &copy)
         { return *this; }
 
+        RELEASE_DX(_shader);
+
         DX10Shader::operator=(copy);
 
         _shader = copy._shader;
@@ -137,6 +146,8 @@ public:
     {
         if(this == &move)
         { return *this; }
+
+        RELEASE_DX(_shader);
 
         DX10Shader::operator=(::std::move(move));
 
@@ -164,7 +175,7 @@ public:
         : _shader(shader)
     { }
 
-    ~DX10PixelShader() noexcept
+    ~DX10PixelShader() noexcept override
     { RELEASE_DX(_shader); }
 
     DX10PixelShader(const DX10PixelShader& copy) noexcept
@@ -182,6 +193,8 @@ public:
         if(this == &copy)
         { return *this; }
 
+        RELEASE_DX(_shader);
+
         DX10Shader::operator=(copy);
 
         _shader = copy._shader;
@@ -194,6 +207,8 @@ public:
     {
         if(this == &move)
         { return *this; }
+
+        RELEASE_DX(_shader);
 
         DX10Shader::operator=(::std::move(move));
 
@@ -236,18 +251,17 @@ public:
         : _gi(gi)
         , _visitor(visitor)
     { }
-
-    [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] DX10Shader* build(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] CPPRef<IShader> buildCPPRef(const ShaderArgs& args, [[tau::out]] Error* error) const noexcept override;
-    [[nodiscard]] NullableRef<IShader> buildTauRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableStrongRef<IShader> buildTauSRef(const ShaderArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    
+    [[nodiscard]] NullableRef<IShader> buildTauRef(const ShaderFileArgs&   args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IShader> buildTauRef(const ShaderSourceArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 private:
-    [[nodiscard]] bool processArgs(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const ShaderFileArgs&   args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processArgs(const ShaderSourceArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
-    [[nodiscard]] bool processBundle(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
-    [[nodiscard]] bool processShader(const CPPRef<IFile>& file, EShader::Stage stage, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processBundle(const ShaderFileArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processShader(const CPPRef<IFile>&  file, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processShader(const DynString&    source, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
-    [[nodiscard]] D3D10ShaderObjects createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] D3D10ShaderObjects createD3DShader(EShader::Stage stage, const DXShaderArgs& dxArgs, [[tau::out]] Error* error) const noexcept;
 };
 #endif

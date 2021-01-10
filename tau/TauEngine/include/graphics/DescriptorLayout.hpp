@@ -19,7 +19,8 @@ public:
         UniformBufferView = 1,
         UnorderedAccessView,
         TextureView,
-        TextureSampler
+        TextureSampler,
+        Constant
     };
 public:
     /**

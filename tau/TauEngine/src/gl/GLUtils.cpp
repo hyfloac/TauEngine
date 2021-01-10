@@ -128,12 +128,12 @@ void stopDefaultDebugOutput() noexcept
     stopDebugOutput();
 }
 
-void __internal__clearGLErrors() noexcept
+void tau_internal_clearGLErrors() noexcept
 {
     while(glGetError() != GL_NO_ERROR);
 }
 
-bool __internal__logGLCall(const char* glFunc, const char* file, u32 line) noexcept
+bool tau_internal_logGLCall(const char* const glFunc, const char* const file, const u32 line) noexcept
 {
     bool noErrors = true;
     do
@@ -153,7 +153,7 @@ bool __internal__logGLCall(const char* glFunc, const char* file, u32 line) noexc
     return noErrors;
 }
 
-static void __cdecl openGLDebugErrorDefaultCallback(GLDebugSource source, GLDebugType type, GLDebugSeverity severity, u32 id, iSys length, const char* message, const void* userParam) noexcept
+static void __cdecl openGLDebugErrorDefaultCallback(const GLDebugSource source, const GLDebugType type, const GLDebugSeverity severity, const u32 id, const iSys length, const char* const message, const void* const userParam) noexcept
 {
     UNUSED4(length, userParam, id, message);
 

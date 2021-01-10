@@ -57,15 +57,7 @@ TAU_DLL bool tauShouldExit() noexcept;
  * @param[in] code
  *    The exit code of the program.
  */
-TAU_DLL void tauExit(i32 code) noexcept;
-
-/**
- * Tells the application that we are ready to exit.
- *
- *   This does not set an exit code. If you need to set an
- * code call `tauExit(i32)`.
- */
-TAU_DLL void tauExit() noexcept;
+TAU_DLL void tauExit(i32 code = 0) noexcept;
 
 /**
  * @return

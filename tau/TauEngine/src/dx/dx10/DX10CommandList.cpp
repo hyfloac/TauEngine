@@ -14,7 +14,6 @@
 #include "dx/dx10/DX10DepthStencilState.hpp"
 #include "dx/dx10/DX10RasterizerState.hpp"
 #include "graphics/BufferView.hpp"
-#include "graphics/ResourceRawInterface.hpp"
 #include "TauConfig.hpp"
 
 static inline const void* computeHead(const NullableRef<DX10CommandAllocator>& allocator) noexcept
@@ -255,18 +254,13 @@ void DX10CommandList::setGraphicsDescriptorTable(const uSys index, const EGraphi
 {
 #if TAU_GENERAL_SAFETY_CHECK
     // Counts don't match
-    if(descriptorCount != _currentLayout->entries()[index].count)
+    if(_currentLayout->entries()[index].count != descriptorCount)
     { return; }
-#endif
-    
-#if TAU_GENERAL_SAFETY_CHECK
+
     if(type == EGraphics::DescriptorType::TextureView)
     {
         // Types don't match
         if(_currentLayout->entries()[index].type != DescriptorLayoutEntry::Type::TextureView)
-        { return; }
-        // Counts don't match
-        if(_currentLayout->entries()[index].count != descriptorCount)
         { return; }
     }
     else if(type == EGraphics::DescriptorType::UniformBufferView)
@@ -274,15 +268,38 @@ void DX10CommandList::setGraphicsDescriptorTable(const uSys index, const EGraphi
         // Types don't match
         if(_currentLayout->entries()[index].type != DescriptorLayoutEntry::Type::UniformBufferView)
         { return; }
-        // Counts don't match
-        if(_currentLayout->entries()[index].count != descriptorCount)
-        { return; }
     }
 #endif
 
     const DX10CL::CommandSetGDescriptorTable setGDescriptorTable(index, type, descriptorCount, handle);
     (void) _commandAllocator->allocateT<DX10CL::Command>(setGDescriptorTable);
     ++_commandCount;
+}
+
+void DX10CommandList::setGraphicsDescriptorConstant(const uSys index, const u32 constant) noexcept
+{
+#if TAU_GENERAL_SAFETY_CHECK
+    // Counts don't match
+    if(_currentLayout->entries()[index].count != 1)
+    { return; }
+
+    // Types don't match
+    if(_currentLayout->entries()[index].type != DescriptorLayoutEntry::Type::Constant)
+    { return; }
+#endif
+}
+
+void DX10CommandList::setGraphicsDescriptorConstants(const uSys index, const uSys constantCount, const void* constants) noexcept
+{
+#if TAU_GENERAL_SAFETY_CHECK
+    // Counts don't match
+    if(_currentLayout->entries()[index].count != constantCount)
+    { return; }
+
+    // Types don't match
+    if(_currentLayout->entries()[index].type != DescriptorLayoutEntry::Type::Constant)
+    { return; }
+#endif
 }
 
 void DX10CommandList::executeBundle(const NullableRef<ICommandList>& bundle) noexcept
@@ -316,6 +333,18 @@ void DX10CommandList::copyResource(const NullableRef<IResource>& dst, const Null
        !RTTD_CHECK(src, DX10Resource, IResource))
     { return; }
 #endif
+
+#if TAU_GENERAL_SAFETY_CHECK
+    if(dst->usageType() == EResource::UsageType::Upload)
+    { return; }
+
+    if(src->usageType() == EResource::UsageType::ReadBack)
+    { return; }
+
+    if(src->usageType() == EResource::UsageType::Upload &&
+       dst->usageType() == EResource::UsageType::ReadBack)
+    { return; }
+#endif
     
     /*
      * Add the pointer to the free list.
@@ -323,8 +352,24 @@ void DX10CommandList::copyResource(const NullableRef<IResource>& dst, const Null
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(dst);
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(src);
 
-    const DX10CL::CommandCopyResource copyResource(dst->_getRawHandle().dx10Resource(), src->_getRawHandle().dx10Resource());
-    (void) _commandAllocator->allocateT<DX10CL::Command>(copyResource);
+    NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dst);
+    
+    if(src->usageType() == EResource::UsageType::Upload)
+    {
+        NullableRef<DX10ResourceTransferBuffer> tSrc = RefCast<DX10ResourceTransferBuffer>(src);
+        void* const mapping = tSrc->transferMapping();
+        
+        const DX10CL::CommandCopyResource transferResource(dxDst.get(), tSrc.get(), mapping);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(transferResource);
+    }
+    else
+    {
+        NullableRef<DX10Resource> dx10Src = RefCast<DX10Resource>(src);
+
+        const DX10CL::CommandCopyResource copyResource(dxDst.get(), dx10Src.get(), nullptr);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(copyResource);
+    }
+
     ++_commandCount;
 }
 
@@ -345,6 +390,16 @@ void DX10CommandList::copyBuffer(const NullableRef<IResource>& dstBuffer, const 
     if(dstBuffer->resourceType() != EResource::Type::Buffer ||
        srcBuffer->resourceType() != EResource::Type::Buffer)
     { return; }
+
+    if(dstBuffer->usageType() == EResource::UsageType::Upload)
+    { return; }
+
+    if(srcBuffer->usageType() == EResource::UsageType::ReadBack)
+    { return; }
+
+    if(srcBuffer->usageType() == EResource::UsageType::Upload &&
+       dstBuffer->usageType() == EResource::UsageType::ReadBack)
+    { return; }
 #endif
     
     /*
@@ -353,13 +408,29 @@ void DX10CommandList::copyBuffer(const NullableRef<IResource>& dstBuffer, const 
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(dstBuffer);
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(srcBuffer);
 
-    const ETexture::EBox srcBox = ETexture::RBox{ static_cast<u32>(srcOffset), static_cast<u32>(byteCount), 0, 0, 0, 0 }.toExact();
+    const ETexture::EBox srcBox = ETexture::RBox { static_cast<u32>(srcOffset), static_cast<u32>(byteCount), 0, 0, 0, 0 }.toExact();
+    
+    {
+        NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dstBuffer);
+        NullableRef<DX10Resource> dxSrc = RefCast<DX10Resource>(srcBuffer);
 
-    const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dstBuffer->_getRawHandle().dx10Resource(), 0, srcBuffer->_getRawHandle().dx10Resource(), 0);
-    (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
-
-    const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1({ static_cast<u32>(dstOffset), 0, 0 }, &srcBox);
-    (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion1);
+        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.get(), 0, dxSrc.get(), 0);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
+    }
+    
+    if(srcBuffer->usageType() == EResource::UsageType::Upload)
+    {
+        NullableRef<DX10ResourceTransferBuffer> tSrc = RefCast<DX10ResourceTransferBuffer>(srcBuffer);
+        void* const mapping = tSrc->transferMapping();
+        
+        const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1(nullptr, { static_cast<u32>(dstOffset), 0, 0 }, &srcBox);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion1);
+    }
+    else
+    {
+        const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1(nullptr, { static_cast<u32>(dstOffset), 0, 0 }, &srcBox);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion1);
+    }
 
     const DX10CL::CommandCopySubresourceRegion2 copySubresourceRegion2(&srcBox);
     (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion2);
@@ -386,6 +457,16 @@ void DX10CommandList::copyTexture(const NullableRef<IResource>& dstTexture, cons
     if(dstTexture->resourceType() == EResource::Type::Buffer ||
        srcTexture->resourceType() == EResource::Type::Buffer)
     { return; }
+
+    if(dstTexture->usageType() == EResource::UsageType::Upload)
+    { return; }
+
+    if(srcTexture->usageType() == EResource::UsageType::ReadBack)
+    { return; }
+
+    if(srcTexture->usageType() == EResource::UsageType::Upload &&
+       dstTexture->usageType() == EResource::UsageType::ReadBack)
+    { return; }
 #endif
     
     /*
@@ -393,11 +474,16 @@ void DX10CommandList::copyTexture(const NullableRef<IResource>& dstTexture, cons
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(dstTexture);
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(srcTexture);
+    
+    {
+        NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dstTexture);
+        NullableRef<DX10Resource> dxSrc = RefCast<DX10Resource>(srcTexture);
 
-    const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dstTexture->_getRawHandle().dx10Resource(), dstSubResource, srcTexture->_getRawHandle().dx10Resource(), srcSubResource);
-    (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
+        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.get(), dstSubResource, dxSrc.get(), srcSubResource);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
+    }
 
-    const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1(BASE_COORD, nullptr);
+    const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1(nullptr, BASE_COORD, nullptr);
     (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion1);
 
     const DX10CL::CommandCopySubresourceRegion2 copySubresourceRegion2(nullptr);
@@ -421,6 +507,16 @@ void DX10CommandList::copyTexture(const NullableRef<IResource>& dstTexture, u32 
     if(dstTexture->resourceType() == EResource::Type::Buffer ||
        srcTexture->resourceType() == EResource::Type::Buffer)
     { return; }
+
+    if(dstTexture->usageType() == EResource::UsageType::Upload)
+    { return; }
+
+    if(srcTexture->usageType() == EResource::UsageType::ReadBack)
+    { return; }
+
+    if(srcTexture->usageType() == EResource::UsageType::Upload &&
+       dstTexture->usageType() == EResource::UsageType::ReadBack)
+    { return; }
 #endif
     
     /*
@@ -428,11 +524,16 @@ void DX10CommandList::copyTexture(const NullableRef<IResource>& dstTexture, u32 
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(dstTexture);
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(srcTexture);
+    
+    {
+        NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dstTexture);
+        NullableRef<DX10Resource> dxSrc = RefCast<DX10Resource>(srcTexture);
 
-    const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dstTexture->_getRawHandle().dx10Resource(), dstSubResource, srcTexture->_getRawHandle().dx10Resource(), srcSubResource);
-    (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
+        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.get(), dstSubResource, dxSrc.get(), srcSubResource);
+        (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
+    }
 
-    const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1(coord, srcBox);
+    const DX10CL::CommandCopySubresourceRegion1 copySubresourceRegion1(nullptr, coord, srcBox);
     (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion1);
 
     const DX10CL::CommandCopySubresourceRegion2 copySubresourceRegion2(srcBox);

@@ -4,13 +4,27 @@
 #include <Safeties.hpp>
 #include <RunTimeType.hpp>
 #include "DLL.hpp"
-#include "graphics/_GraphicsOpaqueObjects.hpp"
 
 class IFile;
+class IShader;
 
-struct ShaderProgramArgs final
+struct ShaderProgramAutoArgs final
 {
     CPPRef<IFile> bundleFile;
+};
+
+struct ShaderProgramManualArgs final
+{
+    NullableRef<IShader> vertexShader;
+    NullableRef<IShader> tessCtrlShader;
+    NullableRef<IShader> tessEvalShader;
+    NullableRef<IShader> geometryShader;
+    NullableRef<IShader> pixelShader;
+};
+
+struct ShaderProgramComputeArgs final
+{
+    NullableRef<IShader> computeShader;
 };
 
 #define SHADER_PROGRAM_IMPL(_TYPE) RTT_IMPL(_TYPE, IShaderProgram)
@@ -36,6 +50,12 @@ public:
     {
         NoError = 0,
         InvalidShaderStage,
+        MissingVertexShader,
+        MissingTessellationControlShader,
+        MissingHullShader = MissingTessellationControlShader,
+        MissingTessellationEvaluationShader,
+        MissingDomainShader = MissingTessellationEvaluationShader,
+        MissingPixelShader,
         CompileError,
         InvalidFile,
         InvalidInclude,
@@ -44,6 +64,6 @@ public:
         InternalError
     };
 public:
-    [[nodiscard]] virtual ShaderProgram build(const ShaderProgramArgs& args, [[tau::out]] Error* error) noexcept = 0;
-    virtual void destroy(ShaderProgram program) noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IShaderProgram> build(const ShaderProgramAutoArgs&   args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IShaderProgram> build(const ShaderProgramManualArgs& args, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 };

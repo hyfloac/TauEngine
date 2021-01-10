@@ -44,13 +44,13 @@ enum class MapType
     /**
      * You will be reading data from the GPU.
      */
-    NoWrite
+    ReadOnly
 };
 
 /**
  * Used to determine how the resource will be used.
  */
-enum class UsageType
+enum class UsageTypeLegacy
 {
     /**
      * General use. Usually written once.
@@ -68,6 +68,27 @@ enum class UsageType
      * Used for retrieving data from the GPU.
      */
     Readable
+};
+
+/**
+ * Used to determine how the resource will be used.
+ */
+enum class UsageType
+{
+    /**
+     *   Accessible by the GPU. Data can only be written or read by
+     * copying the data from an upload buffer or to a read-back
+     * buffer.
+     */
+    Default = 1,
+    /**
+     * Accessible by the CPU, used to transfer data to the GPU.
+     */
+    Upload,
+    /**
+     * Accessible by the CPU, used for retrieving data from the GPU.
+     */
+    ReadBack
 };
 
 }

@@ -14,6 +14,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <MathDefines.hpp>
 
+
+#include "system/GraphicsCapabilities.hpp"
 #include "texture/TextureView.hpp"
 
 #pragma push(pack, 1)
@@ -37,7 +39,7 @@ struct RendererData final
     IGraphicsInterface* gi;
 
     NullableRef<IResource> equilateralTriangleVertexBuffer;
-    NullableRef<IResource> quadTextureBuffer;
+    NullableRef<IResource> quadHexagonTextureBuffer;
     NullableRef<IResource> quadHexagonVertexBuffer;
     NullableRef<IResource> quadHexagonIndexBuffer;
 
@@ -87,6 +89,8 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
         NullableRef<IInputLayout> inputLayout;
 
         {
+            // Use all 32 texture slots, this allows us to use textures in the batching.
+
             DescriptorLayoutEntry entry;
             entry.type = DescriptorLayoutEntry::Type::TextureView;
             entry.begin = 0;
@@ -122,13 +126,21 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
         {
             BufferDescriptorBuilder descriptorBuilder(1, false);
             descriptorBuilder.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
+            descriptorBuilder.addDescriptor(ShaderSemantic::Color, ShaderDataType::Vector4Float);
+            
+            BufferDescriptor descriptors[2];
 
-            BufferDescriptor descriptor = descriptorBuilder.build();
+            descriptors[0] = descriptorBuilder.build();
 
+            descriptorBuilder.reset(1, false);
+            descriptorBuilder.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
+
+            descriptors[1] = descriptorBuilder.build();
+            
             InputLayoutArgs args;
             args.shader = nullptr;
-            args.descriptorCount = 1;
-            args.descriptors = &descriptor;
+            args.descriptorCount = 2;
+            args.descriptors = descriptors;
 
             IInputLayoutBuilder::Error error;
             inputLayout = gi.createInputLayout().buildTauRef(args, &error);
@@ -144,9 +156,11 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
     }
 
     {
+        // For sets of texture coords, one for triangles, one for quads, one for hexagons, one for octagons
+
         DescriptorHeapArgs args;
         args.type = EGraphics::DescriptorType::TextureView;
-        args.numDescriptors = 32 + 32;
+        args.numDescriptors = 32 * 4;
         args.flags = DHF_ShaderAccess;
 
         IDescriptorHeapBuilder::Error error;
@@ -154,22 +168,25 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
     }
 
     {
-        rendererData.equilateralTriangleVertexPositions[0] = glm::vec3(0.0f, 1.0f, 1.0f); // (0, 1)
-        rendererData.equilateralTriangleVertexPositions[1] = glm::vec3(-T_SQRT_3 / 2.0f, -0.5f, 1.0f); // (-sqrt(3)/2, -0.5)
-        rendererData.equilateralTriangleVertexPositions[2] = glm::vec3(T_SQRT_3 / 2.0f, -0.5f, 1.0f); // (sqrt(3), -0.5)
+        static constexpr float SidePointPos = static_cast<float>(+T_SQRT_3 / 2.0);
+        static constexpr float SidePointNeg = static_cast<float>(-T_SQRT_3 / 2.0);
+
+        rendererData.equilateralTriangleVertexPositions[0] = glm::vec3(0.0f, 1.0f, 1.0f);          // (0, 1)
+        rendererData.equilateralTriangleVertexPositions[1] = glm::vec3(SidePointNeg, -0.5f, 1.0f); // (-sqrt(3)/2, -0.5)
+        rendererData.equilateralTriangleVertexPositions[2] = glm::vec3(SidePointPos, -0.5f, 1.0f); // (sqrt(3), -0.5)
 
         rendererData.quadVertexPositions[0] = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); // (0, 0)
         rendererData.quadVertexPositions[1] = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); // (0, 1)
         rendererData.quadVertexPositions[2] = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f); // (1, 0)
         rendererData.quadVertexPositions[3] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // (1, 1)
         
-        rendererData.hexagonVertexPositions[0] = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f); // (0, 0)
-        rendererData.hexagonVertexPositions[1] = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f); // (0, 1)
-        rendererData.hexagonVertexPositions[2] = glm::vec4(-T_SQRT_3 / 2.0f, 0.5f, 1.0f, 1.0f); // (-sqrt(3)/2, 0.5)
-        rendererData.hexagonVertexPositions[3] = glm::vec4(-T_SQRT_3 / 2.0f, -0.5f, 1.0f, 1.0f); // (-sqrt(3)/2, -0.5)
-        rendererData.hexagonVertexPositions[4] = glm::vec4(0.0f, -1.0f, 1.0f, 1.0f); // (0, -1)
-        rendererData.hexagonVertexPositions[5] = glm::vec4(T_SQRT_3 / 2.0f, -0.5f, 1.0f, 1.0f); // (sqrt(3), -0.5)
-        rendererData.hexagonVertexPositions[6] = glm::vec4(T_SQRT_3 / 2.0f, 0.5f, 1.0f, 1.0f); // (sqrt(3), 0.5)
+        rendererData.hexagonVertexPositions[0] = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);          // (0, 0)
+        rendererData.hexagonVertexPositions[1] = glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);          // (0, 1)
+        rendererData.hexagonVertexPositions[2] = glm::vec4(SidePointNeg, 0.5f, 1.0f, 1.0f);  // (-sqrt(3)/2, 0.5)
+        rendererData.hexagonVertexPositions[3] = glm::vec4(SidePointNeg, -0.5f, 1.0f, 1.0f); // (-sqrt(3)/2, -0.5)
+        rendererData.hexagonVertexPositions[4] = glm::vec4(0.0f, -1.0f, 1.0f, 1.0f);         // (0, -1)
+        rendererData.hexagonVertexPositions[5] = glm::vec4(SidePointPos, -0.5f, 1.0f, 1.0f); // (sqrt(3)/2, -0.5)
+        rendererData.hexagonVertexPositions[6] = glm::vec4(SidePointPos, 0.5f, 1.0f, 1.0f);  // (sqrt(3)/2, 0.5)
 
         rendererData.quadIndices[0] = 0;
         rendererData.quadIndices[1] = 2;
@@ -228,10 +245,10 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
         }
 
         {
-            args.size = RendererData::MaxQuadVertices * Vec2Size;
+            args.size = RendererData::MaxQuadVertices * Vec2Size + RendererData::MaxHexagonIndices * Vec2Size;
             args.usageType = EResource::UsageType::Default;
 
-            rendererData.quadTextureBuffer = gi.createResource().buildTauRef(args, nullptr, &error);
+            rendererData.quadHexagonTextureBuffer = gi.createResource().buildTauRef(args, nullptr, &error);
         }
 
         {
@@ -256,10 +273,8 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
         descriptorBuilder.reset(1, false);
         descriptorBuilder.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
 
-        quadView[1] = VertexBufferView(rendererData.quadTextureBuffer, descriptorBuilder.build());
-
-
-
+        quadView[1] = VertexBufferView(rendererData.quadHexagonTextureBuffer, descriptorBuilder.build());
+        
         VertexArrayArgs args;
         args.bufferCount = 1;
         args.bufferViews = &equilateralTriangleView;
@@ -274,7 +289,12 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
     }
 
     {
-        float* const texturesMapping = reinterpret_cast<float*>(rendererData.quadTextureBuffer->map(cmdList, EResource::MapType::Discard));
+        if(!gi.capabilities().resourceCapabilities().supportsDirectModify)
+        {
+            
+        }
+
+        float* const texturesMapping = reinterpret_cast<float*>(rendererData.quadHexagonTextureBuffer->map(cmdList, EResource::MapType::Discard));
 
         float quadTextures[] = {
             0.0f, 0.0f,
@@ -283,12 +303,30 @@ void BatchRenderer::init(IGraphicsInterface& gi, ICommandList& cmdList) noexcept
             1.0f, 1.0f
         };
 
+        static constexpr float SidePointPos = static_cast<float>(+T_SQRT_3 / 4.0 + 0.5);
+        static constexpr float SidePointNeg = static_cast<float>(-T_SQRT_3 / 4.0 + 0.5);
+
+        float hexagonTextures[] = {
+            0.5f, 0.5f,           // (0, 0)
+            0.5f, 1.0f,           // (0, 1)
+            SidePointNeg, 0.75f,  // (-sqrt(3)/4 + 0.5, 0.75)
+            SidePointNeg, 0.25f,  // (-sqrt(3)/4 + 0.5, 0.25)
+            0.5f, 0.0f,           // (0, 0)
+            SidePointPos, 0.25f, // (sqrt(3)/4 + 0.5, 0.25)
+            SidePointPos, 0.75f  // (sqrt(3)/4 + 0.5, 0.75)
+        };
+        
         for(uSys i = 0; i < RendererData::MaxQuads; ++i)
         {
             ::std::memcpy(texturesMapping + i * 4, quadTextures, sizeof(quadTextures));
         }
+        
+        for(uSys i = 0, base = 4 * RendererData::MaxQuads; i < RendererData::MaxHexagons; ++i)
+        {
+            ::std::memcpy(texturesMapping + i * 6 + base, hexagonTextures, sizeof(hexagonTextures));
+        }
 
-        rendererData.quadHexagonIndexBuffer->unmap(cmdList);
+        rendererData.quadHexagonTextureBuffer->unmap(cmdList);
     }
 
     {

@@ -184,30 +184,28 @@ SRWMutex TimingsWriter::_mutex;
 
 void TimingsWriter::begin(const char* const name, const WDynString& fileName) noexcept
 {
-    _mutex.lock();
+    Lock lock(_mutex);
     if(!_profileFile)
     {
         _profileFile = VFS::Instance().openFile(fileName, FileProps::WriteNew);
         _profileCount = 0;
         writeHeader(name);
     }
-    _mutex.unlock();
 }
 
 void TimingsWriter::end() noexcept
 {
-    _mutex.lock();
+    Lock lock(_mutex);
     if(_profileFile)
     {
         writeFooter();
         _profileFile = nullptr;
     }
-    _mutex.unlock();
 }
 
 void TimingsWriter::write(const ProfileResult& pr) noexcept
 {
-    _mutex.lock();
+    Lock lock(_mutex);
     if(_profileFile)
     {
         if(_profileCount++ > 0)
@@ -243,7 +241,6 @@ void TimingsWriter::write(const ProfileResult& pr) noexcept
         }
         _profileFile->writeString(R"(})");
     }
-    _mutex.unlock();
 }
 
 void TimingsWriter::writeHeader(const char* name) noexcept

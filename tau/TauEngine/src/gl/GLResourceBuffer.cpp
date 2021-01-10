@@ -55,7 +55,7 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
                     _currentMapping = glMapBufferRange(_glBufferType, 0, _size, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
                 }
             }
-            else if(mapType == EResource::MapType::NoWrite)
+            else if(mapType == EResource::MapType::ReadOnly)
             {
                 // The user has not requested write access.
 
@@ -165,7 +165,7 @@ void GLResourceBuffer::unmap(IRenderingContext&, uSys, uSys) noexcept
             case EResource::MapType::NoOverwrite:
                 glUnmapBuffer(_glBufferType);
                 break;
-            case EResource::MapType::NoWrite:
+            case EResource::MapType::ReadOnly:
                 glUnmapBuffer(_glBufferType);
                 break;
             default: break;

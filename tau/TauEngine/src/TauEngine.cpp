@@ -75,11 +75,6 @@ void tauExit(const i32 code) noexcept
     exit_code = code;
 }
 
-void tauExit() noexcept
-{
-    should_exit = true;
-}
-
 #ifdef _WIN32
 #pragma warning(push, 0)
 #include <Windows.h>
@@ -110,9 +105,9 @@ i32 tauExitCode() noexcept
     return exit_code;
 }
 
-void tauGameLoop(u32 targetUPS, update_f updateF, render_f renderF, renderFPS_f renderFPS) noexcept
+void tauGameLoop(const u32 targetUPS, const update_f updateF, const render_f renderF, const renderFPS_f renderFPS) noexcept
 {
-    const float Mu_PER_UPDATE = 1000000.0f / targetUPS;
+    const float Mu_PER_UPDATE = 1000000.0f / static_cast<float>(targetUPS);
     u64 lastTime = microTime();
     float lag = 0.0f;
 

@@ -73,20 +73,23 @@ class TAU_DLL TAU_NOVTABLE IResource
 protected:
     uSys _size;
     EResource::Type _resourceType;
+    EResource::UsageType _usageType;
 #if TAU_RESOURCE_DEBUG_DATA
     const tau::debug::ResourceDebugData* _debugData;
 #endif
 protected:
 #if TAU_RESOURCE_DEBUG_DATA
-    IResource(const uSys size, const EResource::Type resourceType) noexcept
+    IResource(const uSys size, const EResource::Type resourceType, const EResource::UsageType usageType) noexcept
         : _size(size)
         , _resourceType(resourceType)
+        , _usageType(usageType)
         , _debugData(nullptr)
     { }
 #else
-    IResource(const uSys size, const EResource::Type resourceType) noexcept
+    IResource(const uSys size, const EResource::Type resourceType, const EResource::UsageType usageType) noexcept
         : _size(size)
         , _resourceType(resourceType)
+        , _usageType(usageType)
     { }
 #endif
 public:
@@ -99,7 +102,8 @@ public:
 
     [[nodiscard]] uSys size() const noexcept { return _size; }
 
-    [[nodiscard]] EResource::Type resourceType() const noexcept { return _resourceType; };
+    [[nodiscard]] EResource::Type resourceType() const noexcept { return _resourceType; }
+    [[nodiscard]] EResource::UsageType usageType() const noexcept { return _usageType; }
 
 #if TAU_RESOURCE_DEBUG_DATA
     [[nodiscard]] const tau::debug::ResourceDebugData* debugData() const noexcept { return _debugData; }
@@ -117,8 +121,8 @@ public:
     }
 #endif
 
-    [[nodiscard]] virtual void* map(ICommandList& context, EResource::MapType mapType = EResource::MapType::Default, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none(), const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
-    virtual void unmap(ICommandList& context, uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = null) noexcept = 0;
+    [[nodiscard]] virtual void* map(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none(), const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
+    virtual void unmap(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
 
     template<typename _Args>
     [[nodiscard]] const _Args* getArgs() const noexcept { return null; }
@@ -140,9 +144,6 @@ struct ResourceBufferArgs final
 public:
     uSys size;
     EBuffer::Type bufferType;
-    /**
-     * A hint on how the resource will be accessed.
-     */
     EResource::UsageType usageType;
     const void* initialBuffer;
 };

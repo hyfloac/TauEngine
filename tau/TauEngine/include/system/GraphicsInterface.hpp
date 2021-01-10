@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Objects.hpp>
-#include <DynArray.hpp>
 
 #include "DLL.hpp"
 #include "GraphicsAccelerator.hpp"

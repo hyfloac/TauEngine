@@ -4,7 +4,6 @@
 #include "dx/dx12/d3dx12.h"
 #include "graphics/CommandList.hpp"
 #include "dx/dx12/DX12GraphicsInterface.hpp"
-#include "dx/dx12/D3D12MemAlloc.h"
 
 void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMapRange* mapReadRange) noexcept
 {
@@ -13,7 +12,7 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
         if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
         { return null; }
 
-        if(mapType == EResource::MapType::NoWrite)
+        if(mapType == EResource::MapType::ReadOnly)
         { return null; }
 
         void* mapping;

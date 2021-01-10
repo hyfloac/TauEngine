@@ -4,9 +4,11 @@
 #include <NumTypes.hpp>
 #include <Safeties.hpp>
 #include <RunTimeType.hpp>
+#include <bit>
 
 #include "DLL.hpp"
 #include "DescriptorHeap.hpp"
+#include "ResourceEnums.hpp"
 #include "GraphicsEnums.hpp"
 #include "texture/TextureEnums.hpp"
 
@@ -20,6 +22,7 @@ class IFrameBuffer;
 class IRenderTargetView;
 class IDepthStencilView;
 class IDescriptorLayout;
+struct ResourceMapRange;
 
 #define COMMAND_LIST_IMPL(_TYPE) RTT_IMPL(_TYPE, ICommandList)
 
@@ -292,6 +295,13 @@ public:
      */
     virtual void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept = 0;
 
+    virtual void setGraphicsDescriptorConstant(uSys index, u32 constant) noexcept = 0;
+    
+    void setGraphicsDescriptorConstant(uSys index, const float constant) noexcept
+    { setGraphicsDescriptorConstant(index, ::std::bit_cast<u32>(constant)); }
+
+    virtual void setGraphicsDescriptorConstants(uSys index, uSys constantCount, const void* constants) noexcept = 0;
+
     /**
      * @brief Executes a command list bundle.
      *
@@ -386,7 +396,7 @@ public:
      *      An optional region box to copy from.
      */
     virtual void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const ETexture::Coord& coord, const NullableRef<IResource>& srcTexture, u32 srcSubResource, const ETexture::EBox* srcBox) noexcept = 0;
-
+    
     RTT_BASE_IMPL(ICommandList);
     RTT_BASE_CHECK(ICommandList);
     RTT_BASE_CAST(ICommandList);
@@ -396,6 +406,7 @@ struct CommandListArgs final
 {
     NullableRef<ICommandAllocator> commandAllocator;
     NullableRef<IPipelineState> pipelineState;
+    EGraphics::CommandListType type;
 };
 
 class TAU_DLL TAU_NOVTABLE ICommandListBuilder
