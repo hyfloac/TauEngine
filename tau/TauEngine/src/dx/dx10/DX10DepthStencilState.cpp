@@ -117,16 +117,16 @@ bool DX10DepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, ID3
     depthStencilDesc.BackFace.StencilPassOp = dxStencilOp(args.backFace.passOp);
     depthStencilDesc.BackFace.StencilFunc = dxComparisonFunc(args.backFace.compareFunc);
 
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.DepthWriteMask) == IntMaxMin<u32>::Max(), Error::InvalidDepthWriteMask);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.DepthFunc) == IntMaxMin<u32>::Max(), Error::InvalidDepthCompareFunc);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilFailOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilDepthFailOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilPassDepthFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilPassOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilPassOp);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilFunc) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilCompareFunc);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilFailOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilDepthFailOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilPassDepthFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilPassOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilPassOp);
-    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilFunc) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilCompareFunc);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.DepthWriteMask) == IntMaxMin<u32>::Max, Error::InvalidDepthWriteMask);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.DepthFunc) == IntMaxMin<u32>::Max, Error::InvalidDepthCompareFunc);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilFailOp) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilDepthFailOp) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilPassDepthFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilPassOp) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilPassOp);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.FrontFace.StencilFunc) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilCompareFunc);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilFailOp) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilDepthFailOp) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilPassDepthFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilPassOp) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilPassOp);
+    ERROR_CODE_COND_F(static_cast<u32>(depthStencilDesc.BackFace.StencilFunc) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilCompareFunc);
 
     const HRESULT res = _gi.d3d10Device()->CreateDepthStencilState(&depthStencilDesc, d3dDepthStencilState);
 
@@ -141,7 +141,7 @@ D3D10_DEPTH_WRITE_MASK DX10DepthStencilStateBuilder::dxDepthWriteMask(const Dept
     {
         case DepthStencilArgs::DepthWriteMask::Zero: return D3D10_DEPTH_WRITE_MASK_ZERO;
         case DepthStencilArgs::DepthWriteMask::All:  return D3D10_DEPTH_WRITE_MASK_ALL;
-        default:                                     return static_cast<D3D10_DEPTH_WRITE_MASK>(IntMaxMin<u32>::Max());
+        default:                                     return static_cast<D3D10_DEPTH_WRITE_MASK>(IntMaxMin<u32>::Max);
     }
 }
 
@@ -157,7 +157,7 @@ D3D10_COMPARISON_FUNC DX10DepthStencilStateBuilder::dxComparisonFunc(const Depth
         case DepthStencilArgs::CompareFunc::NotEqual:           return D3D10_COMPARISON_NOT_EQUAL;
         case DepthStencilArgs::CompareFunc::Always:             return D3D10_COMPARISON_ALWAYS;
         case DepthStencilArgs::CompareFunc::Never:              return D3D10_COMPARISON_NEVER;
-        default:                                                return static_cast<D3D10_COMPARISON_FUNC>(IntMaxMin<u32>::Max());
+        default:                                                return static_cast<D3D10_COMPARISON_FUNC>(IntMaxMin<u32>::Max);
     }
 }
 
@@ -173,7 +173,7 @@ D3D10_STENCIL_OP DX10DepthStencilStateBuilder::dxStencilOp(const DepthStencilArg
         case DepthStencilArgs::StencilOp::DecrementClamp: return D3D10_STENCIL_OP_DECR_SAT;
         case DepthStencilArgs::StencilOp::IncrementWrap:  return D3D10_STENCIL_OP_INCR;
         case DepthStencilArgs::StencilOp::DecrementWrap:  return D3D10_STENCIL_OP_DECR;
-        default:                                          return static_cast<D3D10_STENCIL_OP>(IntMaxMin<u32>::Max());
+        default:                                          return static_cast<D3D10_STENCIL_OP>(IntMaxMin<u32>::Max);
     }
 }
 #endif

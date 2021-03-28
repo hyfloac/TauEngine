@@ -3,7 +3,7 @@
 #include "graphics/CommandQueue.hpp"
 
 #ifdef _WIN32
-#include <d3d10.h>
+#include "graphics/ResourceRawInterface.hpp"
 #include "DX10CommandList.hpp"
 #include "DX10DescriptorLayout.hpp"
 

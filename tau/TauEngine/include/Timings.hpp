@@ -58,13 +58,13 @@ struct ClockCyclesTimeFrame final
  * @param[in] timeoutMS
  *    The number of milliseconds to timeout for.
  */
-TAU_DLL void computeClockCyclesPerTime(const u64 timeoutMS = 50) noexcept;
+TAU_DLL void computeClockCyclesPerTime(u64 timeoutMS = 50) noexcept;
 
 /**
- *   Used to compute the {@link ClockCyclesTimeFrame} from how
- * long the program has been running for. This function 
- * produces an average clock speed unlike 
- * {@link computeClockCyclesPerTime(const u64) @endlink} which
+ *   Used to compute the @link ClockCyclesTimeFrame @endlink
+ * from how long the program has been running for. This
+ * function produces an average clock speed unlike 
+ * @link computeClockCyclesPerTime(u64) @endlink which
  * computes a current clock speed.
  */
 TAU_DLL void computeClockCyclesFromRuntime() noexcept;

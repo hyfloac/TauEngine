@@ -17,9 +17,10 @@
 #include "dx/dx10/DX10FrameBuffer.hpp"
 #include "system/Window.hpp"
 
-DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice) noexcept
+DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* const d3dDevice, IDXGIAdapter1* const dxgiAdapter) noexcept
     : IGraphicsInterface(mode)
     , _d3d10Device(d3dDevice)
+    , _dxgiAdapter(dxgiAdapter)
     , _shaderInfoExtractor(mode.currentMode())
     , _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this, &_shaderInfoExtractor))
     , _shaderProgramBuilder(new(::std::nothrow) DX10ShaderProgramBuilder(&_shaderInfoExtractor))

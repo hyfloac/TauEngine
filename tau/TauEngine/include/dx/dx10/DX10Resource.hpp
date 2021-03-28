@@ -13,9 +13,24 @@ class TAU_DLL TAU_NOVTABLE DX10Resource : public IResource
     DELETE_CM(DX10Resource);
     RESOURCE_IMPL(DX10Resource);
 protected:
-    DX10Resource(const uSys size, const EResource::Type resourceType) noexcept
-        : IResource(size, resourceType)
+    DX10Resource(const uSys size, const EResource::Type resourceType, const EResource::UsageType usageType) noexcept
+        : IResource(size, resourceType, usageType)
     { }
+};
+
+class TAU_DLL DX10TransferResource final
+{
+    DELETE_CONSTRUCT(DX10TransferResource);
+    DELETE_DESTRUCT(DX10TransferResource);
+    DELETE_CM(DX10TransferResource);
+public:
+    static constexpr ::std::align_val_t Alignment { 128 };
+
+    static void* allocate(const uSys size) noexcept
+    { return operator new(size, Alignment, ::std::nothrow); }
+
+    static void deallocate(void* const ptr) noexcept
+    { operator delete(ptr, Alignment, ::std::nothrow); }
 };
 
 class DX10ResourceBuffer;

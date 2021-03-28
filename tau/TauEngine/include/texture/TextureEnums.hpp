@@ -45,7 +45,16 @@ enum class Filter
      *
      * This will produce a rather blurry view during magnification.
      */
-    Linear
+    Linear,
+    /**
+     * Uses anisotropic filtering between pixels.
+     *
+     *   This is very computationally expensive, but produces the
+     * best results, especially at oblique angles. For anisotropic
+     * filtering, all 3 filter elements (min, mag, mip) must be
+     * anisotropic.
+     */
+    Anisotropic
 };
 
 /**
@@ -265,7 +274,7 @@ struct Box<Positioning::Relative> final
     u32 zSize;
 public:
     [[nodiscard]] Box<Positioning::Exact> toExact() const noexcept;
-    [[nodiscard]] operator Box<Positioning::Exact>() const noexcept { return toExact(); }
+    [[nodiscard]] operator Box<Positioning::Exact>() const noexcept;
 };
 
 template<>
@@ -279,7 +288,7 @@ struct Box<Positioning::Exact> final
     u32 back;
 public:
     [[nodiscard]] Box<Positioning::Relative> toRelative() const noexcept;
-    [[nodiscard]] operator Box<Positioning::Relative>() const noexcept { return toRelative(); }
+    [[nodiscard]] operator Box<Positioning::Relative>() const noexcept;
 };
 
 template<>
@@ -291,7 +300,7 @@ struct Rect<Positioning::Relative> final
     u32 ySize;
 public:
     [[nodiscard]] Rect<Positioning::Exact> toExact() const noexcept;
-    [[nodiscard]] operator Rect<Positioning::Exact>() const noexcept { return toExact(); }
+    [[nodiscard]] operator Rect<Positioning::Exact>() const noexcept;
 };
 
 template<>
@@ -303,7 +312,7 @@ struct Rect<Positioning::Exact> final
     u32 bottom;
 public:
     [[nodiscard]] Rect<Positioning::Relative> toRelative() const noexcept;
-    [[nodiscard]] operator Rect<Positioning::Relative>() const noexcept { return toRelative(); }
+    [[nodiscard]] operator Rect<Positioning::Relative>() const noexcept;
 };
 
 inline Box<Positioning::Exact> Box<Positioning::Relative>::toExact() const noexcept
@@ -311,9 +320,19 @@ inline Box<Positioning::Exact> Box<Positioning::Relative>::toExact() const noexc
     return { xPos, xPos + xSize, yPos, yPos + ySize, zPos, zPos + zSize };
 }
 
+inline Box<Positioning::Relative>::operator Box<Positioning::Exact>() const noexcept
+{
+    return toExact();
+}
+
 inline Box<Positioning::Relative> Box<Positioning::Exact>::toRelative() const noexcept
 {
     return { left, right - left, top, bottom - top, front, back - front };
+}
+
+inline Box<Positioning::Exact>::operator Box<Positioning::Relative>() const noexcept
+{
+    return toRelative();
 }
 
 inline Rect<Positioning::Exact> Rect<Positioning::Relative>::toExact() const noexcept
@@ -321,9 +340,19 @@ inline Rect<Positioning::Exact> Rect<Positioning::Relative>::toExact() const noe
     return { xPos, xPos + xSize, yPos, yPos + ySize };
 }
 
+inline Rect<Positioning::Relative>::operator Rect<Positioning::Exact>() const noexcept
+{
+    return toExact();
+}
+
 inline Rect<Positioning::Relative> Rect<Positioning::Exact>::toRelative() const noexcept
 {
     return { left, right - left, top, bottom - top };
+}
+
+inline Rect<Positioning::Exact>::operator Rect<Positioning::Relative>() const noexcept
+{
+    return toRelative();
 }
 
 /**
@@ -599,7 +628,7 @@ static constexpr bool isCompatible(const Format formatA, const Format formatB)
      * Else
      *   return false.
      */
-    return (isTypeless(formatA) ^ isTypeless(formatB)) && bytesPerComponent(formatA) == bytesPerComponent(formatB) && numComponents(formatA) == numComponents(formatB);
+    return isTypeless(formatA) != isTypeless(formatB) && bytesPerComponent(formatA) == bytesPerComponent(formatB) && numComponents(formatA) == numComponents(formatB);
 }
 
 /**
@@ -608,15 +637,15 @@ static constexpr bool isCompatible(const Format formatA, const Format formatB)
  * This divides the side length by 2, and clamps it to 1.
  */
 static constexpr inline u64 computeMipSide(const u64 width) noexcept
-{ return maxT(width / 2, 1); }
+{ return maxT(width / 2ull, 1ull); }
 
 /**
  * Computes the side length at a specific mip level.
  */
 static constexpr inline u64 computeMipSide(const u64 width, const u16 mipLevel) noexcept
 {
-    const u32 divisor = 1 << mipLevel;
-    return maxT(width / divisor, 1);
+    const u64 divisor = 1ull << mipLevel;
+    return maxT(width / divisor, 1ull);
 }
 
 /**
@@ -627,7 +656,7 @@ static constexpr inline u64 computeMipSide(const u64 width, const u16 mipLevel) 
  *      The width of the texture.
  */
 static constexpr inline u64 computeMipLevels(const u64 width) noexcept
-{ return 1 + log2i(width); }
+{ return 1ull + log2i(width); }
 
 /**
  *   Computes the maximum number of mipmap levels this texture
@@ -639,7 +668,7 @@ static constexpr inline u64 computeMipLevels(const u64 width) noexcept
  *      The height of the texture.
  */
 static constexpr inline u64 computeMipLevels(const u64 width, const u32 height) noexcept
-{ return 1 + log2i(maxT(width, height)); }
+{ return 1ull + log2i(maxT(width, height)); }
 
 /**
  *   Computes the maximum number of mipmap levels this texture
@@ -653,7 +682,7 @@ static constexpr inline u64 computeMipLevels(const u64 width, const u32 height) 
  *      The depth of the texture.
  */
 static constexpr inline u64 computeMipLevels(const u64 width, const u32 height, const u16 depth) noexcept
-{ return 1 + log2i(maxT(width, height, depth)); }
+{ return 1ull + log2i(maxT(width, height, depth)); }
 
 /**
  * Computes the sub resource index.
@@ -1141,5 +1170,192 @@ static constexpr inline u64 computeSizeMip(const Format format, const u64 width,
     { size += w * h * d; }
 
     return size * bytesPerPixel(format);
+}
+
+static constexpr inline u64 computeAlignedSubResourceSize(const Format format, const u64 rowAlignment, const u64 width, const u32 height) noexcept
+{
+    const u64 alignedRowPitch = _alignTo(width * bytesPerPixel(format), rowAlignment);
+    return alignedRowPitch * height;
+}
+
+static constexpr inline u64 computeAlignedSubResourceSize(const Format format, const u64 rowAlignment, const u64 depthAlignment, const u64 width, const u32 height, const u16 depth) noexcept
+{
+    const u64 alignedRowPitch = _alignTo(width * bytesPerPixel(format), rowAlignment);
+    const u64 alignedDepthPitch = _alignTo(alignedRowPitch * height, depthAlignment);
+    return alignedDepthPitch * depth;
+}
+
+static constexpr inline u64 computeAlignedSubResourceSizeMip(const Format format, const u64 rowAlignment, const u64 width, const u32 height, const u16 mipLevel) noexcept
+{
+    const u32 divisor = 1 << mipLevel;
+    const u64 alignedRowPitch = _alignTo((width / divisor) * bytesPerPixel(format), rowAlignment);
+    return alignedRowPitch * (height / divisor);
+}
+
+static constexpr inline u64 computeAlignedSubResourceSizeMip(const Format format, const u64 rowAlignment, const u64 depthAlignment, const u64 width, const u32 height, const u16 depth, const u16 mipLevel) noexcept
+{
+    const u32 divisor = 1 << mipLevel;
+    const u64 alignedRowPitch = _alignTo((width / divisor) * bytesPerPixel(format), rowAlignment);
+    const u64 alignedDepthPitch = _alignTo(alignedRowPitch * (height / divisor), depthAlignment);
+    return alignedDepthPitch * (depth / divisor);
+}
+
+static constexpr inline u64 computeAlignedSize(const Format format, const u64 mipAlignment, const u64 width) noexcept
+{
+    u64 size = 0;
+
+    for(u64 w = width; w > 1; w = computeMipSide(w))
+    {
+        size += w * bytesPerPixel(format);
+
+        //   By aligning the current size to the mipAlignment we can
+        // know make sure there is enough slack space for the memory
+        // alignment.
+        size = _alignTo(size, mipAlignment);
+    }
+
+    return size;
+}
+
+static constexpr inline u64 computeAlignedSizeArr(const Format format, const u64 mipAlignment, const u64 arrayAlignment, const u64 width, const u16 arrayCount) noexcept
+{
+    const u64 mipChainSize = computeAlignedSize(format, mipAlignment, width);
+    return _alignTo(mipChainSize, arrayAlignment) * arrayCount;
+}
+
+static constexpr inline u64 computeAlignedSize(const Format format, const u64 rowAlignment, const u64 mipAlignment, const u64 width, const u32 height) noexcept
+{
+    u64 size = 0;
+
+    for(u64 w = width, h = height; w > 1 && h > 1; w = computeMipSide(w), h = computeMipSide(h))
+    {
+        const u64 alignedRowPitch = _alignTo(w * bytesPerPixel(format), rowAlignment);
+        size += alignedRowPitch * h;
+
+        //   By aligning the current size to the mipAlignment we can
+        // know make sure there is enough slack space for the memory
+        // alignment.
+        size = _alignTo(size, mipAlignment);
+    }
+
+    return size;
+}
+
+static constexpr inline u64 computeAlignedSizeArr(const Format format, const u64 rowAlignment, const u64 mipAlignment, const u64 arrayAlignment, const u64 width, const u32 height, const u16 arrayCount) noexcept
+{
+    const u64 mipChainSize = computeAlignedSize(format, rowAlignment, mipAlignment, width, height);
+    return _alignTo(mipChainSize, arrayAlignment) * arrayCount;
+}
+
+static constexpr inline u64 computeAlignedSize(const Format format, const u64 rowAlignment, const u64 depthAlignment, const u64 mipAlignment, const u64 width, const u32 height, const u16 depth) noexcept
+{
+    u64 size = 0;
+
+    for(u64 w = width, h = height, d = depth; w > 1 && h > 1 && d > 1; w = computeMipSide(w), h = computeMipSide(h), d = computeMipSide(d))
+    {
+        const u64 alignedRowPitch = _alignTo(w * bytesPerPixel(format), rowAlignment);
+        const u64 alignedDepthPitch = _alignTo(alignedRowPitch * h, depthAlignment);
+        size += alignedDepthPitch * d;
+
+        //   By aligning the current size to the mipAlignment we can
+        // know make sure there is enough slack space for the memory
+        // alignment.
+        size = _alignTo(size, mipAlignment);
+    }
+
+    return size;
+}
+    
+static constexpr inline u64 computeAlignedSizeMip(const Format format, const u64 mipAlignment, const u64 width, const u16 mipLevels) noexcept
+{
+    u64 size = 0;
+
+    for(u64 w = width, m = mipLevels; w > 1 && m > 0; --m, w = computeMipSide(w))
+    {
+        size += w * bytesPerPixel(format);
+
+        //   By aligning the current size to the mipAlignment we can
+        // know make sure there is enough slack space for the memory
+        // alignment.
+        size = _alignTo(size, mipAlignment);
+    }
+
+    return size;
+}
+
+static constexpr inline u64 computeAlignedSizeArrMip(const Format format, const u64 mipAlignment, const u64 arrayAlignment, const u64 width, const u16 mipLevels, const u16 arrayCount) noexcept
+{
+    const u64 mipChainSize = computeAlignedSizeMip(format, mipAlignment, width, mipLevels);
+    return _alignTo(mipChainSize, arrayAlignment) * arrayCount;
+}
+
+static constexpr inline u64 computeAlignedSizeMip(const Format format, const u64 rowAlignment, const u64 mipAlignment, const u64 width, const u32 height, const u16 mipLevels) noexcept
+{
+    u64 size = 0;
+
+    for(u64 w = width, h = height, m = mipLevels; w > 1 && h > 1 && m > 0; w = computeMipSide(w), h = computeMipSide(h), --m)
+    {
+        const u64 alignedRowPitch = _alignTo(w * bytesPerPixel(format), rowAlignment);
+        size += alignedRowPitch * h;
+
+        //   By aligning the current size to the mipAlignment we can
+        // know make sure there is enough slack space for the memory
+        // alignment.
+        size = _alignTo(size, mipAlignment);
+    }
+
+    return size;
+}
+
+static constexpr inline u64 computeAlignedSizeArrMip(const Format format, const u64 rowAlignment, const u64 mipAlignment, const u64 arrayAlignment, const u64 width, const u32 height, const u16 mipLevels, const u16 arrayCount) noexcept
+{
+    const u64 mipChainSize = computeAlignedSizeMip(format, rowAlignment, mipAlignment, width, height, mipLevels);
+    return _alignTo(mipChainSize, arrayAlignment) * arrayCount;
+}
+
+static constexpr inline u64 computeAlignedSizeMip(const Format format, const u64 rowAlignment, const u64 depthAlignment, const u64 mipAlignment, const u64 width, const u32 height, const u16 depth, const u16 mipLevels) noexcept
+{
+    u64 size = 0;
+
+    for(u64 w = width, h = height, d = depth, m = mipLevels; w > 1 && h > 1 && d > 1 && m > 0; w = computeMipSide(w), h = computeMipSide(h), d = computeMipSide(d), --m)
+    {
+        const u64 alignedRowPitch = _alignTo(w * bytesPerPixel(format), rowAlignment);
+        const u64 alignedDepthPitch = _alignTo(alignedRowPitch * h, depthAlignment);
+        size += alignedDepthPitch * d;
+
+        //   By aligning the current size to the mipAlignment we can
+        // know make sure there is enough slack space for the memory
+        // alignment.
+        size = _alignTo(size, mipAlignment);
+    }
+
+    return size;
+}
+
+static constexpr inline u64 computeOffsetAlignedArrMip(const Format format, const u64 mipAlignment, const u64 arrayAlignment, const u64 width, const u16 mipLevels, const u16 mipTarget, const u16 arrayIndex) noexcept
+{
+    const u64 mipChainSize = computeAlignedSizeMip(format, mipAlignment, width, mipLevels);
+    const u64 arrayOffset = _alignTo(mipChainSize, arrayAlignment) * arrayIndex;
+    const u64 mipOffset = computeAlignedSizeMip(format, mipAlignment, width, mipTarget);
+
+    return mipOffset + arrayOffset;
+}
+
+static constexpr inline u64 computeOffsetAlignedArrMip(const Format format, const u64 rowAlignment, const u64 mipAlignment, const u64 arrayAlignment, const u64 width, const u32 height, const u16 mipLevels, const u16 mipTarget, const u16 arrayIndex) noexcept
+{
+    const u64 mipChainSize = computeAlignedSizeMip(format, rowAlignment, mipAlignment, width, height, mipLevels);
+    const u64 arrayOffset = _alignTo(mipChainSize, arrayAlignment) * arrayIndex;
+    const u64 mipOffset = computeAlignedSizeMip(format, rowAlignment, mipAlignment, width, height, mipTarget);
+    
+    return mipOffset + arrayOffset;
+}
+
+static constexpr inline u64 computeOffsetAlignedArrMip(const Format format, const u64 rowAlignment, const u64 depthAlignment, const u64 mipAlignment, const u64 width, const u32 height, const u16 depth, const u16 mipLevels, const u16 mipTarget, const u16 depthTarget) noexcept
+{
+    const u64 mipChainSize = computeAlignedSizeMip(format, rowAlignment, depthAlignment, mipAlignment, width, height, depth, mipLevels);
+    const u64 arrayOffset = _alignTo(mipChainSize, depthAlignment) * depthTarget;
+    const u64 mipOffset = computeAlignedSizeMip(format, rowAlignment, depthAlignment, mipAlignment, width, height, depth, mipTarget);
+    
+    return mipOffset + arrayOffset;
 }
 }

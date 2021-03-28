@@ -27,6 +27,7 @@ class TAU_DLL DX10GraphicsInterface final : public IGraphicsInterface
     DELETE_CM(DX10GraphicsInterface);
 private:
     ID3D10Device* _d3d10Device;
+    IDXGIAdapter1* _dxgiAdapter;
 
     ShaderInfoExtractorVisitor _shaderInfoExtractor;
 
@@ -43,11 +44,11 @@ private:
     DX10FrameBufferBuilder* _frameBufferBuilder;
     DX10RenderingContextBuilder* _renderingContextBuilder;
 public:
-    DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* d3dDevice) noexcept;
+    DX10GraphicsInterface(const RenderingMode& mode, ID3D10Device* d3dDevice, IDXGIAdapter1* dxgiAdapter) noexcept;
     ~DX10GraphicsInterface() noexcept override;
 
-    [[nodiscard]] const ID3D10Device* d3d10Device() const noexcept { return _d3d10Device; }
-    [[nodiscard]] ID3D10Device* d3d10Device() noexcept { return _d3d10Device; }
+    [[nodiscard]] ID3D10Device*  d3d10Device() const noexcept { return _d3d10Device; }
+    [[nodiscard]] IDXGIAdapter1* dxgiAdapter() const noexcept { return _dxgiAdapter; }
 
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
     [[nodiscard]] IShaderProgramBuilder& createShaderProgram() noexcept override;

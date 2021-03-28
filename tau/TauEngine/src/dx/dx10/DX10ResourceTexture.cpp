@@ -1,143 +1,94 @@
 #include "dx/dx10/DX10ResourceTexture.hpp"
 
 #ifdef _WIN32
-void* DX10ResourceTexture1D::map(const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
+#include "TauConfig.hpp"
+
+static constexpr u64 Alignment = static_cast<u64>(DX10TransferResource::Alignment);
+
+void DX10ResourceTransferTexture1D::transferMapping(void* const ptr) noexcept
 {
-    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
+#if TAU_NULL_CHECK
+    if(!ptr)
+    { return; }
+#endif
 
-    void* mapping;
-
-    if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
-    {
-        if(mapType == EResource::MapType::ReadOnly || (mapWriteRange && mapWriteRange->isNone()))
-        {
-            _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
-        }
-        else if(mapType == EResource::MapType::Default)
-        {
-            _d3dTexture->Map(subResource, D3D10_MAP_READ_WRITE, 0, &mapping);
-        }
-        else
-        {
-            return null;
-        }
-    }
-    else
-    {
-        D3D10_MAP dxMapType;
-        switch(mapType)
-        {
-            case EResource::MapType::Default:     dxMapType = D3D10_MAP_WRITE; break;
-            case EResource::MapType::Discard:     dxMapType = D3D10_MAP_WRITE_DISCARD; break;
-            case EResource::MapType::NoOverwrite: dxMapType = D3D10_MAP_WRITE_NO_OVERWRITE; break;
-            case EResource::MapType::ReadOnly:
-            default: return null;
-        }
-        _d3dTexture->Map(subResource, dxMapType, 0, &mapping);
-
-        if(mapWriteRange && !mapWriteRange->isNone())
-        {
-            mapping = reinterpret_cast<u8*>(mapping) + mapWriteRange->begin;
-        }
-    }
-
-    return mapping;
+    DX10TransferResource::deallocate(_mapping);
+    _mapping = ptr;
 }
 
-void DX10ResourceTexture1D::unmap(const uSys mipLevel, const uSys arrayIndex) noexcept
+void* DX10ResourceTransferTexture1D::transferMapping() noexcept
 {
-    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
-
-    _d3dTexture->Unmap(subResource);
+    void* const ret = _mapping;
+    _mapping = DX10TransferResource::allocate(ETexture::computeAlignedSizeArrMip(_args.dataFormat, Alignment, Alignment, _args.width, _args.mipLevels, _args.arrayCount));
+    return ret;
 }
 
-void* DX10ResourceTexture2D::map(const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
+void DX10ResourceTransferTexture2D::transferMapping(void* const ptr) noexcept
 {
-    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
+#if TAU_NULL_CHECK
+    if(!ptr)
+    { return; }
+#endif
 
-    D3D10_MAPPED_TEXTURE2D mapping;
-
-    if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
-    {
-        if(mapType == EResource::MapType::ReadOnly)
-        {
-            _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
-        }
-        else if(mapType == EResource::MapType::Default)
-        {
-            _d3dTexture->Map(subResource, D3D10_MAP_READ_WRITE, 0, &mapping);
-        }
-        else
-        {
-            return null;
-        }
-    }
-    else
-    {
-        D3D10_MAP dxMapType;
-        switch(mapType)
-        {
-            case EResource::MapType::Default:     dxMapType = D3D10_MAP_WRITE; break;
-            case EResource::MapType::Discard:     dxMapType = D3D10_MAP_WRITE_DISCARD; break;
-            case EResource::MapType::NoOverwrite: dxMapType = D3D10_MAP_WRITE_NO_OVERWRITE; break;
-            case EResource::MapType::ReadOnly:
-            default: return null;
-        }
-        _d3dTexture->Map(subResource, dxMapType, 0, &mapping);
-    }
-
-    return mapping.pData;
+    DX10TransferResource::deallocate(_mapping);
+    _mapping = ptr;
 }
 
-void DX10ResourceTexture2D::unmap(const uSys mipLevel, const uSys arrayIndex) noexcept
+void* DX10ResourceTransferTexture2D::transferMapping() noexcept
 {
-    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
-
-    _d3dTexture->Unmap(subResource);
+    void* const ret = _mapping;
+    _mapping = DX10TransferResource::allocate(ETexture::computeAlignedSizeArrMip(_args.dataFormat, Alignment, Alignment, Alignment, _args.width, _args.height, _args.mipLevels, _args.arrayCount));
+    return ret;
 }
 
-void* DX10ResourceTexture3D::map(const EResource::MapType mapType, const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange) noexcept
+void DX10ResourceTransferTexture3D::transferMapping(void* const ptr) noexcept
 {
-    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
+#if TAU_NULL_CHECK
+    if(!ptr)
+    { return; }
+#endif
 
-    D3D10_MAPPED_TEXTURE3D mapping;
-
-    if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
-    {
-        if(mapType == EResource::MapType::ReadOnly)
-        {
-            _d3dTexture->Map(subResource, D3D10_MAP_READ, 0, &mapping);
-        }
-        else if(mapType == EResource::MapType::Default)
-        {
-            _d3dTexture->Map(subResource, D3D10_MAP_READ_WRITE, 0, &mapping);
-        }
-        else
-        {
-            return null;
-        }
-    }
-    else
-    {
-        D3D10_MAP dxMapType;
-        switch(mapType)
-        {
-            case EResource::MapType::Default:     dxMapType = D3D10_MAP_WRITE; break;
-            case EResource::MapType::Discard:     dxMapType = D3D10_MAP_WRITE_DISCARD; break;
-            case EResource::MapType::NoOverwrite: dxMapType = D3D10_MAP_WRITE_NO_OVERWRITE; break;
-            case EResource::MapType::ReadOnly:
-            default: return null;
-        }
-        _d3dTexture->Map(subResource, dxMapType, 0, &mapping);
-    }
-
-    return mapping.pData;
+    DX10TransferResource::deallocate(_mapping);
+    _mapping = ptr;
 }
 
-void DX10ResourceTexture3D::unmap(const uSys mipLevel, const uSys arrayIndex) noexcept
+void* DX10ResourceTransferTexture3D::transferMapping() noexcept
 {
-    const UINT subResource = D3D10CalcSubresource(static_cast<UINT>(mipLevel), static_cast<UINT>(arrayIndex), _args.mipLevels);
+    void* const ret = _mapping;
+    _mapping = DX10TransferResource::allocate(ETexture::computeAlignedSizeMip(_args.dataFormat, Alignment, Alignment, Alignment, _args.width, _args.height, _args.depth, _args.mipLevels));
+    return ret;
+}
 
-    _d3dTexture->Unmap(subResource);
+void* DX10ResourceTransferTexture1D::map(const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
+{
+    const uSys offset = ETexture::computeOffsetAlignedArrMip(_args.dataFormat, Alignment, Alignment, _args.width, _args.mipLevels, static_cast<u16>(mipLevel), static_cast<u16>(arrayIndex));
+
+    return reinterpret_cast<u8*>(_mapping) + offset;
+}
+
+void DX10ResourceTransferTexture1D::unmap(const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange*) noexcept
+{
+}
+
+void* DX10ResourceTransferTexture2D::map(const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
+{
+    const uSys offset = ETexture::computeOffsetAlignedArrMip(_args.dataFormat, Alignment, Alignment, Alignment, _args.width, _args.height, _args.mipLevels, static_cast<u16>(mipLevel), static_cast<u16>(arrayIndex));
+
+    return reinterpret_cast<u8*>(_mapping) + offset;
+}
+
+void DX10ResourceTransferTexture2D::unmap(const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange*) noexcept
+{
+}
+
+void* DX10ResourceTransferTexture3D::map(const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange* const mapReadRange, const ResourceMapRange* const mapWriteRange) noexcept
+{
+    const uSys offset = ETexture::computeOffsetAlignedArrMip(_args.dataFormat, Alignment, Alignment, Alignment, _args.width, _args.height, _args.depth, _args.mipLevels, static_cast<u16>(mipLevel), static_cast<u16>(arrayIndex));
+
+    return reinterpret_cast<u8*>(_mapping) + offset;
+}
+
+void DX10ResourceTransferTexture3D::unmap(const uSys mipLevel, const uSys arrayIndex, const ResourceMapRange*) noexcept
+{
 }
 #endif

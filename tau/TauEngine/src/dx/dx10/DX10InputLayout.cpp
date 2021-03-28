@@ -92,7 +92,7 @@ bool DX10InputLayoutBuilder::processArgs(const InputLayoutArgs& args, DXInputLay
         ERROR_CODE_COND_F(args.shader->shaderStage() != EShader::Stage::Vertex, Error::ShaderMustBeVertexShader);
 #endif
 #if TAU_RTTI_CHECK
-        ERROR_CODE_COND_F(!RTT_CHECK(args.shader, DX10Shader), Error::InternalError);
+        ERROR_CODE_COND_F(!RTTD_CHECK(args.shader, DX10Shader, IShader), Error::InternalError);
 #endif
         shaderBlob = static_cast<DX10VertexShader*>(args.shader)->shaderBlob();
         shouldRelease = false;

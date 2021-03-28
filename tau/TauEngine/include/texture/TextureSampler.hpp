@@ -14,19 +14,31 @@ struct TextureSamplerArgs final
     DEFAULT_DESTRUCT(TextureSamplerArgs);
     DEFAULT_CM_PU(TextureSamplerArgs);
 public:
+    [[nodiscard]] static constexpr TextureSamplerArgs point() noexcept
+    { return TextureSamplerArgs(ETexture::Filter::Point, ETexture::Filter::Point, ETexture::Filter::Point); }
+
+    [[nodiscard]] static constexpr TextureSamplerArgs bilinear() noexcept
+    { return TextureSamplerArgs(ETexture::Filter::Linear, ETexture::Filter::Linear, ETexture::Filter::Point); }
+
+    [[nodiscard]] static constexpr TextureSamplerArgs trilinear() noexcept
+    { return TextureSamplerArgs(ETexture::Filter::Linear, ETexture::Filter::Linear, ETexture::Filter::Linear); }
+
+    [[nodiscard]] static constexpr TextureSamplerArgs anisotropic() noexcept
+    { return TextureSamplerArgs(ETexture::Filter::Anisotropic, ETexture::Filter::Anisotropic, ETexture::Filter::Anisotropic); }
+public:
     ETexture::Filter magnificationFilter;
     ETexture::Filter minificationFilter;
-    ETexture::Filter mipmapMinificationFilter;
+    ETexture::Filter mipmapFilter;
     ETexture::WrapMode wrapU;
     ETexture::WrapMode wrapV;
     ETexture::WrapMode wrapW;
     ETexture::CompareFunc depthCompareFunc;
     RGBAColor borderColor;
 public:
-    TextureSamplerArgs() noexcept
+    constexpr TextureSamplerArgs() noexcept
         : magnificationFilter(static_cast<ETexture::Filter>(0))
         , minificationFilter(static_cast<ETexture::Filter>(0))
-        , mipmapMinificationFilter(static_cast<ETexture::Filter>(0))
+        , mipmapFilter(static_cast<ETexture::Filter>(0))
         , wrapU(static_cast<ETexture::WrapMode>(0))
         , wrapV(static_cast<ETexture::WrapMode>(0))
         , wrapW(static_cast<ETexture::WrapMode>(0))
@@ -34,15 +46,24 @@ public:
         , borderColor { 0, 0, 0, 0 }
     { }
 
-    [[nodiscard]] const ETexture::Filter&    magFilter() const noexcept { return magnificationFilter;      }
-    [[nodiscard]] const ETexture::Filter&    minFilter() const noexcept { return minificationFilter;       }
-    [[nodiscard]] const ETexture::Filter&    mipFilter() const noexcept { return mipmapMinificationFilter; }
-    [[nodiscard]] const ETexture::Filter& mipMinFilter() const noexcept { return mipmapMinificationFilter; }
+    constexpr TextureSamplerArgs(const ETexture::Filter _magFilter, const ETexture::Filter _minFilter, const ETexture::Filter _mipFilter) noexcept
+        : magnificationFilter(_magFilter)
+        , minificationFilter(_minFilter)
+        , mipmapFilter(_mipFilter)
+        , wrapU(static_cast<ETexture::WrapMode>(0))
+        , wrapV(static_cast<ETexture::WrapMode>(0))
+        , wrapW(static_cast<ETexture::WrapMode>(0))
+        , depthCompareFunc(static_cast<ETexture::CompareFunc>(0))
+        , borderColor { 0, 0, 0, 0 }
+    { }
 
-    [[nodiscard]] ETexture::Filter&    magFilter() noexcept { return magnificationFilter;      }
-    [[nodiscard]] ETexture::Filter&    minFilter() noexcept { return minificationFilter;       }
-    [[nodiscard]] ETexture::Filter&    mipFilter() noexcept { return mipmapMinificationFilter; }
-    [[nodiscard]] ETexture::Filter& mipMinFilter() noexcept { return mipmapMinificationFilter; }
+    [[nodiscard]] ETexture::Filter  magFilter() const noexcept { return magnificationFilter; }
+    [[nodiscard]] ETexture::Filter  minFilter() const noexcept { return minificationFilter;  }
+    [[nodiscard]] ETexture::Filter  mipFilter() const noexcept { return mipmapFilter;        }
+
+    [[nodiscard]] ETexture::Filter& magFilter()       noexcept { return magnificationFilter; }
+    [[nodiscard]] ETexture::Filter& minFilter()       noexcept { return minificationFilter;  }
+    [[nodiscard]] ETexture::Filter& mipFilter()       noexcept { return mipmapFilter;        }
 };
 
 class TAU_DLL TAU_NOVTABLE ITextureSamplerBuilder

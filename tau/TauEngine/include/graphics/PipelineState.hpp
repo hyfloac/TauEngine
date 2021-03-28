@@ -3,7 +3,9 @@
 #include <Objects.hpp>
 #include <Safeties.hpp>
 #include <NumTypes.hpp>
+#include <RunTimeType.hpp>
 
+#include "DescriptorLayout.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 #include "DLL.hpp"
 

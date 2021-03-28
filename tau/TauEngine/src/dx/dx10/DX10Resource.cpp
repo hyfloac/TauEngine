@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include "graphics/ResourceRawInterface.hpp"
+#endif
+
 #include "dx/dx10/DX10Resource.hpp"
 
 #ifdef _WIN32
@@ -25,7 +29,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture1DA
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    const NullableRef<DX10ResourceTexture1D> texture(allocator, args, dxArgs.d3dTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, texture);
@@ -37,7 +41,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture2DA
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    const NullableRef<DX10ResourceTexture2D> texture(allocator, args, dxArgs.d3dTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, texture);
@@ -49,7 +53,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture3DA
     if(!processArgs(args, &dxArgs, error))
     { return null; }
 
-    const NullableRef<DX10Resource> texture(allocator, args, dxArgs.d3dTexture);
+    const NullableRef<DX10ResourceTexture3D> texture(allocator, args, dxArgs.d3dTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
     ERROR_CODE_V(Error::NoError, texture);

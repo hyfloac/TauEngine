@@ -17,6 +17,15 @@
   #endif
 #endif
 
+#if _DEBUG
+#define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
+                               public: \
+                                   [[nodiscard]] static Event::EventType getStaticType() noexcept \
+                                   { static Event::EventType type(TAU_RTTI_STRING(_TYPE), nullptr); \
+                                     return type; } \
+                                   [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
+                                   { return _TYPE::getStaticType(); }
+#else
 #define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                public: \
                                    [[nodiscard]] static Event::EventType getStaticType() noexcept \
@@ -24,6 +33,7 @@
                                      return type; } \
                                    [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
                                    { return _TYPE::getStaticType(); }
+#endif
 
 #if EVENT_GEN_NAMES
   #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE); \

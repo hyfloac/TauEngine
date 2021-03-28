@@ -33,6 +33,7 @@ public:
 
 class TAU_DLL DX10InputLayout final : public IInputLayout
 {
+    INPUT_LAYOUT_IMPL(DX10InputLayout);
     DELETE_CM(DX10InputLayout);
 private:
     ID3D10InputLayout* _inputLayout;

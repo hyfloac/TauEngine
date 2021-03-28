@@ -105,7 +105,7 @@ i32 Controller::runCommand(const char* command) noexcept
     return NO_COMMAND_FOUND;
 }
 
-bool Controller::addAlias(const String commandName, const String aliasName) noexcept
+bool Controller::addAlias(const DynString commandName, const DynString aliasName) noexcept
 {
     if(_commands.count(commandName))
     {

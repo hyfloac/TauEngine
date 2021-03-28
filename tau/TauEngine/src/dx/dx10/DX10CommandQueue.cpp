@@ -1,5 +1,8 @@
 #include "dx/dx10/DX10CommandQueue.hpp"
 
+#include "dx/dx10/DX10Resource.hpp"
+#include "graphics/ResourceRawInterface.hpp"
+
 #ifdef _WIN32
 #include "graphics/PipelineState.hpp"
 #include "dx/dx10/DX10BlendingState.hpp"
@@ -261,7 +264,7 @@ void DX10CommandQueue::_executeBundle(const DX10CL::CommandExecuteBundle& cmd) n
 
 void DX10CommandQueue::_copyResource(const DX10CL::CommandCopyResource& cmd) noexcept
 {
-    _d3d10Device->CopyResource(cmd.dst, cmd.src);
+    _d3d10Device->CopyResource(cmd.dst->_getRawHandle().dx10Resource(), cmd.src->_getRawHandle().dx10Resource());
 }
 
 void DX10CommandQueue::_copySubresourceRegion(const DX10CL::CommandCopySubresourceRegion0& cmd0, const DX10CL::CommandCopySubresourceRegion1& cmd1, const DX10CL::CommandCopySubresourceRegion2& cmd2) noexcept
@@ -275,6 +278,6 @@ void DX10CommandQueue::_copySubresourceRegion(const DX10CL::CommandCopySubresour
         pBox = &box;
     }
 
-    _d3d10Device->CopySubresourceRegion(cmd0.dst, cmd0.dstSubresource, cmd1.coord.x, cmd1.coord.y, cmd1.coord.z, cmd0.src, cmd0.srcSubresource, pBox);
+    _d3d10Device->CopySubresourceRegion(cmd0.dst->_getRawHandle().dx10Resource(), cmd0.dstSubresource, cmd1.coord.x, cmd1.coord.y, cmd1.coord.z, cmd0.src->_getRawHandle().dx10Resource(), cmd0.srcSubresource, pBox);
 }
 #endif

@@ -41,7 +41,7 @@ class TAU_DLL Controller final
     DEFAULT_COPY(Controller);
 public:
 private:
-    std::unordered_map<String, Command*> _commands;
+    std::unordered_map<DynString, Command*> _commands;
     PrintFunctions _printFunctions;
     void* _userParam;
 public:
@@ -70,19 +70,19 @@ public:
         va_end(args);
     }
 
-    inline const char* usage(const String name) noexcept 
+    inline const char* usage(const DynString name) noexcept 
     {
         if(_commands.count(name)) { return _commands[name]->usage(); }
         return nullptr;
     }
 
-    inline const char* info(const String name) noexcept
+    inline const char* info(const DynString name) noexcept
     {
         if(_commands.count(name)) { return _commands[name]->info(); }
         return nullptr;
     }
 
-    bool addAlias(String commandName, String aliasName) noexcept;
+    bool addAlias(DynString commandName, DynString aliasName) noexcept;
 public:
     static BoolFromStr parseBool(const char* str) noexcept;
     static u32 parseU32(const char* RESTRICT str, ParseIntError* RESTRICT error) noexcept;
