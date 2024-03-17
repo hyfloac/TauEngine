@@ -8,12 +8,18 @@
 class TAU_DLL DX10GraphicsAccelerator final : public IGraphicsAccelerator
 {
     DELETE_CM(DX10GraphicsAccelerator);
+    RTT_IMPL(DX10GraphicsAccelerator, IGraphicsAccelerator);
 private:
     IDXGIAdapter* _dxgiAdapter;
 public:
-    DX10GraphicsAccelerator(const DynString& vendor, const DynString& deviceName,
-                            const u64 videoMemory, const u64 systemMemory, const u64 sharedMemory,
-                            IDXGIAdapter* const dxgiAdapter) noexcept
+    DX10GraphicsAccelerator(
+        const WDynString& vendor, 
+        const WDynString& deviceName,
+        const u64 videoMemory, 
+        const u64 systemMemory, 
+        const u64 sharedMemory,
+        IDXGIAdapter* const dxgiAdapter
+    ) noexcept
         : IGraphicsAccelerator(vendor, deviceName, videoMemory, systemMemory, sharedMemory)
         , _dxgiAdapter(dxgiAdapter)
     { dxgiAdapter->AddRef(); }

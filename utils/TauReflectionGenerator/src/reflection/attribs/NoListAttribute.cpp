@@ -1,6 +1,6 @@
 #include "reflection/attribs/NoListAttribute.hpp"
 
-namespace tau { namespace reflection { namespace attribs {
+namespace tau::reflection::attribs {
 
 AttributeData NoListAttribute::parseAttribute(const DynString& attribName, const ::clang::MacroArgs*, const ::clang::Token*& currentToken) const noexcept
 {
@@ -9,4 +9,4 @@ AttributeData NoListAttribute::parseAttribute(const DynString& attribName, const
     return AttributeData(this, nullptr, attribName);
 }
 
-} } }
+}

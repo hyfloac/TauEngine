@@ -15,7 +15,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceBufferArgs
 {
     DXResourceBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10ResourceBuffer> buffer(allocator, args, dxArgs.d3dBuffer);
     ERROR_CODE_COND_N(!buffer, Error::SystemMemoryAllocationFailure);
@@ -27,7 +27,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture1DA
 {
     DXResourceTexture1DArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10ResourceTexture1D> texture(allocator, args, dxArgs.d3dTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
@@ -39,7 +39,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture2DA
 {
     DXResourceTexture2DArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10ResourceTexture2D> texture(allocator, args, dxArgs.d3dTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
@@ -51,7 +51,7 @@ NullableRef<IResource> DX10ResourceBuilder::buildTauRef(const ResourceTexture3DA
 {
     DXResourceTexture3DArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10ResourceTexture3D> texture(allocator, args, dxArgs.d3dTexture);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
@@ -287,10 +287,10 @@ uSys DX10ResourceBuilder::_allocSize(const uSys type) const noexcept
 {
     switch(type)
     {
-        case RB_AS_BUFFER:     return NullableRef<DX10ResourceBuffer>::allocSize();
-        case RB_AS_TEXTURE_1D: return NullableRef<DX10ResourceTexture1D>::allocSize();
-        case RB_AS_TEXTURE_2D: return NullableRef<DX10ResourceTexture2D>::allocSize();
-        case RB_AS_TEXTURE_3D: return NullableRef<DX10ResourceTexture3D>::allocSize();
+        case RB_AS_BUFFER:     return NullableRef<DX10ResourceBuffer>::AllocSize();
+        case RB_AS_TEXTURE_1D: return NullableRef<DX10ResourceTexture1D>::AllocSize();
+        case RB_AS_TEXTURE_2D: return NullableRef<DX10ResourceTexture2D>::AllocSize();
+        case RB_AS_TEXTURE_3D: return NullableRef<DX10ResourceTexture3D>::AllocSize();
         default: return 0;
     }
 }

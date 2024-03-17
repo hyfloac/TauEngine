@@ -3,7 +3,7 @@
 #include <String.hpp>
 #include <istream>
 
-namespace tau { namespace codegen { namespace string { 
+namespace tau::codegen::string { 
 
 struct SourceLocation final
 {
@@ -121,7 +121,7 @@ private:
     SourceLocation _currentLocation;
     SourceRange _currentLocationRange;
 public:
-    Lexer(::std::istream& file, const char escapeChar = '%') noexcept
+    explicit Lexer(::std::istream& file, const char escapeChar = '%') noexcept
         : _file(file)
         , _currentToken(Token::Unknown)
         , _strValue("")
@@ -165,4 +165,4 @@ private:
     [[nodiscard]] bool readChar() noexcept;
 };
 
-} } }
+}

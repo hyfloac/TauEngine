@@ -10,3 +10,6 @@
 [submodule "libs/imgui"]
 	path = libs/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "libs/TauUtils"]
+	path = libs/TauUtils
+	url = https://github.com/hyfloac/tauutils/

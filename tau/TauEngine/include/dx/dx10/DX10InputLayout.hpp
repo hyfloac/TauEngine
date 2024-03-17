@@ -83,7 +83,7 @@ public:
     [[nodiscard]] NullableRef<IInputLayout> buildTauRef(const InputLayoutArgs& args, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 protected:
     [[nodiscard]] uSys _allocSize() const noexcept override
-    { return NullableRef<DX10InputLayout>::allocSize(); }
+    { return NullableRef<DX10InputLayout>::AllocSize(); }
 private:
     [[nodiscard]] bool processArgs(const InputLayoutArgs& args, DXInputLayoutArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 };

@@ -23,7 +23,7 @@ public:
     DX10VertexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, ID3D10Buffer* const d3dBuffer) noexcept
         : IVertexBuffer(usage, bufferSize, descriptor)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 
     ~DX10VertexBuffer() noexcept override
@@ -39,7 +39,7 @@ public:
         : IVertexBuffer(::std::move(move))
         , _d3dBuffer(move._d3dBuffer)
         , _currentMapping(move._currentMapping)
-    { _d3dBuffer = null; }
+    { _d3dBuffer = nullptr; }
 
     DX10VertexBuffer& operator=(const DX10VertexBuffer& copy) noexcept
     {
@@ -70,7 +70,7 @@ public:
         _d3dBuffer = move._d3dBuffer;
         _currentMapping = move._currentMapping;
 
-        move._d3dBuffer = null;
+        move._d3dBuffer = nullptr;
 
         return *this;
     }
@@ -99,7 +99,7 @@ public:
         : IIndexBuffer(usage, indexSize, bufferSize)
         , _dxIndexSize(dxIndexSize)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 
     ~DX10IndexBuffer() noexcept
@@ -117,7 +117,7 @@ public:
         , _dxIndexSize(move._dxIndexSize)
         , _d3dBuffer(move._d3dBuffer)
         , _currentMapping(move._currentMapping)
-    { _d3dBuffer = null; }
+    { _d3dBuffer = nullptr; }
 
     DX10IndexBuffer& operator=(const DX10IndexBuffer& copy) noexcept
     {
@@ -150,7 +150,7 @@ public:
         _d3dBuffer = move._d3dBuffer;
         _currentMapping = move._currentMapping;
 
-        move._d3dBuffer = null;
+        move._d3dBuffer = nullptr;
 
         return *this;
     }
@@ -177,10 +177,10 @@ public:
     DX10UniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D10Buffer* const d3dBuffer) noexcept
         : IUniformBuffer(usage, bufferSize)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 
-    ~DX10UniformBuffer() noexcept
+    ~DX10UniformBuffer() noexcept override
     { RELEASE_DX(_d3dBuffer); }
 
     DX10UniformBuffer(const DX10UniformBuffer& copy) noexcept
@@ -193,7 +193,7 @@ public:
         : IUniformBuffer(::std::move(move))
         , _d3dBuffer(move._d3dBuffer)
         , _currentMapping(move._currentMapping)
-    { _d3dBuffer = null; }
+    { _d3dBuffer = nullptr; }
 
     DX10UniformBuffer& operator=(const DX10UniformBuffer& copy) noexcept
     {
@@ -224,7 +224,7 @@ public:
         _d3dBuffer = move._d3dBuffer;
         _currentMapping = move._currentMapping;
 
-        move._d3dBuffer = null;
+        move._d3dBuffer = nullptr;
 
         return *this;
     }

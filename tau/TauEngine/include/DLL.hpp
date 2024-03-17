@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils.hpp"
+#include <TauMacros.hpp>
 
 #ifdef TAU_DLL_BUILD
   #define TAU_DLL DYNAMIC_EXPORT

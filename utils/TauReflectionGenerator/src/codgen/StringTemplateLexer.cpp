@@ -1,6 +1,6 @@
 #include "codegen/StringTemplateLexer.hpp"
 
-namespace tau { namespace codegen { namespace string {
+namespace tau::codegen::string {
 
 [[nodiscard]] static constexpr bool isWhiteSpace(char c) noexcept;
 [[nodiscard]] static constexpr bool isDelimiter(char c) noexcept;
@@ -469,4 +469,4 @@ bool Lexer::readChar() noexcept
     return false;
 }
 
-} } }
+}

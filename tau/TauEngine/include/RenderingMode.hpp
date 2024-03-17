@@ -57,7 +57,7 @@ public:
 
     void setMode(const Mode mode) noexcept
     {
-        for(auto handler : _changeHandlers)
+        for(const auto handler : _changeHandlers)
         { handler(_currentMode, _debugMode, mode, _debugMode); }
 
         _currentMode = mode;
@@ -65,7 +65,7 @@ public:
 
     void setDebugMode(const bool debugMode) noexcept
     {
-        for(auto handler : _changeHandlers)
+        for(const auto handler : _changeHandlers)
         { handler(_currentMode, _debugMode, _currentMode, debugMode); }
 
         _debugMode = debugMode;
@@ -73,7 +73,7 @@ public:
 
     void setMode(const Mode mode, const bool debugMode) noexcept
     {
-        for(auto handler : _changeHandlers)
+        for(const auto handler : _changeHandlers)
         { handler(_currentMode, _debugMode, mode, debugMode); }
 
         _currentMode = mode;

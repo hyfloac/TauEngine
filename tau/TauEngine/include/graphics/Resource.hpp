@@ -30,7 +30,7 @@ struct ResourceMapRange final
     DEFAULT_CM_PO(ResourceMapRange);
 public:
     static const ResourceMapRange* all() noexcept
-    { return null; }
+    { return nullptr; }
 
     static const ResourceMapRange* none() noexcept
     {
@@ -108,13 +108,13 @@ public:
 #if TAU_RESOURCE_DEBUG_DATA
     [[nodiscard]] const tau::debug::ResourceDebugData* debugData() const noexcept { return _debugData; }
 
-    [[nodiscard]] void attachDebugData(const tau::debug::ResourceDebugCategory& category, const WDynString& name) noexcept
+    void attachDebugData(const tau::debug::ResourceDebugCategory& category, const WDynString& name) noexcept
     {
         delete _debugData;
         _debugData = new(::std::nothrow) tau::debug::ResourceDebugData(category, name);
     }
 
-    [[nodiscard]] void attachDebugData(const tau::debug::ResourceDebugCategory& category, WDynString&& name) noexcept
+    void attachDebugData(const tau::debug::ResourceDebugCategory& category, WDynString&& name) noexcept
     {
         delete _debugData;
         _debugData = new(::std::nothrow) tau::debug::ResourceDebugData(category, ::std::move(name));
@@ -125,7 +125,7 @@ public:
     virtual void unmap(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
 
     template<typename _Args>
-    [[nodiscard]] const _Args* getArgs() const noexcept { return null; }
+    [[nodiscard]] const _Args* getArgs() const noexcept { return nullptr; }
 
     [[nodiscard]] virtual const IResourceRawInterface& _getRawHandle() const noexcept = 0;
 
@@ -278,7 +278,7 @@ inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const 
 {
     if(_resourceType == EResource::Type::Buffer)
     { return reinterpret_cast<const ResourceBufferArgs*>(_getArgs()); }
-    return null;
+    return nullptr;
 }
 
 template<>
@@ -286,7 +286,7 @@ inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() 
 {
     if(_resourceType == EResource::Type::Texture1D)
     { return reinterpret_cast<const ResourceTexture1DArgs*>(_getArgs()); }
-    return null;
+    return nullptr;
 }
 
 template<>
@@ -294,7 +294,7 @@ inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() 
 {
     if(_resourceType == EResource::Type::Texture2D)
     { return reinterpret_cast<const ResourceTexture2DArgs*>(_getArgs()); }
-    return null;
+    return nullptr;
 }
 
 template<>
@@ -302,7 +302,7 @@ inline const ResourceTexture3DArgs* IResource::getArgs<ResourceTexture3DArgs>() 
 {
     if(_resourceType == EResource::Type::Texture3D)
     { return reinterpret_cast<const ResourceTexture3DArgs*>(_getArgs()); }
-    return null;
+    return nullptr;
 }
 
 #define RB_AS_BUFFER     1

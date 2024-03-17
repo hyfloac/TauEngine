@@ -18,61 +18,61 @@
 #endif
 
 
-void DX10FrameBuffer::bind(IRenderingContext& context) noexcept
-{
-    CTX();
-    auto* dsv = reinterpret_cast<DX10DepthStencilView*>(_depthStencilAttachment->renderTarget())->d3dDepthStencilView();
-    ctx.d3dDevice()->OMSetRenderTargets(_colorAttachments.count(), _d3dColorAttachments, dsv);
-}
-
-void DX10FrameBuffer::unbind(IRenderingContext& context) noexcept
-{
-    CTX();
-    ctx.resetFrameBuffer();
-}
-
-void DX10FrameBuffer::clearFrameBuffer(IRenderingContext& context, bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
-{
-    CTX();
-    float colorF[4];
-
-    colorF[0] = static_cast<float>(color.r) / 255.0f;
-    colorF[1] = static_cast<float>(color.g) / 255.0f;
-    colorF[2] = static_cast<float>(color.b) / 255.0f;
-    colorF[3] = static_cast<float>(color.a) / 255.0f;
-
-    if(clearColorBuffer)
-    {
-        for(uSys i = 0; i < _colorAttachments.count(); ++i)
-        {
-            ctx.d3dDevice()->ClearRenderTargetView(_d3dColorAttachments[i], colorF);
-        }
-    }
-
-    UINT clearFlags = 0;
-    if(clearDepthBuffer)
-    {
-        clearFlags |= D3D10_CLEAR_DEPTH;
-    }
-    if(clearStencilBuffer)
-    {
-        clearFlags |= D3D10_CLEAR_STENCIL;
-    }
-
-    auto* dsv = reinterpret_cast<DX10DepthStencilView*>(_depthStencilAttachment->renderTarget())->d3dDepthStencilView();
-    ctx.d3dDevice()->ClearDepthStencilView(dsv, clearFlags, depthValue, stencilValue);
-}
+// void DX10FrameBuffer::bind(IRenderingContext& context) noexcept
+// {
+//     CTX();
+//     auto* dsv = reinterpret_cast<DX10DepthStencilView*>(_depthStencilAttachment->renderTarget())->d3dDepthStencilView();
+//     ctx.d3dDevice()->OMSetRenderTargets(_colorAttachments.count(), _d3dColorAttachments, dsv);
+// }
+//
+// void DX10FrameBuffer::unbind(IRenderingContext& context) noexcept
+// {
+//     CTX();
+//     ctx.resetFrameBuffer();
+// }
+//
+// void DX10FrameBuffer::clearFrameBuffer(IRenderingContext& context, bool clearColorBuffer, bool clearDepthBuffer, bool clearStencilBuffer, RGBAColor color, float depthValue, u8 stencilValue) noexcept
+// {
+//     CTX();
+//     float colorF[4];
+//
+//     colorF[0] = static_cast<float>(color.r) / 255.0f;
+//     colorF[1] = static_cast<float>(color.g) / 255.0f;
+//     colorF[2] = static_cast<float>(color.b) / 255.0f;
+//     colorF[3] = static_cast<float>(color.a) / 255.0f;
+//
+//     if(clearColorBuffer)
+//     {
+//         for(uSys i = 0; i < _colorAttachments.count(); ++i)
+//         {
+//             ctx.d3dDevice()->ClearRenderTargetView(_d3dColorAttachments[i], colorF);
+//         }
+//     }
+//
+//     UINT clearFlags = 0;
+//     if(clearDepthBuffer)
+//     {
+//         clearFlags |= D3D10_CLEAR_DEPTH;
+//     }
+//     if(clearStencilBuffer)
+//     {
+//         clearFlags |= D3D10_CLEAR_STENCIL;
+//     }
+//
+//     auto* dsv = reinterpret_cast<DX10DepthStencilView*>(_depthStencilAttachment->renderTarget())->d3dDepthStencilView();
+//     ctx.d3dDevice()->ClearDepthStencilView(dsv, clearFlags, depthValue, stencilValue);
+// }
 
 NullableRef<IFrameBuffer> DX10FrameBufferBuilder::buildTauRef(const FrameBufferArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     DX10FrameBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10FrameBuffer> frameBuffer(allocator, args.colorAttachments, args.depthStencilAttachment, dxArgs.d3dColorAttachments);
     ERROR_CODE_COND_N(!frameBuffer, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dColorAttachments = null;
+    dxArgs.d3dColorAttachments = nullptr;
     ERROR_CODE_V(Error::NoError, frameBuffer);
 }
 
@@ -84,14 +84,14 @@ bool DX10FrameBufferBuilder::processArgs(const FrameBufferArgs& args, DX10FrameB
         ERROR_CODE_COND_F(!args.colorAttachments[i], Error::NullAttachment);
 #endif
 #if TAU_GENERAL_SAFETY_CHECK
-        ERROR_CODE_COND_F(!RTT_CHECK(args.colorAttachments[i].get(), DX10RenderTargetView), Error::CrossAPIFailure);
+        ERROR_CODE_COND_F(!RTT_CHECK(args.colorAttachments[i].Get(), DX10RenderTargetView), Error::CrossAPIFailure);
 #endif
     }
 
 #if TAU_GENERAL_SAFETY_CHECK
     if(args.depthStencilAttachment)
     {
-        ERROR_CODE_COND_F(!RTT_CHECK(args.depthStencilAttachment.get(), DX10DepthStencilView), Error::CrossAPIFailure);
+        ERROR_CODE_COND_F(!RTT_CHECK(args.depthStencilAttachment.Get(), DX10DepthStencilView), Error::CrossAPIFailure);
     }
 #endif
 

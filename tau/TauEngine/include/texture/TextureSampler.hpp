@@ -107,5 +107,5 @@ public:
         DescriptorTableIsNull
     };
 public:
-    [[nodiscard]] virtual TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, [[tau::out]] Error* error = null) const noexcept = 0;
+    [[nodiscard]] virtual TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, [[tau::out]] Error* error = nullptr) const noexcept = 0;
 };

@@ -66,7 +66,7 @@ public:
 public:
     FrameBufferArgs(const uSys colorAttachmentCount = TAU_MAX_FRAME_BUFFER_ATTACHMENTS) noexcept
         : colorAttachments(minT(colorAttachmentCount, TAU_MAX_FRAME_BUFFER_ATTACHMENTS))
-        , depthStencilAttachment(null)
+        , depthStencilAttachment(nullptr)
     { }
 };
 

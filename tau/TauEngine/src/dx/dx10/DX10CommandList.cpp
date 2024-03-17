@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include <d3d10_1.h>
+#endif
+
 #include "dx/dx10/DX10CommandList.hpp"
 
 #ifdef _WIN32
@@ -37,7 +41,7 @@ void DX10CommandList::reset(const NullableRef<ICommandAllocator>& allocator, con
 #endif
 
 #if TAU_RTTI_CHECK
-    if(!RTT_CHECK(allocator.get(), DX10CommandAllocator))
+    if(!RTT_CHECK(allocator.Get(), DX10CommandAllocator))
     { return; }
 #endif
     
@@ -97,22 +101,22 @@ void DX10CommandList::setPipelineState(const NullableRef<IPipelineState>& pipeli
     const auto& args = pipelineState->args();
 
 #if TAU_RTTI_CHECK
-    if(!rtt_check<SimpleDescriptorLayout>(args.descriptorLayout) ||
-       !rtt_check<DX10InputLayout>(args.inputLayout) ||
-       !rtt_check<DX10BlendingState>(args.blendingState) ||
-       !rtt_check<DX10DepthStencilState>(args.depthStencilState) ||
-       !rtt_check<DX10RasterizerState>(args.rasterizerState))
+    if(!rtt_check<SimpleDescriptorLayout>(args.descriptorLayout.Get()) ||
+       !rtt_check<DX10InputLayout>(args.inputLayout.Get()) ||
+       !rtt_check<DX10BlendingState>(args.blendingState.Get()) ||
+       !rtt_check<DX10DepthStencilState>(args.depthStencilState.Get()) ||
+       !rtt_check<DX10RasterizerState>(args.rasterizerState.Get()))
     { return; }
 #endif
 
-    _currentLayout = static_cast<const SimpleDescriptorLayout*>(args.descriptorLayout.get());
+    _currentLayout = static_cast<const SimpleDescriptorLayout*>(args.descriptorLayout.Get());
 
     /*
      * Add the pointer to the free list.
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IPipelineState>>(pipelineState);
 
-    const DX10CL::CommandSetPipelineState setPipelineState(pipelineState.get());
+    const DX10CL::CommandSetPipelineState setPipelineState(pipelineState.Get());
     (void) _commandAllocator->allocateT<DX10CL::Command>(setPipelineState);
     ++_commandCount;
 }
@@ -129,7 +133,7 @@ void DX10CommandList::setFrameBuffer(const NullableRef<IFrameBuffer>& frameBuffe
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IFrameBuffer>>(frameBuffer);
 
-    const DX10FrameBuffer* const dxFrameBuffer = static_cast<const DX10FrameBuffer*>(frameBuffer.get());
+    const DX10FrameBuffer* const dxFrameBuffer = static_cast<const DX10FrameBuffer*>(frameBuffer.Get());
 
     const DX10CL::CommandSetRenderTargets setRenderTargets(static_cast<UINT>(frameBuffer->colorAttachments().count()), dxFrameBuffer->d3dColorAttachments(), RefCast<DX10DepthStencilView>(frameBuffer->depthStencilAttachment())->d3dDepthStencilView());
     (void) _commandAllocator->allocateT<DX10CL::Command>(setRenderTargets);
@@ -153,7 +157,7 @@ void DX10CommandList::clearRenderTargetView(const NullableRef<IFrameBuffer>& fra
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IRenderTargetView>>(frameBuffer->colorAttachments()[renderTargetIndex]);
 
-    const DX10RenderTargetView* const dxRenderTarget = static_cast<const DX10RenderTargetView*>(frameBuffer->colorAttachments()[renderTargetIndex].get());
+    const DX10RenderTargetView* const dxRenderTarget = static_cast<const DX10RenderTargetView*>(frameBuffer->colorAttachments()[renderTargetIndex].Get());
 
     const DX10CL::CommandClearRenderTarget clearRenderTarget(dxRenderTarget->d3dRenderTargetView(), color);
     (void) _commandAllocator->allocateT<DX10CL::Command>(clearRenderTarget);
@@ -172,7 +176,7 @@ void DX10CommandList::clearDepthStencilView(const NullableRef<IFrameBuffer>& fra
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IDepthStencilView>>(frameBuffer->depthStencilAttachment());
 
-    const DX10DepthStencilView* const dxDepthStencil = static_cast<const DX10DepthStencilView*>(frameBuffer->depthStencilAttachment().get());
+    const DX10DepthStencilView* const dxDepthStencil = static_cast<const DX10DepthStencilView*>(frameBuffer->depthStencilAttachment().Get());
 
     UINT clearFlags = 0;
     if(clearDepth)   { clearFlags  = D3D10_CLEAR_DEPTH;   }
@@ -217,7 +221,7 @@ void DX10CommandList::setVertexArray(const NullableRef<IVertexArray>& va) noexce
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IVertexArray>>(va);
 
-    const DX10VertexArray* const dxVA = static_cast<const DX10VertexArray*>(va.get());
+    const DX10VertexArray* const dxVA = static_cast<const DX10VertexArray*>(va.Get());
 
     const DX10CL::CommandSetVertexArray setVertexArray(0, dxVA->iaBufferCount(), dxVA->iaBuffers());
     (void) _commandAllocator->allocateT<DX10CL::Command>(setVertexArray);
@@ -228,7 +232,7 @@ void DX10CommandList::setIndexBuffer(const IndexBufferView& indexBufferView) noe
 {
     if(!indexBufferView.buffer || 
         indexBufferView.buffer->resourceType() != EResource::Type::Buffer || 
-       !RTTD_CHECK(indexBufferView.buffer.get(), DX10Resource, IResource))
+       !RTTD_CHECK(indexBufferView.buffer.Get(), DX10Resource, IResource))
     { return; }
 
     /*
@@ -236,7 +240,7 @@ void DX10CommandList::setIndexBuffer(const IndexBufferView& indexBufferView) noe
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<IResource>>(indexBufferView.buffer);
 
-    const DX10ResourceBuffer* const buffer = static_cast<const DX10ResourceBuffer*>(indexBufferView.buffer.get());
+    const DX10ResourceBuffer* const buffer = static_cast<const DX10ResourceBuffer*>(indexBufferView.buffer.Get());
 
     const DX10CL::CommandSetIndexBuffer setIndexBuffer(buffer->d3dBuffer(), DX10ResourceBuffer::dxIndexSize(indexBufferView.indexSize));
     (void) _commandAllocator->allocateT<DX10CL::Command>(setIndexBuffer);
@@ -314,7 +318,7 @@ void DX10CommandList::executeBundle(const NullableRef<ICommandList>& bundle) noe
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<ICommandList>>(bundle);
     
-    const DX10CommandList* const dxBundle = static_cast<const DX10CommandList*>(bundle.get());
+    const DX10CommandList* const dxBundle = static_cast<const DX10CommandList*>(bundle.Get());
 
     const DX10CL::CommandExecuteBundle executeBundle(dxBundle);
     (void) _commandAllocator->allocateT<DX10CL::Command>(executeBundle);
@@ -359,14 +363,14 @@ void DX10CommandList::copyResource(const NullableRef<IResource>& dst, const Null
         NullableRef<DX10ResourceTransferBuffer> tSrc = RefCast<DX10ResourceTransferBuffer>(src);
         void* const mapping = tSrc->transferMapping();
         
-        const DX10CL::CommandCopyResource transferResource(dxDst.get(), tSrc.get(), mapping);
+        const DX10CL::CommandCopyResource transferResource(dxDst.Get(), tSrc.Get(), mapping);
         (void) _commandAllocator->allocateT<DX10CL::Command>(transferResource);
     }
     else
     {
         NullableRef<DX10Resource> dx10Src = RefCast<DX10Resource>(src);
 
-        const DX10CL::CommandCopyResource copyResource(dxDst.get(), dx10Src.get(), nullptr);
+        const DX10CL::CommandCopyResource copyResource(dxDst.Get(), dx10Src.Get(), nullptr);
         (void) _commandAllocator->allocateT<DX10CL::Command>(copyResource);
     }
 
@@ -414,7 +418,7 @@ void DX10CommandList::copyBuffer(const NullableRef<IResource>& dstBuffer, const 
         NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dstBuffer);
         NullableRef<DX10Resource> dxSrc = RefCast<DX10Resource>(srcBuffer);
 
-        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.get(), 0, dxSrc.get(), 0);
+        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.Get(), 0, dxSrc.Get(), 0);
         (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
     }
     
@@ -479,7 +483,7 @@ void DX10CommandList::copyTexture(const NullableRef<IResource>& dstTexture, cons
         NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dstTexture);
         NullableRef<DX10Resource> dxSrc = RefCast<DX10Resource>(srcTexture);
 
-        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.get(), dstSubResource, dxSrc.get(), srcSubResource);
+        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.Get(), dstSubResource, dxSrc.Get(), srcSubResource);
         (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
     }
 
@@ -529,7 +533,7 @@ void DX10CommandList::copyTexture(const NullableRef<IResource>& dstTexture, u32 
         NullableRef<DX10Resource> dxDst = RefCast<DX10Resource>(dstTexture);
         NullableRef<DX10Resource> dxSrc = RefCast<DX10Resource>(srcTexture);
 
-        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.get(), dstSubResource, dxSrc.get(), srcSubResource);
+        const DX10CL::CommandCopySubresourceRegion0 copySubresourceRegion0(dxDst.Get(), dstSubResource, dxSrc.Get(), srcSubResource);
         (void) _commandAllocator->allocateT<DX10CL::Command>(copySubresourceRegion0);
     }
 

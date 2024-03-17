@@ -1,7 +1,7 @@
 #include "codegen/ast/StringTemplateLoopAST.hpp"
 #include "codegen/StringTemplateVisitor.hpp"
 
-namespace tau { namespace codegen { namespace string { namespace ast {
+namespace tau::codegen::string::ast {
 
 void StringTemplateBeginLoopAST::visit(IStringTemplateVisitor& visitor) noexcept
 { visitor.visit(*this); }
@@ -12,4 +12,4 @@ void StringTemplateEndLoopAST::visit(IStringTemplateVisitor& visitor) noexcept
 void StringTemplateLoopControlAST::visit(IStringTemplateVisitor& visitor) noexcept
 { visitor.visit(*this); }
 
-} } } }
+}

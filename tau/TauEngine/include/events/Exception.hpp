@@ -25,7 +25,7 @@
 #define EXCEPTION_IMPL_BASE(_TYPE) \
     public: \
         [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
-        { static Exception::ExceptionType type = Exception::ExceptionType::define(); \
+        { static Exception::ExceptionType type; \
           return type; } \
         [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
         { return _TYPE::getStaticType(); }

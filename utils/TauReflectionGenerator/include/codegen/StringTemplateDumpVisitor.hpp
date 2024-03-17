@@ -4,7 +4,7 @@
 
 #include <unordered_map>
 
-namespace tau { namespace codegen { namespace string {
+namespace tau::codegen::string {
 
 class StringTemplateDumpVisitor final : public IStringTemplateVisitor
 {
@@ -69,4 +69,4 @@ private:
     void printIndent(iSys indent) noexcept;
 };
 
-} } }
+}

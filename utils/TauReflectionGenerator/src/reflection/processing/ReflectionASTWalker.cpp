@@ -4,7 +4,7 @@
 #include "reflection/Class.hpp"
 #include "reflection/processing/TagPreProcessor.hpp"
 
-namespace tau { namespace reflection { namespace processing { 
+namespace tau::reflection::processing { 
 
 ::std::unique_ptr<clang::ASTConsumer> ReflectionASTWalkerAction::CreateASTConsumer(clang::CompilerInstance& CI, llvm::StringRef)
 {
@@ -237,4 +237,4 @@ static void reportTagOnNonMember(::clang::DiagnosticsEngine& diagEngine, const :
     }
 }
 
-} } }
+}

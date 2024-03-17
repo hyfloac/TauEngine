@@ -12,6 +12,6 @@ public:
     [[nodiscard]] NullableRef<IDescriptorLayout> build(const DescriptorLayoutArgs& args, Error* error, TauAllocator& allocator) const noexcept override;
 protected:
     [[nodiscard]] uSys _allocSize() const noexcept override
-    { return NullableRef<SimpleDescriptorLayout>::allocSize(); }
+    { return NullableRef<SimpleDescriptorLayout>::AllocSize(); }
 };
 #endif

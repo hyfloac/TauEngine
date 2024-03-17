@@ -402,7 +402,7 @@ public:
     [[nodiscard]] const glm::mat4& leftVP() const noexcept { return _leftVP; }
     [[nodiscard]] const glm::mat4& rightVP() const noexcept { return _rightVP; }
 public:
-    static bool buttonClicked(vr::VRActionHandle_t action, vr::VRInputValueHandle_t* devicePath = null) noexcept;
+    static bool buttonClicked(vr::VRActionHandle_t action, vr::VRInputValueHandle_t* devicePath = nullptr) noexcept;
     static glm::mat4 convertMatrix(const vr::HmdMatrix34_t& matPose) noexcept;
 private:
     void checkKeys() noexcept;

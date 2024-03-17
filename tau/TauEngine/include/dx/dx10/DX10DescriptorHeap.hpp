@@ -72,8 +72,8 @@ protected:
         switch(type)
         {
             case _DHB_AS_RAW_TV:  return sizeof(DX10TextureViewDescriptorHeap);
-            case _DHB_AS_NR_TV:   return NullableRef<DX10TextureViewDescriptorHeap>::allocSize();
-            case _DHB_AS_NSR_TV:  return NullableStrongRef<DX10TextureViewDescriptorHeap>::allocSize();
+            case _DHB_AS_NR_TV:   return NullableRef<DX10TextureViewDescriptorHeap>::AllocSize();
+            case _DHB_AS_NSR_TV:  return NullableStrongRef<DX10TextureViewDescriptorHeap>::AllocSize();
             case _DHB_AS_RAW_RTV:
             case _DHB_AS_NR_RTV:
             case _DHB_AS_NSR_RTV:
@@ -81,8 +81,8 @@ protected:
             case _DHB_AS_NR_DSV:
             case _DHB_AS_NSR_DSV: return 0;
             case _DHB_AS_RAW_UBV: return sizeof(DX10UniformBufferViewDescriptorHeap);
-            case _DHB_AS_NR_UBV:  return NullableRef<DX10UniformBufferViewDescriptorHeap>::allocSize();
-            case _DHB_AS_NSR_UBV: return NullableStrongRef<DX10UniformBufferViewDescriptorHeap>::allocSize();
+            case _DHB_AS_NR_UBV:  return NullableRef<DX10UniformBufferViewDescriptorHeap>::AllocSize();
+            case _DHB_AS_NSR_UBV: return NullableStrongRef<DX10UniformBufferViewDescriptorHeap>::AllocSize();
             case _DHB_AS_RAW_UAV: 
             case _DHB_AS_NR_UAV:  
             case _DHB_AS_NSR_UAV:

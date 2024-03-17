@@ -5,7 +5,7 @@
 #include <clang/Lex/MacroArgs.h>
 #include <clang/Frontend/CompilerInstance.h>
 
-namespace tau { namespace reflection { namespace processing { 
+namespace tau::reflection::processing { 
 
 void TagPreProcessorAction::ExecuteAction()
 {
@@ -204,4 +204,4 @@ static void reportIncorrectAttribForTag(const TagType tagType, const Ref<IAttrib
     }
 }
 
-} } }
+}

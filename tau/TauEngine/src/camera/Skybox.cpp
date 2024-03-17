@@ -29,21 +29,24 @@ public:
 };
 
 Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const shaderPath, const char* const vertexName, const char* const pixelName, const char* const skyboxPath, const char* const fileExtension) noexcept
-    : _shader(IShaderProgram::create(gi)),
-      _uniforms(gi.createUniformBuffer()),
-      _skybox(null), _textureUploader(null), _cubeVA(null), _skyboxDepthStencilState(null)
+    : _shader(nullptr)
+    , _uniforms(gi.createUniformBuffer())
+    , _skybox(nullptr)
+    , _textureUploader(nullptr)
+    , _cubeVA(nullptr)
+    , _skyboxDepthStencilState(nullptr)
 {
-    ShaderArgs shaderArgs;
+    ShaderFileArgs shaderArgs;
     shaderArgs.vfsMount = vfsMount;
     shaderArgs.path = shaderPath;
 
     shaderArgs.fileName = vertexName;
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> vertexShader = gi.createShader().buildCPPRef(shaderArgs, null);
+    Ref<IShader> vertexShader = gi.createShader().buildTauRef(shaderArgs, nullptr);
 
     shaderArgs.fileName = pixelName;
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = gi.createShader().buildCPPRef(shaderArgs, null);
+    Ref<IShader> pixelShader = gi.createShader().buildTauRef(shaderArgs, nullptr);
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
@@ -63,8 +66,8 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
 
     SingleTextureUploaderArgs uploaderArgs;
     uploaderArgs.texture = _skybox->textureView();
-    uploaderArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
-    _textureUploader = gi.createSingleTextureUploader().buildTauRef(uploaderArgs, null);
+    uploaderArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, nullptr);
+    _textureUploader = gi.createSingleTextureUploader().buildTauRef(uploaderArgs, nullptr);
 
     float skyboxVertices[] = {
         // back
@@ -124,7 +127,7 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     skyboxCubeBuilder.instanced = false;
     skyboxCubeBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Type::Vector3Float);
 
-    const CPPRef<IVertexBuffer> skyboxCube = gi.createVertexBuffer().buildCPPRef(skyboxCubeBuilder, nullptr);
+    const CPPRef<IVertexBuffer> skyboxCube = gi.createVertexBuffer().buildCPPRef(skyboxCubeBuilder, nullptrptr);
 
     VertexArrayArgs vaArgs(1);
     vaArgs.shader = vertexShader.get();
@@ -132,16 +135,16 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     vaArgs.drawCount = 36;
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _cubeVA = gi.createVertexArray().buildCPPRef(vaArgs, null);
+    _cubeVA = gi.createVertexArray().buildCPPRef(vaArgs, nullptr);
 
     DepthStencilArgs dsArgs = context.getDefaultDepthStencilArgs();
     dsArgs.depthWriteMask = DepthStencilArgs::DepthWriteMask::Zero;
     dsArgs.depthCompareFunc = DepthStencilArgs::CompareFunc::LessThanOrEqual;
-    _skyboxDepthStencilState = gi.createDepthStencilState().buildTauRef(dsArgs, null);
+    _skyboxDepthStencilState = gi.createDepthStencilState().buildTauRef(dsArgs, nullptr);
 
     RasterizerArgs rArgs = context.getDefaultRasterizerArgs();
     rArgs.frontFaceCounterClockwise = true;
-    _skyboxRasterizerState = gi.createRasterizerState().buildTauRef(rArgs, null);
+    _skyboxRasterizerState = gi.createRasterizerState().buildTauRef(rArgs, nullptr);
 }
 
 void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept

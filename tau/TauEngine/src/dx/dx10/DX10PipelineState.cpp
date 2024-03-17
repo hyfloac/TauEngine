@@ -18,10 +18,10 @@ NullableRef<IPipelineState> DX10PipelineStateBuilder::build(const PipelineArgs& 
 #endif
 
 #if TAU_RTTI_CHECK
-    ERROR_CODE_COND_N(rtt_check<DX10BlendingState>(args.blendingState), Error::InvalidBlendingState);
-    ERROR_CODE_COND_N(rtt_check<DX10DepthStencilState>(args.depthStencilState), Error::InvalidDepthStencilState);
-    ERROR_CODE_COND_N(rtt_check<DX10RasterizerState>(args.rasterizerState), Error::InvalidRasterizerState);
-    ERROR_CODE_COND_N(rtt_check<DX10InputLayout>(args.inputLayout), Error::InvalidInputLayout);
+    ERROR_CODE_COND_N(rtt_check<DX10BlendingState>(args.blendingState.Get()), Error::InvalidBlendingState);
+    ERROR_CODE_COND_N(rtt_check<DX10DepthStencilState>(args.depthStencilState.Get()), Error::InvalidDepthStencilState);
+    ERROR_CODE_COND_N(rtt_check<DX10RasterizerState>(args.rasterizerState.Get()), Error::InvalidRasterizerState);
+    ERROR_CODE_COND_N(rtt_check<DX10InputLayout>(args.inputLayout.Get()), Error::InvalidInputLayout);
 #endif
 
     NullableRef<SimplePipelineState> pipelineState(allocator, args);

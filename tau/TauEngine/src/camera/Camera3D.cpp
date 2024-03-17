@@ -229,7 +229,7 @@ bool FreeCamCamera3DController::blipHandler(GameRecorder::Blip& blip, void* user
 
 GameRecorder::Blip FreeCamCamera3DController::initialBlip(void* userParam) noexcept
 {
-    FreeCamCamera3DController& controller = *reinterpret_cast<FreeCamCamera3DController*>(userParam);
+    const FreeCamCamera3DController& controller = *reinterpret_cast<const FreeCamCamera3DController*>(userParam);
     return { GameRecorder::BlipType::Initial, cameraBlip(), new BlipDataInitial{
         controller._camera._position,
         controller._camera._pitch,
@@ -240,7 +240,12 @@ GameRecorder::Blip FreeCamCamera3DController::initialBlip(void* userParam) noexc
 
 RunTimeType<GameRecorder::Blip> FreeCamCamera3DController::cameraBlip() noexcept
 {
-    static RunTimeType<GameRecorder::Blip> type = RunTimeType<GameRecorder::Blip>::define();
+#ifdef _DEBUG
+    static RunTimeType<GameRecorder::Blip> type("CameraBlip");
+#else
+    static RunTimeType<GameRecorder::Blip> type;
+#endif
+    
     return type;
 }
 

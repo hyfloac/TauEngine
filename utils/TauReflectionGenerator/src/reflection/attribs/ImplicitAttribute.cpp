@@ -2,7 +2,7 @@
 #include "reflection/attribs/ImplicitAttribute.hpp"
 #include "reflection/Class.hpp"
 
-namespace tau { namespace reflection { namespace attribs { 
+namespace tau::reflection::attribs { 
 
 AttributeData ImplicitAttribute::parseAttribute(const DynString& attribName, const ::clang::MacroArgs*, const ::clang::Token*& currentToken) const noexcept
 {
@@ -127,4 +127,4 @@ void ImplicitAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, const
 
 }
 
-} } }
+}

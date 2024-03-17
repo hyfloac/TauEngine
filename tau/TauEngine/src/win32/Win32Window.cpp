@@ -164,7 +164,9 @@ public:
     WindowNode* right;
 public:
     WindowNode(Window* window) noexcept
-        : window(window), left(null), right(null)
+        : window(window)
+        , left(nullptr)
+        , right(nullptr)
     { }
 
     [[nodiscard]] HWND key() const noexcept { return window->_windowContainer.windowHandle; }
@@ -233,7 +235,7 @@ static uSys windowCount() noexcept
 {
     uSys ret = 0;
 
-    for(auto& windowHandle : windowHandles)
+    for(const auto& windowHandle : windowHandles)
     {
         if(windowHandle.window)
         {
@@ -291,7 +293,7 @@ static bool addWindow(Window& systemWindowContainer) noexcept
  * @param[in] systemWindowContainer
  *    The @link Window @endlink to remove from @link windowHandles @endlink.
  */
-static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
+static void removeWindow(const Window* systemWindowContainer) noexcept
 {
     if(root)
     {
@@ -309,7 +311,7 @@ static void removeWindow(NotNull<const Window> systemWindowContainer) noexcept
  *    @link HWND @endlink `handle`. returns null if no window is 
  *    currently holding the referenced handle.
  */
-static Nullable Window* getWindowFromHandle(HWND handle) noexcept
+static Window* getWindowFromHandle(HWND handle) noexcept
 {
     if(root)
     {
@@ -438,9 +440,34 @@ static void callWindowResizeHandler(Window& window, const LPARAM) noexcept
     window._cHeight = cHeight;
 }
 
-LRESULT CALLBACK WindowProc(HWND windowHandle, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) noexcept
+LRESULT CALLBACK StaticWindowProc(HWND hWnd, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) noexcept
 {
-    Window* window = getWindowFromHandle(windowHandle);
+    if(uMsg == WM_NCCREATE)
+    {
+        const CREATESTRUCTW* const createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
+
+        if(!createStruct->lpCreateParams)
+        {
+            return FALSE;
+        }
+
+        (void) SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(createStruct->lpCreateParams));
+    }
+
+    Window* const windowPtr = reinterpret_cast<Window*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
+
+    if(!windowPtr)
+    {
+        return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+    }
+
+    return windowPtr->WindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK Window::WindowProc(HWND windowHandle, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) noexcept
+{
+    // Window* window = getWindowFromHandle(windowHandle);
+    Window* window = this;
 
     switch(uMsg)
     {
@@ -564,7 +591,7 @@ Window::Window(const u32 width, const u32 height, const WDynString& title, void*
     , _parent(parent)
     , _renderingMode(RenderingMode::getGlobalMode())
     , _windowState(WindowState::NEITHER)
-    , _eventHandler(null)
+    , _eventHandler(nullptr)
 { }
 
 Window::Window(const u32 width, const u32 height, WDynString&& title, void* userContainer, const Window* parent) noexcept
@@ -580,7 +607,7 @@ Window::Window(const u32 width, const u32 height, WDynString&& title, void* user
     , _parent(parent)
     , _renderingMode(RenderingMode::getGlobalMode())
     , _windowState(WindowState::NEITHER)
-    , _eventHandler(null)
+    , _eventHandler(nullptr)
 { }
 
 Window::~Window() noexcept
@@ -628,7 +655,7 @@ bool Window::createWindow() noexcept
 
     windowClass->cbSize = sizeof(WNDCLASSEXW);
     windowClass->style = CS_DBLCLKS;
-    windowClass->lpfnWndProc = WindowProc;
+    windowClass->lpfnWndProc = StaticWindowProc;
     windowClass->cbClsExtra = 0;
     windowClass->cbWndExtra = 0;
     windowClass->hInstance = GetModuleHandleW(nullptr);
@@ -765,7 +792,7 @@ void Window::removeFromDesktopBackground() noexcept
     if(_parent)
     { return; }
 
-    SetParent(_windowContainer.windowHandle, null);
+    SetParent(_windowContainer.windowHandle, nullptr);
 }
 
 static BOOL CALLBACK enumWindowsProc(HWND topHandle, const LPARAM lParam)

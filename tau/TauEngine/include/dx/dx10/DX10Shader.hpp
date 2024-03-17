@@ -52,8 +52,8 @@ public:
         , _shader(move._shader)
         , _shaderBlob(move._shaderBlob)
     {
-        move._shader = null;
-        move._shaderBlob = null;
+        move._shader = nullptr;
+        move._shaderBlob = nullptr;
     }
 
     DX10VertexShader& operator=(const DX10VertexShader& copy) noexcept
@@ -88,8 +88,8 @@ public:
         _shader = move._shader;
         _shaderBlob = move._shaderBlob;
 
-        move._shader = null;
-        move._shaderBlob = null;
+        move._shader = nullptr;
+        move._shaderBlob = nullptr;
 
         return *this;
     }
@@ -125,7 +125,7 @@ public:
     DX10GeometryShader(DX10GeometryShader&& move) noexcept
         : DX10Shader(::std::move(move))
         , _shader(move._shader)
-    { move._shader = null; }
+    { move._shader = nullptr; }
 
     DX10GeometryShader& operator=(const DX10GeometryShader& copy) noexcept
     {
@@ -152,7 +152,7 @@ public:
         DX10Shader::operator=(::std::move(move));
 
         _shader = move._shader;
-        move._shader = null;
+        move._shader = nullptr;
 
         return *this;
     }
@@ -186,7 +186,7 @@ public:
     DX10PixelShader(DX10PixelShader&& move) noexcept
         : DX10Shader(::std::move(move))
         , _shader(move._shader)
-    { move._shader = null; }
+    { move._shader = nullptr; }
 
     DX10PixelShader& operator=(const DX10PixelShader& copy) noexcept
     {
@@ -213,7 +213,7 @@ public:
         DX10Shader::operator=(::std::move(move));
 
         _shader = move._shader;
-        move._shader = null;
+        move._shader = nullptr;
 
         return *this;
     }

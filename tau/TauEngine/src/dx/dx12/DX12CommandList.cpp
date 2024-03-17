@@ -398,7 +398,6 @@ void DX12CommandList::trackResourcePreRead(ID3D12Resource* const resource, const
         //   Find the last time this resource was used and set
         // its next usage change handle to this.
         _commands[usageIndices->lastUsage(0)].resourceUsage.nextUsageChange = _commands.count();
-
     }
 
     usageIndices->lastUsage(subresource) = _commands.count();

@@ -32,14 +32,14 @@ public:
     {
         void* const placement = allocate();
         if(!placement) 
-        { return null; }
-        return new(placement) _T(_TauAllocatorUtils::_forward<_Args>(args)...);
+        { return nullptr; }
+        return new(placement) _T(::std::forward<_Args>(args)...);
     }
 
     template<typename _T, typename... _Args>
     _T* allocateFreeList(_Args&&... args) noexcept
     {
-        return _freeList.allocateT<_T>(_TauAllocatorUtils::_forward<_Args>(args)...);
+        return _freeList.allocateT<_T>(::std::forward<_Args>(args)...);
     }
 
 #if TAU_CA_EXPOSE_MEM_STAT

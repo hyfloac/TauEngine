@@ -36,12 +36,12 @@ public:
 public:
     BindingUnion() noexcept
         : type(static_cast<Type>(0))
-        , str(null)
+        , str(nullptr)
     { }
 
-    BindingUnion(const u32 _number) noexcept
+    BindingUnion(const u32 number) noexcept
         : type(Number)
-        , number(_number)
+        , number(static_cast<i32>(number))
     { }
 
     BindingUnion(const DynString& _str) noexcept
@@ -88,7 +88,7 @@ public:
         if(type == Str)
         {
             str = move.str;
-            move.str = null;
+            move.str = nullptr;
         }
         else if(type == Number)
         { number = move.number; }
@@ -130,7 +130,7 @@ public:
         if(type == Str)
         {
             str = move.str;
-            move.str = null;
+            move.str = nullptr;
         }
         else if(type == Number)
         { number = move.number; }

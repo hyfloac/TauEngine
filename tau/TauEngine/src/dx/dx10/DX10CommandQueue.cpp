@@ -120,30 +120,30 @@ void DX10CommandQueue::_setPipelineState(const DX10CL::CommandSetPipelineState& 
     _currentPipelineState = cmd.pipelineState;
     const auto& args = cmd.pipelineState->args();
 
-    _currentLayout = static_cast<const SimpleDescriptorLayout*>(args.descriptorLayout.get());
+    _currentLayout = static_cast<const SimpleDescriptorLayout*>(args.descriptorLayout.Get());
 
-    const DX10InputLayout* const inputLayout = static_cast<const DX10InputLayout*>(args.inputLayout.get());
+    const DX10InputLayout* const inputLayout = static_cast<const DX10InputLayout*>(args.inputLayout.Get());
     if(_currentInputLayout != inputLayout)
     {
         _currentInputLayout = inputLayout;
         _d3d10Device->IASetInputLayout(inputLayout->inputLayout());
     }
 
-    const DX10BlendingState* const blendingState = static_cast<const DX10BlendingState*>(args.blendingState.get());
+    const DX10BlendingState* const blendingState = static_cast<const DX10BlendingState*>(args.blendingState.Get());
     if(_currentBlendState != blendingState->d3dBlendState())
     {
         _currentBlendState = blendingState->d3dBlendState();
         _d3d10Device->OMSetBlendState(_currentBlendState, _blendingFactors, 0xFFFFFFFF);
     }
 
-    const DX10DepthStencilState* const depthStencilState = static_cast<const DX10DepthStencilState*>(args.depthStencilState.get());
+    const DX10DepthStencilState* const depthStencilState = static_cast<const DX10DepthStencilState*>(args.depthStencilState.Get());
     if(_currentDepthStencilState != depthStencilState->d3dDepthStencilState())
     {
         _currentDepthStencilState = depthStencilState->d3dDepthStencilState();
         _d3d10Device->OMSetDepthStencilState(_currentDepthStencilState, static_cast<UINT>(_stencilRef));
     }
 
-    const DX10RasterizerState* const rasterizerState = static_cast<const DX10RasterizerState*>(args.rasterizerState.get());
+    const DX10RasterizerState* const rasterizerState = static_cast<const DX10RasterizerState*>(args.rasterizerState.Get());
     if(_currentRasterizerState != rasterizerState->d3dRasterizerState())
     {
         _currentRasterizerState = rasterizerState->d3dRasterizerState();
@@ -168,7 +168,11 @@ void DX10CommandQueue::_clearDepthStencil(const DX10CL::CommandClearDepthStencil
 
 void DX10CommandQueue::_setBlendFactor(const DX10CL::CommandSetBlendFactor& cmd) noexcept
 {
-    if(::std::memcmp(cmd.blendFactor, _blendingFactors, sizeof(float) * 4) != 0)
+    // if(::std::memcmp(cmd.blendFactor, _blendingFactors, sizeof(float) * 4) != 0)
+    if(cmd.blendFactor[0] == _blendingFactors[0] && 
+       cmd.blendFactor[1] == _blendingFactors[1] && 
+       cmd.blendFactor[2] == _blendingFactors[2] && 
+       cmd.blendFactor[3] == _blendingFactors[3])
     {
         ::std::memcpy(_blendingFactors, cmd.blendFactor, sizeof(float) * 4);
         _d3d10Device->OMSetBlendState(_currentBlendState, cmd.blendFactor, 0xFFFFFFFF);

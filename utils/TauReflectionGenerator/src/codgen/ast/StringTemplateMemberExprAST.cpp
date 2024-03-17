@@ -1,7 +1,7 @@
 #include "codegen/ast/StringTemplateMemberExprAST.hpp"
 #include "codegen/StringTemplateVisitor.hpp"
 
-namespace tau { namespace codegen { namespace string { namespace ast {
+namespace tau::codegen::string::ast {
 
 void StringTemplateMemberAccessExprAST::visit(IStringTemplateVisitor& visitor) noexcept
 { visitor.visit(*this); }
@@ -9,4 +9,4 @@ void StringTemplateMemberAccessExprAST::visit(IStringTemplateVisitor& visitor) n
 void StringTemplateMethodAccessExprAST::visit(IStringTemplateVisitor& visitor) noexcept
 { visitor.visit(*this); }
 
-} } } }
+}

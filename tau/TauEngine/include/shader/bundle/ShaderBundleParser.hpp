@@ -42,16 +42,16 @@ private:
 public:
     inline ShaderBundleParser(const ShaderBundleLexer& lexer) noexcept
         : _lexer(lexer)
-        , _ast(null)
+        , _ast(nullptr)
         , _error(Error::NoError)
-        , _errorMsg(null)
+        , _errorMsg(nullptr)
         , _errorIndex(0)
         , _errorLine(0)
         , _errorLineIndex(0)
         , _codeLine(0)
     { }
 
-    NullableStrongRef<sbp::AST> parse([[tau::out]] Error* error = null) noexcept;
+    NullableStrongRef<sbp::AST> parse([[tau::out]] Error* error = nullptr) noexcept;
 
     [[nodiscard]] const NullableStrongRef<sbp::AST>& ast() const noexcept { return _ast; }
 

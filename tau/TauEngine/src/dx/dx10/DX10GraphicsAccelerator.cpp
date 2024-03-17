@@ -33,7 +33,7 @@ RefDynArray<NullableRef<IGraphicsDisplay>> DX10GraphicsAccelerator::graphicsDisp
 
 NullableRef<DX10GraphicsAccelerator> DX10GraphicsAcceleratorBuilder::build() const noexcept
 {
-#define CHECK(_VAL) do { if(FAILED(_VAL)) { return null; } } while(0)
+#define CHECK(_VAL) do { if(FAILED(_VAL)) { return nullptr; } } while(0)
 
     DXGI_ADAPTER_DESC dxgiAdapterDesc;
     CHECK(_dxgiAdapter->GetDesc(&dxgiAdapterDesc));
@@ -43,14 +43,14 @@ NullableRef<DX10GraphicsAccelerator> DX10GraphicsAcceleratorBuilder::build() con
     const uSys sharedVideoMemory = dxgiAdapterDesc.SharedSystemMemory;
 
     uSys videoCardDescLen;
-    errno_t error = wcstombs_s(&videoCardDescLen, null, 0, dxgiAdapterDesc.Description, 128);
+    errno_t error = wcstombs_s(&videoCardDescLen, nullptr, 0, dxgiAdapterDesc.Description, 128);
     if(error || !videoCardDescLen)
-    { return null; }
+    { return nullptr; }
 
     char* videoCardDesc = new(std::nothrow) char[videoCardDescLen + 1];
     error = wcstombs_s(&videoCardDescLen, videoCardDesc, videoCardDescLen, dxgiAdapterDesc.Description, 128);
     if(error)
-    { return null; }
+    { return nullptr; }
 
     const DynString deviceName = DynString::passControl(videoCardDesc);
 

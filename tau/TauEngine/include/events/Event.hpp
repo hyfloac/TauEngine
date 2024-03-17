@@ -18,13 +18,13 @@
 #endif
 
 #if _DEBUG
-#define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                               public: \
-                                   [[nodiscard]] static Event::EventType getStaticType() noexcept \
-                                   { static Event::EventType type(TAU_RTTI_STRING(_TYPE), nullptr); \
-                                     return type; } \
-                                   [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
-                                   { return _TYPE::getStaticType(); }
+#define EVENT_IMPL_BASE(TYPE) DELETE_COPY(TYPE); \
+                              public: \
+                                  [[nodiscard]] static Event::EventType getStaticType() noexcept \
+                                  { static Event::EventType type(TAU_RTTI_STRING(TYPE), nullptr); \
+                                    return type; } \
+                                  [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
+                                  { return TYPE::getStaticType(); }
 #else
 #define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                public: \
@@ -36,9 +36,9 @@
 #endif
 
 #if EVENT_GEN_NAMES
-  #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE); \
-                            [[nodiscard]] virtual const char* getName() const noexcept override \
-                            { return #_TYPE; }
+  #define EVENT_IMPL(TYPE) EVENT_IMPL_BASE(TYPE); \
+                           [[nodiscard]] virtual const char* getName() const noexcept override \
+                           { return #TYPE; }
   #define EVENT_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
 #else
   #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE)
@@ -98,7 +98,7 @@ public:
     {
         char buf[12];
         _itoa_s(_x, buf, 10);
-        return DynString(getName()).concat(buf);
+        return DynString(getName()).Concat(buf);
     }
 #endif
 };

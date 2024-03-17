@@ -2,7 +2,7 @@
 #include "reflection/Attribute.hpp"
 #include "reflection/Class.hpp"
 
-namespace tau { namespace reflection { namespace processing { 
+namespace tau::reflection::processing { 
 
 void BaseGenerator::generate() noexcept
 {
@@ -150,4 +150,4 @@ void HeaderGenerator::printDummyMacros() noexcept
         "#define TAU_GENERATED_BODY(_CLASS) \n";
 }
 
-} } }
+}

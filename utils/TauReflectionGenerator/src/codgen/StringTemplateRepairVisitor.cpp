@@ -11,7 +11,7 @@
 
 #include "llvm/Support/raw_ostream.h"
 
-namespace tau { namespace codegen { namespace string {
+namespace tau::codegen::string {
 
 void StringTemplateReportErrorsVisitor::visit(ast::StringTemplateStringExprAST&) noexcept
 { }
@@ -376,4 +376,4 @@ void StringTemplateRepairVisitor::visit(ast::StringTemplateEndIfAST& ast) noexce
     visit(ast.next());
 }
 
-} } }
+}

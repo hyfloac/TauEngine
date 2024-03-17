@@ -11,7 +11,7 @@ TextureSampler DX10TextureSamplerBuilder::build(const TextureSamplerArgs& args, 
 
     ID3D10SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
-    { return null; }
+    { return nullptr; }
 
     dxTable->samplers()[tableIndex] = d3dSampler;
     ERROR_CODE_V(Error::NoError, &dxTable->samplers()[tableIndex]);

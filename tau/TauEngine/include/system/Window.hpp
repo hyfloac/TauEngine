@@ -31,8 +31,8 @@ enum class WindowState : u8
 
 #ifdef _WIN32
 static LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;
-static void removeWindow(NotNull<const Window>) noexcept;
-static Nullable Window* getWindowFromHandle(HWND) noexcept;
+static void removeWindow(const Window*) noexcept;
+static Window* getWindowFromHandle(HWND) noexcept;
 static void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
 #endif
 
@@ -176,11 +176,12 @@ public:
 #ifdef _WIN32
     void setAsDesktopBackground() noexcept;
     void removeFromDesktopBackground() noexcept;
+    LRESULT CALLBACK WindowProc(HWND windowHandle, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) noexcept;
 #endif
 public:
 #ifdef _WIN32
     friend LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM) noexcept;
-    friend void removeWindow(NotNull<const Window>) noexcept;
+    friend void removeWindow(const Window*) noexcept;
     friend Window* getWindowFromHandle(HWND) noexcept;
     friend void callWindowResizeHandler(Window& window, const LPARAM lParam) noexcept;
     friend struct WindowNode;

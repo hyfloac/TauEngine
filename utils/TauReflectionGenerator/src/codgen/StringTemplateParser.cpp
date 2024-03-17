@@ -35,7 +35,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 
-namespace tau { namespace codegen { namespace string {
+namespace tau::codegen::string {
 
 StrongRef<ast::StringTemplateRootAST> Parser::parse() noexcept
 {
@@ -754,4 +754,4 @@ StrongRef<ast::StringTemplateBooleanInvertExprAST> Parser::parseBooleanInvert() 
     return StrongRef<ast::StringTemplateBooleanInvertExprAST>(::std::move(expr));
 }
 
-} } }
+}

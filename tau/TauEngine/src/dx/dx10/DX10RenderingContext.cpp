@@ -5,7 +5,7 @@
 #include "TauEngine.hpp"
 
 #ifdef _WIN32
-#include <Utils.hpp>
+// #include <Utils.hpp>
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
 #include "dx/dx10/DX10DepthStencilState.hpp"
@@ -22,14 +22,14 @@ DX10RenderingContext::DX10RenderingContext(DX10GraphicsInterface& gi, const DX10
     , _blendState(args.blendState)
     , _swapChain(args.swapChain)
     , _vsync(false)
-    , _iaStrides(null)
-    , _iaOffsets(null)
-    , _defaultDepthStencilState(null)
-    , _currentDepthStencilState(null)
-    , _defaultRasterizerState(null)
-    , _currentRasterizerState(null)
-    , _defaultBlendingState(null)
-    , _currentBlendingState(null)
+    , _iaStrides(nullptr)
+    , _iaOffsets(nullptr)
+    , _defaultDepthStencilState(nullptr)
+    , _currentDepthStencilState(nullptr)
+    , _defaultRasterizerState(nullptr)
+    , _currentRasterizerState(nullptr)
+    , _defaultBlendingState(nullptr)
+    , _currentBlendingState(nullptr)
 { }
 
 DX10RenderingContext::~DX10RenderingContext() noexcept
@@ -37,7 +37,7 @@ DX10RenderingContext::~DX10RenderingContext() noexcept
 #define RELEASE(_OBJ) do { \
     if(_OBJ) {\
         (_OBJ)->Release(); \
-        (_OBJ) = null; \
+        (_OBJ) = nullptr; \
     } } while(0)
 
     RELEASE(_renderTargetView);
@@ -107,7 +107,7 @@ NullableRef<IDepthStencilState> DX10RenderingContext::setDepthStencilState(const
 {
     NullableRef<IDepthStencilState> ret = RefCast<IDepthStencilState>(_currentDepthStencilState);
 
-    if(!dsState || !RTT_CHECK(dsState.get(), DX10DepthStencilState))
+    if(!dsState || !RTT_CHECK(dsState.Get(), DX10DepthStencilState))
     { return ret; }
 
     _currentDepthStencilState = RefCast<DX10DepthStencilState>(dsState);
@@ -118,7 +118,7 @@ NullableRef<IDepthStencilState> DX10RenderingContext::setDepthStencilState(const
 
 void DX10RenderingContext::setDefaultDepthStencilState(const NullableRef<IDepthStencilState>& dsState) noexcept
 {
-    if(!dsState || !RTT_CHECK(dsState.get(), DX10DepthStencilState))
+    if(!dsState || !RTT_CHECK(dsState.Get(), DX10DepthStencilState))
     { return; }
 
     _defaultDepthStencilState = RefCast<DX10DepthStencilState>(dsState);
@@ -140,7 +140,7 @@ NullableRef<IRasterizerState> DX10RenderingContext::setRasterizerState(const Nul
 {
     NullableRef<IRasterizerState> ret = RefCast<IRasterizerState>(_currentRasterizerState);
 
-    if(!rsState || !RTT_CHECK(rsState.get(), DX10RasterizerState))
+    if(!rsState || !RTT_CHECK(rsState.Get(), DX10RasterizerState))
     { return ret; }
 
     _currentRasterizerState = RefCast<DX10RasterizerState>(rsState);
@@ -151,7 +151,7 @@ NullableRef<IRasterizerState> DX10RenderingContext::setRasterizerState(const Nul
 
 void DX10RenderingContext::setDefaultRasterizerState(const NullableRef<IRasterizerState>& rsState) noexcept
 {
-    if(!rsState || !RTT_CHECK(rsState.get(), DX10RasterizerState))
+    if(!rsState || !RTT_CHECK(rsState.Get(), DX10RasterizerState))
     { return; }
 
     _defaultRasterizerState = RefCast<DX10RasterizerState>(rsState);
@@ -173,7 +173,7 @@ NullableRef<IBlendingState> DX10RenderingContext::setBlendingState(const Nullabl
 {
     NullableRef<IBlendingState> ret = RefCast<IBlendingState>(_currentBlendingState);
 
-    if(!bsState || !RTT_CHECK(bsState.get(), DX10BlendingState))
+    if(!bsState || !RTT_CHECK(bsState.Get(), DX10BlendingState))
     { return ret; }
 
     _currentBlendingState = RefCast<DX10BlendingState>(bsState);
@@ -184,7 +184,7 @@ NullableRef<IBlendingState> DX10RenderingContext::setBlendingState(const Nullabl
 
 void DX10RenderingContext::setDefaultBlendingState(const NullableRef<IBlendingState>& bsState) noexcept
 {
-    if(!bsState || !RTT_CHECK(bsState.get(), DX10BlendingState))
+    if(!bsState || !RTT_CHECK(bsState.Get(), DX10BlendingState))
     { return; }
 
     _defaultBlendingState = RefCast<DX10BlendingState>(bsState);
@@ -273,7 +273,7 @@ DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextA
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX10RenderingContext* const context = new(::std::nothrow) DX10RenderingContext(_gi, dxArgs);
 
@@ -285,7 +285,7 @@ DX10RenderingContext* DX10RenderingContextBuilder::build(const RenderingContextA
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX10RenderingContext* const context = allocator.allocateT<DX10RenderingContext>(_gi, dxArgs);
 
@@ -297,7 +297,7 @@ CPPRef<IRenderingContext> DX10RenderingContextBuilder::buildCPPRef(const Renderi
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX10RenderingContext> context(new(::std::nothrow) DX10RenderingContext(_gi, dxArgs));
 
@@ -309,7 +309,7 @@ NullableRef<IRenderingContext> DX10RenderingContextBuilder::buildTauRef(const Re
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10RenderingContext> context(allocator, _gi, dxArgs);
 
@@ -321,7 +321,7 @@ NullableStrongRef<IRenderingContext> DX10RenderingContextBuilder::buildTauSRef(c
 {
     DX10RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX10RenderingContext> context(allocator, _gi, dxArgs);
 

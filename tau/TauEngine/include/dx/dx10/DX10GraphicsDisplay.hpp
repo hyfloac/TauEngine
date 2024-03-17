@@ -9,6 +9,7 @@
 class TAU_DLL DX10GraphicsDisplay final : public IGraphicsDisplay
 {
     DELETE_CM(DX10GraphicsDisplay);
+    RTT_IMPL(DX10GraphicsDisplay, IGraphicsDisplay)
 private:
     IDXGIOutput* _dxgiAdapterOutput;
     RefDynArray<GraphicsDisplayMode> _displayModes;
@@ -22,7 +23,7 @@ public:
     ~DX10GraphicsDisplay() noexcept override
     { _dxgiAdapterOutput->Release(); }
 
-    [[nodiscard]] RefDynArray<GraphicsDisplayMode> displayModes() noexcept override { return _displayModes; }
+    [[nodiscard]] const RefDynArray<GraphicsDisplayMode>& displayModes() const noexcept override { return _displayModes; }
 };
 
 class TAU_DLL DX10GraphicsDisplayBuilder

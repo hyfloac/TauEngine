@@ -3,7 +3,7 @@
 #include "StringTemplateAST.hpp"
 #include "StringTemplateExprAST.hpp"
 
-namespace tau { namespace codegen { namespace string { namespace ast {
+namespace tau::codegen::string::ast {
 
 class StringTemplateEndLoopAST;
 
@@ -101,4 +101,4 @@ public:
     void visit(IStringTemplateVisitor& visitor) noexcept override;
 };
 
-} } } }
+}

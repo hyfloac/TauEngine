@@ -297,7 +297,7 @@ public:
     inline VertexBufferArgs(const uSys descriptorCount, const bool instanced) noexcept
         : usage(static_cast<EBuffer::UsageType>(0))
         , elementCount(0)
-        , initialBuffer(null)
+        , initialBuffer(nullptr)
         , descriptor(descriptorCount, instanced)
     { }
 
@@ -318,7 +318,7 @@ public:
         : usage(static_cast<EBuffer::UsageType>(0))
         , indexSize(EBuffer::IndexSize::Uint32)
         , elementCount(0)
-        , initialBuffer(null)
+        , initialBuffer(nullptr)
     { }
 
     [[nodiscard]] inline uSys bufferSize() const noexcept { return elementCount * EBuffer::indexSize(indexSize); }
@@ -336,7 +336,7 @@ public:
     inline UniformBufferArgs() noexcept
         : usage(static_cast<EBuffer::UsageType>(0))
         , bufferSize(0)
-        , initialBuffer(null)
+        , initialBuffer(nullptr)
     { }
 };
 

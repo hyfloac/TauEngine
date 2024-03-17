@@ -95,36 +95,36 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Debug\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)tau\TauUtils\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)include\;$(ProjectDir);$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\LZMA\C;$(SolutionDir)libs\fmt-6.0.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Release\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

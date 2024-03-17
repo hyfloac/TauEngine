@@ -3,7 +3,7 @@
 #include "reflection/Attribute.hpp"
 #include "reflection/TagDeclaration.hpp"
 
-namespace tau { namespace reflection {
+namespace tau::reflection {
 
 AttributeManager::AttribHandlerSet AttributeManager::_attributeHandlers;
 AttributeManager::FBAllocator AttributeManager::_attribTreeAllocator(sizeof(TagDeclaration::AttributeSet::Node), 8192);
@@ -28,4 +28,4 @@ Ref<IAttribute> AttributeManager::getAttribute(const DynString& attribName) noex
     return _attributeHandlers[attribName];
 }
 
-} }
+}

@@ -1,3 +1,6 @@
+#ifdef _WIN32
+#include <d3d10_1.h>
+#endif
 #include "dx/dx10/DX10TextureView.hpp"
 
 #ifdef _WIN32
@@ -17,7 +20,7 @@ TextureView DX10TextureViewBuilder::build(const TextureViewArgs& args, CPUDescri
 
     DXTextureViewArgs dxArgs{ placementView };
     if(!processArgs(args, &dxArgs, error))
-    { return { null }; }
+    { return { nullptr }; }
 
     ERROR_CODE_V(Error::NoError, dxArgs.d3dSRV);
 }
@@ -57,7 +60,7 @@ bool DX10TextureViewBuilder::processArgs1D(const TextureViewArgs& args, DXTextur
 
     const ResourceTexture1DArgs* texArgs = dxResource->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
-    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!HasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
     DX10ResourceTexture1D* const dxTexture = static_cast<DX10ResourceTexture1D* const>(dxResource);
@@ -80,7 +83,7 @@ bool DX10TextureViewBuilder::processArgs1DArray(const TextureViewArgs& args, DXT
 
     const ResourceTexture1DArgs* texArgs = dxResource->getArgs<ResourceTexture1DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
-    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!HasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount == 1, Error::TextureIsNotArray);
 
@@ -106,7 +109,7 @@ bool DX10TextureViewBuilder::processArgs2D(const TextureViewArgs& args, DXTextur
 
     const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
-    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!HasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
     DX10ResourceTexture2D* const dxTexture = static_cast<DX10ResourceTexture2D* const>(dxResource);
@@ -129,7 +132,7 @@ bool DX10TextureViewBuilder::processArgs2DArray(const TextureViewArgs& args, DXT
 
     const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
-    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!HasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount == 1, Error::TextureIsNotArray);
 
@@ -155,7 +158,7 @@ bool DX10TextureViewBuilder::processArgs3D(const TextureViewArgs& args, DXTextur
 
     const ResourceTexture3DArgs* texArgs = dxResource->getArgs<ResourceTexture3DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
-    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!HasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
 
     DX10ResourceTexture3D* const dxTexture = static_cast<DX10ResourceTexture3D* const>(dxResource);
@@ -178,7 +181,7 @@ bool DX10TextureViewBuilder::processArgsCube(const TextureViewArgs& args, DXText
 
     const ResourceTexture2DArgs* texArgs = dxResource->getArgs<ResourceTexture2DArgs>();
     ERROR_CODE_COND_F(!texArgs, Error::InvalidTexture);
-    ERROR_CODE_COND_F(!hasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
+    ERROR_CODE_COND_F(!HasFlag(texArgs->flags, ETexture::BindFlags::ShaderAccess), Error::TextureDoesNotSupportView);
     ERROR_CODE_COND_F(!ETexture::isCompatible(texArgs->dataFormat, args.dataFormat), Error::InvalidDataFormat);
     ERROR_CODE_COND_F(texArgs->arrayCount != 6, Error::TextureIsNotArray);
 
@@ -240,16 +243,18 @@ DXGI_FORMAT DX10TextureViewBuilder::dxTextureFormat(const ETexture::Format forma
     }
 }
 
+ENUM_FLAGS(D3D10_BIND_FLAG);
+
 D3D10_BIND_FLAG DX10TextureViewBuilder::dxBindFlags(const ETexture::BindFlags flags) noexcept
 {
     D3D10_BIND_FLAG ret = static_cast<D3D10_BIND_FLAG>(0);
 
-    if(hasFlag(flags, ETexture::BindFlags::RenderTarget) ||
-       hasFlag(flags, ETexture::BindFlags::GenerateMipmaps))
+    if(HasFlag(flags, ETexture::BindFlags::RenderTarget) ||
+       HasFlag(flags, ETexture::BindFlags::GenerateMipmaps))
     {
         ret |= D3D10_BIND_RENDER_TARGET;
     }
-    if(hasFlag(flags, ETexture::BindFlags::ShaderAccess))
+    if(HasFlag(flags, ETexture::BindFlags::ShaderAccess))
     {
         ret |= D3D10_BIND_SHADER_RESOURCE;
     }
@@ -259,8 +264,8 @@ D3D10_BIND_FLAG DX10TextureViewBuilder::dxBindFlags(const ETexture::BindFlags fl
 
 D3D10_RESOURCE_MISC_FLAG DX10TextureViewBuilder::dxMiscFlags(const ETexture::BindFlags flags) noexcept
 {
-    if(hasFlag(flags, ETexture::BindFlags::GenerateMipmaps) &&
-       hasFlag(flags, ETexture::BindFlags::ShaderAccess))
+    if(HasFlag(flags, ETexture::BindFlags::GenerateMipmaps) &&
+       HasFlag(flags, ETexture::BindFlags::ShaderAccess))
     {
         return D3D10_RESOURCE_MISC_GENERATE_MIPS;
     }

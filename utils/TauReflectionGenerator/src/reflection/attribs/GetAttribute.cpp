@@ -2,7 +2,7 @@
 #include "reflection/attribs/GetAttribute.hpp"
 #include "reflection/Class.hpp"
 
-namespace tau { namespace reflection { namespace attribs {
+namespace tau::reflection::attribs {
 
 AttributeData GetPropertyAttribute::parseAttribute(const DynString& attribName, const ::clang::MacroArgs*, const ::clang::Token*& currentToken) const noexcept
 {
@@ -83,4 +83,4 @@ void GetPropertyAttribute::generateImplTauClass(::llvm::raw_fd_ostream& base, co
 
 }
 
-} } }
+}

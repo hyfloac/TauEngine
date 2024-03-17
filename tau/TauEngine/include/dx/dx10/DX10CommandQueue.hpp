@@ -26,14 +26,14 @@ private:
 public:
     DX10CommandQueue(ID3D10Device* const d3d10Device) noexcept
         : _d3d10Device(d3d10Device)
-        , _currentBlendState(null)
-        , _currentDepthStencilState(null)
-        , _currentRasterizerState(null)
+        , _currentBlendState(nullptr)
+        , _currentDepthStencilState(nullptr)
+        , _currentRasterizerState(nullptr)
         , _blendingFactors { 1.0f, 1.0f, 1.0f, 1.0f }
         , _stencilRef(0)
-        , _currentPipelineState(null)
-        , _currentInputLayout(null)
-        , _currentLayout(null)
+        , _currentPipelineState(nullptr)
+        , _currentInputLayout(nullptr)
+        , _currentLayout(nullptr)
     { }
 
     void executeCommandLists(uSys count, const ICommandList* const * lists) noexcept override;

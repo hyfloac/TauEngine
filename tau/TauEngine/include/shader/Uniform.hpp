@@ -3,7 +3,7 @@
 #include <Objects.hpp>
 #include <Safeties.hpp>
 
-#include "model/Buffer.hpp"
+#include "graphics/Buffer.hpp"
 
 enum UniformBlockBinding
 {
@@ -45,18 +45,18 @@ private:
     NullableRef<IUniformBuffer> _buffer;
 public:
     inline UniformBlock(const IBufferBuilder& builder) noexcept
-        : _buffer(null)
+        : _buffer(nullptr)
     {
         UniformBufferArgs args;
         args.usage = EBuffer::UsageType::DynamicDraw;
         args.bufferSize = UniformAccessor<_T>::size();
-        args.initialBuffer = null;
-        _buffer = builder.buildTauRef(args, null);
+        args.initialBuffer = nullptr;
+        _buffer = builder.buildTauRef(args, nullptr);
     }
 
     void set(IRenderingContext& context, const _T& t) noexcept
     {
-        UniformAccessor<_T>::set(context, _buffer.get(), t);
+        UniformAccessor<_T>::set(context, _buffer.Get(), t);
     }
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
@@ -82,21 +82,21 @@ private:
 public:
     template<typename... _Args>
     UniformBlock(const IBufferBuilder& builder, _Args&&... args) noexcept
-        : _buffer(null)
+        : _buffer(nullptr)
         , _t(std::forward<_Args>(args)...)
     {
         UniformBufferArgs bufArgs;
         bufArgs.usage = EBuffer::UsageType::DynamicDraw;
         bufArgs.bufferSize = UniformAccessor<_T>::size();
-        bufArgs.initialBuffer = null;
-        _buffer = builder.buildTauRef(bufArgs, null);
+        bufArgs.initialBuffer = nullptr;
+        _buffer = builder.buildTauRef(bufArgs, nullptr);
     }
 
     [[nodiscard]] _T& data() noexcept { return _t; }
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        UniformAccessor<_T>::set(context, _buffer.get(), _t);
+        UniformAccessor<_T>::set(context, _buffer.Get(), _t);
         _buffer->bind(context, stage, index);
     }
 
@@ -117,19 +117,19 @@ private:
     const _T* _t;
 public:
     UniformBlock(const IBufferBuilder& builder, const _T* t) noexcept
-        : _buffer(null)
+        : _buffer(nullptr)
         , _t(t)
     {
         UniformBufferArgs args;
         args.usage = EBuffer::UsageType::DynamicDraw;
         args.bufferSize = UniformAccessor<_T>::size();
-        args.initialBuffer = null;
-        _buffer = builder.buildTauRef(args, null);
+        args.initialBuffer = nullptr;
+        _buffer = builder.buildTauRef(args, nullptr);
     }
 
     void upload(IRenderingContext& context, const EShader::Stage stage, const u32 index) const noexcept
     {
-        UniformAccessor<_T>::set(context, _buffer.get(), *_t);
+        UniformAccessor<_T>::set(context, _buffer.Get(), *_t);
         _buffer->bind(context, stage, index);
     }
 

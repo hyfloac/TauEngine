@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/_GraphicsOpaqueObjects.hpp"
 #include "texture/TextureSampler.hpp"
 
 #ifdef _WIN32
@@ -22,7 +23,7 @@ public:
         : _gi(gi)
     { }
 
-    [[nodiscard]] TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, Error* error = null) const noexcept override;
+    [[nodiscard]] TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, Error* error = nullptr) const noexcept override;
 private:
     [[nodiscard]] bool processArgs(const TextureSamplerArgs& args, [[tau::out]] ID3D10SamplerState** dxArgs, [[tau::out]] Error* error) const noexcept;
 };

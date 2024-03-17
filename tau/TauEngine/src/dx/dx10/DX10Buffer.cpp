@@ -53,7 +53,7 @@ void DX10VertexBuffer::endModification(IRenderingContext&) noexcept
     if(_currentMapping)
     {
         _d3dBuffer->Unmap();
-        _currentMapping = null;
+        _currentMapping = nullptr;
 
 #if TAU_BUFFER_SAFETY
         --_modificationLockCount;
@@ -152,7 +152,7 @@ void DX10IndexBuffer::endModification(IRenderingContext&) noexcept
     if(_currentMapping)
     {
         _d3dBuffer->Unmap();
-        _currentMapping = null;
+        _currentMapping = nullptr;
 
 #if TAU_BUFFER_SAFETY
         --_modificationLockCount;
@@ -257,13 +257,13 @@ void DX10UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage 
     switch(stage)
     {
         case EShader::Stage::Vertex:
-            ctx.d3dDevice()->VSSetConstantBuffers(index, 0, null);
+            ctx.d3dDevice()->VSSetConstantBuffers(index, 0, nullptr);
             break;
         case EShader::Stage::Geometry:
-            ctx.d3dDevice()->GSSetConstantBuffers(index, 0, null);
+            ctx.d3dDevice()->GSSetConstantBuffers(index, 0, nullptr);
             break;
         case EShader::Stage::Pixel:
-            ctx.d3dDevice()->PSSetConstantBuffers(index, 0, null);
+            ctx.d3dDevice()->PSSetConstantBuffers(index, 0, nullptr);
             break;
         default: break;
     }
@@ -319,7 +319,7 @@ void DX10UniformBuffer::endModification(IRenderingContext&) noexcept
     if(_currentMapping)
     {
         _d3dBuffer->Unmap();
-        _currentMapping = null;
+        _currentMapping = nullptr;
 
 #if TAU_BUFFER_SAFETY
         --_modificationLockCount;
@@ -384,7 +384,7 @@ DX10VertexBuffer* DX10BufferBuilder::build(const VertexBufferArgs& args, Error* 
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX10VertexBuffer* const buffer = new(::std::nothrow) DX10VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -400,7 +400,7 @@ DX10VertexBuffer* DX10BufferBuilder::build(const VertexBufferArgs& args, Error* 
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX10VertexBuffer* const buffer = allocator.allocateT<DX10VertexBuffer>(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -416,7 +416,7 @@ CPPRef<IVertexBuffer> DX10BufferBuilder::buildCPPRef(const VertexBufferArgs& arg
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX10VertexBuffer> buffer(new(::std::nothrow) DX10VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer));
     if(!buffer)
@@ -432,7 +432,7 @@ NullableRef<IVertexBuffer> DX10BufferBuilder::buildTauRef(const VertexBufferArgs
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10VertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -448,7 +448,7 @@ NullableStrongRef<IVertexBuffer> DX10BufferBuilder::buildTauSRef(const VertexBuf
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX10VertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -464,7 +464,7 @@ DX10IndexBuffer* DX10BufferBuilder::build(const IndexBufferArgs& args, Error* co
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX10IndexBuffer* const buffer = new(::std::nothrow) DX10IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -480,7 +480,7 @@ DX10IndexBuffer* DX10BufferBuilder::build(const IndexBufferArgs& args, Error* co
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX10IndexBuffer* const buffer = allocator.allocateT<DX10IndexBuffer>(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -496,7 +496,7 @@ CPPRef<IIndexBuffer> DX10BufferBuilder::buildCPPRef(const IndexBufferArgs& args,
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX10IndexBuffer> buffer(new(::std::nothrow) DX10IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer));
     if(!buffer)
@@ -512,7 +512,7 @@ NullableRef<IIndexBuffer> DX10BufferBuilder::buildTauRef(const IndexBufferArgs& 
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10IndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -528,7 +528,7 @@ NullableStrongRef<IIndexBuffer> DX10BufferBuilder::buildTauSRef(const IndexBuffe
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX10IndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -544,7 +544,7 @@ DX10UniformBuffer* DX10BufferBuilder::build(const UniformBufferArgs& args, Error
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX10UniformBuffer* const buffer = new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
@@ -560,7 +560,7 @@ DX10UniformBuffer* DX10BufferBuilder::build(const UniformBufferArgs& args, Error
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX10UniformBuffer* const buffer = allocator.allocateT<DX10UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
@@ -576,7 +576,7 @@ CPPRef<IUniformBuffer> DX10BufferBuilder::buildCPPRef(const UniformBufferArgs& a
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX10UniformBuffer> buffer(new(::std::nothrow) DX10UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
     if(!buffer)
@@ -592,7 +592,7 @@ NullableRef<IUniformBuffer> DX10BufferBuilder::buildTauRef(const UniformBufferAr
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
@@ -608,7 +608,7 @@ NullableStrongRef<IUniformBuffer> DX10BufferBuilder::buildTauSRef(const UniformB
 {
     ID3D10Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX10UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)

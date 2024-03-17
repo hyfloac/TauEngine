@@ -76,7 +76,7 @@ TAU_DLL void computeClockCyclesFromRuntime() noexcept;
  * @return
  *    A pointer to the current clock speed information.
  */
-TAU_DLL NonNull const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept;
+TAU_DLL const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept;
 
 class IFile;
 

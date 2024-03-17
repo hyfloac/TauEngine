@@ -111,9 +111,9 @@ void DX12ResourceStateManager::resourceBarrier(const D3D12_RESOURCE_BARRIER& bar
             {
                 ReadLock readLock(_globalMutex);
                 globalState = getGlobalResourceState(barrier.Transition.pResource);
-                if(!globalState)
-                { return; }
             }
+            if(!globalState)
+            { return; }
             ResourceState localState(globalState->subresourceStates.count(), static_cast<D3D12_RESOURCE_STATES>(-1));
             localState.setSubresourceState(barrier.Transition.Subresource, barrier.Transition.StateAfter);
             _localStateMap[barrier.Transition.pResource] = ::std::move(localState);
@@ -233,9 +233,10 @@ DX12ResourceStateManager::UsageIndices* DX12ResourceStateManager::getUsageIndice
         {
             ReadLock readLock(_globalMutex);
             globalState = getGlobalResourceState(resource);
-            if(!globalState)
-            { return nullptr; }
         }
+
+        if(!globalState)
+        { return nullptr; }
 
         _usageMap[resource] = UsageIndices(globalState->subresourceStates.count());
     }
@@ -245,7 +246,7 @@ DX12ResourceStateManager::UsageIndices* DX12ResourceStateManager::getUsageIndice
 
 void DX12ResourceStateManager::flushResourceBarriers(ID3D12GraphicsCommandList* const cmdList) noexcept
 {
-    if(_deltaStateList.size() > 0)
+    if(!_deltaStateList.empty())
     {
         cmdList->ResourceBarrier(static_cast<UINT>(_deltaStateList.size()), &_deltaStateList.front());
         _deltaStateList.clear();

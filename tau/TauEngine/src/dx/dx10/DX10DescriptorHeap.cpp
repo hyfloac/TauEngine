@@ -39,7 +39,7 @@ DX10UniformBufferViewDescriptorHeap::~DX10UniformBufferViewDescriptorHeap() noex
 
 IDescriptorHeap* DX10DescriptorHeapBuilder::build(const DescriptorHeapArgs& args, Error* const error) const noexcept
 {
-    IDescriptorHeap* heap = null;
+    IDescriptorHeap* heap = nullptr;
 
     switch(args.type)
     {
@@ -59,7 +59,7 @@ IDescriptorHeap* DX10DescriptorHeapBuilder::build(const DescriptorHeapArgs& args
 
 IDescriptorHeap* DX10DescriptorHeapBuilder::build(const DescriptorHeapArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    IDescriptorHeap* heap = null;
+    IDescriptorHeap* heap = nullptr;
 
     switch(args.type)
     {
@@ -79,7 +79,7 @@ IDescriptorHeap* DX10DescriptorHeapBuilder::build(const DescriptorHeapArgs& args
 
 CPPRef<IDescriptorHeap> DX10DescriptorHeapBuilder::buildCPPRef(const DescriptorHeapArgs& args, Error* const error) const noexcept
 {
-    CPPRef<IDescriptorHeap> heap = null;
+    CPPRef<IDescriptorHeap> heap = nullptr;
     
     switch(args.type)
     {
@@ -99,7 +99,7 @@ CPPRef<IDescriptorHeap> DX10DescriptorHeapBuilder::buildCPPRef(const DescriptorH
 
 NullableRef<IDescriptorHeap> DX10DescriptorHeapBuilder::buildTauRef(const DescriptorHeapArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    NullableRef<IDescriptorHeap> heap = null;
+    NullableRef<IDescriptorHeap> heap = nullptr;
     
     switch(args.type)
     {
@@ -119,7 +119,7 @@ NullableRef<IDescriptorHeap> DX10DescriptorHeapBuilder::buildTauRef(const Descri
 
 NullableStrongRef<IDescriptorHeap> DX10DescriptorHeapBuilder::buildTauSRef(const DescriptorHeapArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
-    NullableStrongRef<IDescriptorHeap> heap = null;
+    NullableStrongRef<IDescriptorHeap> heap = nullptr;
     
     switch(args.type)
     {

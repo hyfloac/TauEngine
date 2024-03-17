@@ -5,6 +5,7 @@
  */
 #pragma once
 #include <NumTypes.hpp>
+#include <EnumBitFields.hpp>
 
 class Window;
 
@@ -77,3 +78,5 @@ public:
 
     [[nodiscard]] static Button convertFromSysVButton(int key) noexcept;
 };
+
+ENUM_FLAGS(Mouse::Flags);
