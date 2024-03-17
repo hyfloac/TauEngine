@@ -13,6 +13,7 @@ class IShaderProgramBuilder;
 class IResourceBuilder;
 class IInputLayoutBuilder;
 class IVertexArrayBuilder;
+class IBufferBuilder;
 class IDepthStencilStateBuilder;
 class IRasterizerStateBuilder;
 class IBlendingStateBuilder;
@@ -43,6 +44,7 @@ public:
     [[nodiscard]] virtual IResourceBuilder& createResource() noexcept = 0;
     [[nodiscard]] virtual IInputLayoutBuilder& createInputLayout() noexcept = 0;
     [[nodiscard]] virtual IVertexArrayBuilder& createVertexArray() noexcept = 0;
+    [[nodiscard]] virtual IBufferBuilder& createBuffer() noexcept = 0;
     [[nodiscard]] virtual IDepthStencilStateBuilder& createDepthStencilState() noexcept = 0;
     [[nodiscard]] virtual IRasterizerStateBuilder& createRasterizerState() noexcept = 0;
     [[nodiscard]] virtual IBlendingStateBuilder& createBlendingState() noexcept = 0;

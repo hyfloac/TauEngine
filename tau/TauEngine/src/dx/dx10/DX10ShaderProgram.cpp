@@ -27,7 +27,7 @@ bool DX10ShaderProgramBuilder::processArgs(const ShaderProgramAutoArgs& args, DX
 
     ShaderInfoExtractorVisitor visitor(RenderingMode::DirectX10);
 
-    visitor.visit(ast.get());
+    visitor.visit(ast.Get());
 
     for(auto it = visitor.begin(); it != visitor.end(); ++it)
     {

@@ -14,4 +14,4 @@ void IShaderBundleVisitor::visit(const sbp::AST& expr) noexcept
 { expr.visit(*this); }
 
 void IShaderBundleVisitor::visit(const sbp::RootAST& expr) noexcept
-{ visit(expr.node().get()); }
+{ visit(expr.node().Get()); }

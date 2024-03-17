@@ -77,7 +77,7 @@ private:
     uSys _currIndent;
     FILE* _file;
 public:
-    PrintShaderBundleVisitor(const PrintSBVArgs* args = null) noexcept;
+    PrintShaderBundleVisitor(const PrintSBVArgs* args = nullptr) noexcept;
 
     void visit(const sbp::AST* expr) noexcept override
     { IShaderBundleVisitor::visit(expr); }

@@ -90,9 +90,9 @@ private:
 public:
     ShaderStageBlockAST(const EShader::Stage stage) noexcept
         : _stage(stage)
-        , _file(null)
-        , _uniforms(null)
-        , _textures(null)
+        , _file(nullptr)
+        , _uniforms(nullptr)
+        , _textures(nullptr)
     { }
 
     [[nodiscard]] EShader::Stage stage() const noexcept { return _stage; }
@@ -118,12 +118,12 @@ public:
     using APISet = ::std::bitset<static_cast<uSys>(RenderingMode::Mode::MAX_VALUE) + 1>;
 private:
     APISet _apis;
-    NullableStrongRef<ShaderStageBlockAST> _vertex;
-    NullableStrongRef<ShaderStageBlockAST> _tessCtrl;
-    NullableStrongRef<ShaderStageBlockAST> _tessEval;
-    NullableStrongRef<ShaderStageBlockAST> _geometry;
-    NullableStrongRef<ShaderStageBlockAST> _pixel;
-    NullableStrongRef<APIBlockAST> _next;
+    StrongRef<ShaderStageBlockAST> _vertex;
+    StrongRef<ShaderStageBlockAST> _tessCtrl;
+    StrongRef<ShaderStageBlockAST> _tessEval;
+    StrongRef<ShaderStageBlockAST> _geometry;
+    StrongRef<ShaderStageBlockAST> _pixel;
+    StrongRef<APIBlockAST> _next;
 public:
     [[nodiscard]]       APISet& apis()       noexcept { return _apis; }
     [[nodiscard]] const APISet& apis() const noexcept { return _apis; }
@@ -131,7 +131,7 @@ public:
     [[nodiscard]] bool hasAPI(const RenderingMode::Mode target) const noexcept
     {
         // https://lemire.me/blog/2018/02/21/iterating-over-set-bits-quickly/
-        const uSys words = (_apis.size() - 1) / (CHAR_BIT * sizeof(uSys)) + 1;
+        constexpr uSys words = (_apis.size() - 1) / (CHAR_BIT * sizeof(uSys)) + 1;
         for(uSys k = 0; k < words; ++k)
         {
             u64 bitSet = _apis._Getword(k);
@@ -154,20 +154,20 @@ public:
         return false;
     }
 
-    [[nodiscard]] NullableStrongRef<ShaderStageBlockAST>&   vertex() noexcept { return _vertex;   }
-    [[nodiscard]] NullableStrongRef<ShaderStageBlockAST>& tessCtrl() noexcept { return _tessCtrl; }
-    [[nodiscard]] NullableStrongRef<ShaderStageBlockAST>& tessEval() noexcept { return _tessEval; }
-    [[nodiscard]] NullableStrongRef<ShaderStageBlockAST>& geometry() noexcept { return _geometry; }
-    [[nodiscard]] NullableStrongRef<ShaderStageBlockAST>&    pixel() noexcept { return _pixel;    }
+    [[nodiscard]] StrongRef<ShaderStageBlockAST>&   vertex() noexcept { return _vertex;   }
+    [[nodiscard]] StrongRef<ShaderStageBlockAST>& tessCtrl() noexcept { return _tessCtrl; }
+    [[nodiscard]] StrongRef<ShaderStageBlockAST>& tessEval() noexcept { return _tessEval; }
+    [[nodiscard]] StrongRef<ShaderStageBlockAST>& geometry() noexcept { return _geometry; }
+    [[nodiscard]] StrongRef<ShaderStageBlockAST>&    pixel() noexcept { return _pixel;    }
 
-    [[nodiscard]] const NullableStrongRef<ShaderStageBlockAST>&   vertex() const noexcept { return _vertex;   }
-    [[nodiscard]] const NullableStrongRef<ShaderStageBlockAST>& tessCtrl() const noexcept { return _tessCtrl; }
-    [[nodiscard]] const NullableStrongRef<ShaderStageBlockAST>& tessEval() const noexcept { return _tessEval; }
-    [[nodiscard]] const NullableStrongRef<ShaderStageBlockAST>& geometry() const noexcept { return _geometry; }
-    [[nodiscard]] const NullableStrongRef<ShaderStageBlockAST>&    pixel() const noexcept { return _pixel;    }
+    [[nodiscard]] const StrongRef<ShaderStageBlockAST>&   vertex() const noexcept { return _vertex;   }
+    [[nodiscard]] const StrongRef<ShaderStageBlockAST>& tessCtrl() const noexcept { return _tessCtrl; }
+    [[nodiscard]] const StrongRef<ShaderStageBlockAST>& tessEval() const noexcept { return _tessEval; }
+    [[nodiscard]] const StrongRef<ShaderStageBlockAST>& geometry() const noexcept { return _geometry; }
+    [[nodiscard]] const StrongRef<ShaderStageBlockAST>&    pixel() const noexcept { return _pixel;    }
 
-    [[nodiscard]]       NullableStrongRef<APIBlockAST>& next()       noexcept { return _next; }
-    [[nodiscard]] const NullableStrongRef<APIBlockAST>& next() const noexcept { return _next; }
+    [[nodiscard]]       StrongRef<APIBlockAST>& next()       noexcept { return _next; }
+    [[nodiscard]] const StrongRef<APIBlockAST>& next() const noexcept { return _next; }
 
     void visit(IShaderBundleVisitor& visitor) const noexcept override
     { visitor.visit(*this); }

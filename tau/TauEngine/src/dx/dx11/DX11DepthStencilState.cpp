@@ -15,7 +15,7 @@ DX11DepthStencilState* DX11DepthStencilStateBuilder::build(const DepthStencilArg
 {
     ID3D11DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
-    { return null; }
+    { return nullptr; }
 
     DX11DepthStencilState* const ret = new(::std::nothrow) DX11DepthStencilState(args, d3dDepthStencilState);
 
@@ -32,7 +32,7 @@ DX11DepthStencilState* DX11DepthStencilStateBuilder::build(const DepthStencilArg
 {
     ID3D11DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
-    { return null; }
+    { return nullptr; }
 
     DX11DepthStencilState* const ret = allocator.allocateT<DX11DepthStencilState>(args, d3dDepthStencilState);
 
@@ -49,7 +49,7 @@ CPPRef<IDepthStencilState> DX11DepthStencilStateBuilder::buildCPPRef(const Depth
 {
     ID3D11DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11DepthStencilState> ret = CPPRef<DX11DepthStencilState>(new(::std::nothrow) DX11DepthStencilState(args, d3dDepthStencilState));
 
@@ -66,7 +66,7 @@ NullableRef<IDepthStencilState> DX11DepthStencilStateBuilder::buildTauRef(const 
 {
     ID3D11DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11DepthStencilState> ret(allocator, args, d3dDepthStencilState);
 
@@ -83,7 +83,7 @@ NullableStrongRef<IDepthStencilState> DX11DepthStencilStateBuilder::buildTauSRef
 {
     ID3D11DepthStencilState* d3dDepthStencilState;
     if(!processArgs(args, &d3dDepthStencilState, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11DepthStencilState> ret(allocator, args, d3dDepthStencilState);
 

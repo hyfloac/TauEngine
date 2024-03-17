@@ -27,6 +27,7 @@ public:
 
 class TAU_DLL DX10FrameBufferBuilder final : public IFrameBufferBuilder
 {
+    DEFAULT_CONSTRUCT_PU(DX10FrameBufferBuilder);
     DEFAULT_DESTRUCT(DX10FrameBufferBuilder);
     DEFAULT_CM_PU(DX10FrameBufferBuilder);
 public:

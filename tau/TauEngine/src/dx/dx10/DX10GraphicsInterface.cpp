@@ -22,8 +22,9 @@ DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10De
     , _d3d10Device(d3dDevice)
     , _dxgiAdapter(dxgiAdapter)
     , _shaderInfoExtractor(mode.currentMode())
+    , m_Capabilities{}
     , _shaderBuilder(new(::std::nothrow) DX10ShaderBuilder(*this, &_shaderInfoExtractor))
-    , _shaderProgramBuilder(new(::std::nothrow) DX10ShaderProgramBuilder(&_shaderInfoExtractor))
+    , _shaderProgramBuilder(new(::std::nothrow) DX10ShaderProgramBuilder(*this))
     , _resourceBuilder(new(::std::nothrow) DX10ResourceBuilder(*this))
     , _inputLayoutBuilder(new(::std::nothrow) DX10InputLayoutBuilder(*this))
     , _vertexArrayBuilder(new(::std::nothrow) DX10VertexArrayBuilder)
@@ -32,14 +33,14 @@ DX10GraphicsInterface::DX10GraphicsInterface(const RenderingMode& mode, ID3D10De
     , _rasterizerStateBuilder(new(::std::nothrow) DX10RasterizerStateBuilder(*this))
     , _blendingStateBuilder(new(::std::nothrow) DX10BlendingStateBuilder(*this))
     , _textureSamplerBuilder(new(::std::nothrow) DX10TextureSamplerBuilder(*this))
-    , _frameBufferBuilder(new(::std::nothrow) DX10FrameBufferBuilder(*this))
+    , _frameBufferBuilder(new(::std::nothrow) DX10FrameBufferBuilder)
     , _renderingContextBuilder(new(::std::nothrow) DX10RenderingContextBuilder(*this))
 { }
 
 DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
 {
     _d3d10Device->Release();
-    _d3d10Device = null;
+    _d3d10Device = nullptr;
 
     delete _shaderBuilder;
     delete _inputLayoutBuilder;
@@ -52,6 +53,9 @@ DX10GraphicsInterface::~DX10GraphicsInterface() noexcept
     delete _frameBufferBuilder;
     delete _renderingContextBuilder;
 }
+
+IGraphicsCapabilities& DX10GraphicsInterface::capabilities() noexcept
+{ return m_Capabilities; }
 
 IShaderBuilder& DX10GraphicsInterface::createShader() noexcept
 { return *_shaderBuilder; }
@@ -98,7 +102,7 @@ NullableRef<DX10GraphicsInterface> DX10GraphicsInterfaceBuilder::build(const Gra
         if(!rtt_check<DXGI11GraphicsAccelerator>(args.graphicsAccelerator))
         { return nullptr; }
 
-        const DXGI11GraphicsAccelerator* const gpu = static_cast<const DXGI11GraphicsAccelerator*>(args.graphicsAccelerator.get());
+        const DXGI11GraphicsAccelerator* const gpu = static_cast<const DXGI11GraphicsAccelerator*>(args.graphicsAccelerator.Get());
         dxgiAdapter = gpu->dxgiAdapter();
     }
 

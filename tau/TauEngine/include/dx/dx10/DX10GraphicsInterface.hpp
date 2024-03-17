@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
+#include "system/GraphicsCapabilities.hpp"
 #include "system/GraphicsInterface.hpp"
 
 #ifdef _WIN32
@@ -22,6 +23,44 @@ class DX10TextureUploaderBuilder;
 class DX10FrameBufferBuilder;
 class DX10RenderingContextBuilder;
 
+class TAU_DLL DX10GraphicsCapabilities final : public IGraphicsCapabilities
+{
+    DEFAULT_DESTRUCT(DX10GraphicsCapabilities);
+    DELETE_CM(DX10GraphicsCapabilities);
+public:
+    DX10GraphicsCapabilities() noexcept
+        : m_CommandListCapabilities {
+            .nativeCommandListSupport = true,
+            .bundleInheritsState = true
+        }
+        , m_ShaderCapabilities {
+            .supportsGeometry = true,
+            .supportsTessellation = false,
+            .supportsMesh = false,
+            .supportsRayTracing = false,
+            .supportsCompute = true
+        }
+        , m_HeapCapabilities{
+            .supportsUserHeap = false,
+            .supportsMultiType = false
+        }
+        , m_ResourceCapabilities{
+            .supportsAliasing = false,
+            .supportsDirectModify = false
+        }
+    { }
+
+    [[nodiscard]] const CommandListCapabilities& commandListCapabilities() const noexcept override { return m_CommandListCapabilities; }
+    [[nodiscard]] const ShaderCapabilities& shaderCapabilities() const noexcept override { return m_ShaderCapabilities; }
+    [[nodiscard]] const HeapCapabilities& heapCapabilities() const noexcept override { return m_HeapCapabilities; }
+    [[nodiscard]] const ResourceCapabilities& resourceCapabilities() const noexcept override { return m_ResourceCapabilities; }
+private:
+    CommandListCapabilities m_CommandListCapabilities;
+    ShaderCapabilities m_ShaderCapabilities;
+    HeapCapabilities m_HeapCapabilities;
+    ResourceCapabilities m_ResourceCapabilities;
+};
+
 class TAU_DLL DX10GraphicsInterface final : public IGraphicsInterface
 {
     DELETE_CM(DX10GraphicsInterface);
@@ -30,6 +69,7 @@ private:
     IDXGIAdapter1* _dxgiAdapter;
 
     ShaderInfoExtractorVisitor _shaderInfoExtractor;
+    DX10GraphicsCapabilities m_Capabilities;
 
     DX10ShaderBuilder* _shaderBuilder;
     DX10ShaderProgramBuilder* _shaderProgramBuilder;
@@ -50,11 +90,14 @@ public:
     [[nodiscard]] ID3D10Device*  d3d10Device() const noexcept { return _d3d10Device; }
     [[nodiscard]] IDXGIAdapter1* dxgiAdapter() const noexcept { return _dxgiAdapter; }
 
+    [[nodiscard]] IGraphicsCapabilities& capabilities() noexcept override;
+
     [[nodiscard]] IShaderBuilder& createShader() noexcept override;
     [[nodiscard]] IShaderProgramBuilder& createShaderProgram() noexcept override;
     [[nodiscard]] IResourceBuilder& createResource() noexcept override;
     [[nodiscard]] IInputLayoutBuilder& createInputLayout() noexcept override;
     [[nodiscard]] IVertexArrayBuilder& createVertexArray() noexcept override;
+    [[nodiscard]] IBufferBuilder& createBuffer() noexcept override;
     [[nodiscard]] IDepthStencilStateBuilder& createDepthStencilState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;

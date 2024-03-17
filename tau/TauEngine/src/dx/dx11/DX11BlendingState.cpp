@@ -26,7 +26,7 @@ DX11BlendingState* DX11BlendingStateBuilder::build(const BlendingArgs& args, Err
 {
     ID3D11BlendState* d3dBlendState;
     if(!processArgs(args, &d3dBlendState, error))
-    { return null; }
+    { return nullptr; }
 
     DX11BlendingState* const blendingState = new(::std::nothrow) DX11BlendingState(args, d3dBlendState);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -38,7 +38,7 @@ DX11BlendingState* DX11BlendingStateBuilder::build(const BlendingArgs& args, Err
 {
     ID3D11BlendState* d3dBlendState;
     if(!processArgs(args, &d3dBlendState, error))
-    { return null; }
+    { return nullptr; }
 
     DX11BlendingState* const blendingState = allocator.allocateT<DX11BlendingState>(args, d3dBlendState);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -50,7 +50,7 @@ CPPRef<IBlendingState> DX11BlendingStateBuilder::buildCPPRef(const BlendingArgs&
 {
     ID3D11BlendState* d3dBlendState;
     if(!processArgs(args, &d3dBlendState, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11BlendingState> blendingState = CPPRef<DX11BlendingState>(new(::std::nothrow) DX11BlendingState(args, d3dBlendState));
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -62,7 +62,7 @@ NullableRef<IBlendingState> DX11BlendingStateBuilder::buildTauRef(const Blending
 {
     ID3D11BlendState* d3dBlendState;
     if(!processArgs(args, &d3dBlendState, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11BlendingState> blendingState(allocator, args, d3dBlendState);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -74,7 +74,7 @@ NullableStrongRef<IBlendingState> DX11BlendingStateBuilder::buildTauSRef(const B
 {
     ID3D11BlendState* d3dBlendState;
     if(!processArgs(args, &d3dBlendState, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11BlendingState> blendingState(allocator, args, d3dBlendState);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);

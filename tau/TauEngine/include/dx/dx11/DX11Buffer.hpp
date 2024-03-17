@@ -23,7 +23,7 @@ public:
     DX11VertexBuffer(const EBuffer::UsageType usage, const uSys bufferSize, const BufferDescriptor& descriptor, ID3D11Buffer* const d3dBuffer) noexcept
         : IVertexBuffer(usage, bufferSize, descriptor)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 
     ~DX11VertexBuffer() noexcept
@@ -39,7 +39,7 @@ public:
         : IVertexBuffer(::std::move(move))
         , _d3dBuffer(move._d3dBuffer)
         , _currentMapping(move._currentMapping)
-    { move._d3dBuffer = null; }
+    { move._d3dBuffer = nullptr; }
 
     DX11VertexBuffer& operator=(const DX11VertexBuffer& copy) noexcept
     {
@@ -70,7 +70,7 @@ public:
         _d3dBuffer = move._d3dBuffer;
         _currentMapping = move._currentMapping;
 
-        move._d3dBuffer = null;
+        move._d3dBuffer = nullptr;
 
         return *this;
     }
@@ -99,7 +99,7 @@ public:
         : IIndexBuffer(usage, indexSize, bufferSize)
         , _dxIndexSize(dxIndexSize)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 
     ~DX11IndexBuffer() noexcept
@@ -117,7 +117,7 @@ public:
         , _dxIndexSize(move._dxIndexSize)
         , _d3dBuffer(move._d3dBuffer)
         , _currentMapping(move._currentMapping)
-    { move._d3dBuffer = null; }
+    { move._d3dBuffer = nullptr; }
 
     DX11IndexBuffer& operator=(const DX11IndexBuffer& copy) noexcept
     {
@@ -150,7 +150,7 @@ public:
         _d3dBuffer = move._d3dBuffer;
         _currentMapping = move._currentMapping;
 
-        move._d3dBuffer = null;
+        move._d3dBuffer = nullptr;
 
         return *this;
     }
@@ -177,7 +177,7 @@ public:
     DX11UniformBuffer(const EBuffer::UsageType usage, const uSys bufferSize, ID3D11Buffer* const d3dBuffer) noexcept
         : IUniformBuffer(usage, bufferSize)
         , _d3dBuffer(d3dBuffer)
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 
     ~DX11UniformBuffer() noexcept
@@ -193,7 +193,7 @@ public:
         : IUniformBuffer(::std::move(move))
         , _d3dBuffer(move._d3dBuffer)
         , _currentMapping(move._currentMapping)
-    { move._d3dBuffer = null; }
+    { move._d3dBuffer = nullptr; }
 
     DX11UniformBuffer& operator=(const DX11UniformBuffer& copy) noexcept
     {
@@ -224,7 +224,7 @@ public:
         _d3dBuffer = move._d3dBuffer;
         _currentMapping = move._currentMapping;
 
-        move._d3dBuffer = null;
+        move._d3dBuffer = nullptr;
 
         return *this;
     }

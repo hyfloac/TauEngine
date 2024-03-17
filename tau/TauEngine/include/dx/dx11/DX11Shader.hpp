@@ -51,8 +51,8 @@ public:
         , _shader(move._shader)
         , _shaderBlob(move._shaderBlob)
     {
-        move._shader = null;
-        move._shaderBlob = null;
+        move._shader = nullptr;
+        move._shaderBlob = nullptr;
     }
 
     DX11VertexShader& operator=(const DX11VertexShader& copy) noexcept
@@ -81,8 +81,8 @@ public:
         _shader = move._shader;
         _shaderBlob = move._shaderBlob;
 
-        move._shader = null;
-        move._shaderBlob = null;
+        move._shader = nullptr;
+        move._shaderBlob = nullptr;
 
         return *this;
     }
@@ -118,7 +118,7 @@ public:
     DX11HullShader(DX11HullShader&& move) noexcept
         : DX11Shader(::std::move(move))
         , _shader(move._shader)
-    { move._shader = null; }
+    { move._shader = nullptr; }
 
     DX11HullShader& operator=(const DX11HullShader& copy) noexcept
     {
@@ -141,7 +141,7 @@ public:
         DX11Shader::operator=(::std::move(move));
 
         _shader = move._shader;
-        move._shader = null;
+        move._shader = nullptr;
 
         return *this;
     }
@@ -175,7 +175,7 @@ public:
     DX11DomainShader(DX11DomainShader&& move) noexcept
         : DX11Shader(::std::move(move))
         , _shader(move._shader)
-    { move._shader = null; }
+    { move._shader = nullptr; }
 
     DX11DomainShader& operator=(const DX11DomainShader& copy) noexcept
     {
@@ -198,7 +198,7 @@ public:
         DX11Shader::operator=(::std::move(move));
 
         _shader = move._shader;
-        move._shader = null;
+        move._shader = nullptr;
 
         return *this;
     }
@@ -232,7 +232,7 @@ public:
     DX11GeometryShader(DX11GeometryShader&& move) noexcept
         : DX11Shader(::std::move(move))
         , _shader(move._shader)
-    { move._shader = null; }
+    { move._shader = nullptr; }
 
     DX11GeometryShader& operator=(const DX11GeometryShader& copy) noexcept
     {
@@ -255,7 +255,7 @@ public:
         DX11Shader::operator=(::std::move(move));
 
         _shader = move._shader;
-        move._shader = null;
+        move._shader = nullptr;
 
         return *this;
     }
@@ -289,7 +289,7 @@ public:
     DX11PixelShader(DX11PixelShader&& move) noexcept
         : DX11Shader(::std::move(move))
         , _shader(move._shader)
-    { move._shader = null; }
+    { move._shader = nullptr; }
 
     DX11PixelShader& operator=(const DX11PixelShader& copy) noexcept
     {
@@ -312,7 +312,7 @@ public:
         DX11Shader::operator=(::std::move(move));
 
         _shader = move._shader;
-        move._shader = null;
+        move._shader = nullptr;
 
         return *this;
     }

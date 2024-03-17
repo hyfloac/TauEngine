@@ -10,7 +10,7 @@ UniformBufferView DX10BufferViewBuilder::build(const UniformBufferViewArgs& args
     ERROR_CODE_COND_N(args.buffer->resourceType() != EResource::Type::Buffer, Error::ResourceIsNotBuffer);
     ERROR_CODE_COND_N(!handle, Error::DescriptorTableIsNull);
 
-    const DX10Resource* const resource = RTTD_CAST(args.buffer.get(), DX10Resource, IResource);
+    const DX10Resource* const resource = RTTD_CAST(args.buffer.Get(), DX10Resource, IResource);
     ERROR_CODE_COND_N(!resource, Error::InternalError);
 
     const DX10ResourceBuffer* const buffer = static_cast<const DX10ResourceBuffer*>(resource);

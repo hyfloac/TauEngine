@@ -4,7 +4,7 @@
 #include "shader/bundle/ast/RootExprAST.hpp"
 
 #pragma region Error Handling
-#define _PARSE_ERROR_INTERNAL(_ERR, _MSG) \
+#define PARSE_ERROR_INTERNAL(_ERR, _MSG) \
     if(_error == ShaderBundleParser::Error::NoError) { _error = (_ERR); } \
     _errorMsg = (_MSG); \
     _errorIndex = _lexer.fileIndex(); \
@@ -13,48 +13,48 @@
     _codeLine = __LINE__
 
 #define PARSE_ERROR(_ERR, _MSG) do { \
-    _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+    PARSE_ERROR_INTERNAL(_ERR, _MSG); \
     return; } while(0)
 
 #define PARSE_ERROR_V(_ERR, _MSG, _VAL) do { \
-    _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+    PARSE_ERROR_INTERNAL(_ERR, _MSG); \
     return _VAL; } while(0)
 
 #define PARSE_ERROR_N(_ERR, _MSG) do { \
-    _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+    PARSE_ERROR_INTERNAL(_ERR, _MSG); \
     return nullptr; } while(0)
 
 #define PARSE_ERROR_T(_ERR, _MSG) do { \
-    _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+    PARSE_ERROR_INTERNAL(_ERR, _MSG); \
     return true; } while(0)
 
 #define PARSE_ERROR_F(_ERR, _MSG) do { \
-    _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+    PARSE_ERROR_INTERNAL(_ERR, _MSG); \
     return false; } while(0)
 
 #define PARSE_COND_ERROR(_COND, _ERR, _MSG) do { \
     if((_COND)) { \
-        _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+        PARSE_ERROR_INTERNAL(_ERR, _MSG); \
         return; } } while(0)
 
 #define PARSE_COND_ERROR_V(_COND, _ERR, _MSG, _VAL) do { \
     if((_COND)) { \
-        _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+        PARSE_ERROR_INTERNAL(_ERR, _MSG); \
         return _VAL; } } while(0)
 
 #define PARSE_COND_ERROR_N(_COND, _ERR, _MSG) do { \
     if((_COND)) { \
-        _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+        PARSE_ERROR_INTERNAL(_ERR, _MSG); \
         return nullptr; } } while(0)
 
 #define PARSE_COND_ERROR_T(_COND, _ERR, _MSG) do { \
     if((_COND)) { \
-        _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+        PARSE_ERROR_INTERNAL(_ERR, _MSG); \
         return true; } } while(0)
 
 #define PARSE_COND_ERROR_F(_COND, _ERR, _MSG) do { \
     if((_COND)) { \
-        _PARSE_ERROR_INTERNAL(_ERR, _MSG); \
+        PARSE_ERROR_INTERNAL(_ERR, _MSG); \
         return false; } } while(0)
 #pragma endregion 
 
@@ -69,9 +69,9 @@ NullableStrongRef<sbp::AST> ShaderBundleParser::parse(Error* const error) noexce
     {
         const NullableStrongRef<sbp::APIBlockAST> apiBlock = parseAPIBlock();
         if(!apiBlock)
-        { return null; }
+        { return nullptr; }
         *curr = apiBlock;
-        curr = &curr->get()->next();
+        curr = &curr->Get()->next();
 
         if(_lexer.getNextToken() == SBPToken::EndOfFile)
         { break; }
@@ -177,7 +177,7 @@ NullableStrongRef<sbp::ShaderStageBlockAST> ShaderBundleParser::parseShaderBlock
             parseShaderContents(shaderBlock);
             return shaderBlock;
         }
-        default: return null;
+        default: return nullptr;
     }
 }
 
@@ -228,61 +228,61 @@ NullableStrongRef<sbp::UniformBlockExprAST> ShaderBundleParser::parseUniformsBlo
     static constexpr const char* ErrorInvalidToken = "Invalid token encountered while parsing uniforms block.";
     static constexpr const char* ErrorInvalidChar = "Invalid character encountered while parsing uniforms block.";
 
-    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-    PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
-    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-    PARSE_COND_ERROR(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
+    PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+    PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+    PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+    PARSE_COND_ERROR_N(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
 
-    NullableStrongRef<sbp::UniformBindingAST> base(null);
-    NullableStrongRef<sbp::UniformBindingAST>* curr = null;
+    NullableStrongRef<sbp::UniformBindingAST> base(nullptr);
+    NullableStrongRef<sbp::UniformBindingAST>* curr = nullptr;
 
     // For all uniforms
     while(true)
     {
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
-        PARSE_COND_ERROR(!isTextureCRM(_lexer.crmToken()), Error::InvalidCRM, ErrorInvalidCRM);
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(!isTextureCRM(_lexer.crmToken()), Error::InvalidCRM, ErrorInvalidCRM);
 
         const CommonRenderingModelToken crmTarget = _lexer.crmToken();
 
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-        PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
 
         const SBPToken valToken = _lexer.getNextToken();
         if(valToken == SBPToken::IntegerLiteral || valToken == SBPToken::UnsignedIntegerLiteral)
         {
             if(!base)
             {
-                base = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), null, crmTarget, sbp::BindingUnion(_lexer.intValue()));
+                base = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), nullptr, crmTarget, sbp::BindingUnion(_lexer.intValue()));
                 curr = &base;
             }
             else
             {
-                curr->get()->next() = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), null, crmTarget, sbp::BindingUnion(_lexer.intValue()));
-                curr = &curr->get()->next();
+                curr->Get()->next() = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), nullptr, crmTarget, sbp::BindingUnion(_lexer.intValue()));
+                curr = &curr->Get()->next();
             }
         }
         else if(valToken == SBPToken::StringLiteral)
         {
             if(!base)
             {
-                base = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), null, crmTarget, sbp::BindingUnion(_lexer.strValue()));
+                base = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), nullptr, crmTarget, sbp::BindingUnion(_lexer.strValue()));
                 curr = &base;
             }
             else
             {
-                curr->get()->next() = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), null, crmTarget, sbp::BindingUnion(_lexer.strValue()));
-                curr = &curr->get()->next();
+                curr->Get()->next() = NullableStrongRef<sbp::UniformBlockExprAST>(DefaultTauAllocator::Instance(), nullptr, crmTarget, sbp::BindingUnion(_lexer.strValue()));
+                curr = &curr->Get()->next();
             }
         }
         else
         {
-            PARSE_ERROR(Error::InvalidToken, ErrorInvalidToken);
+            PARSE_ERROR_N(Error::InvalidToken, ErrorInvalidToken);
         }
 
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
         if(_lexer.cValue() == '}')
         { break; }
-        PARSE_COND_ERROR(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
+        PARSE_COND_ERROR_N(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
     }
 
     return base;
@@ -297,27 +297,27 @@ NullableStrongRef<sbp::TextureParamsBlockAST> ShaderBundleParser::parseTexturesB
     static constexpr const char* ErrorDuplicateSampler = "Duplicate Sampler encountered while parsing texture params block.";
     static constexpr const char* ErrorUnexpectedEndOfBlock = "Unexpected end of block encountered while parsing texture params block.";
 
-    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-    PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
-    PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-    PARSE_COND_ERROR(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
+    PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+    PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+    PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+    PARSE_COND_ERROR_N(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
 
-    NullableStrongRef<sbp::TextureParamsBlockAST> base(null);
-    NullableStrongRef<sbp::TextureParamsBlockAST>* curr = null;
+    NullableStrongRef<sbp::TextureParamsBlockAST> base(nullptr);
+    NullableStrongRef<sbp::TextureParamsBlockAST>* curr = nullptr;
 
     // For all textures
     while(true)
     {
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
-        PARSE_COND_ERROR(!isTextureCRM(_lexer.crmToken()), Error::InvalidCRM, ErrorInvalidCRM);
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::CRMLiteral, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(!isTextureCRM(_lexer.crmToken()), Error::InvalidCRM, ErrorInvalidCRM);
 
         const CommonRenderingModelToken crmTarget = _lexer.crmToken();
 
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-        PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-        PARSE_COND_ERROR(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
-
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(_lexer.cValue() != '{', Error::InvalidCharacter, ErrorInvalidChar);
+                        
         sbp::BindingUnion binding;
         u32 sampler = 0;
 
@@ -330,10 +330,10 @@ NullableStrongRef<sbp::TextureParamsBlockAST> ShaderBundleParser::parseTexturesB
             const SBPToken valToken = _lexer.getNextToken();
             if(valToken == SBPToken::Location)
             {
-                PARSE_COND_ERROR(flags & 0x01, Error::DuplicateDeclaration, ErrorDuplicateLocation);
+                PARSE_COND_ERROR_N(flags & 0x01, Error::DuplicateDeclaration, ErrorDuplicateLocation);
 
-                PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-                PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+                PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+                PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
 
                 if(_lexer.getNextToken() == SBPToken::UnsignedIntegerLiteral)
                 {
@@ -345,54 +345,54 @@ NullableStrongRef<sbp::TextureParamsBlockAST> ShaderBundleParser::parseTexturesB
                 }
                 else
                 {
-                    PARSE_ERROR(Error::InvalidToken, ErrorInvalidToken);
+                    PARSE_ERROR_N(Error::InvalidToken, ErrorInvalidToken);
                 }
                 flags |= 0x01;
             }
             else if(valToken == SBPToken::Sampler)
             {
-                PARSE_COND_ERROR(flags & 0x02, Error::DuplicateDeclaration, ErrorDuplicateSampler);
+                PARSE_COND_ERROR_N(flags & 0x02, Error::DuplicateDeclaration, ErrorDuplicateSampler);
 
-                PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
-                PARSE_COND_ERROR(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
-                PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::UnsignedIntegerLiteral, Error::InvalidToken, ErrorInvalidToken);
+                PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+                PARSE_COND_ERROR_N(_lexer.cValue() != ':', Error::InvalidCharacter, ErrorInvalidChar);
+                PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::UnsignedIntegerLiteral, Error::InvalidToken, ErrorInvalidToken);
                 sampler = _lexer.uintValue();
                 flags |= 0x02;
             }
             else
             {
-                PARSE_ERROR(Error::InvalidToken, ErrorInvalidToken);
+                PARSE_ERROR_N(Error::InvalidToken, ErrorInvalidToken);
             }
 
-            PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+            PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
             if(_lexer.cValue() == '}')
             {
-                PARSE_COND_ERROR(flags != 0x03, Error::UnexpectedEndOfBlock, ErrorUnexpectedEndOfBlock);
+                PARSE_COND_ERROR_N(flags != 0x03, Error::UnexpectedEndOfBlock, ErrorUnexpectedEndOfBlock);
 
                 if(!base)
                 {
-                    base = NullableStrongRef<sbp::TextureParamsBlockAST>(DefaultTauAllocator::Instance(), null, crmTarget, ::std::move(binding), sampler);
+                    base = NullableStrongRef<sbp::TextureParamsBlockAST>(DefaultTauAllocator::Instance(), nullptr, crmTarget, ::std::move(binding), sampler);
                     curr = &base;
                 }
                 else
                 {
-                    curr->get()->next() = NullableStrongRef<sbp::TextureParamsBlockAST>(DefaultTauAllocator::Instance(), null, crmTarget, ::std::move(binding), sampler);
-                    curr = &curr->get()->next();
+                    curr->Get()->next() = NullableStrongRef<sbp::TextureParamsBlockAST>(DefaultTauAllocator::Instance(), nullptr, crmTarget, ::std::move(binding), sampler);
+                    curr = &curr->Get()->next();
                 }
                 break;
             }
             else if(_lexer.cValue() != ',')
             {
-                PARSE_ERROR(Error::InvalidCharacter, ErrorInvalidChar);
+                PARSE_ERROR_N(Error::InvalidCharacter, ErrorInvalidChar);
             }
         }
 
-        PARSE_COND_ERROR(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
+        PARSE_COND_ERROR_N(_lexer.getNextToken() != SBPToken::Character, Error::InvalidToken, ErrorInvalidToken);
         if(_lexer.cValue() == '}')
         {
             break;
         }
-        PARSE_COND_ERROR(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
+        PARSE_COND_ERROR_N(_lexer.cValue() != ',', Error::InvalidCharacter, ErrorInvalidChar);
     }
 
     return base;

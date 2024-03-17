@@ -31,7 +31,7 @@ public:
     DX11BlendingState(DX11BlendingState&& move) noexcept
         : IBlendingState(::std::move(move))
         , _d3dBlendState(move._d3dBlendState)
-    { move._d3dBlendState = null; }
+    { move._d3dBlendState = nullptr; }
 
     DX11BlendingState& operator=(const DX11BlendingState& copy) noexcept
     {
@@ -58,7 +58,7 @@ public:
         IBlendingState::operator=(::std::move(move));
 
         _d3dBlendState = move._d3dBlendState;
-        move._d3dBlendState = null;
+        move._d3dBlendState = nullptr;
 
         return *this;
     }

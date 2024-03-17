@@ -13,7 +13,7 @@ NullableRef<IInputLayout> DX10InputLayoutBuilder::buildTauRef(const InputLayoutA
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10InputLayout> inputLayout(allocator, dxArgs);
 #if TAU_NULL_CHECK

@@ -30,11 +30,11 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderFileArgs& args, 
 {
     DXShaderArgs dxArgs { };
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D10ShaderObjects objects = createD3DShader(args.stage, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     NullableRef<IShader> shader;
 
@@ -67,11 +67,11 @@ NullableRef<IShader> DX10ShaderBuilder::buildTauRef(const ShaderSourceArgs& args
 {
     DXShaderArgs dxArgs { };
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D10ShaderObjects objects = createD3DShader(args.stage, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     NullableRef<IShader> shader;
 
@@ -131,7 +131,7 @@ bool DX10ShaderBuilder::processBundle(const ShaderFileArgs& args, DXShaderArgs* 
     auto ast = parser.parse(&parseError);
 
     _visitor->reset();
-    _visitor->visit(ast.get());
+    _visitor->visit(ast.Get());
     const sbp::ShaderInfo& info = _visitor->get(args.stage);
 
     const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
@@ -169,7 +169,7 @@ bool DX10ShaderBuilder::processShader(const DynString& source, DXShaderArgs* dxA
 
 DX10ShaderBuilder::D3D10ShaderObjects DX10ShaderBuilder::createD3DShader(const EShader::Stage stage, const DXShaderArgs& dxArgs, Error* const error) const noexcept
 {
-    D3D10ShaderObjects objects = { null };
+    D3D10ShaderObjects objects = { nullptr };
 
     HRESULT h;
 	

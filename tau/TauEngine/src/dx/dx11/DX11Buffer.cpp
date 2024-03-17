@@ -58,7 +58,7 @@ void DX11VertexBuffer::endModification(IRenderingContext& context) noexcept
     if(_currentMapping)
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
-        _currentMapping = null;
+        _currentMapping = nullptr;
 
 #if TAU_BUFFER_SAFETY
         --_modificationLockCount;
@@ -163,7 +163,7 @@ void DX11IndexBuffer::endModification(IRenderingContext& context) noexcept
     if(_currentMapping)
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
-        _currentMapping = null;
+        _currentMapping = nullptr;
 
 #if TAU_BUFFER_SAFETY
         --_modificationLockCount;
@@ -279,19 +279,19 @@ void DX11UniformBuffer::unbind(IRenderingContext& context, const EShader::Stage 
     switch(stage)
     {
         case EShader::Stage::Vertex:
-            ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 0, null);
+            ctx.d3d11DeviceContext()->VSSetConstantBuffers(index, 0, nullptr);
             break;
         case EShader::Stage::Hull:
-            ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 0, null);
+            ctx.d3d11DeviceContext()->HSSetConstantBuffers(index, 0, nullptr);
             break;
         case EShader::Stage::Domain:
-            ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 0, null);
+            ctx.d3d11DeviceContext()->DSSetConstantBuffers(index, 0, nullptr);
             break;
         case EShader::Stage::Geometry:
-            ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 0, null);
+            ctx.d3d11DeviceContext()->GSSetConstantBuffers(index, 0, nullptr);
             break;
         case EShader::Stage::Pixel:
-            ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 0, null);
+            ctx.d3d11DeviceContext()->PSSetConstantBuffers(index, 0, nullptr);
             break;
         default: break;
     }
@@ -351,7 +351,7 @@ void DX11UniformBuffer::endModification(IRenderingContext& context) noexcept
     if(_currentMapping)
     {
         ctx.d3d11DeviceContext()->Unmap(_d3dBuffer, 0);
-        _currentMapping = null;
+        _currentMapping = nullptr;
 
 #if TAU_BUFFER_SAFETY
         --_modificationLockCount;
@@ -419,7 +419,7 @@ DX11VertexBuffer* DX11BufferBuilder::build(const VertexBufferArgs& args, Error* 
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX11VertexBuffer* const buffer = new(::std::nothrow) DX11VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -435,7 +435,7 @@ DX11VertexBuffer* DX11BufferBuilder::build(const VertexBufferArgs& args, Error* 
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX11VertexBuffer* const buffer = allocator.allocateT<DX11VertexBuffer>(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -451,7 +451,7 @@ CPPRef<IVertexBuffer> DX11BufferBuilder::buildCPPRef(const VertexBufferArgs& arg
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11VertexBuffer> buffer(new(::std::nothrow) DX11VertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer));
     if(!buffer)
@@ -467,7 +467,7 @@ NullableRef<IVertexBuffer> DX11BufferBuilder::buildTauRef(const VertexBufferArgs
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11VertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -483,7 +483,7 @@ NullableStrongRef<IVertexBuffer> DX11BufferBuilder::buildTauSRef(const VertexBuf
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11VertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), d3dBuffer);
     if(!buffer)
@@ -499,7 +499,7 @@ DX11IndexBuffer* DX11BufferBuilder::build(const IndexBufferArgs& args, Error* co
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11IndexBuffer* const buffer = new(::std::nothrow) DX11IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -515,7 +515,7 @@ DX11IndexBuffer* DX11BufferBuilder::build(const IndexBufferArgs& args, Error* co
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11IndexBuffer* const buffer = allocator.allocateT<DX11IndexBuffer>(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -531,7 +531,7 @@ CPPRef<IIndexBuffer> DX11BufferBuilder::buildCPPRef(const IndexBufferArgs& args,
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11IndexBuffer> buffer(new(::std::nothrow) DX11IndexBuffer(args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer));
     if(!buffer)
@@ -547,7 +547,7 @@ NullableRef<IIndexBuffer> DX11BufferBuilder::buildTauRef(const IndexBufferArgs& 
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11IndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -563,7 +563,7 @@ NullableStrongRef<IIndexBuffer> DX11BufferBuilder::buildTauSRef(const IndexBuffe
 {
     DXIndexBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11IndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), dxArgs.indexSize, dxArgs.d3dBuffer);
     if(!buffer)
@@ -579,7 +579,7 @@ DX11UniformBuffer* DX11BufferBuilder::build(const UniformBufferArgs& args, Error
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX11UniformBuffer* const buffer = new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
@@ -595,7 +595,7 @@ DX11UniformBuffer* DX11BufferBuilder::build(const UniformBufferArgs& args, Error
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     DX11UniformBuffer* const buffer = allocator.allocateT<DX11UniformBuffer>(args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
@@ -611,7 +611,7 @@ CPPRef<IUniformBuffer> DX11BufferBuilder::buildCPPRef(const UniformBufferArgs& a
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11UniformBuffer> buffer(new(::std::nothrow) DX11UniformBuffer(args.usage, args.bufferSize, d3dBuffer));
     if(!buffer)
@@ -627,7 +627,7 @@ NullableRef<IUniformBuffer> DX11BufferBuilder::buildTauRef(const UniformBufferAr
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)
@@ -643,7 +643,7 @@ NullableStrongRef<IUniformBuffer> DX11BufferBuilder::buildTauSRef(const UniformB
 {
     ID3D11Buffer* d3dBuffer;
     if(!processArgs(args, &d3dBuffer, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11UniformBuffer> buffer(allocator, args.usage, args.bufferSize, d3dBuffer);
     if(!buffer)

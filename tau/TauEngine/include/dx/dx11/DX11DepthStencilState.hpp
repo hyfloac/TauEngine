@@ -31,7 +31,7 @@ public:
     DX11DepthStencilState(DX11DepthStencilState&& move) noexcept
         : IDepthStencilState(::std::move(move))
         , _d3dDepthStencilState(move._d3dDepthStencilState)
-    { move._d3dDepthStencilState = null; }
+    { move._d3dDepthStencilState = nullptr; }
 
     DX11DepthStencilState& operator=(const DX11DepthStencilState& copy) noexcept
     {
@@ -58,7 +58,7 @@ public:
         IDepthStencilState::operator=(std::move(move));
 
         _d3dDepthStencilState = move._d3dDepthStencilState;
-        move._d3dDepthStencilState = null;
+        move._d3dDepthStencilState = nullptr;
 
         return *this;
     }
