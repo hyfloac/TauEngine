@@ -30,6 +30,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE src)
 find_package(TauUtils REQUIRED)
 find_package(TauCOM REQUIRED)
 find_package(glm REQUIRED)
+find_package(glew REQUIRED)
 find_package(EASTL REQUIRED)
 find_package(tomlplusplus REQUIRED)
 find_package(Vulkan REQUIRED)
@@ -38,10 +39,26 @@ find_package(freetype REQUIRED)
 if(NOT WIN32)
     find_package(Fontconfig REQUIRED)
 endif()
+find_package(freeimage REQUIRED)
+find_package(openvr REQUIRED)
 
 add_dependencies(${PROJECT_NAME} SDL3::SDL3)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC tauutils::tauutils taucom::taucom SDL3::SDL3 glm::glm EASTL::EASTL tomlplusplus::tomlplusplus Vulkan::Vulkan OpenGL::GL Freetype::Freetype)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    tauutils::tauutils
+    taucom::taucom
+    glm::glm
+    GLEW::glew
+    EASTL::EASTL
+    tomlplusplus::tomlplusplus
+    Vulkan::Vulkan
+    OpenGL::GL
+    Freetype::Freetype
+    freeimage::FreeImage
+    freeimage::FreeImagePlus
+    openvr::openvr
+    SDL3::SDL3
+)
 
 if(NOT WIN32)
     target_link_libraries(${PROJECT_NAME} PUBLIC Fontconfig::Fontconfig)
@@ -53,7 +70,12 @@ endif()
 
 SetCompileFlags(${PROJECT_NAME} PUBLIC PRIVATE ${BUILD_SHARED_LIBS})
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC -DEA_PRAGMA_ONCE_SUPPORTED -DGLM_ENABLE_EXPERIMENTAL -D_ALLOW_RANDOM_DISTRIBUTION_CONST_OPERATOR -DTOML_EXCEPTIONS=0)
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+    -DEA_PRAGMA_ONCE_SUPPORTED
+    -DGLM_ENABLE_EXPERIMENTAL
+    -D_ALLOW_RANDOM_DISTRIBUTION_CONST_OPERATOR
+    -DTOML_EXCEPTIONS=0
+)
 
 if(APPLE)
     # Enable Metal for Vulkan on MacOS
