@@ -21,7 +21,7 @@ public:
     {
         /** The left mouse button is currently pressed.                  */ LeftButtonDown   = 1 << 0,
         /** The right mouse button is currently pressed.                 */ RightButtonDown  = 1 << 1,
-        /** The shift key is current pressed.                            */ ShiftKeyDown     = 1 << 2,
+        /** The shift key is currently pressed.                          */ ShiftKeyDown     = 1 << 2,
         /** The ctrl key is currently pressed.                           */ CtrlKeyDown      = 1 << 3,
         /** The middle mouse button (scroll wheel) is currently pressed. */ MiddleButtonDown = 1 << 4,
         /** The first side mouse button is currently pressed.            */ XButton1Down     = 1 << 5,

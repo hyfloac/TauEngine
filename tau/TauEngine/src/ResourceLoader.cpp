@@ -3,6 +3,7 @@
 #pragma warning(push, 0)
 #include <list>
 #include <future>
+#include <Safeties.hpp>
 #pragma warning(pop)
 
 static std::list<std::future<ResourceLoader::FutureData>> _futures;
@@ -13,7 +14,8 @@ void ResourceLoader::update() noexcept
     while(it != _futures.end())
     {
         std::future<FutureData>& fut = *it;
-        if(fut._Is_ready())
+        // if(fut._Is_ready())
+        if(fut.wait_for(::std::chrono::microseconds(0)) == ::std::future_status::ready)
         {
             const FutureData data = fut.get();
             data.finalizeLoad(data.fileData, data.finalizeParam);

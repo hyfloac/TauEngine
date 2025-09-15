@@ -49,7 +49,7 @@ u64 currentTimeMillis() noexcept
     /* Linux */
     struct timeval timeVal;
 
-    gettimeofday(&timeVal, null);
+    gettimeofday(&timeVal, nullptr);
 
     u64 ret = timeVal.tv_usec;
     /* Convert from micro seconds (10*-6) to milliseconds (10**-3) */
@@ -83,7 +83,7 @@ u64 microTime() noexcept
     /* Linux */
     struct timeval timeVal;
 
-    gettimeofday(&timeVal, null);
+    gettimeofday(&timeVal, nullptr);
 
     return timeVal.tv_usec;
 #endif

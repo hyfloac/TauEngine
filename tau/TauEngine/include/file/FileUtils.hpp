@@ -103,7 +103,7 @@ enum FileMode : u8
  * @return
  *    The string form of the {@link FileMode}.
  */
-NonNull const char* getFileModeStr(FileMode fileMode) noexcept;
+NONNULL const char* getFileModeStr(FileMode fileMode) noexcept;
 
 FileMode getFileMode(const char* fileMode) noexcept;
 

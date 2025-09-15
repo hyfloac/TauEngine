@@ -33,7 +33,7 @@ bool UIRectButton::isMouseOver(u32 mouseX, u32 mouseY, Window& window) noexcept
 
 UIRectButton::UIRectButton(IGraphicsInterface& gi, clickHandler_f clickHandler, u32 x, u32 y, u32 width, u32 height, Vector3f color, UIElement* parent, bool visible) noexcept
     : UIButton(clickHandler, x, y, parent, visible), _width(width), _height(height), _color(color),
-      _vbo(nullptr), _vao(null)
+      _vbo(nullptr), _vao(nullptr)
 {
     const float xx = static_cast<float>(x);
     const float yy = static_cast<float>(y);

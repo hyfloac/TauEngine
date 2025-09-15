@@ -7,80 +7,104 @@
 class FastRand16 final
 {
     DEFAULT_DESTRUCT(FastRand16);
-    DEFAULT_CM(FastRand16);
+    DEFAULT_CM_PU(FastRand16);
 public:
-    static u32 MaxValue() noexcept { return 0x7FFF; }
-private:
-    u32 _seed;
+    using Seed_t = u32;
+    using Rand_t = u16;
+
+    static Rand_t MaxValue() noexcept { return 0x7FFF; }
 public:
     FastRand16() noexcept
-        : _seed(time(nullptr))
+        : m_Seed(time(nullptr))
     { }
 
-    FastRand16(const u32 seed) noexcept
-        : _seed(seed)
+    FastRand16(const Seed_t seed) noexcept
+        : m_Seed(seed)
     { }
 
-    [[nodiscard]] u32 seed() const noexcept { return _seed; }
-    void seed(const u32 seed) noexcept { _seed = seed; }
+    [[nodiscard]] Seed_t Seed() const noexcept { return m_Seed; }
+    [[nodiscard]] Seed_t& Seed() noexcept { return m_Seed; }
 
-    [[nodiscard]] u32 rand() noexcept
+    [[nodiscard]] Seed_t seed() const noexcept { return m_Seed; }
+    void seed(const Seed_t seed) noexcept { m_Seed = seed; }
+
+    [[nodiscard]] Rand_t Rand() noexcept
     {
-        _seed = 214013 * _seed + 2531011;
-        return (_seed >> 16) & 0x7FFF;
+        m_Seed = 214013 * m_Seed + 2531011;
+        return (m_Seed >> 16) & 0x7FFF;
     }
+
+    [[nodiscard]] Rand_t rand() noexcept { return Rand(); }
+private:
+    Seed_t m_Seed;
 };
 
 class FastRand32 final
 {
     DEFAULT_DESTRUCT(FastRand32);
-    DEFAULT_CM(FastRand32);
+    DEFAULT_CM_PU(FastRand32);
 public:
-    static u32 MaxValue() noexcept { return IntMaxMin<u32>::Max; }
-private:
-    u32 _seed;
+    using Seed_t = u32;
+    using Rand_t = u32;
+
+    static Rand_t MaxValue() noexcept { return IntMaxMin<Rand_t>::Max; }
 public:
     FastRand32() noexcept
-        : _seed(time(nullptr))
+        : m_Seed(time(nullptr))
     { }
 
-    FastRand32(const u32 seed) noexcept
-        : _seed(seed)
+    FastRand32(const Seed_t seed) noexcept
+        : m_Seed(seed)
     { }
 
-    [[nodiscard]] u32 seed() const noexcept { return _seed; }
-    void seed(const u32 seed) noexcept { _seed = seed; }
+    [[nodiscard]] Seed_t Seed() const noexcept { return m_Seed; }
+    [[nodiscard]] Seed_t& Seed() noexcept { return m_Seed; }
 
-    [[nodiscard]] u32 rand() noexcept
+    [[nodiscard]] Seed_t seed() const noexcept { return m_Seed; }
+    void seed(const Seed_t seed) noexcept { m_Seed = seed; }
+
+    [[nodiscard]] Rand_t Rand() noexcept
     {
-        _seed = 214013 * _seed + 2531011;
-        return _seed;
+        m_Seed = 214013 * m_Seed + 2531011;
+        return m_Seed;
     }
+
+    [[nodiscard]] Rand_t rand() noexcept { return Rand(); }
+private:
+    Seed_t m_Seed;
 };
 
 class FastRand64 final
 {
     DEFAULT_DESTRUCT(FastRand64);
-    DEFAULT_CM(FastRand64);
+    DEFAULT_CM_PU(FastRand64);
 public:
-    static u64 MaxValue() noexcept { return IntMaxMin<u64>::Max; }
-private:
-    u64 _seed;
+    using Seed_t = u64;
+    using Rand_t = u64;
+
+    static Rand_t MaxValue() noexcept { return IntMaxMin<Rand_t>::Max; }
 public:
     FastRand64() noexcept
-        : _seed(time(nullptr))
+        : m_Seed(time(nullptr))
     { }
 
-    FastRand64(const u64 seed) noexcept
-        : _seed(seed)
+    FastRand64(const Seed_t seed) noexcept
+        : m_Seed(seed)
     { }
 
-    [[nodiscard]] u64 seed() const noexcept { return _seed; }
-    void seed(const u64 seed) noexcept { _seed = seed; }
+    [[nodiscard]] Seed_t Seed() const noexcept { return m_Seed; }
+    [[nodiscard]] Seed_t& Seed() noexcept { return m_Seed; }
 
-    [[nodiscard]] u64 rand() noexcept
+    [[nodiscard]] Seed_t seed() const noexcept { return m_Seed; }
+    void seed(const Seed_t seed) noexcept { m_Seed = seed; }
+
+    [[nodiscard]] Rand_t Rand() noexcept
     {
-        _seed = 214013 * _seed + 2531011;
-        return _seed;
+        m_Seed = 214013 * m_Seed + 2531011;
+        return m_Seed;
     }
+
+    [[nodiscard]] Rand_t rand() noexcept { return Rand(); }
+private:
+    Seed_t m_Seed;
 };

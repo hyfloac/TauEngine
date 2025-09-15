@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils.hpp"
+#include <TauMacros.hpp>
 
 #ifdef TAU_ENGINE_BUILD
   #define TAU_GAPI_DLL DYNAMIC_IMPORT
@@ -12,15 +12,15 @@
 extern "C" {
 #endif
 
-typedef const char*(* __cdecl tauGetGraphicsAPIName_f)();
-typedef bool(* __cdecl tauLoadGraphicsAPI_f)();
+typedef const char*(* tauGetGraphicsAPIName_f)();
+typedef bool(* tauLoadGraphicsAPI_f)();
 
 static constexpr const char* tauGetGraphicsAPIName_name = "tauGetGraphicsAPIName";
 static constexpr const char* tauLoadGraphicsAPI_name = "tauLoadGraphicsAPI";
 
-TAU_GAPI_DLL const char* __cdecl tauGetGraphicsAPIName();
+TAU_GAPI_DLL const char* tauGetGraphicsAPIName();
 
-TAU_GAPI_DLL bool __cdecl tauLoadGraphicsAPI();
+TAU_GAPI_DLL bool tauLoadGraphicsAPI();
 
 #if __cplusplus
 }

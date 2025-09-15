@@ -2,7 +2,7 @@
 #include <Safeties.hpp>
 #include <file/FileUtils.hpp>
 
-NonNull const char* getFileModeStr(FileMode fileMode) noexcept
+NONNULL const char* getFileModeStr(const FileMode fileMode) noexcept
 {
     switch(fileMode)
     {
@@ -25,7 +25,7 @@ NonNull const char* getFileModeStr(FileMode fileMode) noexcept
 
 FileMode getFileMode(const char* fileMode) noexcept
 {
-    Ensure(fileMode != null);
+    Ensure(fileMode != nullptr);
 
     if(fileMode && fileMode[0])
     {

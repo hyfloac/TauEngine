@@ -31,15 +31,15 @@ void initSinTable() noexcept
     {
         for(u32 i = 0; i < 65536; ++i)
         {
-            SIN_TABLE_F[i] = std::sin((static_cast<float>(i) * static_cast<float>(T_PI)) / 32768.0F);
-            SIN_TABLE_D[i] = std::sin((static_cast<double>(i) * static_cast<double>(T_PI)) / 32768.0);
+            SIN_TABLE_F[i] = std::sin((static_cast<float>(i) * T_PI<float>) / 32768.0f);
+            SIN_TABLE_D[i] = std::sin((static_cast<double>(i) * T_PI<double>) / 32768.0);
         }
 
         // Sets some hard values to ensure better accuracy.
-        SIN_TABLE_F[0]     =  0.0F;
-        SIN_TABLE_F[16384] =  1.0F;
-        SIN_TABLE_F[32768] =  0.0F;
-        SIN_TABLE_F[49152] = -1.0F;
+        SIN_TABLE_F[0]     =  0.0f;
+        SIN_TABLE_F[16384] =  1.0f;
+        SIN_TABLE_F[32768] =  0.0f;
+        SIN_TABLE_F[49152] = -1.0f;
 
         SIN_TABLE_D[0]     =  0.0;
         SIN_TABLE_D[16384] =  1.0;
@@ -50,11 +50,11 @@ void initSinTable() noexcept
     }
 }
 
-static constexpr float  SC_RAD_SCALAR_F = 10430.3783504705F; // 65536 / tau
+static constexpr float  SC_RAD_SCALAR_F = 10430.3783504705f; // 65536 / tau
 static constexpr double SC_RAD_SCALAR_D = 10430.3783504704527249495663163811;
 
-static constexpr float  SC_DEG_SCALAR_F = 182.044444444444444444444444444444F;
-static constexpr double SC_DEG_SCALAR_D = 182.044444444444444444444444444444444444444444444444444444444444444444444444444444F;
+static constexpr float  SC_DEG_SCALAR_F = 182.044444444444444444444444444444f;
+static constexpr double SC_DEG_SCALAR_D = 182.044444444444444444444444444444444444444444444444444444444444444444444444444444;
 
 float fastSinR(const float radians) noexcept
 {

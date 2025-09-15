@@ -16,7 +16,7 @@ char* readFile(const char* const filePath) noexcept
     fseek(file, 0, SEEK_END);
 
     const u32 length = ftell(file);
-    char* data = reinterpret_cast<char*>(malloc(sizeof(char) * (length + 1)));
+    char* data = static_cast<char*>(malloc(sizeof(char) * (length + 1)));
 
     if(!data)
     {

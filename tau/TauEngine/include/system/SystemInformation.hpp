@@ -15,6 +15,7 @@ enum class OSType
     Windows8,
     Windows8_1,
     Windows10,
+    Windows11,
     MacOS,
     OSX10_8,
     OSX10_9,
@@ -51,7 +52,10 @@ enum class ProcessorType
     IA64,
     AMD64,
     ARM,
-    ARM64
+    ARM64,
+    RISCV_32,
+    RISCV_64,
+    RISCV_128
 };
 
 [[nodiscard]] inline bool isWindows(const OSType os) noexcept
@@ -64,8 +68,11 @@ enum class ProcessorType
         case OSType::Windows7:
         case OSType::Windows8:
         case OSType::Windows8_1:
-        case OSType::Windows10: return true;
-        default:                return false;
+        case OSType::Windows10:
+        case OSType::Windows11:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -82,8 +89,10 @@ enum class ProcessorType
         case OSType::MacOS10_13:
         case OSType::MacOS10_14:
         case OSType::MacOS10_15:
-        case OSType::MacOS11: return true;
-        default:              return false;
+        case OSType::MacOS11:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -117,8 +126,10 @@ enum class ProcessorType
         case OSType::AmazonLinux2:
         case OSType::OracleLinux:
         case OSType::ChromeOS:
-        case OSType::ChromiumOS: return true;
-        default:                 return false;
+        case OSType::ChromiumOS:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -141,8 +152,10 @@ enum class ProcessorType
         case OSType::AmazonLinux2:
         case OSType::OracleLinux:
         case OSType::ChromeOS:
-        case OSType::ChromiumOS: return true;
-        default:                 return false;
+        case OSType::ChromiumOS:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -152,8 +165,10 @@ enum class ProcessorType
     {
         case ProcessorType::x86:
         case ProcessorType::IA64:
-        case ProcessorType::AMD64: return true;
-        default:                   return false;
+        case ProcessorType::AMD64:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -162,8 +177,23 @@ enum class ProcessorType
     switch(processor)
     {
         case ProcessorType::ARM:
-        case ProcessorType::ARM64: return true;
-        default:                   return false;
+        case ProcessorType::ARM64:
+            return true;
+        default:
+            return false;
+    }
+}
+
+[[nodiscard]] inline bool isRISCV(const ProcessorType processor) noexcept
+{
+    switch(processor)
+    {
+        case ProcessorType::RISCV_32:
+        case ProcessorType::RISCV_64:
+        case ProcessorType::RISCV_128:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -172,8 +202,11 @@ enum class ProcessorType
     switch(processor)
     {
         case ProcessorType::x86:
-        case ProcessorType::ARM: return true;
-        default:                 return false;
+        case ProcessorType::ARM:
+        case ProcessorType::RISCV_32:
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -183,8 +216,22 @@ enum class ProcessorType
     {
         case ProcessorType::IA64:
         case ProcessorType::AMD64: 
-        case ProcessorType::ARM64: return true;
-        default:                   return false;
+        case ProcessorType::ARM64:
+        case ProcessorType::RISCV_64:
+            return true;
+        default:
+            return false;
+    }
+}
+
+[[nodiscard]] inline bool is128Bit(const ProcessorType processor) noexcept
+{
+    switch(processor)
+    {
+        case ProcessorType::RISCV_128:
+            return true;
+        default:
+            return false;
     }
 }
 

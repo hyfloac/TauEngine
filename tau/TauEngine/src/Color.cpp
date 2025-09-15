@@ -1,7 +1,7 @@
 #include <Color.hpp>
 #include <maths/Maths.hpp>
 
-HSVColor rgbToHsv(RGBColor rgb) noexcept
+HSVColor rgbToHsv(const RGBColor rgb) noexcept
 {
     i32 h = 0;
     float s;
@@ -49,7 +49,7 @@ HSVColor rgbToHsv(RGBColor rgb) noexcept
     return HSVColor { reinterpret_cast<u32&>(h), s, (static_cast<float>(maxComponent) / 255.0f) };
 }
 
-HSLColor rgbToHsl(RGBColor rgb) noexcept
+HSLColor rgbToHsl(const RGBColor rgb) noexcept
 {
     i32 h = 0;
     float s;
@@ -97,7 +97,7 @@ HSLColor rgbToHsl(RGBColor rgb) noexcept
     return HSLColor { reinterpret_cast<u32&>(h), s, l };
 }
 
-YUVColor rgbToYuv(RGBColor rgb) noexcept
+YUVColor rgbToYuv(const RGBColor rgb) noexcept
 {
     const float y = static_cast<float>(rgb.r) *  0.299000f + static_cast<float>(rgb.g) *  0.587000f + static_cast<float>(rgb.b) *  0.114000f;
     const float u = static_cast<float>(rgb.r) * -0.168736f + static_cast<float>(rgb.g) * -0.331264f + static_cast<float>(rgb.b) *  0.500000f + 128.0f;
@@ -106,7 +106,7 @@ YUVColor rgbToYuv(RGBColor rgb) noexcept
     return YUVColor { y, u, v };
 }
 
-CMYKColor rgbToCmyk(RGBColor rgb) noexcept
+CMYKColor rgbToCmyk(const RGBColor rgb) noexcept
 {
     const float fr = static_cast<float>(rgb.r) / 255.0f;
     const float fg = static_cast<float>(rgb.g) / 255.0f;
@@ -122,7 +122,7 @@ CMYKColor rgbToCmyk(RGBColor rgb) noexcept
     return CMYKColor { c, m, y, k };
 }
 
-YCbCrColor rgbToYCbCr(RGBColor rgb) noexcept
+YCbCrColor rgbToYCbCr(const RGBColor rgb) noexcept
 {
     const float fr = static_cast<float>(rgb.r) / 255.0f;
     const float fg = static_cast<float>(rgb.g) / 255.0f;
@@ -136,13 +136,13 @@ YCbCrColor rgbToYCbCr(RGBColor rgb) noexcept
 }
 
 
-RGBColor hsvToRgb(HSVColor rgb) noexcept;
+RGBColor hsvToRgb(const HSVColor hsv) noexcept;
 
-RGBColor hslToRgb(HSLColor rgb) noexcept;
+RGBColor hslToRgb(const HSLColor hsl) noexcept;
 
-RGBColor yuvToRgb(YUVColor rgb) noexcept;
+RGBColor yuvToRgb(const YUVColor yuv) noexcept;
 
-RGBColor cmykToRgb(CMYKColor rgb) noexcept;
+RGBColor cmykToRgb(const CMYKColor cmyk) noexcept;
 
-RGBColor yCbCrToRgb(YCbCrColor rgb) noexcept;
+RGBColor yCbCrToRgb(const YCbCrColor yCbCr) noexcept;
 

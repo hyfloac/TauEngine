@@ -1,6 +1,7 @@
 #include "TauEngine.hpp"
 #include <NumTypes.hpp>
 #include <TauCOM.hpp>
+#include <atomic>
 
 #include "allocator/PageAllocator.hpp"
 #include "Timings.hpp"
@@ -18,7 +19,7 @@ static bool InitCom() noexcept
 
     ComRef<IComManager> comManager;
 
-    const ResultCode resultCode = TauComGetComManager(comManager.Load());
+    const EResultCode resultCode = TauComGetComManager(comManager.Load());
 
     if(IsFailure(resultCode))
     {
@@ -87,8 +88,8 @@ void tauThrowException(Exception& e) noexcept
 ExceptionData& tauGetException() noexcept
 { return exData; }
 
-volatile static bool should_exit = false;
-volatile static i32 exit_code = 0;
+static ::std::atomic_bool should_exit = false;
+static ::std::atomic_int32_t exit_code = 0;
 
 bool tauShouldExit() noexcept
 {

@@ -81,7 +81,7 @@ public:
     /**
      * Retrieves the default Depth-Stencil State parameters.
      *
-     * This is useful for creating sub-states.
+     * This is useful for creating substates.
      *
      * @return
      *      The default Depth-Stencil State parameters

@@ -40,8 +40,8 @@ DECL_OPAQUE_TYPE(DescriptorTable);
  * A table of texture samplers.
  *
  *   Normally descriptors are little more than a memory
- * address, but samplers are a bit more involved. Thus they get
- * their own table.
+ * address, but samplers are a bit more involved. Thus, they
+ * get their own table.
  */
 DECL_OPAQUE_TYPE(DescriptorSamplerTable);
 

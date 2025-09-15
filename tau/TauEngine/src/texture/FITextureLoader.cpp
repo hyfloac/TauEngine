@@ -11,7 +11,7 @@
 #include "system/RenderingContext.hpp"
 #include <EnumBitFields.hpp>
 
-NullableRef<IResource> TextureLoader::_missingTexture = null;
+NullableRef<IResource> TextureLoader::_missingTexture = nullptr;
 
 NullableRef<IResource> TextureLoader::generateMissingTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
 {

@@ -100,7 +100,7 @@ public:
     [[nodiscard]] static LockState isKeyLocked(Key key) noexcept;
 
     /**
-     *   If the key is a toggleable key returns if its in
+     *   If the key is a toggleable key returns if it's in
      * the active state, if it is not a toggleable key,
      * returns if it is currently pressed.
      */

@@ -1,4 +1,5 @@
 #include <I18n.hpp>
+#include <Safeties.hpp>
 
 #pragma pack(push, 1)
 struct LangHeader

@@ -54,7 +54,7 @@ void GameRecorder::beginPlayBack()
         {
             break;
         }
-        if(_handlers.count(blip.blipRTT) != 0)
+        if(_handlers.contains(blip.blipRTT))
         {
             const auto& hg = _handlers[blip.blipRTT];
             hg.blipHandler(blip, hg.userParam);
@@ -84,7 +84,7 @@ void GameRecorder::playUpdate() noexcept
         {
             break;
         }
-        if(_handlers.count(blip.blipRTT) != 0)
+        if(_handlers.contains(blip.blipRTT))
         {
             const auto& hg = _handlers[blip.blipRTT];
             hg.blipHandler(blip, hg.userParam);
@@ -114,7 +114,7 @@ void GameRecorder::playRender() noexcept
         {
             break;
         }
-        if(_handlers.count(blip.blipRTT) != 0)
+        if(_handlers.contains(blip.blipRTT))
         {
             const auto& hg = _handlers[blip.blipRTT];
             hg.blipHandler(blip, hg.userParam);
