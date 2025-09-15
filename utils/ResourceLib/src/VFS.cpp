@@ -66,11 +66,11 @@ static PathPair split(const wchar_t* str, const wchar_t separator, const bool ke
 VFS::Container VFS::resolvePath(const wchar_t* path) const noexcept
 {
     if(!path) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = std::wcslen(path);
     if(!len) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     if(path[0] != '|')
     {
@@ -81,7 +81,7 @@ VFS::Container VFS::resolvePath(const wchar_t* path) const noexcept
 
     if(splitStr.path.length() == 0)
     {
-        return VFS::Container::Static({ }, { }, null);
+        return VFS::Container::Static({ }, { }, nullptr);
     }
 
     for(auto it = _mountPoints.find(splitStr.mountPoint); it != _mountPoints.end(); ++it)
@@ -97,17 +97,17 @@ VFS::Container VFS::resolvePath(const wchar_t* path) const noexcept
         }
     }
 
-    return VFS::Container::Static({ }, { }, null);
+    return VFS::Container::Static({ }, { }, nullptr);
 }
 
 VFS::Container VFS::resolvePath(const char* path) const noexcept
 {
     if(!path)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const WDynString wPath = StringCast<wchar_t>(DynString(path));
     if(!wPath.length())
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     if(path[0] != '|')
     {
@@ -118,7 +118,7 @@ VFS::Container VFS::resolvePath(const char* path) const noexcept
 
     if(splitStr.path.length() == 0)
     {
-        return VFS::Container::Static({ }, { }, null);
+        return VFS::Container::Static({ }, { }, nullptr);
     }
 
     for(auto it = _mountPoints.find(splitStr.mountPoint); it != _mountPoints.end(); ++it)
@@ -134,17 +134,17 @@ VFS::Container VFS::resolvePath(const char* path) const noexcept
         }
     }
 
-    return VFS::Container::Static({ }, { }, null);
+    return VFS::Container::Static({ }, { }, nullptr);
 }
 
 VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0) const noexcept
 {
     if(!path || !subPath0)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = ::std::wcslen(path);
     if(!len)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     WDynString pathCompound(path);
     pathCompound = pathCompound.concat(subPath0);
@@ -155,11 +155,11 @@ VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0) co
 VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0, const wchar_t* subPath1) const noexcept
 {
     if(!path || !subPath0 || !subPath1)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = ::std::wcslen(path);
     if(!len)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     WDynString pathCompound(path);
     pathCompound = pathCompound.concat(subPath0).concat(subPath1);
@@ -170,11 +170,11 @@ VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0, co
 VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0, const wchar_t* subPath1, const wchar_t* subPath2) const noexcept
 {
     if(!path || !subPath0 || !subPath1 || !subPath2)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = ::std::wcslen(path);
     if(!len)
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     WDynString pathCompound(path);
     pathCompound = pathCompound.concat(subPath0).concat(subPath1).concat(subPath2);
@@ -185,11 +185,11 @@ VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0, co
 VFS::Container VFS::resolvePath(const char* path, const char* subPath0) const noexcept
 {
     if(!path || !subPath0) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = ::std::strlen(path);
     if(!len) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     DynString pathCompound(path);
     pathCompound = pathCompound.concat(subPath0);
@@ -200,11 +200,11 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0) const no
 VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const char* subPath1) const noexcept
 {
     if(!path || !subPath0 || !subPath1) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = ::std::strlen(path);
     if(!len) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     DynString pathCompound(path);
     pathCompound = pathCompound.concat(subPath0).concat(subPath1);
@@ -215,11 +215,11 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const ch
 VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const char* subPath1, const char* subPath2) const noexcept
 {
     if(!path || !subPath0 || !subPath1 || !subPath2) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     const ::std::size_t len = ::std::strlen(path);
     if(!len) 
-    { return VFS::Container::Static({ }, { }, null); }
+    { return VFS::Container::Static({ }, { }, nullptr); }
 
     DynString pathCompound(path);
     pathCompound = pathCompound.concat(subPath0).concat(subPath1).concat(subPath2);
@@ -295,7 +295,7 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
 {
     bool possibleDeviceEnd = true;
 
-    for(iSys i = length - 1; i >= 0; --i)
+    for(iSys i = static_cast<iSys>(length - 1); i >= 0; --i)
     {
         // Devices are valid only if they are at the end of a path.
         if(path[i] == L'\\')
@@ -619,13 +619,13 @@ WDynString VFS::win32PathSanitizer(const WDynString& path) noexcept
 
 WDynStringView VFS::getFileName(const WDynString& path) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == L'/' || path[i] == L'\\')
+    iSys i = static_cast<iSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == L'/' || path[static_cast<uSys>(i)] == L'\\')
     { return WDynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == L'/' || path[i] == L'\\')
+        if(path[static_cast<uSys>(i)] == L'/' || path[static_cast<uSys>(i)] == L'\\')
         {
             --i;
             break;
@@ -637,13 +637,13 @@ WDynStringView VFS::getFileName(const WDynString& path) noexcept
 
 WDynStringView VFS::getFileName(const WDynStringView& path) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == L'/' || path[i] == L'\\')
+    iSys i = static_cast<iSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == L'/' || path[static_cast<uSys>(i)] == L'\\')
     { return WDynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == L'/' || path[i] == L'\\')
+        if(path[static_cast<uSys>(i)] == L'/' || path[static_cast<uSys>(i)] == L'\\')
         {
             --i;
             break;
@@ -655,13 +655,13 @@ WDynStringView VFS::getFileName(const WDynStringView& path) noexcept
 
 DynStringView VFS::getFileName(const DynString& path) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == '/' || path[i] == '\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == '/' || path[i] == '\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             --i;
             break;
@@ -673,13 +673,13 @@ DynStringView VFS::getFileName(const DynString& path) noexcept
 
 DynStringView VFS::getFileName(const DynStringView& path) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == '/' || path[i] == '\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == '/' || path[i] == '\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             --i;
             break;
@@ -691,18 +691,18 @@ DynStringView VFS::getFileName(const DynStringView& path) noexcept
 
 WDynStringView VFS::getFileExt(const WDynString& path, const bool includeDot) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == L'/' || path[i] == L'\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return WDynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == L'/' || path[i] == L'\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             --i;
             break;
         }
-        if(path[i] == L'.')
+        if(path[static_cast<uSys>(i)] == L'.')
         {
             if(!includeDot)
             {
@@ -717,18 +717,18 @@ WDynStringView VFS::getFileExt(const WDynString& path, const bool includeDot) no
 
 WDynStringView VFS::getFileExt(const WDynStringView& path, const bool includeDot) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == L'/' || path[i] == L'\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return WDynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == L'/' || path[i] == L'\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             --i;
             break;
         }
-        if(path[i] == L'.')
+        if(path[static_cast<uSys>(i)] == L'.')
         {
             if(!includeDot)
             {
@@ -743,18 +743,18 @@ WDynStringView VFS::getFileExt(const WDynStringView& path, const bool includeDot
 
 DynStringView VFS::getFileExt(const DynString& path, const bool includeDot) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == '/' || path[i] == '\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == '/' || path[i] == '\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             --i;
             break;
         }
-        if(path[i] == '.')
+        if(path[static_cast<uSys>(i)] == '.')
         {
             if(!includeDot)
             {
@@ -769,18 +769,18 @@ DynStringView VFS::getFileExt(const DynString& path, const bool includeDot) noex
 
 DynStringView VFS::getFileExt(const DynStringView& path, const bool includeDot) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == '/' || path[i] == '\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == '/' || path[i] == '\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             --i;
             break;
         }
-        if(path[i] == '.')
+        if(path[static_cast<uSys>(i)] == '.')
         {
             if(!includeDot)
             {
@@ -795,13 +795,13 @@ DynStringView VFS::getFileExt(const DynStringView& path, const bool includeDot) 
 
 WDynStringView VFS::getParentFolder(const WDynString& path, bool includePathSeparator) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == L'/' || path[i] == L'\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == L'/' || path[i] == L'\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             if(!includePathSeparator)
             {
@@ -816,13 +816,13 @@ WDynStringView VFS::getParentFolder(const WDynString& path, bool includePathSepa
 
 WDynStringView VFS::getParentFolder(const WDynStringView& path, bool includePathSeparator) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == L'/' || path[i] == L'\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == L'/' || path[i] == L'\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             if(!includePathSeparator)
             {
@@ -837,13 +837,13 @@ WDynStringView VFS::getParentFolder(const WDynStringView& path, bool includePath
 
 DynStringView VFS::getParentFolder(const DynString& path, bool includePathSeparator) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == '/' || path[i] == '\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == '/' || path[i] == '\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             if(!includePathSeparator)
             {
@@ -858,13 +858,13 @@ DynStringView VFS::getParentFolder(const DynString& path, bool includePathSepara
 
 DynStringView VFS::getParentFolder(const DynStringView& path, bool includePathSeparator) noexcept
 {
-    uSys i = path.length() - 1;
-    if(path[i] == '/' || path[i] == '\\')
+    iSys i = static_cast<uSys>(path.length() - 1);
+    if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
     for(; i >= 0; --i)
     {
-        if(path[i] == '/' || path[i] == '\\')
+        if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
         {
             if(!includePathSeparator)
             {
@@ -897,7 +897,7 @@ WDynString VFS::getVFSMount(const WDynString& path, bool includePathSeparator) n
         }
     }
 
-    return path.subString(0, i + 1);
+    return path.SubString(0, i + 1);
 }
 
 WDynString VFS::getVFSMount(const WDynStringView& path, bool includePathSeparator) noexcept
@@ -920,7 +920,7 @@ WDynString VFS::getVFSMount(const WDynStringView& path, bool includePathSeparato
         }
     }
 
-    return path.subString(0, i + 1);
+    return path.SubString(0, i + 1);
 }
 
 DynString VFS::getVFSMount(const DynString& path, bool includePathSeparator) noexcept
@@ -943,7 +943,7 @@ DynString VFS::getVFSMount(const DynString& path, bool includePathSeparator) noe
         }
     }
 
-    return path.subString(0, i + 1);
+    return path.SubString(0, i + 1);
 }
 
 DynString VFS::getVFSMount(const DynStringView& path, bool includePathSeparator) noexcept
@@ -966,7 +966,7 @@ DynString VFS::getVFSMount(const DynStringView& path, bool includePathSeparator)
         }
     }
 
-    return path.subString(0, i + 1);
+    return path.SubString(0, i + 1);
 }
 
 bool VFS::fileExists(const wchar_t* path) const noexcept
@@ -987,11 +987,11 @@ CPPRef<IFile> VFS::openFile(const wchar_t* const path, const FileProps props) co
 {
     const VFS::Container physPath = resolvePath(path);
 
-    if(physPath.fileLoader == null || physPath.basePath.length() == 0 || physPath.subPath.length() == 0)
-    { return null; }
+    if(physPath.fileLoader == nullptr || physPath.basePath.length() == 0 || physPath.subPath.length() == 0)
+    { return nullptr; }
 
     if(props != FileProps::Read && !physPath.canCreateAndWriteFile())
-    { return null; }
+    { return nullptr; }
 
     return physPath.fileLoader->load(physPath.basePath, physPath.subPath, props);
 }
@@ -1000,11 +1000,11 @@ CPPRef<IFile> VFS::openFile(const char* const path, const FileProps props) const
 {
     const VFS::Container physPath = resolvePath(path);
 
-    if(physPath.fileLoader == null || physPath.basePath.length() == 0 || physPath.subPath.length() == 0)
-    { return null; }
+    if(physPath.fileLoader == nullptr || physPath.basePath.length() == 0 || physPath.subPath.length() == 0)
+    { return nullptr; }
 
     if(props != FileProps::Read && !physPath.canCreateAndWriteFile())
-    { return null; }
+    { return nullptr; }
 
     return physPath.fileLoader->load(physPath.basePath, physPath.subPath, props);
 }

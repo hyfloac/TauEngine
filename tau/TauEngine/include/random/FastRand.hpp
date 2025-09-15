@@ -14,7 +14,7 @@ private:
     u32 _seed;
 public:
     FastRand16() noexcept
-        : _seed(time(NULL))
+        : _seed(time(nullptr))
     { }
 
     FastRand16(const u32 seed) noexcept
@@ -41,7 +41,7 @@ private:
     u32 _seed;
 public:
     FastRand32() noexcept
-        : _seed(time(NULL))
+        : _seed(time(nullptr))
     { }
 
     FastRand32(const u32 seed) noexcept
@@ -68,7 +68,7 @@ private:
     u64 _seed;
 public:
     FastRand64() noexcept
-        : _seed(time(NULL))
+        : _seed(time(nullptr))
     { }
 
     FastRand64(const u64 seed) noexcept

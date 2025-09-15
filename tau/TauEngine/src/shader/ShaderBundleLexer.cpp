@@ -1,22 +1,22 @@
 #include "shader/bundle/ShaderBundleLexer.hpp"
 
-[[nodiscard]] static bool isWhiteSpace(char c) noexcept;
-[[nodiscard]] static bool isDelimiter(char c) noexcept;
-[[nodiscard]] static bool isNumber(char c) noexcept;
-[[nodiscard]] static char getEscape(char c) noexcept;
-[[nodiscard]] static bool isValidIdentifier(char c) noexcept;
+[[nodiscard]] static bool isWhiteSpace(c32 c) noexcept;
+[[nodiscard]] static bool isDelimiter(c32 c) noexcept;
+[[nodiscard]] static bool isNumber(c32 c) noexcept;
+[[nodiscard]] static c32 getEscape(c32 c) noexcept;
+[[nodiscard]] static bool isValidIdentifier(c32 c) noexcept;
 
 void ShaderBundleLexer::reset(const CPPRef<IFile>& file) noexcept
 {
-    _file = file;
-    _currentToken = SBPToken::Unknown;
-    _strValue = "";
-    _intValue = 0;
-    _lastRead = '\0';
-    _isEOF = false;
-    _fileIndex = 0;
-    _fileLine = 1;
-    _lineIndex = 0;
+    m_File = file;
+    m_CurrentToken = SBPToken::Unknown;
+    m_StrValue = u8"";
+    m_IntValue = 0;
+    m_LastRead = '\0';
+    m_IsEof = false;
+    m_FileIndex = 0;
+    m_FileLine = 1;
+    m_LineIndex = 0;
 
     (void) readChar();
 }
@@ -25,117 +25,120 @@ SBPToken ShaderBundleLexer::getNextToken() noexcept
 {
     if(skipWhiteSpace())
     {
-        return _currentToken = SBPToken::EndOfFile;
+        return m_CurrentToken = SBPToken::EndOfFile;
     }
 
-    if(isNumber(_lastRead))
+    if(isNumber(m_LastRead))
     {
         if(readUnsignedInteger())
-        { return _currentToken = SBPToken::EndOfFile; }
-        _currentToken = SBPToken::UnsignedIntegerLiteral;
+        { return m_CurrentToken = SBPToken::EndOfFile; }
+        m_CurrentToken = SBPToken::UnsignedIntegerLiteral;
     }
-    else if(_lastRead == '-')
+    else if(m_LastRead == '-')
     {
         if(readInteger())
-        { return _currentToken = SBPToken::EndOfFile; }
-        _currentToken = SBPToken::IntegerLiteral;
+        { return m_CurrentToken = SBPToken::EndOfFile; }
+        m_CurrentToken = SBPToken::IntegerLiteral;
     }
-    else if(isValidIdentifier(_lastRead))
+    else if(isValidIdentifier(m_LastRead))
     {
         if(readIdentifier())
-        { return _currentToken = SBPToken::EndOfFile; }
+        { return m_CurrentToken = SBPToken::EndOfFile; }
 
-#define TOKEN_STR_CASE(_STR, _TOKEN) STR_CASE(_STR, { return _currentToken = SBPToken::_TOKEN; })
-#define TOKEN_BLOCK_STR_CASE(_TOKEN) STR_CASE(#_TOKEN, { return _currentToken = SBPToken::_TOKEN##Block; })
-#define RM_STR_CASE(_API) STR_CASE(#_API, {\
-        _rmValue = RenderingMode::Mode::_API; \
-        return _currentToken = SBPToken::RenderingMode; \
-    })
-#define CRM_STR_CASE(_TOKEN) STR_CASE("CRM" #_TOKEN, { \
-        _crmToken = CommonRenderingModelToken::_TOKEN; \
-        return _currentToken = SBPToken::CRMLiteral; \
-    })
+        m_CurrentToken = SBPToken::Identifier;
 
-        STR_SWITCH(_strValue, {
-            TOKEN_BLOCK_STR_CASE(Vertex)
-            TOKEN_BLOCK_STR_CASE(TessellationControl)
-            TOKEN_STR_CASE("Hull", TessellationControlBlock)
-            TOKEN_BLOCK_STR_CASE(TessellationEvaluation)
-            TOKEN_STR_CASE("Domain", TessellationEvaluationBlock)
-            TOKEN_BLOCK_STR_CASE(Geometry)
-            TOKEN_BLOCK_STR_CASE(Pixel)
-            TOKEN_STR_CASE("Fragment", PixelBlock)
-            TOKEN_BLOCK_STR_CASE(Uniforms)
-            TOKEN_BLOCK_STR_CASE(Textures)
-            TOKEN_STR_CASE("File", File)
-            TOKEN_STR_CASE("Location", Location)
-            TOKEN_STR_CASE("Sampler", Sampler)
-            RM_STR_CASE(DirectX10)
-            RM_STR_CASE(DirectX11)
-            RM_STR_CASE(DirectX12)
-            RM_STR_CASE(DirectX12_1)
-            RM_STR_CASE(Vulkan)
-            RM_STR_CASE(OpenGL4_1)
-            RM_STR_CASE(OpenGL4_2)
-            RM_STR_CASE(OpenGL4_3)
-            RM_STR_CASE(OpenGL4_4)
-            RM_STR_CASE(OpenGL4_5)
-            RM_STR_CASE(OpenGL4_6)
-            // CRM_STR_CASE(InputPosition)
-            // CRM_STR_CASE(InputNormal)
-            // CRM_STR_CASE(InputTangent)
-            // CRM_STR_CASE(InputTextureCoord)
-            // CRM_STR_CASE(InputBoneID)
-            // CRM_STR_CASE(InputBoneWeight)
-            // CRM_STR_CASE(OutputNormal)
-            // CRM_STR_CASE(OutputDiffuse)
-            // CRM_STR_CASE(OutputAlbedo)
-            // CRM_STR_CASE(OutputPBRCompound)
-            // CRM_STR_CASE(OutputEmissivity)
-            // CRM_STR_CASE(OutputPosition)
-            // CRM_STR_CASE(InputFBPosition)
-            // CRM_STR_CASE(InputFBTextureCoord)
-            // CRM_STR_CASE(OutputFBColor)
-            CRM_STR_CASE(UniformBindingCameraDynamic)
-            CRM_STR_CASE(UniformBindingCameraStatic)
-            CRM_STR_CASE(TextureNormal)
-            CRM_STR_CASE(TextureDiffuse)
-            CRM_STR_CASE(TextureAlbedo)
-            CRM_STR_CASE(TexturePBRCompound)
-            CRM_STR_CASE(TextureEmissivity)
-            CRM_STR_CASE(TexturePosition)
-            CRM_STR_CASE(TextureDepth)
-            CRM_STR_CASE(TextureStencil)
-        },
-        { return _currentToken = SBPToken::Identifier; })
-
-#undef TOKEN_STR_CASE
-#undef TOKEN_BLOCK_STR_CASE
-#undef RM_STR_CASE
-#undef CRM_STR_CASE
+// #define TOKEN_STR_CASE(STR, TOKEN) C8STR_CASE(STR, { return m_CurrentToken = SBPToken::TOKEN; })
+// #define TOKEN_BLOCK_STR_CASE(TOKEN) C8STR_CASE(u8#TOKEN, { return m_CurrentToken = SBPToken::TOKEN##Block; })
+// #define RM_STR_CASE(API) C8STR_CASE(u8#API, {\
+//         m_RmValue = RenderingMode::Mode::API; \
+//         return m_CurrentToken = SBPToken::RenderingMode; \
+//     })
+// #define CRM_STR_CASE(TOKEN) C8STR_CASE(u8"CRM" u8#TOKEN, { \
+//         m_CrmToken = CommonRenderingModelToken::TOKEN; \
+//         return m_CurrentToken = SBPToken::CRMLiteral; \
+//     })
+//
+//         STR_SWITCH(m_StrValue, {
+//             TOKEN_BLOCK_STR_CASE(Vertex)
+//             TOKEN_BLOCK_STR_CASE(TessellationControl)
+//             TOKEN_STR_CASE(u8"Hull", TessellationControlBlock)
+//             TOKEN_BLOCK_STR_CASE(TessellationEvaluation)
+//             TOKEN_STR_CASE(u8"Domain", TessellationEvaluationBlock)
+//             TOKEN_BLOCK_STR_CASE(Geometry)
+//             TOKEN_BLOCK_STR_CASE(Pixel)
+//             TOKEN_STR_CASE(u8"Fragment", PixelBlock)
+//             TOKEN_BLOCK_STR_CASE(Uniforms)
+//             TOKEN_BLOCK_STR_CASE(Textures)
+//             TOKEN_STR_CASE(u8"File", File)
+//             TOKEN_STR_CASE(u8"Location", Location)
+//             TOKEN_STR_CASE(u8"Sampler", Sampler)
+//             RM_STR_CASE(DirectX10)
+//             RM_STR_CASE(DirectX11)
+//             RM_STR_CASE(DirectX12)
+//             RM_STR_CASE(DirectX12_1)
+//             RM_STR_CASE(Vulkan)
+//             RM_STR_CASE(OpenGL4_1)
+//             RM_STR_CASE(OpenGL4_2)
+//             RM_STR_CASE(OpenGL4_3)
+//             RM_STR_CASE(OpenGL4_4)
+//             RM_STR_CASE(OpenGL4_5)
+//             RM_STR_CASE(OpenGL4_6)
+//             // CRM_STR_CASE(InputPosition)
+//             // CRM_STR_CASE(InputNormal)
+//             // CRM_STR_CASE(InputTangent)
+//             // CRM_STR_CASE(InputTextureCoord)
+//             // CRM_STR_CASE(InputBoneID)
+//             // CRM_STR_CASE(InputBoneWeight)
+//             // CRM_STR_CASE(OutputNormal)
+//             // CRM_STR_CASE(OutputDiffuse)
+//             // CRM_STR_CASE(OutputAlbedo)
+//             // CRM_STR_CASE(OutputPBRCompound)
+//             // CRM_STR_CASE(OutputEmissivity)
+//             // CRM_STR_CASE(OutputPosition)
+//             // CRM_STR_CASE(InputFBPosition)
+//             // CRM_STR_CASE(InputFBTextureCoord)
+//             // CRM_STR_CASE(OutputFBColor)
+//             CRM_STR_CASE(UniformBindingCameraDynamic)
+//             CRM_STR_CASE(UniformBindingCameraStatic)
+//             CRM_STR_CASE(TextureNormal)
+//             CRM_STR_CASE(TextureDiffuse)
+//             CRM_STR_CASE(TextureAlbedo)
+//             CRM_STR_CASE(TexturePBRCompound)
+//             CRM_STR_CASE(TextureEmissivity)
+//             CRM_STR_CASE(TexturePosition)
+//             CRM_STR_CASE(TextureDepth)
+//             CRM_STR_CASE(TextureStencil)
+//         },
+//         { return m_CurrentToken = SBPToken::Identifier; })
+//
+// #undef TOKEN_STR_CASE
+// #undef TOKEN_BLOCK_STR_CASE
+// #undef RM_STR_CASE
+// #undef CRM_STR_CASE
     }
-    else if(_lastRead == '\"')
+    else if(m_LastRead == U'\"')
     {
         if(readString())
-        { return _currentToken = SBPToken::EndOfFile; }
-        _currentToken = SBPToken::StringLiteral;
+        { return m_CurrentToken = SBPToken::EndOfFile; }
+        m_CurrentToken = SBPToken::StringLiteral;
     }
     else
     {
-        _cValue = _lastRead;
+        m_CValue = m_LastRead;
         (void) readChar();
-        _currentToken = SBPToken::Character;
+        m_CurrentToken = SBPToken::Character;
     }
 
 
-    return _currentToken;
+    return m_CurrentToken;
 }
 
 bool ShaderBundleLexer::skipWhiteSpace() noexcept
 {
-    while(isWhiteSpace(_lastRead))
+    while(isWhiteSpace(m_LastRead))
     {
-        if(readChar()) { return true; }
+        if(readChar()) 
+        { return true; }
     }
     return false;
 }
@@ -143,29 +146,30 @@ bool ShaderBundleLexer::skipWhiteSpace() noexcept
 bool ShaderBundleLexer::readInteger() noexcept
 {
     bool negative = false;
-    if(_lastRead == '-')
+    if(m_LastRead == '-')
     {
         negative = true;
-        if(readChar()) { return true; }
+        if(readChar()) 
+        { return true; }
     }
-    i32 x = static_cast<i32>(_lastRead - '0');
+    i32 x = static_cast<i32>(m_LastRead - U'0');
     while(true)
     {
         if(readChar()) { return true; }
-        if(isDelimiter(_lastRead))
+        if(isDelimiter(m_LastRead))
         {
             if(negative)
             {
                 x *= -1;
             }
-            _intValue = x;
+            m_IntValue = x;
             return false;
         }
         
-        if(isNumber(_lastRead))
+        if(isNumber(m_LastRead))
         {
             x *= 10;
-            x += static_cast<i32>(_lastRead - '0');
+            x += static_cast<i32>(m_LastRead - '0');
         }
         else
         { return true; }
@@ -174,20 +178,20 @@ bool ShaderBundleLexer::readInteger() noexcept
 
 bool ShaderBundleLexer::readUnsignedInteger() noexcept
 {
-    u32 x = static_cast<u32>(_lastRead - '0');
+    u32 x = static_cast<u32>(m_LastRead - '0');
     while(true)
     {
         if(readChar()) { return true; }
-        if(isDelimiter(_lastRead))
+        if(isDelimiter(m_LastRead))
         {
-            _uintValue = x;
+            m_UintValue = x;
             return false;
         }
 
-        if(isNumber(_lastRead))
+        if(isNumber(m_LastRead))
         {
             x *= 10;
-            x += static_cast<u32>(_lastRead - '0');
+            x += static_cast<u32>(m_LastRead - '0');
         }
         else
         { return true; }
@@ -196,122 +200,225 @@ bool ShaderBundleLexer::readUnsignedInteger() noexcept
 
 bool ShaderBundleLexer::readString() noexcept
 {
-    StringBuilder sb;
+    C8StringBuilder sb;
     while(true)
     {
-        if(readChar()) { return true; }
-        if(_lastRead == '"')
+        if(readChar()) 
+        { return true; }
+
+        if(m_LastRead == U'"')
         {
-            _strValue = sb.toString();
+            m_StrValue = sb.ToString();
             (void) readChar();
             return false;
         }
 
-        if(_lastRead == '\\')
+        if(m_LastRead == U'\\')
         {
-            if(readChar()) { return false; }
-            sb.append(getEscape(_lastRead));
+            if(readChar()) 
+            { return false; }
+
+            sb.Append(getEscape(m_LastRead));
         }
         else
-        { sb.append(_lastRead); }
+        { sb.Append(m_LastRead); }
     }
 }
 
 bool ShaderBundleLexer::readIdentifier() noexcept
 {
-    StringBuilder sb;
-    sb.append(_lastRead);
+    C8StringBuilder sb;
+    sb.Append(m_LastRead);
     while(true)
     {
-        if(readChar()) { return true; }
-        if(isDelimiter(_lastRead))
+        if(readChar()) 
+        { return true; }
+
+        if(isDelimiter(m_LastRead))
         {
-            _strValue = sb.toString();
+            m_StrValue = sb.ToString();
             return false;
         }
 
-        if(isValidIdentifier(_lastRead))
-        { sb.append(_lastRead); }
+        if(isValidIdentifier(m_LastRead))
+        { sb.Append(m_LastRead); }
         else
         { return true; }
     }
 }
 
+[[nodiscard]] c32 ShaderBundleLexer::DecodeCodePointForwardUnsafe() noexcept
+{
+    const int ci0 = m_File->readChar();
+
+    if(ci0 == -1)
+    {
+        m_IsEof = true;
+        return static_cast<c32>(-1);
+    }
+
+    if((ci0 & 0x80) == 0) // U+0000 - U+007F
+    {
+        return static_cast<c32>(ci0);
+    }
+    else
+    {
+        if((ci0 & 0xE0) == 0xC0) // U+0080 - U+07FF
+        {
+            const int ci1 = m_File->readChar();
+
+            if(ci1 == -1)
+            {
+                m_IsEof = true;
+                return static_cast<c32>(-1);
+            }
+
+            const c32 byte1Bits = (ci0 & 0x1F) << 6;
+            const c32 byte2Bits = (ci1 & 0x3F);
+            return byte1Bits | byte2Bits;
+        }
+        else if((ci0 & 0xF0) == 0xE0) // U+0800 - U+FFFF
+        {
+            const int ci1 = m_File->readChar();
+
+            if(ci1 == -1)
+            {
+                m_IsEof = true;
+                return static_cast<c32>(-1);
+            }
+
+            const int ci2 = m_File->readChar();
+
+            if(ci2 == -1)
+            {
+                m_IsEof = true;
+                return static_cast<c32>(-1);
+            }
+
+            const c32 byte1Bits = (ci0 & 0x0F) << 12;
+            const c32 byte2Bits = (ci1 & 0x3F) << 6;
+            const c32 byte3Bits = (ci2 & 0x3F);
+            return byte1Bits | byte2Bits | byte3Bits;
+        }
+        else if((ci0 & 0xF0) == 0xF0) // U+10000 - U+10FFFF
+        {
+            const int ci1 = m_File->readChar();
+
+            if(ci1 == -1)
+            {
+                m_IsEof = true;
+                return static_cast<c32>(-1);
+            }
+
+            const int ci2 = m_File->readChar();
+
+            if(ci2 == -1)
+            {
+                m_IsEof = true;
+                return static_cast<c32>(-1);
+            }
+
+            const int ci3 = m_File->readChar();
+
+            if(ci3 == -1)
+            {
+                m_IsEof = true;
+                return static_cast<c32>(-1);
+            }
+
+            const c32 byte1Bits = (ci0 & 0x07) << 18;
+            const c32 byte2Bits = (ci1 & 0x3F) << 12;
+            const c32 byte3Bits = (ci2 & 0x3F) << 6;
+            const c32 byte4Bits = (ci3 & 0x3F);
+            return byte1Bits | byte2Bits | byte3Bits | byte4Bits;
+        }
+        else
+        {
+            return static_cast<c32>(-1);
+        }
+    }
+}
+
 bool ShaderBundleLexer::readChar() noexcept
 {
-    if(_isEOF) { return true; }
-    const int ci = _file->readChar();
-    if(ci == -1) { return _isEOF = true; }
-    _lastRead = static_cast<char>(ci);
+    if(m_IsEof) 
+    { return true; }
 
-    ++_fileIndex;
-    ++_lineIndex;
-    if(ci == '\n')
+    const c32 ci = DecodeCodePointForwardUnsafe();
+
+    if(ci == static_cast<c32>(-1))
+    { return true; }
+
+    m_LastRead = ci;
+
+    ++m_FileIndex;
+    ++m_LineIndex;
+    if(ci == U'\n')
     {
-        ++_fileLine;
-        _lineIndex = 0;
+        ++m_FileLine;
+        m_LineIndex = 0;
     }
 
     return false;
 }
 
-[[nodiscard]] static bool isWhiteSpace(const char c) noexcept
+[[nodiscard]] static bool isWhiteSpace(const c32 c) noexcept
 {
     switch(c)
     {
-        case ' ':
-        case '\n':
-        case '\r':
-        case '\t':
+        case U' ':
+        case U'\n':
+        case U'\r':
+        case U'\t':
             return true;
         default: return false;
     }
 }
 
-[[nodiscard]] static bool isDelimiter(const char c) noexcept
+[[nodiscard]] static bool isDelimiter(const c32 c) noexcept
 {
     switch(c)
     {
-        case ' ':
-        case '\n':
-        case '\r':
-        case '\t':
-        case ':':
-        case ',':
+        case U' ':
+        case U'\n':
+        case U'\r':
+        case U'\t':
+        case U':':
+        case U',':
             return true;
         default: return false;
     }
 }
 
-[[nodiscard]] static bool isNumber(const char c) noexcept
+[[nodiscard]] static bool isNumber(const c32 c) noexcept
 {
-    return c >= '0' && c <= '9';
+    return c >= U'0' && c <= U'9';
 }
 
-[[nodiscard]] static char getEscape(const char c) noexcept
+[[nodiscard]] static c32 getEscape(const c32 c) noexcept
 {
     switch(c)
     {
-        case '\\': return '\\';
-        case 'r':  return '\r';
-        case 'n':  return '\n';
-        case '0':  return '\0';
-        case 't':  return '\t';
-        case '\"': return '\"';
-        case '\'': return '\'';
-        default:   return static_cast<char>(0x7F);
+        case U'\\': return U'\\';
+        case U'r':  return U'\r';
+        case U'n':  return U'\n';
+        case U'0':  return U'\0';
+        case U't':  return U'\t';
+        case U'\"': return U'\"';
+        case U'\'': return U'\'';
+        default:   return static_cast<c32>(0x7F);
     }
 }
 
-[[nodiscard]] static bool isValidIdentifier(const char c) noexcept
+[[nodiscard]] static bool isValidIdentifier(const c32 c) noexcept
 {
-    if(c >= 'A' && c <= 'Z')
+    if(c >= U'A' && c <= U'Z')
     { return true; }
-    if(c >= 'a' && c <= 'z')
+    if(c >= U'a' && c <= U'z')
     { return true; }
-    if(c >= '0' && c <= '9')
+    if(c >= U'0' && c <= U'9')
     { return true; }
-    if(c == '_')
+    if(c == U'_')
     { return true; }
     return false;
 }

@@ -64,7 +64,7 @@ public:
         : DX10ResourceBuffer(args, d3dBuffer)
     { }
 
-    [[nodiscard]] void* map(uSys, uSys, const ResourceMapRange* mapReadRange, const ResourceMapRange* mapWriteRange) noexcept override { return nullptr; }
+    [[nodiscard]] void* map(uSys, uSys, const ResourceMapRange* mapReadRange, const ResourceMapRange* mapWriteRange) noexcept override;// { return nullptr; }
     void unmap(uSys, uSys, const ResourceMapRange*) noexcept override { }
 };
 

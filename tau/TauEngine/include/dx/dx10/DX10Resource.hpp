@@ -73,10 +73,10 @@ public:
         : _gi(gi)
     { }
 
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceBufferArgs&    args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
-    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceBufferArgs&    args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
+    [[nodiscard]] NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator) const noexcept override;
 protected:
     [[nodiscard]] uSys _allocSize(uSys type) const noexcept override;
 private:

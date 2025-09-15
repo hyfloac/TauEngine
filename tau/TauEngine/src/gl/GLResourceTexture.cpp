@@ -4,7 +4,7 @@
 
 void* GLResourceTexture::map(IRenderingContext&, const EResource::MapType mapType, const uSys mipLevel, uSys, const ResourceMapRange* const mapReadRange) noexcept
 {
-    if(mapType != EResource::MapType::Discard || !mapReadRange || mapReadRange->begin < mapReadRange->end)
+    if(mapType != EResource::MapType::Discard || !mapReadRange || mapReadRange->Begin < mapReadRange->End)
     {
         /*
          *   Textures are opaque objects and don't support the same

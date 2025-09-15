@@ -1,25 +1,50 @@
 #include "TauEngine.hpp"
 #include <NumTypes.hpp>
-#include <Utils.hpp>
+#include <TauCOM.hpp>
 
 #include "allocator/PageAllocator.hpp"
 #include "Timings.hpp"
 #include "system/Window.hpp"
 #include "maths/Maths.hpp"
 #include "system/SystemInterface.hpp"
+#include "debug/IDebugInterface.hpp"
 
 #include "dx/dx12/DX12GraphicsInterface.hpp"
 
+static bool InitCom() noexcept
+{
+    using namespace tau;
+    using namespace tau::com;
+
+    ComRef<IComManager> comManager;
+
+    const ResultCode resultCode = TauComGetComManager(comManager.Load());
+
+    if(IsFailure(resultCode))
+    {
+        return false;
+    }
+
+    internal::RegisterDebugInterface(comManager.Get());
+
+    return true;
+}
+
 bool tauInit() noexcept
 {
-    static bool _initializationComplete = false;
+    static bool InitializationComplete = false;
 
-    if(!_initializationComplete)
+    if(!InitializationComplete)
     {
-        _initializationComplete = true;
+        InitializationComplete = true;
         PageAllocator::init();
 
         SystemInterface::registerGraphicsInterface(RenderingMode::DirectX12, new(::std::nothrow) DX12GraphicsInterfaceBuilder);
+
+        if(!InitCom())
+        {
+            return false;
+        }
     }
 
     return true;
@@ -29,16 +54,17 @@ void initProgramStartTimes() noexcept;
 
 void tauMain() noexcept
 {
-    tauInit();
+    const bool initSuccess = tauInit();
     initSinTable();
     initProgramStartTimes();
+    (void) initSuccess;
 }
 
 void tauFinalize() noexcept
 {
 }
 
-static ExceptionData exData = { null, 0, "", "" };
+static ExceptionData exData = { nullptr, 0, "", "" };
 
 #if !defined(TAU_PRODUCTION)
 void tauThrowException(Exception& e, const uSys line, const char* const file, const char* const func) noexcept
@@ -88,7 +114,7 @@ static void runMessageLoop() noexcept
 {
     MSG msg;
     u32 cnt = 0;
-    while(cnt++ < NUM_MESSAGES_TO_READ && PeekMessageA(&msg, null, 0, 0, PM_REMOVE))
+    while(cnt++ < NUM_MESSAGES_TO_READ && PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&msg);
         DispatchMessageA(&msg);

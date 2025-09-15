@@ -55,4 +55,4 @@ DECL_OPAQUE_TYPE(ShaderProgram);
  * not expose such functionality. The exact implementation of
  * this opaque object is left up to the underlying API.
  */
-DECL_OPAQUE_TYPE(ResourceHeap);
+// DECL_OPAQUE_TYPE(ResourceHeap);

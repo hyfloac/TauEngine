@@ -24,10 +24,14 @@
  * @param[in] x
  *    The value to find the logarithm of.
  */
-template<u32 _Base>
+template<u32 Base>
 float logN(const float x) noexcept
 {
-    return log(x) / log(_Base);
+#ifdef _WIN32
+    return log(x) / log(Base);
+#else
+    return logf(x) / logf(Base);
+#endif
 }
 
 /**
@@ -36,10 +40,10 @@ float logN(const float x) noexcept
  * @param[in] x
  *    The value to find the logarithm of.
  */
-template<u32 _Base>
+template<u32 Base>
 double logN(const double x) noexcept
 {
-    return log(x) / log(_Base);
+    return log(x) / log(Base);
 }
 
 /**
@@ -49,10 +53,10 @@ double logN(const double x) noexcept
  * @param[in] x
  *    The value to find the logarithm of.
  */
-template<u32 _Base>
+template<u32 Base>
 long double logN(const long double x) noexcept
 {
-    return log(x) / log(_Base);
+    return log(x) / log(Base);
 }
 
 /**
@@ -152,11 +156,11 @@ TAU_DLL float fastCosD(float degrees) noexcept;
  */
 TAU_DLL double fastCosD(double degrees) noexcept;
 
-template<typename _F>
+template<typename FloatT>
 struct SinCos final
 {
-    _F sin;
-    _F cos;
+    FloatT sin;
+    FloatT cos;
 
     SinCos& negate() noexcept
     {
@@ -198,12 +202,12 @@ static inline float rSqrt(const float x) noexcept
 
 TAU_DLL double fastInverseSqrt(double x) noexcept;
 
-template<typename _Int>
-static inline constexpr _Int rotL(const _Int n, unsigned int c) noexcept
+template<typename IntT>
+static inline constexpr IntT rotL(const IntT n, unsigned int c) noexcept
 {
-    static_assert(std::is_unsigned<_Int>::value, "Rotate Left only makes sense for unsigned types");
+    static_assert(::std::is_unsigned_v<IntT>, "Rotate Left only makes sense for unsigned types");
 
-    constexpr _Int mask = 8 * sizeof(n) - 1;
+    constexpr IntT mask = 8 * sizeof(n) - 1;
     c &= mask;
     signed int cTmp = reinterpret_cast<signed int&>(c);
     cTmp = -cTmp;
@@ -211,12 +215,12 @@ static inline constexpr _Int rotL(const _Int n, unsigned int c) noexcept
     return (n << c) | (n >> negC);
 }
 
-template<typename _Int>
-static inline constexpr _Int rotR(const _Int n, unsigned int c) noexcept
+template<typename IntT>
+static inline constexpr IntT rotR(const IntT n, unsigned int c) noexcept
 {
-    static_assert(std::is_unsigned<_Int>::value, "Rotate Right only makes sense for unsigned types");
+    static_assert(::std::is_unsigned_v<IntT>, "Rotate Right only makes sense for unsigned types");
 
-    constexpr _Int mask = 8 * sizeof(n) - 1;
+    constexpr IntT mask = 8 * sizeof(n) - 1;
     c &= mask;
     signed int cTmp = reinterpret_cast<signed int&>(c);
     cTmp = -cTmp;
@@ -240,7 +244,6 @@ inline u16 rotL<u16>(const u16 n, unsigned int c) noexcept
 template<>
 inline u16 rotR<u16>(const u16 n, unsigned int c) noexcept
 { return _rotr16(n, static_cast<unsigned char>(c)); }
-#endif
 
 template<>
 inline u32 rotL<u32>(const u32 n, unsigned int c) noexcept
@@ -257,3 +260,4 @@ inline u64 rotL<u64>(const u64 n, unsigned int c) noexcept
 template<>
 inline u64 rotR<u64>(const u64 n, unsigned int c) noexcept
 { return _rotr64(n, static_cast<int>(c)); }
+#endif

@@ -11,18 +11,18 @@ enum class SBPToken
     EndOfFile = -1,
     Unknown = 0,
     Identifier,
-    VertexBlock,
-    TessellationControlBlock,
-    TessellationEvaluationBlock,
-    GeometryBlock,
-    PixelBlock,
-    UniformsBlock,
-    TexturesBlock,
-    Location,
-    Sampler,
-    File,
-    RenderingMode,
-    CRMLiteral,
+    // VertexBlock,
+    // TessellationControlBlock,
+    // TessellationEvaluationBlock,
+    // GeometryBlock,
+    // PixelBlock,
+    // UniformsBlock,
+    // TexturesBlock,
+    // Location,
+    // Sampler,
+    // File,
+    // RenderingMode,
+    // CRMLiteral,
     StringLiteral,
     IntegerLiteral,
     UnsignedIntegerLiteral,
@@ -63,58 +63,58 @@ class TAU_DLL ShaderBundleLexer final
     DEFAULT_DESTRUCT(ShaderBundleLexer);
     DEFAULT_CM(ShaderBundleLexer);
 private:
-    CPPRef<IFile> _file;
-    SBPToken _currentToken;
-    DynString _strValue;
+    CPPRef<IFile> m_File;
+    SBPToken m_CurrentToken;
+    C8DynString m_StrValue;
     union
     {
-        i32 _intValue;
-        u32 _uintValue;
-        char _cValue;
-        RenderingMode::Mode _rmValue;
-        CommonRenderingModelToken _crmToken;
+        i32 m_IntValue;
+        u32 m_UintValue;
+        c32 m_CValue;
+        RenderingMode::Mode m_RmValue;
+        CommonRenderingModelToken m_CrmToken;
     };
 
-    char _lastRead;
-    bool _isEOF;
-    uSys _fileIndex;
-    uSys _fileLine;
-    uSys _lineIndex;
+    c32 m_LastRead;
+    bool m_IsEof;
+    uSys m_FileIndex;
+    uSys m_FileLine;
+    uSys m_LineIndex;
 public:
     ShaderBundleLexer(const CPPRef<IFile>& file) noexcept
-        : _file(file)
-        , _currentToken(SBPToken::Unknown)
-        , _strValue("")
-        , _intValue(0)
-        , _lastRead('\0')
-        , _isEOF(false)
-        , _fileIndex(0)
-        , _fileLine(1)
-        , _lineIndex(0)
+        : m_File(file)
+        , m_CurrentToken(SBPToken::Unknown)
+        , m_StrValue(u8"")
+        , m_IntValue(0)
+        , m_LastRead(U'\0')
+        , m_IsEof(false)
+        , m_FileIndex(0)
+        , m_FileLine(1)
+        , m_LineIndex(0)
     { (void) readChar(); }
 
-    [[nodiscard]] SBPToken currentToken() const noexcept { return _currentToken; }
-    [[nodiscard]] const DynString& strValue() const noexcept { return _strValue; }
-    [[nodiscard]] const DynString& identifierValue() const noexcept { return _strValue; }
-    [[nodiscard]] i32 intValue() const noexcept { return _intValue; }
-    [[nodiscard]] u32 uintValue() const noexcept { return _uintValue; }
-    [[nodiscard]] char cValue() const noexcept { return _cValue; }
-    [[nodiscard]] RenderingMode::Mode rmValue() const noexcept { return _rmValue; }
-    [[nodiscard]] CommonRenderingModelToken crmToken() const noexcept { return _crmToken; }
-    [[nodiscard]] bool isEOF() const noexcept { return _isEOF; }
+    [[nodiscard]] SBPToken currentToken() const noexcept { return m_CurrentToken; }
+    [[nodiscard]] const C8DynString& strValue() const noexcept { return m_StrValue; }
+    [[nodiscard]] const C8DynString& identifierValue() const noexcept { return m_StrValue; }
+    [[nodiscard]] i32 intValue() const noexcept { return m_IntValue; }
+    [[nodiscard]] u32 uintValue() const noexcept { return m_UintValue; }
+    [[nodiscard]] c32 cValue() const noexcept { return m_CValue; }
+    // [[nodiscard]] RenderingMode::Mode rmValue() const noexcept { return m_RmValue; }
+    // [[nodiscard]] CommonRenderingModelToken crmToken() const noexcept { return m_CrmToken; }
+    [[nodiscard]] bool isEOF() const noexcept { return m_IsEof; }
 
     /**
      * The current index within the file.
      */
-    [[nodiscard]] uSys fileIndex() const noexcept { return _fileIndex; }
+    [[nodiscard]] uSys fileIndex() const noexcept { return m_FileIndex; }
     /**
      * The current line within the file.
      */
-    [[nodiscard]] uSys fileLine() const noexcept { return _fileLine; }
+    [[nodiscard]] uSys fileLine() const noexcept { return m_FileLine; }
     /**
      * The current index within the current line.
      */
-    [[nodiscard]] uSys lineIndex() const noexcept { return _fileLine; }
+    [[nodiscard]] uSys lineIndex() const noexcept { return m_FileLine; }
 
     void reset(const CPPRef<IFile>& file) noexcept;
 
@@ -128,6 +128,8 @@ private:
     [[nodiscard]] bool readString() noexcept;
 
     [[nodiscard]] bool readIdentifier() noexcept;
+
+    [[nodiscard]] c32 DecodeCodePointForwardUnsafe() noexcept;
 
     /**
      * Returns true if EOF is encountered.

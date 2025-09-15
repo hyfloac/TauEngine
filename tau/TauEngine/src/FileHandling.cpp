@@ -8,7 +8,11 @@
 char* readFile(const char* const filePath) noexcept
 {
     FILE* file;
+#ifdef _WIN32
     fopen_s(&file, filePath, "rb");
+#else
+    file = fopen(filePath, "rb");
+#endif
     fseek(file, 0, SEEK_END);
 
     const u32 length = ftell(file);

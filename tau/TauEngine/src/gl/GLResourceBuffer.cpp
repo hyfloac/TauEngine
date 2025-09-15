@@ -9,7 +9,7 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
     {
         // The buffer is not currently mapped.
 
-        if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
+        if(!mapReadRange || mapReadRange->Begin < mapReadRange->End)
         {
             // The user has requested read access to the buffer
 
@@ -19,7 +19,7 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
 
                 if(mapReadRange)
                 {
-                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->Begin, mapReadRange->Length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
                 }
                 else
                 {
@@ -48,7 +48,7 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
 
                 if(mapReadRange)
                 {
-                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->Begin, mapReadRange->Length(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
                 }
                 else
                 {
@@ -61,7 +61,7 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
 
                 if(mapReadRange)
                 {
-                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->begin, mapReadRange->length(), GL_MAP_READ_BIT);
+                    _currentMapping = glMapBufferRange(_glBufferType, mapReadRange->Begin, mapReadRange->Length(), GL_MAP_READ_BIT);
                 }
                 else
                 {

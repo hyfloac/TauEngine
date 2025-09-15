@@ -9,7 +9,7 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
 {
     if(_resourceUsage == EGraphics::ResourceHeapUsageType::Upload)
     {
-        if(!mapReadRange || mapReadRange->begin < mapReadRange->end)
+        if(!mapReadRange || mapReadRange->Begin < mapReadRange->End)
         { return null; }
 
         if(mapType == EResource::MapType::ReadOnly)
@@ -27,7 +27,7 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
     }
     else if(_resourceUsage == EGraphics::ResourceHeapUsageType::Read)
     {
-        if(mapReadRange && mapReadRange->begin >= mapReadRange->end)
+        if(mapReadRange && mapReadRange->Begin >= mapReadRange->End)
         { return null; }
 
         void* mapping;
@@ -36,7 +36,7 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
 
         if(mapReadRange)
         {
-            const CD3DX12_RANGE range(mapReadRange->begin, mapReadRange->end);
+            const CD3DX12_RANGE range(mapReadRange->Begin, mapReadRange->End);
             const HRESULT res = _d3dResource->Map(0, &range, &mapping);
 
             if(FAILED(res))
@@ -59,7 +59,7 @@ void DX12ResourceBuffer::unmap(const ResourceMapRange* mapWriteRange) noexcept
 {
     if(mapWriteRange)
     {
-        CD3DX12_RANGE range(mapWriteRange->begin, mapWriteRange->end);
+        CD3DX12_RANGE range(mapWriteRange->Begin, mapWriteRange->End);
         _d3dResource->Unmap(0, &range);
     }
     else

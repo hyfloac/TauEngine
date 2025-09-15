@@ -30,7 +30,7 @@ public:
         , binding(_mapPoint)
     { }
 
-    UniformBindPoint(const CommonRenderingModelToken _crmTarget, const DynString& _bindName) noexcept
+    UniformBindPoint(const CommonRenderingModelToken _crmTarget, const C8DynString& _bindName) noexcept
         : crmTarget(_crmTarget)
         , binding(_bindName)
     { }
@@ -66,7 +66,7 @@ public:
         , sampler(_sampler)
     { }
 
-    TextureBindPoint(const CommonRenderingModelToken _crmTarget, const DynString& _bindName, const u32 _sampler) noexcept
+    TextureBindPoint(const CommonRenderingModelToken _crmTarget, const C8DynString& _bindName, const u32 _sampler) noexcept
         : crmTarget(_crmTarget)
         , binding(_bindName)
         , sampler(_sampler)

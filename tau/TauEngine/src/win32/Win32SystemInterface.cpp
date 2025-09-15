@@ -44,14 +44,14 @@ SystemInterface::GAList SystemInterface::graphicsAccelerators(const RenderingMod
 IGraphicsInterfaceBuilder* SystemInterface::createGraphicsInterface(const RenderingMode::Mode mode) noexcept
 {
     if(mode > RenderingMode::MAX_VALUE)
-    { return null; }
+    { return nullptr; }
 
     return _giBuilders0[mode];
 }
 
 IGraphicsInterfaceBuilder* SystemInterface::createGraphicsInterface(const DynString& modeName) noexcept
 {
-    if(_giBuilders.count(modeName))
+    if(_giBuilders.contains(modeName))
     { return _giBuilders[modeName]; }
 
     return nullptr;
@@ -65,9 +65,9 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const G
         case RenderingMode::Mode::DirectX11: return DX11GraphicsInterfaceBuilder::build(args);
         case RenderingMode::Mode::DirectX12:
         case RenderingMode::Mode::DirectX12_1:
-            return null;
+            return nullptr;
         case RenderingMode::Mode::Vulkan:
-            return null;
+            return nullptr;
         case RenderingMode::Mode::OpenGL4_1:
         case RenderingMode::Mode::OpenGL4_2:
         case RenderingMode::Mode::OpenGL4_3:
@@ -79,7 +79,7 @@ NullableRef<IGraphicsInterface> SystemInterface::createGraphicsInterface(const G
             getGLArgs(args.renderingMode, glArgs);
             return GLGraphicsInterfaceBuilder::build(glArgs);
         }
-        default: return null;
+        default: return nullptr;
     }
 }
 

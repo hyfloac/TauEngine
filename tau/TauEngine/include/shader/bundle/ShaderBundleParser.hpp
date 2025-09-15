@@ -74,6 +74,8 @@ private:
 
     NullableStrongRef<sbp::FileAST> parseFile() noexcept;
 
-    [[nodiscard]] static bool isTextureCRM(CommonRenderingModelToken token) noexcept;
-    [[nodiscard]] static bool isUniformCRM(CommonRenderingModelToken token) noexcept;
+    [[nodiscard]] static CommonRenderingModelToken parseCRM(const C8DynString& token) noexcept;
+
+    [[nodiscard]] static bool isTextureCRM(const C8DynString& token) noexcept;
+    [[nodiscard]] static bool isUniformCRM(const C8DynString& token) noexcept;
 };

@@ -49,6 +49,7 @@
     <ClCompile Include="src\dx\dx10\DX10RenderingContext.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Resource.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ResourceBuffer.cpp" />
+    <ClCompile Include="src\dx\dx10\DX10ResourceHeap.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ResourceTexture.cpp" />
     <ClCompile Include="src\dx\dx10\DX10Shader.cpp" />
     <ClCompile Include="src\dx\dx10\DX10ShaderProgram.cpp" />
@@ -105,6 +106,7 @@
     <ClCompile Include="src\events\Event.cpp" />
     <ClCompile Include="src\FileHandling.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
+    <ClCompile Include="src\debug\DebugInterface.cpp" />
     <ClCompile Include="src\gl\GL3_0BlendingState.cpp" />
     <ClCompile Include="src\gl\GL4_0BlendingState.cpp" />
     <ClCompile Include="src\gl\GL4_3VertexArray.cpp" />
@@ -195,6 +197,7 @@
     <ClInclude Include="include\console\ConsoleCommand.hpp" />
     <ClInclude Include="include\console\ConsoleController.hpp" />
     <ClInclude Include="include\console\ConsoleLexer.hpp" />
+    <ClInclude Include="include\debug\IDebugInterface.hpp" />
     <ClInclude Include="include\DLL.hpp" />
     <ClInclude Include="include\dx\dx10\DX10BlendingState.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Buffer.hpp" />
@@ -216,6 +219,7 @@
     <ClInclude Include="include\dx\dx10\DX10RenderTarget.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Resource.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ResourceBuffer.hpp" />
+    <ClInclude Include="include\dx\dx10\DX10ResourceHeap.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ResourceTexture.hpp" />
     <ClInclude Include="include\dx\dx10\DX10Shader.hpp" />
     <ClInclude Include="include\dx\dx10\DX10ShaderProgram.hpp" />
@@ -273,6 +277,7 @@
     <ClInclude Include="include\entity\component\TransformComponent.hpp" />
     <ClInclude Include="include\entity\EntityComponent.hpp" />
     <ClInclude Include="include\entity\Entity.hpp" />
+    <ClInclude Include="include\error\StatusCode.hpp" />
     <ClInclude Include="include\events\Event.hpp" />
     <ClInclude Include="include\events\Exception.hpp" />
     <ClInclude Include="include\events\WindowEvent.hpp" />
@@ -508,24 +513,29 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\libs\conan\conandeps.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\libs\conan\conandeps.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\libs\conan\conandeps.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\libs\conan\conandeps.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\libs\conan\conandeps.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(ConantauutilsIncludeDirectories);$(ConantaucomIncludeDirectories);$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Debug\;$(LibraryPath)</LibraryPath>
@@ -535,7 +545,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='OptimizedDebug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(ConantauutilsIncludeDirectories);$(ConantaucomIncludeDirectories);$(IncludePath)</IncludePath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Debug Static\;$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Debug\;$(LibraryPath)</LibraryPath>
@@ -545,7 +555,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(ConantauutilsIncludeDirectories);$(ConantaucomIncludeDirectories);$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Release\;$(LibraryPath)</LibraryPath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
@@ -555,7 +565,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TRG_Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(ConantauutilsIncludeDirectories);$(ConantaucomIncludeDirectories);$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Release\;$(LibraryPath)</LibraryPath>
     <EnableManagedIncrementalBuild>false</EnableManagedIncrementalBuild>
@@ -565,7 +575,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\TauUtils\TauUtilsDynamic\include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)include\;$(SolutionDir)libs\FreeImage\Dist\x64\;$(SolutionDir)libs\SPDLog\include\;$(SolutionDir)libs\GLEW\include\;$(SolutionDir)libs\freetype-2.10.0\include\;$(SolutionDir)libs\fmt\include\;$(SolutionDir)utils\ResourceLib\include\;$(SolutionDir)libs\glm\;$(SolutionDir)libs\OpenVR\headers\;$(ConantauutilsIncludeDirectories);$(ConantaucomIncludeDirectories);$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(OutDir);$(SolutionDir)libs\FreeImage\Dist\x64;$(SolutionDir)libs\OpenVR\lib\win64\;$(SolutionDir)libs\freetype-2.10.0\objs\x64\Release Static\;$(SolutionDir)libs\TauUtils\build\TauUtilsDynamic\Release\;$(LibraryPath)</LibraryPath>
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>

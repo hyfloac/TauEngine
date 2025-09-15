@@ -12,11 +12,13 @@
 #include "ResourceEnums.hpp"
 #include "BufferEnums.hpp"
 #include "texture/TextureEnums.hpp"
-#include "_GraphicsOpaqueObjects.hpp"
+#include "ResourceHeap.hpp"
 #include "Resource.debug.hpp"
 
 class ICommandList;
 class IResourceRawInterface;
+
+namespace tau {
 
 /**
  * Describes a range of a resource to access.
@@ -29,32 +31,33 @@ struct ResourceMapRange final
     DEFAULT_DESTRUCT(ResourceMapRange);
     DEFAULT_CM_PO(ResourceMapRange);
 public:
-    static const ResourceMapRange* all() noexcept
+    static const ResourceMapRange* All() noexcept
     { return nullptr; }
 
-    static const ResourceMapRange* none() noexcept
+    static const ResourceMapRange* None() noexcept
     {
-        static ResourceMapRange _none(0, 0);
-        return &_none;
+        static ResourceMapRange none(0, 0);
+        return &none;
     }
 public:
     // Inclusive
-    uSys begin;
+    uSys Begin;
     // Exclusive
-    uSys end;
+    uSys End;
 public:
-    ResourceMapRange(const uSys _begin, const uSys _end) noexcept
-        : begin(_begin)
-        , end(_end)
+    ResourceMapRange(const uSys begin, const uSys end) noexcept
+        : Begin(begin)
+        , End(end)
     { }
 
-    [[nodiscard]] uSys length() const noexcept { return end - begin; }
+    [[nodiscard]] uSys Length() const noexcept { return End - Begin; }
 
-    [[nodiscard]] bool isNone() const noexcept { return begin >= end; }
+    [[nodiscard]] bool IsNone() const noexcept { return Begin >= End; }
 };
 
+
 #define RESOURCE_IMPL_BASE(_TYPE) \
-    RTTD_IMPL(_TYPE, IResource)
+    RTTD_IMPL(_TYPE, IResourceLegacy)
 
 #define RESOURCE_IMPL(_TYPE) RESOURCE_IMPL_BASE(_TYPE)
 
@@ -63,47 +66,34 @@ public:
  *
  *   This is the general base for buffers and textures. Do
  * note that these types currently do not have any high level
- * specializations from IResource. Lower level API's are free
+ * specializations from IResource. Lower level APIs are free
  * to implement the various potential structures in their own
  * classes.
  */
-class TAU_DLL TAU_NOVTABLE IResource
+class IResourceLegacy
 {
-    DELETE_CM(IResource);
+    DELETE_CM(IResourceLegacy);
 protected:
-    uSys _size;
-    EResource::Type _resourceType;
-    EResource::UsageType _usageType;
+    IResourceLegacy(const uSys size, const EResource::Type resourceType, const EResource::UsageType usageType) noexcept
+        : m_Size(size)
+        , m_ResourceType(resourceType)
+        , m_UsageType(usageType)
 #if TAU_RESOURCE_DEBUG_DATA
-    const tau::debug::ResourceDebugData* _debugData;
-#endif
-protected:
-#if TAU_RESOURCE_DEBUG_DATA
-    IResource(const uSys size, const EResource::Type resourceType, const EResource::UsageType usageType) noexcept
-        : _size(size)
-        , _resourceType(resourceType)
-        , _usageType(usageType)
         , _debugData(nullptr)
-    { }
-#else
-    IResource(const uSys size, const EResource::Type resourceType, const EResource::UsageType usageType) noexcept
-        : _size(size)
-        , _resourceType(resourceType)
-        , _usageType(usageType)
-    { }
 #endif
+    { }
 public:
 #if TAU_RESOURCE_DEBUG_DATA
-    virtual ~IResource() noexcept
+    virtual ~IResourceLegacy() noexcept
     { delete _debugData; }
 #else
-    virtual ~IResource() noexcept = default;
+    virtual ~IResourceLegacy() noexcept = default;
 #endif
 
-    [[nodiscard]] uSys size() const noexcept { return _size; }
+    [[nodiscard]] uSys size() const noexcept { return m_Size; }
 
-    [[nodiscard]] EResource::Type resourceType() const noexcept { return _resourceType; }
-    [[nodiscard]] EResource::UsageType usageType() const noexcept { return _usageType; }
+    [[nodiscard]] EResource::Type resourceType() const noexcept { return m_ResourceType; }
+    [[nodiscard]] EResource::UsageType usageType() const noexcept { return m_UsageType; }
 
 #if TAU_RESOURCE_DEBUG_DATA
     [[nodiscard]] const tau::debug::ResourceDebugData* debugData() const noexcept { return _debugData; }
@@ -121,19 +111,115 @@ public:
     }
 #endif
 
-    [[nodiscard]] virtual void* map(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::none(), const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
-    virtual void unmap(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = ResourceMapRange::all()) noexcept = 0;
+    [[nodiscard]] virtual void* map(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapReadRange = ResourceMapRange::None(), const ResourceMapRange* mapWriteRange = ResourceMapRange::All()) noexcept = 0;
+    virtual void unmap(uSys mipLevel = 0, uSys arrayIndex = 0, const ResourceMapRange* mapWriteRange = ResourceMapRange::All()) noexcept = 0;
 
-    template<typename _Args>
-    [[nodiscard]] const _Args* getArgs() const noexcept { return nullptr; }
+    template<typename Args>
+    [[nodiscard]] const Args* getArgs() const noexcept { return nullptr; }
 
     [[nodiscard]] virtual const IResourceRawInterface& _getRawHandle() const noexcept = 0;
 
-    RTTD_BASE_IMPL(IResource);
-    RTTD_BASE_CHECK(IResource);
-    RTTD_BASE_CAST(IResource);
+    RTTD_BASE_IMPL(IResourceLegacy);
+    RTTD_BASE_CHECK(IResourceLegacy);
+    RTTD_BASE_CAST(IResourceLegacy);
 protected:
     [[nodiscard]] virtual const void* _getArgs() const noexcept = 0;
+protected:
+    uSys m_Size;
+    EResource::Type m_ResourceType;
+    EResource::UsageType m_UsageType;
+#if TAU_RESOURCE_DEBUG_DATA
+    const tau::debug::ResourceDebugData* _debugData;
+#endif
+};
+
+class IResourceDebug : public tau::com::IUnknown
+{
+    DEFAULT_CONSTRUCT_PO(IResourceDebug);
+    DEFAULT_CM_PO(IResourceDebug);
+    DEFAULT_DESTRUCT_VI(IResourceDebug);
+public:
+    [[nodiscard]] virtual const tau::debug::ResourceDebugData* DebugData() const noexcept = 0;
+    virtual void AttachDebugData(const tau::debug::ResourceDebugCategory& category, const C8DynString& name) noexcept = 0;
+    virtual void AttachDebugData(const tau::debug::ResourceDebugCategory& category, C8DynString&& name) noexcept = 0;
+};
+
+struct ResourceConstructionInfo : tau::com::BaseConstructionInfo
+{
+    DEFAULT_CONSTRUCT_PU(ResourceConstructionInfo);
+    DEFAULT_CM_PU(ResourceConstructionInfo);
+    DEFAULT_DESTRUCT_VI(ResourceConstructionInfo);
+public:
+    /**
+     * A hint on how the resource will be accessed.
+     */
+    EResource::UsageType UsageType;
+};
+
+struct ResourceBufferConstructionInfo final : ResourceConstructionInfo
+{
+    DEFAULT_CONSTRUCT_PU(ResourceBufferConstructionInfo);
+    DEFAULT_CM_PU(ResourceBufferConstructionInfo);
+    DEFAULT_DESTRUCT_VI(ResourceBufferConstructionInfo);
+public:
+    uSys Size;
+    EBuffer::Type BufferType;
+    const void* InitialBuffer;
+};
+
+struct ResourceTexture1DConstructionInfo final : ResourceConstructionInfo
+{
+    DEFAULT_CONSTRUCT_PU(ResourceTexture1DConstructionInfo);
+    DEFAULT_CM_PU(ResourceTexture1DConstructionInfo);
+    DEFAULT_DESTRUCT_VI(ResourceTexture1DConstructionInfo);
+public:
+    uSys Width;
+    u16 ArrayCount;
+    u16 MipLevels;
+    ETexture::Format DataFormat;
+    ETexture::BindFlags Flags;
+    const void* const* InitialBuffers;
+};
+
+struct ResourceTexture2DConstructionInfo final : ResourceConstructionInfo
+{
+    DEFAULT_CONSTRUCT_PU(ResourceTexture2DConstructionInfo);
+    DEFAULT_CM_PU(ResourceTexture2DConstructionInfo);
+    DEFAULT_DESTRUCT_VI(ResourceTexture2DConstructionInfo);
+public:
+    uSys Width;
+    u32 Height;
+    u16 ArrayCount;
+    u16 MipLevels;
+    ETexture::Format DataFormat;
+    ETexture::BindFlags Flags;
+    const void* const* InitialBuffers;
+};
+
+struct ResourceTexture3DConstructionInfo final : ResourceConstructionInfo
+{
+    DEFAULT_CONSTRUCT_PU(ResourceTexture3DConstructionInfo);
+    DEFAULT_CM_PU(ResourceTexture3DConstructionInfo);
+    DEFAULT_DESTRUCT_VI(ResourceTexture3DConstructionInfo);
+public:
+    uSys Width;
+    u32 Height;
+    u16 Depth;
+    u16 ArrayCount;
+    u16 MipLevels;
+    ETexture::Format DataFormat;
+    ETexture::BindFlags Flags;
+    const void* const* InitialBuffers;
+};
+
+class IResource : public tau::com::IUnknown
+{
+    DEFAULT_CONSTRUCT_PO(IResource);
+    DEFAULT_CM_PO(IResource);
+    DEFAULT_DESTRUCT_VI(IResource);
+public:
+
+    virtual u64 GetHandle() const noexcept = 0;
 };
 
 struct ResourceBufferArgs final
@@ -163,7 +249,7 @@ public:
      * A hint on how the resource will be accessed.
      */
     EResource::UsageType usageType;
-    const void* const * initialBuffers;
+    const void* const* initialBuffers;
 };
 
 struct ResourceTexture2DArgs final
@@ -182,7 +268,7 @@ public:
      * A hint on how the resource will be accessed.
      */
     EResource::UsageType usageType;
-    const void* const * initialBuffers;
+    const void* const* initialBuffers;
 };
 
 struct ResourceTexture3DArgs final
@@ -201,7 +287,7 @@ public:
      * A hint on how the resource will be accessed.
      */
     EResource::UsageType usageType;
-    const void* const * initialBuffers;
+    const void* const* initialBuffers;
 };
 
 class TAU_DLL TAU_NOVTABLE IResourceBuilder
@@ -257,18 +343,18 @@ public:
      *
      * This is useful for fixed block allocators.
      *
-     * @tparam _Args
+     * @tparam Args
      *        The ResourceXArgs type. This dictates the type of
      *      resource.
      */
-    template<typename _Args>
+    template<typename Args>
     [[nodiscard]] uSys allocSize() const noexcept
     { return 0; }
 
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs&    args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
-    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, ResourceHeap heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceBufferArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture1DArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture2DArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
+    [[nodiscard]] virtual NullableRef<IResource> buildTauRef(const ResourceTexture3DArgs& args, tau::IResourceHeap* heap, [[tau::out]] Error* error, TauAllocator& allocator = DefaultTauAllocator::Instance()) const noexcept = 0;
 protected:
     [[nodiscard]] virtual uSys _allocSize(uSys type) const noexcept = 0;
 };
@@ -276,7 +362,7 @@ protected:
 template<>
 inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const noexcept
 {
-    if(_resourceType == EResource::Type::Buffer)
+    if(m_ResourceType == EResource::Type::Buffer)
     { return reinterpret_cast<const ResourceBufferArgs*>(_getArgs()); }
     return nullptr;
 }
@@ -284,7 +370,7 @@ inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const 
 template<>
 inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() const noexcept
 {
-    if(_resourceType == EResource::Type::Texture1D)
+    if(m_ResourceType == EResource::Type::Texture1D)
     { return reinterpret_cast<const ResourceTexture1DArgs*>(_getArgs()); }
     return nullptr;
 }
@@ -292,7 +378,7 @@ inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() 
 template<>
 inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() const noexcept
 {
-    if(_resourceType == EResource::Type::Texture2D)
+    if(m_ResourceType == EResource::Type::Texture2D)
     { return reinterpret_cast<const ResourceTexture2DArgs*>(_getArgs()); }
     return nullptr;
 }
@@ -300,7 +386,7 @@ inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() 
 template<>
 inline const ResourceTexture3DArgs* IResource::getArgs<ResourceTexture3DArgs>() const noexcept
 {
-    if(_resourceType == EResource::Type::Texture3D)
+    if(m_ResourceType == EResource::Type::Texture3D)
     { return reinterpret_cast<const ResourceTexture3DArgs*>(_getArgs()); }
     return nullptr;
 }
@@ -325,3 +411,5 @@ inline uSys IResourceBuilder::allocSize<ResourceTexture2DArgs>() const noexcept
 template<>
 inline uSys IResourceBuilder::allocSize<ResourceTexture3DArgs>() const noexcept
 { return _allocSize(RB_AS_TEXTURE_3D); }
+
+}

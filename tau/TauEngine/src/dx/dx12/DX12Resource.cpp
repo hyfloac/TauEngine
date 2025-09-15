@@ -72,14 +72,14 @@ NullableRef<IResource> DX12ResourceBuilder::buildTauRef(const ResourceBufferArgs
                 case EResource::UsageType::Dynamic: break;
                 case EResource::UsageType::Streaming:
                 {
-                    void* mapping = resource->map(EResource::MapType::Discard, ResourceMapRange::none());
+                    void* mapping = resource->map(EResource::MapType::Discard, ResourceMapRange::None());
 
                     if(!mapping)
                     { break; }
 
                     (void) ::std::memcpy(mapping, args.initialBuffer, args.size);
 
-                    resource->unmap(ResourceMapRange::all());
+                    resource->unmap(ResourceMapRange::All());
                 }
                 case EResource::UsageType::Readable: break;
             }
