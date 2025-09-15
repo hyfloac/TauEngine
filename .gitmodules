@@ -13,3 +13,6 @@
 [submodule "libs/TauUtils"]
 	path = libs/TauUtils
 	url = https://github.com/hyfloac/tauutils/
+[submodule "libs/SDL3"]
+	path = libs/SDL3
+	url = https://github.com/libsdl-org/SDL.git
