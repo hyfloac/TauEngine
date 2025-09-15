@@ -1011,3 +1011,4 @@ Doxyfile.bak
 /libs/LZMA/*
 /libs/LZMA_CS/*
 /libs/SPDLog/*
+/libs/conan/*
