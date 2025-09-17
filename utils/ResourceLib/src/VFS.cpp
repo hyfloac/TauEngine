@@ -291,7 +291,7 @@ DynString VFS::unixPath(const DynString& path) noexcept
     return DynString::passControl(cPath);
 }
 
-static bool containsWin32Device(const uSys length, const wchar_t* const path) noexcept
+static bool ContainsWin32Device(const uSys length, const wchar_t* const path) noexcept
 {
     bool possibleDeviceEnd = true;
 
@@ -580,7 +580,7 @@ WDynString VFS::win32PathSanitizer(const WDynString& path) noexcept
         }
     }
 
-    if(containsWin32Device(path.length(), cPath))
+    if(ContainsWin32Device(path.length(), cPath))
     {
         delete[] cPath;
         return WDynString();

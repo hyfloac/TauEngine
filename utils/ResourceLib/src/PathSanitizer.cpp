@@ -3,100 +3,176 @@
  */
 #include "PathSanitizer.hpp"
 
-PathSanitizerSettings PathSanitizer::_settings;
+#ifndef _WIN32
+#include <cstdio>
+#endif
 
-static bool isValidCharset(uSys length, const wchar_t* path) noexcept;
-static wchar_t* fixPathSeparator(uSys length, const wchar_t* path) noexcept;
-static bool validatePathPrefix(uSys length, wchar_t* path) noexcept;
-static bool containsWin32Device(uSys length, const wchar_t* path) noexcept;
-static bool cleanDotDirs(uSys pathLength, wchar_t* path) noexcept;
+PathSanitizerSettings PathSanitizer::s_Settings;
+
+static bool IsValidCharset(const C8DynStringView& path) noexcept;
+static C8DynString FixPathSeparator(const C8DynStringView& path, const bool targetWindows) noexcept;
+static u32 ValidatePathPrefix(const C8DynStringView& path) noexcept;
+static bool ContainsWin32Device(const C8DynStringView& path) noexcept;
+static C8DynString CleanDotDirs(const C8DynStringView& pathView) noexcept;
 
 void PathSanitizer::setSettings(const PathSanitizerSettings& settings) noexcept
 {
-    if(!_settings.lockSettings)
+    if(!s_Settings.lockSettings)
     {
-        _settings = settings;
+        s_Settings = settings;
     }
 }
 
-WDynString PathSanitizer::sanitizePath(const WDynString& path) noexcept
+C8DynString PathSanitizer::sanitizePath(const C8DynStringView& path) noexcept
 {
-    if(!isValidCharset(path.length(), path.c_str()))
+    if(!IsValidCharset(path))
     {
         return { };
     }
 
-    wchar_t* const newPath = fixPathSeparator(path.length(), path.c_str());
+    // We want to target windows initially for the devices.
+    C8DynString newPath = FixPathSeparator(path, true);
 
-    if(!validatePathPrefix(path.length(), newPath))
+    const u32 validateStatus = ValidatePathPrefix(newPath);
+
+    if(validateStatus == 0)
     {
-        delete[] newPath;
+        return { };
+    }
+    else if(validateStatus == 1)
+    {
+        if(newPath.Length() < 3)
+        {
+            return { };
+        }
+
+        char8_t* bypassFixPath = new char8_t[newPath.Length() + 1];
+        (void) ::std::memcpy(bypassFixPath, newPath, newPath.Length() * sizeof(char8_t));
+        bypassFixPath[newPath.Length()] = '\0';
+
+        if(bypassFixPath[0] == u8'\xEF')
+        {
+            if(newPath.Length() < 5 || bypassFixPath[1] != u8'\xBB' || bypassFixPath[2] != u8'\xBF')
+            {
+                delete[] bypassFixPath;
+                return { };
+            }
+
+            bypassFixPath[4] = u8'\\';
+        }
+        else
+        {
+            bypassFixPath[1] = u8'\\';
+        }
+
+        newPath = C8DynString::PassControl(bypassFixPath, [](c8* const ptr) { delete[] ptr; });
+    }
+
+    newPath = CleanDotDirs(newPath);
+
+#if defined(_WIN32)
+    const WDynString widePath = StringCast<wchar_t>(newPath);
+
+    const uSys fullPathLen = GetFullPathNameW(widePath.String(), 0, nullptr, nullptr);
+
+    wchar_t* const fullPathWideRaw = new(::std::nothrow) wchar_t[fullPathLen + 1];
+    fullPathWideRaw[fullPathLen] = u8'\0';
+    if(GetFullPathNameW(widePath.String(), static_cast<DWORD>(fullPathLen), fullPathWideRaw, nullptr) != fullPathLen)
+    {
+        delete[] fullPathWideRaw;
         return { };
     }
 
-    if(!cleanDotDirs(path.length(), newPath))
+    WDynString fullPathWide = WDynString::PassControl(fullPathWideRaw, [](wchar_t* const ptr) { delete[] ptr; });
+    C8DynString fullPath = StringCast<char8_t>(fullPathWide);
+
+    if(s_Settings.blockDevices && ContainsWin32Device(fullPath))
     {
-        delete[] newPath;
         return { };
     }
 
-    const uSys pathLength = ::std::wcslen(newPath);
+    return fullPath;
+#else
+    char fullPath[PATH_MAX + 1];
+    realpath(reinterpret_cast<const char*>(newPath.String()), fullPath);
 
-    const uSys fullPathLen = GetFullPathNameW(newPath, 0, nullptr, nullptr);
-
-    wchar_t* const fullPath = new(::std::nothrow) wchar_t[fullPathLen + 1];
-    fullPath[fullPathLen] = L'\0';
-    if(GetFullPathNameW(newPath, static_cast<DWORD>(fullPathLen), fullPath, nullptr) != fullPathLen)
+    if(s_Settings.blockDevices && ContainsWin32Device(newPath))
     {
-        delete[] newPath;
-        delete[] fullPath;
         return { };
     }
 
-    delete[] newPath;
-
-    if(_settings.blockDevices && containsWin32Device(pathLength, fullPath))
-    {
-        delete[] fullPath;
-        return { };
-    }
-
-    return WDynString::passControl(fullPath);
+    return FixPathSeparator(newPath, false);
+#endif
 }
 
-WDynString PathSanitizer::sanitizeSubPath(const WDynString& path) noexcept
+C8DynString PathSanitizer::sanitizeSubPath(const C8DynStringView& path) noexcept
 {
-    if(!isValidCharset(path.length(), path.c_str()))
+    if(!IsValidCharset(path))
     {
         return { };
     }
 
-    wchar_t* const newPath = fixPathSeparator(path.length(), path.c_str());
-
-    return newPath;
+#ifdef _WIN32
+    return FixPathSeparator(path, true);
+#else
+    return FixPathSeparator(path, false);
+#endif
 }
 
-static bool isValidCharset(const uSys length, const wchar_t* const path) noexcept
+static bool IsValidCharset(const C8DynStringView& path) noexcept
 {
     uSys colonCount = 0;
 
-    for(uSys i = 0; i < length; ++i)
+    const auto begin = path.begin();
+    const auto end = path.end();
+    for(auto iter = begin; iter != end; ++iter)
     {
-        if(path[i] <= 31)
+        const c32 c = *iter;
+
+        if(c <= 31)
         { continue; }
 
-        switch(path[i])
+        //   The first characters are banned on Windows, then we have the set
+        // of direction reversal characters, which may or may not be allowed,
+        // but are notorious for creating unsafe paths. Then we have a bunch of
+        // various Unicode slashes, that can be used to trick people.
+        switch(c)
         {
-            case L'<':
-            case L'>':
-            case L'\"':
-            case L'|':
-            case L'?':
-            case L'*': return false;
+            case U'<':
+            case U'>':
+            case U'\"':
+            case U'|':
+            case U'?':
+            case U'*':
+            case U'\u200E': // Left-to-Right Mark (LRM)
+            case U'\u200F': // Right-to-Left Mark (RLM)
+            case U'\u202A': // Left-to-Right Embedding (LRE)
+            case U'\u202B': // Right-to-Left Embedding (RLE)
+            case U'\u202C': // Pop Directional Formatting (PDF)
+            case U'\u202D': // Left-to-Right Override (LRO)
+            case U'\u202E': // Right-to-Left Override (RLO)
+            case U'\u2066': // Left-to-Right Isolate (LRI)
+            case U'\u2067': // Right-to-Left Isolate (RLI)
+            case U'\u2068': // First Strong Isolate (FSI)
+            case U'\u2069': // Pop Directional Isolate (PDI)
+            case U'\u1735': // Philippine Single Punctuation
+            case U'\u1736': // Philippine Double Punctuation
+            case U'\u2044': // Fraction Slash
+            case U'\u2215': // Division Slash
+            case U'\u2216': // Set Minus
+            case U'\u2571': // Box Drawings Light Diagonal Upper Right to Lower Left
+            case U'\u2572': // Box Drawings Light Diagonal Upper Left to Lower Right
+            case U'\u27CB': // Mathematical Rising Diagonal
+            case U'\u27CD': // Mathematical Falling Diagonal
+            case U'\u29F5': // Reverse Solidus Operator
+            case U'\u29F8': // Big Solidus
+            case U'\u29F9': // Big Reverse Solidus
+            case U'\U0001D10D': // Musical Symbol Repeated Figure-1
+                return false;
             default: break;
         }
 
-        if(path[i] == L':')
+        if(c == U':')
         {
             ++colonCount;
             if(colonCount > 1)
@@ -105,19 +181,26 @@ static bool isValidCharset(const uSys length, const wchar_t* const path) noexcep
             }
         }
 
-        if(path[i] == L'.') // Ensure file doesn't end with a '.'
+        if(c == U'.') // Ensure file doesn't end with a '.'
         {
-            if(i + 1 == length || path[i + 1] == L'\\' || path[i + 1] == L'/')
+            auto tmpIter = iter;
+            if(++tmpIter == end || *tmpIter == U'\\' || *tmpIter == U'/')
             {
-                if(i > 0)
+                if(iter != begin)
                 {
-                    if(path[i - 1] != L'\\' && path[i - 1] != L'/')
+                    tmpIter = iter;
+                    --tmpIter;
+                    if(*tmpIter != u8'\\' && *tmpIter != u8'/')
                     {
-                        if(path[i - 1] == L'.')
+                        if(*tmpIter == u8'.')
                         {
-                            if(i > 1 && path[i - 2] != L'\\' && path[i - 2] != L'/')
+                            if(tmpIter != begin)
                             {
-                                return false;
+                                --tmpIter;
+                                if(*tmpIter != u8'\\' && *tmpIter != u8'/')
+                                {
+                                    return false;
+                                }
                             }
                         }
                         else
@@ -129,23 +212,38 @@ static bool isValidCharset(const uSys length, const wchar_t* const path) noexcep
             }
         }
     }
+
     return true;
 }
 
-static wchar_t* fixPathSeparator(const uSys length, const wchar_t* const path) noexcept
+static C8DynString FixPathSeparator(const C8DynStringView& path, const bool targetWindows) noexcept
 {
-    wchar_t* const newPath = new(::std::nothrow) wchar_t[length + 1];
-    (void) ::std::memcpy(newPath, path, (length + 1) * sizeof(wchar_t));
+    char8_t* const newPath = new(::std::nothrow) char8_t[path.Length() + 1];
+    (void) ::std::memcpy(newPath, path, path.Length() * sizeof(char8_t));
+    newPath[path.Length()] = u8'\0';
 
-    for(uSys i = 0; i < length; ++i)
+    if(targetWindows)
     {
-        if(newPath[i] == L'/')
+        for(uSys i = 0; i < path.Length(); ++i)
         {
-            newPath[i] = L'\\';
+            if(newPath[i] == u8'/')
+            {
+                newPath[i] = u8'\\';
+            }
+        }
+    }
+    else
+    {
+        for(uSys i = 0; i < path.Length(); ++i)
+        {
+            if(newPath[i] == u8'\\')
+            {
+                newPath[i] = u8'/';
+            }
         }
     }
 
-    return newPath;
+    return C8DynString::PassControl(newPath, [](char8_t* const ptr) noexcept { delete[] ptr; });
 }
 
 /**
@@ -153,84 +251,124 @@ static wchar_t* fixPathSeparator(const uSys length, const wchar_t* const path) n
  *
  *   This includes checks like drive specification, and UNC
  * paths.
+ *
+ * @returns 0 on failure, 1 on pass, and 2 if a bypass is being performed.
  */
-static bool validatePathPrefix(const uSys length, wchar_t* const path) noexcept
+static u32 ValidatePathPrefix(const C8DynStringView& path) noexcept
 {
-    if(length < 1)
-    { return false; }
+    auto begin = path.begin();
+    const auto end = path.end();
 
-    if(path[0] == L'\\') // Rooted, UNC Absolute, Local Device, Root Local Device
+    if(begin == end)
     {
-        if(length >= 2)
+        return 0;
+    }
+
+    if(*begin == 0xFEFF)
+    {
+        ++begin;
+    }
+
+    if(begin == end)
+    {
+        return 0;
+    }
+
+    auto iter = begin;
+
+    if(*iter == U'\\') // Rooted, UNC Absolute, Local Device, Root Local Device
+    {
+        ++iter;
+        if(iter != end)
         {
-            if(path[1] == L'\\') // UNC Absolute, Local Device, Root Local Device
+            if(*iter == U'\\') // UNC Absolute, Local Device, Root Local Device
             {
-                if(length >= 3)
+                ++iter;
+                if(iter != end)
                 {
-                    if(path[2] == L'.') // Local Device
+                    if(*iter == U'.') // Local Device
                     {
                         if(PathSanitizer::settings().blockLocalDevicePath)
                         {
-                            return false;
+                            return 0;
                         }
 
-                        if(length < 3 || path[3] != L'\\') // Malformed
+                        auto tmpIter = iter;
+
+                        if(++tmpIter == end || *tmpIter != u8'\\') // Malformed
                         {
-                            return false;
+                            return 0;
                         }
 
-                        if(length >= 6 && path[5] == L':') // Drive Specification
+                        tmpIter = begin;
+                        ++tmpIter; // \\.\
+                        ++tmpIter; // \\.\X
+                        ++tmpIter; // \\.\X:
+
+                        if(tmpIter != end && *tmpIter == U':') // Drive Specification
                         {
                             if(PathSanitizer::settings().blockLocalDeviceDriveAbsolutePath)
                             {
-                                return false;
+                                return 0;
                             }
 
                             if(PathSanitizer::settings().blockNonLetterDrive)
                             {
                                 if(iswalpha(path[2]))
                                 {
-                                    return false;
+                                    return 0;
                                 }
                             }
 
-                            if(length < 7 || path[6] != L'\\') // Malformed
+                            ++tmpIter; // \\.\X:X
+
+                            if(tmpIter == end || *tmpIter != U'\\') // Malformed
                             {
-                                return false;
+                                return 0;
                             }
                         }
                     }
-                    else if(path[2] == L'?') // Root Local Device
+                    else if(*iter == U'?') // Root Local Device
                     {
                         if(PathSanitizer::settings().blockRootLocalDevicePath)
                         {
-                            return false;
+                            return 0;
                         }
 
-                        if(length < 3 || path[3] != L'\\') // Malformed
+                        auto tmpIter = iter;
+
+                        if(++tmpIter == end || *tmpIter != u8'\\') // Malformed
                         {
-                            return false;
+                            return 0;
                         }
 
-                        if(length >= 6 && path[5] == L':') // Drive Specification
+                        tmpIter = begin;
+                        ++tmpIter; // \\.\
+                        ++tmpIter; // \\.\X
+                        const c32 driveLetter = *tmpIter;
+                        ++tmpIter; // \\.\X:
+
+                        if(tmpIter != end && *tmpIter == U':') // Drive Specification
                         {
-                            if(length >= 7 && path[6] == L'\\') // Drive Absolute
+                            ++tmpIter; // \\.\X:X
+
+                            if(tmpIter != end && *tmpIter == U'\\') // Drive Absolute
                             {
                                 if(PathSanitizer::settings().blockRootLocalDeviceDriveAbsolutePath)
                                 {
-                                    return false;
+                                    return 0;
                                 }
                             }
                             else if(PathSanitizer::settings().blockRootLocalDeviceDriveRelativePath) // Drive Relative
                             {
-                                return false;
+                                return 0;
                             }
 
                             if(PathSanitizer::settings().blockNonLetterDrive)
                             {
-                                if(iswalpha(path[2]))
+                                if(iswalpha(driveLetter))
                                 {
-                                    return false;
+                                    return 0;
                                 }
                             }
                         }
@@ -239,78 +377,97 @@ static bool validatePathPrefix(const uSys length, wchar_t* const path) noexcept
                     {
                         if(PathSanitizer::settings().blockUNCPath)
                         {
-                            return false;
+                            return 0;
                         }
 
                         // Drive specification is not allowed in a UNC absolute path.
-                        for(uSys i = 1; i < length; ++i)
+                        for(; iter != end; ++iter)
                         {
-                            if(path[i] == L':')
+                            if(*iter == U':')
                             {
-                                return false;
+                                return 0;
                             }
                         }
                     }
                 }
             }
-            else if(path[1] == L'?') // Root Local Device Bypass
+            else if(*iter == U'?') // Root Local Device Bypass
             {
                 if(PathSanitizer::settings().blockRootLocalDevicePath)
                 {
-                    return false;
+                    return 0;
                 }
 
-                if(length >= 4 && path[2] == '?' && path[3] == '\\') // Fix bypass to proper syntax.
+                ++iter; // \??
+
+                if(iter == end) // Malformed
                 {
-                    path[1] = '\\';
+                    return 0;
+                }
+
+                if(*iter != U'?') // Malformed
+                {
+                    return 0;
+                }
+
+                ++iter; // \??\
+
+                if(iter == end) // Malformed
+                {
+                    return 0;
+                }
+
+                if(*iter == '\\') // Fix bypass to proper syntax.
+                {
+                    return 2;
                 }
                 else // Malformed
                 {
-                    return false;
+                    return 0;
                 }
             }
             else // Rooted
             {
                 if(PathSanitizer::settings().blockRootedPath)
                 {
-                    return false;
+                    return 0;
                 }
 
                 // Drive specification is not allowed in a rooted path.
-                for(uSys i = 1; i < length; ++i)
+                for(; iter != end; ++iter)
                 {
-                    if(path[i] == L':')
+                    if(*iter == U':')
                     {
-                        return false;
+                        return 0;
                     }
                 }
             }
         }
         else
         {
-            return false;
+            return 0;
         }
     }
     else
     {
-        if(length >= 2)
+        if(++iter != end)
         {
-            if(path[1] == L':') // Drive Absolute, Drive Relative
+            if(*iter == U':') // Drive Absolute, Drive Relative
             {
-                if(length >= 3)
+                if(++iter != end)
                 {
-                    if(path[2] == L'\\') // Drive Absolute
+                    if(*iter == U'\\') // Drive Absolute
                     {
                         if(PathSanitizer::settings().blockDriveAbsolutePath)
                         {
-                            return false;
+                            return 0;
                         }
                     }
                     else // Drive Relative
                     {
                         if(PathSanitizer::settings().blockDriveRelativePath)
                         {
-                            return false;
+                            return 0;
                         }
                     }
                 }
@@ -318,23 +475,35 @@ static bool validatePathPrefix(const uSys length, wchar_t* const path) noexcept
         }
     }
 
-    return true;
+    return 1;
 }
 
 /**
  * Identifies a Win32 device anywhere in the path.
  */
-static bool containsWin32Device(const uSys length, const wchar_t* const path) noexcept
+static bool ContainsWin32Device(const C8DynStringView& path) noexcept
 {
     bool possibleDeviceEnd = true;
 
-    for(iSys i = length - 1; i >= 0; --i)
+    auto begin = path.begin();
+    const auto end = path.end();
+
+    if(*begin == 0xFEFF)
+    {
+        ++begin;
+    }
+
+    auto iter = end;
+    --iter;
+
+    // for(iSys i = length - 1; i >= 0; --i)
+    for(; iter != begin; --iter)
     {
         if(possibleDeviceEnd)
         {
             /*
              *   Technically devices don't have to end with [1-9], they can
-             * end in an wide character digit, including U+00B2, U+00B3,
+             * end in any wide character digit, including U+00B2, U+00B3,
              * U+00B9, or Superscript 2, Superscript 3, Superscript 1
              * respectively.
              *
@@ -345,49 +514,66 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
              * prefix the path with `\\.\`, but we'll just reject it either
              * way to be safe.
              */
-            while(i >= 0 && iswdigit(path[i])) // LPT[1-9], COM[1-9]
+            while(iter != begin && iswdigit(*iter)) // LPT[1-9], COM[1-9]
             {
-                --i;
+                --iter;
             }
 
-            if(i < 3) // Not enough characters for a device.
-            {
-                return false;
-            }
+            // if(i < 3) // Not enough characters for a device.
+            // {
+            //     return false;
+            // }
 
-            switch(path[i])
+            switch(*iter)
             {
-                case L'n':
-                case L'N': // PRN, CON
+                case u8'n':
+                case u8'N': // PRN, CON
                 {
-                    --i;
-                    switch(path[i])
+                    --iter;
+                    if(iter == begin)
                     {
-                        case L'r':
-                        case L'R': // PRN
+                        break;
+                    }
+
+                    switch(*iter)
+                    {
+                        case u8'r':
+                        case u8'R': // PRN
                         {
-                            --i;
-                            if(path[i] == L'P' || path[i] == L'p')
+                            --iter;
+                            if(iter == begin)
                             {
-                                if(i == 0 || path[i - 1] == L'\\')
+                                break;
+                            }
+                            if(*iter == u8'P' || *iter == u8'p')
+                            {
+                                auto tmpIter = iter;
+
+                                if(iter == begin || *(--tmpIter) == u8'\\')
                                 {
                                     return true;
                                 }
-                                --i;
+                                --iter;
                             }
                             break;
                         }
-                        case L'o':
-                        case L'O': // CON
+                        case u8'o':
+                        case u8'O': // CON
                         {
-                            --i;
-                            if(path[i] == L'C' || path[i] == L'c')
+                            --iter;
+                            if(iter == begin)
                             {
-                                if(i == 0 || path[i - 1] == L'\\')
+                                break;
+                            }
+                            if(*iter == u8'C' || *iter == u8'c')
+                            {
+                                auto tmpIter = iter;
+
+                                if(iter == begin || *(--tmpIter) == u8'\\')
                                 {
                                     return true;
                                 }
-                                --i;
+                                --iter;
                             }
                             break;
                         }
@@ -396,106 +582,170 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
                     }
                     break;
                 }
-                case L'x':
-                case L'X': // AUX
+                case u8'x':
+                case u8'X': // AUX
                 {
-                    --i;
-                    if(path[i] == L'U' || path[i] == L'u')
+                    --iter;
+                    if(iter == begin)
                     {
-                        --i;
-                        if(path[i] == L'A' || path[i] == L'a')
+                        break;
+                    }
+                    if(*iter == u8'U' || *iter == u8'u')
+                    {
+                        --iter;
+                        if(iter == begin)
                         {
-                            if(i == 0 || path[i - 1] == L'\\')
-                            {
-                                return true;
-                            }
-                            --i;
+                            break;
                         }
-                    }
-                    break;
-                }
-                case L'l':
-                case L'L': // NUL
-                {
-                    --i;
-                    if(path[i] == L'U' || path[i] == L'u')
-                    {
-                        --i;
-                        if(path[i] == L'N' || path[i] == L'n')
+                        if(*iter == u8'A' || *iter == u8'a')
                         {
-                            if(i == 0 || path[i - 1] == L'\\')
-                            {
-                                return true;
-                            }
-                            --i;
-                        }
-                    }
-                    break;
-                }
-                case L'$': // CONIN$, CONOUT$
-                {
-                    if(i < 5)  // Not enough characters for a device.
-                    {
-                        return false;
-                    }
+                            auto tmpIter = iter;
 
-                    --i;
-                    switch(path[i])
-                    {
-                        case L'n':
-                        case L'N': // CONIN$
-                        {
-                            --i;
-                            if(path[i] == L'I' || path[i] == L'i')
+                            if(iter == begin || *(--tmpIter) == u8'\\')
                             {
-                                --i;
-                                if(path[i] == L'N' || path[i] == L'n')
+                                return true;
+                            }
+                            --iter;
+                        }
+                    }
+                    break;
+                }
+                case u8'l':
+                case u8'L': // NUL
+                {
+                    --iter;
+                    if(iter == begin)
+                    {
+                        break;
+                    }
+                    if(*iter == u8'U' || *iter == u8'u')
+                    {
+                        --iter;
+                        if(iter == begin)
+                        {
+                            break;
+                        }
+                        if(*iter == u8'N' || *iter == u8'n')
+                        {
+                            auto tmpIter = iter;
+
+                            if(iter == begin || *(--tmpIter) == u8'\\')
+                            {
+                                return true;
+                            }
+                            --iter;
+                        }
+                    }
+                    break;
+                }
+                case u8'$': // CONIN$, CONOUT$
+                {
+                    // if(i < 5)  // Not enough characters for a device.
+                    // {
+                    //     return false;
+                    // }
+
+                    --iter;
+                    if(iter == begin)
+                    {
+                        break;
+                    }
+                    switch(*iter)
+                    {
+                        case u8'n':
+                        case u8'N': // CONIN$
+                        {
+                            --iter;
+                            if(iter == begin)
+                            {
+                                break;
+                            }
+                            if(*iter == u8'I' || *iter == u8'i')
+                            {
+                                --iter;
+                                if(iter == begin)
                                 {
-                                    --i;
-                                    if(path[i] == L'O' || path[i] == L'o')
+                                    break;
+                                }
+                                if(*iter == u8'N' || *iter == u8'n')
+                                {
+                                    --iter;
+                                    if(iter == begin)
                                     {
-                                        --i;
-                                        if(path[i] == L'C' || path[i] == L'c')
+                                        break;
+                                    }
+                                    if(*iter == u8'O' || *iter == u8'o')
+                                    {
+                                        --iter;
+                                        if(iter == begin)
                                         {
-                                            if(i == 0 || path[i - 1] == L'\\')
+                                            break;
+                                        }
+                                        if(*iter == u8'C' || *iter == u8'c')
+                                        {
+                                            auto tmpIter = iter;
+
+                                            if(iter == begin || *(--tmpIter) == u8'\\')
                                             {
                                                 return true;
                                             }
-                                            --i;
+                                            --iter;
                                         }
                                     }
                                 }
                             }
                             break;
                         }
-                        case L't':
-                        case L'T': // CONOUT$
+                        case u8't':
+                        case u8'T': // CONOUT$
                         {
-                            if(i < 5)  // Not enough characters for a device.
-                            {
-                                return false;
-                            }
+                            // if(i < 5)  // Not enough characters for a device.
+                            // {
+                            //     return false;
+                            // }
 
-                            --i;
-                            if(path[i] == L'U' || path[i] == L'u')
+                            --iter;
+                            if(iter == begin)
                             {
-                                --i;
-                                if(path[i] == L'O' || path[i] == L'o')
+                                break;
+                            }
+                            if(*iter == u8'U' || *iter == u8'u')
+                            {
+                                --iter;
+                                if(iter == begin)
                                 {
-                                    --i;
-                                    if(path[i] == L'N' || path[i] == L'n')
+                                    break;
+                                }
+                                if(*iter == u8'O' || *iter == u8'o')
+                                {
+                                    --iter;
+                                    if(iter == begin)
                                     {
-                                        --i;
-                                        if(path[i] == L'O' || path[i] == L'o')
+                                        break;
+                                    }
+                                    if(*iter == u8'N' || *iter == u8'n')
+                                    {
+                                        --iter;
+                                        if(iter == begin)
                                         {
-                                            --i;
-                                            if(path[i] == L'C' || path[i] == L'c')
+                                            break;
+                                        }
+                                        if(*iter == u8'O' || *iter == u8'o')
+                                        {
+                                            --iter;
+                                            if(iter == begin)
                                             {
-                                                if(i == 0 || path[i - 1] == L'\\')
+                                                break;
+                                            }
+                                            if(*iter == u8'C' || *iter == u8'c')
+                                            {
+                                                auto tmpIter = iter;
+
+                                                if(iter == begin || *(--tmpIter) == u8'\\')
                                                 {
                                                     return true;
                                                 }
-                                                --i;
+                                                --iter;
                                             }
                                         }
                                     }
@@ -519,7 +769,7 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
          * (except '\') after the device, as long as the these
          * characters are prefixed by a '.' or ':', this delimiter is
          * allowed to be prefixed by a space. For safety I'm choosing
-         * to consider all whitespace (' ', '\t', '\r', '\n) a valid
+         * to consider all whitespace (' ', '\t', '\r', '\n') a valid
          * space, even if that isn't actually true.
          *
          * Example:
@@ -527,18 +777,18 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
          *   COM1a      - Invalid
          *   COM1\      - Invalid
          *   COM1 a     - Invalid
-         *   COM1:a     - valid
-         *   COM1  :  a - valid
-         *   COM1.  a   - valid
+         *   COM1:a     - Valid
+         *   COM1  :  a - Valid
+         *   COM1.  a   - Valid
          */
-        switch(path[i])
+        switch(*iter)
         {
-            case L' ':
-            case L'\t':
-            case L'\r':
-            case L'\n':
-            case L'.':
-            case L':':
+            case u8' ':
+            case u8'\t':
+            case u8'\r':
+            case u8'\n':
+            case u8'.':
+            case u8':':
                 possibleDeviceEnd = true;
                 break;
             default:
@@ -550,12 +800,18 @@ static bool containsWin32Device(const uSys length, const wchar_t* const path) no
     return false;
 }
 
-static bool cleanDotDirs(const uSys pathLength, wchar_t* const path) noexcept
+static C8DynString CleanDotDirs(const C8DynStringView& pathView) noexcept
 {
+    // Because we only care about ascii \ and . for this function, we can operate on code units.
+    const uSys pathLength = pathView.Length();
+    char8_t* path = new(::std::nothrow) char8_t[pathLength + 1];
+    ::std::memcpy(path, pathView.String(), pathLength);
+    path[pathLength] = u8'\0';
+
     uSys insert = 0;
     uSys i = 0;
 
-    if(pathLength >= 2 && path[0] == L'\\' && path[1] == L'\\')
+    if(pathLength >= 2 && path[0] == u8'\\' && path[1] == u8'\\')
     {
         if(pathLength >= 4 && (path[2] == '?' || path[2] == '.'))
         {
@@ -573,29 +829,29 @@ static bool cleanDotDirs(const uSys pathLength, wchar_t* const path) noexcept
     {
         if(path[i] == '?') // Ensure there are no '?' in the path.
         {
-            return false;
+            return { };
         }
 
-        if(path[i] == L'.')
+        if(path[i] == u8'.')
         {
             if(i > 0)
             {
-                if(path[i - 1] == L'\\')
+                if(path[i - 1] == u8'\\')
                 {
                     if(i < pathLength)
                     {
-                        if(path[i + 1] == L'\\')
+                        if(path[i + 1] == u8'\\')
                         {
                             i += 2;
                         }
-                        else if(path[i + 1] == L'.')
+                        else if(path[i + 1] == u8'.')
                         {
                             if(i + 2 < pathLength)
                             {
-                                if(path[i + 2] == L'\\')
+                                if(path[i + 2] == u8'\\')
                                 {
                                     iSys j = insert - 2;
-                                    while(j >= 0 && path[j] != L'\\')
+                                    while(j >= 0 && path[j] != u8'\\')
                                     {
                                         --j;
                                         --insert;
@@ -608,7 +864,7 @@ static bool cleanDotDirs(const uSys pathLength, wchar_t* const path) noexcept
                             else
                             {
                                 iSys j = insert - 2;
-                                while(j >= 0 && path[j] != L'\\')
+                                while(j >= 0 && path[j] != u8'\\')
                                 {
                                     --j;
                                     --insert;
@@ -621,7 +877,7 @@ static bool cleanDotDirs(const uSys pathLength, wchar_t* const path) noexcept
                     }
                     else
                     {
-                        return false;
+                        return { };
                     }
                 }
             }
@@ -634,6 +890,6 @@ static bool cleanDotDirs(const uSys pathLength, wchar_t* const path) noexcept
         path[insert++] = path[i];
     }
 
-    path[insert] = L'\0';
-    return true;
+    path[insert] = u8'\0';
+    return C8DynString::PassControl(path, [](c8* const ptr) { delete[] ptr; });
 }

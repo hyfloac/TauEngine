@@ -42,7 +42,7 @@ public:
 
     ~Entity() noexcept override
     {
-        _components.iterate([](ComponentList::Node* node){ delete node->value; });
+        _components.Iterate([](ComponentList::Node* const node){ delete node->Value; });
     }
 
     template<typename _T>
@@ -129,7 +129,7 @@ template<typename _T>
 _T* Entity::addComponent() noexcept
 {
     _T* const component = EntityManager::buildComponent<_T>(this);
-    _components.insert(component);
+    _components.Insert(component);
     return component;
 }
 
@@ -137,7 +137,7 @@ template<typename _T, typename ... _Args>
 _T* Entity::addComponent(_Args&&... args) noexcept
 {
     _T* const component = EntityManager::buildComponent<_T>(this);
-    component->initialize(_TauAllocatorUtils::_forward<_Args>(args)...);
-    _components.insert(component);
+    component->initialize(TauAllocatorUtils::Forward<_Args>(args)...);
+    _components.Insert(component);
     return component;
 }

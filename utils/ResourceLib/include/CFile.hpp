@@ -8,7 +8,6 @@
 #include "IFile.hpp"
 
 #include <cstdio>
-#include <Utils.hpp>
 #include <String.hpp>
 
 class Win32File;
@@ -49,7 +48,7 @@ public:
 
     [[nodiscard]] i64 size() noexcept override;
 
-    [[nodiscard]] bool exists() noexcept override { return _file != null; }
+    [[nodiscard]] bool exists() noexcept override { return _file != nullptr; }
 
     [[nodiscard]] const wchar_t* name() noexcept override { return _name; }
 

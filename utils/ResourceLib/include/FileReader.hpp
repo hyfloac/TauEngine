@@ -8,6 +8,7 @@
 #include <Safeties.hpp>
 #include <NumTypes.hpp>
 #include <Endian.hpp>
+#include <cstring>
 
 class IFile;
 

@@ -22,7 +22,7 @@ private:
     CPPRef<IFileLoader> _loader;
 public:
     inline SelectedResource() noexcept
-        : _index(0), _name(""), _path(""), _loader(null)
+        : _index(0), _name(""), _path(""), _loader(nullptr)
     { }
 
     inline SelectedResource(const uSys index, const DynString& name, const DynString& path, const CPPRef<IFileLoader>& fileLoader) noexcept

@@ -1,4 +1,4 @@
-// #include "pch.h"
+#ifdef _WIN32
 #include "Win32File.hpp"
 #include <Utils.hpp>
 #include <ShlObj.h>
@@ -268,3 +268,4 @@ u64 Win32FileLoader::modifyTime(const char* const path) const noexcept
 
     return (static_cast<u64>(mTime.dwHighDateTime) << 32) | static_cast<u64>(mTime.dwLowDateTime);
 }
+#endif

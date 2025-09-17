@@ -30,10 +30,10 @@ enum class ParseIntError : u8
 
 struct PrintFunctions final
 {
-    void (*__cdecl print_f)(void*, const char*);
-    void (*__cdecl println_f)(void*, const char*);
-    void (*__cdecl printnl_f)(void*);
-    void (*__cdecl printf_f)(void*, const char*, va_list);
+    void (* print_f)(void*, const char*);
+    void (* println_f)(void*, const char*);
+    void (* printnl_f)(void*);
+    void (* printf_f)(void*, const char*, va_list);
 };
 
 class TAU_DLL Controller final

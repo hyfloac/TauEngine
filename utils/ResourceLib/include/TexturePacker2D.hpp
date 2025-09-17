@@ -6,197 +6,286 @@
 #include <ArrayList.hpp>
 #include <algorithm>
 
+namespace tau {
+
+namespace texture::internal {
+
+    /**
+     * @tparam CoordT
+     *      An integer type for the coordinate. If your max texture size is
+     *    less than 65,536 then you should use a ::std::uint16_t instead of
+     *    a ::std::uint32_t to have better cache locality.
+     */
+    template<typename CoordT>
+    struct Rect final
+    {
+        DEFAULT_CONSTRUCT_PUC(Rect);
+        DEFAULT_DESTRUCT(Rect);
+        DEFAULT_CM_PU(Rect);
+    public:
+        CoordT Top;
+        CoordT Bottom;
+        CoordT Left;
+        CoordT Right;
+
+        Rect(
+            const CoordT top,
+            const CoordT bottom,
+            const CoordT left,
+            const CoordT right
+        ) noexcept
+            : Top(top)
+            , Bottom(bottom)
+            , Left(left)
+            , Right(right)
+        { }
+    };
+
+    /**
+     * @tparam HandleT
+     *      A type for a handle back to the texture, this is used
+     *    when actually packing in the texture data.
+     * @tparam CoordT
+     *      An integer type for the coordinate. If your max texture size is
+     *    less than 65,536 then you should use a ::std::uint16_t instead of
+     *    a ::std::uint32_t to have better cache locality.
+     */
+    template<typename HandleT, typename CoordT>
+    struct Coord final
+    {
+        DEFAULT_CONSTRUCT_PUC(Coord);
+        DEFAULT_DESTRUCT(Coord);
+        DEFAULT_CM_PU(Coord);
+    public:
+        HandleT Handle;
+        union
+        {
+            CoordT X;
+            CoordT Width;
+        };
+        union
+        {
+            CoordT Y;
+            CoordT Height;
+        };
+
+        Coord(
+            const HandleT handle,
+            const CoordT x,
+            const CoordT y
+        ) noexcept
+            : Handle(handle)
+            , X(x)
+            , Y(y)
+        { }
+
+        /**
+         *   Technically you're not supposed to switch which member of a
+         * union you access. Thus, this constructor exists to set the width
+         * and height members.
+         */
+        Coord(
+            const HandleT handle,
+            const CoordT width,
+            const CoordT height,
+            ::std::nullptr_t // This is just to let you select this constructor.
+        ) noexcept
+            : Handle(handle)
+            , Width(width)
+            , Height(height)
+        { }
+    };
+
+    template<typename ChildT, typename CoordT>
+    struct TextureGreaterComparator
+    {
+        [[nodiscard]] static int Compare(const CoordT& a, const CoordT& b) noexcept
+        {
+            const ::std::size_t aQuantity = ChildT::GetQuantity(a);
+            const ::std::size_t bQuantity = ChildT::GetQuantity(b);
+
+            if(aQuantity == bQuantity)
+            {
+                return 0;
+            }
+
+            return aQuantity > bQuantity ? 1 : -1;
+        }
+
+        [[nodiscard]] bool CompareB(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return Compare(a, b) == 1;
+        }
+
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return CompareB(a, b);
+        }
+    };
+
+    template<typename CoordT>
+    struct TextureAreaGreater final : TextureGreaterComparator<TextureAreaGreater<CoordT>, CoordT>
+    {
+        [[nodiscard]] static ::std::size_t GetQuantity(const CoordT& c) noexcept
+        {
+            return c.Width * c.Height;
+        }
+
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return CompareB(a, b);
+        }
+    };
+
+    template<typename CoordT>
+    struct TexturePerimeterGreater final : TextureGreaterComparator<TexturePerimeterGreater<CoordT>, CoordT>
+    {
+        [[nodiscard]] static ::std::size_t GetQuantity(const CoordT& c) noexcept
+        {
+            return c.Width * 2 + c.Height * 2;
+        }
+
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return CompareB(a, b);
+        }
+    };
+
+    template<typename CoordT>
+    struct TextureSideGreater final : TextureGreaterComparator<TextureSideGreater<CoordT>, CoordT>
+    {
+        [[nodiscard]] static ::std::size_t GetQuantity(const CoordT& c) noexcept
+        {
+            return ::std::max(c.Width, c.Height);
+        }
+
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return CompareB(a, b);
+        }
+    };
+
+    template<typename CoordT>
+    struct TextureWidthGreater final : TextureGreaterComparator<TextureWidthGreater<CoordT>, CoordT>
+    {
+        [[nodiscard]] static ::std::size_t GetQuantity(const CoordT& c) noexcept
+        {
+            return c.Width;
+        }
+
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return CompareB(a, b);
+        }
+    };
+
+    template<typename CoordT>
+    struct TextureHeightGreater final : TextureGreaterComparator<TextureHeightGreater<CoordT>, CoordT>
+    {
+        [[nodiscard]] static ::std::size_t GetQuantity(const CoordT& c) noexcept
+        {
+            return c.Height;
+        }
+
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            return CompareB(a, b);
+        }
+    };
+
+    template<typename CoordT>
+    struct TextureGreater final
+    {
+        [[nodiscard]] bool operator()(const CoordT& a, const CoordT& b) const noexcept
+        {
+            int compare = TextureAreaGreater<CoordT>::Compare(a, b);
+            if(compare != 0)
+            {
+                return compare == 1;
+            }
+
+            compare = TexturePerimeterGreater<CoordT>::Compare(a, b);
+            if(compare != 0)
+            {
+                return compare == 1;
+            }
+
+            compare = TextureSideGreater<CoordT>::Compare(a, b);
+            if(compare != 0)
+            {
+                return compare == 1;
+            }
+
+            compare = TextureWidthGreater<CoordT>::Compare(a, b);
+            if(compare != 0)
+            {
+                return compare == 1;
+            }
+
+            compare = TextureHeightGreater<CoordT>::Compare(a, b);
+            return compare == 1;
+        }
+    };
+}
+
 /**
- * @tparam _HandleT
+ * @tparam HandleT
  *      A type for a handle back to the texture, this is used
  *    when actually packing in the texture data.
- * @tparam _CoordT
+ * @tparam CoordT
  *      An integer type for the coordinate. If your max texture
  *    size is less than 65,536 then you should use a u16
  *    instead of a u32 to have better cache locality.
  */
-template<typename _HandleT, typename _CoordT = u16>
+template<typename HandleT, typename CoordT = u16>
 class TexturePacker2D final
 {
 public:
-    struct Rect final
-    {
-        _CoordT top;
-        _CoordT left;
-        _CoordT bottom;
-        _CoordT right;
+    using Rect = texture::internal::Rect<CoordT>;
+    using Coord = texture::internal::Coord<HandleT, CoordT>;
 
-        Rect(const _CoordT _top, const _CoordT _left, const _CoordT _bottom, const _CoordT _right) noexcept
-            : top(_top)
-            , left(_left)
-            , bottom(_bottom)
-            , right(_right)
-        { }
-    };
-
-    struct Coord final
-    {
-        DEFAULT_CONSTRUCT_PU(Coord);
-
-        _HandleT handle;
-        union
-        {
-            _CoordT x;
-            _CoordT width;
-        };
-        union
-        {
-            _CoordT y;
-            _CoordT height;
-        };
-
-        Coord(const _HandleT _handle, const _CoordT _x, const _CoordT _y) noexcept
-            : handle(_handle)
-            , x(_x)
-            , y(_y)
-        { }
-    };
-
-    using Texture = Coord;
-
-    struct TextureAreaGreater final
-    {
-        static i32 compare(const Texture& a, const Texture& b) noexcept
-        {
-            const uSys aArea = (a.width * a.height);
-            const uSys bArea = (b.width * b.height);
-
-            if(aArea == bArea)
-            { return 0; }
-
-            return aArea > bArea ? 1 : -1;
-        }
-
-        bool operator()(const Texture& a, const Texture& b) noexcept
-        { return compare(a, b) == 1; }
-    };
-
-    struct TexturePerimeterGreater final
-    {
-        static i32 compare(const Texture& a, const Texture& b) noexcept
-        {
-            const uSys aPerimeter = (a.width * 2 + a.height * 2);
-            const uSys bPerimeter = (b.width * 2 + b.height * 2);
-            
-            if(aPerimeter == bPerimeter)
-            { return 0; }
-
-            return aPerimeter > bPerimeter ? 1 : -1;
-        }
-
-        bool operator()(const Texture& a, const Texture& b) noexcept
-        { return compare(a, b) == 1; }
-    };
-
-    struct TextureSideGreater final
-    {
-        static i32 compare(const Texture& a, const Texture& b) noexcept
-        {
-            const uSys aLargestSide = maxT(a.width, a.height);
-            const uSys bLargestSide = maxT(b.width, b.height);
-            
-            if(aLargestSide == bLargestSide)
-            { return 0; }
-
-            return aLargestSide > bLargestSide ? 1 : -1;
-        }
-
-        bool operator()(const Texture& a, const Texture& b) noexcept
-        { return compare(a, b) == 1; }
-    };
-
-    struct TextureWidthGreater final
-    {
-        static i32 compare(const Texture& a, const Texture& b) noexcept
-        {
-            if(a.width == b.width)
-            { return 0; }
-
-            return a.width > b.width ? 1 : -1;
-        }
-
-        bool operator()(const Texture& a, const Texture& b) noexcept
-        { return compare(a, b) == 1; }
-    };
-
-    struct TextureHeightGreater final
-    {
-        static i32 compare(const Texture& a, const Texture& b) noexcept
-        {
-            if(a.height == b.height)
-            { return 0; }
-
-            return a.height > b.height ? 1 : -1;
-        }
-
-        bool operator()(const Texture& a, const Texture& b) noexcept
-        { return compare(a, b) == 1; }
-    };
-
-    struct TextureGreater final
-    {
-        bool operator()(const Texture& a, const Texture& b) noexcept
-        {
-            const i32 areaCompare = TextureAreaGreater::compare(a, b);
-            if(areaCompare != 0)
-            { return areaCompare == 1; }
-            
-            const i32 perimeterCompare = TexturePerimeterGreater::compare(a, b);
-            if(perimeterCompare != 0)
-            { return perimeterCompare == 1; }
-
-            const i32 sideCompare = TextureSideGreater::compare(a, b);
-            if(sideCompare != 0)
-            { return sideCompare == 1; }
-
-            const i32 widthCompare = TextureWidthGreater::compare(a, b);
-            if(widthCompare != 0)
-            { return widthCompare == 1; }
-
-            const i32 heightCompare = TextureHeightGreater::compare(a, b);
-            return heightCompare == 1;
-        }
-    };
-private:
-    ArrayList<Rect, ALMoveMethod::MemCopy> _freeSpaces;
-    ArrayList<Coord, ALMoveMethod::MemCopy> _allocatedSpaces;
-
-    uSys _packedWidth;
-    uSys _packedHeight;
+    using TextureAreaGreater = texture::internal::TextureAreaGreater<Coord>;
+    using TexturePerimeterGreater = texture::internal::TexturePerimeterGreater<Coord>;
+    using TextureSideGreater = texture::internal::TextureSideGreater<Coord>;
+    using TextureWidthGreater = texture::internal::TextureWidthGreater<Coord>;
+    using TextureHeightGreater = texture::internal::TextureHeightGreater<Coord>;
+    using TextureGreater = texture::internal::TextureGreater<Coord>;
 public:
     TexturePacker2D(const uSys maxTextures) noexcept
-        : _freeSpaces(maxTextures * 2)
-        , _allocatedSpaces(maxTextures)
-        , _packedWidth(0)
-        , _packedHeight(0)
+        : m_FreeSpaces(maxTextures * 2)
+        , m_AllocatedSpaces(maxTextures)
+        , m_PackedWidth(0)
+        , m_PackedHeight(0)
     { }
 
-    [[nodiscard]] const ArrayList<Coord, ALMoveMethod::MemCopy>& allocatedSpaces() const noexcept { return _allocatedSpaces; }
+    [[nodiscard]] const ArrayList<Rect, ALMoveMethod::MemCopy>& FreeSpaces() const noexcept { return m_FreeSpaces; }
+    [[nodiscard]] const ArrayList<Coord, ALMoveMethod::MemCopy>& AllocatedSpaces() const noexcept { return m_AllocatedSpaces; }
 
-    [[nodiscard]] uSys packedWidth() const noexcept { return _packedWidth; }
-    [[nodiscard]] uSys packedHeight() const noexcept { return _packedHeight; }
+    [[nodiscard]] uSys PackedWidth() const noexcept { return m_PackedWidth; }
+    [[nodiscard]] uSys PackedHeight() const noexcept { return m_PackedHeight; }
 
     template<typename _TextureComparator = TextureGreater>
-    void pack(const Texture* textures, uSys textureCount, uSys maxMapWidth, uSys maxMapHeight, iSys minRegression) noexcept;
+    void Pack(const Coord* textures, uSys textureCount, uSys maxMapWidth, uSys maxMapHeight, iSys minRegression) noexcept;
     
     template<typename _TextureComparator = TextureGreater>
-    void pack(const Texture* const textures, const uSys textureCount, const uSys maxMapSize, const iSys minRegression = 32) noexcept
+    void Pack(const Coord* const textures, const uSys textureCount, const uSys maxMapSize, const iSys minRegression = 32) noexcept
     { pack<_TextureComparator>(textures, textureCount, maxMapSize, maxMapSize, minRegression); }
 private:
-    bool _pack(const Texture* sortedTextures, uSys textureCount, uSys mapWidth, uSys mapHeight) noexcept;
+    bool InternalPack(const Coord* sortedTextures, uSys textureCount, uSys mapWidth, uSys mapHeight) noexcept;
+private:
+    ArrayList<Rect, ALMoveMethod::MemCopy> m_FreeSpaces;
+    ArrayList<Coord, ALMoveMethod::MemCopy> m_AllocatedSpaces;
+
+    uSys m_PackedWidth;
+    uSys m_PackedHeight;
 };
 
 template<typename _HandleT, typename _CoordT>
 template<typename _TextureComparator>
-void TexturePacker2D<_HandleT, _CoordT>::pack(const Texture* const textures, const uSys textureCount, const uSys maxMapWidth, const uSys maxMapHeight, const iSys minRegression) noexcept
+void TexturePacker2D<_HandleT, _CoordT>::Pack(const Coord* const textures, const uSys textureCount, const uSys maxMapWidth, const uSys maxMapHeight, const iSys minRegression) noexcept
 {
-    Texture* const sortedTextures = new(::std::nothrow) Texture[textureCount];
-    ::std::memcpy(sortedTextures, textures, textureCount * sizeof(Texture));
+    Coord* const sortedTextures = new(::std::nothrow) Coord[textureCount];
+    ::std::memcpy(sortedTextures, textures, textureCount * sizeof(Coord));
     ::std::sort(sortedTextures, &sortedTextures[textureCount], _TextureComparator());
 
     uSys maxWidth = maxMapWidth;
@@ -211,7 +300,7 @@ void TexturePacker2D<_HandleT, _CoordT>::pack(const Texture* const textures, con
 
     while(true)
     {
-        const bool success = _pack(sortedTextures, textureCount, currentWidth, currentHeight);
+        const bool success = InternalPack(sortedTextures, textureCount, currentWidth, currentHeight);
 
         if(success)
         {
@@ -229,46 +318,49 @@ void TexturePacker2D<_HandleT, _CoordT>::pack(const Texture* const textures, con
 
         if(regression == 0)
         {
-            const bool finalWidth = abs(nextWidth - static_cast<iSys>(currentWidth)) <= minRegression;
-            const bool finalHeight = abs(nextHeight - static_cast<iSys>(currentHeight)) <= minRegression;
+            const bool finalWidth = ::std::abs(nextWidth - static_cast<iSys>(currentWidth)) <= minRegression;
+            const bool finalHeight = ::std::abs(nextHeight - static_cast<iSys>(currentHeight)) <= minRegression;
 
-            if((finalWidth && finalHeight) || (!finalWidth && finalHeight))
+            if(finalHeight)
             {
                 regression = 1;
                 currentHeight = maxHeight;
                 minWidth = 0;
-                currentWidth = (maxWidth + minWidth) / 2;
-                continue;
+                currentWidth = nextWidth;
             }
             else if(finalWidth)
             {
                 regression = 2;
                 currentWidth = maxWidth;
                 minHeight = 0;
-                currentHeight = (maxHeight + minHeight) / 2;
-                continue;
+                currentHeight = nextHeight;
             }
-
-            currentWidth = nextWidth;
-            currentHeight = nextHeight;
+            else
+            {
+                currentWidth = nextWidth;
+                currentHeight = nextHeight;
+            }
         }
         else if(regression == 1)
         {
-            if(abs(nextWidth - static_cast<iSys>(currentWidth)) <= minRegression)
+            if(::std::abs(nextWidth - static_cast<iSys>(currentWidth)) <= minRegression)
             {
                 regression = 2;
                 currentWidth = maxWidth;
                 minHeight = 0;
-                currentHeight = (maxHeight + minHeight) / 2;
-                continue;
+                currentHeight = nextHeight;
             }
-
-            currentWidth = nextWidth;
+            else
+            {
+                currentWidth = nextWidth;
+            }
         }
         else
         {
-            if(abs(nextHeight - static_cast<iSys>(currentHeight)) <= minRegression)
-            { break; }
+            if(::std::abs(nextHeight - static_cast<iSys>(currentHeight)) <= minRegression)
+            {
+                break;
+            }
 
             currentHeight = nextHeight;
         }
@@ -276,89 +368,112 @@ void TexturePacker2D<_HandleT, _CoordT>::pack(const Texture* const textures, con
 
     if(currentWidth != maxWidth || 
        currentHeight != maxHeight)
-    { _pack(sortedTextures, textureCount, maxWidth, maxHeight); }
+    { InternalPack(sortedTextures, textureCount, maxWidth, maxHeight); }
 
-    _packedWidth = maxWidth;
-    _packedHeight = maxHeight;
+    m_PackedWidth = maxWidth;
+    m_PackedHeight = maxHeight;
 }
 
-template<typename _HandleT, typename _CoordT>
-bool TexturePacker2D<_HandleT, _CoordT>::_pack(const Texture* const sortedTextures, const uSys textureCount, const uSys mapWidth, const uSys mapHeight) noexcept
+template<typename HandleT, typename CoordT>
+bool TexturePacker2D<HandleT, CoordT>::InternalPack(const Coord* const sortedTextures, const uSys textureCount, const uSys mapWidth, const uSys mapHeight) noexcept
 {
-    _freeSpaces.clear(false);
-    _allocatedSpaces.clear(false);
+    m_FreeSpaces.clear(false);
+    m_AllocatedSpaces.clear(false);
 
-    _freeSpaces.emplace(0, 0, mapHeight, mapWidth);
+    m_FreeSpaces.emplace(0, mapHeight, 0, mapWidth);
 
     for(uSys i = 0; i < textureCount; ++i)
     {
-        const Texture& texture = sortedTextures[i];
+        const Coord& texture = sortedTextures[i];
 
         bool success = false;
 
-        for(iSys j = _freeSpaces.count() - 1; j >= 0; --j)
+        for(iSys j = m_FreeSpaces.count() - 1; j >= 0; --j)
         {
-            const Rect& freeSpace = _freeSpaces[j];
-            
-            const uSys width = freeSpace.right - freeSpace.left;
-            const uSys height = freeSpace.bottom - freeSpace.top;
+            const Rect& freeSpace = m_FreeSpaces[j];
 
-            if(texture.width > width || texture.height > height)
-            { continue; }
+            const uSys width = freeSpace.Right - freeSpace.Left;
+            const uSys height = freeSpace.Bottom - freeSpace.Top;
 
-            success = true;
-
-            _allocatedSpaces.emplace(texture.handle, freeSpace.left, freeSpace.top);
-
-            if(texture.width == width && texture.height == height)
+            if(texture.Width <= width && texture.Height <= height)
             {
-                _freeSpaces.remove(j);
-            }
-            else if(texture.width == width && texture.height < height)
-            {
-                const Rect rect(freeSpace.top + texture.height, freeSpace.left, freeSpace.bottom, freeSpace.right);
+                // Affirm that we found a spot.
+                success = true;
 
-                _freeSpaces.remove(j);
-                _freeSpaces.add(rect);
-            }
-            else if(texture.width < width && texture.height == height)
-            {
-                const Rect rect(freeSpace.top, freeSpace.left + texture.width, freeSpace.bottom, freeSpace.right);
+                // Add the spot to the allocated spaces.
+                // We're only passing the texture handle and the (X, Y) coordinate of where it will end up.
+                m_AllocatedSpaces.emplace(texture.Handle, freeSpace.Left, freeSpace.Top);
 
-                _freeSpaces.remove(j);
-                _freeSpaces.add(rect);
-            }
-            else
-            {
-                const _CoordT aRight = texture.height > texture.width ? freeSpace.right : freeSpace.left + texture.width;
-                const _CoordT bBottom = texture.height > texture.width ? freeSpace.top + texture.height : freeSpace.bottom;
-
-                const Rect rectA(freeSpace.top + texture.height, freeSpace.left, freeSpace.bottom, aRight);
-                const Rect rectB(freeSpace.top, freeSpace.left + texture.width, bBottom, freeSpace.right);
-
-                const uSys areaA = (rectA.bottom - rectA.top) * (rectA.right - rectA.left);
-                const uSys areaB = (rectB.bottom - rectB.top) * (rectB.right - rectB.left);
-                
-                _freeSpaces.remove(j);
-
-                if(areaA > areaB)
+                if(texture.Width == width && texture.Height == height)
                 {
-                    _freeSpaces.add(rectA);
-                    _freeSpaces.add(rectB);
+                    // If the texture was a perfect match then we can just remove the space.
+                    m_FreeSpaces.remove(j);
+                }
+                else if(texture.Width == width && texture.Height < height)
+                {
+                    //   If the width matched, but it was less than the height, then we can
+                    // just shift the top to immediately below the texture and add the
+                    // space to the end of the list.
+                    const Rect rect(freeSpace.Top + texture.Height, freeSpace.Bottom, freeSpace.Left, freeSpace.Right);
+
+                    m_FreeSpaces.remove(j);
+                    m_FreeSpaces.add(rect);
+                }
+                else if(texture.Width < width && texture.Height == height)
+                {
+                    const Rect rect(freeSpace.Top, freeSpace.Bottom, freeSpace.Left + texture.Width, freeSpace.Right);
+
+                    m_FreeSpaces.remove(j);
+                    m_FreeSpaces.add(rect);
                 }
                 else
                 {
-                    _freeSpaces.add(rectB);
-                    _freeSpaces.add(rectA);
-                }
-            }
+                    // Otherwise we'll have to create two rectangles.
+                    // The goal will be to create the largest rectangles possible.
 
-            break;
+                    const uSys remainingWidth = freeSpace.Right - (freeSpace.Left + texture.Width);
+                    const uSys remainingHeight = freeSpace.Bottom - (freeSpace.Top + texture.Height);
+
+                    //   The right edge of the first rectangle and the bottom edge of the
+                    // second rectangle.
+                    const CoordT aRight = remainingWidth >= remainingHeight ? freeSpace.Left + texture.Width : freeSpace.Right;
+                    const CoordT bBottom = remainingWidth >= remainingHeight ? freeSpace.Bottom : freeSpace.Top + texture.Height;
+
+                    // Create the new rects.
+                    const Rect rectA(freeSpace.Top + texture.Height, freeSpace.Bottom, freeSpace.Left, aRight);
+                    const Rect rectB(freeSpace.Top, bBottom, freeSpace.Left + texture.Width, freeSpace.Right);
+
+                    // Calculate the area of the new rects.
+                    const uSys areaA = (rectA.Bottom - rectA.Top) * (rectA.Right - rectA.Left);
+                    const uSys areaB = (rectB.Bottom - rectB.Top) * (rectB.Right - rectB.Left);
+
+                    // Remove the old space.
+                    m_FreeSpaces.remove(j);
+
+                    // Place the largest space first to keep a quasi sorting.
+                    if(areaA > areaB)
+                    {
+                        m_FreeSpaces.add(rectA);
+                        m_FreeSpaces.add(rectB);
+                    }
+                    else
+                    {
+                        m_FreeSpaces.add(rectB);
+                        m_FreeSpaces.add(rectA);
+                    }
+                }
+
+                break;
+            }
         }
 
         if(!success)
-        { return false; }
+        {
+            return false;
+        }
     }
 
     return true;
+}
+
 }

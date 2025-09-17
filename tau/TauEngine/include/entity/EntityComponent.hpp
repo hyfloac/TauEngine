@@ -180,12 +180,14 @@ public:
 { return left.asInt() <= right.asInt(); }
 
 namespace std {
+    template<>
     struct hash<IEntityComponent::Type> final
     {
         [[nodiscard]] inline ::std::size_t operator()(const IEntityComponent::Type& type) const noexcept
         { return type.asInt(); }
     };
 
+    template<>
     struct hash<IEntityComponent*> final
     {
         [[nodiscard]] inline ::std::size_t operator()(const IEntityComponent*& entity) const noexcept

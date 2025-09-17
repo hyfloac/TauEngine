@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Objects.hpp>
-#include <Utils.hpp>
 #include <NumTypes.hpp>
 #include "IFile.hpp"
 
@@ -26,19 +25,19 @@ private:
 public:
     TauModelPart() noexcept
         : _vertexCount(0), _indiceCount(0),
-          _positions(null), _normals(null), _tangents(null), _textureUVs(null),
-          _indices(null), _refCount(null)
+          _positions(nullptr), _normals(nullptr), _tangents(nullptr), _textureUVs(nullptr),
+          _indices(nullptr), _refCount(nullptr)
     { }
 
-    TauModelPart(nullptr_t) noexcept
+    TauModelPart(::std::nullptr_t) noexcept
         : _vertexCount(0), _indiceCount(0),
-          _positions(null), _normals(null), _tangents(null), _textureUVs(null),
-          _indices(null), _refCount(null)
+          _positions(nullptr), _normals(nullptr), _tangents(nullptr), _textureUVs(nullptr),
+          _indices(nullptr), _refCount(nullptr)
     { }
 
     TauModelPart(const uSys vertexCount, const uSys indiceCount) noexcept
         : _vertexCount(vertexCount), _indiceCount(indiceCount),
-          _positions(null), _normals(null), _tangents(null), _textureUVs(null),
+          _positions(nullptr), _normals(nullptr), _tangents(nullptr), _textureUVs(nullptr),
           _indices(new(::std::nothrow) uSys[indiceCount]), _refCount(new(::std::nothrow) uSys(1))
     {
         const uSys vec3Count = vertexCount * 3;
@@ -124,7 +123,7 @@ public:
         return *this;
     }
 
-    TauModelPart& operator =(nullptr_t) noexcept
+    TauModelPart& operator =(::std::nullptr_t) noexcept
     {
         TauModelPart::~TauModelPart();
         _positions = nullptr;
@@ -134,10 +133,6 @@ public:
         _indices = nullptr;
         _vertexCount = 0;
         _indiceCount = 0;
-        _refCount = nullptr;
-
-        if(_refCount)
-        { ++(*_refCount); }
 
         return *this;
     }
@@ -212,7 +207,7 @@ private:
 public:
     AnimationComposition(const uSys numVertices, const uSys weightCount, const uSys boneCount) noexcept
         : _numVertices(numVertices), _weightCount(weightCount), _boneCount(boneCount),
-        _weights(null), _indices(null), _bonePositions(null), _boneRotations(null)
+        _weights(nullptr), _indices(nullptr), _bonePositions(nullptr), _boneRotations(nullptr)
     {
         const uSys numWeights = weightCount * numVertices;
         const uSys numBones = boneCount * 4;

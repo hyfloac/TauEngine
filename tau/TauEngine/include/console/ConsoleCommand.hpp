@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Objects.hpp>
 #include <NumTypes.hpp>
 
 namespace Console {

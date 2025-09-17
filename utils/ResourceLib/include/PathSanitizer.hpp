@@ -1,6 +1,6 @@
 #pragma once
 
-#include "String.hpp"
+#include <String.hpp>
 
 struct PathSanitizerSettings final
 {
@@ -20,14 +20,14 @@ struct PathSanitizerSettings final
 
 class PathSanitizer final
 {
-private:
-    static PathSanitizerSettings _settings;
 public:
     static void setSettings(const PathSanitizerSettings& settings) noexcept;
 
     [[nodiscard]] static const PathSanitizerSettings& settings() noexcept
-    { return _settings; }
+    { return s_Settings; }
 
-    static WDynString sanitizePath(const WDynString& path) noexcept;
-    static WDynString sanitizeSubPath(const WDynString& path) noexcept;
+    static C8DynString sanitizePath(const C8DynStringView& path) noexcept;
+    static C8DynString sanitizeSubPath(const C8DynStringView& path) noexcept;
+private:
+    static PathSanitizerSettings s_Settings;
 };

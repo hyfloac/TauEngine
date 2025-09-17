@@ -31,12 +31,12 @@ public:
             delete bitangents;
             delete textures;
             delete indices;
-            positions = null;
-            normals = null;
-            tangents = null;
-            bitangents = null;
-            textures = null;
-            indices = null;
+            positions = nullptr;
+            normals = nullptr;
+            tangents = nullptr;
+            bitangents = nullptr;
+            textures = nullptr;
+            indices = nullptr;
         }
     };
 
@@ -69,8 +69,8 @@ public:
         {
             delete squares;
             delete triangles;
-            squares = null;
-            triangles = null;
+            squares = nullptr;
+            triangles = nullptr;
         }
     };
 

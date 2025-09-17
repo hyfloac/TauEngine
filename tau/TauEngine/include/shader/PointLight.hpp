@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Objects.hpp>
 #include "shader/Uniform.hpp"
 #include "maths/Vector3f.hpp"
 #include "Color.hpp"

@@ -99,6 +99,8 @@ struct MipHeader final
 } }
 #pragma pack(pop)
 
+ENUM_FLAGS(TT::Flags);
+
 static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexcept;
 
 #define CHECK(__TARGET_SIZE) \
@@ -117,21 +119,21 @@ static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexc
 
 #define CHECK_N(__TARGET_SIZE) \
     if(readSize < 0) \
-    { return null; } \
+    { return nullptr; } \
     if(static_cast<uSys>(readSize) != (__TARGET_SIZE)) \
-    { return null; } \
+    { return nullptr; } \
     offset += static_cast<uSys>(readSize)
 
 CPPRef<TauTexture> TauTexture::load(const CPPRef<IFile>& file) noexcept
 {
     if(!file)
-    { return null; }
+    { return nullptr; }
 
     if(file->size() <= 0)
-    { return null; }
+    { return nullptr; }
 
     if(static_cast<uSys>(file->size()) < sizeof(TT::Header))
-    { return null; }
+    { return nullptr; }
 
     uSys offset = 0;
 
@@ -140,31 +142,31 @@ CPPRef<TauTexture> TauTexture::load(const CPPRef<IFile>& file) noexcept
     CHECK_N(sizeof(header));
 
     if(header.magic != TAU_TEXTURE_MAGIC)
-    { return null; }
+    { return nullptr; }
 
     if(header.version > TAU_TEXTURE_VERSION_CURRENT)
-    { return null; }
+    { return nullptr; }
 
     switch(header.version)
     {
         case TAU_TEXTURE_VERSION_0_1: return load_0_1(file, offset);
-        default: return null;
+        default: return nullptr;
     }
 }
 
 static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexcept
 {
     if(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::Header) + offset)
-    { return null; }
+    { return nullptr; }
 
     TT::_0_1::Header header;
     i64 readSize = file->readType(&header);
     CHECK_N(sizeof(header));
 
     if(header.format > TauTextureFormat::MAX)
-    { return null; }
+    { return nullptr; }
 
-    const bool hasDebugData = hasFlag(header.flags, TT::Flags::HasDebugData);
+    const bool hasDebugData = HasFlag(header.flags, TT::Flags::HasDebugData);
 
     TT::_0_1::DebugHeader debugHeader;
     TT::_0_1::DebugData debugData;
@@ -172,13 +174,13 @@ static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexc
     if(hasDebugData)
     {
         if(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::DebugHeader) + offset)
-        { return null; }
+        { return nullptr; }
 
         readSize = file->readType(&debugHeader);
         CHECK_N(sizeof(debugHeader));
-        
+
         if(static_cast<uSys>(file->size()) < (debugHeader.filePathLen + debugHeader.nameLen) * sizeof(wchar_t) + offset)
-        { return null; }
+        { return nullptr; }
 
         const uSys totalLen = debugHeader.filePathLen + debugHeader.nameLen + 1;
 
@@ -193,7 +195,7 @@ static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexc
 
     RefDynArray<TauTextureMip> mipmaps(header.mipLevels);
 
-    return null;
+    return nullptr;
 }
 
 void TauTextureCodec::beginTextureLoad(ReadState& readState, const CPPRef<IFile>& file, Error* const error) noexcept
@@ -241,7 +243,7 @@ void TauTextureCodec::loadTextureInfo(ReadState& readState, TauTextureInfo& info
     ERROR_CODE_COND(static_cast<uSys>(file->size()) < sizeof(TT::Header), Error::FileTooSmall);
 
     uSys& offset = readState.offset;
-    
+
     TT::Header header;
     const i64 readSize = file->readType(&header);
     CHECK(sizeof(header));
@@ -308,8 +310,8 @@ void TauTextureCodec::loadTextureInfo_0_1(ReadState& readState, TauTextureInfo& 
     readState.flags = static_cast<uSys>(header.flags);
     readState.subResourceCount = header.mipLevels * header.arrayCount;
 
-    info.hasDebugData = hasFlag(header.flags, TT::Flags::HasDebugData);
-    info.compressed = hasFlag(header.flags, TT::Flags::Compressed);
+    info.hasDebugData = HasFlag(header.flags, TT::Flags::HasDebugData);
+    info.compressed = HasFlag(header.flags, TT::Flags::Compressed);
 
     TT::_0_1::DebugHeader debugHeader;
 
@@ -370,7 +372,7 @@ uSys TauTextureCodec::loadTextureSubresource_0_1(ReadState& readState, void* con
         ERROR_CODE_V(Error::NoError, header.uncompressedLength);
     }
     
-    if(hasFlag(readState.flags, TT::Flags::Compressed))
+    if(HasFlag(readState.flags, TT::Flags::Compressed))
     {
         ERROR_CODE_COND_V(static_cast<uSys>(file->size()) < header.offset + header.compressedLength + 1, Error::FileTooSmall, 0);
 
@@ -429,8 +431,8 @@ void TauTextureCodec::writeTextureInfo_0_1(WriteState& writeState, const TauText
     header.height = info.height;
     header.arrayCount = info.arrayCount;
     header.mipLevels = info.arrayCount;
-    header.flags = setFlag(TT::Flags::None, TT::Flags::HasDebugData, static_cast<bool>(debugData));
-    setFlag(header.flags, TT::Flags::Compressed, info.compressed);
+    header.flags = SetFlag(TT::Flags::None, TT::Flags::HasDebugData, static_cast<bool>(debugData));
+    SetFlag(header.flags, TT::Flags::Compressed, info.compressed);
 
     offset += file->writeType(header);
 
