@@ -126,7 +126,7 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
 
                         const uSys includeLineLen = i - includeBegin;
 
-                        RefDynArray<u8> includeFileData = VFS::Instance().openFile(includePath, FileProps::Read)->readFile();
+                        RefDynArray<u8> includeFileData = VFS::Instance().openFile(includePath, FileProps::Read)->ReadFile();
 
                         delete[] includePath;
 
@@ -264,7 +264,7 @@ bool GLShaderBuilder::processBundle(const ShaderArgs& args, GLShaderArgs* const 
 
 bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* const glArgs, const GLenum shaderStage, Error* const error) const noexcept
 {
-    RefDynArray<u8> data = file->readFile();
+    RefDynArray<u8> data = file->ReadFile();
     data = handleIncludes(data);
 
     const GLchar* const shaderSrc = reinterpret_cast<GLchar*>(data.arr());
@@ -292,7 +292,7 @@ bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* con
     {
 #if !defined(TAU_PRODUCTION)
         (void) validateFail(glArgs->shaderHandle, "compile");
-        ConPrinter::print(stderr, "File Path: %\n", file->name());
+        ConPrinter::print(stderr, "File Path: %\n", file->Name());
         ConPrinter::print(stderr, "File Data: \n%\n", shaderSrc);
 #else
         glDeleteProgram(glArgs->shaderHandle);

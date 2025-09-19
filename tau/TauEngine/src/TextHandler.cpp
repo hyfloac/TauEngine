@@ -174,7 +174,7 @@ TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, cons
     
     if(!file) { return null; }
     
-    RefDynArray<u8> data = file->readFile();
+    RefDynArray<u8> data = file->ReadFile();
 
     FT_Face face;
     const FT_Error error = FT_New_Memory_Face(_ft, data.arr(), data.size() - 1, 0, &face);

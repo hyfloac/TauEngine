@@ -249,7 +249,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
 
 [[nodiscard]] c32 ShaderBundleLexer::DecodeCodePointForwardUnsafe() noexcept
 {
-    const int ci0 = m_File->readChar();
+    const int ci0 = m_File->ReadChar();
 
     if(ci0 == -1)
     {
@@ -265,7 +265,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
     {
         if((ci0 & 0xE0) == 0xC0) // U+0080 - U+07FF
         {
-            const int ci1 = m_File->readChar();
+            const int ci1 = m_File->ReadChar();
 
             if(ci1 == -1)
             {
@@ -279,7 +279,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
         }
         else if((ci0 & 0xF0) == 0xE0) // U+0800 - U+FFFF
         {
-            const int ci1 = m_File->readChar();
+            const int ci1 = m_File->ReadChar();
 
             if(ci1 == -1)
             {
@@ -287,7 +287,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
                 return static_cast<c32>(-1);
             }
 
-            const int ci2 = m_File->readChar();
+            const int ci2 = m_File->ReadChar();
 
             if(ci2 == -1)
             {
@@ -302,7 +302,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
         }
         else if((ci0 & 0xF0) == 0xF0) // U+10000 - U+10FFFF
         {
-            const int ci1 = m_File->readChar();
+            const int ci1 = m_File->ReadChar();
 
             if(ci1 == -1)
             {
@@ -310,7 +310,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
                 return static_cast<c32>(-1);
             }
 
-            const int ci2 = m_File->readChar();
+            const int ci2 = m_File->ReadChar();
 
             if(ci2 == -1)
             {
@@ -318,7 +318,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
                 return static_cast<c32>(-1);
             }
 
-            const int ci3 = m_File->readChar();
+            const int ci3 = m_File->ReadChar();
 
             if(ci3 == -1)
             {

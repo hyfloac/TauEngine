@@ -80,7 +80,7 @@ public:
     Lexer(CPPRef<IFile> file) noexcept
         : _file(std::move(file)), _lastToken(), _lastTokenVal(0), _lastChar('\0')
     {
-        const int c = file->readChar();
+        const int c = file->ReadChar();
 
         if(c < 0)
         {

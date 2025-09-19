@@ -119,7 +119,7 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
         const uSys ind = res.index;
         ret[ind]._index = ind;
         ret[ind]._name = res.filePath;
-        ret[ind]._path = StringCast<char>(WDynString(vfsRes.basePath).concat(vfsRes.subPath));
+        ret[ind]._path = StringCast<char>(WDynString(vfsRes.basePath).Concat(vfsRes.subPath));
         ret[ind]._loader = vfsRes.fileLoader;
     }
 
@@ -351,26 +351,26 @@ DynString _ResourceSelector::Lexer::readString() noexcept
             switch(c)
             {
                 case 't':
-                    sb.append('\t');
+                    sb.Append('\t');
                     break;
                 case '0':
-                    sb.append('0');
+                    sb.Append('0');
                     break;
                 case 'r':
-                    sb.append('\r');
+                    sb.Append('\r');
                     break;
                 case 'n':
-                    sb.append('\n');
+                    sb.Append('\n');
                     break;
                 case '\\':
-                    sb.append('\\');
+                    sb.Append('\\');
                     break;
                 default: return "";
             }
             continue;
         }
 
-        sb.append(static_cast<char>(c));
+        sb.Append(static_cast<char>(c));
     } while(c != '"');
     
     return sb.backspace().toString();

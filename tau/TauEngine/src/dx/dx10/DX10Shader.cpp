@@ -104,7 +104,7 @@ bool DX10ShaderBuilder::processArgs(const ShaderFileArgs& args, DXShaderArgs* co
 {
     ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 
-    const WDynString path = args.file->name();
+    const WDynString path = args.file->Name();
 
     if(VFS::getFileExt(path, false) == L"tausi")
     {
@@ -143,13 +143,13 @@ bool DX10ShaderBuilder::processBundle(const ShaderFileArgs& args, DXShaderArgs* 
 
 bool DX10ShaderBuilder::processShader(const CPPRef<IFile>& file, DXShaderArgs* dxArgs, Error* error) const noexcept
 {
-    const i64 fileSize = file->size();
+    const i64 fileSize = file->Size();
 
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
     ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
-    (void) file->read(dataBuffer, fileSize);
+    (void) file->Read(dataBuffer, fileSize);
 
     return true;
 }

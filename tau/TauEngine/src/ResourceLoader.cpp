@@ -30,7 +30,7 @@ void ResourceLoader::update() noexcept
 
 static ResourceLoader::FutureData loadFileAsync(const CPPRef<IFile>& file, ResourceLoader::parseFile_f parseFile, void* parseParam, ResourceLoader::finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
 {
-    const RefDynArray<u8> fileData = file->readFile();
+    const RefDynArray<u8> fileData = file->ReadFile();
     void* fileParse = parseFile(fileData, parseParam);
     return { fileParse, finalizeParam, finalizeLoad };
 }

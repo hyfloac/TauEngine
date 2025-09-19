@@ -46,14 +46,14 @@ public:
         , _cursor(cursor)
     { }
     
-    [[nodiscard]] i64 size() noexcept override { return _file->fileSize; }
-    [[nodiscard]] bool exists() noexcept override { return true; }
-    [[nodiscard]] const wchar_t* name() noexcept override { return _name; }
+    [[nodiscard]] i64 Size() noexcept override { return _file->fileSize; }
+    [[nodiscard]] bool Exists() noexcept override { return true; }
+    [[nodiscard]] const wchar_t* Name() noexcept override { return _name; }
 
     void setPos(uSys pos) noexcept override;
-    void advancePos(iSys phase) noexcept override;
-    i64 readBytes(u8* buffer, uSys len) noexcept override;
-    i64 writeBytes(const u8* buffer, uSys len) noexcept override;
+    void AdvancePos(iSys phase) noexcept override;
+    i64 ReadBytes(u8* buffer, uSys len) noexcept override;
+    i64 WriteBytes(const u8* buffer, uSys len) noexcept override;
 private:
     [[nodiscard]] bool reserveData(uSys pages) noexcept;
     [[nodiscard]] bool assertSize(uSys targetSize) noexcept;

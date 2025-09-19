@@ -35,7 +35,7 @@ static u64 currentTimeMillis() noexcept
     /* Linux */
     struct timeval timeVal;
 
-    gettimeofday(&timeVal, null);
+    gettimeofday(&timeVal, nullptr);
 
     u64 ret = timeVal.tv_usec;
     /* Convert from micro seconds (10*-6) to milliseconds (10**-3) */
@@ -66,7 +66,7 @@ void MemoryFile::setPos(const uSys pos) noexcept
     }
 }
 
-void MemoryFile::advancePos(const iSys phase) noexcept
+void MemoryFile::AdvancePos(const iSys phase) noexcept
 {
     // Ensure the phase won't underflow.
     if(phase < 0 && -phase > static_cast<iSys>(_cursor))
@@ -79,7 +79,7 @@ void MemoryFile::advancePos(const iSys phase) noexcept
     }
 }
 
-i64 MemoryFile::readBytes(u8* const buffer, const uSys len) noexcept
+i64 MemoryFile::ReadBytes(u8* const buffer, const uSys len) noexcept
 {
     if(_props != FileProps::Read && _props != FileProps::ReadWrite)
     { return -1; }
@@ -99,7 +99,7 @@ i64 MemoryFile::readBytes(u8* const buffer, const uSys len) noexcept
     }
 }
 
-i64 MemoryFile::writeBytes(const u8* const buffer, const uSys len) noexcept
+i64 MemoryFile::WriteBytes(const u8* const buffer, const uSys len) noexcept
 {
     if(_props == FileProps::Read)
     { return -1; }
@@ -134,7 +134,7 @@ bool MemoryFile::assertSize(const uSys targetSize) noexcept
     const uSys pageBytes = (_file->committedPages - 1) * PageAllocator::pageSize();
     if(pageBytes < targetSize)
     {
-        const uSys targetPageBytes = _alignTo(targetSize, PageAllocator::pageSize());
+        const uSys targetPageBytes = AlignTo(targetSize, PageAllocator::pageSize());
         const uSys diff = targetPageBytes - pageBytes;
         const uSys targetPageCount = diff / PageAllocator::pageSize() + 4;
         return reserveData(targetPageCount);
@@ -187,7 +187,7 @@ bool MemoryFileLoader::deleteFile(const wchar_t* path) const noexcept
     if(_fileMap.count(wPath) > 0)
     {
         auto& file = _fileMap.at(wPath);
-        if(file.refCount() > 1)
+        if(file.RefCount() > 1)
         { return false; }
         _fileMap.erase(wPath);
         return true;

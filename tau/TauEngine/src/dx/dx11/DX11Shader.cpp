@@ -280,13 +280,13 @@ bool DX11ShaderBuilder::processBundle(const ShaderArgs& args, DXShaderArgs* dxAr
 
 bool DX11ShaderBuilder::processShader(const CPPRef<IFile>& file, const EShader::Stage stage, DXShaderArgs* dxArgs, Error* error) const noexcept
 {
-    const i64 fileSize = file->size();
+    const i64 fileSize = file->Size();
     
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
     ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
-    (void) file->readBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
+    (void) file->ReadBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
 
     return true;
 }

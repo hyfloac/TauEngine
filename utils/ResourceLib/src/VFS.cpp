@@ -147,7 +147,7 @@ VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0) co
     { return VFS::Container::Static({ }, { }, nullptr); }
 
     WDynString pathCompound(path);
-    pathCompound = pathCompound.concat(subPath0);
+    pathCompound = pathCompound.Concat(subPath0);
 
     return resolvePath(pathCompound);
 }
@@ -162,7 +162,7 @@ VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0, co
     { return VFS::Container::Static({ }, { }, nullptr); }
 
     WDynString pathCompound(path);
-    pathCompound = pathCompound.concat(subPath0).concat(subPath1);
+    pathCompound = pathCompound.Concat(subPath0).Concat(subPath1);
 
     return resolvePath(pathCompound);
 }
@@ -177,7 +177,7 @@ VFS::Container VFS::resolvePath(const wchar_t* path, const wchar_t* subPath0, co
     { return VFS::Container::Static({ }, { }, nullptr); }
 
     WDynString pathCompound(path);
-    pathCompound = pathCompound.concat(subPath0).concat(subPath1).concat(subPath2);
+    pathCompound = pathCompound.Concat(subPath0).Concat(subPath1).Concat(subPath2);
 
     return resolvePath(pathCompound);
 }
@@ -192,7 +192,7 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0) const no
     { return VFS::Container::Static({ }, { }, nullptr); }
 
     DynString pathCompound(path);
-    pathCompound = pathCompound.concat(subPath0);
+    pathCompound = pathCompound.Concat(subPath0);
 
     return resolvePath(StringCast<wchar_t>(pathCompound));
 }
@@ -207,7 +207,7 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const ch
     { return VFS::Container::Static({ }, { }, nullptr); }
 
     DynString pathCompound(path);
-    pathCompound = pathCompound.concat(subPath0).concat(subPath1);
+    pathCompound = pathCompound.Concat(subPath0).Concat(subPath1);
 
     return resolvePath(StringCast<wchar_t>(pathCompound));
 }
@@ -222,7 +222,7 @@ VFS::Container VFS::resolvePath(const char* path, const char* subPath0, const ch
     { return VFS::Container::Static({ }, { }, nullptr); }
 
     DynString pathCompound(path);
-    pathCompound = pathCompound.concat(subPath0).concat(subPath1).concat(subPath2);
+    pathCompound = pathCompound.Concat(subPath0).Concat(subPath1).Concat(subPath2);
 
     return resolvePath(StringCast<wchar_t>(pathCompound));
 }
@@ -655,7 +655,7 @@ WDynStringView VFS::getFileName(const WDynStringView& path) noexcept
 
 DynStringView VFS::getFileName(const DynString& path) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
@@ -673,7 +673,7 @@ DynStringView VFS::getFileName(const DynString& path) noexcept
 
 DynStringView VFS::getFileName(const DynStringView& path) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
@@ -691,7 +691,7 @@ DynStringView VFS::getFileName(const DynStringView& path) noexcept
 
 WDynStringView VFS::getFileExt(const WDynString& path, const bool includeDot) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return WDynStringView(path, 0, 0); }
 
@@ -717,7 +717,7 @@ WDynStringView VFS::getFileExt(const WDynString& path, const bool includeDot) no
 
 WDynStringView VFS::getFileExt(const WDynStringView& path, const bool includeDot) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return WDynStringView(path, 0, 0); }
 
@@ -743,7 +743,7 @@ WDynStringView VFS::getFileExt(const WDynStringView& path, const bool includeDot
 
 DynStringView VFS::getFileExt(const DynString& path, const bool includeDot) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
@@ -769,7 +769,7 @@ DynStringView VFS::getFileExt(const DynString& path, const bool includeDot) noex
 
 DynStringView VFS::getFileExt(const DynStringView& path, const bool includeDot) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { return DynStringView(path, 0, 0); }
 
@@ -795,7 +795,7 @@ DynStringView VFS::getFileExt(const DynStringView& path, const bool includeDot) 
 
 WDynStringView VFS::getParentFolder(const WDynString& path, bool includePathSeparator) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
@@ -816,7 +816,7 @@ WDynStringView VFS::getParentFolder(const WDynString& path, bool includePathSepa
 
 WDynStringView VFS::getParentFolder(const WDynStringView& path, bool includePathSeparator) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
@@ -837,7 +837,7 @@ WDynStringView VFS::getParentFolder(const WDynStringView& path, bool includePath
 
 DynStringView VFS::getParentFolder(const DynString& path, bool includePathSeparator) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 
@@ -858,7 +858,7 @@ DynStringView VFS::getParentFolder(const DynString& path, bool includePathSepara
 
 DynStringView VFS::getParentFolder(const DynStringView& path, bool includePathSeparator) noexcept
 {
-    iSys i = static_cast<uSys>(path.length() - 1);
+    iSys i = static_cast<iSys>(path.length() - 1);
     if(path[static_cast<uSys>(i)] == '/' || path[static_cast<uSys>(i)] == '\\')
     { --i; }
 

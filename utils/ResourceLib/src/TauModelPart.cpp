@@ -36,14 +36,14 @@ struct TauModelPartHeader final
 
 DynArray<TauModelPart> TauModelPart::parse(const CPPRef<IFile>& file) noexcept
 {
-    const uSys fileSize = file->size();
+    const uSys fileSize = file->Size();
     if(fileSize < sizeof(TauModelHeader))
     { return DynArray<TauModelPart>(0); }
 
     uSys index = 0;
 
     TauModelHeader modelHeader {};
-    file->readType(&modelHeader);
+    file->ReadType(&modelHeader);
     index += sizeof(modelHeader);
 
     if(modelHeader.magic != TAU_MODEL_MAGIC)
@@ -61,7 +61,7 @@ DynArray<TauModelPart> TauModelPart::parse(const CPPRef<IFile>& file) noexcept
         if(index + sizeof(TauModelDebugHeader) > fileSize)
         { return DynArray<TauModelPart>(0); }
 
-        file->readType(&debugModelHeader);
+        file->ReadType(&debugModelHeader);
         index += sizeof(debugModelHeader);
     }
 
