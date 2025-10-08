@@ -78,7 +78,7 @@ public:
     [[nodiscard]] virtual bool IsFolder(const C8DynString& path) const noexcept = 0;
     [[nodiscard]] virtual bool IsSymlink(const C8DynString& path) const noexcept = 0;
 
-    [[nodiscard]] virtual IFile* Load(const C8DynString& path, FileProps props) const noexcept = 0;
+    [[nodiscard]] virtual IFileStream* Load(const C8DynString& path, FileProps props) const noexcept = 0;
 
     [[nodiscard]] virtual bool CreateFolders(const C8DynString& path) const noexcept = 0;
 

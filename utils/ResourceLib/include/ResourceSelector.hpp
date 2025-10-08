@@ -32,7 +32,7 @@ public:
     [[nodiscard]] const C8DynString& path() const noexcept { return m_Path; }
     [[nodiscard]] const ::tau::com::ComRef<::tau::IFileLoader>& loader() const noexcept { return m_Loader; }
 
-    [[nodiscard]] CPPRef<::tau::IFile> loadFile(const ::tau::FileProps props) const noexcept;
+    [[nodiscard]] CPPRef<::tau::IFileStream> loadFile(const ::tau::FileProps props) const noexcept;
 private:
     uSys m_Index;
     C8DynString m_Name;
@@ -136,13 +136,16 @@ class Lexer final
     DEFAULT_DESTRUCT(Lexer);
     DEFAULT_COPY(Lexer);
 private:
-    CPPRef<IFile> _file;
+    ::tau::com::ComRef<tau::IStream> _file;
     Token _currentToken;
     DynString _currentString;
     char _currentChar;
 public:
-    inline Lexer(const CPPRef<IFile>& file) noexcept
-        : _file(file), _currentToken(Token::Unknown), _currentString(""), _currentChar('\0')
+    inline Lexer(const ::tau::com::ComRef<tau::IStream>& file) noexcept
+        : _file(file)
+        , _currentToken(Token::Unknown)
+        , _currentString("")
+        , _currentChar('\0')
     { }
 
     [[nodiscard]] Token getCurrentToken() const noexcept { return _currentToken; }

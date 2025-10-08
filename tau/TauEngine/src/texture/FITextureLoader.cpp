@@ -213,10 +213,10 @@ NullableRef<IResource> TextureLoader::loadTexture(IGraphicsInterface& gi, IRende
 
     FIBITMAP* texture = null;
     
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.basePath.length() == 0);
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.subPath.length() == 0);
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.BasePath.length() == 0);
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.SubPath.length() == 0);
 
-    WDynString path = physPath.basePath + physPath.subPath;
+    WDynString path = physPath.BasePath + physPath.SubPath;
     DynString strPath = StringCast<char>(path);
 
     const char* fileName = strPath.c_str();
@@ -308,10 +308,10 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
 
         FIBITMAP* texture = null;
 
-        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.basePath.length() == 0);
-        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.subPath.length() == 0);
+        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.BasePath.length() == 0);
+        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.SubPath.length() == 0);
 
-        WDynString path = physPath.basePath + physPath.subPath;
+        WDynString path = physPath.BasePath + physPath.SubPath;
         DynString strPath = StringCast<char>(path);
 
         const char* fileName = strPath.c_str();

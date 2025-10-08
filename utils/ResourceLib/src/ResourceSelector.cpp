@@ -37,16 +37,16 @@ static void writeCache(const VFS::Container& con, const ParseData& parseData, uS
 static void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept;
 
 static bool _fileExists(const VFS::Container& con) noexcept
-{ return con.fileLoader->fileExists(con.basePath, con.subPath); }
+{ return con.FileLoader->Exists(con.BasePath, con.SubPath); }
 
 static CPPRef<IFile> _loadFile(const VFS::Container& con, const FileProps props = FileProps::Read) noexcept
-{ return con.fileLoader->load(con.basePath, con.subPath, props); }
+{ return con.FileLoader->load(con.BasePath, con.SubPath, props); }
 
 static u64 _creationTime(const VFS::Container& con) noexcept
-{ return con.fileLoader->creationTime(con.basePath, con.subPath); }
+{ return con.FileLoader->creationTime(con.BasePath, con.SubPath); }
 
 static u64 _modifyTime(const VFS::Container& con) noexcept
-{ return con.fileLoader->modifyTime(con.basePath, con.subPath); }
+{ return con.FileLoader->modifyTime(con.BasePath, con.SubPath); }
 
 CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
 { return m_Loader->load(m_Path, props); }
@@ -54,7 +54,7 @@ CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
 RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
 {
     const VFS::Container cacheDir = VFS::Instance().resolvePath(_cacheDir, path);
-    if(!cacheDir.fileLoader->createFolders(cacheDir.basePath, cacheDir.subPath))
+    if(!cacheDir.FileLoader->createFolders(cacheDir.BasePath, cacheDir.SubPath))
     { return RefDynArray<SelectedResource>(0); }
 
     const VFS::Container binaryCache = VFS::Instance().resolvePath(_cacheDir, path, filename, ".tauibcache");
@@ -119,8 +119,8 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
         const uSys ind = res.index;
         ret[ind].m_Index = ind;
         ret[ind].m_Name = res.filePath;
-        ret[ind].m_Path = StringCast<char>(WDynString(vfsRes.basePath).Concat(vfsRes.subPath));
-        ret[ind].m_Loader = vfsRes.fileLoader;
+        ret[ind].m_Path = StringCast<char>(WDynString(vfsRes.BasePath).Concat(vfsRes.SubPath));
+        ret[ind].m_Loader = vfsRes.FileLoader;
     }
 
     return ret;
