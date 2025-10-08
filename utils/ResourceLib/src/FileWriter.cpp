@@ -2,13 +2,15 @@
 #include "IFile.hpp"
 #include <allocator/PageAllocator.hpp>
 
-FileWriter::FileWriter(const CPPRef<IFile>& file) noexcept
-    : _file(file)
+FileWriter::FileWriter(const tau::com::ComRef<tau::IStream>& stream) noexcept
+    : m_Stream(stream)
     , _fileIndex(0)
     , _bufferIndex(0)
     , _bufferSize(TAU_FW_BUFFER_PAGE_CNT * PageAllocator::pageSize())
     , _buffer(PageAllocator::alloc(TAU_FW_BUFFER_PAGE_CNT))
-{ file->setPos(0); }
+{
+    stream->Position(0, tau::ESeekOrigin::Begin);
+}
 
 FileWriter::~FileWriter() noexcept
 {
@@ -22,13 +24,9 @@ i64 FileWriter::flush() noexcept
     if(_bufferIndex == 0)
     { return 0; }
 
-    const i64 writeCount = _file->write(_buffer, _bufferIndex - 1);
+    m_Stream->Write(_buffer, _bufferIndex - 1);
 
-    // Did we fail to write?
-    if(writeCount <= 0)
-    { return 0; }
-
-    _fileIndex += writeCount;
+    _fileIndex += _bufferIndex - 1;
     _bufferIndex = 0;
 
     return 0;
@@ -96,13 +94,9 @@ i64 FileWriter::write2(const void* buffer) noexcept
         (void) ::std::memcpy(reinterpret_cast<u8*>(_buffer) + _bufferIndex, buffer, 1);
 
         // Flush the buffer.
-        const i64 writeCount = _file->write(_buffer, _bufferSize);
+        m_Stream->Write(_buffer, _bufferSize);
 
-        // Did we fail to write?
-        if(writeCount <= 0)
-        { return 0; }
-
-        _fileIndex += writeCount;
+        _fileIndex += _bufferIndex;
 
         // Set index to 1 because we are in a new buffer.
         _bufferIndex = 1;

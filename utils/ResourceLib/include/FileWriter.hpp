@@ -9,8 +9,13 @@
 #include <NumTypes.hpp>
 #include <Endian.hpp>
 #include <cstring>
+#include <TauCOM.hpp>
 
-class IFile;
+namespace tau {
+
+class IStream;
+
+}
 
 #ifndef TAU_FW_BUFFER_PAGE_CNT
   #define TAU_FW_BUFFER_PAGE_CNT (16)
@@ -78,18 +83,12 @@ struct WriteVal<_T, Endian::EndianBig> final
 class FileWriter final
 {
     DELETE_CM(FileWriter);
-private:
-    CPPRef<IFile> _file;
-    u64 _fileIndex;
-    uSys _bufferIndex;
-    uSys _bufferSize;
-    void* _buffer;
 public:
-    FileWriter(const CPPRef<IFile>& file) noexcept;
+    FileWriter(const tau::com::ComRef<tau::IStream>& stream) noexcept;
 
     ~FileWriter() noexcept;
 
-    [[nodiscard]] const CPPRef<IFile>& file() const noexcept { return _file; }
+    [[nodiscard]] const tau::com::ComRef<tau::IStream>& Stream() const noexcept { return m_Stream; }
     [[nodiscard]] u64 index() const noexcept { return _fileIndex + _bufferIndex; }
 
     /**
@@ -278,6 +277,12 @@ private:
 
         return _BufferSize;
     }
+private:
+    tau::com::ComRef<tau::IStream> m_Stream;
+    u64 _fileIndex;
+    uSys _bufferIndex;
+    uSys _bufferSize;
+    void* _buffer;
 };
 
 template<>
