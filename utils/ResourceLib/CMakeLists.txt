@@ -3,8 +3,6 @@ project(ResourceLib VERSION 1.0.0 LANGUAGES CXX C)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
-# We use this to check for some compiler flags, mostly to disable warnings.
-include(CheckCCompilerFlag)
 # This is a helper utility for generating the folder layout in VS.
 include(GenVsFilters)
 include(SetCompileFlags)
@@ -33,12 +31,15 @@ find_package(glm REQUIRED)
 find_package(EASTL REQUIRED)
 find_package(tomlplusplus REQUIRED)
 
+add_dependencies(${PROJECT_NAME} LZMA::LZMA)
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
     tauutils::tauutils
     taucom::taucom
     glm::glm
     EASTL::EASTL
     tomlplusplus::tomlplusplus
+    LZMA::LZMA
 )
 
 SetCompileFlags(${PROJECT_NAME} PUBLIC PRIVATE ${BUILD_SHARED_LIBS})
@@ -48,6 +49,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     -DGLM_ENABLE_EXPERIMENTAL
     -D_ALLOW_RANDOM_DISTRIBUTION_CONST_OPERATOR
     -DTOML_EXCEPTIONS=0
+    -DTAU_COM_USE_TAU_UTILS
 )
 
 install(

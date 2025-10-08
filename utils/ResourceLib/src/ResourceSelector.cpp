@@ -49,7 +49,7 @@ static u64 _modifyTime(const VFS::Container& con) noexcept
 { return con.fileLoader->modifyTime(con.basePath, con.subPath); }
 
 CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
-{ return _loader->load(_path, props); }
+{ return m_Loader->load(m_Path, props); }
 
 RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
 {
@@ -117,10 +117,10 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
         const VFS::Container vfsRes = VFS::Instance().resolvePath(vfsMount, path, resourceData.resources[i].filePath);
         const auto& res = resourceData.resources[i];
         const uSys ind = res.index;
-        ret[ind]._index = ind;
-        ret[ind]._name = res.filePath;
-        ret[ind]._path = StringCast<char>(WDynString(vfsRes.basePath).Concat(vfsRes.subPath));
-        ret[ind]._loader = vfsRes.fileLoader;
+        ret[ind].m_Index = ind;
+        ret[ind].m_Name = res.filePath;
+        ret[ind].m_Path = StringCast<char>(WDynString(vfsRes.basePath).Concat(vfsRes.subPath));
+        ret[ind].m_Loader = vfsRes.fileLoader;
     }
 
     return ret;

@@ -44,7 +44,7 @@ public:
     {
         if(m_File)
         {
-            fclose(m_File);
+            (void) fclose(m_File);
         }
     }
 
@@ -174,8 +174,8 @@ private:
 class CFileLoader final : public IFileLoader
 {
     DEFAULT_CONSTRUCT_PU(CFileLoader);
-    DEFAULT_DESTRUCT(CFileLoader);
-    DEFAULT_CM_PO(CFileLoader);
+    DEFAULT_DESTRUCT_O(CFileLoader);
+    DELETE_CM(CFileLoader);
     TAU_COM_IMPL_REF_COUNT();
 public:
     // IUnknown
@@ -198,7 +198,7 @@ public:
 
         if((file = _wfopen(widePath, "r")))
         {
-            fclose(file);
+            (void) fclose(file);
             return true;
         }
 #else
@@ -251,7 +251,7 @@ public:
             return nullptr;
         }
 
-        return new CFile(handle, path, props);
+        return BasicTauAllocator<AllocationTracking::None>::Instance().AllocateT<CFile>(handle, path, props);
     }
 
     [[nodiscard]] bool CreateFolders(const C8DynString& path) const noexcept override

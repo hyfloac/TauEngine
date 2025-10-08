@@ -5,36 +5,39 @@
 #include <Safeties.hpp>
 #include <DynArray.hpp>
 #include <String.hpp>
+#include <TauCOM.hpp>
 #include <unordered_map>
-
-enum class FileProps;
-class IFile;
-class IFileLoader;
+#include "IFile.hpp"
 
 class SelectedResource final
 {
+    DEFAULT_CONSTRUCT_PU(SelectedResource);
     DEFAULT_DESTRUCT(SelectedResource);
     DEFAULT_COPY(SelectedResource);
-private:
-    uSys _index;
-    DynString _name;
-    DynString _path;
-    CPPRef<IFileLoader> _loader;
 public:
-    inline SelectedResource() noexcept
-        : _index(0), _name(""), _path(""), _loader(nullptr)
+    SelectedResource(
+        const uSys index,
+        const C8DynString& name,
+        const C8DynString& path,
+        const ::tau::com::ComRef<::tau::IFileLoader>& fileLoader
+    ) noexcept
+        : m_Index(index)
+        , m_Name(name)
+        , m_Path(path)
+        , m_Loader(fileLoader)
     { }
 
-    inline SelectedResource(const uSys index, const DynString& name, const DynString& path, const CPPRef<IFileLoader>& fileLoader) noexcept
-        : _index(index), _name(name), _path(path), _loader(fileLoader)
-    { }
+    [[nodiscard]] uSys index() const noexcept { return m_Index; }
+    [[nodiscard]] const C8DynString& name() const noexcept { return m_Name; }
+    [[nodiscard]] const C8DynString& path() const noexcept { return m_Path; }
+    [[nodiscard]] const ::tau::com::ComRef<::tau::IFileLoader>& loader() const noexcept { return m_Loader; }
 
-    [[nodiscard]] uSys index() const noexcept { return _index; }
-    [[nodiscard]] const DynString& name() const noexcept { return _name; }
-    [[nodiscard]] const DynString& path() const noexcept { return _path; }
-    [[nodiscard]] const CPPRef<IFileLoader>& loader() const noexcept { return _loader; }
-
-    [[nodiscard]] CPPRef<IFile> loadFile(FileProps props) const noexcept;
+    [[nodiscard]] CPPRef<::tau::IFile> loadFile(const ::tau::FileProps props) const noexcept;
+private:
+    uSys m_Index;
+    C8DynString m_Name;
+    C8DynString m_Path;
+    ::tau::com::ComRef<::tau::IFileLoader> m_Loader;
 private:
     friend class ResourceSelectorLoader;
 };
@@ -44,6 +47,7 @@ class NOVTABLE IResourceSelectorTransformer
     DEFAULT_CONSTRUCT_PO(IResourceSelectorTransformer);
     DEFAULT_DESTRUCT_VI(IResourceSelectorTransformer);
     DELETE_COPY(IResourceSelectorTransformer);
+    DEFAULT_MOVE(IResourceSelectorTransformer);
 public:
     using ResIndex = uSys;
 public:
@@ -52,23 +56,27 @@ public:
 
 class HashTableResourceSelectorTransformer final : public IResourceSelectorTransformer
 {
-    DEFAULT_DESTRUCT(HashTableResourceSelectorTransformer);
+    DEFAULT_CONSTRUCT_PU(HashTableResourceSelectorTransformer);
+    DEFAULT_DESTRUCT_O(HashTableResourceSelectorTransformer);
     DELETE_COPY(HashTableResourceSelectorTransformer);
-private:
-    ::std::unordered_map<DynString, uSys> _transforms;
+    DEFAULT_MOVE(HashTableResourceSelectorTransformer);
 public:
-    HashTableResourceSelectorTransformer() noexcept
-    { }
-
     void addTransform(const DynString& key, ResIndex value)
-    { _transforms.insert_or_assign(key, value); }
+    {
+        _transforms.insert_or_assign(key, value);
+    }
 
     [[nodiscard]] ResIndex transform(const DynString& key) noexcept override
     {
-        if(_transforms.count(key))
-        { return _transforms[key]; }
+        if(_transforms.contains(key))
+        {
+            return _transforms[key];
+        }
+
         return -1;
     }
+private:
+    ::std::unordered_map<DynString, uSys> _transforms;
 };
 
 class ResourceSelector final
@@ -79,7 +87,7 @@ private:
     using RST = IResourceSelectorTransformer;
 private:
     RefDynArray<SelectedResource> _files;
-    const CPPRef<RST> _rst;
+    CPPRef<RST> _rst;
 public:
     ResourceSelector(const RefDynArray<SelectedResource>& files, const CPPRef<RST>& rst) noexcept
         : _files(files), _rst(rst)
@@ -147,4 +155,5 @@ private:
 
     DynString readString() noexcept;
 };
+
 }
