@@ -1,6 +1,9 @@
+# We use this to check for some compiler flags, mostly to disable warnings.
+include(CheckCCompilerFlag)
+
 function(SetCompileFlags ProjectName PublicType PrivateType UseDLL)
     # Set C++20
-    target_compile_features(${ProjectName} ${PublicType} cxx_std_20)
+    target_compile_features(${ProjectName} ${PublicType} cxx_std_23)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")

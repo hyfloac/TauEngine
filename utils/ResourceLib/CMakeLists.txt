@@ -31,15 +31,12 @@ find_package(glm REQUIRED)
 find_package(EASTL REQUIRED)
 find_package(tomlplusplus REQUIRED)
 
-add_dependencies(${PROJECT_NAME} LZMA::LZMA)
-
 target_link_libraries(${PROJECT_NAME} PUBLIC
     tauutils::tauutils
     taucom::taucom
     glm::glm
     EASTL::EASTL
     tomlplusplus::tomlplusplus
-    LZMA::LZMA
 )
 
 SetCompileFlags(${PROJECT_NAME} PUBLIC PRIVATE ${BUILD_SHARED_LIBS})
