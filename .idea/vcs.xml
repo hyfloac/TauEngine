@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/libs/OpenVR" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/libs/SDL3" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/libs/TauUtils" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/libs/fmt" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/libs/glm" vcs="Git" />
