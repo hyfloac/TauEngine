@@ -37,6 +37,8 @@ public:
     enum class ErrorCode : i8
     {
         EndOfFile = -1,
+        ReadOnly = -2,
+        WriteOnly = -3
     };
 public:
     /**
@@ -81,15 +83,21 @@ public:
 
     virtual ::std::expected<uSys, ErrorCode> Read(void* const buffer, const uSys count) = 0;
 
-    virtual ::std::expected<uSys, ErrorCode> Read(const ::std::span<u8>& buffer) = 0;
+    virtual ::std::expected<uSys, ErrorCode> Read(const ::std::span<u8>& buffer)
+    {
+        return Read(buffer.data(), buffer.size());
+    }
 
     [[nodiscard]] virtual ::std::expected<u8, ErrorCode> ReadByte() = 0;
 
     virtual void Write(const void* const buffer, const uSys count) = 0;
 
-    virtual void Write(const ::std::span<u8>& buffer) = 0;
+    virtual void Write(const ::std::span<u8>& buffer)
+    {
+        Write(buffer.data(), buffer.size());
+    }
 
-    virtual void Flush() = 0;
+    virtual void Flush() { }
 };
 
 class ITimeoutStream : public com::IUnknown

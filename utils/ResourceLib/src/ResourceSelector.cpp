@@ -4,6 +4,8 @@
 
 #include <TUMaths.hpp>
 
+using VFS = tau::VFS;
+
 using RST = IResourceSelectorTransformer;
 
 DynString ResourceSelectorLoader::_cacheDir = "";

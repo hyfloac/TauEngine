@@ -15,7 +15,7 @@ namespace tau {
  * handling system. In general there may be a much faster
  * and more optimized implementation like {@link Win32File @endlink}.
  */
-class CFile final : public IFile, ICFile
+class CFile final : public IFileStream, ICFile
 {
     DELETE_CM(CFile);
     TAU_COM_IMPL_REF_COUNT();
@@ -59,9 +59,9 @@ public:
             return RC_NullParam;
         }
 
-        if(iid == iid_of<IUnknown> || iid == iid_of<IFile>)
+        if(iid == iid_of<IUnknown> || iid == iid_of<IStream> || iid == iid_of<IFileStream>)
         {
-            *pInterface = static_cast<IFile*>(this);
+            *pInterface = static_cast<IFileStream*>(this);
         }
         else if(iid == iid_of<ICFile>)
         {
@@ -76,9 +76,32 @@ public:
         return RC_Success;
     }
 
-    // IFile
+    // IStream
 
-    [[nodiscard]] i64 Size() noexcept override
+    [[nodiscard]] bool CanRead() const noexcept override
+    {
+        return m_Props == FileProps::Read || m_Props == FileProps::ReadWrite;
+    }
+
+    [[nodiscard]] bool CanWrite() const noexcept override
+    {
+        switch(m_Props)
+        {
+            case FileProps::WriteNew:
+            case FileProps::WriteOverwrite:
+            case FileProps::WriteAppend:
+            case FileProps::ReadWrite:
+                return true;
+            default: return false;
+        }
+    }
+
+    [[nodiscard]] bool CanSeek() const noexcept override
+    {
+        return true;
+    }
+
+    [[nodiscard]] i64 Length() const noexcept override
     {
 #ifdef _WIN32
         const i64 curPos = _ftelli64(m_File);
@@ -103,57 +126,75 @@ public:
         return size;
     }
 
-    [[nodiscard]] bool Exists() noexcept override { return m_File != nullptr; }
+    [[nodiscard]] i64 Position() const noexcept override
+    {
+#ifdef _WIN32
+        return _ftelli64(m_File);
+#else
+        return ftell(m_File);
+#endif
+    }
+
+    i64 Position(const i64 pos, const ESeekOrigin origin) noexcept override
+    {
+        int whence;
+        switch(origin)
+        {
+            case ESeekOrigin::Begin:
+                whence = SEEK_SET;
+                break;
+            case ESeekOrigin::Current:
+                whence = SEEK_CUR;
+                break;
+            case ESeekOrigin::End:
+                whence = SEEK_END;
+                break;
+            default: return Position();
+        }
+
+#ifdef _WIN32
+        (void) _fseeki64(m_File, pos, whence);
+#else
+        (void) fseek(m_File, pos, whence);
+#endif
+        return Position();
+    }
+
+    ::std::expected<uSys, ErrorCode> Read(void* const buffer, const uSys len) override
+    {
+        if(!CanRead())
+        {
+            return ::std::unexpected(ErrorCode::ReadOnly);
+        }
+
+        return fread(buffer, 1, len, m_File);
+    }
+
+    ::std::expected<u8, ErrorCode> ReadByte() override
+    {
+        if(!CanRead())
+        {
+            return ::std::unexpected(ErrorCode::ReadOnly);
+        }
+
+        u8 ret;
+        (void) fread(&ret, 1, 1, m_File);
+        return ret;
+    }
+
+    void Write(const void* const buffer, const uSys len) override
+    {
+        if(!CanWrite())
+        {
+            assert(false);
+        }
+
+        (void) fwrite(buffer, 1, len, m_File);
+    }
+
+    // IFileStream
 
     [[nodiscard]] C8DynString Name() noexcept override { return m_Name; }
-
-    void SetPos(const i64 pos) noexcept override
-    {
-#ifdef _WIN32
-        (void) _fseeki64(m_File, pos, SEEK_SET);
-#else
-        (void) fseek(m_File, pos, SEEK_SET);
-#endif
-    }
-
-    void AdvancePos(const i64 phase) noexcept override
-    {
-#ifdef _WIN32
-        (void) _fseeki64(m_File, pos, SEEK_CUR);
-#else
-        (void) fseek(m_File, phase, SEEK_CUR);
-#endif
-    }
-
-    i64 ReadBytes(u8* const buffer, const uSys len) noexcept override
-    {
-        if(m_Props != FileProps::Read && m_Props != FileProps::ReadWrite)
-        {
-            return -1;
-        }
-
-        return fread(buffer, sizeof(u8), len, m_File);
-    }
-
-    i64 WriteBytes(const u8* buffer, uSys len) noexcept override
-    {
-        if(m_Props == FileProps::Read)
-        {
-            return -1;
-        }
-
-        return fwrite(buffer, sizeof(u8), len, m_File);
-    }
-
-    int ReadChar() noexcept override
-    {
-        if(m_Props == FileProps::Read)
-        {
-            return -1;
-        }
-
-        return fgetc(m_File);
-    }
 
     // ICFile
 
@@ -219,7 +260,7 @@ public:
         return ::std::filesystem::is_symlink(path.String(), ec);
     }
 
-    [[nodiscard]] IFile* Load(const C8DynString& path, FileProps props) const noexcept override
+    [[nodiscard]] IFileStream* Load(const C8DynString& path, FileProps props) const noexcept override
     {
         FILE* handle;
 #ifdef _WIN32
@@ -251,6 +292,7 @@ public:
             return nullptr;
         }
 
+        // ReSharper disable once CppRedundantTemplateArguments
         return BasicTauAllocator<AllocationTracking::None>::Instance().AllocateT<CFile>(handle, path, props);
     }
 

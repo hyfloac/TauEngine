@@ -9,8 +9,13 @@
 #include <NumTypes.hpp>
 #include <Endian.hpp>
 #include <cstring>
+#include <TauCOM.hpp>
 
-class IFile;
+namespace tau {
+
+class IStream;
+
+}
 
 #ifndef TAU_FR_BUFFER_PAGE_CNT
   #define TAU_FR_BUFFER_PAGE_CNT (16)
@@ -80,19 +85,15 @@ struct ReadVal<_T, Endian::EndianBig> final
 class FileReader final
 {
     DELETE_CM(FileReader);
-private:
-    CPPRef<IFile> _file;
-    u64 _fileIndex;
-    uSys _bufferIndex;
-    uSys _bufferSize;
-    uSys _bufferFillCount;
-    void* _buffer;
 public:
-    FileReader(const CPPRef<IFile>& file) noexcept;
+    template<typename T>
+    using ComRef = ::tau::com::ComRef<T>;
+public:
+    FileReader(const ComRef<tau::IStream>& stream) noexcept;
 
     ~FileReader() noexcept;
 
-    [[nodiscard]] const CPPRef<IFile>& file() const noexcept { return _file; }
+    [[nodiscard]] const ComRef<tau::IStream>& Stream() const noexcept { return _file; }
     [[nodiscard]] u64 index() const noexcept { return _fileIndex; }
     
     /**
@@ -295,6 +296,13 @@ private:
 
         return _BufferSize;
     }
+private:
+    ComRef<tau::IStream> _file;
+    u64 _fileIndex;
+    uSys _bufferIndex;
+    uSys _bufferSize;
+    uSys _bufferFillCount;
+    void* _buffer;
 };
 
 template<>

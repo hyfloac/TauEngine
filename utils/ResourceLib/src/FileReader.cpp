@@ -2,14 +2,14 @@
 #include "IFile.hpp"
 #include <allocator/PageAllocator.hpp>
 
-FileReader::FileReader(const CPPRef<IFile>& file) noexcept
-    : _file(file)
+FileReader::FileReader(const ComRef<tau::IStream>& stream) noexcept
+    : _file(stream)
     , _fileIndex(0)
     , _bufferIndex(0)
     , _bufferSize(TAU_FR_BUFFER_PAGE_CNT * PageAllocator::pageSize())
     , _bufferFillCount(0)
     , _buffer(PageAllocator::alloc(TAU_FR_BUFFER_PAGE_CNT))
-{ file->setPos(0); }
+{ }
 
 FileReader::~FileReader() noexcept
 {
@@ -163,14 +163,14 @@ i64 FileReader::readCountSafe(void* const buffer, const uSys bufferSize) noexcep
 
 i64 FileReader::bufferData() noexcept
 {
-    const iSys fillCount = _file->read(_buffer, _bufferSize);
-    if(fillCount <= 0)
-    { return fillCount; }
+    const auto fillCount = _file->Read(_buffer, _bufferSize);
+    if(!fillCount)
+    { return -1; }
 
-    _fileIndex += fillCount;
-    _bufferFillCount = fillCount;
+    _fileIndex += fillCount.value();
+    _bufferFillCount = fillCount.value();
     _bufferIndex = 0;
-    return fillCount;
+    return fillCount.value();
 }
 
 

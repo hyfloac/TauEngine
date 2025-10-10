@@ -138,11 +138,6 @@ public:
         return n;
     }
 
-    std::expected<uSys, ErrorCode> Read(const std::span<u8>& buffer) override
-    {
-        return Read(buffer.data(), buffer.size());
-    }
-
     [[nodiscard]] std::expected<u8, ErrorCode> ReadByte() override
     {
         if(m_Position >= m_Length)
@@ -183,11 +178,6 @@ public:
 
         (void) ::std::memcpy(m_Buffer.Array() + m_Position, buffer, i);
         m_Position = i;
-    }
-
-    void Write(const std::span<u8>& buffer) override
-    {
-        Write(buffer.data(), buffer.size());
     }
 
     void Flush() override { }
@@ -234,7 +224,7 @@ private:
 
     void DestroySelf() noexcept;
 
-    com::EResultCode Factory(
+    static com::EResultCode Factory(
         const com::UUID& iid,
         void** const pInterface,
         const com::BaseConstructionInfo* const pConstructionInfo
@@ -392,11 +382,6 @@ public:
         return n;
     }
 
-    std::expected<uSys, ErrorCode> Read(const std::span<u8>& buffer) override
-    {
-        return Read(buffer.data(), buffer.size());
-    }
-
     [[nodiscard]] std::expected<u8, ErrorCode> ReadByte() override
     {
         if(m_Position >= m_Length)
@@ -421,13 +406,6 @@ public:
         (void) ::std::memcpy(m_Buffer + m_Position, buffer, i);
         m_Position = i;
     }
-
-    void Write(const std::span<u8>& buffer) override
-    {
-        return Write(buffer.data(), buffer.size());
-    }
-
-    void Flush() override { }
 private:
     iSys SeekCore(const iSys offset, const iSys loc)
     {
@@ -439,7 +417,7 @@ private:
 
     void DestroySelf() noexcept;
 
-    com::EResultCode Factory(
+    static com::EResultCode Factory(
         const com::UUID& iid,
         void** const pInterface,
         const com::BaseConstructionInfo* const pConstructionInfo

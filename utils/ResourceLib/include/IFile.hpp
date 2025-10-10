@@ -63,9 +63,9 @@ public:
 };
 
 /**
- * An interface used to load {@link IFile @endlink}'s.
+ * An interface used to load {@link IFileStream @endlink}'s.
  *
- *   Any implementation of {@link IFile @endlink} should implement
+ *   Any implementation of {@link IFileStream @endlink} should implement
  * a corresponding {@link IFileLoader @endlink}.
  */
 class IFileLoader : public com::IUnknown
@@ -93,7 +93,3 @@ public:
 
 TAU_DECL_UUID(tau::IFileStream, 0x41C9E07BFF04414Cull, 0x93201E3C44C15661ull);
 TAU_DECL_UUID(tau::IFileLoader, 0xDC11BD20E41544ABull, 0xA6F1E040DFEA5506ull);
-
-// using tau::FileProps;
-// using tau::IFile;
-// using tau::IFileLoader;
