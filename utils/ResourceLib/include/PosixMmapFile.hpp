@@ -36,7 +36,7 @@ public:
  *   Returns a loader instance that produces read-only POSIX
  * @c mmap-backed file handles.
  */
-[[nodiscard]] com::ComRef<IFileLoader> GetPosixMmapFileLoader() noexcept;
+[[nodiscard]] com::ComRef<IFileLoader> CreatePosixMmapFileLoader() noexcept;
 
 }
 

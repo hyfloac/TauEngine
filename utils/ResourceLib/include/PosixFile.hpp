@@ -31,7 +31,7 @@ public:
  *   Returns a shared loader instance that produces
  * @link PosixFile @endlink handles.
  */
-[[nodiscard]] com::ComRef<IFileLoader> GetPosixFileLoader() noexcept;
+[[nodiscard]] com::ComRef<IFileLoader> CreatePosixFileLoader() noexcept;
 
 }
 

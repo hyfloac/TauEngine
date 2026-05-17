@@ -41,6 +41,29 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LZMA::LZMA)
 
+# NVIDIA stdexec — reference implementation of the C++26 std::execution
+# proposal. Used for the io_uring async file backend on Linux.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include(FetchContent)
+    FetchContent_Declare(
+        stdexec
+        GIT_REPOSITORY https://github.com/NVIDIA/stdexec.git
+        GIT_TAG        nvhpc-25.09
+        GIT_SHALLOW    TRUE
+    )
+    set(STDEXEC_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(STDEXEC_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(stdexec)
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC STDEXEC::stdexec)
+
+    # liburing — userspace wrapper around the io_uring syscalls. Used
+    # by the IoUringFile async backend.
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBURING REQUIRED IMPORTED_TARGET liburing)
+    target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::LIBURING)
+endif()
+
 SetCompileFlags(${PROJECT_NAME} PUBLIC PRIVATE ${BUILD_SHARED_LIBS})
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC

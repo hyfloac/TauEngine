@@ -298,7 +298,7 @@ public:
     }
 };
 
-com::ComRef<IFileLoader> GetPosixMmapFileLoader() noexcept
+com::ComRef<IFileLoader> CreatePosixMmapFileLoader() noexcept
 {
     return com::ComRef<IFileLoader>(BasicTauAllocator<AllocationTracking::None>::Instance().AllocateT<PosixMmapFileLoader>());
 }

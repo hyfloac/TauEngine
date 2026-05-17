@@ -335,7 +335,7 @@ public:
     }
 };
 
-com::ComRef<IFileLoader> GetPosixFileLoader() noexcept
+com::ComRef<IFileLoader> CreatePosixFileLoader() noexcept
 {
     return com::ComRef<IFileLoader>(BasicTauAllocator<AllocationTracking::None>::Instance().AllocateT<PosixFileLoader>());
 }

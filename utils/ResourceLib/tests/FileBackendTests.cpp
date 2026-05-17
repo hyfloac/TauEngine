@@ -66,7 +66,7 @@ TEST(PosixFileTest, WriteThenReadBack)
     TempFile temp;
     ASSERT_FALSE(temp.Path().empty());
 
-    auto loader = tau::GetPosixFileLoader();
+    auto loader = tau::CreatePosixFileLoader();
     ASSERT_TRUE(loader);
 
     // Write phase
@@ -104,7 +104,7 @@ TEST(PosixFileTest, SeekFromEnd)
     const std::uint8_t payload[] = { 10, 20, 30, 40, 50, 60, 70, 80 };
     WriteRawFile(temp.Path(), payload, sizeof(payload));
 
-    auto loader = tau::GetPosixFileLoader();
+    auto loader = tau::CreatePosixFileLoader();
     tau::com::ComRef<tau::IFileStream> stream(loader->Load(temp.PathAsC8(), tau::FileProps::Read));
     ASSERT_TRUE(stream);
 
@@ -121,7 +121,7 @@ TEST(MmapFileTest, ReadBackAndIMmapAccess)
     const std::uint8_t payload[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     WriteRawFile(temp.Path(), payload, sizeof(payload));
 
-    auto loader = tau::GetPosixMmapFileLoader();
+    auto loader = tau::CreatePosixMmapFileLoader();
     ASSERT_TRUE(loader);
 
     tau::com::ComRef<tau::IFileStream> stream(loader->Load(temp.PathAsC8(), tau::FileProps::Read));
@@ -151,7 +151,7 @@ TEST(MmapFileTest, WriteIsRejected)
     const std::uint8_t payload[] = { 1 };
     WriteRawFile(temp.Path(), payload, sizeof(payload));
 
-    auto loader = tau::GetPosixMmapFileLoader();
+    auto loader = tau::CreatePosixMmapFileLoader();
     EXPECT_EQ(loader->Load(temp.PathAsC8(), tau::FileProps::WriteNew), nullptr);
 }
 
