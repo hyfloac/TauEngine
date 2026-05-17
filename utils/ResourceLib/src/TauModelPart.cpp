@@ -34,10 +34,12 @@ struct TauModelPartHeader final
 };
 #pragma pack(pop)
 
-DynArray<TauModelPart> TauModelPart::parse(const CPPRef<IFile>& file) noexcept
+DynArray<TauModelPart> TauModelPart::parse(const ::tau::com::ComRef<::tau::IFileStream>& file) noexcept
 {
-    const uSys fileSize = file->Size();
-    if(fileSize < sizeof(TauModelHeader))
+    const i64 fileSize = file->Length();
+    if(fileSize < 0)
+    { return DynArray<TauModelPart>(0); }
+    if(static_cast<uSys>(fileSize) < sizeof(TauModelHeader))
     { return DynArray<TauModelPart>(0); }
 
     uSys index = 0;
@@ -58,7 +60,7 @@ DynArray<TauModelPart> TauModelPart::parse(const CPPRef<IFile>& file) noexcept
 
     if(modelHeader.hasDebugData)
     {
-        if(index + sizeof(TauModelDebugHeader) > fileSize)
+        if(index + sizeof(TauModelDebugHeader) > static_cast<uSys>(fileSize))
         { return DynArray<TauModelPart>(0); }
 
         file->ReadType(&debugModelHeader);

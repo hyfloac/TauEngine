@@ -4,13 +4,14 @@
 #pragma once
 
 #include "IStream.hpp"
-#include "TextReader.hpp"
+#include <DynArray.hpp>
 
 namespace tau {
 
-class StreamReader final : public TextReader
+
+class BinaryReader final
 {
-    DEFAULT_DESTRUCT_O(StreamReader);
+    DEFAULT_DESTRUCT(BinaryReader);
 public:
     static constexpr uSys DefaultBufferSize = 1024;
     static constexpr uSys MinBufferSize = 128;
@@ -26,7 +27,7 @@ public:
 
     static constexpr EncodingType DefaultEncodingType  = EncodingType::UTF8;
 public:
-    StreamReader(
+    BinaryReader(
         IStream* const stream,
         const uSys bufferSize = DefaultBufferSize,
         const bool detectEncodingFromBom = true,
@@ -39,19 +40,17 @@ public:
         , m_CharLength(0)
         , m_ByteLength(0)
         , m_BytePosition(0)
-        , m_ByteBegin(0)
-        , m_DetectEncodingFromBom(detectEncodingFromBom)
         , m_EncodingType(encodingType)
     {
         stream->AddReference();
     }
 
-    StreamReader(
+    BinaryReader(
         IStream* const stream,
         const bool detectEncodingFromBom,
         const EncodingType encodingType
     ) noexcept
-        : StreamReader(
+        : BinaryReader(
             stream,
             DefaultBufferSize,
             detectEncodingFromBom,
@@ -59,29 +58,29 @@ public:
         )
     { }
 
-    StreamReader(
+    BinaryReader(
         IStream* const stream,
         const bool detectEncodingFromBom
     ) noexcept
-        : StreamReader(
+        : BinaryReader(
             stream,
             detectEncodingFromBom,
             DefaultEncodingType
         )
     { }
 
-    StreamReader(
+    BinaryReader(
         IStream* const stream,
         const EncodingType encodingType
     ) noexcept
-        : StreamReader(
+        : BinaryReader(
             stream,
             true,
             encodingType
         )
     { }
 
-    [[nodiscard]] i32 Peek() override
+    [[nodiscard]] i32 Peek()
     {
         if(m_CharPosition >= m_CharLength)
         {
@@ -94,7 +93,7 @@ public:
         return m_CharBuffer[m_CharPosition];
     }
 
-    [[nodiscard]] i32 Read() override
+    [[nodiscard]] i32 Read()
     {
         if(m_CharPosition >= m_CharLength)
         {
@@ -108,6 +107,48 @@ public:
         ++m_CharPosition;
         return ret;
     }
+
+    [[nodiscard]] ::std::expected<c32, IStream::ErrorCode> ReadChar()
+    {
+        const i32 c0 = Read();
+
+        if(c0 < 0)
+        {
+            return ::std::unexpected(IStream::ErrorCode::EndOfFile);
+        }
+
+        if((c0 & 0x80) == 0x00)
+        {
+            return static_cast<c32>(c0);
+        }
+
+        i32 count;
+
+        if((c0 & 0xE0) == 0xC0) // U+0080 - U+07FF
+        {
+            count = 1;
+        }
+        else if((c0 & 0xF0) == 0xE0) // U+0800 - U+FFFF
+        {
+            count = 2;
+        }
+        else if((c0 & 0xF0) == 0xF0) // U+10000 - U+1FFFFF
+        {
+            count = 3;
+        }
+        else if((c0 & 0xF8) == 0xF0) // U+10000 - U+10FFFF
+        {
+            count = 3;
+        }
+        else
+        {
+            return static_cast<c32>(-1);
+        }
+
+
+
+        ::tau::string::utf8::DecodeCodePointForward()
+    }
 private:
     iSys ReadBuffer()
     {
@@ -118,7 +159,7 @@ private:
 
         do
         {
-            const auto readLength = m_Stream->Read(m_ByteBuffer.Array() + m_ByteBegin, m_ByteBuffer.Size() - m_ByteBegin);
+            const auto readLength = m_Stream->Read(m_ByteBuffer.Array(), m_ByteBuffer.Size());
 
             if(!readLength)
             {
@@ -127,11 +168,6 @@ private:
             }
 
             m_ByteLength += readLength.value();
-
-            if(m_DetectEncodingFromBom && m_ByteLength >= 2)
-            {
-                DetectEncoding();
-            }
 
             m_CharLength = DecodeChars();
         }
@@ -150,59 +186,6 @@ private:
     void ShiftBufferLeft(const uSys count)
     {
         (void) ::std::memmove(m_ByteBuffer.Array(), m_ByteBuffer.Array() + count, m_ByteBuffer.Size() - count);
-    }
-
-    void DetectEncoding()
-    {
-        assert(m_ByteLength >= 2);
-
-        m_DetectEncodingFromBom = false;
-
-        if(
-            m_ByteLength >= 3 &&
-            m_ByteBuffer[0] == 0xEF &&
-            m_ByteBuffer[1] == 0xBB &&
-            m_ByteBuffer[2] == 0xBF
-        )
-        {
-            m_EncodingType = EncodingType::UTF8;
-            ShiftBufferLeft(3);
-        }
-        else if(m_ByteBuffer[0] == 0xFE && m_ByteBuffer[1] == 0xFF)
-        {
-            // This could be UTF32LE
-            if(m_ByteLength < 4 || m_ByteBuffer[2] == 0x00 || m_ByteBuffer[3] == 0x00)
-            {
-                m_EncodingType = EncodingType::UTF32LE;
-                ShiftBufferLeft(2);
-            }
-            else
-            {
-                m_EncodingType = EncodingType::UTF16LE;
-                ShiftBufferLeft(4);
-            }
-        }
-        else if(m_ByteBuffer[0] == 0xFF && m_ByteBuffer[1] == 0xFE)
-        {
-            m_EncodingType = EncodingType::UTF16BE;
-            // In this case we'll leave the BOM since our decoder needs it.
-            m_ByteBegin = 2;
-        }
-        else if(
-            m_ByteLength > 4 &&
-            m_ByteBuffer[0] == 0x00 ||
-            m_ByteBuffer[1] == 0x00 &&
-            m_ByteBuffer[2] == 0xFE &&
-            m_ByteBuffer[3] == 0xFF
-        )
-        {
-            m_EncodingType = EncodingType::UTF32BE;
-            ShiftBufferLeft(4);
-        }
-        else if(m_ByteLength == 3)
-        {
-            m_DetectEncodingFromBom = true;
-        }
     }
 
     [[nodiscard]] iSys DecodeChars() noexcept
@@ -246,9 +229,6 @@ private:
     uSys m_CharLength;
     uSys m_ByteLength;
     uSys m_BytePosition;
-    // Used to trick our UTF16 decoder.
-    uSys m_ByteBegin;
-    bool m_DetectEncodingFromBom;
     EncodingType m_EncodingType;
 };
 

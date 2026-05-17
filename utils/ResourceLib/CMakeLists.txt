@@ -39,6 +39,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     tomlplusplus::tomlplusplus
 )
 
+target_link_libraries(${PROJECT_NAME} PRIVATE LZMA::LZMA)
+
 SetCompileFlags(${PROJECT_NAME} PUBLIC PRIVATE ${BUILD_SHARED_LIBS})
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
@@ -101,3 +103,9 @@ install(
 )
 
 add_library(ResourceLib::ResourceLib ALIAS ${PROJECT_NAME})
+
+# Tests (enabled when BUILD_TESTING is ON, set by include(CTest) in the
+# top-level CMakeLists.txt).
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

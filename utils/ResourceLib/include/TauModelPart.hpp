@@ -9,7 +9,7 @@ class TauModelPart final
 public:
     class AnimationComposition;
 public:
-    static DynArray<TauModelPart> parse(const CPPRef<IFile>& file) noexcept;
+    static DynArray<TauModelPart> parse(const ::tau::com::ComRef<::tau::IFileStream>& file) noexcept;
 private:
     uSys _vertexCount;
     uSys _indiceCount;

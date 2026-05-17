@@ -8,60 +8,63 @@ using VFS = tau::VFS;
 
 using RST = IResourceSelectorTransformer;
 
-DynString ResourceSelectorLoader::_cacheDir = "";
+C8DynString ResourceSelectorLoader::s_CacheDir = u8"";
 
 struct SelectorBundle final
 {
     uSys index;
-    DynString filePath;
+    C8DynString filePath;
 
     SelectorBundle() noexcept
-        : index(0), filePath("")
+        : index(0)
+        , filePath()
     { }
 };
 
 struct ParseData final
 {
-    u64 lastModifyTime;
+    ::std::chrono::time_point<::std::chrono::utc_clock> lastModifyTime;
     RefDynArray<SelectorBundle> resources;
 };
 
+using UtcTimePoint = ::std::chrono::time_point<::std::chrono::utc_clock>;
+
 static ParseData nullParse() noexcept
 {
-    return { 0, RefDynArray<SelectorBundle>(0) };
+    return { UtcTimePoint{}, RefDynArray<SelectorBundle>(0) };
 }
 
 static ParseData parseBinaryCache(const VFS::Container& con) noexcept;
 static ParseData parseBinaryFile(const VFS::Container& con) noexcept;
 static ParseData parseTextFile(const VFS::Container& con, const CPPRef<RST>& rst) noexcept;
-static void writeCache(const VFS::Container& con, const ParseData& parseData, uSys lastModifyTim) noexcept;
+static void writeCache(const VFS::Container& con, const ParseData& parseData, const UtcTimePoint& lastModifyTime) noexcept;
 // ReSharper disable once CppDeclaratorNeverUsed
 static void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept;
 
 static bool _fileExists(const VFS::Container& con) noexcept
-{ return con.FileLoader->Exists(con.BasePath, con.SubPath); }
+{ return con.FileLoader->Exists(con.FilePath); }
 
-static CPPRef<IFile> _loadFile(const VFS::Container& con, const FileProps props = FileProps::Read) noexcept
-{ return con.FileLoader->load(con.BasePath, con.SubPath, props); }
+static ::tau::com::ComRef<tau::IFileStream> _loadFile(const VFS::Container& con, const tau::FileProps props = tau::FileProps::Read) noexcept
+{ return con.FileLoader->Load(con.FilePath, props); }
 
-static u64 _creationTime(const VFS::Container& con) noexcept
-{ return con.FileLoader->creationTime(con.BasePath, con.SubPath); }
+static ::std::chrono::time_point<::std::chrono::utc_clock> _creationTime(const VFS::Container& con) noexcept
+{ return con.FileLoader->CreationTime(con.FilePath); }
 
-static u64 _modifyTime(const VFS::Container& con) noexcept
-{ return con.FileLoader->modifyTime(con.BasePath, con.SubPath); }
+static ::std::chrono::time_point<::std::chrono::utc_clock> _modifyTime(const VFS::Container& con) noexcept
+{ return con.FileLoader->ModifyTime(con.FilePath); }
 
-CPPRef<IFile> SelectedResource::loadFile(const FileProps props) const noexcept
-{ return m_Loader->load(m_Path, props); }
+::tau::com::ComRef<tau::IFileStream> SelectedResource::loadFile(const tau::FileProps props) const noexcept
+{ return m_Loader->Load(m_Path, props); }
 
-RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
+RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const c8* vfsMount, const c8* path, const c8* filename, const CPPRef<RST>& rst) noexcept
 {
-    const VFS::Container cacheDir = VFS::Instance().resolvePath(_cacheDir, path);
-    if(!cacheDir.FileLoader->createFolders(cacheDir.BasePath, cacheDir.SubPath))
+    const VFS::Container cacheDir = VFS::Instance().ResolvePath(s_CacheDir.Concat(u8"/").Concat(path));
+    if(!cacheDir.FileLoader->CreateFolders(cacheDir.FilePath))
     { return RefDynArray<SelectedResource>(0); }
 
-    const VFS::Container binaryCache = VFS::Instance().resolvePath(_cacheDir, path, filename, ".tauibcache");
-    const VFS::Container binaryFile = VFS::Instance().resolvePath(vfsMount, path, filename, ".tauib");
-    const VFS::Container textFile = VFS::Instance().resolvePath(vfsMount, path, filename, ".taui");
+    const VFS::Container binaryCache = VFS::Instance().ResolvePath(s_CacheDir, path, filename, u8".tauibcache");
+    const VFS::Container binaryFile = VFS::Instance().ResolvePath(vfsMount, path, filename, u8".tauib");
+    const VFS::Container textFile = VFS::Instance().ResolvePath(vfsMount, path, filename, u8".taui");
 
     const bool binaryCacheExists = _fileExists(binaryCache);
     const bool binaryFileExists = _fileExists(binaryFile);
@@ -70,8 +73,8 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
     if(!binaryFileExists && !textFileExists)
     { return RefDynArray<SelectedResource>(0); }
 
-    u64 lastModifyBinary = 0;
-    u64 lastModifyText = 0;
+    ::std::chrono::time_point<::std::chrono::utc_clock> lastModifyBinary;
+    ::std::chrono::time_point<::std::chrono::utc_clock> lastModifyText;
 
     if(binaryFileExists)
     {
@@ -84,7 +87,7 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
     }
 
     bool parseText = lastModifyText > lastModifyBinary;
-    const u64 lastModify = maxT(lastModifyBinary, lastModifyText);
+    const ::std::chrono::time_point<::std::chrono::utc_clock> lastModify = maxT(lastModifyBinary, lastModifyText);
 
     ParseData resourceData = nullParse();
 
@@ -116,22 +119,23 @@ RefDynArray<SelectedResource> ResourceSelectorLoader::loadFiles(const char* vfsM
 
     for(uSys i = 0; i < resourceData.resources.size(); ++i)
     {
-        const VFS::Container vfsRes = VFS::Instance().resolvePath(vfsMount, path, resourceData.resources[i].filePath);
+        const VFS::Container vfsRes = VFS::Instance().ResolvePath(vfsMount, path, resourceData.resources[i].filePath);
         const auto& res = resourceData.resources[i];
         const uSys ind = res.index;
         ret[ind].m_Index = ind;
         ret[ind].m_Name = res.filePath;
-        ret[ind].m_Path = StringCast<char>(WDynString(vfsRes.BasePath).Concat(vfsRes.SubPath));
+        ret[ind].m_Path = vfsRes.FilePath;
         ret[ind].m_Loader = vfsRes.FileLoader;
     }
 
     return ret;
 }
 
-static RefDynArray<SelectorBundle> parseBinaryData(const CPPRef<IFile>& file) noexcept
+static RefDynArray<SelectorBundle> parseBinaryData(const ::tau::com::ComRef<tau::IFileStream>& file) noexcept
 {
     uSys numEntries;
-    file->readType(&numEntries);
+    if(file->ReadType(&numEntries) != sizeof(uSys))
+    { return RefDynArray<SelectorBundle>(0); }
 
     if(numEntries == 0)
     { return RefDynArray<SelectorBundle>(0); }
@@ -140,38 +144,43 @@ static RefDynArray<SelectorBundle> parseBinaryData(const CPPRef<IFile>& file) no
 
     for(uSys i = 0; i < numEntries; ++i)
     {
-        if(file->readType(&bundles[i].index) != sizeof(uSys))
+        if(file->ReadType(&bundles[i].index) != sizeof(uSys))
         { return RefDynArray<SelectorBundle>(0); }
 
         uSys fileNameLen;
-        if(file->readType(&fileNameLen) != sizeof(uSys))
+        if(file->ReadType(&fileNameLen) != sizeof(uSys))
         { return RefDynArray<SelectorBundle>(0); }
 
         if(!fileNameLen)
         { return RefDynArray<SelectorBundle>(0); }
 
-        char* fileName = new char[fileNameLen + 1];
-        fileName[fileNameLen] = '\0';
+        c8* const fileName = new c8[fileNameLen + 1];
+        fileName[fileNameLen] = u8'\0';
 
-        if(file->readString(fileName, fileNameLen) != static_cast<i64>(fileNameLen))
-        { return RefDynArray<SelectorBundle>(0); }
+        const auto readResult = file->Read(fileName, fileNameLen);
+        if(!readResult || readResult.value() != fileNameLen)
+        {
+            delete[] fileName;
+            return RefDynArray<SelectorBundle>(0);
+        }
 
-        bundles[i].filePath = DynString::passControl(fileName);
+        bundles[i].filePath = C8DynString::passControl(fileName);
     }
 
     return bundles;
 }
 
-static void writeBinaryData(const CPPRef<IFile>& file, const ParseData& parseData) noexcept
+static void writeBinaryData(const ::tau::com::ComRef<tau::IFileStream>& file, const ParseData& parseData) noexcept
 {
     const uSys numEntries = parseData.resources.count();
-    file->writeType(numEntries);
+    file->WriteType(numEntries);
 
     for(uSys i = 0; i < numEntries; ++i)
     {
-        file->writeType(parseData.resources[i].index);
-        file->writeType(parseData.resources[i].filePath.length());
-        file->write(parseData.resources[i].filePath.c_str(), parseData.resources[i].filePath.length());
+        const uSys pathLength = parseData.resources[i].filePath.Length();
+        file->WriteType(parseData.resources[i].index);
+        file->WriteType(pathLength);
+        file->Write(parseData.resources[i].filePath.String(), pathLength);
     }
 }
 
@@ -182,51 +191,51 @@ static constexpr u16 BinaryVersion = 0;
 
 ParseData parseBinaryCache(const VFS::Container& con) noexcept
 {
-    const CPPRef<IFile> cacheFile = _loadFile(con);
-    const i64 size = cacheFile->size();
+    const ::tau::com::ComRef<tau::IFileStream> cacheFile = _loadFile(con);
+    const i64 size = cacheFile->Length();
 
-    if(size < 0 || static_cast<uSys>(size) < sizeof(u32) + sizeof(u64) + sizeof(uSys))
+    if(size < 0 || static_cast<uSys>(size) < sizeof(u32) + sizeof(u16) + sizeof(UtcTimePoint) + sizeof(uSys))
     { return nullParse(); }
 
     u32 header;
-    cacheFile->readType(&header);
+    cacheFile->ReadType(&header);
 
     if(header != CacheHeader)
     { return nullParse(); }
 
     u16 version;
-    cacheFile->readType(&version);
+    cacheFile->ReadType(&version);
 
     if(version > CacheVersion)
     { return nullParse(); }
 
-    u64 lastModifyTime;
-    cacheFile->readType(&lastModifyTime);
+    UtcTimePoint lastModifyTime;
+    cacheFile->ReadType(&lastModifyTime);
 
     return { lastModifyTime, parseBinaryData(cacheFile) };
 }
 
 ParseData parseBinaryFile(const VFS::Container& con) noexcept
 {
-    const CPPRef<IFile> binaryFile = _loadFile(con);
-    const i64 size = binaryFile->size();
+    const ::tau::com::ComRef<tau::IFileStream> binaryFile = _loadFile(con);
+    const i64 size = binaryFile->Length();
 
     if(size < 0 || static_cast<uSys>(size) < sizeof(u32) + sizeof(u16) + sizeof(uSys))
     { return nullParse(); }
 
     u32 header;
-    binaryFile->readType(&header);
+    binaryFile->ReadType(&header);
 
     if(header != BinaryHeader)
     { return nullParse(); }
 
     u16 version;
-    binaryFile->readType(&version);
+    binaryFile->ReadType(&version);
 
     if(version > BinaryVersion)
     { return nullParse(); }
 
-    return { 0, parseBinaryData(binaryFile) };
+    return { UtcTimePoint{}, parseBinaryData(binaryFile) };
 }
 
 struct TextParseKV final
@@ -252,8 +261,14 @@ ParseData parseTextFile(const VFS::Container& con, const CPPRef<RST>& rst) noexc
     using Token = _ResourceSelector::Token;
     using Lexer = _ResourceSelector::Lexer;
 
-    const CPPRef<IFile> textFile = _loadFile(con);
-    Lexer lexer(textFile);
+    const ::tau::com::ComRef<tau::IFileStream> textFile = _loadFile(con);
+    ::tau::com::ComRef<tau::IStream> stream;
+    if(IsFailure(textFile->QueryInterface<tau::IStream>(stream.Load())))
+    {
+        return { };
+    }
+
+    Lexer lexer(stream);
 
     ArrayList<TextParseKV> entries(4096);
 
@@ -283,29 +298,29 @@ ParseData parseTextFile(const VFS::Container& con, const CPPRef<RST>& rst) noexc
     for(uSys i = 0; i < entries.count(); ++i)
     {
         selectors[i].index = rst->transform(entries[i].key);
-        selectors[i].filePath = entries[i].value;
+        selectors[i].filePath = StringCast<c8>(entries[i].value);
     }
 
     return { _modifyTime(con), selectors };
 }
 
-void writeCache(const VFS::Container& con, const ParseData& parseData, const uSys lastModifyTime) noexcept
+void writeCache(const VFS::Container& con, const ParseData& parseData, const UtcTimePoint& lastModifyTime) noexcept
 {
-    const CPPRef<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
+    const ::tau::com::ComRef<tau::IFileStream> cacheFile = _loadFile(con, ::tau::FileProps::WriteOverwrite);
 
-    cacheFile->writeType(CacheHeader);
-    cacheFile->writeType(CacheVersion);
-    cacheFile->writeType(lastModifyTime);
+    cacheFile->WriteType(CacheHeader);
+    cacheFile->WriteType(CacheVersion);
+    cacheFile->WriteType(lastModifyTime);
 
     writeBinaryData(cacheFile, parseData);
 }
 
 void writeBinary(const VFS::Container& con, const ParseData& parseData) noexcept  // NOLINT(clang-diagnostic-unused-function)
 {
-    const CPPRef<IFile> cacheFile = _loadFile(con, FileProps::WriteOverwrite);
+    const ::tau::com::ComRef<tau::IFileStream> cacheFile = _loadFile(con, ::tau::FileProps::WriteOverwrite);
 
-    cacheFile->writeType(BinaryHeader);
-    cacheFile->writeType(BinaryVersion);
+    cacheFile->WriteType(BinaryHeader);
+    cacheFile->WriteType(BinaryVersion);
 
     writeBinaryData(cacheFile, parseData);
 }
@@ -316,7 +331,7 @@ _ResourceSelector::Token _ResourceSelector::Lexer::getNextToken() noexcept
 
     if(_currentChar == '"')
     {
-        _currentString = readString(); 
+        _currentString = readString();
         _currentToken = Token::String;
     }
     else
@@ -327,12 +342,20 @@ _ResourceSelector::Token _ResourceSelector::Lexer::getNextToken() noexcept
     return _currentToken;
 }
 
+i32 _ResourceSelector::Lexer::readByte() noexcept
+{
+    const auto result = _file->ReadByte();
+    if(!result)
+    { return -1; }
+    return static_cast<i32>(result.value());
+}
+
 void _ResourceSelector::Lexer::skipWhitespace() noexcept
 {
-    int c;
+    i32 c;
     do
     {
-        c = _file->readChar();
+        c = readByte();
     } while(c == ' ' || c == '\t' || c == '\n' || c == '\r');
     _currentChar = static_cast<char>(c);
 }
@@ -340,15 +363,18 @@ void _ResourceSelector::Lexer::skipWhitespace() noexcept
 // ReSharper disable once CppMemberFunctionMayBeConst
 DynString _ResourceSelector::Lexer::readString() noexcept
 {
-    int c;
+    i32 c;
     StringBuilder sb;
 
     do
     {
-        c = _file->readChar();
+        c = readByte();
+        if(c < 0)
+        { return ""; }
+
         if(c == '\\')
         {
-            c = _file->readChar();
+            c = readByte();
 
             switch(c)
             {
@@ -374,6 +400,6 @@ DynString _ResourceSelector::Lexer::readString() noexcept
 
         sb.Append(static_cast<char>(c));
     } while(c != '"');
-    
+
     return sb.backspace().toString();
 }

@@ -9,6 +9,7 @@
 #include <DynArray.hpp>
 #include <Safeties.hpp>
 #include <String.hpp>
+#include <TauCOM.hpp>
 
 
 #ifndef TAU_MAKE_VERSION
@@ -21,7 +22,9 @@ static constexpr u16 TAU_TEXTURE_VERSION_0_1 = TAU_MAKE_VERSION(0, 1);
 
 static constexpr u16 TAU_TEXTURE_VERSION_CURRENT = TAU_TEXTURE_VERSION_0_1;
 
-class IFile;
+namespace tau {
+class IFileStream;
+}
 
 enum class TauTextureFormat : u16
 {
@@ -103,7 +106,7 @@ class TauTexture final
     DEFAULT_DESTRUCT(TauTexture);
     DEFAULT_CM_PU(TauTexture);
 public:
-    CPPRef<TauTexture> load(const CPPRef<IFile>& file) noexcept;
+    CPPRef<TauTexture> load(const ::tau::com::ComRef<::tau::IFileStream>& file) noexcept;
 private:
     TauTextureFormat _format;
     RefDynArray<TauTextureMip> _mipChain;
@@ -177,7 +180,7 @@ public:
 
     struct ReadState final
     {
-        CPPRef<IFile> file;
+        ::tau::com::ComRef<::tau::IFileStream> file;
         uSys offset;
         u16 version;
         uSys flags;
@@ -189,7 +192,7 @@ public:
 
     struct WriteState final
     {
-        CPPRef<IFile> file;
+        ::tau::com::ComRef<::tau::IFileStream> file;
         uSys offset;
         u16 version;
         uSys flags;
@@ -201,14 +204,14 @@ public:
         bool clearPadSpace;
     };
 public:
-    static void beginTextureLoad(ReadState& readState, const CPPRef<IFile>& file, [[tau::out]] Error* error) noexcept;
-    static void beginTextureWrite(WriteState& writeState, const CPPRef<IFile>& file, u8 alignmentExponent, bool clearPadSpace, [[tau::out]] Error* error) noexcept;
+    static void beginTextureLoad(ReadState& readState, const ::tau::com::ComRef<::tau::IFileStream>& file, [[tau::out]] Error* error) noexcept;
+    static void beginTextureWrite(WriteState& writeState, const ::tau::com::ComRef<::tau::IFileStream>& file, u8 alignmentExponent, bool clearPadSpace, [[tau::out]] Error* error) noexcept;
 
     static void loadTextureInfo(ReadState& readState, [[tau::out]] TauTextureInfo& info, [[tau::out]] TauTextureDebugData* debugData, [[tau::out]] Error* error) noexcept;
     static uSys loadTextureSubresource(ReadState& readState, [[tau::out]] void* storage, uSys length, uSys subResource, [[tau::out]] Error* error) noexcept;
 
     static void writeTextureHeader(WriteState& writeState, const TauTextureInfo& info, const TauTextureDebugData* debugData, [[tau::out]] Error* error) noexcept;
-    static void writeTextureSubresource(const CPPRef<IFile>& file, const void* textureData, uSys dataLength, uSys subResource) noexcept;
+    static void writeTextureSubresource(const ::tau::com::ComRef<::tau::IFileStream>& file, const void* textureData, uSys dataLength, uSys subResource) noexcept;
 private:
     static void loadTextureInfo_0_1(ReadState& readState, [[tau::out]] TauTextureInfo& info, [[tau::out]] TauTextureDebugData* debugData, [[tau::out]] Error* error) noexcept;
     static uSys loadTextureSubresource_0_1(ReadState& readState, [[tau::out]] void* storage, uSys length, uSys subResource, [[tau::out]] Error* error) noexcept;

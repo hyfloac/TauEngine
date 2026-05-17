@@ -32,7 +32,7 @@ public:
     [[nodiscard]] const C8DynString& path() const noexcept { return m_Path; }
     [[nodiscard]] const ::tau::com::ComRef<::tau::IFileLoader>& loader() const noexcept { return m_Loader; }
 
-    [[nodiscard]] CPPRef<::tau::IFileStream> loadFile(const ::tau::FileProps props) const noexcept;
+    [[nodiscard]] ::tau::com::ComRef<::tau::IFileStream> loadFile(const ::tau::FileProps props) const noexcept;
 private:
     uSys m_Index;
     C8DynString m_Name;
@@ -110,15 +110,15 @@ class ResourceSelectorLoader final
 private:
     using RST = IResourceSelectorTransformer;
 private:
-    static DynString _cacheDir;
+    static C8DynString s_CacheDir;
 private:
-    static RefDynArray<SelectedResource> loadFiles(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept;
+    static RefDynArray<SelectedResource> loadFiles(const c8* vfsMount, const c8* path, const c8* filename, const CPPRef<RST>& rst) noexcept;
 public:
-    [[nodiscard]] static ResourceSelector load(const char* vfsMount, const char* path, const char* filename, const CPPRef<RST>& rst) noexcept
+    [[nodiscard]] static ResourceSelector load(const c8* vfsMount, const c8* path, const c8* filename, const CPPRef<RST>& rst) noexcept
     { return ResourceSelector(loadFiles(vfsMount, path, filename, rst), rst); }
 
-    static void setCacheDirectory(const DynString& cacheDir) noexcept
-    { _cacheDir = cacheDir; }
+    static void setCacheDirectory(const C8DynString& cacheDir) noexcept
+    { s_CacheDir = cacheDir; }
 };
 
 namespace _ResourceSelector {
@@ -154,6 +154,7 @@ public:
 
     [[nodiscard]] Token getNextToken() noexcept;
 private:
+    i32 readByte() noexcept;
     void skipWhitespace() noexcept;
 
     DynString readString() noexcept;

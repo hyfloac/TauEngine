@@ -101,7 +101,7 @@ struct MipHeader final
 
 ENUM_FLAGS(TT::Flags);
 
-static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexcept;
+static CPPRef<TauTexture> load_0_1(const ::tau::com::ComRef<::tau::IFileStream>& file, uSys offset) noexcept;
 
 #define CHECK(__TARGET_SIZE) \
     if(readSize < 0) \
@@ -124,21 +124,21 @@ static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexc
     { return nullptr; } \
     offset += static_cast<uSys>(readSize)
 
-CPPRef<TauTexture> TauTexture::load(const CPPRef<IFile>& file) noexcept
+CPPRef<TauTexture> TauTexture::load(const ::tau::com::ComRef<::tau::IFileStream>& file) noexcept
 {
     if(!file)
     { return nullptr; }
 
-    if(file->size() <= 0)
+    if(file->Length() <= 0)
     { return nullptr; }
 
-    if(static_cast<uSys>(file->size()) < sizeof(TT::Header))
+    if(static_cast<uSys>(file->Length()) < sizeof(TT::Header))
     { return nullptr; }
 
     uSys offset = 0;
 
     TT::Header header;
-    const i64 readSize = file->readType(&header);
+    const i64 readSize = file->ReadType(&header);
     CHECK_N(sizeof(header));
 
     if(header.magic != TAU_TEXTURE_MAGIC)
@@ -154,13 +154,13 @@ CPPRef<TauTexture> TauTexture::load(const CPPRef<IFile>& file) noexcept
     }
 }
 
-static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexcept
+static CPPRef<TauTexture> load_0_1(const ::tau::com::ComRef<::tau::IFileStream>& file, uSys offset) noexcept
 {
-    if(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::Header) + offset)
+    if(static_cast<uSys>(file->Length()) < sizeof(TT::_0_1::Header) + offset)
     { return nullptr; }
 
     TT::_0_1::Header header;
-    i64 readSize = file->readType(&header);
+    i64 readSize = file->ReadType(&header);
     CHECK_N(sizeof(header));
 
     if(header.format > TauTextureFormat::MAX)
@@ -173,19 +173,19 @@ static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexc
 
     if(hasDebugData)
     {
-        if(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::DebugHeader) + offset)
+        if(static_cast<uSys>(file->Length()) < sizeof(TT::_0_1::DebugHeader) + offset)
         { return nullptr; }
 
-        readSize = file->readType(&debugHeader);
+        readSize = file->ReadType(&debugHeader);
         CHECK_N(sizeof(debugHeader));
 
-        if(static_cast<uSys>(file->size()) < (debugHeader.filePathLen + debugHeader.nameLen) * sizeof(wchar_t) + offset)
+        if(static_cast<uSys>(file->Length()) < (debugHeader.filePathLen + debugHeader.nameLen) * sizeof(wchar_t) + offset)
         { return nullptr; }
 
         const uSys totalLen = debugHeader.filePathLen + debugHeader.nameLen + 1;
 
         wchar_t* const fullData = new(::std::nothrow) wchar_t[totalLen];
-        readSize = file->read(fullData, totalLen * sizeof(wchar_t));
+        readSize = file->ReadBytes(fullData, totalLen * sizeof(wchar_t));
         CHECK_N(totalLen * sizeof(wchar_t));
 
         debugData._base = WDynString::passControl(fullData);
@@ -198,10 +198,10 @@ static CPPRef<TauTexture> load_0_1(const CPPRef<IFile>& file, uSys offset) noexc
     return nullptr;
 }
 
-void TauTextureCodec::beginTextureLoad(ReadState& readState, const CPPRef<IFile>& file, Error* const error) noexcept
+void TauTextureCodec::beginTextureLoad(ReadState& readState, const ::tau::com::ComRef<::tau::IFileStream>& file, Error* const error) noexcept
 {
     ERROR_CODE_COND(!file, TauTextureCodec::NullFile);
-    ERROR_CODE_COND(file->size() <= 0, TauTextureCodec::FileTooSmall);
+    ERROR_CODE_COND(file->Length() <= 0, TauTextureCodec::FileTooSmall);
 
     readState.file = file;
     readState.offset = 0;
@@ -215,10 +215,10 @@ void TauTextureCodec::beginTextureLoad(ReadState& readState, const CPPRef<IFile>
     ERROR_CODE(TauTextureCodec::NoError);
 }
 
-void TauTextureCodec::beginTextureWrite(WriteState& writeState, const CPPRef<IFile>& file, const u8 alignmentExponent, const bool clearPadSpace, Error* const error) noexcept
+void TauTextureCodec::beginTextureWrite(WriteState& writeState, const ::tau::com::ComRef<::tau::IFileStream>& file, const u8 alignmentExponent, const bool clearPadSpace, Error* const error) noexcept
 {
     ERROR_CODE_COND(!file, TauTextureCodec::NullFile);
-    ERROR_CODE_COND(file->size() <= 0, TauTextureCodec::FileTooSmall);
+    ERROR_CODE_COND(file->Length() <= 0, TauTextureCodec::FileTooSmall);
 
     writeState.file = file;
     writeState.offset = 0;
@@ -236,16 +236,16 @@ void TauTextureCodec::beginTextureWrite(WriteState& writeState, const CPPRef<IFi
 
 void TauTextureCodec::loadTextureInfo(ReadState& readState, TauTextureInfo& info, TauTextureDebugData* const debugData, Error* const error) noexcept
 {
-    const CPPRef<IFile>& file = readState.file;
+    const ::tau::com::ComRef<::tau::IFileStream>& file = readState.file;
 
     ERROR_CODE_COND(!file, Error::NullFile);
-    ERROR_CODE_COND(file->size() <= 0, Error::FileTooSmall);
-    ERROR_CODE_COND(static_cast<uSys>(file->size()) < sizeof(TT::Header), Error::FileTooSmall);
+    ERROR_CODE_COND(file->Length() <= 0, Error::FileTooSmall);
+    ERROR_CODE_COND(static_cast<uSys>(file->Length()) < sizeof(TT::Header), Error::FileTooSmall);
 
     uSys& offset = readState.offset;
 
     TT::Header header;
-    const i64 readSize = file->readType(&header);
+    const i64 readSize = file->ReadType(&header);
     CHECK(sizeof(header));
 
     ERROR_CODE_COND(header.magic != TAU_TEXTURE_MAGIC, Error::InvalidFileFormat);
@@ -274,7 +274,7 @@ uSys TauTextureCodec::loadTextureSubresource(ReadState& readState, void* const s
 
 void TauTextureCodec::writeTextureHeader(WriteState& writeState, const TauTextureInfo& info, const TauTextureDebugData* const debugData, Error* error) noexcept
 {
-    const CPPRef<IFile>& file = writeState.file;
+    const ::tau::com::ComRef<::tau::IFileStream>& file = writeState.file;
 
     ERROR_CODE_COND(!file, Error::NullFile);
 
@@ -285,7 +285,7 @@ void TauTextureCodec::writeTextureHeader(WriteState& writeState, const TauTextur
     header.version = TAU_TEXTURE_VERSION_CURRENT;
     header.alignmentExponent = writeState.alignmentExponent;
 
-    offset += file->writeType(header);
+    offset += file->WriteType(header);
 
     switch(writeState.version)
     {
@@ -296,13 +296,13 @@ void TauTextureCodec::writeTextureHeader(WriteState& writeState, const TauTextur
 
 void TauTextureCodec::loadTextureInfo_0_1(ReadState& readState, TauTextureInfo& info, TauTextureDebugData* const debugData, Error* const error) noexcept
 {
-    const CPPRef<IFile>& file = readState.file;
+    const ::tau::com::ComRef<::tau::IFileStream>& file = readState.file;
     uSys& offset = readState.offset;
 
-    ERROR_CODE_COND(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::Header) + offset, Error::FileTooSmall);
+    ERROR_CODE_COND(static_cast<uSys>(file->Length()) < sizeof(TT::_0_1::Header) + offset, Error::FileTooSmall);
 
     TT::_0_1::Header header;
-    i64 readSize = file->readType(&header);
+    i64 readSize = file->ReadType(&header);
     CHECK(sizeof(header));
     
     ERROR_CODE_COND(header.format > TauTextureFormat::MAX, Error::InvalidTextureFormat);
@@ -317,19 +317,19 @@ void TauTextureCodec::loadTextureInfo_0_1(ReadState& readState, TauTextureInfo& 
 
     if(info.hasDebugData)
     {
-        ERROR_CODE_COND(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::DebugHeader) + offset, Error::FileTooSmall);
+        ERROR_CODE_COND(static_cast<uSys>(file->Length()) < sizeof(TT::_0_1::DebugHeader) + offset, Error::FileTooSmall);
 
-        readSize = file->readType(&debugHeader);
+        readSize = file->ReadType(&debugHeader);
         CHECK(sizeof(debugHeader));
         
         const uSys totalLen = debugHeader.filePathLen + debugHeader.nameLen;
-        ERROR_CODE_COND(static_cast<uSys>(file->size()) < totalLen * sizeof(wchar_t) + offset, Error::FileTooSmall);
+        ERROR_CODE_COND(static_cast<uSys>(file->Length()) < totalLen * sizeof(wchar_t) + offset, Error::FileTooSmall);
 
         if(debugData)
         {
             wchar_t* const fullData = new(::std::nothrow) wchar_t[totalLen + 1];
             fullData[totalLen] = L'\0';
-            readSize = file->read(fullData, totalLen * sizeof(wchar_t));
+            readSize = file->ReadBytes(fullData, totalLen * sizeof(wchar_t));
             CHECK(totalLen * sizeof(wchar_t));
 
             debugData->type = debugHeader.type;
@@ -339,7 +339,7 @@ void TauTextureCodec::loadTextureInfo_0_1(ReadState& readState, TauTextureInfo& 
         }
         else
         {
-            file->advancePos(totalLen);
+            file->AdvancePosition(totalLen);
         }
     }
 
@@ -350,17 +350,17 @@ void TauTextureCodec::loadTextureInfo_0_1(ReadState& readState, TauTextureInfo& 
 
 uSys TauTextureCodec::loadTextureSubresource_0_1(ReadState& readState, void* const storage, uSys length, const uSys subResource, Error* const error) noexcept
 {
-    const CPPRef<IFile>& file = readState.file;
+    const ::tau::com::ComRef<::tau::IFileStream>& file = readState.file;
     uSys& offset = readState.offset;
 
     const uSys subResourceOffset = readState.subResourceHeaderOffset + sizeof(TT::_0_1::SubResourceHeader) * subResource;
 
-    ERROR_CODE_COND_V(static_cast<uSys>(file->size()) < sizeof(TT::_0_1::SubResourceHeader) + subResourceOffset, Error::FileTooSmall, 0);
+    ERROR_CODE_COND_V(static_cast<uSys>(file->Length()) < sizeof(TT::_0_1::SubResourceHeader) + subResourceOffset, Error::FileTooSmall, 0);
 
     offset = subResourceOffset;
 
     TT::_0_1::SubResourceHeader header;
-    i64 readSize = file->readType(&header);
+    i64 readSize = file->ReadType(&header);
     CHECK_V(sizeof(header), 0);
 
     if(storage)
@@ -374,22 +374,22 @@ uSys TauTextureCodec::loadTextureSubresource_0_1(ReadState& readState, void* con
     
     if(HasFlag(readState.flags, TT::Flags::Compressed))
     {
-        ERROR_CODE_COND_V(static_cast<uSys>(file->size()) < header.offset + header.compressedLength + 1, Error::FileTooSmall, 0);
+        ERROR_CODE_COND_V(static_cast<uSys>(file->Length()) < header.offset + header.compressedLength + 1, Error::FileTooSmall, 0);
 
-        file->setPos(header.offset);
+        file->SetPosition(header.offset);
         offset = header.offset;
 
         Byte props;
-        readSize = file->readType(&props);
+        readSize = file->ReadType(&props);
         CHECK_V(sizeof(props), 0);
 
         void* srcBuffer = ::std::malloc(header.compressedLength);
         ERROR_CODE_COND_V(!srcBuffer, Error::SystemMemoryAllocationFailure, 0);
-        readSize = file->read(srcBuffer, header.compressedLength);
+        readSize = file->ReadBytes(srcBuffer, header.compressedLength);
         CHECK_V(header.compressedLength, 0);
 
-        uSys srcLength = header.compressedLength;
-        uSys destLength = length;
+        SizeT srcLength = header.compressedLength;
+        SizeT destLength = length;
 
         ELzmaStatus status;
         const SRes res = Lzma2Decode(reinterpret_cast<Byte*>(storage), &destLength, reinterpret_cast<Byte*>(srcBuffer), &srcLength, props, LZMA_FINISH_ANY, &status, &g_Alloc);
@@ -408,12 +408,12 @@ uSys TauTextureCodec::loadTextureSubresource_0_1(ReadState& readState, void* con
     }
     else
     {
-        ERROR_CODE_COND_V(static_cast<uSys>(file->size()) < header.offset + header.uncompressedLength, Error::FileTooSmall, 0);
+        ERROR_CODE_COND_V(static_cast<uSys>(file->Length()) < header.offset + header.uncompressedLength, Error::FileTooSmall, 0);
 
-        file->setPos(header.offset);
+        file->SetPosition(header.offset);
         offset = header.offset;
 
-        readSize = file->read(storage, header.uncompressedLength);
+        readSize = file->ReadBytes(storage, header.uncompressedLength);
         CHECK_V(header.uncompressedLength, 0);
 
         ERROR_CODE_V(Error::NoError, header.uncompressedLength);
@@ -422,7 +422,7 @@ uSys TauTextureCodec::loadTextureSubresource_0_1(ReadState& readState, void* con
 
 void TauTextureCodec::writeTextureInfo_0_1(WriteState& writeState, const TauTextureInfo& info, const TauTextureDebugData* const debugData, Error* error) noexcept
 {
-    const CPPRef<IFile>& file = writeState.file;
+    const ::tau::com::ComRef<::tau::IFileStream>& file = writeState.file;
     uSys& offset = writeState.offset;
 
     TT::_0_1::Header header;
@@ -434,7 +434,7 @@ void TauTextureCodec::writeTextureInfo_0_1(WriteState& writeState, const TauText
     header.flags = SetFlag(TT::Flags::None, TT::Flags::HasDebugData, static_cast<bool>(debugData));
     SetFlag(header.flags, TT::Flags::Compressed, info.compressed);
 
-    offset += file->writeType(header);
+    offset += file->WriteType(header);
 
     writeState.flags = header.flags;
 
@@ -445,9 +445,9 @@ void TauTextureCodec::writeTextureInfo_0_1(WriteState& writeState, const TauText
         debugHeader.filePathLen = debugData->filePath.length();
         debugHeader.nameLen = debugData->name.length();
 
-        offset += file->writeType(debugHeader);
+        offset += file->WriteType(debugHeader);
 
-        offset += file->write(debugData->_base.c_str(), debugData->_base.length() * sizeof(wchar_t));
+        offset += file->WriteBytes(debugData->_base.c_str(), debugData->_base.length() * sizeof(wchar_t));
     }
 
     if(writeState.dataAlignment)
@@ -457,7 +457,7 @@ void TauTextureCodec::writeTextureInfo_0_1(WriteState& writeState, const TauText
 
         if(writeState.clearPadSpace)
         {
-            file->setPos(offset);
+            file->SetPosition(offset);
         }
     }
 

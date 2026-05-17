@@ -38,7 +38,8 @@ public:
     {
         EndOfFile = -1,
         ReadOnly = -2,
-        WriteOnly = -3
+        WriteOnly = -3,
+        Unexpected = -4
     };
 public:
     /**
@@ -98,6 +99,74 @@ public:
     }
 
     virtual void Flush() { }
+
+    /**
+     *   Reads a value of trivially-copyable type @c _T from the
+     * stream into @p value.
+     *
+     * @return
+     *     The number of bytes read, or a negative value on
+     *     failure (typically @c -1 for end-of-file).
+     */
+    template<typename _T>
+    i64 ReadType(_T* const value)
+    {
+        const auto result = Read(value, sizeof(_T));
+        if(!result)
+        {
+            return -1;
+        }
+        return static_cast<i64>(result.value());
+    }
+
+    /**
+     * Writes a value of trivially-copyable type @c _T to the stream.
+     *
+     * @return The number of bytes written.
+     */
+    template<typename _T>
+    i64 WriteType(const _T& value)
+    {
+        Write(&value, sizeof(_T));
+        return static_cast<i64>(sizeof(_T));
+    }
+
+    /**
+     *   Convenience wrapper around @link Read @endlink that returns an
+     * @c i64 byte count: the number of bytes read on success, or @c -1
+     * on end-of-stream / error.
+     */
+    i64 ReadBytes(void* const buffer, const uSys count)
+    {
+        const auto result = Read(buffer, count);
+        if(!result)
+        {
+            return -1;
+        }
+        return static_cast<i64>(result.value());
+    }
+
+    /**
+     *   Convenience wrapper around @link Write @endlink that returns
+     * the number of bytes written.
+     */
+    i64 WriteBytes(const void* const buffer, const uSys count)
+    {
+        Write(buffer, count);
+        return static_cast<i64>(count);
+    }
+
+    /**
+     * Sets the absolute position in the stream.
+     */
+    i64 SetPosition(const i64 pos) noexcept
+    { return Position(pos, ESeekOrigin::Begin); }
+
+    /**
+     * Advances the current position by @p delta bytes.
+     */
+    i64 AdvancePosition(const i64 delta) noexcept
+    { return Position(delta, ESeekOrigin::Current); }
 };
 
 class ITimeoutStream : public com::IUnknown

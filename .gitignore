@@ -1012,3 +1012,5 @@ Doxyfile.bak
 /libs/LZMA_CS/*
 /libs/SPDLog/*
 /libs/conan/*
+
+.claude/
