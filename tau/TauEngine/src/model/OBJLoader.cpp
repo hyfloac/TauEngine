@@ -129,23 +129,23 @@
 //                     case 't': /* Texture Coord */
 //                     {
 //                         ++fileData;
-//                         const float u = std::strtof(fileData, null);
+//                         const float u = std::strtof(fileData, nullptr);
 //                         continueToWhitespace(fileData);
 //                         if(*fileData == '\0') { return; }
-//                         const float v = std::strtof(fileData, null);
+//                         const float v = std::strtof(fileData, nullptr);
 //                         textures.push_back({ u, v });
 //                     }
 //                         break;
 //                     case 'n': /* Normal */
 //                     {
 //                         ++fileData;
-//                         const float xn = std::strtof(fileData, null);
+//                         const float xn = std::strtof(fileData, nullptr);
 //                         continueToWhitespace(fileData);
 //                         if(*fileData == '\0') { return; }
-//                         const float yn = std::strtof(fileData, null);
+//                         const float yn = std::strtof(fileData, nullptr);
 //                         continueToWhitespace(fileData);
 //                         if(*fileData == '\0') { return; }
-//                         const float zn = std::strtof(fileData, null);
+//                         const float zn = std::strtof(fileData, nullptr);
 //                         normals.push_back({ xn, yn, zn });
 //                     }
 //                         break;
@@ -153,13 +153,13 @@
 //                     case '\t':
 //                     {
 //                         ++fileData;
-//                         const float x = std::strtof(fileData, null);
+//                         const float x = std::strtof(fileData, nullptr);
 //                         continueToWhitespace(fileData);
 //                         if(*fileData == '\0') { return; }
-//                         const float y = std::strtof(fileData, null);
+//                         const float y = std::strtof(fileData, nullptr);
 //                         continueToWhitespace(fileData);
 //                         if(*fileData == '\0') { return; }
-//                         const float z = std::strtof(fileData, null);
+//                         const float z = std::strtof(fileData, nullptr);
 //                         vertices.push_back({ x, y, z });
 //                     }
 //                     break;

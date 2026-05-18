@@ -88,7 +88,7 @@ CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const 
     vaArgs.indexBuffer = indicesBuf;
     vaArgs.drawType = DrawType::SeparatedTriangles;
     vaArgs.drawCount = numIndices * 2;
-    CPPRef<IVertexArray> vao = gi.createVertexArray().buildCPPRef(vaArgs, null);
+    CPPRef<IVertexArray> vao = gi.createVertexArray().buildCPPRef(vaArgs, nullptr);
 
     return vao;
 }

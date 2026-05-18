@@ -9,7 +9,7 @@ TextureView GLTextureViewBuilder::build(const TextureViewArgs& args, const CPUDe
     
     GLTextureViewArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureView* view = new(handle) GLTextureView(glArgs.target, glArgs.texture);
 

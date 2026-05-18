@@ -82,7 +82,7 @@ bool GL4_3VertexArrayBuilder::processArgs(const VertexArrayArgs& args, GL4_3Vert
     }
     else
     {
-        glArgs->indexBuffer = null;
+        glArgs->indexBuffer = nullptr;
     }
 
     glArgs->drawType = glDrawType(args.drawType);

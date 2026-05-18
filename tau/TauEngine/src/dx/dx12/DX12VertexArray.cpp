@@ -8,7 +8,7 @@ DX12VertexArray* DX12VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
 {
     DXVertexArrayArgs dxArgs { DynArray<NullableRef<IResource>>(args.bufferCount), DynArray<D3D12_VERTEX_BUFFER_VIEW>(args.bufferCount) };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX12VertexArray* const va = new(::std::nothrow) DX12VertexArray(::std::move(dxArgs.buffers), ::std::move(dxArgs.d3dBuffers));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -20,7 +20,7 @@ DX12VertexArray* DX12VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
 {
     DXVertexArrayArgs dxArgs { DynArray<NullableRef<IResource>>(args.bufferCount), DynArray<D3D12_VERTEX_BUFFER_VIEW>(args.bufferCount) };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX12VertexArray* const va = allocator.allocateT<DX12VertexArray>(::std::move(dxArgs.buffers), ::std::move(dxArgs.d3dBuffers));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -32,7 +32,7 @@ CPPRef<IVertexArray> DX12VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& 
 {
     DXVertexArrayArgs dxArgs { DynArray<NullableRef<IResource>>(args.bufferCount), DynArray<D3D12_VERTEX_BUFFER_VIEW>(args.bufferCount) };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX12VertexArray> va(new(::std::nothrow) DX12VertexArray(::std::move(dxArgs.buffers), ::std::move(dxArgs.d3dBuffers)));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -44,7 +44,7 @@ NullableRef<IVertexArray> DX12VertexArrayBuilder::buildTauRef(const VertexArrayA
 {
     DXVertexArrayArgs dxArgs { DynArray<NullableRef<IResource>>(args.bufferCount), DynArray<D3D12_VERTEX_BUFFER_VIEW>(args.bufferCount) };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX12VertexArray> va(allocator, ::std::move(dxArgs.buffers), ::std::move(dxArgs.d3dBuffers));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -56,7 +56,7 @@ NullableStrongRef<IVertexArray> DX12VertexArrayBuilder::buildTauSRef(const Verte
 {
     DXVertexArrayArgs dxArgs { DynArray<NullableRef<IResource>>(args.bufferCount), DynArray<D3D12_VERTEX_BUFFER_VIEW>(args.bufferCount) };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX12VertexArray> va(allocator, ::std::move(dxArgs.buffers), ::std::move(dxArgs.d3dBuffers));
 

@@ -78,7 +78,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
       _modelGenShader(IShaderProgram::create(globals.gi)),
       _texture(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/TestTexture.png")),
       _overlay(TextureLoader::loadTexture(globals.gi, globals.rc, "|TERes/Overlay.png")),
-      _frameBufferVA(null),
+      _frameBufferVA(nullptr),
       _modelPos(0, 0, 0), _modelViewMatrix(1.0f), _poses{}, _validPoses{}, _validPoseCount(0)
 {
     PERF();
@@ -89,11 +89,11 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     shaderArgs.fileName = "Vertex";
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> vertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     shaderArgs.fileName = "Pixel";
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     objl::Loader loader;
     if(loader.loadFile("|TERes/nanosuit/nanosuit.obj"))
@@ -126,21 +126,21 @@ Layer3D::Layer3D(Globals& globals) noexcept
 
     shaderArgs.fileName = "FBVertex";
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> frameBufferVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> frameBufferVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     shaderArgs.fileName = "FBPixel";
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> frameBufferPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> frameBufferPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     shaderArgs.path = "/shader/TestShader/";
 
     shaderArgs.fileName = "Vertex";
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> modelGenVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> modelGenVertexShader = globals.gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     shaderArgs.fileName = "Pixel";
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> modelGenPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> modelGenPixelShader = globals.gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     _shader->setVertexShader(globals.rc, vertexShader);
     _shader->setPixelShader(globals.rc, pixelShader);
@@ -179,23 +179,23 @@ Layer3D::Layer3D(Globals& globals) noexcept
     tArgs.mipmapLevels = 1;
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
     tArgs.flags = ETexture::BindFlags::RenderTarget | ETexture::BindFlags::ShaderAccess;
-    tArgs.initialBuffer = null;
+    tArgs.initialBuffer = nullptr;
 
-    const CPPRef<ITexture2D> colorTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
-    const CPPRef<ITexture2D> specularTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> colorTexture = globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
+    const CPPRef<ITexture2D> specularTexture = globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
 
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha32Float;
-    const CPPRef<ITexture2D> positionTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> positionTexture = globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
 
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha16Float;
-    const CPPRef<ITexture2D> normalTexture = globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> normalTexture = globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
 
     TextureDepthStencilArgs tdsArgs;
     tdsArgs.width = globals.window.width();
     tdsArgs.height = globals.window.height();
     tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget | ETexture::DepthStencilBindFlags::DepthShaderAccess;
-    tdsArgs.initialBuffer = null;
-    const CPPRef<ITextureDepthStencil> dsTexture = globals.gi.createTexture().buildCPPRef(tdsArgs, null);
+    tdsArgs.initialBuffer = nullptr;
+    const CPPRef<ITextureDepthStencil> dsTexture = globals.gi.createTexture().buildCPPRef(tdsArgs, nullptr);
 
     FrameBufferArgs fbArgs(4);
     fbArgs.colorAttachments[0] = colorTexture;
@@ -204,7 +204,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     fbArgs.colorAttachments[3] = specularTexture;
     fbArgs.depthStencilAttachment = dsTexture;
 
-    _frameBuffer = globals.gi.createFrameBuffer().buildCPPRef(fbArgs, null);
+    _frameBuffer = globals.gi.createFrameBuffer().buildCPPRef(fbArgs, nullptr);
 
     float quadVertices[] = {
         -1.0f,  1.0f, 0.0f, 1.0f,
@@ -231,7 +231,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     vaArgs.buffers[0] = positions;
     vaArgs.drawCount = 6;
     vaArgs.drawType = DrawType::SeparatedTriangles;
-    _frameBufferVA = globals.gi.createVertexArray().buildCPPRef(vaArgs, null);
+    _frameBufferVA = globals.gi.createVertexArray().buildCPPRef(vaArgs, nullptr);
 
     TextureSamplerArgs tsArgs;
     tsArgs.magFilter() = ETexture::Filter::Linear;
@@ -241,7 +241,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     tsArgs.wrapV = ETexture::WrapMode::Repeat;
     tsArgs.wrapW = ETexture::WrapMode::Repeat;
     tsArgs.depthCompareFunc = ETexture::CompareFunc::Never;
-    _frameBufferSampler = _globals.gi.createTextureSampler().buildCPPRef(tsArgs, null);
+    _frameBufferSampler = _globals.gi.createTextureSampler().buildCPPRef(tsArgs, nullptr);
 
     _testTexture = TextureLoader::generateDebugTexture8(globals.gi, globals.rc, 7);
 
@@ -252,7 +252,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     fbTuArgs.textures[3] = specularTexture->textureView();
     fbTuArgs.textures[4] = dsTexture->depthView();
     fbTuArgs.textureSampler = _frameBufferSampler;
-    _frameBufferUploader = _globals.gi.createTextureUploader().buildCPPRef(fbTuArgs, null);
+    _frameBufferUploader = _globals.gi.createTextureUploader().buildCPPRef(fbTuArgs, nullptr);
 
     // _modelViewMatrix = glmExt::translate(_modelViewMatrix, _modelPos);
     _modelViewMatrix = glm::translate(_modelViewMatrix, glm::vec3(0.0f, 0.0f, -1.0f));
@@ -318,22 +318,22 @@ Layer3D::Layer3D(Globals& globals) noexcept
         bGenArgs.initialBuffer = cubeMesh.positions;
         bGenArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector3Float);
         
-        const CPPRef<IVertexBuffer> modelGenPos = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, null);
+        const CPPRef<IVertexBuffer> modelGenPos = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, nullptr);
         
         bGenArgs.initialBuffer = cubeMesh.normals;
-        const CPPRef<IVertexBuffer> modelGenNorm = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, null);
+        const CPPRef<IVertexBuffer> modelGenNorm = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, nullptr);
         
         bGenArgs.initialBuffer = cubeMesh.textures;
         bGenArgs.descriptor.reset(1);
         bGenArgs.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-        const CPPRef<IVertexBuffer> modelGenTex = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, null);
+        const CPPRef<IVertexBuffer> modelGenTex = globals.gi.createVertexBuffer().buildCPPRef(bGenArgs, nullptr);
         
         IndexBufferArgs ibGenArgs;
         ibGenArgs.usage = EBuffer::UsageType::StaticDraw;
         ibGenArgs.elementCount = cubeMesh.indiceCount;
         ibGenArgs.initialBuffer = cubeMesh.indices;
         
-        const CPPRef<IIndexBuffer> modelGenIndices = globals.gi.createIndexBuffer().buildCPPRef(ibGenArgs, null);
+        const CPPRef<IIndexBuffer> modelGenIndices = globals.gi.createIndexBuffer().buildCPPRef(ibGenArgs, nullptr);
         
         VertexArrayArgs mgArgs(3);
         mgArgs.shader = modelGenVertexShader.get();
@@ -344,7 +344,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
         mgArgs.drawCount = cubeMesh.indiceCount;
         mgArgs.drawType = DrawType::SeparatedTriangles;
         
-        _modelGenVA = globals.gi.createVertexArray().buildCPPRef(mgArgs, null);
+        _modelGenVA = globals.gi.createVertexArray().buildCPPRef(mgArgs, nullptr);
         
         eCubeMesh.destroy();
         cubeMesh.destroy();
@@ -448,13 +448,13 @@ void Layer3D::onRender() noexcept
             for(const CPPRef<RenderableObject>& ro : _objects)
             {
                 TextureIndices indices(0, 0, 0, &_bindMap);
-                // TextureIndices indices(0, 0, 0, null);
+                // TextureIndices indices(0, 0, 0, nullptr);
                 ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, _bindMap.mapUniformBindPoint(0, EShader::Stage::Pixel), indices);
                 // ro->material().upload(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
                 ro->preRender(context);
                 ro->render(context);
                 ro->postRender(context);
-                // indices = TextureIndices(0, 0, 0, null);
+                // indices = TextureIndices(0, 0, 0, nullptr);
                 indices = TextureIndices(0, 0, 0, &_bindMap);
                 // ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, 1, indices);
                 ro->material().unbind(context, _materialUniforms, EShader::Stage::Pixel, _bindMap.mapUniformBindPoint(0, EShader::Stage::Pixel), indices);
@@ -534,23 +534,23 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     tArgs.mipmapLevels = 1;
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
     tArgs.flags = ETexture::BindFlags::RenderTarget | ETexture::BindFlags::ShaderAccess;
-    tArgs.initialBuffer = null;
+    tArgs.initialBuffer = nullptr;
 
-    const CPPRef<ITexture2D> colorTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
-    const CPPRef<ITexture2D> specularTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> colorTexture = _globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
+    const CPPRef<ITexture2D> specularTexture = _globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
 
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha32Float;
-    const CPPRef<ITexture2D> positionTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> positionTexture = _globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
 
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha16Float;
-    const CPPRef<ITexture2D> normalTexture = _globals.gi.createTexture().buildCPPRef(tArgs, null);
+    const CPPRef<ITexture2D> normalTexture = _globals.gi.createTexture().buildCPPRef(tArgs, nullptr);
 
     TextureDepthStencilArgs tdsArgs;
     tdsArgs.width = e.newWidth();
     tdsArgs.height = e.newHeight();
     tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget | ETexture::DepthStencilBindFlags::DepthShaderAccess;
-    tdsArgs.initialBuffer = null;
-    const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, null);
+    tdsArgs.initialBuffer = nullptr;
+    const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, nullptr);
 
     FrameBufferArgs fbArgs(4);
     fbArgs.colorAttachments[0] = colorTexture;
@@ -559,7 +559,7 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     fbArgs.colorAttachments[3] = specularTexture;
     fbArgs.depthStencilAttachment = dsTexture;
 
-    _frameBuffer = _globals.gi.createFrameBuffer().buildCPPRef(fbArgs, null);
+    _frameBuffer = _globals.gi.createFrameBuffer().buildCPPRef(fbArgs, nullptr);
 
     TextureUploaderArgs fbTuArgs(5);
     fbTuArgs.textures[0] = colorTexture->textureView();
@@ -568,7 +568,7 @@ bool Layer3D::onWindowResize(WindowResizeEvent& e) noexcept
     fbTuArgs.textures[3] = specularTexture->textureView();
     fbTuArgs.textures[4] = dsTexture->depthView();
     fbTuArgs.textureSampler = _frameBufferSampler;
-    _frameBufferUploader = _globals.gi.createTextureUploader().buildCPPRef(fbTuArgs, null);
+    _frameBufferUploader = _globals.gi.createTextureUploader().buildCPPRef(fbTuArgs, nullptr);
 
     return true;
 }

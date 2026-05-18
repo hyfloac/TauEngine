@@ -64,7 +64,7 @@ GLTexture2D* GLTextureBuilder::build(const Texture2DArgs& args, Error* error) co
 {
     GLTexture2DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTexture2D* const texture = new(::std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -80,7 +80,7 @@ GLTexture2D* GLTextureBuilder::build(const Texture2DArgs& args, Error* error, Ta
 {
     GLTexture2DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTexture2D* const texture = allocator.allocateT<GLTexture2D>(args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -96,7 +96,7 @@ CPPRef<ITexture2D> GLTextureBuilder::buildCPPRef(const Texture2DArgs& args, Erro
 {
     GLTexture2DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLTexture2D> texture(new(::std::nothrow) GLTexture2D(args.width, args.height, args.dataFormat, glArgs.texture));
     if(!texture)
@@ -112,7 +112,7 @@ NullableRef<ITexture2D> GLTextureBuilder::buildTauRef(const Texture2DArgs& args,
 {
     GLTexture2DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -128,7 +128,7 @@ NullableStrongRef<ITexture2D> GLTextureBuilder::buildTauSRef(const Texture2DArgs
 {
     GLTexture2DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLTexture2D> texture(allocator, args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -144,7 +144,7 @@ GLTexture3D* GLTextureBuilder::build(const Texture3DArgs& args, Error* error) co
 {
     GLTexture3DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTexture3D* const texture = new(::std::nothrow) GLTexture3D(args.width, args.height, args.depth, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -160,7 +160,7 @@ GLTexture3D* GLTextureBuilder::build(const Texture3DArgs& args, Error* error, Ta
 {
     GLTexture3DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTexture3D* const texture = allocator.allocateT<GLTexture3D>(args.width, args.height, args.depth, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -176,7 +176,7 @@ CPPRef<ITexture3D> GLTextureBuilder::buildCPPRef(const Texture3DArgs& args, Erro
 {
     GLTexture3DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLTexture3D> texture(new(::std::nothrow) GLTexture3D(args.width, args.height, args.depth, args.dataFormat, glArgs.texture));
     if(!texture)
@@ -192,7 +192,7 @@ NullableRef<ITexture3D> GLTextureBuilder::buildTauRef(const Texture3DArgs& args,
 {
     GLTexture3DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLTexture3D> texture(allocator, args.width, args.height, args.depth, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -208,7 +208,7 @@ NullableStrongRef<ITexture3D> GLTextureBuilder::buildTauSRef(const Texture3DArgs
 {
     GLTexture3DArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLTexture3D> texture(allocator, args.width, args.height, args.depth, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -224,7 +224,7 @@ GLTextureCube* GLTextureBuilder::build(const TextureCubeArgs& args, Error* error
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureCube* const texture = new(::std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -240,7 +240,7 @@ GLTextureCube* GLTextureBuilder::build(const TextureCubeArgs& args, Error* error
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureCube* const texture = allocator.allocateT<GLTextureCube>(args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -256,7 +256,7 @@ CPPRef<ITextureCube> GLTextureBuilder::buildCPPRef(const TextureCubeArgs& args, 
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLTextureCube> texture(new(::std::nothrow) GLTextureCube(args.width, args.height, args.dataFormat, glArgs.texture));
     if(!texture)
@@ -272,7 +272,7 @@ NullableRef<ITextureCube> GLTextureBuilder::buildTauRef(const TextureCubeArgs& a
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -288,7 +288,7 @@ NullableStrongRef<ITextureCube> GLTextureBuilder::buildTauSRef(const TextureCube
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLTextureCube> texture(allocator, args.width, args.height, args.dataFormat, glArgs.texture);
     if(!texture)
@@ -304,7 +304,7 @@ GLTextureDepthStencil* GLTextureBuilder::build(const TextureDepthStencilArgs& ar
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureDepthStencil* const texture = new(::std::nothrow) GLTextureDepthStencil(args.width, args.height, glArgs.texture);
     if(!texture)
@@ -320,7 +320,7 @@ GLTextureDepthStencil* GLTextureBuilder::build(const TextureDepthStencilArgs& ar
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureDepthStencil* const texture = allocator.allocateT<GLTextureDepthStencil>(args.width, args.height, glArgs.texture);
     if(!texture)
@@ -336,7 +336,7 @@ CPPRef<ITextureDepthStencil> GLTextureBuilder::buildCPPRef(const TextureDepthSte
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLTextureDepthStencil> texture(new(::std::nothrow) GLTextureDepthStencil(args.width, args.height, glArgs.texture));
     if(!texture)
@@ -352,7 +352,7 @@ NullableRef<ITextureDepthStencil> GLTextureBuilder::buildTauRef(const TextureDep
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLTextureDepthStencil> texture(allocator, args.width, args.height, glArgs.texture);
     if(!texture)
@@ -368,7 +368,7 @@ NullableStrongRef<ITextureDepthStencil> GLTextureBuilder::buildTauSRef(const Tex
 {
     GLTextureCubeArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLTextureDepthStencil> texture(allocator, args.width, args.height, glArgs.texture);
     if(!texture)
@@ -428,7 +428,7 @@ bool GLTextureBuilder::processArgs(const Texture3DArgs& args, GLTexture3DArgs* g
      * a special texture target which appears to basically emulate in
      * glTexStorage3D in older version of OpenGL.
      */
-    glTexImage3D(GL_PROXY_TEXTURE_3D, 0, internalFormat, args.width, args.height, args.depth, 0, inputFormat, inputDataType, null);
+    glTexImage3D(GL_PROXY_TEXTURE_3D, 0, internalFormat, args.width, args.height, args.depth, 0, inputFormat, inputDataType, nullptr);
     glBindTexture(GL_TEXTURE_3D, 0);
 
     return true;
@@ -464,7 +464,7 @@ bool GLTextureBuilder::processArgs(const TextureCubeArgs& args, GLTextureCubeArg
     }
     else
     {
-        glTexImage2D(GL_PROXY_TEXTURE_CUBE_MAP, 0, internalFormat, args.width, args.height, 0, inputFormat, inputDataType, null);
+        glTexImage2D(GL_PROXY_TEXTURE_CUBE_MAP, 0, internalFormat, args.width, args.height, 0, inputFormat, inputDataType, nullptr);
     }
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 

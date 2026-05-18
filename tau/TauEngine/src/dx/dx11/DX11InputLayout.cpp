@@ -29,23 +29,23 @@ void DX11InputLayout::bind(IRenderingContext& context) noexcept
 void DX11InputLayout::unbind(IRenderingContext& context) noexcept
 {
     CTX();
-    ctx.d3d11DeviceContext()->IASetInputLayout(null);
-    ctx.setBufferData(null, null);
+    ctx.d3d11DeviceContext()->IASetInputLayout(nullptr);
+    ctx.setBufferData(nullptr, nullptr);
 }
 
 DX11InputLayout* DX11InputLayoutBuilder::build(const InputLayoutArgs& args, Error* error) noexcept
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11InputLayout* const inputLayout = new(::std::nothrow) DX11InputLayout(dxArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
+    dxArgs.iaStrides = nullptr;
+    dxArgs.iaOffsets = nullptr;
+    dxArgs.inputLayout = nullptr;
 
     ERROR_CODE_V(Error::NoError, inputLayout);
 }
@@ -54,15 +54,15 @@ DX11InputLayout* DX11InputLayoutBuilder::build(const InputLayoutArgs& args, Erro
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11InputLayout* const inputLayout = allocator.allocateT<DX11InputLayout>(dxArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
+    dxArgs.iaStrides = nullptr;
+    dxArgs.iaOffsets = nullptr;
+    dxArgs.inputLayout = nullptr;
 
     ERROR_CODE_V(Error::NoError, inputLayout);
 }
@@ -71,15 +71,15 @@ CPPRef<IInputLayout> DX11InputLayoutBuilder::buildCPPRef(const InputLayoutArgs& 
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11InputLayout> inputLayout = CPPRef<DX11InputLayout>(new(::std::nothrow) DX11InputLayout(dxArgs));
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
+    dxArgs.iaStrides = nullptr;
+    dxArgs.iaOffsets = nullptr;
+    dxArgs.inputLayout = nullptr;
 
     ERROR_CODE_V(Error::NoError, inputLayout);
 }
@@ -88,15 +88,15 @@ NullableRef<IInputLayout> DX11InputLayoutBuilder::buildTauRef(const InputLayoutA
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11InputLayout> inputLayout(allocator, dxArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
+    dxArgs.iaStrides = nullptr;
+    dxArgs.iaOffsets = nullptr;
+    dxArgs.inputLayout = nullptr;
 
     ERROR_CODE_V(Error::NoError, inputLayout);
 }
@@ -105,15 +105,15 @@ NullableStrongRef<IInputLayout> DX11InputLayoutBuilder::buildTauSRef(const Input
 {
     DXInputLayoutArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11InputLayout> inputLayout(allocator, dxArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaStrides = null;
-    dxArgs.iaOffsets = null;
-    dxArgs.inputLayout = null;
+    dxArgs.iaStrides = nullptr;
+    dxArgs.iaOffsets = nullptr;
+    dxArgs.inputLayout = nullptr;
 
     ERROR_CODE_V(Error::NoError, inputLayout);
 }

@@ -66,12 +66,12 @@ DX11FrameBuffer* DX11FrameBufferBuilder::build(const FrameBufferArgs& args, Erro
 {
     DX11FrameBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11FrameBuffer* const frameBuffer = new(::std::nothrow) DX11FrameBuffer(args.colorAttachments, args.depthStencilAttachment, dxArgs.d3dColorAttachments);
     ERROR_CODE_COND_N(!frameBuffer, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dColorAttachments = null;
+    dxArgs.d3dColorAttachments = nullptr;
     ERROR_CODE_V(Error::NoError, frameBuffer);
 }
 
@@ -79,12 +79,12 @@ DX11FrameBuffer* DX11FrameBufferBuilder::build(const FrameBufferArgs& args, Erro
 {
     DX11FrameBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11FrameBuffer* const frameBuffer = allocator.allocateT<DX11FrameBuffer>(args.colorAttachments, args.depthStencilAttachment, dxArgs.d3dColorAttachments);
     ERROR_CODE_COND_N(!frameBuffer, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dColorAttachments = null;
+    dxArgs.d3dColorAttachments = nullptr;
     ERROR_CODE_V(Error::NoError, frameBuffer);
 }
 
@@ -92,12 +92,12 @@ CPPRef<IFrameBuffer> DX11FrameBufferBuilder::buildCPPRef(const FrameBufferArgs& 
 {
     DX11FrameBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11FrameBuffer> frameBuffer = CPPRef<DX11FrameBuffer>(new(::std::nothrow) DX11FrameBuffer(args.colorAttachments, args.depthStencilAttachment, dxArgs.d3dColorAttachments));
     ERROR_CODE_COND_N(!frameBuffer, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dColorAttachments = null;
+    dxArgs.d3dColorAttachments = nullptr;
     ERROR_CODE_V(Error::NoError, frameBuffer);
 }
 
@@ -105,12 +105,12 @@ NullableRef<IFrameBuffer> DX11FrameBufferBuilder::buildTauRef(const FrameBufferA
 {
     DX11FrameBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11FrameBuffer> frameBuffer(allocator, args.colorAttachments, args.depthStencilAttachment, dxArgs.d3dColorAttachments);
     ERROR_CODE_COND_N(!frameBuffer, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dColorAttachments = null;
+    dxArgs.d3dColorAttachments = nullptr;
     ERROR_CODE_V(Error::NoError, frameBuffer);
 }
 
@@ -118,12 +118,12 @@ NullableStrongRef<IFrameBuffer> DX11FrameBufferBuilder::buildTauSRef(const Frame
 {
     DX11FrameBufferArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11FrameBuffer> frameBuffer(allocator, args.colorAttachments, args.depthStencilAttachment, dxArgs.d3dColorAttachments);
     ERROR_CODE_COND_N(!frameBuffer, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dColorAttachments = null;
+    dxArgs.d3dColorAttachments = nullptr;
     ERROR_CODE_V(Error::NoError, frameBuffer);
 }
 

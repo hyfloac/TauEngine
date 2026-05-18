@@ -8,7 +8,7 @@ TextureSampler GLTextureSamplerBuilder::build(const TextureSamplerArgs& args, De
 
     GLTextureSamplerArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     glTable->samplers()[tableIndex] = glArgs.sampler;
     ERROR_CODE_V(Error::NoError, &glTable->samplers()[tableIndex]);

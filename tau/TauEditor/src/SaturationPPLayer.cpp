@@ -15,11 +15,11 @@
 SaturationPPLayer::SaturationPPLayer(Globals& globals, float saturation) noexcept
     : _globals(globals)
     , _saturation(saturation)
-    , _shader(null)
-    , _va(null)
-    , _frameBuffer(null)
-    , _textureSampler(null)
-    , _fbUploader(null)
+    , _shader(nullptr)
+    , _va(nullptr)
+    , _frameBuffer(nullptr)
+    , _textureSampler(nullptr)
+    , _fbUploader(nullptr)
     , _saturationUniform(globals.gi.createBuffer())
 { _saturationUniform.set(_globals.rc, _saturation); }
 
@@ -67,7 +67,7 @@ bool SaturationPPLayer::init() noexcept
         args.path = "/shader/FrameBuffer/Saturation/";
         args.fileName = "Pixel";
         args.stage = EShader::Stage::Pixel;
-        const CPPRef<IShader> pixelShader = _globals.gi.createShader().buildCPPRef(args, null);
+        const CPPRef<IShader> pixelShader = _globals.gi.createShader().buildCPPRef(args, nullptr);
 
         if(error != IShaderBuilder::Error::NoError)
         {
@@ -175,7 +175,7 @@ bool SaturationPPLayer::init() noexcept
         tArgs.mipmapLevels = 1;
         tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
         tArgs.flags = ETexture::BindFlags::RenderTarget | ETexture::BindFlags::ShaderAccess;
-        tArgs.initialBuffer = null;
+        tArgs.initialBuffer = nullptr;
 
         ITextureBuilder::Error error;
         const CPPRef<ITexture2D> colorTexture = _globals.gi.createTexture().buildCPPRef(tArgs, &error);
@@ -211,7 +211,7 @@ bool SaturationPPLayer::init() noexcept
         tdsArgs.width = _globals.window.width();
         tdsArgs.height = _globals.window.height();
         tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget | ETexture::DepthStencilBindFlags::DepthShaderAccess;
-        tdsArgs.initialBuffer = null;
+        tdsArgs.initialBuffer = nullptr;
 
         const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, &error);
 
@@ -371,7 +371,7 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
     tArgs.mipmapLevels = 1;
     tArgs.dataFormat = ETexture::Format::RedGreenBlueAlpha8UnsignedInt;
     tArgs.flags = ETexture::BindFlags::RenderTarget | ETexture::BindFlags::ShaderAccess;
-    tArgs.initialBuffer = null;
+    tArgs.initialBuffer = nullptr;
 
     ITextureBuilder::Error error;
     const CPPRef<ITexture2D> colorTexture = _globals.gi.createTexture().buildCPPRef(tArgs, &error);
@@ -407,7 +407,7 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
     tdsArgs.width = e.newWidth();
     tdsArgs.height = e.newHeight();
     tdsArgs.flags = ETexture::DepthStencilBindFlags::RenderTarget | ETexture::DepthStencilBindFlags::DepthShaderAccess;
-    tdsArgs.initialBuffer = null;
+    tdsArgs.initialBuffer = nullptr;
 
     const CPPRef<ITextureDepthStencil> dsTexture = _globals.gi.createTexture().buildCPPRef(tdsArgs, &error);
 

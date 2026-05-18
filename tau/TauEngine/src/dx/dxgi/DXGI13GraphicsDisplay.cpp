@@ -7,7 +7,7 @@ NullableRef<DXGI13GraphicsDisplay> DXGI13GraphicsDisplay::build(IDXGIOutput3* co
     HRESULT res = dxgiOutput->GetDisplayModeList1(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numDisplayModes, nullptr);
 
     if(FAILED(res))
-    { return null; }
+    { return nullptr; }
 
     DynArray<DXGI_MODE_DESC1> dxgiDisplayModes(numDisplayModes);
 
@@ -16,7 +16,7 @@ NullableRef<DXGI13GraphicsDisplay> DXGI13GraphicsDisplay::build(IDXGIOutput3* co
     RefDynArray<IGraphicsDisplay::GraphicsDisplayMode> displayModes(numDisplayModes);
 
     if(FAILED(res))
-    { return null; }
+    { return nullptr; }
 
     for(uSys i = 0; i < numDisplayModes; ++i)
     {

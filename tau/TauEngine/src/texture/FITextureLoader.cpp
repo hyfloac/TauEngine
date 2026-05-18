@@ -57,7 +57,7 @@ NullableRef<IResource> TextureLoader::generateMissingTexture(IGraphicsInterface&
 
     args.initialBuffers = initialBuffers;
 
-    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, nullptr);
 
     return ret;
 }
@@ -110,7 +110,7 @@ NullableRef<IResource> TextureLoader::generateDebugTexture8(IGraphicsInterface& 
     args.usageType = EResource::UsageType::Immutable;
     args.initialBuffers = initialBuffers;
 
-    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, nullptr);
 
     delete[] textureData;
     delete[] initialBuffers;
@@ -167,7 +167,7 @@ NullableRef<IResource> TextureLoader::generateDebugTexture16(IGraphicsInterface&
     args.usageType = EResource::UsageType::Immutable;
     args.initialBuffers = initialBuffers;
 
-    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, nullptr);
 
     delete[] textureData;
     delete[] initialBuffers;
@@ -195,7 +195,7 @@ NullableRef<IResource> TextureLoader::generateColorTexture(IGraphicsInterface& g
     const void* initialBuffers[1] = { textureData };
     args.initialBuffers = initialBuffers;
 
-    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, nullptr);
 
     return ret;
 }
@@ -211,7 +211,7 @@ NullableRef<IResource> TextureLoader::loadTexture(IGraphicsInterface& gi, IRende
 
     const VFS::Container physPath = VFS::Instance().resolvePath(fileName);
 
-    FIBITMAP* texture = null;
+    FIBITMAP* texture = nullptr;
     
     ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.BasePath.length() == 0);
     ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.SubPath.length() == 0);
@@ -259,7 +259,7 @@ NullableRef<IResource> TextureLoader::loadTexture(IGraphicsInterface& gi, IRende
     const void* initialBuffers[1] = { textureData };
     args.initialBuffers = initialBuffers;
 
-    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, nullptr);
 
     FreeImage_Unload(texture);
 
@@ -285,7 +285,7 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
     if((__CHECK)) { \
         if(error) { *error = __ERR; } \
         if(texture) { FreeImage_Unload(texture); } \
-        return null; }
+        return nullptr; }
 
     ResourceTexture2DArgs args;
     args.arrayCount = 6;
@@ -306,7 +306,7 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
     {
         const VFS::Container physPath = VFS::Instance().resolvePath(folderPath, fileNames[i],  fileExtension);
 
-        FIBITMAP* texture = null;
+        FIBITMAP* texture = nullptr;
 
         ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.BasePath.length() == 0);
         ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.SubPath.length() == 0);
@@ -349,7 +349,7 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
             {
                 *error = TextureLoadError::TEXTURE_SIZES_DONT_MATCH;
             }
-            return null;
+            return nullptr;
         }
 
         ERR_EXIT(TextureLoadError::NULL_TEXTURE_DATA, !textureData);
@@ -367,7 +367,7 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
         initialBuffers[i] = textureData;
     }
 
-    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, null);
+    const NullableRef<IResource> ret = gi.createResource().buildTauRef(args, nullptr);
 
     for(uSys i = 0; i < 6; ++i)
     {

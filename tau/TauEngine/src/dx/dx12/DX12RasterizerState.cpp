@@ -5,7 +5,7 @@ NullableRef<IRasterizerState> DX12RasterizerStateBuilder::buildTauRef(const Rast
 {
     D3D12_RASTERIZER_DESC rasterizerDesc;
     if(!processArgs(args, &rasterizerDesc, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX12RasterizerState> rasterizerState(allocator, args, rasterizerDesc);
     ERROR_CODE_COND_N(!rasterizerState, Error::SystemMemoryAllocationFailure);

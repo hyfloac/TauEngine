@@ -6,7 +6,7 @@ NullableRef<IBlendingState> DX12BlendingStateBuilder::buildTauRef(const Blending
 {
     D3D12_BLEND_DESC desc;
     if(!processArgs(args, &desc, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX12BlendingState> blendingState(allocator, args, desc);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);

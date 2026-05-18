@@ -35,7 +35,7 @@ public:
     DXGI12GraphicsAccelerator(DXGI12GraphicsAccelerator&& move) noexcept
         : IGraphicsAccelerator(::std::move(move))
         , _dxgiAdapter(move._dxgiAdapter)
-    { move._dxgiAdapter = null; }
+    { move._dxgiAdapter = nullptr; }
 
     DXGI12GraphicsAccelerator& operator=(const DXGI12GraphicsAccelerator& copy) noexcept
     {
@@ -62,7 +62,7 @@ public:
         _dxgiAdapter->Release();
 
         _dxgiAdapter = move._dxgiAdapter;
-        move._dxgiAdapter = null;
+        move._dxgiAdapter = nullptr;
 
         return *this;
     }

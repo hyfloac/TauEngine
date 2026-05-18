@@ -36,8 +36,8 @@ MeshGenerator::Mesh MeshGenerator::generateMesh(const EditableMesh& mesh, const 
 
     float* positions = new(::std::nothrow) float[vertexCount * 3];
     float* normals = new(::std::nothrow) float[vertexCount * 3];
-    // float* tangents = args.generateTangents ? new(::std::nothrow) float[vertexCount * 3] : null;
-    // float* bitangents = args.generateTangents && args.generateBitangents ? new(::std::nothrow) float[vertexCount * 3] : null;
+    // float* tangents = args.generateTangents ? new(::std::nothrow) float[vertexCount * 3] : nullptr;
+    // float* bitangents = args.generateTangents && args.generateBitangents ? new(::std::nothrow) float[vertexCount * 3] : nullptr;
     float* textures = new(::std::nothrow) float[vertexCount * 2];
     u32* indices = new(::std::nothrow) u32[vertexCount];
 
@@ -124,12 +124,12 @@ MeshGenerator::Mesh MeshGenerator::generateMesh(const EditableMesh& mesh, const 
         }
     }
 
-    return Mesh{ totalVertices, vertexCount, positionsRet, normalsRet, null, null, texturesRet, indices };
+    return Mesh{ totalVertices, vertexCount, positionsRet, normalsRet, nullptr, nullptr, texturesRet, indices };
 }
 
 MeshGenerator::EditableMesh MeshGenerator::generateCube() noexcept
 {
-    EditableMesh ret{ 6, 0, new(::std::nothrow) Square[6], null };
+    EditableMesh ret{ 6, 0, new(::std::nothrow) Square[6], nullptr };
 
     // Top (0, +y, 0)
     {

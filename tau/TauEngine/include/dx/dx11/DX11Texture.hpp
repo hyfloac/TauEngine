@@ -202,9 +202,9 @@ public:
             , renderTarget(move.renderTarget)
             , textureView(move.textureView)
         {
-            move.d3dTexture = null;
-            move.renderTarget = null;
-            move.textureView = null;
+            move.d3dTexture = nullptr;
+            move.renderTarget = nullptr;
+            move.textureView = nullptr;
         }
 
         DXTexture2DArgs& operator=(DXTexture2DArgs&& move) noexcept
@@ -216,9 +216,9 @@ public:
             renderTarget = move.renderTarget;
             textureView = move.textureView;
 
-            move.d3dTexture = null;
-            move.renderTarget = null;
-            move.textureView = null;
+            move.d3dTexture = nullptr;
+            move.renderTarget = nullptr;
+            move.textureView = nullptr;
 
             return *this;
         }
@@ -245,9 +245,9 @@ public:
             , renderTarget(move.renderTarget)
             , textureView(move.textureView)
         {
-            move.d3dTexture = null;
-            move.renderTarget = null;
-            move.textureView = null;
+            move.d3dTexture = nullptr;
+            move.renderTarget = nullptr;
+            move.textureView = nullptr;
         }
 
         DXTexture3DArgs& operator=(DXTexture3DArgs&& move) noexcept
@@ -259,9 +259,9 @@ public:
             renderTarget = move.renderTarget;
             textureView = move.textureView;
 
-            move.d3dTexture = null;
-            move.renderTarget = null;
-            move.textureView = null;
+            move.d3dTexture = nullptr;
+            move.renderTarget = nullptr;
+            move.textureView = nullptr;
 
             return *this;
         }
@@ -304,10 +304,10 @@ public:
             , depthView(move.depthView)
             , stencilView(move.stencilView)
         {
-            move.d3dTexture = null;
-            move.renderTarget = null;
-            move.depthView = null;
-            move.stencilView = null;
+            move.d3dTexture = nullptr;
+            move.renderTarget = nullptr;
+            move.depthView = nullptr;
+            move.stencilView = nullptr;
         }
 
         DXTextureDepthStencilArgs& operator=(const DXTextureDepthStencilArgs& copy) noexcept
@@ -338,10 +338,10 @@ public:
             depthView = copy.depthView;
             stencilView = copy.stencilView;
 
-            copy.d3dTexture = null;
-            copy.renderTarget = null;
-            copy.depthView = null;
-            copy.stencilView = null;
+            copy.d3dTexture = nullptr;
+            copy.renderTarget = nullptr;
+            copy.depthView = nullptr;
+            copy.stencilView = nullptr;
 
             return *this;
         }

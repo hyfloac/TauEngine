@@ -39,7 +39,7 @@ GLRasterizerState* GLRasterizerStateBuilder::build(const RasterizerArgs& args, E
 {
     GLRasterizerArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLRasterizerState* const state = new(::std::nothrow) GLRasterizerState(args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode, glArgs.polygonOffsetFactor, glArgs.polygonOffsetUnits, glArgs.polygonOffsetClamp);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -51,7 +51,7 @@ GLRasterizerState* GLRasterizerStateBuilder::build(const RasterizerArgs& args, E
 {
     GLRasterizerArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLRasterizerState* const state = allocator.allocateT<GLRasterizerState>(args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode, glArgs.polygonOffsetFactor, glArgs.polygonOffsetUnits, glArgs.polygonOffsetClamp);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -63,7 +63,7 @@ CPPRef<IRasterizerState> GLRasterizerStateBuilder::buildCPPRef(const RasterizerA
 {
     GLRasterizerArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLRasterizerState> state(new(::std::nothrow) GLRasterizerState(args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode, glArgs.polygonOffsetFactor, glArgs.polygonOffsetUnits, glArgs.polygonOffsetClamp));
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -75,7 +75,7 @@ NullableRef<IRasterizerState> GLRasterizerStateBuilder::buildTauRef(const Raster
 {
     GLRasterizerArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLRasterizerState> state(allocator, args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode, glArgs.polygonOffsetFactor, glArgs.polygonOffsetUnits, glArgs.polygonOffsetClamp);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -87,7 +87,7 @@ NullableStrongRef<IRasterizerState> GLRasterizerStateBuilder::buildTauSRef(const
 {
     GLRasterizerArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLRasterizerState> state(allocator, args, glArgs.frontFace, glArgs.cullMode, glArgs.fillMode, glArgs.polygonOffsetFactor, glArgs.polygonOffsetUnits, glArgs.polygonOffsetClamp);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);

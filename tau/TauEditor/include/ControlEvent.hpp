@@ -10,7 +10,7 @@ private:
     uSys _type;
     void* _arg;
 public:
-    ControlEvent(const uSys type, void* const arg = null) noexcept
+    ControlEvent(const uSys type, void* const arg = nullptr) noexcept
         : _type(type)
         , _arg(arg)
     { }

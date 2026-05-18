@@ -16,7 +16,7 @@
 //     GlyphSetHandle _charSet;
 //     TextHandler& _textHandler;
 // public:
-//     UIText(u32 x, u32 y, UIElement* parent = null, bool visible = true) noexcept;
+//     UIText(u32 x, u32 y, UIElement* parent = nullptr, bool visible = true) noexcept;
 //
 //     void onRender(float delta) noexcept override;
 // };

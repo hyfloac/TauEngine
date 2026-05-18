@@ -56,7 +56,7 @@ IVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* co
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLVertexArray* const va = new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -68,7 +68,7 @@ IVertexArray* GLVertexArrayBuilder::build(const VertexArrayArgs& args, Error* co
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLVertexArray* const va = allocator.allocateT<GLVertexArray>(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -80,7 +80,7 @@ CPPRef<IVertexArray> GLVertexArrayBuilder::buildCPPRef(const VertexArrayArgs& ar
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLVertexArray> va = CPPRef<GLVertexArray>(new(::std::nothrow) GLVertexArray(args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -92,7 +92,7 @@ NullableRef<IVertexArray> GLVertexArrayBuilder::buildTauRef(const VertexArrayArg
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -104,7 +104,7 @@ NullableStrongRef<IVertexArray> GLVertexArrayBuilder::buildTauSRef(const VertexA
 {
     GLVertexArrayArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLVertexArray> va(allocator, args.drawCount, args.buffers, glArgs.vao, glArgs.drawType, glArgs.indexBuffer);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
@@ -130,7 +130,7 @@ bool GLVertexArrayBuilder::processArgs(const VertexArrayArgs& args, GLVertexArra
     }
     else
     {
-        glArgs->indexBuffer = null;
+        glArgs->indexBuffer = nullptr;
     }
 
     glArgs->drawType = glDrawType(args.drawType);

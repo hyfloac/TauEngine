@@ -31,7 +31,7 @@ public:
     {
         void* const placement = allocate();
         if(!placement) 
-        { return null; }
+        { return nullptr; }
         return new(placement) _T(_TauAllocatorUtils::_forward<_Args>(args)...);
     }
 

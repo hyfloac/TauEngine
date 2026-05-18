@@ -134,11 +134,11 @@ void* GLResourceBuffer::map(IRenderingContext&, const EResource::MapType mapType
              *   This thread is mapped differently from the original
              * mapping or the original mapping has failed.
              *
-             * Decrement the map count and return null.
+             * Decrement the map count and return nullptr.
              */
 
             atomicDecrement(_atomicMapCount);
-            return null;
+            return nullptr;
         }
     }
     return _currentMapping;
@@ -171,7 +171,7 @@ void GLResourceBuffer::unmap(IRenderingContext&, uSys, uSys) noexcept
             default: break;
         }
 
-        _currentMapping = null;
+        _currentMapping = nullptr;
         _currentMapType = static_cast<EResource::MapType>(0);
     }
 }

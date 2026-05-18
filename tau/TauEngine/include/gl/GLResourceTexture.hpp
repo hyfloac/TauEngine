@@ -22,7 +22,7 @@ protected:
         : GLResource(size, resourceType)
         , _texture(texture)
         , _atomicMapCount(new(::std::nothrow) iSys(0))
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
     { }
 public:
     virtual ~GLResourceTexture() noexcept

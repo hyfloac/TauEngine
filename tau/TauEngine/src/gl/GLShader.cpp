@@ -27,7 +27,7 @@ GLShaderData* GLShaderManager::acquire(const WDynString& path) noexcept
         return shader;
     }
 
-    return null;
+    return nullptr;
 }
 
 void GLShaderManager::release(GLShaderData* const shader) noexcept
@@ -47,7 +47,7 @@ void GLShaderManager::release(GLShaderData* const shader) noexcept
 GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, const WDynString& path) noexcept
 {
     if(_shaderMap.count(path) > 0)
-    { return null; }
+    { return nullptr; }
 
     GLShaderData* const shader = _allocator.allocateT<GLShaderData>(handle, stage, path);
 
@@ -59,7 +59,7 @@ GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, const
 GLShaderData* GLShaderManager::create(GLuint handle, EShader::Stage stage, WDynString&& path) noexcept
 {
     if(_shaderMap.count(path) > 0)
-    { return null; }
+    { return nullptr; }
 
     GLShaderData* const shader = _allocator.allocateT<GLShaderData>(handle, stage, ::std::move(path));
 
@@ -150,7 +150,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error) const noe
 {
     GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLShader* const shader = new(::std::nothrow) GLShader(glArgs.shaderHandle, args.stage);
 
@@ -163,7 +163,7 @@ GLShader* GLShaderBuilder::build(const ShaderArgs& args, Error* error, TauAlloca
 {
     GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLShader* const shader = allocator.allocateT<GLShader>(glArgs.shaderHandle, args.stage);
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
@@ -175,7 +175,7 @@ CPPRef<IShader> GLShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* erro
 {
     GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLShader> shader = CPPRef<GLShader>(new(::std::nothrow) GLShader(glArgs.shaderHandle, args.stage));
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
@@ -187,7 +187,7 @@ ReferenceCountingPointer<IShader> GLShaderBuilder::buildTauRef(const ShaderArgs&
 {
     GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const ReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderHandle, args.stage);
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);
@@ -199,7 +199,7 @@ StrongReferenceCountingPointer<IShader> GLShaderBuilder::buildTauSRef(const Shad
 {
     GLShaderArgs glArgs { };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const StrongReferenceCountingPointer<GLShader> shader(allocator, glArgs.shaderHandle, args.stage);
     ERROR_CODE_COND_N(!shader, Error::SystemMemoryAllocationFailure);

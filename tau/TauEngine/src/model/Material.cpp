@@ -24,5 +24,5 @@ Material MaterialBuilder::build() const noexcept
     uploaderArgs.textures[2] = _normalTexture->textureView();
     uploaderArgs.textureSampler = _textureSampler;
 
-    return Material(_specularExponent, _diffuseTexture, _specularTexture, _normalTexture, _gi.createTextureUploader().buildCPPRef(uploaderArgs, null));
+    return Material(_specularExponent, _diffuseTexture, _specularTexture, _normalTexture, _gi.createTextureUploader().buildCPPRef(uploaderArgs, nullptr));
 }

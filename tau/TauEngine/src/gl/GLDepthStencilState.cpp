@@ -22,7 +22,7 @@ GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& a
 {
     GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLDepthStencilState* const ret = new(::std::nothrow) GLDepthStencilState(args, glArgs);
 
@@ -35,7 +35,7 @@ GLDepthStencilState* GLDepthStencilStateBuilder::build(const DepthStencilArgs& a
 {
     GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLDepthStencilState* const ret = allocator.allocateT<GLDepthStencilState>(args, glArgs);
 
@@ -48,7 +48,7 @@ CPPRef<IDepthStencilState> GLDepthStencilStateBuilder::buildCPPRef(const DepthSt
 {
     GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLDepthStencilState> ret = CPPRef<GLDepthStencilState>(new(::std::nothrow) GLDepthStencilState(args, glArgs));
 
@@ -61,7 +61,7 @@ NullableRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauRef(const De
 {
     GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLDepthStencilState> ret(allocator, args, glArgs);
 
@@ -74,7 +74,7 @@ NullableStrongRef<IDepthStencilState> GLDepthStencilStateBuilder::buildTauSRef(c
 {
     GLDepthStencilArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLDepthStencilState> ret(allocator, args, glArgs);
 

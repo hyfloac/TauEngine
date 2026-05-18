@@ -29,7 +29,7 @@ public:
         , _glUsage(glUsage)
         , _buffer(buffer)
         , _atomicMapCount(new(::std::nothrow) iSys(0))
-        , _currentMapping(null)
+        , _currentMapping(nullptr)
         , _currentMapType(static_cast<EResource::MapType>(0))
     { }
 

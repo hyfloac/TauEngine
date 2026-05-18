@@ -62,14 +62,14 @@
 // {
 //     DXTexture2DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     DX10Texture2D* const texture = new(::std::nothrow) DX10Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -78,14 +78,14 @@
 // {
 //     DXTexture2DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     DX10Texture2D* const texture = allocator.allocateT<DX10Texture2D>(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -94,14 +94,14 @@
 // {
 //     DXTexture2DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const CPPRef<DX10Texture2D> texture(new(::std::nothrow) DX10Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -110,14 +110,14 @@
 // {
 //     DXTexture2DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const NullableRef<DX10Texture2D> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -126,14 +126,14 @@
 // {
 //     DXTexture2DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const NullableStrongRef<DX10Texture2D> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -143,15 +143,15 @@
 //     DXTexture3DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
 //     {
-//         return null;
+//         return nullptr;
 //     }
 //
 //     DX10Texture3D* const texture = new(::std::nothrow) DX10Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -161,15 +161,15 @@
 //     DXTexture3DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
 //     {
-//         return null;
+//         return nullptr;
 //     }
 //
 //     DX10Texture3D* const texture = allocator.allocateT<DX10Texture3D>(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -179,15 +179,15 @@
 //     DXTexture3DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
 //     {
-//         return null;
+//         return nullptr;
 //     }
 //
 //     const CPPRef<DX10Texture3D> texture(new(::std::nothrow) DX10Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -197,15 +197,15 @@
 //     DXTexture3DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
 //     {
-//         return null;
+//         return nullptr;
 //     }
 //
 //     const NullableRef<DX10Texture3D> texture(allocator, args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -215,15 +215,15 @@
 //     DXTexture3DArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
 //     {
-//         return null;
+//         return nullptr;
 //     }
 //
 //     const NullableStrongRef<DX10Texture3D> texture(allocator,  args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -232,14 +232,14 @@
 // {
 //     DXTextureCubeArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     DX10TextureCube* const texture = new(::std::nothrow) DX10TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -248,14 +248,14 @@
 // {
 //     DXTextureCubeArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     DX10TextureCube* const texture = allocator.allocateT<DX10TextureCube>(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -264,14 +264,14 @@
 // {
 //     DXTextureCubeArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const CPPRef<DX10TextureCube> texture(new(::std::nothrow) DX10TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -280,14 +280,14 @@
 // {
 //     DXTextureCubeArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const NullableRef<DX10TextureCube> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -296,14 +296,14 @@
 // {
 //     DXTextureCubeArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const NullableStrongRef<DX10TextureCube> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.textureView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.textureView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -312,15 +312,15 @@
 // {
 //     DXTextureDepthStencilArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     DX10TextureDepthStencil* const texture = new(::std::nothrow) DX10TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.depthView = null;
-//     dxArgs.stencilView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.depthView = nullptr;
+//     dxArgs.stencilView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -329,15 +329,15 @@
 // {
 //     DXTextureDepthStencilArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     DX10TextureDepthStencil* const texture = allocator.allocateT<DX10TextureDepthStencil>(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.depthView = null;
-//     dxArgs.stencilView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.depthView = nullptr;
+//     dxArgs.stencilView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -346,15 +346,15 @@
 // {
 //     DXTextureDepthStencilArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const CPPRef<DX10TextureDepthStencil> texture(new(::std::nothrow) DX10TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView));
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.depthView = null;
-//     dxArgs.stencilView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.depthView = nullptr;
+//     dxArgs.stencilView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -363,15 +363,15 @@
 // {
 //     DXTextureDepthStencilArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const NullableRef<DX10TextureDepthStencil> texture(allocator, args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.depthView = null;
-//     dxArgs.stencilView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.depthView = nullptr;
+//     dxArgs.stencilView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }
@@ -380,15 +380,15 @@
 // {
 //     DXTextureDepthStencilArgs dxArgs { };
 //     if(!processArgs(args, &dxArgs, error))
-//     { return null; }
+//     { return nullptr; }
 //
 //     const NullableStrongRef<DX10TextureDepthStencil> texture(allocator, args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
 //     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 //
-//     dxArgs.d3dTexture = null;
-//     dxArgs.renderTarget = null;
-//     dxArgs.depthView = null;
-//     dxArgs.stencilView = null;
+//     dxArgs.d3dTexture = nullptr;
+//     dxArgs.renderTarget = nullptr;
+//     dxArgs.depthView = nullptr;
+//     dxArgs.stencilView = nullptr;
 //
 //     ERROR_CODE_V(Error::NoError, texture);
 // }

@@ -51,7 +51,7 @@ struct Globals final
 
     Globals(Window& window, IGraphicsInterface& gi, IRenderingContext& rc, GameRecorder& gr, const State gameState) noexcept
         : window(window),
-          gi(gi), rc(rc), gr(gr), vr(null), vrCamera(null), vrHandles(),
-          gameState(gameState), currentLeftEye(false), renderer(null)
+          gi(gi), rc(rc), gr(gr), vr(nullptr), vrCamera(nullptr), vrHandles(),
+          gameState(gameState), currentLeftEye(false), renderer(nullptr)
     { }
 };

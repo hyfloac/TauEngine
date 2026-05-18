@@ -20,8 +20,8 @@ private:
     DynString _text;
     TextDescriptor* _next;
 public:
-    inline TextDescriptor(const RGBAColor& textColor, const TextType formatType, DynString text, TextDescriptor* parent = null) noexcept
-        : _textColor(textColor), _formatType(formatType), _text(std::move(text)), _next(null)
+    inline TextDescriptor(const RGBAColor& textColor, const TextType formatType, DynString text, TextDescriptor* parent = nullptr) noexcept
+        : _textColor(textColor), _formatType(formatType), _text(std::move(text)), _next(nullptr)
     {
         if(parent)
         { parent->_next = this; }

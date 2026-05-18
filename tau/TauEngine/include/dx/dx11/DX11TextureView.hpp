@@ -27,7 +27,7 @@ public:
     DX11TextureView(DX11TextureView&& move) noexcept
         : ITextureView(::std::move(move))
         , _d3dShaderResourceView(move._d3dShaderResourceView)
-    { move._d3dShaderResourceView = null; }
+    { move._d3dShaderResourceView = nullptr; }
 
     DX11TextureView& operator=(const DX11TextureView& copy) noexcept
     {
@@ -50,7 +50,7 @@ public:
         ITextureView::operator=(::std::move(move));
 
         _d3dShaderResourceView = move._d3dShaderResourceView;
-        move._d3dShaderResourceView = null;
+        move._d3dShaderResourceView = nullptr;
 
         return *this;
     }

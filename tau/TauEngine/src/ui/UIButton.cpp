@@ -2,7 +2,7 @@
 #include "events/WindowEvent.hpp"
 #include "system/GraphicsInterface.hpp"
 
-// static CPPRef<IInputLayout> _inputLayoutCache = null;
+// static CPPRef<IInputLayout> _inputLayoutCache = nullptr;
 
 bool UIButton::onClick(WindowMouseClickEvent& e) noexcept
 {
@@ -62,7 +62,7 @@ UIRectButton::UIRectButton(IGraphicsInterface& gi, clickHandler_f clickHandler, 
     vaArgs.drawCount = 6;
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _vao = gi.createVertexArray().buildCPPRef(vaArgs, null);
+    _vao = gi.createVertexArray().buildCPPRef(vaArgs, nullptr);
 }
 
 void UIRectButton::onRender(float delta) noexcept

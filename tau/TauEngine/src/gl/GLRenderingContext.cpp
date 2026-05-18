@@ -23,14 +23,14 @@ GLRenderingContext::GLRenderingContext(const RenderingMode& mode, const GLRender
     , _gi(glArgs.gi)
     , _device(glSysArgs.device)
     , _context(glSysArgs.context)
-    , _iaOffsets(null)
-    , _iaStrides(null)
-    , _defaultDepthStencilState(null)
-    , _currentDepthStencilState(null)
-    , _defaultRasterizerState(null)
-    , _currentRasterizerState(null)
-    , _defaultBlendingState(null)
-    , _currentBlendingState(null)
+    , _iaOffsets(nullptr)
+    , _iaStrides(nullptr)
+    , _defaultDepthStencilState(nullptr)
+    , _currentDepthStencilState(nullptr)
+    , _defaultRasterizerState(nullptr)
+    , _currentRasterizerState(nullptr)
+    , _defaultBlendingState(nullptr)
+    , _currentBlendingState(nullptr)
 { }
 
 GLRenderingContext::~GLRenderingContext() noexcept
@@ -167,11 +167,11 @@ GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs&
 {
     GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLSystemRenderingContextArgs glSysArgs { };
     if(!processSysArgs(args, glArgs, &glSysArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLRenderingContext* const context = new(::std::nothrow) GLRenderingContext(_gi.renderingMode(), glArgs, glSysArgs);
 
@@ -183,11 +183,11 @@ GLRenderingContext* GLRenderingContextBuilder::build(const RenderingContextArgs&
 {
     GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLSystemRenderingContextArgs glSysArgs { };
     if(!processSysArgs(args, glArgs, &glSysArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLRenderingContext* const context = allocator.allocateT<GLRenderingContext>(_gi.renderingMode(), glArgs, glSysArgs);
 
@@ -199,11 +199,11 @@ CPPRef<IRenderingContext> GLRenderingContextBuilder::buildCPPRef(const Rendering
 {
     GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLSystemRenderingContextArgs glSysArgs { };
     if(!processSysArgs(args, glArgs, &glSysArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLRenderingContext> context(new(::std::nothrow) GLRenderingContext(_gi.renderingMode(), glArgs, glSysArgs));
 
@@ -215,11 +215,11 @@ NullableRef<IRenderingContext> GLRenderingContextBuilder::buildTauRef(const Rend
 {
     GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLSystemRenderingContextArgs glSysArgs { };
     if(!processSysArgs(args, glArgs, &glSysArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLRenderingContext> context(allocator, _gi.renderingMode(), glArgs, glSysArgs);
 
@@ -231,11 +231,11 @@ NullableStrongRef<IRenderingContext> GLRenderingContextBuilder::buildTauSRef(con
 {
     GLRenderingContextArgs glArgs { _gi };
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLSystemRenderingContextArgs glSysArgs { };
     if(!processSysArgs(args, glArgs, &glSysArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLRenderingContext> context(allocator, _gi.renderingMode(), glArgs, glSysArgs);
 

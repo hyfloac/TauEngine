@@ -48,13 +48,13 @@ ID3DBlob* DXShaderStubGenerator::genShader(const uSys bufferCount, const BufferD
 
     sb.append("}; struct VS_Output { }; VS_Output main(VS_Input input) { VS_Output output; return output; }");
 
-    D3D_SHADER_MACRO shaderMacros = { null, null };
+    D3D_SHADER_MACRO shaderMacros = { nullptr, nullptr };
     ID3DBlob* ret;
     ID3DBlob* errors;
-    const HRESULT res = D3DCompile(sb.c_str(), sb.size(), null, &shaderMacros, null, "main", shaderVersion, D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &ret, &errors);
+    const HRESULT res = D3DCompile(sb.c_str(), sb.size(), nullptr, &shaderMacros, nullptr, "main", shaderVersion, D3DCOMPILE_SKIP_VALIDATION | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &ret, &errors);
 
     if(FAILED(res) || !ret || errors)
-    { return null; }
+    { return nullptr; }
 
     errors->Release();
 

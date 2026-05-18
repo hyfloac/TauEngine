@@ -51,7 +51,7 @@ static void subdivideSquare(const Square& square, SubdividedSquare* const subdiv
 
 CPPRef<IVertexArray> generateNormalizedCubeSphere(const uSys subdivisions) noexcept
 {
-    return null;
+    return nullptr;
 }
 
 static void triangulateSquare(const Square& square, TriSquare* const subdivided) noexcept

@@ -38,7 +38,7 @@ DX11GraphicsInterface::DX11GraphicsInterface(const RenderingMode& mode, ID3D11De
 DX11GraphicsInterface::~DX11GraphicsInterface() noexcept
 {
     _d3d11Device->Release();
-    _d3d11Device = null;
+    _d3d11Device = nullptr;
 
     delete _shaderBuilder;
     delete _inputLayoutBuilder;

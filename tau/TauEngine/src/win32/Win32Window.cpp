@@ -308,7 +308,7 @@ static void removeWindow(const Window* systemWindowContainer) noexcept
  *    The handle of the @link Window @endlink to retrieve.
  * @return 
  *      A pointer to the @link Window @endlink containing the 
- *    @link HWND @endlink `handle`. returns null if no window is 
+ *    @link HWND @endlink `handle`. returns nullptr if no window is 
  *    currently holding the referenced handle.
  */
 static Window* getWindowFromHandle(HWND handle) noexcept

@@ -14,7 +14,7 @@ IGraphicsInterface* DX12GraphicsInterfaceBuilder::build(const GraphicsInterfaceA
 {
     DXGraphicsInterfaceArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX12GraphicsInterface* const gi = new(::std::nothrow) DX12GraphicsInterface(args.renderingMode, dxArgs.d3dDevice, dxArgs.gpuAllocator);
     ERROR_CODE_COND_N(!gi, Error::SystemMemoryAllocationFailure);
@@ -26,7 +26,7 @@ IGraphicsInterface* DX12GraphicsInterfaceBuilder::build(const GraphicsInterfaceA
 {
     DXGraphicsInterfaceArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX12GraphicsInterface* const gi = allocator.allocateT<DX12GraphicsInterface>(args.renderingMode, dxArgs.d3dDevice, dxArgs.gpuAllocator);
     ERROR_CODE_COND_N(!gi, Error::SystemMemoryAllocationFailure);
@@ -38,7 +38,7 @@ NullableRef<IGraphicsInterface> DX12GraphicsInterfaceBuilder::buildTauRef(const 
 {
     DXGraphicsInterfaceArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX12GraphicsInterface> gi(allocator, args.renderingMode, dxArgs.d3dDevice, dxArgs.gpuAllocator);
     ERROR_CODE_COND_N(!gi, Error::SystemMemoryAllocationFailure);
@@ -49,13 +49,13 @@ NullableRef<IGraphicsInterface> DX12GraphicsInterfaceBuilder::buildTauRef(const 
 bool DX12GraphicsInterfaceBuilder::processArgs(const GraphicsInterfaceArgs& args, DXGraphicsInterfaceArgs* const dxArgs, Error* error) const noexcept
 {
     if(!RTT_CHECK(args.graphicsAccelerator.get(), DXGI16GraphicsAccelerator))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DXGI16GraphicsAccelerator> gpu = RefCast<DXGI16GraphicsAccelerator>(args.graphicsAccelerator);
 
     constexpr D3D_FEATURE_LEVEL TargetLevel = D3D_FEATURE_LEVEL_12_0;
 
-    HRESULT res = D3D12CreateDevice(gpu->dxgiAdapter(), TargetLevel, __uuidof(*dxArgs->d3dDevice), null);
+    HRESULT res = D3D12CreateDevice(gpu->dxgiAdapter(), TargetLevel, __uuidof(*dxArgs->d3dDevice), nullptr);
     ERROR_CODE_COND_F(FAILED(res), Error::UnsupportedAPI);
 
     if(args.renderingMode.debugMode())

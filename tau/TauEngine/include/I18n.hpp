@@ -34,5 +34,5 @@ public:
 
     bool loadTranslations(const CPPRef<IFile>& file) noexcept;
 
-    [[nodiscard]] const WDynString& translate(const DynString& key, [[tau::out]] Error* error = null) const noexcept;
+    [[nodiscard]] const WDynString& translate(const DynString& key, [[tau::out]] Error* error = nullptr) const noexcept;
 };

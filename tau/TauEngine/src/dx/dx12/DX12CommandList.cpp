@@ -23,7 +23,7 @@ void DX12CommandList::reset(const NullableRef<ICommandAllocator>& allocator, con
 
     _cmdAllocator = RefCast<DX12CommandAllocator>(allocator);
 
-    ID3D12PipelineState* pipelineState = null;
+    ID3D12PipelineState* pipelineState = nullptr;
     if(initialState)
     {
         pipelineState = initialState->get<ID3D12PipelineState>();
@@ -313,7 +313,7 @@ void DX12CommandList::trackResourcePreWrite(ID3D12Resource* const resource, cons
 
     DX12ResourceStateManager::UsageIndices* const usageIndices = _stateManager.getUsageIndices(resource);
     
-    //   This falls under general safety because returning null means that
+    //   This falls under general safety because returning nullptr means that
     // the resource wasn't properly tracked.
 #if TAU_GENERAL_SAFETY_CHECK
     if(!usageIndices)
@@ -346,7 +346,7 @@ void DX12CommandList::trackResourcePostWrite(ID3D12Resource* const resource, con
 
     DX12ResourceStateManager::UsageIndices* const usageIndices = _stateManager.getUsageIndices(resource);
     
-    //   This falls under general safety because returning null means that
+    //   This falls under general safety because returning nullptr means that
     // the resource wasn't properly tracked.
 #if TAU_GENERAL_SAFETY_CHECK
     if(!usageIndices)
@@ -372,7 +372,7 @@ void DX12CommandList::trackResourcePreRead(ID3D12Resource* const resource, const
 
     DX12ResourceStateManager::UsageIndices* usageIndices = _stateManager.getUsageIndices(resource);
 
-    //   This falls under general safety because returning null means that
+    //   This falls under general safety because returning nullptr means that
     // the resource wasn't properly tracked.
 #if TAU_GENERAL_SAFETY_CHECK
     if(!usageIndices)
@@ -415,7 +415,7 @@ void DX12CommandList::trackResourcePostRead(ID3D12Resource* const resource, cons
 
     DX12ResourceStateManager::UsageIndices* usageIndices = _stateManager.getUsageIndices(resource);
 
-    //   This falls under general safety because returning null means that
+    //   This falls under general safety because returning nullptr means that
     // the resource wasn't properly tracked.
 #if TAU_GENERAL_SAFETY_CHECK
     if(!usageIndices)

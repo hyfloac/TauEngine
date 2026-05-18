@@ -36,7 +36,7 @@ public:
         : IGraphicsDisplay(::std::move(move))
         , _dxgiOutput(move._dxgiOutput)
         , _displayModes(::std::move(move._displayModes))
-    { move._dxgiOutput = null; }
+    { move._dxgiOutput = nullptr; }
 
     DXGI14GraphicsDisplay& operator=(const DXGI14GraphicsDisplay& copy) noexcept
     {
@@ -67,7 +67,7 @@ public:
         _dxgiOutput = move._dxgiOutput;
         _displayModes = ::std::move(move._displayModes);
 
-        move._dxgiOutput = null;
+        move._dxgiOutput = nullptr;
 
         return *this;
     }

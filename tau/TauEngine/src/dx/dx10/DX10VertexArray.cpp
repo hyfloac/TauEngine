@@ -10,13 +10,13 @@ NullableRef<IVertexArray> DX10VertexArrayBuilder::buildTauRef(const VertexArrayA
 {
     DXVertexArrayArgs dxArgs(args.bufferCount);
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaBuffers = null;
+    dxArgs.iaBuffers = nullptr;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }

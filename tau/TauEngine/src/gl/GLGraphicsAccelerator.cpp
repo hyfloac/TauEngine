@@ -13,21 +13,21 @@ RefDynArray<NullableRef<IGraphicsDisplay>> GLGraphicsAcceleratorATI::graphicsDis
 
 NullableRef<GLGraphicsAcceleratorNV> GLGraphicsAcceleratorBuilderNV::build() const noexcept
 {
-    if(!WGLEW_NV_gpu_affinity) { return null; }
-    if(!GL_NVX_gpu_memory_info) { return null; }
+    if(!WGLEW_NV_gpu_affinity) { return nullptr; }
+    if(!GL_NVX_gpu_memory_info) { return nullptr; }
 
     /* Create temporary context with affinity to GPU */
     
     // ReSharper disable once CppLocalVariableMayBeConst
     HDC tmpHdc = wglCreateAffinityDCNV(&_gpuHandle);
-    if(!tmpHdc) { return null; }
+    if(!tmpHdc) { return nullptr; }
 
     // ReSharper disable once CppLocalVariableMayBeConst
     HGLRC rc = wglCreateContext(tmpHdc);
     if(!rc)
     {
         (void) wglDeleteDCNV(tmpHdc);
-        return null;
+        return nullptr;
     }
     
     (void) wglMakeCurrent(NULL, NULL);
@@ -35,7 +35,7 @@ NullableRef<GLGraphicsAcceleratorNV> GLGraphicsAcceleratorBuilderNV::build() con
     {
         (void) wglDeleteContext(rc);
         (void) wglDeleteDCNV(tmpHdc);
-        return null;
+        return nullptr;
     }
 
     /* Get GPU info */
@@ -60,19 +60,19 @@ NullableRef<GLGraphicsAcceleratorNV> GLGraphicsAcceleratorBuilderNV::build() con
 
 NullableRef<GLGraphicsAcceleratorATI> GLGraphicsAcceleratorBuilderATI::build() const noexcept
 {
-    if(!WGLEW_AMD_gpu_association) { return null; }
+    if(!WGLEW_AMD_gpu_association) { return nullptr; }
 
     /* Create temporary context with affinity to GPU */
 
     // ReSharper disable once CppLocalVariableMayBeConst
     HGLRC rc = wglCreateAssociatedContextAMD(_gpuHandle);
-    if(!rc) { return null; }
+    if(!rc) { return nullptr; }
     
     (void) wglMakeCurrent(NULL, NULL);
     if(!wglMakeAssociatedContextCurrentAMD(rc))
     {
         (void) wglDeleteAssociatedContextAMD(rc);
-        return null;
+        return nullptr;
     }
 
     /* Get GPU info */

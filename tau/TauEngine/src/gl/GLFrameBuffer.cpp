@@ -57,7 +57,7 @@ GLFrameBuffer* GLFrameBufferBuilder::build(const FrameBufferArgs& args, Error* e
 {
     GLFrameBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLFrameBuffer* const frameBuffer = new(::std::nothrow) GLFrameBuffer(glArgs.fbo, args.colorAttachments, args.depthStencilAttachment);
 
@@ -74,7 +74,7 @@ GLFrameBuffer* GLFrameBufferBuilder::build(const FrameBufferArgs& args, Error* e
 {
     GLFrameBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLFrameBuffer* const frameBuffer = allocator.allocateT<GLFrameBuffer>(glArgs.fbo, args.colorAttachments, args.depthStencilAttachment);
 
@@ -91,7 +91,7 @@ CPPRef<IFrameBuffer> GLFrameBufferBuilder::buildCPPRef(const FrameBufferArgs& ar
 {
     GLFrameBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLFrameBuffer> frameBuffer = CPPRef<GLFrameBuffer>(new(::std::nothrow) GLFrameBuffer(glArgs.fbo, args.colorAttachments, args.depthStencilAttachment));
 
@@ -108,7 +108,7 @@ NullableRef<IFrameBuffer> GLFrameBufferBuilder::buildTauRef(const FrameBufferArg
 {
     GLFrameBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLFrameBuffer> frameBuffer(allocator, glArgs.fbo, args.colorAttachments, args.depthStencilAttachment);
 
@@ -125,7 +125,7 @@ NullableStrongRef<IFrameBuffer> GLFrameBufferBuilder::buildTauSRef(const FrameBu
 {
     GLFrameBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLFrameBuffer> frameBuffer(allocator, glArgs.fbo, args.colorAttachments, args.depthStencilAttachment);
 

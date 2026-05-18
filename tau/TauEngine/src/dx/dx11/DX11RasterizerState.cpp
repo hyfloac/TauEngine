@@ -13,7 +13,7 @@ DX11RasterizerState* DX11RasterizerStateBuilder::build(const RasterizerArgs& arg
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11RasterizerState* const state = new(::std::nothrow) DX11RasterizerState(args, dxArgs.state);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -25,7 +25,7 @@ DX11RasterizerState* DX11RasterizerStateBuilder::build(const RasterizerArgs& arg
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11RasterizerState* const state = allocator.allocateT<DX11RasterizerState>(args, dxArgs.state);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -37,7 +37,7 @@ CPPRef<IRasterizerState> DX11RasterizerStateBuilder::buildCPPRef(const Rasterize
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11RasterizerState> state = CPPRef<DX11RasterizerState>(new(::std::nothrow) DX11RasterizerState(args, dxArgs.state));
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -49,7 +49,7 @@ NullableRef<IRasterizerState> DX11RasterizerStateBuilder::buildTauRef(const Rast
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11RasterizerState> state(allocator, args, dxArgs.state);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);
@@ -61,7 +61,7 @@ NullableStrongRef<IRasterizerState> DX11RasterizerStateBuilder::buildTauSRef(con
 {
     DXRasterizerArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11RasterizerState> state(allocator, args, dxArgs.state);
     ERROR_CODE_COND_N(!state, Error::SystemMemoryAllocationFailure);

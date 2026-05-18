@@ -49,7 +49,7 @@ TextureIndices DX10SingleTextureUploader::upload(IRenderingContext& context, con
 TextureIndices DX10SingleTextureUploader::unbind(IRenderingContext& context, const TextureIndices& indices, const EShader::Stage stage) noexcept
 {
     CTX();
-    ID3D10ShaderResourceView* nullSRV = null;
+    ID3D10ShaderResourceView* nullSRV = nullptr;
     switch(stage)
     {
         case EShader::Stage::Vertex:
@@ -100,10 +100,10 @@ TextureIndices DX10TextureUploader::unbind(IRenderingContext& context, const Tex
 {
     CTX();
     ID3D10ShaderResourceView* nullSRV[16] = {
-        null, null, null, null,
-        null, null, null, null,
-        null, null, null, null,
-        null, null, null, null
+        nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr
     };
 
     for(uSys i = 0; i < _textures.size(); i += 16)
@@ -132,7 +132,7 @@ DX10TextureUploader* DX10TextureUploaderBuilder::build(const TextureUploaderArgs
 {
     DXTextureUploaderArgs dxArgs(args.textures.count());
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX10TextureUploader* const uploader = new(::std::nothrow) DX10TextureUploader(args.textures, RefCast<DX10TextureSampler>(args.textureSampler), dxArgs.textures);
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -144,7 +144,7 @@ DX10TextureUploader* DX10TextureUploaderBuilder::build(const TextureUploaderArgs
 {
     DXTextureUploaderArgs dxArgs(args.textures.count());
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX10TextureUploader* const uploader = allocator.allocateT<DX10TextureUploader>(args.textures, RefCast<DX10TextureSampler>(args.textureSampler), dxArgs.textures);
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -156,7 +156,7 @@ CPPRef<ITextureUploader> DX10TextureUploaderBuilder::buildCPPRef(const TextureUp
 {
     DXTextureUploaderArgs dxArgs(args.textures.count());
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX10TextureUploader> uploader = CPPRef<DX10TextureUploader>(new(::std::nothrow) DX10TextureUploader(args.textures, RefCast<DX10TextureSampler>(args.textureSampler), dxArgs.textures));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -168,7 +168,7 @@ NullableRef<ITextureUploader> DX10TextureUploaderBuilder::buildTauRef(const Text
 {
     DXTextureUploaderArgs dxArgs(args.textures.count());
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10TextureUploader> uploader(allocator, args.textures, RefCast<DX10TextureSampler>(args.textureSampler), dxArgs.textures);
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -180,7 +180,7 @@ NullableStrongRef<ITextureUploader> DX10TextureUploaderBuilder::buildTauSRef(con
 {
     DXTextureUploaderArgs dxArgs(args.textures.count());
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX10TextureUploader> uploader(allocator, args.textures, RefCast<DX10TextureSampler>(args.textureSampler), dxArgs.textures);
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -209,7 +209,7 @@ bool DX10TextureUploaderBuilder::processArgs(const TextureUploaderArgs& args, DX
 DX10SingleTextureUploader* DX10TextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* error) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     DX10SingleTextureUploader* const uploader = new(::std::nothrow) DX10SingleTextureUploader(args.texture, RefCast<DX10TextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -220,7 +220,7 @@ DX10SingleTextureUploader* DX10TextureUploaderBuilder::build(const SingleTexture
 DX10SingleTextureUploader* DX10TextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     DX10SingleTextureUploader* const uploader = allocator.allocateT<DX10SingleTextureUploader>(args.texture, RefCast<DX10TextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -231,7 +231,7 @@ DX10SingleTextureUploader* DX10TextureUploaderBuilder::build(const SingleTexture
 CPPRef<ISingleTextureUploader> DX10TextureUploaderBuilder::buildCPPRef(const SingleTextureUploaderArgs& args, Error* error) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX10SingleTextureUploader> uploader = CPPRef<DX10SingleTextureUploader>(new(::std::nothrow) DX10SingleTextureUploader(args.texture, RefCast<DX10TextureSampler>(args.textureSampler)));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -242,7 +242,7 @@ CPPRef<ISingleTextureUploader> DX10TextureUploaderBuilder::buildCPPRef(const Sin
 NullableRef<ISingleTextureUploader> DX10TextureUploaderBuilder::buildTauRef(const SingleTextureUploaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX10SingleTextureUploader> uploader(allocator, args.texture, RefCast<DX10TextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -253,7 +253,7 @@ NullableRef<ISingleTextureUploader> DX10TextureUploaderBuilder::buildTauRef(cons
 NullableStrongRef<ISingleTextureUploader> DX10TextureUploaderBuilder::buildTauSRef(const SingleTextureUploaderArgs& args, Error* error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX10SingleTextureUploader> uploader(allocator, args.texture, RefCast<DX10TextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);

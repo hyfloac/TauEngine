@@ -84,7 +84,7 @@ TextureIndices GLTextureUploader::unbind(IRenderingContext& context, const Textu
 GLTextureUploader* GLTextureUploaderBuilder::build(const TextureUploaderArgs& args, Error* const error) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureUploader* const uploader = new(::std::nothrow) GLTextureUploader(args.textures, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -95,7 +95,7 @@ GLTextureUploader* GLTextureUploaderBuilder::build(const TextureUploaderArgs& ar
 GLTextureUploader* GLTextureUploaderBuilder::build(const TextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     GLTextureUploader* const uploader = allocator.allocateT<GLTextureUploader>(args.textures, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -106,7 +106,7 @@ GLTextureUploader* GLTextureUploaderBuilder::build(const TextureUploaderArgs& ar
 CPPRef<ITextureUploader> GLTextureUploaderBuilder::buildCPPRef(const TextureUploaderArgs& args, Error* const error) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLTextureUploader> uploader = CPPRef<GLTextureUploader>(new(::std::nothrow) GLTextureUploader(args.textures, RefCast<GLTextureSampler>(args.textureSampler)));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -117,7 +117,7 @@ CPPRef<ITextureUploader> GLTextureUploaderBuilder::buildCPPRef(const TextureUplo
 NullableRef<ITextureUploader> GLTextureUploaderBuilder::buildTauRef(const TextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLTextureUploader> uploader(allocator, args.textures, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -128,7 +128,7 @@ NullableRef<ITextureUploader> GLTextureUploaderBuilder::buildTauRef(const Textur
 NullableStrongRef<ITextureUploader> GLTextureUploaderBuilder::buildTauSRef(const TextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLTextureUploader> uploader(allocator, args.textures, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -155,7 +155,7 @@ bool GLTextureUploaderBuilder::processArgs(const TextureUploaderArgs& args, Erro
 GLSingleTextureUploader* GLTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     GLSingleTextureUploader* const uploader = new(::std::nothrow) GLSingleTextureUploader(args.texture, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -166,7 +166,7 @@ GLSingleTextureUploader* GLTextureUploaderBuilder::build(const SingleTextureUplo
 GLSingleTextureUploader* GLTextureUploaderBuilder::build(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     GLSingleTextureUploader* const uploader = allocator.allocateT<GLSingleTextureUploader>(args.texture, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -177,7 +177,7 @@ GLSingleTextureUploader* GLTextureUploaderBuilder::build(const SingleTextureUplo
 CPPRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildCPPRef(const SingleTextureUploaderArgs& args, Error* const error) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLSingleTextureUploader> uploader = CPPRef<GLSingleTextureUploader>(new(::std::nothrow) GLSingleTextureUploader(args.texture, RefCast<GLTextureSampler>(args.textureSampler)));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -188,7 +188,7 @@ CPPRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildCPPRef(const Singl
 NullableRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildTauRef(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLSingleTextureUploader> uploader(allocator, args.texture, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);
@@ -199,7 +199,7 @@ NullableRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildTauRef(const 
 NullableStrongRef<ISingleTextureUploader> GLTextureUploaderBuilder::buildTauSRef(const SingleTextureUploaderArgs& args, Error* const error, TauAllocator& allocator) const noexcept
 {
     if(!processArgs(args, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLSingleTextureUploader> uploader(allocator, args.texture, RefCast<GLTextureSampler>(args.textureSampler));
     ERROR_CODE_COND_N(!uploader, Error::SystemMemoryAllocationFailure);

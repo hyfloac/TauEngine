@@ -21,7 +21,7 @@ public:
     static GLint glWrapMode(ETexture::WrapMode wrapMode) noexcept;
     static GLint glDepthCompareFunc(ETexture::CompareFunc func) noexcept;
 public:
-    [[nodiscard]] TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, Error* error = null) const noexcept override;
+    [[nodiscard]] TextureSampler build(const TextureSamplerArgs& args, DescriptorSamplerTable table, uSys tableIndex, Error* error = nullptr) const noexcept override;
 private:
     static bool processArgs(const TextureSamplerArgs& args, [[tau::out]] GLTextureSamplerArgs* glArgs, [[tau::out]] Error* error) noexcept;
 };

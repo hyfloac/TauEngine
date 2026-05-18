@@ -27,7 +27,7 @@ public:
     DX11RenderTarget(DX11RenderTarget&& move) noexcept
         : IRenderTarget(::std::move(move))
         , _d3dRenderTargetView(move._d3dRenderTargetView)
-    { move._d3dRenderTargetView = null; }
+    { move._d3dRenderTargetView = nullptr; }
 
     DX11RenderTarget& operator=(const DX11RenderTarget& copy) noexcept
     {
@@ -54,7 +54,7 @@ public:
         IRenderTarget::operator=(::std::move(move));
 
         _d3dRenderTargetView = move._d3dRenderTargetView;
-        move._d3dRenderTargetView = null;
+        move._d3dRenderTargetView = nullptr;
 
         return *this;
     }
@@ -84,7 +84,7 @@ public:
     DX11DepthStencilTarget(DX11DepthStencilTarget&& move) noexcept
         : IRenderTarget(::std::move(move))
         , _d3dDepthStencilView(move._d3dDepthStencilView)
-    { move._d3dDepthStencilView = null; }
+    { move._d3dDepthStencilView = nullptr; }
 
     DX11DepthStencilTarget& operator=(const DX11DepthStencilTarget& copy) noexcept
     {
@@ -111,7 +111,7 @@ public:
         IRenderTarget::operator=(::std::move(move));
 
         _d3dDepthStencilView = move._d3dDepthStencilView;
-        move._d3dDepthStencilView = null;
+        move._d3dDepthStencilView = nullptr;
 
         return *this;
     }

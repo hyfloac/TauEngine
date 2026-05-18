@@ -68,9 +68,9 @@ NullableRef<IRasterizerState> TextHandler::rs = nullptr;
 #define INSTANCE_COUNT 128
 
 TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* const vfsMount, const char* const path, const char* const vertexName, const char* const pixelName) noexcept
-    : _ft(null)
+    : _ft(nullptr)
     , _shader(IShaderProgram::create(gi))
-    , _va(null)
+    , _va(nullptr)
     , _viewUniforms(gi.createBuffer())
     , _colorUniforms(gi.createBuffer())
 {
@@ -81,11 +81,11 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     
     shaderArgs.fileName = vertexName;
     shaderArgs.stage = EShader::Stage::Vertex;
-    CPPRef<IShader> vertexShader = gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> vertexShader = gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     shaderArgs.fileName = pixelName;
     shaderArgs.stage = EShader::Stage::Pixel;
-    CPPRef<IShader> pixelShader = gi.createShader().buildCPPRef(shaderArgs, null);
+    CPPRef<IShader> pixelShader = gi.createShader().buildCPPRef(shaderArgs, nullptr);
 
     _shader->setVertexShader(context, vertexShader);
     _shader->setPixelShader(context, pixelShader);
@@ -103,15 +103,15 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
 
     SingleTextureUploaderArgs tuArgs;
     tuArgs.texture = TextureLoader::getMissingTexture()->textureView();
-    tuArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null);
-    _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, null);
+    tuArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, nullptr);
+    _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, nullptr);
 
     VertexBufferArgs bufferBuilder(1);
     bufferBuilder.type = EBuffer::Type::ArrayBuffer;
     bufferBuilder.usage = EBuffer::UsageType::DynamicDraw;
     bufferBuilder.elementCount = 6;
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);
-    bufferBuilder.initialBuffer = null;
+    bufferBuilder.initialBuffer = nullptr;
     
     _positionBuffer = gi.createVertexBuffer().buildCPPRef(bufferBuilder, nullptr);
 
@@ -130,7 +130,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     bufferBuilder.descriptor.reset(1);
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::TextureCoord, ShaderDataType::Vector2Float);
     
-    const CPPRef<IVertexBuffer> textureCoordBuffer = gi.createVertexBuffer().buildCPPRef(bufferBuilder, null);
+    const CPPRef<IVertexBuffer> textureCoordBuffer = gi.createVertexBuffer().buildCPPRef(bufferBuilder, nullptr);
 
     VertexArrayArgs vaArgs(2);
     vaArgs.shader = vertexShader.get();
@@ -139,7 +139,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     vaArgs.drawCount = 6;
     vaArgs.drawType = DrawType::SeparatedTriangles;
 
-    _va = gi.createVertexArray().buildCPPRef(vaArgs, null);
+    _va = gi.createVertexArray().buildCPPRef(vaArgs, nullptr);
 
     if(!rs)
     {
@@ -151,7 +151,7 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
         else
         {
             rArgs.frontFaceCounterClockwise = true;
-            rs = gi.createRasterizerState().buildTauRef(rArgs, null);
+            rs = gi.createRasterizerState().buildTauRef(rArgs, nullptr);
         }
     }
 }
@@ -172,14 +172,14 @@ TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, cons
     PERF();
     const CPPRef<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
     
-    if(!file) { return null; }
+    if(!file) { return nullptr; }
     
     RefDynArray<u8> data = file->ReadFile();
 
     FT_Face face;
     const FT_Error error = FT_New_Memory_Face(_ft, data.arr(), data.size() - 1, 0, &face);
 
-    if(error) { return null; }
+    if(error) { return nullptr; }
 
     FT_Set_Pixel_Sizes(face, pixelWidth, pixelHeight);
 

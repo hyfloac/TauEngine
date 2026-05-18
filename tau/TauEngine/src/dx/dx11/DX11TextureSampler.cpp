@@ -12,7 +12,7 @@ void DX11TextureSampler::bind(DX11RenderingContext& context, const UINT slot) co
 
 void DX11TextureSampler::unbind(DX11RenderingContext& context, const UINT slot) const noexcept
 {
-    ID3D11SamplerState* nullSS = null;
+    ID3D11SamplerState* nullSS = nullptr;
     context.d3d11DeviceContext()->PSSetSamplers(slot, 1, &nullSS);
 }
 
@@ -20,7 +20,7 @@ DX11TextureSampler* DX11TextureSamplerBuilder::build(const TextureSamplerArgs& a
 {
     ID3D11SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
-    { return null; }
+    { return nullptr; }
 
     DX11TextureSampler* const sampler = new(::std::nothrow) DX11TextureSampler(d3dSampler);
 
@@ -37,7 +37,7 @@ DX11TextureSampler* DX11TextureSamplerBuilder::build(const TextureSamplerArgs& a
 {
     ID3D11SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
-    { return null; }
+    { return nullptr; }
 
     DX11TextureSampler* const sampler = allocator.allocateT<DX11TextureSampler>(d3dSampler);
 
@@ -54,7 +54,7 @@ CPPRef<ITextureSampler> DX11TextureSamplerBuilder::buildCPPRef(const TextureSamp
 {
     ID3D11SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11TextureSampler> sampler = CPPRef<DX11TextureSampler>(new(::std::nothrow) DX11TextureSampler(d3dSampler));
 
@@ -71,7 +71,7 @@ NullableRef<ITextureSampler> DX11TextureSamplerBuilder::buildTauRef(const Textur
 {
     ID3D11SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11TextureSampler> sampler(allocator, d3dSampler);
 
@@ -88,7 +88,7 @@ NullableStrongRef<ITextureSampler> DX11TextureSamplerBuilder::buildTauSRef(const
 {
     ID3D11SamplerState* d3dSampler;
     if(!processArgs(args, &d3dSampler, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11TextureSampler> sampler(allocator, d3dSampler);
 

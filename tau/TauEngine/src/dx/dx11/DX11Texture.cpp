@@ -62,14 +62,14 @@ DX11Texture2D* DX11TextureBuilder::build(const Texture2DArgs& args, Error* error
 {
     DXTexture2DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11Texture2D* const texture = new(::std::nothrow) DX11Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -78,14 +78,14 @@ DX11Texture2D* DX11TextureBuilder::build(const Texture2DArgs& args, Error* error
 {
     DXTexture2DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11Texture2D* const texture = allocator.allocateT<DX11Texture2D>(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -94,14 +94,14 @@ CPPRef<ITexture2D> DX11TextureBuilder::buildCPPRef(const Texture2DArgs& args, Er
 {
     DXTexture2DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11Texture2D> texture(new(::std::nothrow) DX11Texture2D(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -110,14 +110,14 @@ NullableRef<ITexture2D> DX11TextureBuilder::buildTauRef(const Texture2DArgs& arg
 {
     DXTexture2DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11Texture2D> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -126,14 +126,14 @@ NullableStrongRef<ITexture2D> DX11TextureBuilder::buildTauSRef(const Texture2DAr
 {
     DXTexture2DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11Texture2D> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -143,15 +143,15 @@ DX11Texture3D* DX11TextureBuilder::build(const Texture3DArgs& args, Error* error
     DXTexture3DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
     {
-        return null;
+        return nullptr;
     }
 
     DX11Texture3D* const texture = new(::std::nothrow) DX11Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -161,15 +161,15 @@ DX11Texture3D* DX11TextureBuilder::build(const Texture3DArgs& args, Error* error
     DXTexture3DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
     {
-        return null;
+        return nullptr;
     }
 
     DX11Texture3D* const texture = allocator.allocateT<DX11Texture3D>(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -179,15 +179,15 @@ CPPRef<ITexture3D> DX11TextureBuilder::buildCPPRef(const Texture3DArgs& args, Er
     DXTexture3DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
     {
-        return null;
+        return nullptr;
     }
 
     const CPPRef<DX11Texture3D> texture(new(::std::nothrow) DX11Texture3D(args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -197,15 +197,15 @@ NullableRef<ITexture3D> DX11TextureBuilder::buildTauRef(const Texture3DArgs& arg
     DXTexture3DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
     {
-        return null;
+        return nullptr;
     }
 
     const NullableRef<DX11Texture3D> texture(allocator, args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -215,15 +215,15 @@ NullableStrongRef<ITexture3D> DX11TextureBuilder::buildTauSRef(const Texture3DAr
     DXTexture3DArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
     {
-        return null;
+        return nullptr;
     }
 
     const NullableStrongRef<DX11Texture3D> texture(allocator,  args.width, args.height, args.depth, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -232,14 +232,14 @@ DX11TextureCube* DX11TextureBuilder::build(const TextureCubeArgs& args, Error* e
 {
     DXTextureCubeArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11TextureCube* const texture = new(::std::nothrow) DX11TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -248,14 +248,14 @@ DX11TextureCube* DX11TextureBuilder::build(const TextureCubeArgs& args, Error* e
 {
     DXTextureCubeArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11TextureCube* const texture = allocator.allocateT<DX11TextureCube>(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -264,14 +264,14 @@ CPPRef<ITextureCube> DX11TextureBuilder::buildCPPRef(const TextureCubeArgs& args
 {
     DXTextureCubeArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11TextureCube> texture(new(::std::nothrow) DX11TextureCube(args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -280,14 +280,14 @@ NullableRef<ITextureCube> DX11TextureBuilder::buildTauRef(const TextureCubeArgs&
 {
     DXTextureCubeArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11TextureCube> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -296,14 +296,14 @@ NullableStrongRef<ITextureCube> DX11TextureBuilder::buildTauSRef(const TextureCu
 {
     DXTextureCubeArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11TextureCube> texture(allocator, args.width, args.height, args.dataFormat, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.textureView, args.mipmapLevels);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.textureView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.textureView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -312,15 +312,15 @@ DX11TextureDepthStencil* DX11TextureBuilder::build(const TextureDepthStencilArgs
 {
     DXTextureDepthStencilArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11TextureDepthStencil* const texture = new(::std::nothrow) DX11TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.depthView = null;
-    dxArgs.stencilView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.depthView = nullptr;
+    dxArgs.stencilView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -329,15 +329,15 @@ DX11TextureDepthStencil* DX11TextureBuilder::build(const TextureDepthStencilArgs
 {
     DXTextureDepthStencilArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11TextureDepthStencil* const texture = allocator.allocateT<DX11TextureDepthStencil>(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.depthView = null;
-    dxArgs.stencilView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.depthView = nullptr;
+    dxArgs.stencilView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -346,15 +346,15 @@ CPPRef<ITextureDepthStencil> DX11TextureBuilder::buildCPPRef(const TextureDepthS
 {
     DXTextureDepthStencilArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11TextureDepthStencil> texture(new(::std::nothrow) DX11TextureDepthStencil(args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView));
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.depthView = null;
-    dxArgs.stencilView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.depthView = nullptr;
+    dxArgs.stencilView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -363,15 +363,15 @@ NullableRef<ITextureDepthStencil> DX11TextureBuilder::buildTauRef(const TextureD
 {
     DXTextureDepthStencilArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11TextureDepthStencil> texture(allocator, args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.depthView = null;
-    dxArgs.stencilView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.depthView = nullptr;
+    dxArgs.stencilView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }
@@ -380,15 +380,15 @@ NullableStrongRef<ITextureDepthStencil> DX11TextureBuilder::buildTauSRef(const T
 {
     DXTextureDepthStencilArgs dxArgs { };
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11TextureDepthStencil> texture(allocator, args.width, args.height, dxArgs.d3dTexture, dxArgs.renderTarget, dxArgs.depthView, dxArgs.stencilView);
     ERROR_CODE_COND_N(!texture, Error::SystemMemoryAllocationFailure);
 
-    dxArgs.d3dTexture = null;
-    dxArgs.renderTarget = null;
-    dxArgs.depthView = null;
-    dxArgs.stencilView = null;
+    dxArgs.d3dTexture = nullptr;
+    dxArgs.renderTarget = nullptr;
+    dxArgs.depthView = nullptr;
+    dxArgs.stencilView = nullptr;
 
     ERROR_CODE_V(Error::NoError, texture);
 }

@@ -7,7 +7,7 @@ NullableRef<IInputLayout> DX12InputLayoutBuilder::buildTauRef(const InputLayoutA
 {
     DXInputLayoutArgs dxArgs(args.descriptorCount);
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     NullableRef<DX12InputLayout> inputLayout(allocator, ::std::move(dxArgs.inputLayout));
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);

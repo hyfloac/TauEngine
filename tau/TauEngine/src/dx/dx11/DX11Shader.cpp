@@ -43,11 +43,11 @@ DX11Shader* DX11ShaderBuilder::build(const ShaderArgs& args, Error* const error)
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D11ShaderObjects objects = createD3DShader(args, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     DX11Shader* shader;
 
@@ -84,11 +84,11 @@ DX11Shader* DX11ShaderBuilder::build(const ShaderArgs& args, Error* const error,
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D11ShaderObjects objects = createD3DShader(args, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     DX11Shader* shader;
 
@@ -125,11 +125,11 @@ CPPRef<IShader> DX11ShaderBuilder::buildCPPRef(const ShaderArgs& args, Error* co
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D11ShaderObjects objects = createD3DShader(args, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     CPPRef<DX11Shader> shader;
 
@@ -166,11 +166,11 @@ NullableRef<IShader> DX11ShaderBuilder::buildTauRef(const ShaderArgs& args, Erro
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D11ShaderObjects objects = createD3DShader(args, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     NullableRef<IShader> shader;
 
@@ -207,11 +207,11 @@ NullableStrongRef<IShader> DX11ShaderBuilder::buildTauSRef(const ShaderArgs& arg
 {
     DXShaderArgs dxArgs {};
 	if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const D3D11ShaderObjects objects = createD3DShader(args, dxArgs, error);
 	if(!objects.vertex)
-    { return null; }
+    { return nullptr; }
 	
     NullableStrongRef<IShader> shader;
 
@@ -293,7 +293,7 @@ bool DX11ShaderBuilder::processShader(const CPPRef<IFile>& file, const EShader::
 
 DX11ShaderBuilder::D3D11ShaderObjects DX11ShaderBuilder::createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, Error* const error) const noexcept
 {
-    D3D11ShaderObjects objects = { null };
+    D3D11ShaderObjects objects = { nullptr };
 
     HRESULT h;
 	

@@ -29,7 +29,7 @@ struct GLDebugCallbackData final
     void* userParam;
 };
 
-static GLDebugCallbackData* callbackData = null;
+static GLDebugCallbackData* callbackData = nullptr;
 
 void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullable void* userParam, bool synchronous) noexcept
 {
@@ -66,7 +66,7 @@ void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullabl
     }
     else if(GLEW_AMD_debug_output)
     {
-        glDebugMessageEnableAMD(0, 0, 0, null, true);
+        glDebugMessageEnableAMD(0, 0, 0, nullptr, true);
         glDebugMessageCallbackAMD(openGLDebugErrorWrapperCallbackAMD, callbackData);
     }
     else
@@ -78,23 +78,23 @@ void setupDebugMessageCallback(Nullable debugMessageCallback_f callback, Nullabl
 void stopDebugOutput() noexcept
 {
     delete callbackData;
-    callbackData = null;
+    callbackData = nullptr;
 
     if(GLEW_KHR_debug)
     {
         glDisable(GL_DEBUG_OUTPUT);
-        glDebugMessageCallback(null, null);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, GL_FALSE);
+        glDebugMessageCallback(nullptr, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
     }
     else if(GLEW_ARB_debug_output)
     {
-        glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, GL_FALSE);
-        glDebugMessageCallbackARB(null, null);
+        glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_FALSE);
+        glDebugMessageCallbackARB(nullptr, nullptr);
     }
     else if(GLEW_AMD_debug_output)
     {
-        glDebugMessageEnableAMD(0, 0, 0, null, GL_FALSE);
-        glDebugMessageCallbackAMD(null, null);
+        glDebugMessageEnableAMD(0, 0, 0, nullptr, GL_FALSE);
+        glDebugMessageCallbackAMD(nullptr, nullptr);
     }
 }
 
@@ -102,15 +102,15 @@ void filterDebugOutput(GLDebugSeverity filter, bool allowed) noexcept
 {
     if(GLEW_KHR_debug)
     {
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, glSeverity(filter), 0, null, allowed);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, glSeverity(filter), 0, nullptr, allowed);
     }
     else if(GLEW_ARB_debug_output)
     {
-        glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, glSeverityARB(filter), 0, null, allowed);
+        glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, glSeverityARB(filter), 0, nullptr, allowed);
     }
     else if(GLEW_AMD_debug_output)
     {
-        glDebugMessageEnableAMD(0, glSeverityAMD(filter), 0, null, allowed);
+        glDebugMessageEnableAMD(0, glSeverityAMD(filter), 0, nullptr, allowed);
     }
 }
 
@@ -124,7 +124,7 @@ void setupDefaultDebugMessageCallback(const CPPRef<spdlog::logger>& logger, bool
 
 void stopDefaultDebugOutput() noexcept
 {
-    _logger = null;
+    _logger = nullptr;
     stopDebugOutput();
 }
 

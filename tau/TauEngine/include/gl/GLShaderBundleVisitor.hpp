@@ -30,7 +30,7 @@ public:
     BindPointUnion() noexcept
         : type(static_cast<Type>(0))
         , bindPoint(-1)
-        , bindName(null)
+        , bindName(nullptr)
     { }
 
     BindPointUnion(const u32 _bindPoint, const u32 _mapPoint) noexcept

@@ -73,13 +73,13 @@ DX11VertexArray* DX11VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11VertexArray* const va = new(::std::nothrow) DX11VertexArray(args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaBuffers = null;
+    dxArgs.iaBuffers = nullptr;
 
     ERROR_CODE_V(Error::NoError, va);
 }
@@ -88,13 +88,13 @@ DX11VertexArray* DX11VertexArrayBuilder::build(const VertexArrayArgs& args, Erro
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11VertexArray* const va = allocator.allocateT<DX11VertexArray>(args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaBuffers = null;
+    dxArgs.iaBuffers = nullptr;
 
     ERROR_CODE_V(Error::NoError, va);
 }
@@ -103,13 +103,13 @@ CPPRef<IVertexArray> DX11VertexArrayBuilder::buildCPPRef(const VertexArrayArgs& 
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11VertexArray> va = CPPRef<DX11VertexArray>(new(::std::nothrow) DX11VertexArray(args, dxArgs));
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaBuffers = null;
+    dxArgs.iaBuffers = nullptr;
 
     ERROR_CODE_V(Error::NoError, va);
 }
@@ -118,13 +118,13 @@ NullableRef<IVertexArray> DX11VertexArrayBuilder::buildTauRef(const VertexArrayA
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaBuffers = null;
+    dxArgs.iaBuffers = nullptr;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
@@ -133,13 +133,13 @@ NullableStrongRef<IVertexArray> DX11VertexArrayBuilder::buildTauSRef(const Verte
 {
     DXVertexArrayArgs dxArgs;
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11VertexArray> va(allocator, args, dxArgs);
     ERROR_CODE_COND_N(!va, Error::SystemMemoryAllocationFailure);
 
     // Prevent the arrays from being deleted at destruction.
-    dxArgs.iaBuffers = null;
+    dxArgs.iaBuffers = nullptr;
 
     ERROR_CODE_V(Error::NoError, RefCast<IVertexArray>(va));
 }
@@ -162,7 +162,7 @@ bool DX11VertexArrayBuilder::processArgs(const VertexArrayArgs& args, DXVertexAr
     }
     else
     {
-        dxArgs->indexBuffer = null;
+        dxArgs->indexBuffer = nullptr;
     }
 
     dxArgs->iaBuffers = new ID3D11Buffer* [args.buffers.size()];

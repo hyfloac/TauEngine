@@ -314,7 +314,7 @@ public:
          *
          *   This error is produced when a call to the system memory
          * allocator (malloc, new, new[], HeapAlloc, LocalAlloc,
-         * GlobalAlloc) fails (returns null). This generally occurs
+         * GlobalAlloc) fails (returns nullptr). This generally occurs
          * when the system has run out of memory. It may also mean
          * that the process itself has exceed its maximum allotted
          * memory. It may also occur when allocating a buffer that

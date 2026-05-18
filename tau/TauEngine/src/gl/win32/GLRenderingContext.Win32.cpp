@@ -49,11 +49,11 @@ void GLRenderingContext::handleCtxError(int profileMask) const noexcept
 
     LPVOID lpMsgBuf;
     FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                   null,
+                   nullptr,
                    errorCodeLow,
                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                    reinterpret_cast<LPSTR>(&lpMsgBuf),
-                   0, null);
+                   0, nullptr);
 
     fprintf(stderr, "Error string from system (may not be accurate): %s\n", reinterpret_cast<LPSTR>(lpMsgBuf));
     LocalFree(lpMsgBuf);
@@ -129,7 +129,7 @@ void GLRenderingContext::handleCtxError(int profileMask) const noexcept
     else if(errorCodeLow == ERROR_INVALID_OPERATION)
     {
         fputs("Error Code Enum: ERROR_INVALID_OPERATION\n", stderr);
-        fprintf(stderr, "hSharedContext is neither null nor a valid context.\n");
+        fprintf(stderr, "hSharedContext is neither nullptr nor a valid context.\n");
     }
     else if(errorCodeLow == ERROR_DC_NOT_FOUND)
     {
@@ -160,7 +160,7 @@ void GLRenderingContext::handleCtxError(int profileMask) const noexcept
 
 void GLRenderingContext::deactivateContext() noexcept
 {
-    wglMakeCurrent(null, null);
+    wglMakeCurrent(nullptr, nullptr);
 }
 
 void GLRenderingContext::activateContext() noexcept
@@ -239,7 +239,7 @@ bool GLRenderingContextBuilder::processSysArgs(const RenderingContextArgs& args,
         };
 
         // ReSharper disable once CppLocalVariableMayBeConst
-        HGLRC attribContext = wglCreateContextAttribsARB(hDevice, null, attribs);
+        HGLRC attribContext = wglCreateContextAttribsARB(hDevice, nullptr, attribs);
 
         if(!attribContext)
         {
@@ -249,7 +249,7 @@ bool GLRenderingContextBuilder::processSysArgs(const RenderingContextArgs& args,
 
         glSysArgs->context = attribContext;
 
-        wglMakeCurrent(null, null);
+        wglMakeCurrent(nullptr, nullptr);
         wglDeleteContext(tmpContext);
     }
     else
@@ -296,11 +296,11 @@ void GLRenderingContextBuilder::handleCtxError(int profileMask) const noexcept
 
     LPVOID lpMsgBuf;
     FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        null,
+        nullptr,
         errorCodeLow,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         reinterpret_cast<LPSTR>(&lpMsgBuf),
-        0, null);
+        0, nullptr);
 
     fprintf(stderr, "Error string from system (may not be accurate): %s\n", reinterpret_cast<LPSTR>(lpMsgBuf));
     LocalFree(lpMsgBuf);
@@ -376,7 +376,7 @@ void GLRenderingContextBuilder::handleCtxError(int profileMask) const noexcept
     else if(errorCodeLow == ERROR_INVALID_OPERATION)
     {
         fputs("Error Code Enum: ERROR_INVALID_OPERATION\n", stderr);
-        fprintf(stderr, "hSharedContext is neither null nor a valid context.\n");
+        fprintf(stderr, "hSharedContext is neither nullptr nor a valid context.\n");
     }
     else if(errorCodeLow == ERROR_DC_NOT_FOUND)
     {

@@ -10,10 +10,10 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
     if(_resourceUsage == EGraphics::ResourceHeapUsageType::Upload)
     {
         if(!mapReadRange || mapReadRange->Begin < mapReadRange->End)
-        { return null; }
+        { return nullptr; }
 
         if(mapType == EResource::MapType::ReadOnly)
-        { return null; }
+        { return nullptr; }
 
         void* mapping;
 
@@ -21,18 +21,18 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
         const HRESULT res = _d3dResource->Map(0, &range, &mapping);
 
         if(FAILED(res))
-        { return null; }
+        { return nullptr; }
 
         return mapping;
     }
     else if(_resourceUsage == EGraphics::ResourceHeapUsageType::Read)
     {
         if(mapReadRange && mapReadRange->Begin >= mapReadRange->End)
-        { return null; }
+        { return nullptr; }
 
         void* mapping;
         if(mapType == EResource::MapType::Discard)
-        { return null; }
+        { return nullptr; }
 
         if(mapReadRange)
         {
@@ -40,19 +40,19 @@ void* DX12ResourceBuffer::map(const EResource::MapType mapType, const ResourceMa
             const HRESULT res = _d3dResource->Map(0, &range, &mapping);
 
             if(FAILED(res))
-            { return null; }
+            { return nullptr; }
         }
         else
         {
-            const HRESULT res = _d3dResource->Map(0, null, &mapping);
+            const HRESULT res = _d3dResource->Map(0, nullptr, &mapping);
 
             if(FAILED(res))
-            { return null; }
+            { return nullptr; }
         }
         return mapping;
     }
 
-    return null;
+    return nullptr;
 }
 
 void DX12ResourceBuffer::unmap(const ResourceMapRange* mapWriteRange) noexcept
@@ -64,7 +64,7 @@ void DX12ResourceBuffer::unmap(const ResourceMapRange* mapWriteRange) noexcept
     }
     else
     {
-        _d3dResource->Unmap(0, null);
+        _d3dResource->Unmap(0, nullptr);
     }
 }
 #endif

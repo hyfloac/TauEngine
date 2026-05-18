@@ -59,7 +59,7 @@ public:
     static NullableRef<IResource> generateNormalTexture(IGraphicsInterface& gi, IRenderingContext& context) noexcept
     { return generateColorTexture(gi, context, { 127, 127, 255 }); }
 
-    static NullableRef<IResource> loadTexture(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = null) noexcept;
+    static NullableRef<IResource> loadTexture(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT fileName, TextureLoadError* RESTRICT error = nullptr) noexcept;
 
-    static NullableRef<IResource> loadTextureCube(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = null) noexcept;
+    static NullableRef<IResource> loadTextureCube(IGraphicsInterface& gi, IRenderingContext& context, const char* RESTRICT folderPath, const char* RESTRICT fileExtension, TextureLoadError* RESTRICT error = nullptr) noexcept;
 };

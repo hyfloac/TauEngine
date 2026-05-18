@@ -6,7 +6,7 @@
 void* DX12ResourceTexture1D::map(ICommandList& context, EResource::MapType mapType, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapReadRange, const ResourceMapRange* mapWriteRange) noexcept
 {
     if(_args.usageType == EResource::UsageType::Immutable)
-    { return null; }
+    { return nullptr; }
 }
 
 void DX12ResourceTexture1D::unmap(ICommandList& context, uSys mipLevel, uSys arrayIndex, const ResourceMapRange* mapWriteRange) noexcept

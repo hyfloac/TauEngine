@@ -61,7 +61,7 @@ public:
             case EShader::Stage::TessellationEvaluation: return _tessEval;
             case EShader::Stage::Geometry:               return _geometry;
             case EShader::Stage::Pixel:                  return _pixel;
-            default:                                     return null;
+            default:                                     return nullptr;
         }
     }
 };

@@ -31,7 +31,7 @@ public:
     DX11RasterizerState(DX11RasterizerState&& move) noexcept
         : IRasterizerState(::std::move(move))
         , _d3dRasterizerState(move._d3dRasterizerState)
-    { move._d3dRasterizerState = null; }
+    { move._d3dRasterizerState = nullptr; }
 
     DX11RasterizerState& operator=(const DX11RasterizerState& copy) noexcept
     {
@@ -58,7 +58,7 @@ public:
         IRasterizerState::operator=(::std::move(move));
 
         _d3dRasterizerState = move._d3dRasterizerState;
-        move._d3dRasterizerState = null;
+        move._d3dRasterizerState = nullptr;
 
         return *this;
     }

@@ -21,14 +21,14 @@ DX11RenderingContext::DX11RenderingContext(DX11GraphicsInterface& gi, const DX11
     , _blendState(args.blendState)
     , _swapChain(args.swapChain)
     , _vsync(false)
-    , _iaStrides(null)
-    , _iaOffsets(null)
-    , _defaultDepthStencilState(null)
-    , _currentDepthStencilState(null)
-    , _defaultRasterizerState(null)
-    , _currentRasterizerState(null)
-    , _defaultBlendingState(null)
-    , _currentBlendingState(null)
+    , _iaStrides(nullptr)
+    , _iaOffsets(nullptr)
+    , _defaultDepthStencilState(nullptr)
+    , _currentDepthStencilState(nullptr)
+    , _defaultRasterizerState(nullptr)
+    , _currentRasterizerState(nullptr)
+    , _defaultBlendingState(nullptr)
+    , _currentBlendingState(nullptr)
 { }
 
 DX11RenderingContext::~DX11RenderingContext() noexcept
@@ -36,7 +36,7 @@ DX11RenderingContext::~DX11RenderingContext() noexcept
 #define RELEASE(_OBJ) do { \
     if(_OBJ) {\
         (_OBJ)->Release(); \
-        (_OBJ) = null; \
+        (_OBJ) = nullptr; \
     } } while(0)
 
     RELEASE(_d3d11DeviceContext);
@@ -273,7 +273,7 @@ DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextA
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11RenderingContext* const context = new(::std::nothrow) DX11RenderingContext(_gi, dxArgs);
 
@@ -285,7 +285,7 @@ DX11RenderingContext* DX11RenderingContextBuilder::build(const RenderingContextA
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     DX11RenderingContext* const context = allocator.allocateT<DX11RenderingContext>(_gi, dxArgs);
 
@@ -297,7 +297,7 @@ CPPRef<IRenderingContext> DX11RenderingContextBuilder::buildCPPRef(const Renderi
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<DX11RenderingContext> context(new(::std::nothrow) DX11RenderingContext(_gi, dxArgs));
 
@@ -309,7 +309,7 @@ NullableRef<IRenderingContext> DX11RenderingContextBuilder::buildTauRef(const Re
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX11RenderingContext> context(allocator, _gi, dxArgs);
 
@@ -321,7 +321,7 @@ NullableStrongRef<IRenderingContext> DX11RenderingContextBuilder::buildTauSRef(c
 {
     DX11RenderingContextArgs dxArgs{};
     if(!processArgs(args, &dxArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<DX11RenderingContext> context(allocator, _gi, dxArgs);
 

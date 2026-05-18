@@ -41,7 +41,7 @@ NullableRef<DXGI11GraphicsAccelerator> DXGI11GraphicsAccelerator::build(IDXGIAda
     const HRESULT res = adapter->GetDesc1(&dxgiAdapterDesc);
 
     if(FAILED(res))
-    { return null; }
+    { return nullptr; }
 
     const uSys videoCardMemory = dxgiAdapterDesc.DedicatedVideoMemory;
     const uSys systemVideoMemory = dxgiAdapterDesc.DedicatedSystemMemory;

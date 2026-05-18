@@ -23,9 +23,9 @@
 //     }
 //
 //     CPPRef<IShader> vertex;
-//     CPPRef<IShader> tessCtrl = null;
-//     CPPRef<IShader> tessEval = null;
-//     CPPRef<IShader> geometry = null;
+//     CPPRef<IShader> tessCtrl = nullptr;
+//     CPPRef<IShader> tessEval = nullptr;
+//     CPPRef<IShader> geometry = nullptr;
 //     CPPRef<IShader> pixel;
 //
 //     {
@@ -35,26 +35,26 @@
 //
 //         args.fileName = _vertex.fileName;
 //         args.stage = EShader::Stage::Vertex;
-//         vertex = gi.createShader().buildCPPRef(args, null);
+//         vertex = gi.createShader().buildCPPRef(args, nullptr);
 //
 //         args.fileName = _tessCtrl.fileName;
 //         args.stage = EShader::Stage::TessellationControl;
 //         if(_tessCtrl.fileName.length() > 0)
-//         { tessCtrl = gi.createShader().buildCPPRef(args, null); }
+//         { tessCtrl = gi.createShader().buildCPPRef(args, nullptr); }
 //
 //         args.fileName = _tessEval.fileName;
 //         args.stage = EShader::Stage::TessellationEvaluation;
 //         if(_tessEval.fileName.length() > 0)
-//         { tessEval = gi.createShader().buildCPPRef(args, null); }
+//         { tessEval = gi.createShader().buildCPPRef(args, nullptr); }
 //
 //         args.fileName = _geometry.fileName;
 //         args.stage = EShader::Stage::Geometry;
 //         if(_geometry.fileName.length() > 0)
-//         { geometry = gi.createShader().buildCPPRef(args, null); }
+//         { geometry = gi.createShader().buildCPPRef(args, nullptr); }
 //
 //         args.fileName = _pixel.fileName;
 //         args.stage = EShader::Stage::Pixel;
-//         pixel = gi.createShader().buildCPPRef(args, null);
+//         pixel = gi.createShader().buildCPPRef(args, nullptr);
 //     }
 //
 //     const CPPRef<IShaderProgram> shader = IShaderProgram::create(gi);

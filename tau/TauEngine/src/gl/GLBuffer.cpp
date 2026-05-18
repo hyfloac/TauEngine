@@ -303,7 +303,7 @@ GLVertexBuffer* GLBufferBuilder::build(const VertexBufferArgs& args, Error* cons
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLVertexBuffer* const buffer = new(std::nothrow) GLVertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), glArgs);
 
@@ -322,7 +322,7 @@ GLVertexBuffer* GLBufferBuilder::build(const VertexBufferArgs& args, Error* cons
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLVertexBuffer* const buffer = allocator.allocateT<GLVertexBuffer>(args.usage, args.bufferSize(), args.descriptor.build(), glArgs);
 
@@ -341,7 +341,7 @@ CPPRef<IVertexBuffer> GLBufferBuilder::buildCPPRef(const VertexBufferArgs& args,
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLVertexBuffer> buffer(new(std::nothrow) GLVertexBuffer(args.usage, args.bufferSize(), args.descriptor.build(), glArgs));
 
@@ -360,7 +360,7 @@ NullableRef<IVertexBuffer> GLBufferBuilder::buildTauRef(const VertexBufferArgs& 
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLVertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), glArgs);
 
@@ -379,7 +379,7 @@ NullableStrongRef<IVertexBuffer> GLBufferBuilder::buildTauSRef(const VertexBuffe
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLVertexBuffer> buffer(allocator, args.usage, args.bufferSize(), args.descriptor.build(), glArgs);
 
@@ -398,7 +398,7 @@ GLIndexBuffer* GLBufferBuilder::build(const IndexBufferArgs& args, Error* const 
 {
     GLIndexBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLIndexBuffer* const buffer = new(std::nothrow) GLIndexBuffer(args.usage, args.indexSize, args.bufferSize(), glArgs);
 
@@ -417,7 +417,7 @@ GLIndexBuffer* GLBufferBuilder::build(const IndexBufferArgs& args, Error* const 
 {
     GLIndexBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLIndexBuffer* const buffer = allocator.allocateT<GLIndexBuffer>(args.usage, args.indexSize, args.bufferSize(), glArgs);
 
@@ -436,7 +436,7 @@ CPPRef<IIndexBuffer> GLBufferBuilder::buildCPPRef(const IndexBufferArgs& args, E
 {
     GLIndexBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLIndexBuffer> buffer(new(std::nothrow) GLIndexBuffer(args.usage, args.indexSize, args.bufferSize(), glArgs));
 
@@ -455,7 +455,7 @@ NullableRef<IIndexBuffer> GLBufferBuilder::buildTauRef(const IndexBufferArgs& ar
 {
     GLIndexBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLIndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), glArgs);
 
@@ -474,7 +474,7 @@ NullableStrongRef<IIndexBuffer> GLBufferBuilder::buildTauSRef(const IndexBufferA
 {
     GLIndexBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLIndexBuffer> buffer(allocator, args.usage, args.indexSize, args.bufferSize(), glArgs);
 
@@ -493,7 +493,7 @@ GLUniformBuffer* GLBufferBuilder::build(const UniformBufferArgs& args, Error* co
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLUniformBuffer* const buffer = new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs);
 
@@ -512,7 +512,7 @@ GLUniformBuffer* GLBufferBuilder::build(const UniformBufferArgs& args, Error* co
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GLUniformBuffer* const buffer = allocator.allocateT<GLUniformBuffer>(args.usage, args.bufferSize, glArgs);
 
@@ -531,7 +531,7 @@ CPPRef<IUniformBuffer> GLBufferBuilder::buildCPPRef(const UniformBufferArgs& arg
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GLUniformBuffer> buffer(new(std::nothrow) GLUniformBuffer(args.usage, args.bufferSize, glArgs));
 
@@ -550,7 +550,7 @@ NullableRef<IUniformBuffer> GLBufferBuilder::buildTauRef(const UniformBufferArgs
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GLUniformBuffer> buffer(allocator, args.usage, args.bufferSize, glArgs);
 
@@ -569,7 +569,7 @@ NullableStrongRef<IUniformBuffer> GLBufferBuilder::buildTauSRef(const UniformBuf
 {
     GLBufferArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GLUniformBuffer> buffer(allocator, args.usage, args.bufferSize, glArgs);
 

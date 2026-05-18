@@ -27,8 +27,8 @@ static bool setupDebugCallback(TauEditorApplication* tea) noexcept;
 
 TauEditorApplication::TauEditorApplication() noexcept
     : Application(32), _config { false, true, 800, 600 },
-      _window(null), _logger(null), _renderer(null), _vr(null), _gameState(State::Game), _globals(nullptr),
-      _vrProjLeft(1.0f), _vrProjRight(1.0f), _vrLeftFB(null), _vrRightFB(null)
+      _window(nullptr), _logger(nullptr), _renderer(nullptr), _vr(nullptr), _gameState(State::Game), _globals(nullptr),
+      _vrProjLeft(1.0f), _vrProjRight(1.0f), _vrLeftFB(nullptr), _vrRightFB(nullptr)
 { }
 
 TauEditorApplication::~TauEditorApplication() noexcept
@@ -247,12 +247,12 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
 
             if(error != vr::VRInitError_None)
             {
-                _vr = null;
+                _vr = nullptr;
                 _logger->error("Unable to init VR runtime: {}", vr::VR_GetVRInitErrorAsEnglishDescription(error));
             }
             else if(!vr::VRCompositor())
             {
-                _vr = null;
+                _vr = nullptr;
             }
             else
             {
@@ -273,7 +273,7 @@ bool TauEditorApplication::init(int argCount, char* args[]) noexcept
                 _vr->GetRecommendedRenderTargetSize(&_width, &_height);
                 RECT rect{ 0, 0, (LONG) _width, (LONG) _height };
                 AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
-                SetWindowPos(_window->sysWindowContainer().windowHandle, null, 0, 0, static_cast<int>(rect.right), static_cast<int>(rect.bottom), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+                SetWindowPos(_window->sysWindowContainer().windowHandle, nullptr, 0, 0, static_cast<int>(rect.right), static_cast<int>(rect.bottom), SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
 
                 Mouse::setVisible(true);
             }
@@ -295,7 +295,7 @@ void TauEditorApplication::finalize() noexcept
     if(_vr)
     {
         vr::VR_Shutdown();
-        _vr = null;
+        _vr = nullptr;
     }
 }
 
@@ -401,7 +401,7 @@ void TauEditorApplication::runMessageLoop() noexcept
 
     MSG msg;
     u32 cnt = 0;
-    while(cnt++ < NUM_MESSAGES_TO_READ && PeekMessageA(&msg, null, 0, 0, PM_REMOVE))
+    while(cnt++ < NUM_MESSAGES_TO_READ && PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&msg);
         DispatchMessageA(&msg);

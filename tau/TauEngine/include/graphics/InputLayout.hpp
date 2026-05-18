@@ -33,7 +33,7 @@ struct InputLayoutArgs final
     /**
      * Used to validate the layout.
      *
-     * Can be null most of the time. A fake shader will be generated.
+     * Can be nullptr most of the time. A fake shader will be generated.
      */
     IShader* shader;
     uSys descriptorCount;

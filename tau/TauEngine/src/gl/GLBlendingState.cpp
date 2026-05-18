@@ -12,7 +12,7 @@ GLBlendingState* GLBlendingStateBuilder::build(const BlendingArgs& args, Error* 
 {
     GL2_0BlendingArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GL2_0BlendingState* const blendingState = new(::std::nothrow) GL2_0BlendingState(args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -24,7 +24,7 @@ GLBlendingState* GLBlendingStateBuilder::build(const BlendingArgs& args, Error* 
 {
     GL2_0BlendingArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GL2_0BlendingState* const blendingState = allocator.allocateT<GL2_0BlendingState>(args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -36,7 +36,7 @@ CPPRef<IBlendingState> GLBlendingStateBuilder::buildCPPRef(const BlendingArgs& a
 {
     GL2_0BlendingArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GL2_0BlendingState> blendingState = CPPRef<GL2_0BlendingState>(new(::std::nothrow) GL2_0BlendingState(args, glArgs));
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -48,7 +48,7 @@ NullableRef<IBlendingState> GLBlendingStateBuilder::buildTauRef(const BlendingAr
 {
     GL2_0BlendingArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GL2_0BlendingState> blendingState(allocator, args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);
@@ -60,7 +60,7 @@ NullableStrongRef<IBlendingState> GLBlendingStateBuilder::buildTauSRef(const Ble
 {
     GL2_0BlendingArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GL2_0BlendingState> blendingState(allocator, args, glArgs);
     ERROR_CODE_COND_N(!blendingState, Error::SystemMemoryAllocationFailure);

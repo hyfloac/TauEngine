@@ -14,7 +14,7 @@ NullableRef<IRasterizerState> RenderableObject::cwRS = nullptr;
 NullableRef<IRasterizerState> RenderableObject::ccwRS = nullptr;
 
 RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& context, const objl::Mesh& mesh, const char* materialFolder, const CPPRef<IShader>& shader, bool counterClockwise, const DrawType drawType) noexcept
-    : _va(null), _rs(cwRS)
+    : _va(nullptr), _rs(cwRS)
 {
     PERF();
     const size_t cnt1 = mesh.vertices.size();
@@ -94,7 +94,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     vaArgs.indexBuffer = indices;
     vaArgs.drawCount = mesh.indices.size();
     vaArgs.drawType = drawType;
-    _va = gi.createVertexArray().buildCPPRef(vaArgs, null);
+    _va = gi.createVertexArray().buildCPPRef(vaArgs, nullptr);
 
     MaterialBuilder matBuilder(gi);
 
@@ -139,7 +139,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     textureSamplerArgs.wrapW = ETexture::WrapMode::Repeat;
     textureSamplerArgs.depthCompareFunc = ETexture::CompareFunc::Never;
 
-    matBuilder.textureSampler(CPPRef<ITextureSampler>(gi.createTextureSampler().buildCPPRef(textureSamplerArgs, null)));
+    matBuilder.textureSampler(CPPRef<ITextureSampler>(gi.createTextureSampler().buildCPPRef(textureSamplerArgs, nullptr)));
 
     _material = matBuilder.build();
 
@@ -155,7 +155,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
             else
             {
                 rArgs.frontFaceCounterClockwise = true;
-                ccwRS = gi.createRasterizerState().buildTauRef(rArgs, null);
+                ccwRS = gi.createRasterizerState().buildTauRef(rArgs, nullptr);
             }
         }
 
@@ -173,7 +173,7 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
             else
             {
                 rArgs.frontFaceCounterClockwise = false;
-                cwRS = gi.createRasterizerState().buildTauRef(rArgs, null);
+                cwRS = gi.createRasterizerState().buildTauRef(rArgs, nullptr);
             }
         }
 

@@ -35,7 +35,7 @@ int main(int argCount, char* args[]) noexcept
     const char* propertiesFileName = "application.props";
 
     char path[MAX_PATH + 64];
-    const DWORD pathError = GetModuleFileNameA(null, path, MAX_PATH);
+    const DWORD pathError = GetModuleFileNameA(nullptr, path, MAX_PATH);
 
     if(!pathError)
     {

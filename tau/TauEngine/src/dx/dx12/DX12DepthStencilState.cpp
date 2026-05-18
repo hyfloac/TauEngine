@@ -5,7 +5,7 @@ NullableRef<IDepthStencilState> DX12DepthStencilStateBuilder::buildTauRef(const 
 {
     D3D12_DEPTH_STENCIL_DESC desc;
     if(!processArgs(args, &desc, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<DX12DepthStencilState> depthStencilState(allocator, args, desc);
     ERROR_CODE_COND_N(!depthStencilState, Error::SystemMemoryAllocationFailure);

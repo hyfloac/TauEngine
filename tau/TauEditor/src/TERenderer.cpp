@@ -39,7 +39,7 @@ void TERenderer::finalizeLoadConsolasBoldItalic(TextHandler::FileData* file, Tex
 
 TERenderer::TERenderer(Globals& globals) noexcept
     : _globals(globals),
-      _consolas(null), _consolasBold(null), _consolasItalic(null), _consolasBoldItalic(null),
+      _consolas(nullptr), _consolasBold(nullptr), _consolasItalic(nullptr), _consolasBoldItalic(nullptr),
       _th(nullptr), 
       _camera(globals.window, 800.0f, 100.0f, Keyboard::Key::W, Keyboard::Key::S, Keyboard::Key::A, Keyboard::Key::D, Keyboard::Key::Q, Keyboard::Key::E),
       _layerStack()

@@ -25,14 +25,14 @@ void GL4_3InputLayout::unbind(IRenderingContext& context) noexcept
 {
     CTX();
     glBindVertexArray(0);
-    ctx.setBufferData(null, null);
+    ctx.setBufferData(nullptr, nullptr);
 }
 
 GL4_3InputLayout* GL4_3InputLayoutBuilder::build(const InputLayoutArgs& args, Error* const error) noexcept
 {
     GL4_3InputLayoutArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GL4_3InputLayout* const inputLayout = new(::std::nothrow) GL4_3InputLayout(glArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
@@ -44,7 +44,7 @@ GL4_3InputLayout* GL4_3InputLayoutBuilder::build(const InputLayoutArgs& args, Er
 {
     GL4_3InputLayoutArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     GL4_3InputLayout* const inputLayout = allocator.allocateT<GL4_3InputLayout>(glArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
@@ -56,7 +56,7 @@ CPPRef<IInputLayout> GL4_3InputLayoutBuilder::buildCPPRef(const InputLayoutArgs&
 {
     GL4_3InputLayoutArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const CPPRef<GL4_3InputLayout> inputLayout = CPPRef<GL4_3InputLayout>(new(::std::nothrow) GL4_3InputLayout(glArgs));
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
@@ -68,7 +68,7 @@ NullableRef<IInputLayout> GL4_3InputLayoutBuilder::buildTauRef(const InputLayout
 {
     GL4_3InputLayoutArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableRef<GL4_3InputLayout> inputLayout(allocator, glArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);
@@ -80,7 +80,7 @@ NullableStrongRef<IInputLayout> GL4_3InputLayoutBuilder::buildTauSRef(const Inpu
 {
     GL4_3InputLayoutArgs glArgs;
     if(!processArgs(args, &glArgs, error))
-    { return null; }
+    { return nullptr; }
 
     const NullableStrongRef<GL4_3InputLayout> inputLayout(allocator, glArgs);
     ERROR_CODE_COND_N(!inputLayout, Error::SystemMemoryAllocationFailure);

@@ -11,7 +11,7 @@ void* GLResourceTexture::map(IRenderingContext&, const EResource::MapType mapTyp
          * mapping modes as buffers.
          */
 
-        return null;
+        return nullptr;
     }
 
     const iSys currAtomicLockCount = atomicIncrement(_atomicMapCount);
@@ -42,11 +42,11 @@ void* GLResourceTexture::map(IRenderingContext&, const EResource::MapType mapTyp
             /*
              * The original mapping has failed.
              *
-             * Decrement the map count and return null.
+             * Decrement the map count and return nullptr.
              */
 
             atomicDecrement(_atomicMapCount);
-            return null;
+            return nullptr;
         }
     }
 
@@ -63,7 +63,7 @@ void GLResourceTexture::unmap(IRenderingContext&, const uSys mipLevel, const uSy
 
         uploadTexture(mipLevel, arrayIndex, _currentMapping);
         operator delete[](_currentMapping, ::std::align_val_t{ 64 }, ::std::nothrow);
-        _currentMapping = null;
+        _currentMapping = nullptr;
     }
 }
 
