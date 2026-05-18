@@ -6,6 +6,7 @@
 #include <model/OBJLoader.hpp>
 #include <memory>
 #include "VFS.hpp"
+#include "StreamUtils.hpp"
 #include "Timings.hpp"
 
 namespace objl
@@ -633,14 +634,14 @@ namespace objl
         const size_t pathLen = strlen(path);
         if(!(pathLen > 4 && path[pathLen - 4] == '.' && path[pathLen - 3] == 'o' && path[pathLen - 2] == 'b' && path[pathLen - 1] == 'j')) { return false; }
 
-        VFS::Container physPath = VFS::Instance().resolvePath(path);
+        tau::VFS::Container physPath = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(path)));
 
-        if(physPath.path.length() == 0)
+        if(physPath.FilePath.Length() == 0)
         {
             return false;
         }
 
-        path = physPath.path.c_str();
+        path = reinterpret_cast<const char*>(physPath.FilePath.String());
 
         FILE* cFile;
         if(fopen_s(&cFile, path, "r")) { return false; }

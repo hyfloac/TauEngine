@@ -362,7 +362,7 @@ private:
     [[nodiscard]] bool processArgs(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
     [[nodiscard]] bool processBundle(const ShaderArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
-    [[nodiscard]] bool processShader(const CPPRef<IFile>& file, EShader::Stage stage, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processShader(tau::IStream* file, EShader::Stage stage, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
     [[nodiscard]] D3D11ShaderObjects createD3DShader(const ShaderArgs& args, const DXShaderArgs& dxArgs, [[tau::out]] Error* error) const noexcept;
 };

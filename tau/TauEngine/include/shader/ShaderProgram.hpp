@@ -3,14 +3,15 @@
 #include <Objects.hpp>
 #include <Safeties.hpp>
 #include <RunTimeType.hpp>
+#include <TauCOM.hpp>
 #include "DLL.hpp"
 
-class IFile;
+namespace tau { class IStream; }
 class IShader;
 
 struct ShaderProgramAutoArgs final
 {
-    CPPRef<IFile> bundleFile;
+    tau::com::ComRef<tau::IStream> bundleFile;
 };
 
 struct ShaderProgramManualArgs final

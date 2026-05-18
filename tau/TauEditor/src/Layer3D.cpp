@@ -9,6 +9,8 @@
 #include "texture/FITextureLoader.hpp"
 #include "Timings.hpp"
 #include "system/GraphicsInterface.hpp"
+#include <VFS.hpp>
+#include <StreamUtils.hpp>
 #include <EnumBitFields.hpp>
 #include "TERenderer.hpp"
 #include "ControlEvent.hpp"
@@ -155,7 +157,7 @@ Layer3D::Layer3D(Globals& globals) noexcept
     _frameBufferShader->link(globals.rc);
     _modelGenShader->link(globals.rc);
 
-    ShaderBundleLexer lexer(VFS::Instance().openFile("|TERes/shader/Deferred/Deferred_Model.tausi", FileProps::Read));
+    ShaderBundleLexer lexer(tau::com::ComRef<tau::IStream>(tau::VFS::Instance().Load(StringCast<c8>(DynString("|TERes/shader/Deferred/Deferred_Model.tausi")), tau::FileProps::Read)));
     ShaderBundleParser parser(lexer);
     NullableStrongRef<AST> ast = parser.parse();
 

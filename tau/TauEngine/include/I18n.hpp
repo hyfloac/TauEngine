@@ -5,7 +5,7 @@
 #pragma warning(pop)
 
 #include <Objects.hpp>
-#include <IFile.hpp>
+#include <IStream.hpp>
 #include <String.hpp>
 
 #include "DLL.hpp"
@@ -32,7 +32,7 @@ public:
 
     [[nodiscard]] inline const WDynString& operator[](const DynString& key) const noexcept { return translate(key); }
 
-    bool loadTranslations(const CPPRef<IFile>& file) noexcept;
+    bool loadTranslations(tau::IStream* file) noexcept;
 
     [[nodiscard]] const WDynString& translate(const DynString& key, [[tau::out]] Error* error = nullptr) const noexcept;
 };

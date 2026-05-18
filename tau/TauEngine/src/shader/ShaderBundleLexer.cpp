@@ -1,12 +1,20 @@
 #include "shader/bundle/ShaderBundleLexer.hpp"
 
+[[nodiscard]] static int readByteOrEof(const tau::com::ComRef<tau::IStream>& stream) noexcept
+{
+    const auto result = stream->ReadByte();
+    if(!result)
+    { return -1; }
+    return static_cast<int>(result.value());
+}
+
 [[nodiscard]] static bool isWhiteSpace(c32 c) noexcept;
 [[nodiscard]] static bool isDelimiter(c32 c) noexcept;
 [[nodiscard]] static bool isNumber(c32 c) noexcept;
 [[nodiscard]] static c32 getEscape(c32 c) noexcept;
 [[nodiscard]] static bool isValidIdentifier(c32 c) noexcept;
 
-void ShaderBundleLexer::reset(const CPPRef<IFile>& file) noexcept
+void ShaderBundleLexer::reset(const tau::com::ComRef<tau::IStream>& file) noexcept
 {
     m_File = file;
     m_CurrentToken = SBPToken::Unknown;
@@ -249,7 +257,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
 
 [[nodiscard]] c32 ShaderBundleLexer::DecodeCodePointForwardUnsafe() noexcept
 {
-    const int ci0 = m_File->ReadChar();
+    const int ci0 = readByteOrEof(m_File);
 
     if(ci0 == -1)
     {
@@ -265,7 +273,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
     {
         if((ci0 & 0xE0) == 0xC0) // U+0080 - U+07FF
         {
-            const int ci1 = m_File->ReadChar();
+            const int ci1 = readByteOrEof(m_File);
 
             if(ci1 == -1)
             {
@@ -279,7 +287,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
         }
         else if((ci0 & 0xF0) == 0xE0) // U+0800 - U+FFFF
         {
-            const int ci1 = m_File->ReadChar();
+            const int ci1 = readByteOrEof(m_File);
 
             if(ci1 == -1)
             {
@@ -287,7 +295,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
                 return static_cast<c32>(-1);
             }
 
-            const int ci2 = m_File->ReadChar();
+            const int ci2 = readByteOrEof(m_File);
 
             if(ci2 == -1)
             {
@@ -302,7 +310,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
         }
         else if((ci0 & 0xF0) == 0xF0) // U+10000 - U+10FFFF
         {
-            const int ci1 = m_File->ReadChar();
+            const int ci1 = readByteOrEof(m_File);
 
             if(ci1 == -1)
             {
@@ -310,7 +318,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
                 return static_cast<c32>(-1);
             }
 
-            const int ci2 = m_File->ReadChar();
+            const int ci2 = readByteOrEof(m_File);
 
             if(ci2 == -1)
             {
@@ -318,7 +326,7 @@ bool ShaderBundleLexer::readIdentifier() noexcept
                 return static_cast<c32>(-1);
             }
 
-            const int ci3 = m_File->ReadChar();
+            const int ci3 = readByteOrEof(m_File);
 
             if(ci3 == -1)
             {

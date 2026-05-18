@@ -9,6 +9,7 @@
 #include <Safeties.hpp>
 #include <Objects.hpp>
 #include <String.hpp>
+#include <TauCOM.hpp>
 #include "DLL.hpp"
 #include "system/Mutex.hpp"
 
@@ -78,7 +79,7 @@ TAU_DLL void computeClockCyclesFromRuntime() noexcept;
  */
 TAU_DLL const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept;
 
-class IFile;
+namespace tau { class IStream; }
 
 class TAU_DLL TimingsWriter final
 {
@@ -104,11 +105,11 @@ public:
         { }
     };
 private:
-    static CPPRef<IFile> _profileFile;
+    static tau::com::ComRef<tau::IStream> _profileFile;
     static u32 _profileCount;
     static SRWMutex _mutex;
 public:
-    static void begin(const char* name, const WDynString& fileName = L"results.json") noexcept;
+    static void begin(const char* name, const C8DynString& fileName = u8"results.json") noexcept;
 
     static void end() noexcept;
 

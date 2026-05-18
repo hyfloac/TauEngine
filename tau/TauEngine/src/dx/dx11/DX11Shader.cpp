@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #include <d3dcompiler.h>
 #include <VFS.hpp>
+#include <StreamUtils.hpp>
 #include "dx/dx11/DX11GraphicsInterface.hpp"
 #include "dx/dx11/DX11RenderingContext.hpp"
 #include "shader/bundle/ShaderBundleParser.hpp"
@@ -248,16 +249,18 @@ bool DX11ShaderBuilder::processArgs(const ShaderArgs& args, DXShaderArgs* const 
 {
     ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 
-    const DynString path = args.file->name();
-
-    if(VFS::getFileExt(path, false) == "tausi")
+    tau::IFileStream* fileStream = nullptr;
+    args.file->QueryInterface(&fileStream);
+    if(fileStream)
     {
-        return processBundle(args, dxArgs, error);
+        const C8DynString path = fileStream->Name();
+        fileStream->ReleaseReference();
+        if(tau::VFS::getFileExt(path, false) == reinterpret_cast<const c8*>(u8"tausi"))
+        {
+            return processBundle(args, dxArgs, error);
+        }
     }
-    else
-    {
-        return processShader(args.file, args.stage, dxArgs, error);
-    }
+    return processShader(args.file.Get(), args.stage, dxArgs, error);
 }
 
 bool DX11ShaderBuilder::processBundle(const ShaderArgs& args, DXShaderArgs* dxArgs, Error* error) const noexcept
@@ -271,22 +274,22 @@ bool DX11ShaderBuilder::processBundle(const ShaderArgs& args, DXShaderArgs* dxAr
     _visitor->visit(ast.get());
     const sbp::ShaderInfo& info = _visitor->get(args.stage);
 
-    const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
-    if(!processShader(file, args.stage, dxArgs, error))
+    const tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(StringCast<c8>(DynString(info.fileName)), tau::FileProps::Read);
+    if(!processShader(file.Get(), args.stage, dxArgs, error))
     { return false; }
 
     return true;
 }
 
-bool DX11ShaderBuilder::processShader(const CPPRef<IFile>& file, const EShader::Stage stage, DXShaderArgs* dxArgs, Error* error) const noexcept
+bool DX11ShaderBuilder::processShader(tau::IStream* const file, const EShader::Stage stage, DXShaderArgs* dxArgs, Error* error) const noexcept
 {
-    const i64 fileSize = file->Size();
-    
+    const i64 fileSize = file->Length();
+
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
     ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
-    (void) file->ReadBytes(reinterpret_cast<u8*>(dataBuffer), fileSize);
+    (void) file->Read(dataBuffer, static_cast<uSys>(fileSize));
 
     return true;
 }

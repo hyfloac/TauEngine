@@ -259,7 +259,7 @@ private:
     [[nodiscard]] bool processArgs(const ShaderSourceArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
     [[nodiscard]] bool processBundle(const ShaderFileArgs& args, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
-    [[nodiscard]] bool processShader(const CPPRef<IFile>&  file, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processShader(tau::IStream*  file, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
     [[nodiscard]] bool processShader(const DynString&    source, [[tau::out]] DXShaderArgs* dxArgs, [[tau::out]] Error* error) const noexcept;
 
     [[nodiscard]] D3D10ShaderObjects createD3DShader(EShader::Stage stage, const DXShaderArgs& dxArgs, [[tau::out]] Error* error) const noexcept;

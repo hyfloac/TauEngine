@@ -1,6 +1,7 @@
 #include <Safeties.hpp>
 #include <VariableLengthArray.hpp>
 #include <VFS.hpp>
+#include <StreamUtils.hpp>
 
 #include "gl/GLShader.hpp"
 #include "gl/GLShaderProgram.hpp"
@@ -136,12 +137,12 @@ bool GLShaderProgramBuilder::processShader(const DynString& path, const EShader:
     const GLenum glStage = glShaderStage(stage);
     ERROR_CODE_COND_F(glStage == 0, Error::InvalidShaderStage);
 
-    const CPPRef<IFile> file = VFS::Instance().openFile(path, FileProps::Read);
+    const tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(StringCast<c8>(DynString(path)), tau::FileProps::Read);
 
     IShaderBuilder::Error shaderError;
 
     GLShaderBuilder::GLShaderArgs glShaderArgs;
-    if(!_shaderBuilder->processShader(file, &glShaderArgs, glStage, &shaderError))
+    if(!_shaderBuilder->processShader(file.Get(), &glShaderArgs, glStage, &shaderError))
     {
         switch(shaderError)
         {

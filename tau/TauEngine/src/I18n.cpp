@@ -18,7 +18,7 @@ struct TranslationHeader
 };
 #pragma pack(pop)
 
-bool I18n::loadTranslations(const CPPRef<IFile>& file) noexcept
+bool I18n::loadTranslations(tau::IStream* const file) noexcept
 {
     LangHeader header;
     file->ReadType(&header);
@@ -29,7 +29,7 @@ bool I18n::loadTranslations(const CPPRef<IFile>& file) noexcept
 
         wchar_t* languageName = new wchar_t[header.languageNameLength + 1];
         languageName[header.languageNameLength] = '\0';
-        if(file->ReadString(languageName, header.languageNameLength) != header.languageNameLength * sizeof(wchar_t))
+        if(file->ReadBytes(languageName, header.languageNameLength * sizeof(wchar_t)) != static_cast<i64>(header.languageNameLength * sizeof(wchar_t)))
         { return false; }
 
         _language = WDynString::passControl(languageName);
@@ -42,12 +42,12 @@ bool I18n::loadTranslations(const CPPRef<IFile>& file) noexcept
 
             char* key = new char[tHeader.keyLength + 1];
             key[tHeader.keyLength] = '\0';
-            if(file->ReadString(key, tHeader.keyLength) != tHeader.keyLength * sizeof(char))
+            if(file->ReadBytes(key, tHeader.keyLength * sizeof(char)) != static_cast<i64>(tHeader.keyLength * sizeof(char)))
             { return false; }
 
             wchar_t* value = new wchar_t[tHeader.valueLength + 1];
             value[tHeader.valueLength] = '\0';
-            if(file->ReadString(value, tHeader.valueLength) != tHeader.valueLength * sizeof(wchar_t))
+            if(file->ReadBytes(value, tHeader.valueLength * sizeof(wchar_t)) != static_cast<i64>(tHeader.valueLength * sizeof(wchar_t)))
             { return false; }
 
             _translations.emplace(DynString::passControl(key), WDynString::passControl(value));

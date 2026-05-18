@@ -153,7 +153,7 @@ private:
     [[nodiscard]] bool processArgs(const ShaderArgs& args, [[tau::out]] GLShaderArgs* glArgs, [[tau::out]] Error* error) const noexcept;
 
     [[nodiscard]] bool processBundle(const ShaderArgs& args, [[tau::out]] GLShaderArgs* glArgs, GLenum shaderStage, [[tau::out]] Error* error) const noexcept;
-    [[nodiscard]] bool processShader(const CPPRef<IFile>& file, [[tau::out]] GLShaderArgs* glArgs, GLenum shaderStage, [[tau::out]] Error* error) const noexcept;
+    [[nodiscard]] bool processShader(tau::IStream* file, [[tau::out]] GLShaderArgs* glArgs, GLenum shaderStage, [[tau::out]] Error* error) const noexcept;
 private:
     friend class GLShaderProgramBuilder;
 };

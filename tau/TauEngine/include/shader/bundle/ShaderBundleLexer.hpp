@@ -1,7 +1,7 @@
 #pragma once
 
 #include <String.hpp>
-#include <IFile.hpp>
+#include <IStream.hpp>
 
 #include "DLL.hpp"
 #include "RenderingMode.hpp"
@@ -63,7 +63,7 @@ class TAU_DLL ShaderBundleLexer final
     DEFAULT_DESTRUCT(ShaderBundleLexer);
     DEFAULT_CM(ShaderBundleLexer);
 private:
-    CPPRef<IFile> m_File;
+    tau::com::ComRef<tau::IStream> m_File;
     SBPToken m_CurrentToken;
     C8DynString m_StrValue;
     union
@@ -81,7 +81,7 @@ private:
     uSys m_FileLine;
     uSys m_LineIndex;
 public:
-    ShaderBundleLexer(const CPPRef<IFile>& file) noexcept
+    ShaderBundleLexer(const tau::com::ComRef<tau::IStream>& file) noexcept
         : m_File(file)
         , m_CurrentToken(SBPToken::Unknown)
         , m_StrValue(u8"")
@@ -116,7 +116,7 @@ public:
      */
     [[nodiscard]] uSys lineIndex() const noexcept { return m_FileLine; }
 
-    void reset(const CPPRef<IFile>& file) noexcept;
+    void reset(const tau::com::ComRef<tau::IStream>& file) noexcept;
 
     [[nodiscard]] SBPToken getNextToken() noexcept;
 private:

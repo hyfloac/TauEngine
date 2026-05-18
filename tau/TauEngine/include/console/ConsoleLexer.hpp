@@ -3,7 +3,7 @@
 #include "DLL.hpp"
 #include <NumTypes.hpp>
 #include <String.hpp>
-#include <IFile.hpp>
+#include <IStream.hpp>
 #include <utility>
 
 namespace Console {
@@ -72,24 +72,24 @@ union TokenVal final
 class TAU_DLL Lexer final
 {
 private:
-    CPPRef<IFile> _file;
+    tau::com::ComRef<tau::IStream> _file;
     Token _lastToken;
     TokenVal _lastTokenVal;
     char _lastChar;
 public:
-    Lexer(CPPRef<IFile> file) noexcept
+    Lexer(tau::com::ComRef<tau::IStream> file) noexcept
         : _file(std::move(file)), _lastToken(), _lastTokenVal(0), _lastChar('\0')
     {
-        const int c = file->ReadChar();
+        const auto readResult = _file->ReadByte();
 
-        if(c < 0)
+        if(!readResult)
         {
             _lastToken = Token(Token::Eof);
             _lastChar = '\0';
         }
         else
         {
-            _lastChar = static_cast<char>(c);
+            _lastChar = static_cast<char>(readResult.value());
         }
     }
 

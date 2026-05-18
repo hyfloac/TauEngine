@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IFile.hpp>
+#include <IStream.hpp>
 #include <DynArray.hpp>
 #include <Objects.hpp>
 
@@ -28,10 +28,10 @@ public:
 public:
     static void update() noexcept;
 
-    static void loadFile(const CPPRef<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
+    static void loadFile(tau::IStream* file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept;
 
     template<typename _TParse, typename _TFinalize, typename _F>
-    static void loadFileT(const CPPRef<IFile>& file, const parseFileT_f<_TParse, _F> parseFile, _TParse* const parseParam, const finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* const finalizeParam) noexcept
+    static void loadFileT(tau::IStream* const file, const parseFileT_f<_TParse, _F> parseFile, _TParse* const parseParam, const finalizeLoadT_f<_TFinalize, _F> finalizeLoad, _TFinalize* const finalizeParam) noexcept
     {
         loadFile(file,
                  reinterpret_cast<parseFile_f>(parseFile), parseParam,

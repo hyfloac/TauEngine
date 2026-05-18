@@ -4,6 +4,7 @@
 
 #include <Utils.hpp>
 #include <VFS.hpp>
+#include <StreamUtils.hpp>
 
 #include "TextHandler.hpp"
 
@@ -170,11 +171,11 @@ FT_Error TextHandler::init() noexcept
 TextHandler::FileData* TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight) const noexcept
 {
     PERF();
-    const CPPRef<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
-    
+    const tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(C8DynString(reinterpret_cast<const c8*>(fileName)), tau::FileProps::Read);
+
     if(!file) { return nullptr; }
-    
-    RefDynArray<u8> data = file->ReadFile();
+
+    RefDynArray<u8> data = tau::ReadAll(file);
 
     FT_Face face;
     const FT_Error error = FT_New_Memory_Face(_ft, data.arr(), data.size() - 1, 0, &face);
@@ -196,12 +197,12 @@ struct LoadData final
 int TextHandler::loadTTFFile(const char* const fileName, const FT_UInt pixelWidth, const FT_UInt pixelHeight, const ResourceLoader::finalizeLoadT_f<FinalizeData, FileData> finalizeLoad, void* const userParam) noexcept
 {
     PERF();
-    const CPPRef<IFile> file = VFS::Instance().openFile(fileName, FileProps::Read);
+    const tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(C8DynString(reinterpret_cast<const c8*>(fileName)), tau::FileProps::Read);
 
     if(!file)
     { return -1; }
 
-    ResourceLoader::loadFileT(file, TextHandler::load2, new LoadData { *this, pixelWidth, pixelHeight }, finalizeLoad, new FinalizeData { *this, userParam });
+    ResourceLoader::loadFileT(file.Get(), TextHandler::load2, new LoadData { *this, pixelWidth, pixelHeight }, finalizeLoad, new FinalizeData { *this, userParam });
     return 0;
 }
 

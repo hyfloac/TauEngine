@@ -4,6 +4,7 @@
 #include <list>
 #include <future>
 #include <Safeties.hpp>
+#include <StreamUtils.hpp>
 #pragma warning(pop)
 
 static std::list<std::future<ResourceLoader::FutureData>> _futures;
@@ -28,17 +29,18 @@ void ResourceLoader::update() noexcept
     }
 }
 
-static ResourceLoader::FutureData loadFileAsync(const CPPRef<IFile>& file, ResourceLoader::parseFile_f parseFile, void* parseParam, ResourceLoader::finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
+static ResourceLoader::FutureData loadFileAsync(tau::com::ComRef<tau::IStream> file, ResourceLoader::parseFile_f parseFile, void* parseParam, ResourceLoader::finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
 {
-    const RefDynArray<u8> fileData = file->ReadFile();
+    const RefDynArray<u8> fileData = tau::ReadAll(file.Get());
     void* fileParse = parseFile(fileData, parseParam);
     return { fileParse, finalizeParam, finalizeLoad };
 }
 
-void ResourceLoader::loadFile(const CPPRef<IFile>& file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
+void ResourceLoader::loadFile(tau::IStream* const file, parseFile_f parseFile, void* parseParam, finalizeLoad_f finalizeLoad, void* finalizeParam) noexcept
 {
     if(!file || !parseFile || !finalizeLoad)
     { return; }
 
-    _futures.push_back(std::async(std::launch::async, loadFileAsync, file, parseFile, parseParam, finalizeLoad, finalizeParam));
+    file->AddReference();
+    _futures.push_back(std::async(std::launch::async, loadFileAsync, tau::com::ComRef<tau::IStream>(file), parseFile, parseParam, finalizeLoad, finalizeParam));
 }

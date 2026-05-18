@@ -2,7 +2,7 @@
 
 #include <Objects.hpp>
 #include <RunTimeType.hpp>
-#include <IFile.hpp>
+#include <IStream.hpp>
 
 #include "DLL.hpp"
 #include "events/Exception.hpp"
@@ -36,7 +36,7 @@ struct ShaderFileArgs final
     DEFAULT_DESTRUCT(ShaderFileArgs);
     DEFAULT_CM_PU(ShaderFileArgs);
 public:
-    CPPRef<IFile> file;
+    tau::com::ComRef<tau::IStream> file;
     EShader::Stage stage;
 public:
 	ShaderFileArgs() noexcept
@@ -44,7 +44,7 @@ public:
         , stage(static_cast<EShader::Stage>(0))
     { }
 
-	ShaderFileArgs(const CPPRef<IFile>& _file, const EShader::Stage _stage) noexcept
+	ShaderFileArgs(const tau::com::ComRef<tau::IStream>& _file, const EShader::Stage _stage) noexcept
         : file(_file)
         , stage(_stage)
     { }

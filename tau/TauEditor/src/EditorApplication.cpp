@@ -14,6 +14,7 @@
 #include <ResourceLoader.hpp>
 #include <ResourceSelector.hpp>
 #include <Timings.hpp>
+#include <StreamUtils.hpp>
 
 #include <system/SystemInterface.hpp>
 #include <graphics/DepthStencilState.hpp>
@@ -411,12 +412,12 @@ void TauEditorApplication::runMessageLoop() noexcept
 void TauEditorApplication::setupConfig() noexcept
 {
     PERF();
-    if(VFS::Instance().fileExists(CONFIG_PATH))
+    if(tau::VFS::Instance().Exists(StringCast<c8>(DynString(CONFIG_PATH))))
     {
-        CPPRef<IFile> configFile = VFS::Instance().openFile(CONFIG_PATH, FileProps::Read);
+        tau::com::ComRef<tau::IStream> configFile = tau::VFS::Instance().Load(StringCast<c8>(DynString(CONFIG_PATH)), tau::FileProps::Read);
         Config tmp = { false, false, 0, 0 };
-        const i32 read = configFile->readBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
-        if(read != sizeof(tmp))
+        const i64 read = configFile->ReadBytes(reinterpret_cast<u8*>(&tmp), sizeof(tmp));
+        if(read != static_cast<i64>(sizeof(tmp)))
         {
             writeConfig();
         }
@@ -434,10 +435,10 @@ void TauEditorApplication::setupConfig() noexcept
 void TauEditorApplication::writeConfig() const noexcept
 {
     PERF();
-    CPPRef<IFile> file = VFS::Instance().openFile(CONFIG_PATH, FileProps::WriteNew);
+    tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(StringCast<c8>(DynString(CONFIG_PATH)), tau::FileProps::WriteNew);
     if(file)
     {
-        file->writeType(_config);
+        file->WriteType(_config);
     }
 }
 
@@ -524,8 +525,8 @@ void TauEditorApplication::onBufferSafetyException(BufferSafetyException& ex) co
 
 void TauEditorApplication::initVRControls() const noexcept
 {
-    const auto path = VFS::Instance().resolvePath("|TERes/vr/vr_actions.json");
-    vr::VRInput()->SetActionManifestPath(path.path.c_str());
+    const auto path = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString("|TERes/vr/vr_actions.json")));
+    vr::VRInput()->SetActionManifestPath(reinterpret_cast<const char*>(path.FilePath.String()));
 
     vr::VRInput()->GetActionHandle("/actions/TauEditor/in/Up", &_globals->vrHandles.moveUp);
     vr::VRInput()->GetActionHandle("/actions/TauEditor/in/Down", &_globals->vrHandles.moveDown);
@@ -579,11 +580,11 @@ static void setupGameFolders(const bool dbgVFSFolder) noexcept
 {
     if(dbgVFSFolder)
     {
-        VFS::Instance().mountDynamic("TERes", "D:/TauEngine/tau/TauEditor/resources", Win32FileLoader::Instance());
+        tau::VFS::Instance().MountDynamic(StringCast<c8>(DynString("TERes")), StringCast<c8>(DynString("D:/TauEngine/tau/TauEditor/resources")), tau::Win32FileLoader::Instance());
     }
     else
     {
-        VFS::Instance().mountDynamic("TERes", "resources", Win32FileLoader::Instance());
+        tau::VFS::Instance().MountDynamic(StringCast<c8>(DynString("TERes")), StringCast<c8>(DynString("resources")), tau::Win32FileLoader::Instance());
     }
 }
 

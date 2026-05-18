@@ -6,6 +6,7 @@
 #include "maths/Maths.hpp"
 #include "RenderingMode.hpp"
 #include "VFS.hpp"
+#include "StreamUtils.hpp"
 #include "Timings.hpp"
 #include "system/GraphicsInterface.hpp"
 #include "system/RenderingContext.hpp"
@@ -209,17 +210,13 @@ NullableRef<IResource> TextureLoader::loadTexture(IGraphicsInterface& gi, IRende
         if(texture) { FreeImage_Unload(texture); } \
         return _missingTexture; }
 
-    const VFS::Container physPath = VFS::Instance().resolvePath(fileName);
+    const tau::VFS::Container physPath = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(fileName)));
 
     FIBITMAP* texture = nullptr;
-    
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.BasePath.length() == 0);
-    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.SubPath.length() == 0);
 
-    WDynString path = physPath.BasePath + physPath.SubPath;
-    DynString strPath = StringCast<char>(path);
+    ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.FilePath.Length() == 0);
 
-    const char* fileName = strPath.c_str();
+    const char* fileName = reinterpret_cast<const char*>(physPath.FilePath.String());
 
     FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName);
 
@@ -304,17 +301,13 @@ NullableRef<IResource> TextureLoader::loadTextureCube(IGraphicsInterface& gi, IR
 
     for(uSys i = 0; i < 6; ++i)
     {
-        const VFS::Container physPath = VFS::Instance().resolvePath(folderPath, fileNames[i],  fileExtension);
+        const tau::VFS::Container physPath = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(folderPath)), StringCast<c8>(DynString(fileNames[i])), StringCast<c8>(DynString(fileExtension)));
 
         FIBITMAP* texture = nullptr;
 
-        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.BasePath.length() == 0);
-        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.SubPath.length() == 0);
+        ERR_EXIT(TextureLoadError::INVALID_PATH, physPath.FilePath.Length() == 0);
 
-        WDynString path = physPath.BasePath + physPath.SubPath;
-        DynString strPath = StringCast<char>(path);
-
-        const char* fileName = strPath.c_str();
+        const char* fileName = reinterpret_cast<const char*>(physPath.FilePath.String());
 
         FREE_IMAGE_FORMAT format = FreeImage_GetFileType(fileName);
 

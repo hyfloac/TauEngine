@@ -5,6 +5,7 @@
 #include "shader/bundle/ShaderBundleParser.hpp"
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 #include "VFS.hpp"
+#include "StreamUtils.hpp"
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "TauConfig.hpp"
 
@@ -34,7 +35,7 @@ bool DX10ShaderProgramBuilder::processArgs(const ShaderProgramAutoArgs& args, DX
         const auto& info = *it;
 
         ShaderFileArgs shaderArgs;
-        shaderArgs.file = VFS::openFile(info.fileName, FileProps::Read);
+        shaderArgs.file = tau::VFS::Instance().Load(StringCast<c8>(DynString(info.fileName)), tau::FileProps::Read);
         shaderArgs.stage = it.stage();
 
         IShaderBuilder::Error shaderError;

@@ -5,6 +5,7 @@
 
 #include <Win32File.hpp>
 #include <VFS.hpp>
+#include <cstring>
 
 #pragma warning(push, 0)
 #include <thread>
@@ -178,16 +179,21 @@ void computeClockCyclesFromRuntime() noexcept
 const ClockCyclesTimeFrame* getClockCyclesPerTimeFrame() noexcept
 { return &clockCycles; }
 
-CPPRef<IFile> TimingsWriter::_profileFile = nullptr;
+tau::com::ComRef<tau::IStream> TimingsWriter::_profileFile = nullptr;
 u32 TimingsWriter::_profileCount = 0;
 SRWMutex TimingsWriter::_mutex;
 
-void TimingsWriter::begin(const char* const name, const WDynString& fileName) noexcept
+static void writeCStr(tau::IStream* const stream, const char* const str) noexcept
+{
+    stream->Write(str, ::std::strlen(str));
+}
+
+void TimingsWriter::begin(const char* const name, const C8DynString& fileName) noexcept
 {
     Lock lock(_mutex);
     if(!_profileFile)
     {
-        _profileFile = VFS::Instance().openFile(fileName, FileProps::WriteNew);
+        _profileFile = tau::VFS::Instance().Load(fileName, tau::FileProps::WriteNew);
         _profileCount = 0;
         writeHeader(name);
     }
@@ -210,36 +216,36 @@ void TimingsWriter::write(const ProfileResult& pr) noexcept
     {
         if(_profileCount++ > 0)
         {
-            _profileFile->writeString(R"(,)");
+            writeCStr(_profileFile.Get(), R"(,)");
         }
 
         const u64 duration = pr.end - pr.start;
 
-        _profileFile->writeString(R"({)");
-        _profileFile->writeString(R"("cat":"function",)");
-        _profileFile->writeString(R"("dur":)");
+        writeCStr(_profileFile.Get(), R"({)");
+        writeCStr(_profileFile.Get(), R"("cat":"function",)");
+        writeCStr(_profileFile.Get(), R"("dur":)");
         {
             const std::string durString = std::to_string(duration);
-            _profileFile->writeString(durString.c_str());
+            writeCStr(_profileFile.Get(), durString.c_str());
         }
-        _profileFile->writeString(R"(,)");
-        _profileFile->writeString(R"("name":")");
-        _profileFile->writeString(pr.name);
-        _profileFile->writeString(R"(",)");
-        _profileFile->writeString(R"("ph":"X",)");
-        _profileFile->writeString(R"("pid":"0",)");
-        _profileFile->writeString(R"("tid":)");
+        writeCStr(_profileFile.Get(), R"(,)");
+        writeCStr(_profileFile.Get(), R"("name":")");
+        writeCStr(_profileFile.Get(), pr.name);
+        writeCStr(_profileFile.Get(), R"(",)");
+        writeCStr(_profileFile.Get(), R"("ph":"X",)");
+        writeCStr(_profileFile.Get(), R"("pid":"0",)");
+        writeCStr(_profileFile.Get(), R"("tid":)");
         {
             const std::string threadIDString = std::to_string(pr.threadID);
-            _profileFile->writeString(threadIDString.c_str());
+            writeCStr(_profileFile.Get(), threadIDString.c_str());
         }
-        _profileFile->writeString(R"(,)");
-        _profileFile->writeString(R"("ts":)");
+        writeCStr(_profileFile.Get(), R"(,)");
+        writeCStr(_profileFile.Get(), R"("ts":)");
         {
             const std::string startString = std::to_string(pr.start);
-            _profileFile->writeString(startString.c_str());
+            writeCStr(_profileFile.Get(), startString.c_str());
         }
-        _profileFile->writeString(R"(})");
+        writeCStr(_profileFile.Get(), R"(})");
     }
 }
 
@@ -247,9 +253,9 @@ void TimingsWriter::writeHeader(const char* name) noexcept
 {
     if(_profileFile)
     {
-        _profileFile->writeString(R"({"otherData:":{"name": ")");
-        _profileFile->writeString(name);
-        _profileFile->writeString(R"("},"traceEvents":[)");
+        writeCStr(_profileFile.Get(), R"({"otherData:":{"name": ")");
+        writeCStr(_profileFile.Get(), name);
+        writeCStr(_profileFile.Get(), R"("},"traceEvents":[)");
     }
 }
 
@@ -257,7 +263,7 @@ void TimingsWriter::writeFooter() noexcept
 {
     if(_profileFile)
     {
-        _profileFile->writeString(R"(]})");
+        writeCStr(_profileFile.Get(), R"(]})");
     }
 }
 

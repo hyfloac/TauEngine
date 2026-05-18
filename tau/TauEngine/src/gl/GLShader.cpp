@@ -8,6 +8,7 @@
 #include <VFS.hpp>
 #include <VariableLengthArray.hpp>
 #include <ConPrinter.hpp>
+#include <StreamUtils.hpp>
 
 #include "Timings.hpp"
 #include "gl/GLShader.hpp"
@@ -126,7 +127,8 @@ static RefDynArray<u8> handleIncludes(RefDynArray<u8>& shader) noexcept
 
                         const uSys includeLineLen = i - includeBegin;
 
-                        RefDynArray<u8> includeFileData = VFS::Instance().openFile(includePath, FileProps::Read)->ReadFile();
+                        const tau::com::ComRef<tau::IStream> includeStream = tau::VFS::Instance().Load(StringCast<c8>(DynString(includePath)), tau::FileProps::Read);
+                        RefDynArray<u8> includeFileData = tau::ReadAll(includeStream);
 
                         delete[] includePath;
 
@@ -257,14 +259,14 @@ bool GLShaderBuilder::processBundle(const ShaderArgs& args, GLShaderArgs* const 
     _visitor->visit(ast.get());
     const sbp::ShaderInfo& info = _visitor->get(args.stage);
 
-    const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
+    const tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(StringCast<c8>(DynString(info.fileName)), tau::FileProps::Read);
 
-    return processShader(file, glArgs, shaderStage, error);
+    return processShader(file.Get(), glArgs, shaderStage, error);
 }
 
-bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* const glArgs, const GLenum shaderStage, Error* const error) const noexcept
+bool GLShaderBuilder::processShader(tau::IStream* const file, GLShaderArgs* const glArgs, const GLenum shaderStage, Error* const error) const noexcept
 {
-    RefDynArray<u8> data = file->ReadFile();
+    RefDynArray<u8> data = tau::ReadAll(file);
     data = handleIncludes(data);
 
     const GLchar* const shaderSrc = reinterpret_cast<GLchar*>(data.arr());
@@ -292,7 +294,7 @@ bool GLShaderBuilder::processShader(const CPPRef<IFile>& file, GLShaderArgs* con
     {
 #if !defined(TAU_PRODUCTION)
         (void) validateFail(glArgs->shaderHandle, "compile");
-        ConPrinter::print(stderr, "File Path: %\n", file->Name());
+        ConPrinter::print(stderr, "File: %\n", static_cast<const void*>(file));
         ConPrinter::print(stderr, "File Data: \n%\n", shaderSrc);
 #else
         glDeleteProgram(glArgs->shaderHandle);

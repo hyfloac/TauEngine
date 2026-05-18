@@ -6,6 +6,7 @@
 #include "Timings.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "VFS.hpp"
+#include "StreamUtils.hpp"
 #include "graphics/RasterizerState.hpp"
 #include "system/GraphicsInterface.hpp"
 #include <glm/vec4.hpp>
@@ -100,13 +101,13 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
 
     if(!mesh.material.map_Kd.empty())
     {
-        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Kd.c_str());
-        matBuilder.diffuseTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path)));
+        const auto path = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(materialFolder)), StringCast<c8>(DynString(mesh.material.map_Kd.c_str())));
+        matBuilder.diffuseTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, reinterpret_cast<const char*>(path.FilePath.String()))));
     }
     if(!mesh.material.map_Ks.empty())
     {
-        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ks.c_str());
-        matBuilder.specularTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path)));
+        const auto path = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(materialFolder)), StringCast<c8>(DynString(mesh.material.map_Ks.c_str())));
+        matBuilder.specularTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, reinterpret_cast<const char*>(path.FilePath.String()))));
     }
     else
     {
@@ -114,13 +115,13 @@ RenderableObject::RenderableObject(IGraphicsInterface& gi, IRenderingContext& co
     }
     if(!mesh.material.map_Ka.empty())
     {
-        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_Ka.c_str());
-        _reflectiveTexture = CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path));
+        const auto path = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(materialFolder)), StringCast<c8>(DynString(mesh.material.map_Ka.c_str())));
+        _reflectiveTexture = CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, reinterpret_cast<const char*>(path.FilePath.String())));
     }
     if(!mesh.material.map_bump.empty())
     {
-        const auto path = VFS::Instance().resolvePath(materialFolder, mesh.material.map_bump.c_str());
-        matBuilder.normalTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, path.path)));
+        const auto path = tau::VFS::Instance().ResolvePath(StringCast<c8>(DynString(materialFolder)), StringCast<c8>(DynString(mesh.material.map_bump.c_str())));
+        matBuilder.normalTexture(CPPRef<ITexture2D>(TextureLoader::loadTexture(gi, context, reinterpret_cast<const char*>(path.FilePath.String()))));
     }
     else
     {

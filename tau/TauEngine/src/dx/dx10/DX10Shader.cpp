@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #include <d3dcompiler.h>
 #include <VFS.hpp>
+#include <StreamUtils.hpp>
 #include "dx/dx10/DX10GraphicsInterface.hpp"
 #include "dx/dx10/DX10RenderingContext.hpp"
 #include "shader/bundle/ShaderBundleParser.hpp"
@@ -104,16 +105,18 @@ bool DX10ShaderBuilder::processArgs(const ShaderFileArgs& args, DXShaderArgs* co
 {
     ERROR_CODE_COND_F(!args.file, Error::InvalidFile);
 
-    const WDynString path = args.file->Name();
-
-    if(VFS::getFileExt(path, false) == L"tausi")
+    tau::IFileStream* fileStream = nullptr;
+    args.file->QueryInterface(&fileStream);
+    if(fileStream)
     {
-        return processBundle(args, dxArgs, error);
+        const C8DynString path = fileStream->Name();
+        fileStream->ReleaseReference();
+        if(tau::VFS::getFileExt(path, false) == reinterpret_cast<const c8*>(u8"tausi"))
+        {
+            return processBundle(args, dxArgs, error);
+        }
     }
-    else
-    {
-        return processShader(args.file, dxArgs, error);
-    }
+    return processShader(args.file.Get(), dxArgs, error);
 }
 
 bool DX10ShaderBuilder::processArgs(const ShaderSourceArgs& args, DXShaderArgs* const dxArgs, Error* const error) const noexcept
@@ -134,22 +137,22 @@ bool DX10ShaderBuilder::processBundle(const ShaderFileArgs& args, DXShaderArgs* 
     _visitor->visit(ast.Get());
     const sbp::ShaderInfo& info = _visitor->get(args.stage);
 
-    const CPPRef<IFile> file = VFS::Instance().openFile(info.fileName, FileProps::Read);
-    if(!processShader(file, dxArgs, error))
+    const tau::com::ComRef<tau::IStream> file = tau::VFS::Instance().Load(StringCast<c8>(DynString(info.fileName)), tau::FileProps::Read);
+    if(!processShader(file.Get(), dxArgs, error))
     { return false; }
 
     return true;
 }
 
-bool DX10ShaderBuilder::processShader(const CPPRef<IFile>& file, DXShaderArgs* dxArgs, Error* error) const noexcept
+bool DX10ShaderBuilder::processShader(tau::IStream* const file, DXShaderArgs* dxArgs, Error* error) const noexcept
 {
-    const i64 fileSize = file->Size();
+    const i64 fileSize = file->Length();
 
     const HRESULT h = D3DCreateBlob(fileSize, &dxArgs->dataBlob);
     ERROR_CODE_COND_F(FAILED(h), Error::DriverMemoryAllocationFailure);
 
     void* const dataBuffer = dxArgs->dataBlob->GetBufferPointer();
-    (void) file->Read(dataBuffer, fileSize);
+    (void) file->Read(dataBuffer, static_cast<uSys>(fileSize));
 
     return true;
 }
