@@ -3,7 +3,7 @@
 using namespace tau;
 using namespace com;
 
-tau::com::ResultCode DX10ResourceHeap::QueryInterface(const tau::com::UUID& iid, void** const pInterface) noexcept
+tau::com::EResultCode DX10ResourceHeap::QueryInterface(const tau::com::UUID& iid, void** const pInterface) noexcept
 {
     if(!pInterface)
     {
@@ -28,7 +28,7 @@ tau::com::ResultCode DX10ResourceHeap::QueryInterface(const tau::com::UUID& iid,
     return RC_Success;
 }
 
-ResultCode DX10ResourceHeap::Factory(const UUID& iid, void** const pInterface, const BaseConstructionInfo* const pConstructionInfo) noexcept
+EResultCode DX10ResourceHeap::Factory(const UUID& iid, void** const pInterface, const BaseConstructionInfo* const pConstructionInfo) noexcept
 {
     if(!pInterface)
     {

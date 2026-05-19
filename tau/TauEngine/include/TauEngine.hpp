@@ -30,7 +30,13 @@ struct ExceptionData final
 #if !defined(TAU_PRODUCTION)
 TAU_DLL void tauThrowException(Exception& e, uSys line, const char* file, const char* func) noexcept;
 
-#define TAU_THROW(_TYPE, ...) tauThrowException(*new _TYPE(__VA_ARGS__), __LINE__, __FILE__, __FUNCSIG__)
+#if defined(_MSC_VER)
+  #define TAU_FUNC_SIG __FUNCSIG__
+#else
+  #define TAU_FUNC_SIG __PRETTY_FUNCTION__
+#endif
+
+#define TAU_THROW(_TYPE, ...) tauThrowException(*new _TYPE(__VA_ARGS__), __LINE__, __FILE__, TAU_FUNC_SIG)
 #else
 TAU_DLL void tauThrowException(Exception& e) noexcept;
 

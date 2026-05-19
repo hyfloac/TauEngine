@@ -1,8 +1,12 @@
 #pragma once
 
-#pragma warning(push, 0)
-#include <Windows.h>
-#pragma warning(pop)
+#ifdef _WIN32
+  #pragma warning(push, 0)
+  #include <Windows.h>
+  #pragma warning(pop)
+#else
+  #include <pthread.h>
+#endif
 
 #include <Objects.hpp>
 
@@ -18,25 +22,61 @@ class CSMutex final
 {
     DELETE_CM(CSMutex);
 private:
+#ifdef _WIN32
     CRITICAL_SECTION _criticalSection;
+#else
+    pthread_mutex_t _mutex;
+#endif
 public:
     CSMutex() noexcept
     {
+#ifdef _WIN32
         const DWORD flags = TAU_MUTEX_USE_DBG ? 0 : CRITICAL_SECTION_NO_DEBUG_INFO;
         InitializeCriticalSectionEx(&_criticalSection, 512, flags);
+#else
+        pthread_mutexattr_t attr;
+        pthread_mutexattr_init(&attr);
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutex_init(&_mutex, &attr);
+        pthread_mutexattr_destroy(&attr);
+#endif
     }
 
     ~CSMutex() noexcept
-    { DeleteCriticalSection(&_criticalSection); }
+    {
+#ifdef _WIN32
+        DeleteCriticalSection(&_criticalSection);
+#else
+        pthread_mutex_destroy(&_mutex);
+#endif
+    }
 
     void lock() noexcept
-    { EnterCriticalSection(&_criticalSection); }
+    {
+#ifdef _WIN32
+        EnterCriticalSection(&_criticalSection);
+#else
+        pthread_mutex_lock(&_mutex);
+#endif
+    }
 
     bool try_lock() noexcept
-    { return TryEnterCriticalSection(&_criticalSection) != 0; }
+    {
+#ifdef _WIN32
+        return TryEnterCriticalSection(&_criticalSection) != 0;
+#else
+        return pthread_mutex_trylock(&_mutex) == 0;
+#endif
+    }
 
     void unlock() noexcept
-    { LeaveCriticalSection(&_criticalSection); }
+    {
+#ifdef _WIN32
+        LeaveCriticalSection(&_criticalSection);
+#else
+        pthread_mutex_unlock(&_mutex);
+#endif
+    }
 };
 
 class SRWMutex final
@@ -44,29 +84,75 @@ class SRWMutex final
     DEFAULT_DESTRUCT(SRWMutex);
     DELETE_CM(SRWMutex);
 private:
+#ifdef _WIN32
     SRWLOCK _srw;
+#else
+    pthread_rwlock_t _rw;
+#endif
 public:
     SRWMutex() noexcept
+#ifdef _WIN32
         : _srw(SRWLOCK_INIT)
     { }
+#else
+    {
+        pthread_rwlock_init(&_rw, nullptr);
+    }
+#endif
 
     void lockRead() noexcept
-    { AcquireSRWLockShared(&_srw); }
+    {
+#ifdef _WIN32
+        AcquireSRWLockShared(&_srw);
+#else
+        pthread_rwlock_rdlock(&_rw);
+#endif
+    }
 
     bool tryLockRead() noexcept
-    { return TryAcquireSRWLockShared(&_srw) != 0; }
+    {
+#ifdef _WIN32
+        return TryAcquireSRWLockShared(&_srw) != 0;
+#else
+        return pthread_rwlock_tryrdlock(&_rw) == 0;
+#endif
+    }
 
     void unlockRead() noexcept
-    { ReleaseSRWLockShared(&_srw); }
+    {
+#ifdef _WIN32
+        ReleaseSRWLockShared(&_srw);
+#else
+        pthread_rwlock_unlock(&_rw);
+#endif
+    }
 
     void lockWrite() noexcept
-    { AcquireSRWLockExclusive(&_srw); }
+    {
+#ifdef _WIN32
+        AcquireSRWLockExclusive(&_srw);
+#else
+        pthread_rwlock_wrlock(&_rw);
+#endif
+    }
 
     bool tryLockWrite() noexcept
-    { return TryAcquireSRWLockExclusive(&_srw) != 0; }
+    {
+#ifdef _WIN32
+        return TryAcquireSRWLockExclusive(&_srw) != 0;
+#else
+        return pthread_rwlock_trywrlock(&_rw) == 0;
+#endif
+    }
 
     void unlockWrite() noexcept
-    { ReleaseSRWLockExclusive(&_srw); }
+    {
+#ifdef _WIN32
+        ReleaseSRWLockExclusive(&_srw);
+#else
+        pthread_rwlock_unlock(&_rw);
+#endif
+    }
 
     void lock() noexcept
     { lockWrite(); }

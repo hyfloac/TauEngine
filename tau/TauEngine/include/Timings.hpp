@@ -148,7 +148,11 @@ public:
 
 #if TAU_PERF_MONITOR
   #define PERF_NAMED(_NAME) PerfTimer _x_timer##__LINE__(_NAME)
-  #define PERF() PERF_NAMED(__FUNCSIG__)
+  #if defined(_MSC_VER)
+    #define PERF() PERF_NAMED(__FUNCSIG__)
+  #else
+    #define PERF() PERF_NAMED(__PRETTY_FUNCTION__)
+  #endif
 #else
   #define PERF_NAMED(_NAME)
   #define PERF()

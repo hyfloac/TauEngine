@@ -14,12 +14,12 @@ public:
     { }
 
     // IUnknown
-    tau::com::ResultCode QueryInterface(const tau::com::UUID& iid, void** const pInterface) noexcept override;
+    tau::com::EResultCode QueryInterface(const tau::com::UUID& iid, void** const pInterface) noexcept override;
 
     // IResourceHeap
     [[nodiscard]] const tau::ResourceHeapArgs& HeapArgs() const noexcept override { return m_HeapArgs; }
 public:
-    static tau::com::ResultCode Factory(const tau::com::UUID& iid, void** const pInterface, const tau::com::BaseConstructionInfo* const pConstructionInfo) noexcept;
+    static tau::com::EResultCode Factory(const tau::com::UUID& iid, void** const pInterface, const tau::com::BaseConstructionInfo* const pConstructionInfo) noexcept;
 public:
     tau::ResourceHeapArgs m_HeapArgs;
 };

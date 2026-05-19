@@ -69,33 +69,34 @@ class ExceptionDispatcher final
 {
     DEFAULT_DESTRUCT(ExceptionDispatcher);
     DEFAULT_CM_PU(ExceptionDispatcher);
-private:
-    Exception& _ex;
-    Exception::ExceptionType _cache;
 public:
-    inline ExceptionDispatcher(Exception& ex) noexcept
-        : _ex(ex), _cache(ex.getExceptionType())
+    ExceptionDispatcher(Exception& ex) noexcept
+        : m_Exception(&ex)
+        , m_TypeCache(ex.getExceptionType())
     { }
 
-    template<typename _T, typename _F>
-    inline bool dispatch(const _F& func) noexcept
+    template<typename TException, typename TFunc>
+    bool dispatch(const TFunc& func) noexcept
     {
-        if(_cache == _T::getStaticType())
+        if(m_TypeCache == TException::getStaticType())
         {
-            func(reinterpret_cast<_T&>(_ex));
+            func(reinterpret_cast<TException&>(m_Exception));
             return true;
         }
         return false;
     }
 
-    template<typename _T, typename _C, typename _F>
-    inline bool dispatch(_C* instance, const _F& func) noexcept
+    template<typename TException, typename TClass, typename TFunc>
+    bool dispatch(TClass* instance, const TFunc& func) noexcept
     {
-        if(_cache == _T::getStaticType())
+        if(m_TypeCache == TException::getStaticType())
         {
-            (instance->*func)(reinterpret_cast<_T&>(_ex));
+            (instance->*func)(reinterpret_cast<TException&>(m_Exception));
             return true;
         }
         return false;
     }
+private:
+    Exception* m_Exception;
+    Exception::ExceptionType m_TypeCache;
 };

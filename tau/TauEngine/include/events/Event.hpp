@@ -2,6 +2,7 @@
 
 #pragma warning(push, 0)
 #include <cstdlib>
+#include <cstdio>
 #pragma warning(pop)
 
 #include <DLL.hpp>
@@ -17,7 +18,7 @@
   #endif
 #endif
 
-#if _DEBUG
+#if TAU_RTTI_DEBUG
 #define EVENT_IMPL_BASE(TYPE) DELETE_COPY(TYPE); \
                               public: \
                                   [[nodiscard]] static Event::EventType getStaticType() noexcept \
@@ -29,7 +30,7 @@
 #define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
                                public: \
                                    [[nodiscard]] static Event::EventType getStaticType() noexcept \
-                                   { static Event::EventType type = Event::EventType::define(); \
+                                   { static Event::EventType type; \
                                      return type; } \
                                    [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
                                    { return _TYPE::getStaticType(); }
@@ -97,7 +98,7 @@ public:
     [[nodiscard]] virtual DynString toString() const noexcept override
     {
         char buf[12];
-        _itoa_s(_x, buf, 10);
+        ::std::snprintf(buf, sizeof(buf), "%d", _x);
         return DynString(getName()).Concat(buf);
     }
 #endif
