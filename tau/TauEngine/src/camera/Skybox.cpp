@@ -32,7 +32,6 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     : _shader(nullptr)
     , _uniforms(gi.createUniformBuffer())
     , _skybox(nullptr)
-    , _textureUploader(nullptr)
     , _cubeVA(nullptr)
     , _skyboxDepthStencilState(nullptr)
 {
@@ -64,10 +63,12 @@ Skybox::Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* c
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.depthCompareFunc = ETexture::CompareFunc::Never;
 
+#if 0 // TODO: port to ICommandQueue upload path
     SingleTextureUploaderArgs uploaderArgs;
     uploaderArgs.texture = _skybox->textureView();
     uploaderArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, nullptr);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(uploaderArgs, nullptr);
+#endif
 
     float skyboxVertices[] = {
         // back
@@ -156,9 +157,9 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     _uniforms.data().projectionMatrix = camera.projectionMatrix();
     _uniforms.data().viewMatrix = camera.viewRotMatrix();
     _uniforms.upload(context, EShader::Stage::Vertex, 0);
-    {
-        (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
-    }
+#if 0 // TODO: port to ICommandQueue upload path
+    (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+#endif
 
     _cubeVA->bind(context);
     _cubeVA->preDraw(context);
@@ -167,9 +168,9 @@ void Skybox::render(IRenderingContext& context, const Camera3D& camera) noexcept
     _cubeVA->unbind(context);
 
     _uniforms.unbind(context, EShader::Stage::Vertex, 0);
-    {
-        (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
-    }
+#if 0 // TODO: port to ICommandQueue upload path
+    (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+#endif
 
     _shader->unbind(context);
 

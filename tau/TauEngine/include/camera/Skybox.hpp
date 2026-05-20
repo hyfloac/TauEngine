@@ -7,7 +7,8 @@
 #include "shader/ShaderProgram.hpp"
 #include "graphics/Resource.hpp"
 #include "shader/Uniform.hpp"
-#include "shader/TextureUploader.hpp"
+// TODO: port to ICommandQueue upload path
+// #include "shader/TextureUploader.hpp"
 #include "graphics/DepthStencilState.hpp"
 #include "graphics/RasterizerState.hpp"
 
@@ -39,8 +40,10 @@ private:
     CPPRef<IShaderProgram> _shader;
     UniformBlockS<Uniforms> _uniforms;
 
-    NullableRef<IResource> _skybox;
+    NullableRef<tau::IResource> _skybox;
+#if 0 // TODO: port to ICommandQueue upload path
     NullableRef<ISingleTextureUploader> _textureUploader;
+#endif
     CPPRef<IVertexArray> _cubeVA;
 
     NullableRef<IDepthStencilState> _skyboxDepthStencilState;
@@ -48,8 +51,8 @@ private:
 public:
     Skybox(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* shaderPath, const char* vertexName, const char* pixelName, const char* skyboxPath, const char* fileExtension) noexcept;
 
-    [[nodiscard]]       NullableRef<IResource>  skybox()       noexcept { return _skybox; }
-    [[nodiscard]] const NullableRef<IResource>& skybox() const noexcept { return _skybox; }
+    [[nodiscard]]       NullableRef<tau::IResource>  skybox()       noexcept { return _skybox; }
+    [[nodiscard]] const NullableRef<tau::IResource>& skybox() const noexcept { return _skybox; }
 
     void render(IRenderingContext& context, const Camera3D& camera) noexcept;
 };

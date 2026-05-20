@@ -7,8 +7,7 @@
 
 #include "DLL.hpp"
 #include "graphics/BufferView.hpp"
-
-class IResource;
+#include "graphics/Resource.hpp"
 
 #define VERTEX_ARRAY_IMPL_BASE(_TYPE) \
     RTT_IMPL(_TYPE, IVertexArray)
@@ -24,17 +23,17 @@ protected:
      *   It is necessary to hold on to a pointer to the buffers to
      * ensure they don't get destroyed.
      */
-    DynArray<NullableRef<IResource>> _buffers;
+    DynArray<NullableRef<tau::IResource>> _buffers;
 protected:
-    IVertexArray(const DynArray<NullableRef<IResource>>& buffers) noexcept
+    IVertexArray(const DynArray<NullableRef<tau::IResource>>& buffers) noexcept
         : _buffers(buffers)
     { }
 
-    IVertexArray(DynArray<NullableRef<IResource>>&& buffers) noexcept
+    IVertexArray(DynArray<NullableRef<tau::IResource>>&& buffers) noexcept
         : _buffers(::std::move(buffers))
     { }
 public:
-    [[nodiscard]] const DynArray<NullableRef<IResource>>& buffers() const noexcept { return _buffers; }
+    [[nodiscard]] const DynArray<NullableRef<tau::IResource>>& buffers() const noexcept { return _buffers; }
 public:
     RTT_BASE_IMPL(IVertexArray);
     RTT_BASE_CHECK(IVertexArray);

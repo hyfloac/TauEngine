@@ -300,6 +300,7 @@ bool SaturationPPLayer::init() noexcept
             return false;
         }
 
+#if 0 // TODO: port to ICommandQueue upload path
         TextureUploaderArgs fbTuArgs(2);
         fbTuArgs.textures[0] = colorTexture->textureView();
         fbTuArgs.textures[1] = dsTexture->depthView();
@@ -325,6 +326,7 @@ bool SaturationPPLayer::init() noexcept
             }
             return false;
         }
+#endif
     }
 
     return true;
@@ -467,6 +469,7 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
         return false;
     }
 
+#if 0 // TODO: port to ICommandQueue upload path
     TextureUploaderArgs fbTuArgs(2);
     fbTuArgs.textures[0] = colorTexture->textureView();
     fbTuArgs.textures[1] = dsTexture->depthView();
@@ -492,6 +495,7 @@ bool SaturationPPLayer::onWindowResize(WindowResizeEvent& e) noexcept
         }
         return false;
     }
+#endif
 
     return false;
 }

@@ -1,3 +1,5 @@
+// TODO: port to ICommandQueue upload path. Kept as reference until then.
+#if 0
 #include "gl/GLTextureUploader.hpp"
 #include "gl/GLTextureSampler.hpp"
 #include "gl/GLTexture.hpp"
@@ -217,3 +219,4 @@ bool GLTextureUploaderBuilder::processArgs(const SingleTextureUploaderArgs& args
 
     return true;
 }
+#endif

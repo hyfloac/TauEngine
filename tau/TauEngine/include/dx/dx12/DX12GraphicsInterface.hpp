@@ -50,7 +50,8 @@ public:
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
+    // TODO: port to ICommandQueue upload path
+    // [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };

@@ -3,6 +3,7 @@
 #include <NumTypes.hpp>
 #include <Objects.hpp>
 #include <ArrayList.hpp>
+#include <algorithm>
 
 class RenderingMode final
 {

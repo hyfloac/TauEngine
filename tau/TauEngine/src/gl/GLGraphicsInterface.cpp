@@ -32,7 +32,6 @@ GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int ma
     , _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder)
     , _textureBuilder(new(::std::nothrow) GLTextureBuilder)
     , _textureSamplerBuilder(new(::std::nothrow) GLTextureSamplerBuilder)
-    , _textureUploaderBuilder(new(::std::nothrow) GLTextureUploaderBuilder)
     , _frameBufferBuilder(new(::std::nothrow) GLFrameBufferBuilder)
     , _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
 {
@@ -76,7 +75,6 @@ GLGraphicsInterface::~GLGraphicsInterface() noexcept
     delete _blendingStateBuilder;
     delete _textureBuilder;
     delete _textureSamplerBuilder;
-    delete _textureUploaderBuilder;
     delete _frameBufferBuilder;
     delete _renderingContextBuilder;
 }
@@ -114,8 +112,9 @@ ITextureBuilder& GLGraphicsInterface::createTexture() noexcept
 ITextureSamplerBuilder& GLGraphicsInterface::createTextureSampler() noexcept
 { return *_textureSamplerBuilder; }
 
-ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
-{ return *_textureUploaderBuilder; }
+// TODO: port to ICommandQueue upload path
+// ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
+// { return *_textureUploaderBuilder; }
 
 IFrameBufferBuilder& GLGraphicsInterface::createFrameBuffer() noexcept
 { return *_frameBufferBuilder; }

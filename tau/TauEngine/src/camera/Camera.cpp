@@ -1,5 +1,7 @@
 #include "camera/Camera.hpp"
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 void Camera::update(const float fixedDelta) noexcept
 {
@@ -60,6 +62,7 @@ void Camera::checkKeys() noexcept
 
     float speed = WALK_FORWARD_VELOCITY;
 
+#ifdef _WIN32
     if(GetKeyState(VK_SHIFT) & 0x8000)
     {
         speed = RUN_FORWARD_VELOCITY;
@@ -71,4 +74,8 @@ void Camera::checkKeys() noexcept
     if(GetKeyState(0x53) & 0x8000) /* s */ { _velocity.x() -= speed; }
     if(GetKeyState(VK_SPACE)   & 0x8000)   { _velocity.y() += speed; }
     if(GetKeyState(VK_CONTROL) & 0x8000)   { _velocity.y() -= speed; }
+#else
+    // TODO: port keyboard polling off Win32 GetKeyState.
+    (void) speed;
+#endif
 }

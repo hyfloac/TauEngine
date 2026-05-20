@@ -360,7 +360,7 @@ protected:
 };
 
 template<>
-inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const noexcept
+inline const ResourceBufferArgs* IResourceLegacy::getArgs<ResourceBufferArgs>() const noexcept
 {
     if(m_ResourceType == EResource::Type::Buffer)
     { return reinterpret_cast<const ResourceBufferArgs*>(_getArgs()); }
@@ -368,7 +368,7 @@ inline const ResourceBufferArgs* IResource::getArgs<ResourceBufferArgs>() const 
 }
 
 template<>
-inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() const noexcept
+inline const ResourceTexture1DArgs* IResourceLegacy::getArgs<ResourceTexture1DArgs>() const noexcept
 {
     if(m_ResourceType == EResource::Type::Texture1D)
     { return reinterpret_cast<const ResourceTexture1DArgs*>(_getArgs()); }
@@ -376,7 +376,7 @@ inline const ResourceTexture1DArgs* IResource::getArgs<ResourceTexture1DArgs>() 
 }
 
 template<>
-inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() const noexcept
+inline const ResourceTexture2DArgs* IResourceLegacy::getArgs<ResourceTexture2DArgs>() const noexcept
 {
     if(m_ResourceType == EResource::Type::Texture2D)
     { return reinterpret_cast<const ResourceTexture2DArgs*>(_getArgs()); }
@@ -384,7 +384,7 @@ inline const ResourceTexture2DArgs* IResource::getArgs<ResourceTexture2DArgs>() 
 }
 
 template<>
-inline const ResourceTexture3DArgs* IResource::getArgs<ResourceTexture3DArgs>() const noexcept
+inline const ResourceTexture3DArgs* IResourceLegacy::getArgs<ResourceTexture3DArgs>() const noexcept
 {
     if(m_ResourceType == EResource::Type::Texture3D)
     { return reinterpret_cast<const ResourceTexture3DArgs*>(_getArgs()); }

@@ -101,10 +101,12 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     textureSamplerArgs.wrapW = ETexture::WrapMode::ClampToEdge;
     textureSamplerArgs.depthCompareFunc = ETexture::CompareFunc::Never;
 
+#if 0 // TODO: port to ICommandQueue upload path
     SingleTextureUploaderArgs tuArgs;
     tuArgs.texture = TextureLoader::getMissingTexture()->textureView();
     tuArgs.textureSampler = gi.createTextureSampler().buildCPPRef(textureSamplerArgs, nullptr);
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, nullptr);
+#endif
 
     VertexBufferArgs bufferBuilder(1);
     bufferBuilder.type = EBuffer::Type::ArrayBuffer;
@@ -343,9 +345,10 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
             { xpos + w, ypos + h }
         };
 
+#if 0 // TODO: port to ICommandQueue upload path
         _textureUploader->texture(gc->texture->textureView());
-
         (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+#endif
 
         _positionBuffer->beginModification(context);
         _positionBuffer->modifyBuffer(0, sizeof(vertices), vertices);
@@ -353,7 +356,9 @@ void TextHandler::renderText(IRenderingContext& context, GlyphSetHandle glyphSet
 
         _va->draw(context);
 
+#if 0 // TODO: port to ICommandQueue upload path
         (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+#endif
 
         x += (gc->advance >> 6) * scale;
     }
@@ -424,8 +429,10 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
             { xpos + w, ypos + h }
         };
 
+#if 0 // TODO: port to ICommandQueue upload path
         _textureUploader->texture(gc->texture->textureView());
         (void) _textureUploader->upload(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+#endif
 
         _positionBuffer->beginModification(context);
         _positionBuffer->modifyBuffer(0, sizeof(vertices), vertices);
@@ -433,7 +440,9 @@ float TextHandler::renderTextLineWrapped(IRenderingContext& context, GlyphSetHan
 
         _va->draw(context);
 
+#if 0 // TODO: port to ICommandQueue upload path
         (void) _textureUploader->unbind(context, TextureIndices(0, 0, 0), EShader::Stage::Pixel);
+#endif
 
         x += advance;
     }

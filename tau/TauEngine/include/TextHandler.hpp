@@ -124,7 +124,9 @@ private:
     CPPRef<IVertexBuffer> _positionBuffer;
     UniformBlockS<ProjectionUniforms> _viewUniforms;
     UniformBlockS<ColorUniforms> _colorUniforms;
+#if 0 // TODO: port to ICommandQueue upload path
     NullableRef<ISingleTextureUploader> _textureUploader;
+#endif
 public:
     TextHandler(IGraphicsInterface& gi, IRenderingContext& context, const char* vfsMount, const char* path, const char* vertexName, const char* pixelName) noexcept;
 

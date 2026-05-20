@@ -5,7 +5,8 @@
 #include "shader/ShaderProgram.hpp"
 #include "texture/Texture.hpp"
 
-#include "shader/TextureUploader.hpp"
+// TODO: port to ICommandQueue upload path
+// #include "shader/TextureUploader.hpp"
 #include "shader/Uniform.hpp"
 
 class IGraphicsInterface;
@@ -20,14 +21,15 @@ private:
     CPPRef<ITexture2D> _diffuseTexture;
     CPPRef<ITexture2D> _specularTexture;
     CPPRef<ITexture2D> _normalTexture;
+#if 0 // TODO: port to ICommandQueue upload path
     CPPRef<ITextureUploader> _textureUploader;
+#endif
 private:
-    inline Material(const float specularExponent, const CPPRef<ITexture2D>& diffuseTexture, const CPPRef<ITexture2D>& specularTexture, const CPPRef<ITexture2D>& normalTexture, const CPPRef<ITextureUploader>& textureUploader) noexcept
+    inline Material(const float specularExponent, const CPPRef<ITexture2D>& diffuseTexture, const CPPRef<ITexture2D>& specularTexture, const CPPRef<ITexture2D>& normalTexture) noexcept
         : _specularExponent(specularExponent)
         , _diffuseTexture(diffuseTexture)
         , _specularTexture(specularTexture)
         , _normalTexture(normalTexture)
-        , _textureUploader(textureUploader)
     { }
 public:
     TextureIndices upload(IRenderingContext& context, UniformBlockU<Material>& uniform, EShader::Stage stage, u32 uniformIndex, const TextureIndices& textureIndices) const noexcept;

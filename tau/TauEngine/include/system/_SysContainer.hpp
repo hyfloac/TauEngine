@@ -16,4 +16,17 @@ struct _SysContainer final
 {
     HMODULE programHandle;
 };
+#else
+// Stub containers for non-Windows builds. A real X11/Wayland backend would
+// store its native handles here.
+struct _SysWindowContainer final
+{
+    void* windowHandle;
+    void* displayHandle;
+};
+
+struct _SysContainer final
+{
+    void* programHandle;
+};
 #endif

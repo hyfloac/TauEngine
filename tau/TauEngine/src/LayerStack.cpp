@@ -1,4 +1,5 @@
 #include <layer/LayerStack.hpp>
+#include <algorithm>
 
 LayerStack::~LayerStack() noexcept
 {

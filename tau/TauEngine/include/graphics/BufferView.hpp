@@ -9,9 +9,8 @@
 #include "BufferEnums.hpp"
 #include "BufferDescriptor.hpp"
 #include "DescriptorHeap.hpp"
+#include "Resource.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
-
-class IResource;
 
 /**
  * A view into a vertex buffer resource.
@@ -25,10 +24,10 @@ struct VertexBufferView final
     DEFAULT_DESTRUCT(VertexBufferView);
     DEFAULT_CM_PU(VertexBufferView);
 public:
-    NullableRef<IResource> buffer;
+    NullableRef<tau::IResource> buffer;
     BufferDescriptor descriptor;
 public:
-    VertexBufferView(const NullableRef<IResource>& _buffer, const BufferDescriptor& _descriptor) noexcept
+    VertexBufferView(const NullableRef<tau::IResource>& _buffer, const BufferDescriptor& _descriptor) noexcept
         : buffer(_buffer)
         , descriptor(_descriptor)
     { }
@@ -46,10 +45,10 @@ struct IndexBufferView final
     DEFAULT_DESTRUCT(IndexBufferView);
     DEFAULT_CM_PU(IndexBufferView);
 public:
-    NullableRef<IResource> buffer;
+    NullableRef<tau::IResource> buffer;
     EBuffer::IndexSize indexSize;
 public:
-    IndexBufferView(const NullableRef<IResource>& _buffer, const EBuffer::IndexSize _indexSize) noexcept
+    IndexBufferView(const NullableRef<tau::IResource>& _buffer, const EBuffer::IndexSize _indexSize) noexcept
         : buffer(_buffer)
         , indexSize(_indexSize)
     { }
@@ -61,9 +60,9 @@ struct UniformBufferViewArgs final
     DEFAULT_DESTRUCT(UniformBufferViewArgs);
     DEFAULT_CM_PU(UniformBufferViewArgs);
 public:
-    NullableRef<IResource> buffer;
+    NullableRef<tau::IResource> buffer;
 public:
-    UniformBufferViewArgs(const NullableRef<IResource>& _buffer) noexcept
+    UniformBufferViewArgs(const NullableRef<tau::IResource>& _buffer) noexcept
         : buffer(_buffer)
     { }
 };

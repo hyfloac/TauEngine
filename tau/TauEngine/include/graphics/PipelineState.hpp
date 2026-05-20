@@ -6,14 +6,14 @@
 #include <RunTimeType.hpp>
 
 #include "DescriptorLayout.hpp"
+#include "BlendingState.hpp"
+#include "DepthStencilState.hpp"
+#include "RasterizerState.hpp"
+#include "InputLayout.hpp"
 #include "_GraphicsOpaqueObjects.hpp"
 #include "DLL.hpp"
 
-class IBlendingState;
-class IDepthStencilState;
-class IRasterizerState;
 class IShaderProgram;
-class IInputLayout;
 
 struct PipelineArgs final
 {

@@ -1,3 +1,5 @@
+// TODO: port to ICommandQueue upload path. Kept as reference until then.
+#if 0
 #include "dx/dx11/DX11TextureUploader.hpp"
 
 #ifdef _WIN32
@@ -294,4 +296,5 @@ bool DX11TextureUploaderBuilder::processArgs(const SingleTextureUploaderArgs& ar
 
     return true;
 }
+#endif
 #endif

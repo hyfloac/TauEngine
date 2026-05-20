@@ -50,7 +50,9 @@ private:
     GLRasterizerStateBuilder* _rasterizerStateBuilder;
     GLBlendingStateBuilder* _blendingStateBuilder;
     GLTextureSamplerBuilder* _textureSamplerBuilder;
+#if 0 // TODO: port to ICommandQueue upload path
     GLTextureUploaderBuilder* _textureUploaderBuilder;
+#endif
     GLFrameBufferBuilder* _frameBufferBuilder;
     GLRenderingContextBuilder* _renderingContextBuilder;
 public:
@@ -75,7 +77,8 @@ public:
     [[nodiscard]] IBlendingStateBuilder& createBlendingState() noexcept override;
     [[nodiscard]] IRasterizerStateBuilder& createRasterizerState() noexcept override;
     [[nodiscard]] ITextureSamplerBuilder& createTextureSampler() noexcept override;
-    [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
+    // TODO: port to ICommandQueue upload path
+    // [[nodiscard]] ITextureUploaderBuilder& createTextureUploader() noexcept override;
     [[nodiscard]] IFrameBufferBuilder& createFrameBuffer() noexcept override;
     [[nodiscard]] IRenderingContextBuilder& createRenderingContext() noexcept override;
 };
