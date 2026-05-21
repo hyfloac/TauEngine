@@ -1,8 +1,7 @@
 #pragma once
 
-#include "texture/Texture.hpp"
-
 #ifdef _WIN32
+#include "texture/Texture.hpp"
 #include <d3d11.h>
 #include "dx/DXUtils.hpp"
 

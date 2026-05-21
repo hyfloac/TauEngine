@@ -13,8 +13,8 @@
 
 
 #include "texture/Texture.hpp"
-#include "model/BufferDescriptor.hpp"
-#include "model/VertexArray.hpp"
+#include "graphics/BufferDescriptor.hpp"
+#include "graphics/VertexArray.hpp"
 #include "shader/ShaderProgram.hpp"
 #include "shader/Shader.hpp"
 #include <Windows.h>

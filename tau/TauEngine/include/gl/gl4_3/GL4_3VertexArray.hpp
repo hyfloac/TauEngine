@@ -5,7 +5,7 @@
 #pragma warning(pop)
 
 #include "gl/GLVertexArray.hpp"
-#include "model/BufferDescriptor.hpp"
+#include "graphics/BufferDescriptor.hpp"
 
 class GLIndexBuffer;
 

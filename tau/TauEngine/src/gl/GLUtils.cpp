@@ -1,6 +1,6 @@
 #include <spdlog/spdlog.h>
 #include <gl/GLUtils.hpp>
-#include <Utils.hpp>
+
 
 static void __cdecl openGLDebugErrorDefaultCallback(GLDebugSource source, GLDebugType type, GLDebugSeverity severity, u32 id, iSys length, const char* message, const void* userParam) noexcept;
 

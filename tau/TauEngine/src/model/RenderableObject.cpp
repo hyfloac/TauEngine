@@ -2,7 +2,7 @@
 #include <DynArray.hpp>
 #include <NumTypes.hpp>
 #include "system/RenderingContext.hpp"
-#include "model/VertexArray.hpp"
+#include "graphics/VertexArray.hpp"
 #include "Timings.hpp"
 #include "texture/FITextureLoader.hpp"
 #include "VFS.hpp"

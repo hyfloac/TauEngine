@@ -1,10 +1,10 @@
 #pragma once
 
-#include <model/BufferDescriptor.hpp>
+#include <graphics/BufferDescriptor.hpp>
 #include <model/OBJLoader.hpp>
 #include <DLL.hpp>
 #include <Objects.hpp>
-#include "VertexArray.hpp"
+#include "graphics/VertexArray.hpp"
 #include "model/Material.hpp"
 
 class IGraphicsInterface;

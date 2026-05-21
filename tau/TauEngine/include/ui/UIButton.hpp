@@ -2,9 +2,9 @@
 
 #include "UIElement.hpp"
 #include "maths/Vector3f.hpp"
-#include "model/BufferDescriptor.hpp"
-#include "model/Buffer.hpp"
-#include "model/VertexArray.hpp"
+#include "graphics/BufferDescriptor.hpp"
+#include "graphics/Buffer.hpp"
+#include "graphics/VertexArray.hpp"
 
 class Window;
 class WindowMouseClickEvent;

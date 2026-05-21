@@ -12,6 +12,11 @@ include(SetCompileFlags)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c" "src/*.rc")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h" "include/*.inl")
 
+if(NOT WIN32)
+    list(FILTER SOURCES EXCLUDE REGEX "/dx/dx12/")
+    list(FILTER HEADERS EXCLUDE REGEX "/dx/dx12/")
+endif()
+
 set(TAU_ENGINE_SOURCE_FILES ${SOURCES} ${HEADERS})
 
 add_library(${PROJECT_NAME} ${TAU_ENGINE_SOURCE_FILES})
@@ -41,6 +46,7 @@ if(NOT WIN32)
 endif()
 find_package(freeimage REQUIRED)
 find_package(openvr REQUIRED)
+find_package(spdlog REQUIRED)
 
 add_dependencies(${PROJECT_NAME} SDL3::SDL3)
 add_dependencies(${PROJECT_NAME} ResourceLib::ResourceLib)
@@ -58,6 +64,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     freeimage::FreeImage
     freeimage::FreeImagePlus
     openvr::openvr
+    spdlog::spdlog
     SDL3::SDL3
     ResourceLib::ResourceLib
 )

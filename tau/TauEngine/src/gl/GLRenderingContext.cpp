@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #pragma warning(pop)
 
-#include <Utils.hpp>
+
 
 #include "gl/GLRenderingContext.hpp"
 

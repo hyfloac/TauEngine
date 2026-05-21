@@ -1,10 +1,10 @@
 #pragma once
 
-#include "model/VertexArray.hpp"
+#include "graphics/VertexArray.hpp"
 
 #ifdef _WIN32
 #include <d3d11.h>
-#include "model/BufferDescriptor.hpp"
+#include "graphics/BufferDescriptor.hpp"
 
 class DX11RenderingContext;
 class DX11IndexBuffer;

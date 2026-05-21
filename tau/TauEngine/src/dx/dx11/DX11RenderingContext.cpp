@@ -3,7 +3,7 @@
 #include "dx/dx11/DX11RenderingContext.hpp"
 
 #ifdef _WIN32
-#include <Utils.hpp>
+
 #include "system/Window.hpp"
 #include "system/SystemInterface.hpp"
 #include "dx/dx11/DX11DepthStencilState.hpp"

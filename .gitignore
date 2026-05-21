@@ -1014,3 +1014,5 @@ Doxyfile.bak
 /libs/conan/*
 
 .claude/
+
+AGENTS.md

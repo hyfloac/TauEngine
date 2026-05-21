@@ -23,7 +23,8 @@ class TauEngineRecipe(ConanFile):
         "freetype/2.13.2",
         "fontconfig/[^2.15.0]",
         "freeimage/[^3.18.0]",
-        "openvr/[^1.16.8]"
+        "openvr/[^1.16.8]",
+        "spdlog/[^1.14.1]"
     )
     options = {
         "shared": [True, False],
