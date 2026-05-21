@@ -23,7 +23,6 @@ class Window;
 class IVertexArray;
 class IVertexBuffer;
 class IShaderProgram;
-class ITexture;
 class IBufferDescriptor;
 class IRasterizerState;
 class IGraphicsInterface;
@@ -61,7 +60,7 @@ public:
     wchar_t maxGlyph;
     uSys glyphCount;
     DynArray<GlyphCharacter> glyphs;
-    NullableRef<IResource> texture;
+    NullableRef<tau::IResource> texture;
 
     GlyphSet(const DynString& _setName, const wchar_t _minGlyph, const wchar_t _maxGlyph) noexcept
         : setName(_setName)

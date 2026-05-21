@@ -12,7 +12,6 @@
 #include <TexturePacker2D.hpp>
 
 
-#include "texture/Texture.hpp"
 #include "graphics/BufferDescriptor.hpp"
 #include "graphics/VertexArray.hpp"
 #include "shader/ShaderProgram.hpp"
@@ -26,7 +25,6 @@
 #include "system/Window.hpp"
 #include "graphics/RasterizerState.hpp"
 #include "system/GraphicsInterface.hpp"
-#include "texture/NullTexture.hpp"
 #include "texture/FITextureLoader.hpp"
 #include <EnumBitFields.hpp>
 

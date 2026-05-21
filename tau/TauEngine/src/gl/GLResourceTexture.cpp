@@ -1,6 +1,6 @@
 #include "gl/GLResourceTexture.hpp"
 #include <AtomicIntrinsics.hpp>
-#include "gl/GLTexture.hpp"
+#include "gl/GLTextureUtils.hpp"
 
 void* GLResourceTexture::map(IRenderingContext&, const EResource::MapType mapType, const uSys mipLevel, uSys, const ResourceMapRange* const mapReadRange) noexcept
 {
@@ -76,10 +76,10 @@ void GLResourceTexture1D::uploadTexture(uSys mipLevel, uSys, const void* const d
     glTexImage1D(
         GL_TEXTURE_1D, 
         mipLevel, 
-        GLTexture2D::glInternalFormat(_args.dataFormat), 
+        GLTextureUtils::glInternalFormat(_args.dataFormat), 
         ETexture::computeMipSide(_args.width, mipLevel), 
-        0, GLTexture2D::glInputFormat(_args.dataFormat), 
-        GLTexture2D::glInputDataType(_args.dataFormat), 
+        0, GLTextureUtils::glInputFormat(_args.dataFormat), 
+        GLTextureUtils::glInputDataType(_args.dataFormat), 
         data);
 }
 
@@ -92,12 +92,12 @@ void GLResourceTexture2D::uploadTexture(uSys mipLevel, uSys, const void* const d
     glTexImage2D(
         GL_TEXTURE_2D, 
         mipLevel, 
-        GLTexture2D::glInternalFormat(_args.dataFormat), 
+        GLTextureUtils::glInternalFormat(_args.dataFormat), 
         ETexture::computeMipSide(_args.width, mipLevel), 
         ETexture::computeMipSide(_args.height, mipLevel), 
         0, 
-        GLTexture2D::glInputFormat(_args.dataFormat), 
-        GLTexture2D::glInputDataType(_args.dataFormat), 
+        GLTextureUtils::glInputFormat(_args.dataFormat), 
+        GLTextureUtils::glInputDataType(_args.dataFormat), 
         data);
 }
 
@@ -110,13 +110,13 @@ void GLResourceTexture3D::uploadTexture(uSys mipLevel, uSys, const void* const d
     glTexImage3D(
         GL_TEXTURE_1D,
         mipLevel,
-        GLTexture2D::glInternalFormat(_args.dataFormat),
+        GLTextureUtils::glInternalFormat(_args.dataFormat),
         ETexture::computeMipSide(_args.width, mipLevel),
         ETexture::computeMipSide(_args.height, mipLevel),
         ETexture::computeMipSide(_args.depth, mipLevel),
         0,
-        GLTexture2D::glInputFormat(_args.dataFormat),
-        GLTexture2D::glInputDataType(_args.dataFormat),
+        GLTextureUtils::glInputFormat(_args.dataFormat),
+        GLTextureUtils::glInputDataType(_args.dataFormat),
         data);
 }
 

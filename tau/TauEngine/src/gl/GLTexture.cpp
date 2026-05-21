@@ -1,3 +1,4 @@
+#if 0 // TODO: refactor to derive from IResource; keep for reference / helper extraction
 #include "gl/GLTexture.hpp"
 #include "gl/GLUtils.hpp"
 
@@ -625,3 +626,5 @@ GLenum GLTextureCube::glCubeMapFace(ETexture::CubeSide cubeSide) noexcept
         default: return 0;
     }
 }
+
+#endif

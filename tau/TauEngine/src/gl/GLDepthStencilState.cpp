@@ -1,5 +1,6 @@
 #include "gl/GLDepthStencilState.hpp"
 #include "gl/GLStateManager.hpp"
+#include "gl/GLTextureUtils.hpp"
 
 void GLDepthStencilState::apply(GLStateManager& glStateManager) const noexcept
 {
@@ -89,7 +90,7 @@ bool GLDepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, GLDep
     glArgs->enableStencilTest = args.enableStencilTest;
 
     glArgs->depthWriteMask = args.depthWriteMask == DepthStencilArgs::DepthWriteMask::Zero ? GL_FALSE : GL_TRUE;
-    glArgs->depthCompareFunc = GLTexture2D::glDepthCompareFunc(args.depthCompareFunc);
+    glArgs->depthCompareFunc = GLTextureUtils::glDepthCompareFunc(args.depthCompareFunc);
 
     glArgs->stencilReadMask = args.stencilReadMask;
     glArgs->stencilWriteMask = args.stencilWriteMask;
@@ -97,22 +98,22 @@ bool GLDepthStencilStateBuilder::processArgs(const DepthStencilArgs& args, GLDep
     glArgs->frontFace.failOp = glStencilOperation(args.frontFace.failOp);
     glArgs->frontFace.stencilPassDepthFailOp = glStencilOperation(args.frontFace.stencilPassDepthFailOp);
     glArgs->frontFace.passOp = glStencilOperation(args.frontFace.passOp);
-    glArgs->frontFace.compareFunc = GLTexture2D::glDepthCompareFunc(args.frontFace.compareFunc);
+    glArgs->frontFace.compareFunc = GLTextureUtils::glDepthCompareFunc(args.frontFace.compareFunc);
 
     glArgs->backFace.failOp = glStencilOperation(args.backFace.failOp);
     glArgs->backFace.stencilPassDepthFailOp = glStencilOperation(args.backFace.stencilPassDepthFailOp);
     glArgs->backFace.passOp = glStencilOperation(args.backFace.passOp);
-    glArgs->backFace.compareFunc = GLTexture2D::glDepthCompareFunc(args.backFace.compareFunc);
+    glArgs->backFace.compareFunc = GLTextureUtils::glDepthCompareFunc(args.backFace.compareFunc);
 
     ERROR_CODE_COND_F(args.depthWriteMask != DepthStencilArgs::DepthWriteMask::Zero && args.depthWriteMask != DepthStencilArgs::DepthWriteMask::All, Error::InvalidDepthWriteMask);
     ERROR_CODE_COND_F(glArgs->depthCompareFunc == 0, Error::InvalidDepthCompareFunc);
-    ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.failOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.stencilPassDepthFailOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilPassDepthFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.passOp) == IntMaxMin<u32>::Max(), Error::InvalidFrontFaceStencilPassOp);
+    ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.failOp) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.stencilPassDepthFailOp) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilPassDepthFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(glArgs->frontFace.passOp) == IntMaxMin<u32>::Max, Error::InvalidFrontFaceStencilPassOp);
     ERROR_CODE_COND_F(glArgs->frontFace.compareFunc == 0, Error::InvalidFrontFaceStencilCompareFunc);
-    ERROR_CODE_COND_F(static_cast<u32>(glArgs->backFace.failOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(glArgs->backFace.stencilPassDepthFailOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilPassDepthFailOp);
-    ERROR_CODE_COND_F(static_cast<u32>(glArgs->backFace.passOp) == IntMaxMin<u32>::Max(), Error::InvalidBackFaceStencilPassOp);
+    ERROR_CODE_COND_F(static_cast<u32>(glArgs->backFace.failOp) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(glArgs->backFace.stencilPassDepthFailOp) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilPassDepthFailOp);
+    ERROR_CODE_COND_F(static_cast<u32>(glArgs->backFace.passOp) == IntMaxMin<u32>::Max, Error::InvalidBackFaceStencilPassOp);
     ERROR_CODE_COND_F(glArgs->backFace.compareFunc == 0, Error::InvalidBackFaceStencilCompareFunc);
 
     return true;
@@ -130,6 +131,6 @@ GLenum GLDepthStencilStateBuilder::glStencilOperation(DepthStencilArgs::StencilO
         case DepthStencilArgs::StencilOp::DecrementClamp: return GL_DECR;
         case DepthStencilArgs::StencilOp::IncrementWrap:  return GL_INCR_WRAP;
         case DepthStencilArgs::StencilOp::DecrementWrap:  return GL_DECR_WRAP;
-        default:                                            return static_cast<GLenum>(IntMaxMin<u32>::Max());
+        default:                                            return static_cast<GLenum>(IntMaxMin<u32>::Max);
     }
 }

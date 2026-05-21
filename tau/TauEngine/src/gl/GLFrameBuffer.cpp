@@ -1,7 +1,7 @@
 #include "gl/GLFrameBuffer.hpp"
 #include "system/RenderingContext.hpp"
 #include "gl/GLRenderingContext.hpp"
-#include "gl/GLTexture.hpp"
+#include "gl/GLTextureUtils.hpp"
 
 static GLenum getFrameBufferMode(IFrameBuffer::AccessMode mode) noexcept;
 

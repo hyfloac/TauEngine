@@ -3,7 +3,8 @@
 #include <Safeties.hpp>
 
 #include "shader/ShaderProgram.hpp"
-#include "texture/Texture.hpp"
+#include "graphics/Resource.hpp"
+#include "texture/TextureSampler.hpp"
 
 // TODO: port to ICommandQueue upload path
 // #include "shader/TextureUploader.hpp"
@@ -18,14 +19,14 @@ class Material final
     DEFAULT_COPY(Material);
 private:
     float _specularExponent;
-    CPPRef<ITexture2D> _diffuseTexture;
-    CPPRef<ITexture2D> _specularTexture;
-    CPPRef<ITexture2D> _normalTexture;
+    NullableRef<tau::IResource> _diffuseTexture;
+    NullableRef<tau::IResource> _specularTexture;
+    NullableRef<tau::IResource> _normalTexture;
 #if 0 // TODO: port to ICommandQueue upload path
     CPPRef<ITextureUploader> _textureUploader;
 #endif
 private:
-    inline Material(const float specularExponent, const CPPRef<ITexture2D>& diffuseTexture, const CPPRef<ITexture2D>& specularTexture, const CPPRef<ITexture2D>& normalTexture) noexcept
+    inline Material(const float specularExponent, const NullableRef<tau::IResource>& diffuseTexture, const NullableRef<tau::IResource>& specularTexture, const NullableRef<tau::IResource>& normalTexture) noexcept
         : _specularExponent(specularExponent)
         , _diffuseTexture(diffuseTexture)
         , _specularTexture(specularTexture)
@@ -46,20 +47,20 @@ class MaterialBuilder final
 private:
     IGraphicsInterface& _gi;
     float _specularExponent;
-    CPPRef<ITexture2D> _diffuseTexture;
-    CPPRef<ITexture2D> _specularTexture;
-    CPPRef<ITexture2D> _normalTexture;
-    CPPRef<ITextureSampler> _textureSampler;
+    NullableRef<tau::IResource> _diffuseTexture;
+    NullableRef<tau::IResource> _specularTexture;
+    NullableRef<tau::IResource> _normalTexture;
+    TextureSamplerArgs _textureSampler;
 public:
     inline MaterialBuilder(IGraphicsInterface& gi) noexcept
         : _gi(gi), _specularExponent(1.0f)
     { }
 
     inline void specularExponent(const float specularExponent) noexcept { _specularExponent = specularExponent; }
-    inline void diffuseTexture(const CPPRef<ITexture2D>& diffuseTexture) noexcept { _diffuseTexture = diffuseTexture; }
-    inline void specularTexture(const CPPRef<ITexture2D>& specularTexture) noexcept { _specularTexture = specularTexture; }
-    inline void normalTexture(const CPPRef<ITexture2D>& normalTexture) noexcept { _normalTexture = normalTexture; }
-    inline void textureSampler(const CPPRef<ITextureSampler>& textureSampler) noexcept { _textureSampler = textureSampler; }
+    inline void diffuseTexture(const NullableRef<tau::IResource>& diffuseTexture) noexcept { _diffuseTexture = diffuseTexture; }
+    inline void specularTexture(const NullableRef<tau::IResource>& specularTexture) noexcept { _specularTexture = specularTexture; }
+    inline void normalTexture(const NullableRef<tau::IResource>& normalTexture) noexcept { _normalTexture = normalTexture; }
+    inline void textureSampler(const TextureSamplerArgs& textureSampler) noexcept { _textureSampler = textureSampler; }
 
     [[nodiscard]] Material build() const noexcept;
 };
