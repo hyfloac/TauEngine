@@ -19,9 +19,9 @@ class IVertexArray;
 
 class TAU_DLL Skybox final
 {
-    DEFAULT_CONSTRUCT_PU(Skybox);
     DEFAULT_DESTRUCT(Skybox);
-    DEFAULT_CM(Skybox);
+    DEFAULT_MOVE_PU(Skybox);
+    DELETE_COPY(Skybox);
 public:
     struct Uniforms final
     {

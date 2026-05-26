@@ -18,7 +18,7 @@ GLCommandList::GLCommandList(const NullableRef<GLCommandAllocator>& allocator) n
     , _commandCount(0)
 { }
 
-void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* const initialState) noexcept
+void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator, const NullableRef<IPipelineState>& initialState) noexcept
 {
 #if TAU_NULL_CHECK
     if(!allocator)
@@ -26,7 +26,7 @@ void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator, const
 #endif
 
 #if TAU_RTTI_CHECK
-    if(!RTT_CHECK(allocator.get(), GLCommandAllocator))
+    if(!RTT_CHECK(allocator.Get(), GLCommandAllocator))
     { return; }
 #endif
 
@@ -35,7 +35,7 @@ void GLCommandList::reset(const NullableRef<ICommandAllocator>& allocator, const
     _commandCount = 0;
     
     if(initialState)
-    { setPipelineState(*initialState); }
+    { setPipelineState(initialState); }
 }
 
 void GLCommandList::begin() noexcept
@@ -119,9 +119,9 @@ void GLCommandList::setDrawType(const EGraphics::DrawType drawType) noexcept
     ++_commandCount;
 }
 
-void GLCommandList::setPipelineState(const PipelineState& pipelineState) noexcept
+void GLCommandList::setPipelineState(const NullableRef<IPipelineState>& pipelineState) noexcept
 {
-    const GLCL::CommandSetPipelineState setPipelineState(&pipelineState);
+    const GLCL::CommandSetPipelineState setPipelineState(pipelineState);
     (void) _commandAllocator->allocateT<GLCL::Command>(setPipelineState);
     ++_commandCount;
 }
@@ -140,7 +140,7 @@ void GLCommandList::setVertexArray(const NullableRef<IVertexArray>& va) noexcept
     { return; }
 #endif
 #if TAU_RTTI_CHECK
-    if(!RTT_CHECK(va.get(), GLVertexArray))
+    if(!RTT_CHECK(va.Get(), GLVertexArray))
     { return; }
 #endif
     
@@ -162,11 +162,11 @@ void GLCommandList::setIndexBuffer(const IndexBufferView& indexBufferView) noexc
     { return; }
 #endif
 #if TAU_GENERAL_SAFETY_CHECK
-    if(indexBufferView.buffer->resourceType() != EResource::Type::Buffer)
-    { return; }
+    // if(indexBufferView.buffer->Type() != EResource::Type::Buffer)
+    // { return; }
 #endif
 #if TAU_RTTI_CHECK
-    if(!RTTD_CHECK(indexBufferView.buffer.get(), GLResource, IResource))
+    if(!RTTD_CHECK(indexBufferView.buffer.Get(), GLResource, IResource))
     { return; }
 #endif
 
@@ -202,7 +202,7 @@ void GLCommandList::executeBundle(const NullableRef<ICommandList>& bundle) noexc
     { return; }
 #endif
 #if TAU_RTTI_CHECK
-    if(!RTT_CHECK(bundle.get(), GLCommandList))
+    if(!RTT_CHECK(bundle.Get(), GLCommandList))
     { return; }
 #endif
     
@@ -211,7 +211,7 @@ void GLCommandList::executeBundle(const NullableRef<ICommandList>& bundle) noexc
      */
     (void) _commandAllocator->allocateFreeList<NullableRef<ICommandList>>(bundle);
 
-    const GLCL::CommandExecuteBundle executeBundle(RefCast<GLCommandList>(bundle).get());
+    const GLCL::CommandExecuteBundle executeBundle(RefCast<GLCommandList>(bundle).Get());
     (void) _commandAllocator->allocateT<GLCL::Command>(executeBundle);
     ++_commandCount;
 }

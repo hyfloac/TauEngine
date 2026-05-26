@@ -65,5 +65,5 @@ const WDynString& I18n::translate(const DynString& key, Error* const error) cons
         ERROR_CODE_V(Error::NoError, translation);
     }
 
-    ERROR_CODE_V(Error::UnknownTranslationKey, WDynString());
+    ERROR_CODE_V(Error::UnknownTranslationKey, ::std::move(WDynString()));
 }

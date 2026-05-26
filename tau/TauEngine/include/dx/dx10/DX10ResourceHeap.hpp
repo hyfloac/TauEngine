@@ -5,7 +5,7 @@
 
 class DX10ResourceHeap final : public tau::IResourceHeap
 {
-    DEFAULT_CM_PU(DX10ResourceHeap);
+    DELETE_CM(DX10ResourceHeap);
     DEFAULT_DESTRUCT(DX10ResourceHeap);
     TAU_COM_IMPL_REF_COUNT();
 public:

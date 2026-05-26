@@ -14,33 +14,28 @@
 #endif
 
 #if TAU_RTTI_DEBUG
-#define EXCEPTION_IMPL_BASE(_TYPE) \
-    public: \
-        [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
-        { static Exception::ExceptionType type("Exception::" TAU_RTTI_STRING(_TYPE), nullptr); \
-          return type; } \
-        [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
-        { return _TYPE::getStaticType(); }
+    #define EXCEPTION_INTERNAL_TYPE_DECL(TYPE) ("Exception::" TAU_RTTI_STRING(TYPE), nullptr);
 #else
-#define EXCEPTION_IMPL_BASE(_TYPE) \
-    public: \
-        [[nodiscard]] static Exception::ExceptionType getStaticType() noexcept \
-        { static Exception::ExceptionType type; \
-          return type; } \
-        [[nodiscard]] virtual Exception::ExceptionType getExceptionType() const noexcept override \
-        { return _TYPE::getStaticType(); }
+    #define EXCEPTION_INTERNAL_TYPE_DECL(TYPE)
 #endif
 
+#define EXCEPTION_IMPL_BASE(TYPE) \
+    public: \
+        [[nodiscard]] static Exception::ExceptionType GetStaticType() noexcept \
+        { static Exception::ExceptionType type EXCEPTION_INTERNAL_TYPE_DECL(TYPE); \
+          return type; } \
+        [[nodiscard]] virtual Exception::ExceptionType GetExceptionType() const noexcept override \
+        { return TYPE::GetStaticType(); }
 
 #if EXCEPTION_GEN_NAMES
-  #define EXCEPTION_IMPL(_TYPE) \
-      EXCEPTION_IMPL_BASE(_TYPE); \
-      [[nodiscard]] virtual const char* getName() const noexcept override \
-      { return #_TYPE; }
-  #define EXCEPTION_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
+  #define EXCEPTION_IMPL(TYPE) \
+      EXCEPTION_IMPL_BASE(TYPE); \
+      [[nodiscard]] virtual const c8* GetName() const noexcept override \
+      { return u8 ## #TYPE; }
+  #define EXCEPTION_GET_NAME(EVENT_PTR) (EVENT_PTR)->GetName()
 #else
-  #define EXCEPTION_IMPL(_TYPE) EXCEPTION_IMPL_BASE(_TYPE)
-  #define EXCEPTION_GET_NAME(_EVENT_PTR) ""
+  #define EXCEPTION_IMPL(TYPE) EXCEPTION_IMPL_BASE(TYPE)
+  #define EXCEPTION_GET_NAME(EVENT_PTR) u8""
 #endif
 
 class TAU_DLL Exception
@@ -51,16 +46,18 @@ class TAU_DLL Exception
 public:
     using ExceptionType = RunTimeType<Exception>;
 public:
-    [[nodiscard]] virtual ExceptionType getExceptionType() const noexcept = 0;
+    [[nodiscard]] virtual ExceptionType GetExceptionType() const noexcept = 0;
 
 #if EXCEPTION_GEN_NAMES
-    [[nodiscard]] virtual const char* getName() const noexcept = 0;
-    [[nodiscard]] virtual DynString toString() const noexcept { return DynString(getName()); }
+    [[nodiscard]] virtual const c8* GetName() const noexcept = 0;
+    [[nodiscard]] virtual C8DynString ToString() const noexcept { return C8DynString(GetName()); }
 #endif
     
-    template<typename _T>
-    [[nodiscard]] bool isExceptionType() const noexcept
-    { return _T::getStaticType() == getExceptionType(); }
+    template<typename TException>
+    [[nodiscard]] bool IsExceptionType() const noexcept
+    {
+        return TException::GetStaticType() == GetExceptionType();
+    }
 private:
     friend class ExceptionDispatcher;
 };
@@ -72,28 +69,30 @@ class ExceptionDispatcher final
 public:
     ExceptionDispatcher(Exception& ex) noexcept
         : m_Exception(&ex)
-        , m_TypeCache(ex.getExceptionType())
+        , m_TypeCache(ex.GetExceptionType())
     { }
 
     template<typename TException, typename TFunc>
-    bool dispatch(const TFunc& func) noexcept
+    bool Dispatch(const TFunc& func) noexcept
     {
         if(m_TypeCache == TException::getStaticType())
         {
             func(reinterpret_cast<TException&>(m_Exception));
             return true;
         }
+
         return false;
     }
 
     template<typename TException, typename TClass, typename TFunc>
-    bool dispatch(TClass* instance, const TFunc& func) noexcept
+    bool Dispatch(TClass* instance, const TFunc& func) noexcept
     {
         if(m_TypeCache == TException::getStaticType())
         {
             (instance->*func)(reinterpret_cast<TException&>(m_Exception));
             return true;
         }
+
         return false;
     }
 private:

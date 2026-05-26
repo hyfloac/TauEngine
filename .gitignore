@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode,doxygen
-# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,clion,cmake,conan,linux,macos,rider,csharp,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode,doxygen
+# Created by https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode
 
 ### C ###
 # Prerequisites
@@ -974,9 +974,7 @@ $RECYCLE.BIN/
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
-# End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode,doxygen
-# Created by https://www.gitignore.io/api/c,c++,cmake,gradle,csharp,windows,sublimetext,intellij+all,visualstudio,premake-gmake,jetbrains+all,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=c,c++,cmake,gradle,csharp,windows,sublimetext,intellij+all,visualstudio,premake-gmake,jetbrains+all,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode
 
 # Documentation
 /docs/
@@ -1016,3 +1014,5 @@ Doxyfile.bak
 .claude/
 
 AGENTS.md
+!/tau/TauEngine/include/debug/
+!/tau/TauEngine/src/debug/

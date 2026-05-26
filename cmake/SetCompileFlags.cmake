@@ -14,6 +14,7 @@ function(SetCompileFlags ProjectName PublicType PrivateType UseDLL)
             # using clang with regular front end
 
             target_compile_options(${ProjectName} ${PrivateType} -Wno-unknown-attributes)
+            target_compile_options(${ProjectName} ${PrivateType} -Wno-vla-cxx-extension)
 
             # Disable RTTI and exceptions
             target_compile_options(${ProjectName} ${PrivateType} -fno-rtti -fno-exceptions)

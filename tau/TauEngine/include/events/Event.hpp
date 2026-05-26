@@ -11,71 +11,71 @@
 #include <Objects.hpp>
 
 #ifndef EVENT_GEN_NAMES
-  #ifndef TAU_PRODUCTION
-    #define EVENT_GEN_NAMES 1
-  #else
-    #define EVENT_GEN_NAMES 0
-  #endif
+    #ifndef TAU_PRODUCTION
+        #define EVENT_GEN_NAMES 1
+    #else
+        #define EVENT_GEN_NAMES 0
+    #endif
 #endif
 
 #if TAU_RTTI_DEBUG
-#define EVENT_IMPL_BASE(TYPE) DELETE_COPY(TYPE); \
-                              public: \
-                                  [[nodiscard]] static Event::EventType getStaticType() noexcept \
-                                  { static Event::EventType type(TAU_RTTI_STRING(TYPE), nullptr); \
-                                    return type; } \
-                                  [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
-                                  { return TYPE::getStaticType(); }
+    #define EVENT_IMPL_BASE(TYPE) ("Event::" TAU_RTTI_STRING(TYPE), nullptr);
 #else
-#define EVENT_IMPL_BASE(_TYPE) DELETE_COPY(_TYPE); \
-                               public: \
-                                   [[nodiscard]] static Event::EventType getStaticType() noexcept \
-                                   { static Event::EventType type; \
-                                     return type; } \
-                                   [[nodiscard]] virtual Event::EventType getEventType() const noexcept override \
-                                   { return _TYPE::getStaticType(); }
+    #define EVENT_NTERNAL_TYPE_DECL(TYPE)
 #endif
+
+#define EVENT_IMPL_BASE(TYPE) \
+    DELETE_COPY(TYPE); \
+    public: \
+        [[nodiscard]] static Event::EventType GetStaticType() noexcept \
+        { static Event::EventType type EVENT_NTERNAL_TYPE_DECL(TYPE); \
+          return type; } \
+        [[nodiscard]] virtual Event::EventType GetEventType() const noexcept override \
+        { return TYPE::GetStaticType(); }
 
 #if EVENT_GEN_NAMES
-  #define EVENT_IMPL(TYPE) EVENT_IMPL_BASE(TYPE); \
-                           [[nodiscard]] virtual const char* getName() const noexcept override \
-                           { return #TYPE; }
-  #define EVENT_GET_NAME(_EVENT_PTR) (_EVENT_PTR)->getName()
+    #define EVENT_IMPL(TYPE) \
+        EVENT_IMPL_BASE(TYPE); \
+        [[nodiscard]] virtual const c8* GetName() const noexcept override \
+        { return u8 ## #TYPE; }
+    #define EVENT_GET_NAME(EVENT_PTR) (EVENT_PTR)->GetName()
 #else
-  #define EVENT_IMPL(_TYPE) EVENT_IMPL_BASE(_TYPE)
-  #define EVENT_GET_NAME(_EVENT_PTR) ""
+    #define EVENT_IMPL(TYPE) EVENT_IMPL_BASE(TYPE)
+#define EVENT_GET_NAME(EVENT_PTR) u8""
 #endif
 
-#define EVENT_INTERCEPTABLE(_STATE) [[nodiscard]] virtual bool canBeIntercepted() const noexcept override \
-                                    { return _STATE;  }
+#define EVENT_INTERCEPTABLE(STATE) \
+    [[nodiscard]] virtual bool CanBeIntercepted() const noexcept override \
+    { return STATE;  }
 
 class TAU_DLL Event
 {
     DEFAULT_DESTRUCT_VI(Event);
     DELETE_COPY(Event);
+    DEFAULT_MOVE_PO(Event);
 public:
     using EventType = RunTimeType<Event>;
-private:
-    bool _intercepted;
 protected:
-    inline Event() noexcept
-        : _intercepted(false)
+    Event() noexcept
+        : m_Intercepted(false)
     { }
 public:
-    [[nodiscard]] inline bool intercepted() const noexcept { return _intercepted; }
-    [[nodiscard]] virtual bool canBeIntercepted() const noexcept { return false; }
-    [[nodiscard]] bool interceptable() const noexcept { return canBeIntercepted(); }
+    [[nodiscard]] bool Intercepted() const noexcept { return m_Intercepted; }
+    [[nodiscard]] virtual bool CanBeIntercepted() const noexcept { return false; }
+    [[nodiscard]] bool Interceptable() const noexcept { return CanBeIntercepted(); }
 
-    [[nodiscard]] virtual Event::EventType getEventType() const noexcept = 0;
+    [[nodiscard]] virtual Event::EventType GetEventType() const noexcept = 0;
 
 #if EVENT_GEN_NAMES
-    [[nodiscard]] virtual const char* getName() const noexcept = 0;
-    [[nodiscard]] virtual DynString toString() const noexcept { return DynString(getName()); }
+    [[nodiscard]] virtual const c8* GetName() const noexcept = 0;
+    [[nodiscard]] virtual C8DynString ToString() const noexcept { return C8DynString(GetName()); }
 #endif
 
-    template<typename _T>
-    [[nodiscard]] bool isEventType() const noexcept
-    { return _T::getStaticType() == getEventType(); }
+    template<typename TEvent>
+    [[nodiscard]] bool IsEventType() const noexcept
+    { return TEvent::GetStaticType() == GetEventType(); }
+private:
+    bool m_Intercepted;
 private:
     friend class EventDispatcher;
 };
@@ -83,68 +83,79 @@ private:
 class ExampleEvent final : public Event
 {
     DEFAULT_DESTRUCT(ExampleEvent);
-private:
-    int _x;
 public:
-    inline ExampleEvent(int x = 42) noexcept
-        : _x(x)
+    ExampleEvent(const int x = 42) noexcept
+        : m_X(x)
     { }
 
-    [[nodiscard]] int x() const noexcept { return _x; }
+    [[nodiscard]] int X() const noexcept { return m_X; }
 
     EVENT_IMPL(ExampleEvent);
 
 #if EVENT_GEN_NAMES
-    [[nodiscard]] virtual DynString toString() const noexcept override
+    [[nodiscard]] virtual C8DynString ToString() const noexcept override
     {
-        char buf[12];
-        ::std::snprintf(buf, sizeof(buf), "%d", _x);
-        return DynString(getName()).Concat(buf);
+        c8 buf[12];
+        ::std::snprintf(reinterpret_cast<char*>(buf), sizeof(buf), "%d", m_X);
+        return C8DynString(GetName()).Concat(buf);
     }
 #endif
+private:
+    int m_X;
 };
 
 class EventDispatcher final
 {
     DEFAULT_DESTRUCT(EventDispatcher);
     DEFAULT_CM_PU(EventDispatcher);
-private:
-    Event& _event;
-    Event::EventType _cache;
 public:
-    inline EventDispatcher(Event& event) noexcept
-        : _event(event), _cache(event.getEventType())
+    EventDispatcher(Event& event) noexcept
+        : m_Event(&event)
+        , m_TypeCache(event.GetEventType())
     { }
 
-    template<typename _T, typename _F>
-    inline bool dispatch(const _F& func) noexcept
+    template<typename TEvent, typename TFunc>
+    bool dispatch(const TFunc& func) noexcept
     {
-        if(_event.intercepted()) { return false; }
-        if(_cache == _T::getStaticType())
+        if(m_Event->Intercepted())
         {
-            const bool intercepted = func(reinterpret_cast<_T&>(_event));
-            if(_event.canBeIntercepted())
+            return false;
+        }
+
+        if(m_TypeCache == TEvent::getStaticType())
+        {
+            const bool intercepted = func(reinterpret_cast<TEvent&>(m_Event));
+            if(m_Event->CanBeIntercepted())
             {
-                _event._intercepted = intercepted;
+                m_Event->m_Intercepted = intercepted;
             }
             return true;
         }
+
         return false;
     }
 
-    template<typename _T, typename _C, typename _F>
-    inline bool dispatch(_C* instance, const _F& func) noexcept
+    template<typename TEvent, typename TClass, typename TFunction>
+    bool dispatch(TClass* instance, const TFunction& func) noexcept
     {
-        if(_event.intercepted()) { return false; }
-        if(_cache == _T::getStaticType())
+        if(m_Event->Intercepted())
         {
-            const bool intercepted = (instance->*func)(reinterpret_cast<_T&>(_event));
-            if(_event.canBeIntercepted())
+            return false;
+        }
+
+        if(m_TypeCache == TEvent::getStaticType())
+        {
+            const bool intercepted = (instance->*func)(reinterpret_cast<TEvent&>(m_Event));
+            if(m_Event->CanBeIntercepted())
             {
-                _event._intercepted = intercepted;
+                m_Event->m_Intercepted = intercepted;
             }
             return true;
         }
+
         return false;
     }
+private:
+    Event* m_Event;
+    Event::EventType m_TypeCache;
 };

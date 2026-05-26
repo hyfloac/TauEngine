@@ -254,9 +254,9 @@ struct CommandSetPipelineState final
     DEFAULT_DESTRUCT(CommandSetPipelineState);
     DEFAULT_CM_PU(CommandSetPipelineState);
 public:
-    const PipelineState* pipelineState;
+    const NullableRef<IPipelineState>& pipelineState;
 public:
-    CommandSetPipelineState(const PipelineState* const _pipelineState) noexcept
+    CommandSetPipelineState(const NullableRef<IPipelineState>& _pipelineState) noexcept
         : pipelineState(_pipelineState)
     { }
 };
@@ -308,9 +308,9 @@ struct CommandSetGDescriptorLayout final
     DEFAULT_DESTRUCT(CommandSetGDescriptorLayout);
     DEFAULT_CM_PU(CommandSetGDescriptorLayout);
 public:
-    DescriptorLayout layout;
+    IDescriptorLayout* layout;
 public:
-    CommandSetGDescriptorLayout(const DescriptorLayout _layout) noexcept
+    CommandSetGDescriptorLayout(IDescriptorLayout* const _layout) noexcept
         : layout(_layout)
     { }
 };
@@ -485,7 +485,7 @@ public:
     [[nodiscard]] const void* head() const noexcept { return _head; }
     [[nodiscard]] uSys commandCount() const noexcept { return _commandCount; }
 
-    void reset(const NullableRef<ICommandAllocator>& allocator, const PipelineState* initialState) noexcept override;
+    void reset(const NullableRef<ICommandAllocator>& allocator, const NullableRef<IPipelineState>& initialState) noexcept override;
     void begin() noexcept override;
     void finish() noexcept override;
     void draw(uSys vertexCount, uSys startVertex) noexcept override;
@@ -493,11 +493,11 @@ public:
     void drawInstanced(uSys vertexCount, uSys startVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void drawIndexedInstanced(uSys indexCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept override;
     void setDrawType(EGraphics::DrawType drawType) noexcept override;
-    void setPipelineState(const PipelineState& pipelineState) noexcept override;
+    void setPipelineState(const NullableRef<IPipelineState>& pipelineState) noexcept override;
     void setStencilRef(uSys stencilRef) noexcept override;
     void setVertexArray(const NullableRef<IVertexArray>& va) noexcept override;
     void setIndexBuffer(const IndexBufferView& indexBufferView) noexcept override;
-    void setGraphicsDescriptorLayout(DescriptorLayout layout) noexcept override;
+    // void setGraphicsDescriptorLayout(IDescriptorLayout* layout) noexcept override;
     void setGraphicsDescriptorTable(uSys index, EGraphics::DescriptorType type, uSys descriptorCount, GPUDescriptorHandle handle) noexcept override;
     void executeBundle(const NullableRef<ICommandList>& bundle) noexcept override;
 private:

@@ -40,7 +40,9 @@ bool tauInit() noexcept
         InitializationComplete = true;
         PageAllocator::init();
 
+#ifdef _WIN32
         SystemInterface::registerGraphicsInterface(RenderingMode::DirectX12, new(::std::nothrow) DX12GraphicsInterfaceBuilder);
+#endif
 
         if(!InitCom())
         {

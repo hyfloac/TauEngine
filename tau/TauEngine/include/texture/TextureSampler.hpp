@@ -6,6 +6,7 @@
 #include "TextureEnums.hpp"
 #include "Color.hpp"
 #include "graphics/DescriptorHeap.hpp"
+#include "graphics/_GraphicsOpaqueObjects.hpp"
 
 DECL_OPAQUE_TYPE(TextureSampler);
 

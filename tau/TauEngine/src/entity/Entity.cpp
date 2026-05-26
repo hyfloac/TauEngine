@@ -2,9 +2,9 @@
 
 void Entity::update(const float fixedDelta) noexcept
 {
-    _components.iterate([fixedDelta](auto* node)
+    _components.Iterate([fixedDelta](auto* node)
     {
-        IEntityComponent* entity = node->value;
+        IEntityComponent* entity = node->Value;
         if(entity->doesUpdate())
         {
             entity->update(fixedDelta);
@@ -14,9 +14,9 @@ void Entity::update(const float fixedDelta) noexcept
 
 void Entity::render(const DeltaTime& delta) noexcept
 {
-    _components.iterate([delta](auto* node)
+    _components.Iterate([delta](auto* node)
     {
-        IEntityComponent* entity = node->value;
+        IEntityComponent* entity = node->Value;
         if(entity->doesRender() && entity->isVisible())
         {
             entity->render(delta);
@@ -27,9 +27,9 @@ void Entity::render(const DeltaTime& delta) noexcept
 #if TAU_ECS_EDITOR_MODE
 void Entity::debugRender(const DeltaTime& delta) noexcept
 {
-    _components.iterate([delta](auto* node)
+    _components.Iterate([delta](auto* node)
     {
-        IEntityComponent* entity = node->value;
+        IEntityComponent* entity = node->Value;
         if(entity->doesEditorRender() && entity->isEditorVisible())
         {
             entity->debugRender(delta);
@@ -40,11 +40,17 @@ void Entity::debugRender(const DeltaTime& delta) noexcept
 
 IEntityComponent* Entity::getComponent(IEntityComponent::Type type) const noexcept
 {
-    const auto* node = _components.get(type);
-    if(!node)
-    { return nullptr; }
+    IEntityComponent* foundNode = nullptr;
+    _components.Iterate([type, &foundNode](auto* node)
+    {
+        IEntityComponent* entity = node->Value;
+        if(!foundNode && type == entity->_getType())
+        {
+            foundNode = entity;
+        }
+    });
 
-    return node->value;
+    return foundNode;
 }
 
 ::std::unordered_map<IEntityComponent::Type, EntityManager::ComponentData> EntityManager::components;
@@ -68,19 +74,19 @@ DynString EntityManager::compileEntity(Entity* entity, const DynString& typeName
 
     StringBuilder builder(1024);
 
-    builder.append("#include <ds/AVLTree.hpp>\n");
-    builder.append("#include \"DLL.hpp\"\n");
-    builder.append("#include \"entity/Entity.hpp\"\n");
+    builder.Append("#include <ds/AVLTree.hpp>\n");
+    builder.Append("#include \"DLL.hpp\"\n");
+    builder.Append("#include \"entity/Entity.hpp\"\n");
 
-    builder.append("class TAU_DLL ").append(typeName).append(" : public IEntity\n");
-    builder.append("{\n");
-    builder.append("    DELETE_CM(").append(typeName).append(");\n");
-    builder.append("private:\n");
-    builder.append("    void* _placement;\n");
-    builder.append("public:\n");
-    builder.append("    ").append(typeName).append("() noexcept\n");
-    builder.append("        : _placement(operator new(::std::nothrow))\n");
-    builder.append("    { }\n");
+    builder.Append("class TAU_DLL ").Append(typeName).Append(" : public IEntity\n");
+    builder.Append("{\n");
+    builder.Append("    DELETE_CM(").Append(typeName).Append(");\n");
+    builder.Append("private:\n");
+    builder.Append("    void* _placement;\n");
+    builder.Append("public:\n");
+    builder.Append("    ").Append(typeName).Append("() noexcept\n");
+    builder.Append("        : _placement(operator new(::std::nothrow))\n");
+    builder.Append("    { }\n");
 
 
     return builder.toString();
