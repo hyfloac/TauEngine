@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,visualstudiocode
 
 ### C ###
 # Prerequisites
@@ -673,10 +673,6 @@ Temporary Items
 # iCloud generated files
 *.icloud
 
-### premake-gmake ###
-*.make
-obj/
-
 ### Rider ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -974,7 +970,7 @@ $RECYCLE.BIN/
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
-# End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,premake-gmake,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,conan,linux,macos,rider,csharp,doxygen,windows,sublimetext,visualstudio,visualstudiocode
 
 # Documentation
 /docs/
@@ -986,18 +982,9 @@ $RECYCLE.BIN/
 # Caching
 /tau/TauEditor/resources/cache/
 
-# Old License
-LICENSE.old
-
-# VS Code
-.vscode
-
 # GLEW stuff
 glewinfo.txt
 visualinfo.txt
-
-# Doxygen backup file
-Doxyfile.bak
 
 # Libraries to ignore
 /libs/FreeImage/*
@@ -1012,7 +999,7 @@ Doxyfile.bak
 /libs/conan/*
 
 .claude/
-
 AGENTS.md
+
 !/tau/TauEngine/include/debug/
 !/tau/TauEngine/src/debug/
