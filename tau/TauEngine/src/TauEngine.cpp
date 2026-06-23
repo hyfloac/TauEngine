@@ -26,6 +26,7 @@ static bool InitCom() noexcept
         return false;
     }
 
+    internal::RegisterSystemInterface(comManager.Get());
     internal::RegisterDebugInterface(comManager.Get());
 
     return true;
@@ -40,14 +41,14 @@ bool tauInit() noexcept
         InitializationComplete = true;
         PageAllocator::init();
 
-#ifdef _WIN32
-        SystemInterface::registerGraphicsInterface(RenderingMode::DirectX12, new(::std::nothrow) DX12GraphicsInterfaceBuilder);
-#endif
-
         if(!InitCom())
         {
             return false;
         }
+#ifdef _WIN32
+        SystemInterface::registerGraphicsInterface(RenderingMode::DirectX12, new(::std::nothrow) DX12GraphicsInterfaceBuilder);
+#endif
+
     }
 
     return true;

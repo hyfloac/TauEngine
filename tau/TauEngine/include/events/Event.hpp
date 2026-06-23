@@ -19,16 +19,16 @@
 #endif
 
 #if TAU_RTTI_DEBUG
-    #define EVENT_IMPL_BASE(TYPE) ("Event::" TAU_RTTI_STRING(TYPE), nullptr);
+    #define EVENT_INTERNAL_TYPE_DECL(TYPE) ("Event::" TAU_RTTI_STRING(TYPE), nullptr)
 #else
-    #define EVENT_NTERNAL_TYPE_DECL(TYPE)
+    #define EVENT_INTERNAL_TYPE_DECL(TYPE)
 #endif
 
 #define EVENT_IMPL_BASE(TYPE) \
     DELETE_COPY(TYPE); \
     public: \
         [[nodiscard]] static Event::EventType GetStaticType() noexcept \
-        { static Event::EventType type EVENT_NTERNAL_TYPE_DECL(TYPE); \
+        { static Event::EventType type EVENT_INTERNAL_TYPE_DECL(TYPE); \
           return type; } \
         [[nodiscard]] virtual Event::EventType GetEventType() const noexcept override \
         { return TYPE::GetStaticType(); }

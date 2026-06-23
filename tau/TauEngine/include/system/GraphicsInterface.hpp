@@ -24,10 +24,23 @@ class IDescriptorLayoutBuilder;
 class ITextureViewBuilder;
 class IRenderingContextBuilder;
 
-class TAU_DLL TAU_NOVTABLE IGraphicsInterface
+namespace tau {
+
+class IGraphicsInterface : public com::IUnknown
 {
     DEFAULT_DESTRUCT_VI(IGraphicsInterface);
     DEFAULT_CM_PO(IGraphicsInterface);
+public:
+    struct ConstructionInfo final : com::BaseConstructionInfo
+    {
+        DEFAULT_CONSTRUCT_PU(ConstructionInfo);
+        DEFAULT_DESTRUCT_O(ConstructionInfo);
+        DEFAULT_CM_PU(ConstructionInfo);
+    public:
+        C8DynString RenderingMode;
+        bool DebugMode;
+        com::ComRef<IGraphicsAccelerator> GraphicsAccelerator;
+    };
 protected:
     RenderingMode _mode;
 protected:
@@ -55,6 +68,10 @@ public:
     [[nodiscard]] virtual ITextureViewBuilder& createTextureView() noexcept = 0;
     [[nodiscard]] virtual IRenderingContextBuilder& createRenderingContext() noexcept = 0;
 };
+
+}
+
+TAU_DECL_UUID(::tau::IGraphicsInterface, 0xC6BF4BAEE08D4C7Dull, 0xA5B09288EFAC6E6Cull);
 
 struct GraphicsInterfaceArgs final
 {

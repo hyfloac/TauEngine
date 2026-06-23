@@ -16,8 +16,10 @@
 #include "graphics/VertexArray.hpp"
 #include "shader/ShaderProgram.hpp"
 #include "shader/Shader.hpp"
+#ifdef _WIN32
 #include <Windows.h>
 #include <winreg.h>
+#endif
 
 #include "GL/glew.h"
 #include "Timings.hpp"
@@ -564,6 +566,6 @@ WDynString findSystemFont(const WDynString& fontName) noexcept
 #else
 WDynString findSystemFont(const WDynString& fontName) noexcept
 {
-    return "";
+    return L"";
 }
 #endif

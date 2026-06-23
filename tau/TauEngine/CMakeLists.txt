@@ -91,6 +91,10 @@ if(APPLE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC -DVK_USE_PLATFORM_METAL_EXT)
 endif()
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+    "$<$<CONFIG:Debug>:TAU_RTTI_DEBUG=1>"
+)
+
 install(
     TARGETS ${PROJECT_NAME}
     RUNTIME_DEPENDENCY_SET TauEngineDeps

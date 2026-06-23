@@ -4,6 +4,8 @@
 #include "PathSanitizer.hpp"
 
 #ifndef _WIN32
+#include <cstdlib>
+#include <limits.h>
 #include <cstdio>
 #endif
 

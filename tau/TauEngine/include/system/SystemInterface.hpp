@@ -9,12 +9,59 @@
 #include <String.hpp>
 #include <unordered_map>
 #include <MapIterator.hpp>
+#include <TauCOM.hpp>
 
 struct GraphicsInterfaceArgs;
 class IGraphicsInterface;
 class IGraphicsInterfaceBuilder;
 class RenderingMode;
 class IGraphicsAccelerator;
+
+namespace tau {
+
+class ISystemInterface : public tau::com::IUnknown
+{
+    DEFAULT_CONSTRUCT_PO(ISystemInterface);
+    DEFAULT_DESTRUCT_VIO(ISystemInterface);
+    DEFAULT_CM_PO(ISystemInterface);
+public:
+    using EnumerateGA = com::EResultCode(*)(i32* index, IGraphicsAccelerator** graphicsAccelerator);
+public:
+    virtual com::EResultCode EnumerateGraphicsModes(
+        i32* index,
+        C8DynString* mode
+    ) noexcept = 0;
+
+    virtual com::EResultCode EnumerateGraphicsAccelerators(
+        i32* index,
+        const C8DynString& mode,
+        IGraphicsAccelerator** graphicsAccelerator
+    ) noexcept = 0;
+
+    virtual com::EResultCode BuildComManagerForGraphicsAPI(
+        com::IComManager1** newComManager,
+        com::IComManager* comManager,
+        const C8DynString& mode
+    ) noexcept = 0;
+
+    virtual com::EResultCode RegisterGraphicsInterface(
+        const C8DynString& mode,
+        com::IComManager::ComFactoryFunc graphicsInterfaceFactory,
+        EnumerateGA graphicsAcceleratorEnumerator
+    ) noexcept = 0;
+
+    virtual com::EResultCode CreateAlert(const C8DynString& title, const C8DynString& message) noexcept = 0;
+};
+
+namespace internal {
+
+void RegisterSystemInterface(com::IComManager* comManager) noexcept;
+
+}
+
+}
+
+TAU_DECL_UUID(::tau::ISystemInterface, 0x6D63E045FE9A4775ull, 0xAD56BBE228E794ECull);
 
 class TAU_DLL SystemInterface final
 {
