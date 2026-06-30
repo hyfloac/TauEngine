@@ -12,9 +12,11 @@ include(SetCompileFlags)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c" "src/*.rc")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h" "include/*.inl")
 
-set(TAU_COMMON_SOURCE_FILES ${SOURCES} ${HEADERS})
-
-add_library(${PROJECT_NAME} ${TAU_COMMON_SOURCE_FILES})
+if(TAU_COMMON_BUILD_SHARED_LIBS)
+    add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+else()
+    add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
+endif()
 
 GenVsFilters(HEADERS)
 GenVsFilters(SOURCES)

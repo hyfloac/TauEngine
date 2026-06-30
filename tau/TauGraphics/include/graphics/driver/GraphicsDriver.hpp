@@ -5,15 +5,11 @@
 
 #include <NumTypes.hpp>
 #include <Objects.hpp>
+#include <String.hpp>
 #include <TauCOM.hpp>
 #include "DeviceContext.hpp"
 
 namespace tau::graphics::driver {
-
-constexpr u32 MakeVersion(const u32 major, const u32 minor) noexcept
-{
-    return (major << 16) | minor;
-}
 
 DECL_OPAQUE_TYPE(EngineHandle);
 DECL_OPAQUE_TYPE(DriverHandle);
@@ -26,8 +22,8 @@ struct EngineCallbacks final
 enum class DriverTableType : u32
 {
     DriverCore = 0,
-    CommandList3D,
-    CommandQueue3D
+    CommandQueue3D,
+    CommandList3D
 };
 
 typedef com::EResultCode FillFuncTable_f(
@@ -55,8 +51,10 @@ struct DriverFuncs final
     CloseDriver_f* CloseDriver;
 };
 
-constexpr u32 Interface1_0 = MakeVersion(1, 0);
-constexpr u32 InterfaceCurrent = Interface1_0;
+#define TAU_GRAPHICS_INTERFACE_VERSION_1_0 0x00010000
+#ifndef TAU_GRAPHICS_INTERFACE_VERSION_CURRENT
+    #define TAU_GRAPHICS_INTERFACE_VERSION_CURRENT TAU_GRAPHICS_INTERFACE_VERSION_1_0
+#endif
 
 struct OpenDriver final
 {
@@ -65,8 +63,9 @@ struct OpenDriver final
     DriverHandle Driver;
     const EngineCallbacks* Callbacks;
     DriverFuncs* Funcs;
+    C8DynString DriverName;
 };
 
-extern "C" com::EResultCode OpenGraphicsDriver_f(OpenDriver& pOpenDriver);
+typedef com::EResultCode OpenGraphicsDriver_f(OpenDriver& pOpenDriver);
 
 }

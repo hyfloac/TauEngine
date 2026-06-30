@@ -15,6 +15,7 @@ enum class DrawType : u8
     TriangleStrip,
     TrianglesAdjacency,
     TriangleStripAdjacency,
+    TriangleFan,
     Patches
 };
 

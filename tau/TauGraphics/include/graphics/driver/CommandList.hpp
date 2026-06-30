@@ -16,7 +16,7 @@ DECL_OPAQUE_TYPE(CommandListHandle);
 typedef void BeginCommandList_f(CommandListHandle commandList);
 typedef void EndCommandList_f(CommandListHandle commandList);
 typedef void Draw_f(CommandListHandle commandList, uSys vertexCount, uSys startVertex);
-typedef void DrawIndexed_f(CommandListHandle commandList, uSys vertexCount, uSys startVertex, iSys baseVertex);
+typedef void DrawIndexed_f(CommandListHandle commandList, uSys indexCount, uSys startIndex, iSys baseVertex);
 typedef void DrawInstanced_f(CommandListHandle commandList, uSys vertexCount, uSys startVertex, uSys instanceCount, uSys startInstance);
 typedef void DrawIndexedInstanced_f(CommandListHandle commandList, uSys indexCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance);
 typedef void SetDrawType_f(CommandListHandle commandList, DrawType drawType);

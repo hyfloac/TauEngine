@@ -20,18 +20,18 @@ struct DeviceCallbacks final
 
 struct CheckCapabilityArgs final
 {
-    const com::UUID& UUID;
+    com::UUID UUID;
     void* pCapability;
     u32 Size;
 };
 
-typedef com::EResultCode CheckCapability_f(DeviceHandle driver, CheckCapabilityArgs& checkCapabilityArgs);
+typedef com::EResultCode CheckCapability_f(DeviceHandle device, const CheckCapabilityArgs& checkCapabilityArgs);
 
-typedef uSys CalcPrivateCommandListSize_f(DeviceHandle driver, const CreateCommandListArgs& createCommandListArgs);
+typedef uSys CalcPrivateCommandListSize_f(DeviceHandle device, const CreateCommandListArgs& createCommandListArgs);
 
-typedef com::EResultCode CreateCommandList_f(DeviceHandle driver, CreateCommandListArgs& createCommandListArgs);
+typedef com::EResultCode CreateCommandList_f(DeviceHandle device, CreateCommandListArgs& createCommandListArgs);
 
-typedef void DestroyCommandList_f(DeviceHandle driver, CommandListHandle commandList);
+typedef void DestroyCommandList_f(DeviceHandle device, CommandListHandle commandList);
 
 struct DeviceFuncs final
 {

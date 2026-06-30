@@ -10,7 +10,7 @@
 #include <bit>
 #include <NumTypes.hpp>
 
-namespace tau::graphics {
+namespace tau {
 
 #ifndef PUSH_ASSERT
     #if !defined(TAU_PRODUCTION)

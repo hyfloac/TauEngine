@@ -1,12 +1,10 @@
 /**
  * @file
  */
-
 #include "gl/GLDriver.hpp"
-
-#include <graphics/driver/GraphicsDriver.hpp>
-
+#include "gl/GLDeviceContext.hpp"
 #include "Logging.hpp"
+#include "gl/GLCommandList.hpp"
 
 namespace tau::graphics::driver::gl {
 
@@ -18,7 +16,7 @@ GLDriver::GLDriver(
     , m_EngineCallbacks(engineCallbacks)
 { }
 
-com::EResultCode GLDriver::FillFuncTable(DriverTableType tableType, void* pTable, uSys tableSize) noexcept
+com::EResultCode GLDriver::FillFuncTable(const DriverTableType tableType, void* const pTable, const uSys tableSize) noexcept
 {
     if(!pTable)
     {
@@ -32,24 +30,96 @@ com::EResultCode GLDriver::FillFuncTable(DriverTableType tableType, void* pTable
         return com::RC_InvalidParam;
     }
 
-    return com::RC_NotImplemented;
+    switch(tableType)
+    {
+        case DriverTableType::DriverCore:
+        {
+            if(tableSize != sizeof(DeviceFuncs))
+            {
+                LOG_ERROR(u8"tableSize was not equal to sizeof(DeviceFuncs) (0x{X} != 0x{X}).", tableSize, sizeof(DeviceFuncs));
+                return com::RC_InvalidParam;
+            }
+
+            auto* const funcs = static_cast<DeviceFuncs*>(pTable);
+
+            funcs->CheckCapability = GLCheckCapability;
+            funcs->CalcPrivateCommandListSize = GLCalcPrivateCommandListSize;
+            funcs->CreateCommandList = GLCreateCommandList;
+            funcs->DestroyCommandList = GLDestroyCommandList;
+
+            break;
+        }
+        case DriverTableType::CommandQueue3D:return com::RC_NotImplemented;
+        case DriverTableType::CommandList3D:
+        {
+            if(tableSize != sizeof(CommandListFuncs))
+            {
+                LOG_ERROR(u8"tableSize was not equal to sizeof(CommandListFuncs) (0x{X} != 0x{X}).", tableSize, sizeof(CommandListFuncs));
+                return com::RC_InvalidParam;
+            }
+
+            auto* const funcs = static_cast<CommandListFuncs*>(pTable);
+
+            funcs->Begin = GLBeginCommandList;
+            funcs->End = GLEndCommandList;
+            funcs->Draw = GLDraw;
+            funcs->DrawIndexed = GLDrawIndexed;
+            funcs->DrawInstanced = GLDrawInstanced;
+            funcs->DrawIndexedInstanced = GLDrawIndexedInstanced;
+            funcs->SetDrawType = GLSetDrawType;
+
+            break;
+        }
+    }
+
+    return com::RC_Success;
 }
 
 uSys GLDriver::CalcPrivateDeviceSize(const CreateDeviceArgs& calcPrivateDeviceSize) noexcept
 {
     (void) calcPrivateDeviceSize;
 
-    return sizeof(0);
+    return sizeof(GLDeviceContext);
 }
 
 com::EResultCode GLDriver::CreateDevice(CreateDeviceArgs& createDeviceArgs)
 {
-    return com::RC_NotImplemented;
+    using namespace com;
+
+    if(!createDeviceArgs.Callbacks)
+    {
+        return RC_NullParam;
+    }
+
+    auto* deviceContext = new(::std::nothrow) GLDeviceContext(
+        createDeviceArgs.EngineDevice,
+        *createDeviceArgs.Callbacks
+    );
+
+    if(!deviceContext)
+    {
+        return RC_OutOfMemory;
+    }
+
+    createDeviceArgs.DriverDevice = deviceContext;
+
+    return RC_Success;
 }
 
 void GLDriver::DestroyDevice(DeviceHandle device)
 {
+    if(!device.raw)
+    {
+        return;
+    }
 
+    if(device.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Device header did not match TaGL.");
+        return;
+    }
+
+    delete device.get<GLDeviceContext>();
 }
 
 com::EResultCode GLFillFuncTable(
@@ -176,24 +246,35 @@ void GLCloseDriver(DriverHandle driver)
     delete driver.get<GLDriver>();
 }
 
-extern "C" tau::com::EResultCode OpenGraphicsDriver(tau::graphics::driver::OpenDriver& pOpenDriver)
+extern "C" tau::com::EResultCode OpenGraphicsDriver(OpenDriver& openDriver)
 {
     using namespace com;
 
-
-    if(pOpenDriver.Interface < Interface1_0)
+    if(openDriver.Interface < TAU_GRAPHICS_INTERFACE_VERSION_1_0)
     {
         return RC_InvalidParam;
     }
 
-    auto* driver = new(::std::nothrow) GLDriver(pOpenDriver.Engine, *pOpenDriver.Callbacks);
+    if(!openDriver.Callbacks)
+    {
+        return RC_NullParam;
+    }
 
-    pOpenDriver.Driver = driver;
-    pOpenDriver.Funcs->FillFuncTable = GLFillFuncTable;
-    pOpenDriver.Funcs->CalcPrivateDeviceSize = GLCalcPrivateDeviceSize;
-    pOpenDriver.Funcs->CreateDevice = GLCreateDevice;
-    pOpenDriver.Funcs->DestroyDevice = GLDestroyDevice;
-    pOpenDriver.Funcs->CloseDriver = GLCloseDriver;
+    auto* driver = new(::std::nothrow) GLDriver(openDriver.Engine, *openDriver.Callbacks);
+
+    if(!driver)
+    {
+        return RC_OutOfMemory;
+    }
+
+    openDriver.Interface = TAU_GRAPHICS_INTERFACE_VERSION_CURRENT;
+    openDriver.Driver = driver;
+    openDriver.Funcs->FillFuncTable = GLFillFuncTable;
+    openDriver.Funcs->CalcPrivateDeviceSize = GLCalcPrivateDeviceSize;
+    openDriver.Funcs->CreateDevice = GLCreateDevice;
+    openDriver.Funcs->DestroyDevice = GLDestroyDevice;
+    openDriver.Funcs->CloseDriver = GLCloseDriver;
+    openDriver.DriverName = u8"OpenGL";
 
     return RC_Success;
 }

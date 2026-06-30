@@ -6,7 +6,7 @@
 #if defined(__linux__) || defined(__unix__) || defined(_POSIX_VERSION)
 #include <TauCOM.impl.hpp>
 #include <EASTL/unordered_map.h>
-#include "EASTLString.hpp"
+#include "../../../TauCommon/include/EASTLString.hpp"
 
 namespace tau {
 class LinuxSystemInterface : public ISystemInterface
