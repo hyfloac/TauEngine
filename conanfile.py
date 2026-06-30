@@ -13,8 +13,8 @@ class TauEngineRecipe(ConanFile):
 
     settings = "os", "compiler", "arch", "build_type"
     requires = (
-        "tauutils/[^1.5.3]",
-        "taucom/[^0.3.1]",
+        "tauutils/[^1.5.4]",
+        "taucom/[^1.0.0]",
         "glm/[^1.0.1]",
         "glew/[^2.2.0]",
         "vulkan-memory-allocator/[^3.0.1]",

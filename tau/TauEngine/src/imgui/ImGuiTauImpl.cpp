@@ -5,7 +5,7 @@
 #include "shader/ShaderProgram.hpp"
 #include "events/WindowEvent.hpp"
 #include "system/Keyboard.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 #include <EnumBitFields.hpp>
 
 void ImGuiTau::render(IGraphicsInterface& gi, IRenderingContext& ctx, ImDrawData* const drawData) noexcept

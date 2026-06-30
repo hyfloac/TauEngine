@@ -8,7 +8,7 @@
 #include "VFS.hpp"
 #include "StreamUtils.hpp"
 #include "graphics/RasterizerState.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 #include <glm/vec4.hpp>
 
 NullableRef<IRasterizerState> RenderableObject::cwRS = nullptr;

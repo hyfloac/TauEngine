@@ -1,6 +1,6 @@
 #pragma once
 
-#include "system/GraphicsInterface.hpp"
+#include "../../graphics/GraphicsInterface.hpp"
 
 #ifdef _WIN32
 #include <d3d12.h>

@@ -1,5 +1,5 @@
 #include "model/Material.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 #include "system/RenderingContext.hpp"
 #include "texture/FITextureLoader.hpp"
 

@@ -16,6 +16,7 @@
 #include "graphics/VertexArray.hpp"
 #include "shader/ShaderProgram.hpp"
 #include "shader/Shader.hpp"
+#include "texture/TextureSampler.hpp"
 #ifdef _WIN32
 #include <Windows.h>
 #include <winreg.h>
@@ -26,7 +27,7 @@
 #include "system/RenderingContext.hpp"
 #include "system/Window.hpp"
 #include "graphics/RasterizerState.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../include/graphics/GraphicsInterface.hpp"
 #include "texture/FITextureLoader.hpp"
 #include <EnumBitFields.hpp>
 
@@ -108,8 +109,8 @@ TextHandler::TextHandler(IGraphicsInterface& gi, IRenderingContext& context, con
     _textureUploader = gi.createSingleTextureUploader().buildTauRef(tuArgs, nullptr);
 #endif
 
-    VertexBufferArgs bufferBuilder(1);
-    bufferBuilder.type = EBuffer::Type::ArrayBuffer;
+    VertexBufferArgs bufferBuilder(1, false);
+    // bufferBuilder.type = EBuffer::Type::ArrayBuffer;
     bufferBuilder.usage = EBuffer::UsageType::DynamicDraw;
     bufferBuilder.elementCount = 6;
     bufferBuilder.descriptor.addDescriptor(ShaderSemantic::Position, ShaderDataType::Vector2Float);

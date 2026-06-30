@@ -1,7 +1,7 @@
 #include "terrain/TerrainTile.hpp"
 #include "graphics/VertexArray.hpp"
 #include "graphics/Buffer.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 
 CPPRef<IVertexArray> TerrainTile::generateTerrain(IGraphicsInterface& gi, const float size, const uSys edgeVertices) noexcept
 {

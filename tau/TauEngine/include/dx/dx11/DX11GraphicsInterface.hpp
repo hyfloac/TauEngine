@@ -1,7 +1,7 @@
 #pragma once
 
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../graphics/GraphicsInterface.hpp"
 
 #ifdef _WIN32
 #include <d3d11.h>

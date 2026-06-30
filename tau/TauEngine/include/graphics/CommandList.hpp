@@ -11,6 +11,7 @@
 #include "ResourceEnums.hpp"
 #include "GraphicsEnums.hpp"
 #include "texture/TextureEnums.hpp"
+#include "GraphicsInterfaceChild.hpp"
 
 class IPipelineState;
 class IInputLayout;
@@ -24,26 +25,34 @@ class IDepthStencilView;
 class IDescriptorLayout;
 struct ResourceMapRange;
 
-#define COMMAND_LIST_IMPL(_TYPE) RTT_IMPL(_TYPE, ICommandList)
+namespace tau::graphics {
 
-class TAU_DLL TAU_NOVTABLE ICommandList
+class ICommandList : public IGraphicsInterfaceChild
 {
     DEFAULT_CONSTRUCT_PO(ICommandList);
     DEFAULT_DESTRUCT_VI(ICommandList);
     DEFAULT_CM_PO(ICommandList);
 public:
+    struct ConstructionInfo final : com::BaseConstructionInfo
+    {
+        DEFAULT_CONSTRUCT_PU(ConstructionInfo);
+        DEFAULT_DESTRUCT_O(ConstructionInfo);
+        DEFAULT_CM_PU(ConstructionInfo);
+    public:
+        ICommandAllocator* CommandAllocator;
+        IPipelineState* InitialState;
+        EGraphics::CommandListType Type;
+    };
+public:
     /**
      * @brief Resets the command list to the initial state to begin
      * recording again.
      *
-     * @param[in] allocator
-     *        The allocator that should be used to store all the
-     *      commands.
      * @param[in] initialState
      *        An optional initial pipeline state to use for the
      *      command list.
      */
-    virtual void reset(const NullableRef<ICommandAllocator>& allocator, const NullableRef<IPipelineState>& initialState) noexcept = 0;
+    virtual void reset(const IPipelineState* initialState) noexcept = 0;
 
     /**
      * @brief Begins recording the command list.
@@ -396,11 +405,9 @@ public:
      *      An optional region box to copy from.
      */
     virtual void copyTexture(const NullableRef<IResource>& dstTexture, u32 dstSubResource, const ETexture::Coord& coord, const NullableRef<IResource>& srcTexture, u32 srcSubResource, const ETexture::EBox* srcBox) noexcept = 0;
-    
-    RTT_BASE_IMPL(ICommandList);
-    RTT_BASE_CHECK(ICommandList);
-    RTT_BASE_CAST(ICommandList);
 };
+
+}
 
 struct CommandListArgs final
 {

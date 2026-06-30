@@ -1,8 +1,10 @@
 #pragma once
 
+#include <NumTypes.hpp>
+
 namespace EGraphics {
 
-enum class DrawType
+enum class DrawType : u8
 {
     Points = 1,
     Lines,
@@ -16,7 +18,7 @@ enum class DrawType
     Patches
 };
 
-enum class DescriptorType
+enum class DescriptorType : u8
 {
     TextureView = 1,
     RenderTargetView,
@@ -35,7 +37,7 @@ enum class DescriptorHeapFlags
 #define DHF_None EGraphics::DescriptorHeapFlags::None
 #define DHF_ShaderAccess EGraphics::DescriptorHeapFlags::ShaderAccess
 
-enum class ShaderAccess
+enum class ShaderAccess : u8
 {
     All = 0,
     Vertex,
@@ -45,7 +47,7 @@ enum class ShaderAccess
     Pixel
 };
 
-enum class ResourceAlignment
+enum class ResourceAlignment : u8
 {
     Default = 0,
     MSAA
@@ -62,18 +64,21 @@ enum class ResourceHeapDataType
 #define RHDT_Texture EGraphics::ResourceHeapDataType::Texture
 #define RHDT_RenderTarget EGraphics::ResourceHeapDataType::RenderTarget
 
-enum class ResourceHeapUsageType
+enum class ResourceHeapUsageType : u8
 {
     Default = 0,
     Upload,
     Read
 };
 
-enum class CommandListType
+enum class CommandListType : u8
 {
     Graphics = 0,
+    Secondary,
     Compute,
-    Upload
+    Copy,
+    VideoDecode,
+    VideoProcess
 };
 
 }

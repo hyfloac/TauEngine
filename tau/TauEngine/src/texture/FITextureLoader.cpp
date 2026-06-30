@@ -8,7 +8,7 @@
 #include "VFS.hpp"
 #include "StreamUtils.hpp"
 #include "Timings.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 #include "system/RenderingContext.hpp"
 #include <EnumBitFields.hpp>
 

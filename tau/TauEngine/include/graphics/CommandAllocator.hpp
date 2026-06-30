@@ -30,7 +30,7 @@ public:
     /**
      * Gets the amount of memory reserved in bytes.
      *
-     *   This may return a negative number if they API is unable to
+     *   This may return a negative number if the API is unable to
      * determine exactly how much memory is allocated. This would
      * be indicative of an API which has builtin support for
      * command lists and allocators (such as DirectX12 or Vulkan).
@@ -43,7 +43,7 @@ public:
     /**
      * Gets the amount of memory committed in bytes.
      *
-     *   This may return a negative number if they API is unable to
+     *   This may return a negative number if the API is unable to
      * determine exactly how much memory is allocated. This would
      * be indicative of an API which has builtin support for
      * command lists and allocators (such as DirectX12 or Vulkan).

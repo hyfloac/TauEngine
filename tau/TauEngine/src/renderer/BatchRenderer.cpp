@@ -1,6 +1,6 @@
 #include "renderer/BatchRenderer.hpp"
 #include "graphics/Resource.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 #include "graphics/CommandList.hpp"
 #include "graphics/VertexArray.hpp"
 #include "graphics/PipelineState.hpp"

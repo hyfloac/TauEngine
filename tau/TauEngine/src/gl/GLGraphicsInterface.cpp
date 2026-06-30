@@ -18,108 +18,146 @@
 #include "gl/gl4_3/GL4_3VertexArray.hpp"
 #include "system/Window.hpp"
 
-GLGraphicsInterface::GLGraphicsInterface(const RenderingMode& mode, const int majorVersion, const int minorVersion, const GLProfile compat, const bool forwardCompatible)
-    : IGraphicsInterface(mode)
-    , _majorVersion(majorVersion)
+namespace tau::gl {
+
+GLGraphicsInterface::GLGraphicsInterface(
+    const C8DynString& mode,
+    const int majorVersion,
+    const int minorVersion,
+    const GLProfile compat,
+    const bool forwardCompatible
+)
+    : _majorVersion(majorVersion)
     , _minorVersion(minorVersion)
     , _compat(compat)
     , _forwardCompatible(forwardCompatible)
-    , _shaderInfoExtractor(mode.currentMode())
-    , _shaderBuilder(new(::std::nothrow) GLShaderBuilder(&_shaderInfoExtractor))
-    , _shaderProgramBuilder(new(::std::nothrow) GLShaderProgramBuilder(&_shaderInfoExtractor))
-    , _depthStencilStateBuilder(new(::std::nothrow) GLDepthStencilStateBuilder)
-    , _rasterizerStateBuilder(new(::std::nothrow) GLRasterizerStateBuilder)
-    , _textureBuilder(new(::std::nothrow) GLTextureBuilder)
-    , _textureSamplerBuilder(new(::std::nothrow) GLTextureSamplerBuilder)
-    , _frameBufferBuilder(new(::std::nothrow) GLFrameBufferBuilder)
-    , _renderingContextBuilder(new(::std::nothrow) GLRenderingContextBuilder(*this))
 {
-    switch(_mode.currentMode())
-    {
-        case RenderingMode::Mode::OpenGL4_2:
-            _inputLayoutBuilder = new(::std::nothrow) GLInputLayoutBuilder;
-            _vertexArrayBuilder = new(::std::nothrow) GLVertexArrayBuilder;
-            _bufInterface = new(::std::nothrow) GLBufInterface;
-            _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
-            break;
-        case RenderingMode::Mode::OpenGL4_3:
-        case RenderingMode::Mode::OpenGL4_4:
-            _inputLayoutBuilder = new(::std::nothrow) GL4_3InputLayoutBuilder;
-            _vertexArrayBuilder = new(::std::nothrow) GL4_3VertexArrayBuilder;
-            _bufInterface = new(::std::nothrow) GLBufInterface;
-            _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
-            break;
-        case RenderingMode::Mode::OpenGL4_5:
-        case RenderingMode::Mode::OpenGL4_6:
-            _inputLayoutBuilder = new(::std::nothrow) GL4_3InputLayoutBuilder;
-            _vertexArrayBuilder = new(::std::nothrow) GL4_3VertexArrayBuilder;
-            _bufInterface = new(::std::nothrow) GLBuf4_5Interface;
-            _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
-            break;
-        default: break;
-    }
-
-    _bufferBuilder = new(::std::nothrow) GLBufferBuilder(*_bufInterface);
+    (void) mode;
+    // switch(_mode.currentMode())
+    // {
+    //     case RenderingMode::Mode::OpenGL4_2:
+    //         _inputLayoutBuilder = new(::std::nothrow) GLInputLayoutBuilder;
+    //         _vertexArrayBuilder = new(::std::nothrow) GLVertexArrayBuilder;
+    //         _bufInterface = new(::std::nothrow) GLBufInterface;
+    //         _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
+    //         break;
+    //     case RenderingMode::Mode::OpenGL4_3:
+    //     case RenderingMode::Mode::OpenGL4_4:
+    //         _inputLayoutBuilder = new(::std::nothrow) GL4_3InputLayoutBuilder;
+    //         _vertexArrayBuilder = new(::std::nothrow) GL4_3VertexArrayBuilder;
+    //         _bufInterface = new(::std::nothrow) GLBufInterface;
+    //         _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
+    //         break;
+    //     case RenderingMode::Mode::OpenGL4_5:
+    //     case RenderingMode::Mode::OpenGL4_6:
+    //         _inputLayoutBuilder = new(::std::nothrow) GL4_3InputLayoutBuilder;
+    //         _vertexArrayBuilder = new(::std::nothrow) GL4_3VertexArrayBuilder;
+    //         _bufInterface = new(::std::nothrow) GLBuf4_5Interface;
+    //         _blendingStateBuilder = new(::std::nothrow) GL4_0BlendingStateBuilder;
+    //         break;
+    //     default: break;
+    // }
+    //
+    // _bufferBuilder = new(::std::nothrow) GLBufferBuilder(*_bufInterface);
 }
 
 GLGraphicsInterface::~GLGraphicsInterface() noexcept
 {
-    delete _shaderBuilder;
-    delete _shaderProgramBuilder;
-    delete _inputLayoutBuilder;
-    delete _vertexArrayBuilder;
-    delete _bufferBuilder;
-    delete _depthStencilStateBuilder;
-    delete _rasterizerStateBuilder;
-    delete _blendingStateBuilder;
-    delete _textureBuilder;
-    delete _textureSamplerBuilder;
-    delete _frameBufferBuilder;
-    delete _renderingContextBuilder;
 }
 
-RefDynArray<NullableRef<IGraphicsAccelerator>> GLGraphicsInterface::graphicsAccelerators() noexcept
-{ return RefDynArray<NullableRef<IGraphicsAccelerator>>(0); }
+void GLGraphicsInterface::DestroySelf() noexcept
+{
+    TAU_COM_DEFAULT_DESTROY(this);
+}
 
-IShaderBuilder& GLGraphicsInterface::createShader() noexcept
-{ return *_shaderBuilder; }
+com::EResultCode GLGraphicsInterface::QueryInterface(const com::UUID& iid, void** const pInterface) noexcept
+{
+    using namespace com;
 
-IShaderProgramBuilder& GLGraphicsInterface::createShaderProgram() noexcept
-{ return *_shaderProgramBuilder; }
+    if(!pInterface)
+    {
+        return RC_NullParam;
+    }
 
-IInputLayoutBuilder& GLGraphicsInterface::createInputLayout() noexcept
-{ return *_inputLayoutBuilder; }
+    if(iid == iid_of<IUnknown>)
+    {
+        *pInterface = static_cast<IGraphicsInterface*>(this);
+    }
+    else
+    {
+        return RC_InterfaceNotFound;
+    }
 
-IVertexArrayBuilder& GLGraphicsInterface::createVertexArray() noexcept
-{ return *_vertexArrayBuilder; }
+    AddReference();
+    return RC_Success;
+}
 
-IBufferBuilder& GLGraphicsInterface::createBuffer() noexcept
-{ return *_bufferBuilder; }
+com::EResultCode GLGraphicsInterface::GetPrivateData(const com::UUID& uuid, u32* pDataSize, void* pData) noexcept
+{
+}
 
-IDepthStencilStateBuilder& GLGraphicsInterface::createDepthStencilState() noexcept
-{ return *_depthStencilStateBuilder; }
+com::EResultCode GLGraphicsInterface::SetPrivateData(const com::UUID& uuid, u32 dataSize, const void* pData) noexcept
+{
+}
 
-IRasterizerStateBuilder& GLGraphicsInterface::createRasterizerState() noexcept
-{ return *_rasterizerStateBuilder; }
+com::EResultCode GLGraphicsInterface::SetPrivateDataInterface(const com::UUID& uuid, IUnknown* pInterface) noexcept
+{
+}
 
-IBlendingStateBuilder& GLGraphicsInterface::createBlendingState() noexcept
-{ return *_blendingStateBuilder; }
+com::EResultCode GLGraphicsInterface::SetName(const C8DynString& name) noexcept
+{
+}
 
-ITextureBuilder& GLGraphicsInterface::createTexture() noexcept
-{ return *_textureBuilder; }
+const C8DynString& GLGraphicsInterface::RenderingMode() const noexcept
+{
+}
 
-ITextureSamplerBuilder& GLGraphicsInterface::createTextureSampler() noexcept
-{ return *_textureSamplerBuilder; }
+com::EResultCode GLGraphicsInterface::CreateCommandList(graphics::ICommandList** pCommandList,
+    const graphics::ICommandList::ConstructionInfo* constructionInfo)
+{
+}
 
-// TODO: port to ICommandQueue upload path
-// ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
-// { return *_textureUploaderBuilder; }
+}
 
-IFrameBufferBuilder& GLGraphicsInterface::createFrameBuffer() noexcept
-{ return *_frameBufferBuilder; }
-
-IRenderingContextBuilder& GLGraphicsInterface::createRenderingContext() noexcept
-{ return *_renderingContextBuilder; }
-
-NullableRef<GLGraphicsInterface> GLGraphicsInterfaceBuilder::build(const GLGraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
-{ return NullableRef<GLGraphicsInterface>(allocator, args.mode, args.majorVersion, args.minorVersion, args.compat, args.forwardCompatible); }
+// IShaderBuilder& GLGraphicsInterface::createShader() noexcept
+// { return *_shaderBuilder; }
+//
+// IShaderProgramBuilder& GLGraphicsInterface::createShaderProgram() noexcept
+// { return *_shaderProgramBuilder; }
+//
+// IInputLayoutBuilder& GLGraphicsInterface::createInputLayout() noexcept
+// { return *_inputLayoutBuilder; }
+//
+// IVertexArrayBuilder& GLGraphicsInterface::createVertexArray() noexcept
+// { return *_vertexArrayBuilder; }
+//
+// IBufferBuilder& GLGraphicsInterface::createBuffer() noexcept
+// { return *_bufferBuilder; }
+//
+// IDepthStencilStateBuilder& GLGraphicsInterface::createDepthStencilState() noexcept
+// { return *_depthStencilStateBuilder; }
+//
+// IRasterizerStateBuilder& GLGraphicsInterface::createRasterizerState() noexcept
+// { return *_rasterizerStateBuilder; }
+//
+// IBlendingStateBuilder& GLGraphicsInterface::createBlendingState() noexcept
+// { return *_blendingStateBuilder; }
+//
+// ITextureBuilder& GLGraphicsInterface::createTexture() noexcept
+// { return *_textureBuilder; }
+//
+// ITextureSamplerBuilder& GLGraphicsInterface::createTextureSampler() noexcept
+// { return *_textureSamplerBuilder; }
+//
+// // TODO: port to ICommandQueue upload path
+// // ITextureUploaderBuilder& GLGraphicsInterface::createTextureUploader() noexcept
+// // { return *_textureUploaderBuilder; }
+//
+// IFrameBufferBuilder& GLGraphicsInterface::createFrameBuffer() noexcept
+// { return *_frameBufferBuilder; }
+//
+// IRenderingContextBuilder& GLGraphicsInterface::createRenderingContext() noexcept
+// { return *_renderingContextBuilder; }
+//
+// NullableRef<GLGraphicsInterface> GLGraphicsInterfaceBuilder::build(const GLGraphicsInterfaceArgs& args, TauAllocator& allocator) noexcept
+// { return NullableRef<GLGraphicsInterface>(allocator, args.mode, args.majorVersion, args.minorVersion, args.compat, args.forwardCompatible); }

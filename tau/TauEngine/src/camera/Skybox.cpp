@@ -6,7 +6,7 @@
 #include "texture/FITextureLoader.hpp"
 #include <glm/gtc/type_ptr.hpp>
 
-#include "system/GraphicsInterface.hpp"
+#include "../../include/graphics/GraphicsInterface.hpp"
 
 template<>
 class UniformAccessor<Skybox::Uniforms> final

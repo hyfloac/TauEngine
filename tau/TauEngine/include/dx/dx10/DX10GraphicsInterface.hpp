@@ -2,7 +2,7 @@
 
 #include "shader/bundle/ShaderInfoExtractorVisitor.hpp"
 #include "system/GraphicsCapabilities.hpp"
-#include "system/GraphicsInterface.hpp"
+#include "../../graphics/GraphicsInterface.hpp"
 
 #ifdef _WIN32
 #include <d3d10.h>
