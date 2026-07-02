@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(TauGLDriver VERSION 0.0.1 LANGUAGES CXX C)
+project(TauGLDriver VERSION 3.0.0 LANGUAGES CXX C)
 
 option(TAU_GL_DRIVER_BUILD_SHARED_LIBS "Build shared libraries" OFF)
 

@@ -16,6 +16,7 @@ enum class ECommand : u32
     DrawIndexed,
     DrawInstanced,
     DrawIndexedInstanced,
+    Dispatch,
     SetDrawTypePoints,
     SetDrawTypeLines,
     SetDrawTypeLineStrip,
@@ -27,6 +28,9 @@ enum class ECommand : u32
     SetDrawTypeTriangleStripAdjacency,
     SetDrawTypeTriangleFan,
     SetDrawTypePatches,
+    SetBlendFactor,
+    SetStencilRef,
+    ExecuteCommandList,
 };
 
 GLCommandList::GLCommandList(
@@ -63,15 +67,24 @@ void GLCommandList::DrawInstanced(uSys vertexCount, uSys startVertex, uSys insta
 }
 
 void GLCommandList::DrawIndexedInstanced(
-    uSys indexCount,
-    uSys startIndex,
-    iSys baseVertex,
-    uSys instanceCount,
-    uSys startInstance
+    const uSys indexCount,
+    const uSys startIndex,
+    const iSys baseVertex,
+    const uSys instanceCount,
+    const uSys startInstance
 ) noexcept
 {
     m_PushBuffer.PushT(ECommand::DrawIndexedInstanced, static_cast<u32>(indexCount), static_cast<u32>(startIndex), static_cast<i32>(baseVertex));
     m_PushBuffer.PushT(static_cast<u32>(instanceCount), static_cast<u32>(startInstance));
+}
+
+void GLCommandList::Dispatch(
+    const uSys threadGroupCountX,
+    const uSys threadGroupCountY,
+    const uSys threadGroupCountZ
+) noexcept
+{
+    m_PushBuffer.PushT(ECommand::Dispatch, static_cast<u32>(threadGroupCountX), static_cast<u32>(threadGroupCountY), static_cast<u32>(threadGroupCountZ));
 }
 
 void GLCommandList::SetDrawType(DrawType drawType) noexcept
@@ -98,33 +111,336 @@ void GLCommandList::SetDrawType(DrawType drawType) noexcept
     m_PushBuffer.PushT(command);
 }
 
+void GLCommandList::SetBlendFactor(const float blendFactor[4]) noexcept
+{
+    m_PushBuffer.PushT(ECommand::SetBlendFactor, blendFactor[0], blendFactor[1], blendFactor[2]);
+    m_PushBuffer.PushT(blendFactor[3]);
+}
+
+void GLCommandList::SetStencilRef(const u32 stencilRef) noexcept
+{
+    m_PushBuffer.PushT(ECommand::SetStencilRef, stencilRef);
+}
+
+void GLCommandList::ExecuteCommandList(CommandListHandle subCommandList) noexcept
+{
+
+    if(!subCommandList.raw)
+    {
+        LOG_ERROR(u8"subCommandList was not set.");
+        return;
+    }
+
+    if(subCommandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Sub Command List header did not match TaGL.");
+        return;
+    }
+
+    m_PushBuffer.PushT(ECommand::ExecuteCommandList, subCommandList.raw);
+}
+
 void GLBeginCommandList(CommandListHandle commandList)
 {
+    TRACE_ENTRYPOINT();
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->Begin();
 }
 
 void GLEndCommandList(CommandListHandle commandList)
 {
+    TRACE_ENTRYPOINT();
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->End();
 }
 
-void GLDraw(CommandListHandle commandList, uSys vertexCount, uSys startVertex)
+void GLDraw(
+    CommandListHandle commandList,
+    const uSys vertexCount,
+    const uSys startVertex
+)
 {
+    TRACE_ENTRYPOINT_ARG(
+        u8"vertexCount: {}, startVertex: {}",
+        vertexCount,
+        startVertex
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->Draw(
+        vertexCount,
+        startVertex
+    );
 }
 
-void GLDrawIndexed(CommandListHandle commandList, uSys vertexCount, uSys startVertex, iSys baseVertex)
+void GLDrawIndexed(
+    CommandListHandle commandList,
+    const uSys indexCount,
+    const uSys startIndex,
+    const iSys baseVertex
+)
 {
+    TRACE_ENTRYPOINT_ARG(
+        u8"indexCount: {}, startIndex: {}, baseVertex: {}",
+        indexCount,
+        startIndex,
+        baseVertex
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->DrawIndexed(
+        indexCount,
+        startIndex,
+        baseVertex
+    );
 }
 
-void GLDrawInstanced(CommandListHandle commandList, uSys vertexCount, uSys startVertex, uSys instanceCount,
-    uSys startInstance)
+void GLDrawInstanced(
+    CommandListHandle commandList,
+    const uSys vertexCount,
+    const uSys startVertex,
+    const uSys instanceCount,
+    const uSys startInstance
+)
 {
+    TRACE_ENTRYPOINT_ARG(
+        u8"vertexCount: {}, startVertex: {}, instanceCount: {}, startInstance: {}",
+        vertexCount,
+        startVertex,
+        instanceCount,
+        startInstance
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->DrawInstanced(
+        vertexCount,
+        startVertex,
+        instanceCount,
+        startInstance
+    );
 }
 
-void GLDrawIndexedInstanced(CommandListHandle commandList, uSys indexCount, uSys startIndex, iSys baseVertex,
-    uSys instanceCount, uSys startInstance)
+void GLDrawIndexedInstanced(
+    CommandListHandle commandList,
+    const uSys indexCount,
+    const uSys startIndex,
+    const iSys baseVertex,
+    const uSys instanceCount,
+    const uSys startInstance
+)
 {
+    TRACE_ENTRYPOINT_ARG(
+        u8"indexCount: {}, startIndex: {}, baseVertex: {}, instanceCount: {}, startInstance: {}",
+        indexCount,
+        startIndex,
+        baseVertex,
+        instanceCount,
+        startInstance
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->DrawIndexedInstanced(
+        indexCount,
+        startIndex,
+        baseVertex,
+        instanceCount,
+        startInstance
+    );
 }
 
-void GLSetDrawType(CommandListHandle commandList, DrawType drawType)
+void GLDispatch(
+    CommandListHandle commandList,
+    const uSys threadGroupCountX,
+    const uSys threadGroupCountY,
+    const uSys threadGroupCountZ
+)
 {
+    TRACE_ENTRYPOINT_ARG(
+        u8"threadGroupCountX: 0x{X}, threadGroupCountY: 0x{X}, threadGroupCountZ: 0x{X}",
+        threadGroupCountX,
+        threadGroupCountY,
+        threadGroupCountZ
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->Dispatch(
+        threadGroupCountX,
+        threadGroupCountY,
+        threadGroupCountZ
+    );
 }
+
+void GLSetDrawType(
+    CommandListHandle commandList,
+    const DrawType drawType
+)
+{
+    TRACE_ENTRYPOINT_ARG(
+        u8"drawType: {}",
+        static_cast<u32>(drawType)
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->SetDrawType(drawType);
+}
+
+void GLSetBlendFactor(CommandListHandle commandList, const float blendFactor[4])
+{
+    TRACE_ENTRYPOINT_ARG(
+        u8"blendFactor[0]: {}, blendFactor[1]: {}, blendFactor[2]: {}, blendFactor[3]: {}",
+        blendFactor[0],
+        blendFactor[1],
+        blendFactor[2],
+        blendFactor[3]
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->SetBlendFactor(blendFactor);
+}
+
+void GLSetStencilRef(CommandListHandle commandList, const u32 stencilRef)
+{
+    TRACE_ENTRYPOINT_ARG(
+        u8"stencilRef: {}",
+        stencilRef
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->SetStencilRef(stencilRef);
+}
+
+void GLExecuteCommandList(CommandListHandle commandList, const CommandListHandle subCommandList)
+{
+    TRACE_ENTRYPOINT_ARG(
+        u8"subCommandList: 0x{XP0}",
+        subCommandList.raw
+    );
+
+    if(!commandList.raw)
+    {
+        LOG_ERROR(u8"commandList was not set.");
+        return;
+    }
+
+    if(commandList.get<GLDriverHeader>()->Magic != GLDriverMagic)
+    {
+        LOG_ERROR(u8"Command List header did not match TaGL.");
+        return;
+    }
+
+    return commandList.get<GLCommandList>()->ExecuteCommandList(subCommandList);
+}
+
 }

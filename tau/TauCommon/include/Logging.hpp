@@ -78,18 +78,18 @@ DECL_LOG(Error);
 #endif
 
 #if TAU_ENABLE_ENTRYPOINT_TRACING
-  #define TRACE_ENTRYPOINT() internal_LOG(Debug, __FUNCTION__, __FILE__, __LINE__, "")
-  #define TRACE_ENTRYPOINT_ARG(...) internal_LOG(Debug, __FUNCTION__, __FILE__, __LINE__ , ## __VA_ARGS__)
+    #define TRACE_ENTRYPOINT() internal_LOG(Debug, __FUNCTION__, __FILE__, __LINE__, "")
+    #define TRACE_ENTRYPOINT_ARG(...) internal_LOG(Debug, __FUNCTION__, __FILE__, __LINE__ , ## __VA_ARGS__)
 #else
-  #define TRACE_ENTRYPOINT() do { } while(false)
-  #define TRACE_ENTRYPOINT_ARG(...) do { } while(false)
+    #define TRACE_ENTRYPOINT() do { } while(false)
+    #define TRACE_ENTRYPOINT_ARG(...) do { } while(false)
 #endif
 
 
 #if GS_ENABLE_DEBUG_LOGGING
-  #define LOG_DEBUG(...) internal_LOG(Debug, __FUNCTION__, __FILE__, __LINE__ , ## __VA_ARGS__)
+    #define LOG_DEBUG(...) internal_LOG(Debug, __FUNCTION__, __FILE__, __LINE__ , ## __VA_ARGS__)
 #else
-  #define LOG_DEBUG(...) do { } while(false)
+    #define LOG_DEBUG(...) do { } while(false)
 #endif
 
 #define LOG_INFO(...) internal_LOG(Info, __FUNCTION__, __FILE__, __LINE__ , ## __VA_ARGS__)

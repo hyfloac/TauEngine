@@ -124,6 +124,8 @@ public:
      */
     virtual void DrawIndexedInstanced(uSys indexCount, uSys startIndex, iSys baseVertex, uSys instanceCount, uSys startInstance) noexcept = 0;
 
+    virtual void Dispatch(uSys threadGroupCountX, uSys threadGroupCountY, uSys threadGroupCountZ) noexcept = 0;
+
     /**
      * @brief Sets the draw type.
      *
@@ -135,6 +137,11 @@ public:
      */
     virtual void SetDrawType(DrawType drawType) noexcept = 0;
 
+    virtual void SetBlendFactor(const float blendFactor[4]) noexcept = 0;
+
+    virtual void SetStencilRef(u32 stencilRef) noexcept = 0;
+
+    virtual void ExecuteCommandList(ICommandList* commandList) noexcept = 0;
 };
 
 }

@@ -6,6 +6,13 @@
 #include <TauCOM.impl.hpp>
 #include <EASTL/unordered_map.h>
 #include <EASTLString.hpp>
+#include <OSMacro.hpp>
+
+#ifdef _WIN32
+    #include <Windows.h>
+#elif defined(HAS_DLFCN) || defined(IS_NIX)
+    #include <dlfcn.h>
+#endif
 
 namespace tau::graphics {
 
@@ -27,6 +34,156 @@ struct ExternalDriver final
     driver::DriverFuncs Funcs;
     b8 Loaded : 1;
     b8 Open : 1;
+};
+
+class DriverWrapper final
+{
+public:
+    DriverWrapper(const C8DynString& driverPath, EGraphicsDriverFlags flags) noexcept
+        : m_DriverPath(driverPath)
+        , m_EntryPoint(nullptr)
+        , m_Flags(flags)
+        , m_Driver(nullptr)
+        , m_Funcs { }
+        , m_Open(false)
+        , m_ModuleHandle(nullptr)
+    { }
+
+    DriverWrapper(driver::OpenGraphicsDriver_f* entrypoint, EGraphicsDriverFlags flags) noexcept
+        : m_DriverPath()
+        , m_EntryPoint(entrypoint)
+        , m_Flags(flags)
+        , m_Driver(nullptr)
+        , m_Funcs { }
+        , m_Open(false)
+        , m_ModuleHandle(nullptr)
+    { }
+
+    ~DriverWrapper() noexcept
+    {
+        Close();
+    }
+
+    com::EResultCode Load() noexcept
+    {
+        if(!IsLoaded())
+        {
+            InternalLoad();
+            if(!IsLoaded())
+            {
+                return com::RC_NotFound;
+            }
+
+            m_EntryPoint = reinterpret_cast<driver::OpenGraphicsDriver_f*>(InternalGetFunc("OpenGraphicsDriver"));
+        }
+
+        return com::RC_Success;
+    }
+
+    void Unload() noexcept
+    {
+        Close();
+
+        if(IsLoaded())
+        {
+            InternalUnload();
+            m_ModuleHandle = nullptr;
+        }
+    }
+
+    com::EResultCode Open() noexcept
+    {
+        using namespace com;
+
+        EResultCode status = Load();
+
+        if(IsFailure(status) || !m_EntryPoint)
+        {
+            return status;
+        }
+
+        if(m_Open)
+        {
+            return RC_Success;
+        }
+
+        driver::EngineCallbacks engineCallbacks { };
+
+        driver::OpenDriver openDriver { };
+        openDriver.Interface = TAU_GRAPHICS_INTERFACE_VERSION_CURRENT;
+        openDriver.Engine.raw = nullptr;
+        openDriver.Driver.raw = nullptr;
+        openDriver.Callbacks = &engineCallbacks;
+        openDriver.Funcs = &m_Funcs;
+        openDriver.DriverName = C8DynString();
+
+        status = m_EntryPoint(openDriver);
+
+        if(IsFailure(status))
+        {
+            return status;
+        }
+
+        return RC_Success;
+    }
+
+    void Close() noexcept
+    {
+        if(m_Open && m_Funcs.CloseDriver)
+        {
+            m_Funcs.CloseDriver(m_Driver);
+            m_Open = false;
+        }
+    }
+private:
+    bool IsLoaded() const noexcept
+    {
+#ifdef _WIN32
+        return m_ModuleHandle != INVALID_HANDLE_VALUE && m_ModuleHandle;
+#elif defined(HAS_DLFCN) || defined(IS_NIX)
+        return m_ModuleHandle != nullptr;
+#endif
+    }
+
+    void InternalLoad() noexcept
+    {
+#ifdef _WIN32
+        m_ModuleHandle = LoadLibraryA(reinterpret_cast<const char*>(m_DriverPath.String()));
+#elif defined(HAS_DLFCN) || defined(IS_NIX)
+        m_ModuleHandle = dlopen(reinterpret_cast<const char*>(m_DriverPath.String()), RTLD_LAZY | RTLD_LOCAL);
+#endif
+    }
+
+    void InternalUnload() noexcept
+    {
+#ifdef _WIN32
+        (void) FreeLibrary(m_ModuleHandle);
+#elif defined(HAS_DLFCN) || defined(IS_NIX)
+        dlclose(m_ModuleHandle);
+#endif
+    }
+
+    void* InternalGetFunc(const char* const name) noexcept
+    {
+#ifdef _WIN32
+        return GetProcAddress(m_ModuleHandle, name);
+#elif defined(HAS_DLFCN) || defined(IS_NIX)
+        return dlsym(m_ModuleHandle, name);
+#endif
+    }
+private:
+    C8DynString m_DriverPath;
+    driver::OpenGraphicsDriver_f* m_EntryPoint;
+    EGraphicsDriverFlags m_Flags;
+    driver::DriverHandle m_Driver;
+    driver::DriverFuncs m_Funcs;
+    b8 m_Open : 1;
+
+#ifdef _WIN32
+    HMODULE m_ModuleHandle;
+#elif defined(HAS_DLFCN) || defined(IS_NIX)
+    void* m_ModuleHandle;
+#endif
 };
 
 class GraphicsManager final : public IGraphicsManager

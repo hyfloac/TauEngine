@@ -66,7 +66,11 @@ com::EResultCode GLDriver::FillFuncTable(const DriverTableType tableType, void* 
             funcs->DrawIndexed = GLDrawIndexed;
             funcs->DrawInstanced = GLDrawInstanced;
             funcs->DrawIndexedInstanced = GLDrawIndexedInstanced;
+            funcs->Dispatch = GLDispatch;
             funcs->SetDrawType = GLSetDrawType;
+            funcs->SetBlendFactor = GLSetBlendFactor;
+            funcs->SetStencilRef = GLSetStencilRef;
+            funcs->ExecuteCommandList = GLExecuteCommandList;
 
             break;
         }
